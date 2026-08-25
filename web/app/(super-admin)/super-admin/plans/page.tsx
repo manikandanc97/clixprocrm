@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   CreditCard,
   Check,
@@ -12,130 +12,101 @@ import {
   RefreshCw,
   Edit,
   X,
+  Sliders,
+  CheckCircle2,
+  Search,
+  Bot,
+  HardDrive,
+  Users,
+  Target,
+  FileSpreadsheet,
+  AlertCircle,
+  Plus,
+  Trash2,
+  AlertTriangle,
+  ArrowRight,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import { Switch } from "@/shared/ui/switch";
 import { toast } from "sonner";
-import { fetchPlatformOverview } from "@/shared/lib/api/super-admin.api";
+import {
+  fetchPlatformPlans,
+  createPlatformPlan,
+  updatePlatformPlan,
+  deletePlatformPlan,
+  formatPlanPrice,
+  PlatformPlanItem,
+  FeatureCatalogItem,
+} from "@/shared/lib/api/super-admin.api";
 import {
   CRMPageContainer,
   CRMPageHeader,
   CRMMetricsGrid,
   CRMMetricCard,
 } from "@/shared/components/crm";
+import { compareFormValues } from "@/shared/hooks/use-dirty-form";
+import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 
-interface PlanConfig {
-  id: string;
-  name: string;
-  price: string;
-  priceNum: number;
-  billing: string;
-  description: string;
-  features: string[];
-  maxUsers: string;
-  maxLeads: string;
-  storage: string;
-  highlight?: boolean;
-}
-
-const INITIAL_PLANS: PlanConfig[] = [
-  {
-    id: "free",
-    name: "Free Sandbox",
-    price: "₹0",
-    priceNum: 0,
-    billing: "forever",
-    description: "Essential CRM tooling for solo founders and pre-revenue startups.",
-    features: [
-      "Up to 3 Team Members",
-      "500 Leads & Contacts",
-      "Standard Deal Pipeline",
-      "Email Notifications",
-      "Community Support",
-    ],
-    maxUsers: "3 Users",
-    maxLeads: "500 Leads",
-    storage: "1 GB",
-  },
-  {
-    id: "starter",
-    name: "Starter Growth",
-    price: "₹1,999",
-    priceNum: 1999,
-    billing: "per month",
-    description: "Empower growing sales teams with automation and lead tracking.",
-    features: [
-      "Up to 10 Team Members",
-      "5,000 Leads & Contacts",
-      "Custom Deal Stages & Kanban",
-      "Automated Activity Reminders",
-      "Standard Financial Invoicing",
-      "Priority Email Support",
-    ],
-    maxUsers: "10 Users",
-    maxLeads: "5,000 Leads",
-    storage: "10 GB",
-  },
-  {
-    id: "pro",
-    name: "Professional",
-    price: "₹4,999",
-    priceNum: 4999,
-    billing: "per month",
-    description: "Advanced intelligence, deep analytics, and rupee invoicing.",
-    features: [
-      "Up to 30 Team Members",
-      "Unlimited Leads & Deals",
-      "AI Smart Summary & Copilot",
-      "Advanced Revenue Analytics",
-      "Rupee Invoicing (₹)",
-      "Custom Role Permissions",
-      "24/7 Priority Support",
-    ],
-    maxUsers: "30 Users",
-    maxLeads: "Unlimited",
-    storage: "50 GB",
-    highlight: true,
-  },
-  {
-    id: "enterprise",
-    name: "Enterprise",
-    price: "₹14,999",
-    priceNum: 14999,
-    billing: "per month",
-    description: "Dedicated infrastructure, audit logs, and bespoke compliance for large orgs.",
-    features: [
-      "Unlimited Team Members",
-      "Unlimited Leads & Quotations",
-      "Full AI Document RAG Engine",
-      "Complete Platform Audit Logs",
-      "Dedicated Database Isolation",
-      "Custom SLA & Dedicated Manager",
-    ],
-    maxUsers: "Unlimited",
-    maxLeads: "Unlimited",
-    storage: "500 GB",
-  },
-];
+type ConfigTab = "basic" | "pricing" | "limits" | "ai" | "features";
 
 export default function SuperAdminPlansPage() {
-  const [plans, setPlans] = useState<PlanConfig[]>(INITIAL_PLANS);
+  const [plans, setPlans] = useState<PlatformPlanItem[]>([]);
   const [distribution, setDistribution] = useState<Record<string, number>>({});
+  const [featureCatalog, setFeatureCatalog] = useState<FeatureCatalogItem[]>([]);
+  const [aiModels, setAiModels] = useState<Array<{ id: string; modelKey: string; displayName: string; provider: string }>>([]);
+  const [metrics, setMetrics] = useState<{
+    activePlans: number;
+    totalOrganizations: number;
+    monthlyMRR: number;
+    projectedARR: number;
+    hasBillingData: boolean;
+  }>({
+    activePlans: 0,
+    totalOrganizations: 0,
+    monthlyMRR: 0,
+    projectedARR: 0,
+    hasBillingData: false,
+  });
+
   const [loading, setLoading] = useState(true);
-  const [editingPlan, setEditingPlan] = useState<PlanConfig | null>(null);
+  const [error, setError] = useState<string | null>(null);
+  const [saving, setSaving] = useState(false);
+  const [deleting, setDeleting] = useState(false);
+
+  // Configuration Modal State (Edit / Create)
+  const [editingPlan, setEditingPlan] = useState<PlatformPlanItem | null>(null);
+  const [originalPlan, setOriginalPlan] = useState<PlatformPlanItem | null>(null);
+  const [isCreatingNew, setIsCreatingNew] = useState(false);
+  const [showUnsavedWarning, setShowUnsavedWarning] = useState(false);
+  const [activeTab, setActiveTab] = useState<ConfigTab>("basic");
+  const [featureSearch, setFeatureSearch] = useState("");
+
+  // Deletion Confirmation Modal State
+  const [deletingPlan, setDeletingPlan] = useState<PlatformPlanItem | null>(null);
+
+  const isDirty = useMemo(() => {
+    if (isCreatingNew) return Boolean(editingPlan?.name?.trim());
+    if (!editingPlan || !originalPlan) return false;
+    return !compareFormValues(originalPlan, editingPlan);
+  }, [editingPlan, originalPlan, isCreatingNew]);
 
   const loadData = async () => {
     try {
       setLoading(true);
-      const overview = await fetchPlatformOverview();
-      const dist: Record<string, number> = {};
-      overview.planDistribution.forEach((p) => {
-        dist[p.plan.toLowerCase()] = p.count;
-      });
-      setDistribution(dist);
+      setError(null);
+      const res = await fetchPlatformPlans();
+      setPlans(res.plans);
+      setDistribution(res.distribution);
+      setFeatureCatalog(res.featureCatalog);
+      setAiModels(res.aiModels);
+      setMetrics(res.metrics);
     } catch (err: any) {
-      toast.error("Failed to load subscription distribution.");
+      const msg = err?.response?.data?.message || err?.message || "Failed to load subscription plans.";
+      setError(msg);
+      toast.error(msg);
     } finally {
       setLoading(false);
     }
@@ -145,33 +116,256 @@ export default function SuperAdminPlansPage() {
     loadData();
   }, []);
 
-  const handleSavePlan = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!editingPlan) return;
-
-    setPlans((prev) =>
-      prev.map((p) => (p.id === editingPlan.id ? editingPlan : p))
+  // Filtered feature catalog for search
+  const filteredCatalog = useMemo(() => {
+    if (!featureSearch.trim()) return featureCatalog;
+    const q = featureSearch.toLowerCase();
+    return featureCatalog.filter(
+      (f) =>
+        f.name.toLowerCase().includes(q) ||
+        f.category.toLowerCase().includes(q) ||
+        f.description.toLowerCase().includes(q)
     );
-    toast.success(`Plan "${editingPlan.name}" configuration updated.`);
-    setEditingPlan(null);
+  }, [featureCatalog, featureSearch]);
+
+  // Group features by category
+  const groupedFeatures = useMemo(() => {
+    const map: Record<string, FeatureCatalogItem[]> = {};
+    filteredCatalog.forEach((item) => {
+      if (!map[item.category]) map[item.category] = [];
+      map[item.category].push(item);
+    });
+    return map;
+  }, [filteredCatalog]);
+
+  const handleOpenCreate = () => {
+    const defaultModel = aiModels.length > 0 ? aiModels[0].id : null;
+    const newPlanDraft: PlatformPlanItem = {
+      id: "",
+      name: "",
+      description: "",
+      price: "₹1,999",
+      priceNum: 1999,
+      annualPriceNum: 19990,
+      currency: "INR",
+      billing: "per month",
+      pricingMode: "FIXED",
+      features: [
+        "Lead Management",
+        "Contact Management",
+        "Deal Pipeline",
+        "Standard Reports",
+        "Tasks & Reminders",
+      ],
+      maxUsers: 5,
+      maxLeads: 2500,
+      maxContacts: 5000,
+      storageGb: 10,
+      maxApiRequests: 25000,
+      trialDays: 14,
+      billingCycleMonthly: true,
+      billingCycleAnnual: true,
+      highlight: false,
+      isActive: true,
+      status: "ACTIVE",
+      sortOrder: (plans.length || 0) + 1,
+      tenantCount: 0,
+      aiEnabled: true,
+      aiLevel: "Standard AI",
+      dailyTokenLimit: 50000,
+      defaultModelId: defaultModel,
+      defaultModel: null,
+      allowedModelIds: defaultModel ? [defaultModel] : [],
+      allowedModels: [],
+    };
+
+    setIsCreatingNew(true);
+    setEditingPlan(newPlanDraft);
+    setOriginalPlan(JSON.parse(JSON.stringify(newPlanDraft)));
+    setActiveTab("basic");
+    setFeatureSearch("");
   };
 
-  const totalMonthlyMRR = plans.reduce((acc, plan) => {
-    const count = distribution[plan.id] || 0;
-    return acc + count * plan.priceNum;
-  }, 0);
+  const handleOpenConfigure = (plan: PlatformPlanItem) => {
+    // Clone plan object for safe editing and baseline comparison
+    const cloned: PlatformPlanItem = {
+      ...plan,
+      features: [...plan.features],
+      allowedModelIds: [...plan.allowedModelIds],
+    };
+    setIsCreatingNew(false);
+    setEditingPlan(cloned);
+    setOriginalPlan(JSON.parse(JSON.stringify(cloned)));
+    setActiveTab("basic");
+    setFeatureSearch("");
+  };
+
+  const handleCloseConfigure = () => {
+    if (isDirty) {
+      setShowUnsavedWarning(true);
+    } else {
+      setEditingPlan(null);
+      setOriginalPlan(null);
+      setIsCreatingNew(false);
+    }
+  };
+
+  const handleSavePlan = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!editingPlan || !isDirty) return;
+
+    if (!editingPlan.name || !editingPlan.name.trim()) {
+      toast.error("Plan name is required.");
+      return;
+    }
+
+    try {
+      setSaving(true);
+      if (isCreatingNew) {
+        const res = await createPlatformPlan({
+          id: editingPlan.id?.trim() || undefined,
+          name: editingPlan.name.trim(),
+          description: editingPlan.description,
+          priceNum: Number(editingPlan.priceNum),
+          annualPriceNum: Number(editingPlan.annualPriceNum),
+          currency: editingPlan.currency,
+          billing: editingPlan.billing,
+          pricingMode: editingPlan.pricingMode,
+          features: editingPlan.features,
+          maxUsers: editingPlan.maxUsers,
+          maxLeads: editingPlan.maxLeads,
+          maxContacts: editingPlan.maxContacts,
+          storageGb: Number(editingPlan.storageGb),
+          maxApiRequests: editingPlan.maxApiRequests,
+          trialDays: Number(editingPlan.trialDays),
+          billingCycleMonthly: editingPlan.billingCycleMonthly,
+          billingCycleAnnual: editingPlan.billingCycleAnnual,
+          highlight: editingPlan.highlight,
+          status: editingPlan.status,
+          isActive: editingPlan.status === "ACTIVE",
+          sortOrder: Number(editingPlan.sortOrder),
+          aiEnabled: editingPlan.aiEnabled,
+          aiLevel: editingPlan.aiLevel,
+          dailyTokenLimit: Number(editingPlan.dailyTokenLimit),
+          defaultModelId: editingPlan.defaultModelId,
+          allowedModelIds: editingPlan.allowedModelIds,
+        });
+
+        if (res.success) {
+          toast.success(`Plan "${editingPlan.name}" created successfully.`);
+          setEditingPlan(null);
+          setIsCreatingNew(false);
+          await loadData();
+        }
+      } else {
+        const res = await updatePlatformPlan(editingPlan.id, {
+          name: editingPlan.name,
+          description: editingPlan.description,
+          priceNum: Number(editingPlan.priceNum),
+          annualPriceNum: Number(editingPlan.annualPriceNum),
+          currency: editingPlan.currency,
+          billing: editingPlan.billing,
+          pricingMode: editingPlan.pricingMode,
+          features: editingPlan.features,
+          maxUsers: editingPlan.maxUsers,
+          maxLeads: editingPlan.maxLeads,
+          maxContacts: editingPlan.maxContacts,
+          storageGb: Number(editingPlan.storageGb),
+          maxApiRequests: editingPlan.maxApiRequests,
+          trialDays: Number(editingPlan.trialDays),
+          billingCycleMonthly: editingPlan.billingCycleMonthly,
+          billingCycleAnnual: editingPlan.billingCycleAnnual,
+          highlight: editingPlan.highlight,
+          status: editingPlan.status,
+          isActive: editingPlan.status === "ACTIVE",
+          sortOrder: Number(editingPlan.sortOrder),
+          aiEnabled: editingPlan.aiEnabled,
+          aiLevel: editingPlan.aiLevel,
+          dailyTokenLimit: Number(editingPlan.dailyTokenLimit),
+          defaultModelId: editingPlan.defaultModelId,
+          allowedModelIds: editingPlan.allowedModelIds,
+        });
+
+        if (res.success) {
+          toast.success(`Plan "${editingPlan.name}" updated successfully.`);
+          setEditingPlan(null);
+          await loadData();
+        }
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || "Failed to save plan configuration.";
+      toast.error(msg);
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const handleDeletePlan = async (plan: PlatformPlanItem) => {
+    try {
+      setDeleting(true);
+      const res = await deletePlatformPlan(plan.id);
+      if (res.success) {
+        toast.success(`Plan "${plan.name}" deleted successfully.`);
+        setDeletingPlan(null);
+        if (editingPlan?.id === plan.id) {
+          setEditingPlan(null);
+        }
+        await loadData();
+      }
+    } catch (err: any) {
+      const msg = err?.response?.data?.message || err?.message || `Failed to delete plan "${plan.name}".`;
+      toast.error(msg);
+    } finally {
+      setDeleting(false);
+    }
+  };
+
+  const toggleFeature = (featureName: string) => {
+    if (!editingPlan) return;
+    const exists = editingPlan.features.includes(featureName);
+    const updatedFeatures = exists
+      ? editingPlan.features.filter((f) => f !== featureName)
+      : [...editingPlan.features, featureName];
+    setEditingPlan({ ...editingPlan, features: updatedFeatures });
+  };
+
+  const toggleAllowedModel = (modelId: string) => {
+    if (!editingPlan) return;
+    const exists = editingPlan.allowedModelIds.includes(modelId);
+    let updated = exists
+      ? editingPlan.allowedModelIds.filter((id) => id !== modelId)
+      : [...editingPlan.allowedModelIds, modelId];
+
+    // If default model was unchecked, pick another available one
+    let newDefaultId = editingPlan.defaultModelId;
+    if (exists && editingPlan.defaultModelId === modelId) {
+      newDefaultId = updated.length > 0 ? updated[0] : null;
+    }
+
+    setEditingPlan({
+      ...editingPlan,
+      allowedModelIds: updated,
+      defaultModelId: newDefaultId,
+    });
+  };
 
   return (
     <CRMPageContainer>
-      {/* 1. Standard CRM Page Header */}
+      {/* 1. Standard CRM Page Header with Create Plan & Refresh */}
       <CRMPageHeader
         title="Plans & Subscriptions"
-        subtitle="Configure multi-tenant subscription tiers, pricing models, and feature packaging."
+        subtitle="Manage canonical subscription tiers, real-time pricing models, resource quotas, AI entitlements, and custom tiers."
         icon={CreditCard}
         badge="SaaS Pricing Engine"
         actions={[
           {
-            label: "Refresh",
+            label: "Create Plan",
+            icon: Plus,
+            onClick: handleOpenCreate,
+            variant: "default",
+          },
+          {
+            label: "Refresh Data",
             icon: RefreshCw,
             onClick: loadData,
             variant: "outline",
@@ -179,216 +373,969 @@ export default function SuperAdminPlansPage() {
         ]}
       />
 
-      {/* 2. Standard CRM KPI Metrics Grid */}
+      {/* Error Alert */}
+      {error && !loading && (
+        <div className="p-4 rounded-xl bg-destructive/10 border border-destructive/20 text-destructive flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <AlertCircle className="h-5 w-5 shrink-0" />
+            <p className="text-sm font-semibold">{error}</p>
+          </div>
+          <Button size="sm" variant="outline" onClick={loadData}>
+            Retry
+          </Button>
+        </div>
+      )}
+
+      {/* 2. Top Summary KPI Cards (Real DB Data Only) */}
       <div className="shrink-0">
         <CRMMetricsGrid cols={3}>
           <CRMMetricCard
-            title="Total Active Tiers"
-            value={plans.length}
-            change={`${plans.length} Configured Tiers`}
+            title="Active Plans"
+            value={loading ? "..." : `${metrics.activePlans} Active`}
+            change={`${plans.length} Tiers Configured`}
             trend="neutral"
             icon={Layers}
             color="blue"
             loading={loading}
           />
           <CRMMetricCard
-            title="Estimated Monthly MRR"
-            value={`₹${totalMonthlyMRR.toLocaleString()}`}
-            change="Monthly Recurring SaaS"
+            title="Active Organizations"
+            value={loading ? "..." : `${metrics.totalOrganizations} Orgs`}
+            change="Real Multi-Tenant Subscriptions"
             trend="up"
-            icon={Zap}
+            icon={Building2}
             color="emerald"
             loading={loading}
           />
           <CRMMetricCard
-            title="Projected Annual ARR"
-            value={`₹${(totalMonthlyMRR * 12).toLocaleString()}`}
-            change="12-Month Run Rate"
-            trend="up"
-            icon={CreditCard}
+            title="Monthly Recurring Revenue"
+            value={
+              loading
+                ? "..."
+                : metrics.hasBillingData
+                ? formatPlanPrice(metrics.monthlyMRR, "INR")
+                : "Not enough billing data"
+            }
+            change={
+              metrics.hasBillingData
+                ? `Projected ARR: ${formatPlanPrice(metrics.projectedARR, "INR")}`
+                : "Awaiting active paid subscriptions"
+            }
+            trend={metrics.hasBillingData ? "up" : "neutral"}
+            icon={Zap}
             color="purple"
             loading={loading}
           />
         </CRMMetricsGrid>
       </div>
 
-      {/* 3. Plans Grid */}
+      {/* 3. Subscription Plans Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {plans.map((plan) => {
-          const tenantCount = distribution[plan.id] || 0;
-
-          return (
-            <div
-              key={plan.id}
-              className={`rounded-2xl bg-card border p-6 flex flex-col justify-between shadow-card relative transition-all duration-200 hover:shadow-lg ${
-                plan.highlight
-                  ? "border-emerald-500/50 ring-1 ring-emerald-500/20"
-                  : "border-border"
-              }`}
-            >
-              {plan.highlight && (
-                <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-bold tracking-wider uppercase shadow-sm">
-                  Most Popular
-                </span>
-              )}
-
-              <div className="space-y-4">
-                <div>
-                  <h3 className="font-bold text-base text-foreground">{plan.name}</h3>
-                  <p className="text-xs text-muted-foreground mt-1 min-h-[32px] leading-relaxed">
-                    {plan.description}
-                  </p>
-                </div>
-
-                <div className="pt-2">
-                  <div className="flex items-baseline gap-1">
-                    <span className="text-2xl sm:text-3xl font-extrabold text-foreground">
-                      {plan.price}
-                    </span>
-                    <span className="text-xs text-muted-foreground font-semibold">
-                      /{plan.billing}
-                    </span>
-                  </div>
-
-                  <div className="mt-3 py-2 px-3 rounded-xl bg-muted/50 border border-border flex items-center justify-between text-xs">
-                    <span className="text-muted-foreground font-semibold">Active Tenants:</span>
-                    <span className="font-black text-emerald-600">{tenantCount} orgs</span>
+        {loading
+          ? Array.from({ length: 4 }).map((_, idx) => (
+              <div
+                key={idx}
+                className="rounded-2xl bg-card border border-border p-6 flex flex-col justify-between shadow-card animate-pulse space-y-4 min-h-[420px]"
+              >
+                <div className="space-y-3">
+                  <div className="h-5 bg-muted rounded-lg w-1/2" />
+                  <div className="h-3.5 bg-muted/60 rounded-md w-4/5" />
+                  <div className="h-8 bg-muted rounded-lg w-2/3 mt-4" />
+                  <div className="h-8 bg-muted/40 rounded-xl w-full mt-2" />
+                  <div className="space-y-2 pt-4">
+                    <div className="h-3 bg-muted/60 rounded w-1/3" />
+                    <div className="h-3 bg-muted/40 rounded w-full" />
+                    <div className="h-3 bg-muted/40 rounded w-5/6" />
+                    <div className="h-3 bg-muted/40 rounded w-4/6" />
                   </div>
                 </div>
-
-                <div className="border-t border-border/60 pt-4 space-y-2.5">
-                  <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                    Included Features:
-                  </p>
-                  {plan.features.map((feat, idx) => (
-                    <div key={idx} className="flex items-start gap-2 text-xs">
-                      <Check className="h-4 w-4 text-emerald-500 shrink-0 mt-0.5" />
-                      <span className="text-foreground/90 font-medium">{feat}</span>
-                    </div>
-                  ))}
-                </div>
+                <div className="h-10 bg-muted rounded-xl w-full" />
               </div>
+            ))
+          : plans.map((plan) => {
+              const orgCount = distribution[plan.id.toLowerCase()] || 0;
+              const isPopular = plan.highlight;
+              const isCustom = plan.pricingMode === "CUSTOM";
 
-              <div className="pt-6">
-                <Button
-                  variant={plan.highlight ? "default" : "outline"}
-                  className={`w-full rounded-xl text-xs font-bold ${
-                    plan.highlight
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-md"
-                      : ""
+              return (
+                <div
+                  key={plan.id}
+                  className={`rounded-2xl bg-card border p-6 flex flex-col justify-between shadow-card relative transition-all duration-200 hover:shadow-lg ${
+                    isPopular
+                      ? "border-emerald-500/50 ring-2 ring-emerald-500/20 bg-gradient-to-b from-card to-emerald-500/[0.02]"
+                      : plan.status === "ARCHIVED"
+                      ? "border-dashed border-border opacity-70"
+                      : "border-border"
                   }`}
-                  onClick={() => setEditingPlan(plan)}
                 >
-                  Configure Tier
-                </Button>
-              </div>
-            </div>
-          );
-        })}
+                  {isPopular && (
+                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold tracking-wider uppercase shadow-md flex items-center gap-1">
+                      <Sparkles className="h-3 w-3" />
+                      Most Popular
+                    </span>
+                  )}
+
+                  <div className="space-y-4">
+                    {/* Title & Status */}
+                    <div className="flex items-start justify-between gap-2">
+                      <div>
+                        <div className="flex items-center gap-2">
+                          <h3 className="font-extrabold text-lg text-foreground tracking-tight">
+                            {plan.name}
+                          </h3>
+                        </div>
+                        <span className="text-[10px] font-mono text-muted-foreground uppercase bg-muted/60 px-1.5 py-0.5 rounded border border-border/50">
+                          {plan.id}
+                        </span>
+                        <p className="text-xs text-muted-foreground mt-1.5 min-h-[32px] leading-relaxed line-clamp-2">
+                          {plan.description || "Platform SaaS subscription tier."}
+                        </p>
+                      </div>
+                      {plan.status !== "ACTIVE" && (
+                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground border shrink-0">
+                          {plan.status}
+                        </span>
+                      )}
+                    </div>
+
+                    {/* Price & Billing Cycle */}
+                    <div className="pt-2 border-t border-border/40">
+                      {isCustom ? (
+                        <div className="py-1">
+                          <span className="text-2xl font-black text-foreground">
+                            Custom Pricing
+                          </span>
+                          <p className="text-xs text-muted-foreground font-medium">
+                            Contact Sales / Enterprise Contract
+                          </p>
+                        </div>
+                      ) : (
+                        <div className="flex items-baseline gap-1.5">
+                          <span className="text-3xl font-black text-foreground tracking-tight">
+                            {formatPlanPrice(plan.priceNum, plan.currency)}
+                          </span>
+                          <span className="text-xs text-muted-foreground font-semibold">
+                            / {plan.billing || "month"}
+                          </span>
+                        </div>
+                      )}
+
+                      {/* Real Active Organizations */}
+                      <div className="mt-3.5 py-2 px-3 rounded-xl bg-muted/40 border border-border/60 flex items-center justify-between text-xs">
+                        <span className="text-muted-foreground font-medium flex items-center gap-1.5">
+                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
+                          Active Workspaces:
+                        </span>
+                        <span className="font-bold text-foreground">
+                          {orgCount} {orgCount === 1 ? "organization" : "organizations"}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Key Entitlements */}
+                    <div className="border-t border-border/60 pt-4 space-y-2.5">
+                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                        Key Entitlements:
+                      </p>
+                      <div className="space-y-2">
+                        {plan.features.slice(0, 5).map((feat, idx) => (
+                          <div key={idx} className="flex items-start gap-2 text-xs">
+                            <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
+                            <span className="text-foreground/90 font-medium leading-tight">
+                              {feat}
+                            </span>
+                          </div>
+                        ))}
+                        {plan.features.length > 5 && (
+                          <p className="text-[11px] font-medium text-muted-foreground pt-1">
+                            + {plan.features.length - 5} more features included
+                          </p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Plan Action Buttons (Edit & Delete) */}
+                  <div className="pt-6 border-t border-border/40 mt-4 flex items-center gap-2">
+                    <Button
+                      variant={isPopular ? "default" : "outline"}
+                      className={`flex-1 rounded-xl text-xs font-bold transition-all shadow-sm ${
+                        isPopular
+                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
+                          : "hover:bg-muted"
+                      }`}
+                      onClick={() => handleOpenConfigure(plan)}
+                    >
+                      <Edit className="h-3.5 w-3.5 mr-1.5" />
+                      Edit Plan
+                    </Button>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9 shrink-0"
+                      title={`Delete Plan ${plan.name}`}
+                      onClick={() => setDeletingPlan(plan)}
+                    >
+                      <Trash2 className="h-4 w-4" />
+                    </Button>
+                  </div>
+                </div>
+              );
+            })}
       </div>
 
-      {/* 4. Edit Plan Modal */}
+      {/* 4. Super Admin 5-Section Configuration / Create Modal */}
       {editingPlan && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
-          <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
-            <div className="flex items-center justify-between border-b border-border/60 pb-3">
-              <div className="flex items-center gap-2.5">
-                <div className="p-2 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-                  <Edit className="h-5 w-5" />
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh] overflow-hidden">
+            {/* Modal Header */}
+            <div className="p-5 border-b border-border flex items-center justify-between bg-muted/20">
+              <div className="flex items-center gap-3">
+                <div className="p-2.5 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
+                  {isCreatingNew ? <Plus className="h-5 w-5" /> : <Sliders className="h-5 w-5" />}
                 </div>
                 <div>
-                  <h3 className="text-base font-bold text-foreground">
-                    Edit {editingPlan.name}
-                  </h3>
-                  <p className="text-xs text-muted-foreground">
-                    Update tier pricing and configuration
+                  <div className="flex items-center gap-2">
+                    <h3 className="text-base font-extrabold text-foreground">
+                      {isCreatingNew ? "Create New Subscription Plan" : `Edit Tier: ${editingPlan.name}`}
+                    </h3>
+                    {!isCreatingNew && (
+                      <span className="text-[10px] font-bold px-2 py-0.5 rounded bg-muted text-muted-foreground uppercase border">
+                        {editingPlan.id}
+                      </span>
+                    )}
+                  </div>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    {isCreatingNew
+                      ? "Define pricing, resource limits, AI model entitlements, and features"
+                      : "Update production tier pricing, limits, AI entitlements & features"}
                   </p>
                 </div>
               </div>
               <button
-                onClick={() => setEditingPlan(null)}
-                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+                onClick={handleCloseConfigure}
+                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted transition-colors cursor-pointer"
               >
                 <X className="h-5 w-5" />
               </button>
             </div>
 
-            <form onSubmit={handleSavePlan} className="space-y-4">
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Tier Name</Label>
-                <Input
-                  value={editingPlan.name}
-                  onChange={(e) =>
-                    setEditingPlan({ ...editingPlan, name: e.target.value })
-                  }
-                  className="rounded-xl h-10"
-                  required
-                />
+            {/* 5-Tab Navigation Header */}
+            <div className="flex items-center border-b border-border bg-muted/40 px-5 overflow-x-auto gap-1">
+              {[
+                { id: "basic", label: "1. Basic", icon: Building2 },
+                { id: "pricing", label: "2. Pricing", icon: CreditCard },
+                { id: "limits", label: "3. Limits", icon: HardDrive },
+                { id: "ai", label: "4. AI Config", icon: Bot },
+                { id: "features", label: "5. Features", icon: CheckCircle2 },
+              ].map((tab) => {
+                const Icon = tab.icon;
+                const isActive = activeTab === tab.id;
+                return (
+                  <button
+                    key={tab.id}
+                    type="button"
+                    onClick={() => setActiveTab(tab.id as ConfigTab)}
+                    className={`flex items-center gap-2 py-3 px-3.5 text-xs font-bold border-b-2 transition-all shrink-0 ${
+                      isActive
+                        ? "border-emerald-600 text-emerald-600 bg-background/60 rounded-t-lg"
+                        : "border-transparent text-muted-foreground hover:text-foreground hover:bg-background/30"
+                    }`}
+                  >
+                    <Icon className="h-3.5 w-3.5" />
+                    {tab.label}
+                  </button>
+                );
+              })}
+            </div>
+
+            {/* Modal Body: Tab Content */}
+            <form onSubmit={handleSavePlan} className="flex flex-col flex-1 overflow-hidden">
+              <div className="p-6 overflow-y-auto space-y-5 flex-1">
+                {/* =================================================== */}
+                {/* SECTION 1: BASIC */}
+                {/* =================================================== */}
+                {activeTab === "basic" && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Plan Name *</Label>
+                        <Input
+                          value={editingPlan.name}
+                          onChange={(e) =>
+                            setEditingPlan({ ...editingPlan, name: e.target.value })
+                          }
+                          className="rounded-xl h-10 font-semibold"
+                          placeholder="e.g. Enterprise Plus"
+                          required
+                        />
+                      </div>
+
+                      {isCreatingNew ? (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold">Plan Slug / ID (Optional)</Label>
+                          <Input
+                            value={editingPlan.id}
+                            onChange={(e) =>
+                              setEditingPlan({
+                                ...editingPlan,
+                                id: e.target.value.toLowerCase().replace(/[^a-z0-9-_]/g, ""),
+                              })
+                            }
+                            className="rounded-xl h-10 font-mono text-xs"
+                            placeholder="e.g. enterprise-plus (auto-generated if empty)"
+                          />
+                        </div>
+                      ) : (
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold">Plan Identifier</Label>
+                          <Input
+                            value={editingPlan.id}
+                            disabled
+                            className="rounded-xl h-10 font-mono text-xs bg-muted/50 cursor-not-allowed"
+                          />
+                        </div>
+                      )}
+                    </div>
+
+                    <div className="space-y-1.5">
+                      <Label className="text-xs font-semibold">Short Description</Label>
+                      <Input
+                        value={editingPlan.description}
+                        onChange={(e) =>
+                          setEditingPlan({
+                            ...editingPlan,
+                            description: e.target.value,
+                          })
+                        }
+                        className="rounded-xl h-10"
+                        placeholder="e.g. For scaling enterprises requiring high AI tokens and API access"
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Plan Status</Label>
+                        <select
+                          value={editingPlan.status}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              status: e.target.value as any,
+                            })
+                          }
+                          className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
+                        >
+                          <option value="ACTIVE">ACTIVE (Available for subscriptions)</option>
+                          <option value="INACTIVE">INACTIVE (Disabled / Hidden)</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Display Sort Order</Label>
+                        <Input
+                          type="number"
+                          value={editingPlan.sortOrder}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              sortOrder: Number(e.target.value),
+                            })
+                          }
+                          className="rounded-xl h-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="p-4 rounded-xl border border-border bg-muted/20 flex items-center justify-between mt-4">
+                      <div>
+                        <p className="text-xs font-bold text-foreground">
+                          Most Popular Tier Badge
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Highlight this plan in pricing views. Marking this will automatically clear other plans.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={editingPlan.highlight}
+                        onCheckedChange={(checked) =>
+                          setEditingPlan({ ...editingPlan, highlight: checked })
+                        }
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION 2: PRICING */}
+                {/* =================================================== */}
+                {activeTab === "pricing" && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Currency</Label>
+                        <select
+                          value={editingPlan.currency}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              currency: e.target.value,
+                            })
+                          }
+                          className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
+                        >
+                          <option value="INR">INR (₹) - Indian Rupee</option>
+                          <option value="USD">USD ($) - US Dollar</option>
+                          <option value="EUR">EUR (€) - Euro</option>
+                          <option value="GBP">GBP (£) - British Pound</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Pricing Mode</Label>
+                        <select
+                          value={editingPlan.pricingMode}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              pricingMode: e.target.value as any,
+                            })
+                          }
+                          className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
+                        >
+                          <option value="FIXED">Fixed Subscription Price</option>
+                          <option value="CUSTOM">Custom Enterprise (Contact Sales)</option>
+                        </select>
+                      </div>
+                    </div>
+
+                    {editingPlan.pricingMode === "FIXED" ? (
+                      <div className="grid grid-cols-2 gap-4 pt-2">
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold">
+                            Monthly Price ({editingPlan.currency})
+                          </Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={editingPlan.priceNum}
+                            onChange={(e) =>
+                              setEditingPlan({
+                                ...editingPlan,
+                                priceNum: Number(e.target.value),
+                              })
+                            }
+                            className="rounded-xl h-10 font-bold"
+                            required
+                          />
+                        </div>
+
+                        <div className="space-y-1.5">
+                          <Label className="text-xs font-semibold">
+                            Annual Price ({editingPlan.currency}/year)
+                          </Label>
+                          <Input
+                            type="number"
+                            min="0"
+                            value={editingPlan.annualPriceNum}
+                            onChange={(e) =>
+                              setEditingPlan({
+                                ...editingPlan,
+                                annualPriceNum: Number(e.target.value),
+                              })
+                            }
+                            className="rounded-xl h-10 font-bold"
+                          />
+                        </div>
+                      </div>
+                    ) : (
+                      <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
+                        Enterprise custom pricing will display as <strong>"Contact Sales"</strong> on customer pricing pages. Subscriptions will be provisioned manually or via sales contracts.
+                      </div>
+                    )}
+
+                    <div className="grid grid-cols-2 gap-4 pt-2">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Free Trial Period</Label>
+                        <Input
+                          type="number"
+                          min="0"
+                          value={editingPlan.trialDays}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              trialDays: Number(e.target.value),
+                            })
+                          }
+                          className="rounded-xl h-10"
+                          placeholder="e.g. 14 days"
+                        />
+                      </div>
+
+                      <div className="space-y-2 pt-1">
+                        <Label className="text-xs font-semibold">Supported Billing Cycles</Label>
+                        <div className="flex items-center gap-4 pt-1">
+                          <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editingPlan.billingCycleMonthly}
+                              onChange={(e) =>
+                                setEditingPlan({
+                                  ...editingPlan,
+                                  billingCycleMonthly: e.target.checked,
+                                })
+                              }
+                              className="rounded border-input text-emerald-600 focus:ring-emerald-500"
+                            />
+                            Monthly
+                          </label>
+                          <label className="flex items-center gap-2 text-xs font-medium cursor-pointer">
+                            <input
+                              type="checkbox"
+                              checked={editingPlan.billingCycleAnnual}
+                              onChange={(e) =>
+                                setEditingPlan({
+                                  ...editingPlan,
+                                  billingCycleAnnual: e.target.checked,
+                                })
+                              }
+                              className="rounded border-input text-emerald-600 focus:ring-emerald-500"
+                            />
+                            Annual
+                          </label>
+                        </div>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION 3: LIMITS */}
+                {/* =================================================== */}
+                {activeTab === "limits" && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    <p className="text-xs text-muted-foreground">
+                      Configure operational resource quotas for organizations subscribed to this tier. Use <strong>-1</strong> for Unlimited.
+                    </p>
+
+                    <div className="grid grid-cols-2 gap-4">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-semibold">Max Users</Label>
+                          <span className="text-[10px] text-muted-foreground">
+                            {editingPlan.maxUsers === -1 ? "Unlimited" : `${editingPlan.maxUsers} users`}
+                          </span>
+                        </div>
+                        <Input
+                          type="number"
+                          value={editingPlan.maxUsers}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              maxUsers: Number(e.target.value),
+                            })
+                          }
+                          className="rounded-xl h-10"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-semibold">Max Leads</Label>
+                          <span className="text-[10px] text-muted-foreground">
+                            {editingPlan.maxLeads === -1 ? "Unlimited" : `${editingPlan.maxLeads} leads`}
+                          </span>
+                        </div>
+                        <Input
+                          type="number"
+                          value={editingPlan.maxLeads}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              maxLeads: Number(e.target.value),
+                            })
+                          }
+                          className="rounded-xl h-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-1">
+                      <div className="space-y-1.5">
+                        <div className="flex items-center justify-between">
+                          <Label className="text-xs font-semibold">Max Contacts</Label>
+                          <span className="text-[10px] text-muted-foreground">
+                            {editingPlan.maxContacts === -1 ? "Unlimited" : `${editingPlan.maxContacts} contacts`}
+                          </span>
+                        </div>
+                        <Input
+                          type="number"
+                          value={editingPlan.maxContacts}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              maxContacts: Number(e.target.value),
+                            })
+                          }
+                          className="rounded-xl h-10"
+                        />
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Storage Quota (GB)</Label>
+                        <Input
+                          type="number"
+                          min="1"
+                          value={editingPlan.storageGb}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              storageGb: Number(e.target.value),
+                            })
+                          }
+                          className="rounded-xl h-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-1">
+                      <div className="flex items-center justify-between">
+                        <Label className="text-xs font-semibold">Max Monthly API Requests</Label>
+                        <span className="text-[10px] text-muted-foreground">
+                          {editingPlan.maxApiRequests === -1 ? "Unlimited" : `${editingPlan.maxApiRequests.toLocaleString()} req/mo`}
+                        </span>
+                      </div>
+                      <Input
+                        type="number"
+                        value={editingPlan.maxApiRequests}
+                        onChange={(e) =>
+                          setEditingPlan({
+                            ...editingPlan,
+                            maxApiRequests: Number(e.target.value),
+                          })
+                        }
+                        className="rounded-xl h-10"
+                      />
+                    </div>
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION 4: AI CONFIGURATION */}
+                {/* =================================================== */}
+                {activeTab === "ai" && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    <div className="p-4 rounded-xl border border-border bg-muted/20 flex items-center justify-between">
+                      <div>
+                        <p className="text-xs font-bold text-foreground">
+                          AI Features Enabled
+                        </p>
+                        <p className="text-[11px] text-muted-foreground">
+                          Enables AI Copilot, summary, RAG, and lead scoring for this plan.
+                        </p>
+                      </div>
+                      <Switch
+                        checked={editingPlan.aiEnabled}
+                        onCheckedChange={(checked) =>
+                          setEditingPlan({ ...editingPlan, aiEnabled: checked })
+                        }
+                      />
+                    </div>
+
+                    <div className="grid grid-cols-2 gap-4 pt-1">
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">AI Tier Level</Label>
+                        <select
+                          value={editingPlan.aiLevel}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              aiLevel: e.target.value,
+                            })
+                          }
+                          className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
+                        >
+                          <option value="Basic AI">Basic AI</option>
+                          <option value="Standard AI">Standard AI</option>
+                          <option value="Advanced AI">Advanced AI</option>
+                          <option value="Premium AI">Premium AI</option>
+                          <option value="Full AI">Full AI</option>
+                        </select>
+                      </div>
+
+                      <div className="space-y-1.5">
+                        <Label className="text-xs font-semibold">Daily Token Quota</Label>
+                        <Input
+                          type="number"
+                          min="1000"
+                          step="5000"
+                          value={editingPlan.dailyTokenLimit}
+                          onChange={(e) =>
+                            setEditingPlan({
+                              ...editingPlan,
+                              dailyTokenLimit: Number(e.target.value),
+                            })
+                          }
+                          className="rounded-xl h-10"
+                        />
+                      </div>
+                    </div>
+
+                    <div className="space-y-1.5 pt-2">
+                      <Label className="text-xs font-semibold">Authoritative Default Model</Label>
+                      <select
+                        value={editingPlan.defaultModelId || ""}
+                        onChange={(e) =>
+                          setEditingPlan({
+                            ...editingPlan,
+                            defaultModelId: e.target.value,
+                          })
+                        }
+                        className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-bold text-foreground"
+                      >
+                        <option value="" disabled>Select default AI model</option>
+                        {aiModels.map((m) => (
+                          <option key={m.id} value={m.id}>
+                            {m.displayName} ({m.provider}) - {m.modelKey}
+                          </option>
+                        ))}
+                      </select>
+                      <p className="text-[11px] text-muted-foreground">
+                        All new conversations initiated by users in this plan will immediately use this model.
+                      </p>
+                    </div>
+
+                    <div className="space-y-2 pt-2">
+                      <Label className="text-xs font-semibold">Allowed AI Models Catalog</Label>
+                      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 rounded-xl border border-border bg-muted/20">
+                        {aiModels.map((model) => {
+                          const isChecked = editingPlan.allowedModelIds.includes(model.id);
+                          return (
+                            <label
+                              key={model.id}
+                              className={`flex items-center gap-2 p-2 rounded-lg border text-xs cursor-pointer transition-all ${
+                                isChecked
+                                  ? "bg-emerald-500/10 border-emerald-500/30 text-foreground font-semibold"
+                                  : "border-border/60 text-muted-foreground hover:bg-background/60"
+                              }`}
+                            >
+                              <input
+                                type="checkbox"
+                                checked={isChecked}
+                                onChange={() => toggleAllowedModel(model.id)}
+                                className="rounded border-input text-emerald-600 focus:ring-emerald-500"
+                              />
+                              <div className="truncate">
+                                <p className="leading-tight truncate">{model.displayName}</p>
+                                <span className="text-[10px] text-muted-foreground uppercase">
+                                  {model.provider}
+                                </span>
+                              </div>
+                            </label>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  </div>
+                )}
+
+                {/* =================================================== */}
+                {/* SECTION 5: FEATURES */}
+                {/* =================================================== */}
+                {activeTab === "features" && (
+                  <div className="space-y-4 animate-in fade-in duration-100">
+                    <div className="relative">
+                      <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        value={featureSearch}
+                        onChange={(e) => setFeatureSearch(e.target.value)}
+                        placeholder="Search CRM feature catalog..."
+                        className="pl-9 h-10 rounded-xl text-xs"
+                      />
+                    </div>
+
+                    <div className="space-y-4 max-h-72 overflow-y-auto pr-1">
+                      {Object.keys(groupedFeatures).map((cat) => (
+                        <div key={cat} className="space-y-2">
+                          <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+                            {cat}
+                          </p>
+                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                            {groupedFeatures[cat].map((feat) => {
+                              const isIncluded = editingPlan.features.includes(feat.name);
+                              return (
+                                <div
+                                  key={feat.key}
+                                  onClick={() => toggleFeature(feat.name)}
+                                  className={`p-2.5 rounded-xl border text-xs cursor-pointer transition-all flex items-start justify-between gap-2 ${
+                                    isIncluded
+                                      ? "bg-emerald-500/10 border-emerald-500/30 text-foreground font-semibold shadow-xs"
+                                      : "border-border/60 text-muted-foreground hover:bg-muted/40"
+                                  }`}
+                                >
+                                  <div>
+                                    <p className="text-xs font-semibold leading-tight text-foreground">
+                                      {feat.name}
+                                    </p>
+                                    <p className="text-[10px] text-muted-foreground mt-0.5 line-clamp-1">
+                                      {feat.description}
+                                    </p>
+                                  </div>
+                                  <div
+                                    className={`w-4 h-4 rounded flex items-center justify-center shrink-0 mt-0.5 border ${
+                                      isIncluded
+                                        ? "bg-emerald-600 border-emerald-600 text-white"
+                                        : "border-muted-foreground/40 bg-background"
+                                    }`}
+                                  >
+                                    {isIncluded && <Check className="h-3 w-3" />}
+                                  </div>
+                                </div>
+                              );
+                            })}
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
               </div>
 
-              <div className="grid grid-cols-2 gap-3">
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Price Display</Label>
-                  <Input
-                    value={editingPlan.price}
-                    onChange={(e) =>
-                      setEditingPlan({ ...editingPlan, price: e.target.value })
-                    }
-                    className="rounded-xl h-10"
-                    required
-                  />
+              {/* Modal Footer */}
+              <div className="p-4 border-t border-border flex items-center justify-between bg-muted/20">
+                <div>
+                  {!isCreatingNew && (
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      size="sm"
+                      disabled={saving || deleting}
+                      onClick={() => {
+                        setDeletingPlan(editingPlan);
+                      }}
+                      className="text-xs text-destructive hover:bg-destructive/10 rounded-xl"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1.5" />
+                      Delete Plan
+                    </Button>
+                  )}
                 </div>
-                <div className="space-y-1.5">
-                  <Label className="text-xs font-semibold">Price (₹/mo)</Label>
-                  <Input
-                    type="number"
-                    value={editingPlan.priceNum}
-                    onChange={(e) =>
-                      setEditingPlan({
-                        ...editingPlan,
-                        priceNum: Number(e.target.value),
-                      })
-                    }
-                    className="rounded-xl h-10"
-                    required
-                  />
+
+                <div className="flex items-center gap-2">
+                  <Button
+                    type="button"
+                    variant="outline"
+                    onClick={handleCloseConfigure}
+                    className="rounded-xl text-xs font-semibold cursor-pointer"
+                  >
+                    Cancel
+                  </Button>
+                  <Button
+                    type="submit"
+                    disabled={!isDirty || saving}
+                    className={`font-bold rounded-xl text-xs shadow-md transition-all ${
+                      !isDirty || saving
+                        ? "opacity-50 cursor-not-allowed bg-emerald-600/50 text-white"
+                        : "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+                    }`}
+                  >
+                    {saving
+                      ? "Saving..."
+                      : isCreatingNew
+                      ? "Create Plan Tier"
+                      : "Save Configuration"}
+                  </Button>
                 </div>
-              </div>
-
-              <div className="space-y-1.5">
-                <Label className="text-xs font-semibold">Description</Label>
-                <Input
-                  value={editingPlan.description}
-                  onChange={(e) =>
-                    setEditingPlan({
-                      ...editingPlan,
-                      description: e.target.value,
-                    })
-                  }
-                  className="rounded-xl h-10"
-                />
-              </div>
-
-              <div className="flex items-center justify-end gap-3 pt-3">
-                <Button
-                  type="button"
-                  variant="outline"
-                  onClick={() => setEditingPlan(null)}
-                  className="rounded-xl text-xs font-semibold"
-                >
-                  Cancel
-                </Button>
-                <Button
-                  type="submit"
-                  className="bg-emerald-600 hover:bg-emerald-700 text-white font-bold rounded-xl text-xs shadow-md"
-                >
-                  Save Configuration
-                </Button>
               </div>
             </form>
           </div>
         </div>
       )}
+
+      {/* 5. Standard Uniform CRM Delete Plan Confirmation Modal */}
+      {deletingPlan && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">
+                  Delete Subscription Plan
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  This action is permanent and cannot be undone.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to delete <strong className="text-foreground">{deletingPlan.name}</strong> (<span className="font-mono text-[11px]">{deletingPlan.id}</span>)?
+            </p>
+
+            {/* Clean Uniform Info Box for ALL plans */}
+            <div className="p-3.5 rounded-xl bg-muted/60 border border-border/60 text-xs text-muted-foreground leading-relaxed">
+              {(distribution[deletingPlan.id.toLowerCase()] || 0) > 0 ? (
+                <>
+                  This plan currently has <strong className="text-foreground">{distribution[deletingPlan.id.toLowerCase()]} active organization(s)</strong>. Deleting this tier will permanently remove the plan and automatically reassign all subscribed organizations to the <strong className="text-foreground">Free tier</strong>.
+                </>
+              ) : (
+                <>
+                  This plan has <strong className="text-foreground">0 active workspaces</strong>. All AI entitlements and configuration for this tier will be permanently removed.
+                </>
+              )}
+            </div>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setDeletingPlan(null)}
+                disabled={deleting}
+                className="rounded-xl text-xs font-semibold h-9 px-4"
+              >
+                Cancel
+              </Button>
+
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                disabled={deleting}
+                onClick={() => handleDeletePlan(deletingPlan)}
+                className="rounded-xl text-xs font-bold h-9 px-4 gap-1.5 cursor-pointer"
+              >
+                {deleting ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Deleting...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Delete Plan</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* Unsaved Changes Warning Dialog */}
+      <UnsavedWarning
+        open={showUnsavedWarning}
+        onOpenChange={setShowUnsavedWarning}
+        onConfirm={() => {
+          setShowUnsavedWarning(false);
+          setEditingPlan(null);
+          setOriginalPlan(null);
+          setIsCreatingNew(false);
+        }}
+        onCancel={() => setShowUnsavedWarning(false)}
+      />
     </CRMPageContainer>
   );
 }

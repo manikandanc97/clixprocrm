@@ -103,35 +103,53 @@ export async function POST(req: NextRequest) {
     };
     const tools = getMcpTools(mcpContext);
 
-    // 4. Token-Optimized System Prompt Enforcement
+    // 4. Determine Model & Analytical Mode
+    const requestedModel = body.model || process.env.AI_MODEL || 'gemini-3.6-flash';
+    const isDeepReasoningModel =
+      requestedModel.toLowerCase().includes('pro') ||
+      requestedModel.toLowerCase().includes('sonnet') ||
+      requestedModel.toLowerCase().includes('gpt-4o') ||
+      body.mode === 'deep' ||
+      body.deepAnalysis === true;
+
     const today = new Date().toISOString().split('T')[0];
-    const systemPrompt = `You are ClixPro AI, the CRM assistant for ClixProCRM.
+    const systemPrompt = isDeepReasoningModel
+      ? `You are ClixPro AI (Deep Analysis & Enterprise Intelligence Mode), the advanced AI CRM reasoning assistant for ClixProCRM.
+Current Date: ${today}.
+Default Currency: INR (₹).
+
+DEEP REASONING & ANALYSIS RULES:
+1. Conduct thorough, multi-step analysis on CRM queries (leads, pipeline velocity, deal health, customer churn risks, and sales performance).
+2. Present CRM findings using clean Markdown tables, highlighted metrics, and clear root-cause breakdowns.
+3. Include proactive, actionable strategic recommendations based on the live CRM data retrieved.
+4. For read operations, invoke live CRM tools (list_leads, list_deals, get_pipeline, get_sales_report, etc.) to fetch authentic data.
+5. If data is not found in the CRM, state clearly: "I couldn't find that information in your CRM records." Never hallucinate fake records.
+6. For write operations (create/update), ALWAYS ask for explicit confirmation with proposed values before executing with confirmed=true.
+7. Never expose sensitive auth tokens, passwords, API keys, or database internals.`
+      : `You are ClixPro AI, the intelligent CRM assistant for ClixProCRM.
 Current Date: ${today}.
 Default Currency: INR (₹).
 
 RESPONSE & TOKEN RULES:
-1. Answer ONLY the user's exact question. Keep responses ultra-concise, direct, and token-efficient.
-2. No conversational filler, no greetings (except when user greets), no background, and do not repeat the user's question.
-3. For simple questions, answer in 1-3 short sentences. For data queries, return only the requested data.
-4. If information is not found in the CRM, say: "I couldn't find that information." Never hallucinate data.
-5. For read operations, invoke the appropriate tool to fetch live CRM data.
-6. For write operations (create/update), ask for explicit confirmation with proposed values before executing with confirmed=true.
-7. Never expose sensitive tokens, passwords, secrets, internal IDs, or database internals.
-8. Avoid complex markdown unless it enhances readability.`;
+1. Answer the user's CRM questions directly, accurately, and concisely.
+2. For data queries, retrieve live CRM records and format them in clean tables or lists.
+3. If information is not found in the CRM, say: "I couldn't find that information." Never hallucinate data.
+4. For read operations, invoke the appropriate tool to fetch live CRM data.
+5. For write operations (create/update), ask for explicit confirmation with proposed values before executing with confirmed=true.
+6. Never expose sensitive tokens, passwords, secrets, internal IDs, or database internals.
+7. Use clean Markdown tables when presenting multiple CRM records.`;
 
     const sanitized = sanitizeMessages(rawMessages);
     const modelMessages = await convertToModelMessages(sanitized, { tools });
 
-    const modelName = process.env.AI_MODEL || 'gemini-3.6-flash';
-
-    // 5. Orchestrate AI Stream
+    // 5. Orchestrate AI Stream with Selected Entitled Model
     const result = await streamText({
-      model: google(modelName),
+      model: google(requestedModel),
       messages: modelMessages,
       system: systemPrompt,
       tools,
       stopWhen: isStepCount(5),
-      temperature: 0.7,
+      temperature: isDeepReasoningModel ? 0.4 : 0.7,
     });
 
     return createUIMessageStreamResponse({

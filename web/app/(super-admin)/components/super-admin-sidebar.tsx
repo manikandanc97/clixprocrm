@@ -17,6 +17,7 @@ import {
   LogOut,
   ArrowLeftRight,
   Layers,
+  Sparkles,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -32,6 +33,7 @@ const superAdminNavGroups: NavGroup[] = [
         title: "Overview",
         href: "/super-admin",
         icon: LayoutDashboard,
+        exact: true,
       },
       {
         title: "Organizations",
@@ -52,6 +54,11 @@ const superAdminNavGroups: NavGroup[] = [
         title: "Plans & Billing",
         href: "/super-admin/plans",
         icon: CreditCard,
+      },
+      {
+        title: "AI Models & Tiers",
+        href: "/super-admin/ai",
+        icon: Sparkles,
       },
       {
         title: "Analytics",

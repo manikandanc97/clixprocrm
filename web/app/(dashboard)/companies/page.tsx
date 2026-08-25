@@ -5,8 +5,10 @@ import { motion, AnimatePresence } from "framer-motion";
 import { Building2, Plus, Factory, Briefcase } from "lucide-react";
 
 import dynamic from "next/dynamic";
+import { TableSkeleton } from "@/shared/components/skeletons";
+
 const CompaniesTable = dynamic(() => import("@/features/companies/components/CompaniesTable").then(mod => ({ default: mod.CompaniesTable })), {
-  loading: () => <div className="h-[400px] skeleton rounded-xl" />
+  loading: () => <TableSkeleton rows={8} cols={6} showPagination={true} />
 });
 import { PageErrorState } from "@/shared/components/page-states";
 import { CompaniesSkeleton } from "@/features/companies/components/CompaniesSkeleton";
@@ -24,7 +26,7 @@ import { FormModal } from "@/shared/components/form-modal";
 import { CompanyForm } from "@/features/forms/CompanyForm";
 
 const CompaniesGrid = dynamic(() => import("@/features/companies/components/CompaniesGrid").then(mod => ({ default: mod.CompaniesGrid })), {
-  loading: () => <div className="h-[400px] skeleton rounded-xl" />
+  loading: () => <TableSkeleton rows={6} cols={4} showPagination={false} />
 });
 import { useViewMode } from "@/shared/hooks/useViewMode";
 

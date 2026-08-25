@@ -15,6 +15,7 @@ import { buildLeadsTools } from './tools/leads.tools';
 import { buildCustomersTools } from './tools/customers.tools';
 import { buildTasksTools } from './tools/tasks.tools';
 import { buildQuotationsTools } from './tools/quotations.tools';
+import { buildPlatformTools } from './tools/platform.tools';
 
 /**
  * @file ai/ai.service.ts
@@ -47,6 +48,27 @@ export class AiService {
    */
   private getSystemPrompt(userContext: UserSecurityContext): string {
     const today = new Date().toISOString().split('T')[0];
+    const isSuperAdmin =
+      userContext.roleName === 'SUPER_ADMIN' ||
+      userContext.roleName.replace(/[\s_]+/g, '') === 'SUPERADMIN' ||
+      userContext.isSystemAdmin;
+
+    if (isSuperAdmin) {
+      return `You are ClixPro AI (Platform Agent) for ClixProCRM Superadmin Platform (User ID: ${userContext.userId}, Role: SUPER_ADMIN).
+Current Date: ${today}. Default Currency: INR (₹).
+
+ROLE & CAPABILITIES:
+You are the executive platform AI assistant for ClixProCRM Super-Administrators. You have access to platform tools to inspect organizations/tenants, platform analytics/MRR, security audit logs, platform users, and subscription tiers.
+
+RESPONSE & TOKEN RULES:
+1. Answer ONLY the user's exact question. Keep responses ultra-concise, direct, and token-efficient.
+2. No conversational filler, no greetings (except when user greets), and do not repeat the user's question.
+3. For simple questions, answer in 1-3 short sentences. For data queries, return only the requested data cleanly formatted.
+4. If information is not found, say: "I couldn't find that platform information." Never hallucinate data.
+5. Bound strictly by Superadmin platform oversight and tool responses.
+6. Never expose internal API keys, JWT secrets, database connection strings, passwords, or credentials.`;
+    }
+
     return `You are ClixPro AI for ClixProCRM (User ID: ${userContext.userId}, Role: ${userContext.roleName}).
 Current Date: ${today}. Default Currency: INR (₹).
 
@@ -64,7 +86,13 @@ RESPONSE & TOKEN RULES:
    * Each builder enforces its own permission checks via AiSecurityService.
    */
   public getAuthorizedTools(userContext: UserSecurityContext): Record<string, any> {
+    const isSuperAdmin =
+      userContext.roleName === 'SUPER_ADMIN' ||
+      userContext.roleName.replace(/[\s_]+/g, '') === 'SUPERADMIN' ||
+      userContext.isSystemAdmin;
+
     return {
+      ...(isSuperAdmin ? buildPlatformTools(this.prisma, this.aiSecurityService, userContext) : {}),
       ...buildDealsTools(this.prisma, this.aiSecurityService, userContext),
       ...buildLeadsTools(this.prisma, this.aiSecurityService, userContext, this.enc),
       ...buildCustomersTools(this.prisma, this.aiSecurityService, userContext, this.enc),
@@ -146,8 +174,9 @@ RESPONSE & TOKEN RULES:
 
   async generateStream(
     messages: any[],
-    modelName = 'gemini-3.6-flash',
+    modelName = 'gemini-2.5-flash',
     userContext: UserSecurityContext,
+    provider = 'google',
   ): Promise<any> {
     const aiClient = await this.getAiClientForTenant(userContext.tenantId);
     const activeModel = this.resolveModelName(modelName);
@@ -184,8 +213,9 @@ RESPONSE & TOKEN RULES:
 
   async generateText(
     messages: any[],
-    modelName = 'gemini-3.6-flash',
+    modelName = 'gemini-2.5-flash',
     userContext: UserSecurityContext,
+    provider = 'google',
   ): Promise<string> {
     const aiClient = await this.getAiClientForTenant(userContext.tenantId);
     const activeModel = this.resolveModelName(modelName);

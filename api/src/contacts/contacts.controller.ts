@@ -15,6 +15,9 @@ import { TenantGuard } from '../auth/tenant.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
 
+import { PlanLimitGuard } from '../common/plans/plan-feature.guard';
+import { RequirePlanLimit } from '../common/plans/plan-feature.decorator';
+
 @Controller('crm/customers')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)
 export class ContactsController {
@@ -29,13 +32,14 @@ export class ContactsController {
 
   @Post()
   @Roles('ADMIN', 'MANAGER', 'SALES')
+  @UseGuards(PlanLimitGuard)
+  @RequirePlanLimit('maxContacts')
   async createCustomer(@Req() req: any, @Body() body: CreateContactDto) {
     const data = await this.contactsService.createCustomer(
       req.tenantId,
       body,
       req.user.sub,
     );
-    // NestJS default is 201 Created for POST, which perfectly matches Next.js NextReponse.json(..., {status: 201})
     return { success: true, data };
   }
 }

@@ -7,7 +7,7 @@ import { ChevronLeft, ChevronsUpDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 import { ClixProIcon } from "@/shared/ui/logo";
-import { type NavGroup } from "@/shared/lib/auth/rbac";
+import { type NavGroup, type NavItem, isNavRouteActive } from "@/shared/lib/auth/rbac";
 
 export interface SidebarHeaderConfig {
   title: string;
@@ -17,6 +17,7 @@ export interface SidebarHeaderConfig {
     icon?: React.ComponentType<{ className?: string }>;
     className?: string;
   };
+  badgeElement?: React.ReactNode;
   collapsedTag?: string;
   logo?: React.ReactNode;
 }
@@ -48,6 +49,11 @@ export function BaseSidebarContent({
   const pathname = usePathname();
   const collapsedState = isMobile ? false : isCollapsed;
 
+  // Flatten all navigation item hrefs for segment-aware longest-prefix resolution
+  const allItemHrefs = React.useMemo(() => {
+    return groups.flatMap((group) => group.items.map((item) => item.href)).filter(Boolean);
+  }, [groups]);
+
   // Theme variant styling tokens
   const isEmerald = variant === "emerald";
   const themeClasses = isEmerald
@@ -76,12 +82,13 @@ export function BaseSidebarContent({
         activePill: "bg-sidebar-primary shadow-sm shadow-sidebar-primary/50",
       };
 
-  const isItemActive = (href: string) => {
-    if (!href || href === "#") return false;
-    if (href === "/super-admin" || href === "/dashboard") {
-      return pathname === href;
-    }
-    return pathname === href || pathname.startsWith(`${href}/`);
+  const isItemActive = (item: NavItem) => {
+    return isNavRouteActive(
+      item.href,
+      pathname,
+      allItemHrefs,
+      item.exact || item.match === "exact"
+    );
   };
 
   // Mobile drawer single-card layout
@@ -101,12 +108,14 @@ export function BaseSidebarContent({
                   {header.title}
                 </h1>
                 <div className="flex items-center mt-0.5 gap-1.5">
-                  {header.badge && (
+                  {header.badgeElement ? (
+                    header.badgeElement
+                  ) : header.badge ? (
                     <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider inline-flex items-center gap-1 ${header.badge.className || themeClasses.badge}`}>
                       {BadgeIcon && <BadgeIcon className="w-2.5 h-2.5" />}
                       {header.badge.text}
                     </span>
-                  )}
+                  ) : null}
                   {header.subtitle && (
                     <span className="text-sidebar-foreground/50 text-[11px] font-medium truncate max-w-[85px]">
                       {header.subtitle}
@@ -137,12 +146,13 @@ export function BaseSidebarContent({
                 <nav className="space-y-1">
                   {group.items.map((item) => {
                     const Icon = item.icon;
-                    const isActive = isItemActive(item.href);
+                    const isActive = isItemActive(item);
                     return (
                       <Link
-                        key={item.title}
+                        key={item.href || item.title}
                         href={item.href || "#"}
-                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] group relative ${
+                        aria-current={isActive ? "page" : undefined}
+                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
                           isActive
                             ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveBg} font-bold shadow-sm border border-sidebar-primary/15`
                             : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
@@ -229,13 +239,15 @@ export function BaseSidebarContent({
                   <h1 className="text-sidebar-foreground font-bold text-sm tracking-tight leading-tight truncate max-w-[130px] capitalize">
                     {header.title}
                   </h1>
-                  <div className="flex items-center mt-0.5 gap-1.5">
-                    {header.badge && (
+                  <div className="flex items-center mt-0.5 gap-1.5 flex-wrap">
+                    {header.badgeElement ? (
+                      header.badgeElement
+                    ) : header.badge ? (
                       <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-sm uppercase tracking-wider inline-flex items-center gap-1 ${header.badge.className || themeClasses.badge}`}>
                         {BadgeIcon && <BadgeIcon className="w-2.5 h-2.5" />}
                         {header.badge.text}
                       </span>
-                    )}
+                    ) : null}
                     {header.subtitle && (
                       <span className="text-sidebar-foreground/50 text-[11px] font-medium truncate">
                         {header.subtitle}
@@ -292,7 +304,7 @@ export function BaseSidebarContent({
                 <nav className="flex flex-col gap-1.5">
                   {group.items.map((item) => {
                     const Icon = item.icon;
-                    const isActive = isItemActive(item.href);
+                    const isActive = isItemActive(item);
 
                     if (collapsedState) {
                       return (
@@ -301,7 +313,8 @@ export function BaseSidebarContent({
                             <TooltipTrigger asChild>
                               <Link
                                 href={item.href || "#"}
-                                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 group relative ${
+                                aria-current={isActive ? "page" : undefined}
+                                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
                                   isActive
                                     ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveCollapsedBg} font-semibold shadow-sm`
                                     : "text-sidebar-foreground/60 hover:text-primary hover:bg-primary/10"
@@ -356,9 +369,10 @@ export function BaseSidebarContent({
                       <div key={item.title}>
                         <Link
                           href={item.href || "#"}
-                          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] group relative ${
+                          aria-current={isActive ? "page" : undefined}
+                          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
                             isActive
-                              ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveBg} font-bold shadow-sm`
+                              ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveBg} font-bold shadow-sm border border-sidebar-primary/15`
                               : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
                           }`}
                         >

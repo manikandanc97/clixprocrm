@@ -137,11 +137,15 @@ export class TenantGuard implements CanActivate {
     request.tenantId = membership.tenantId;
     request.userRole = membership.role;
     request.isSuperAdmin = false;
+    request.isOrgOwner = !!membership.isOrgOwner;
+    request.branchId = membership.branchId || null;
 
     this.tenantContext?.setContext({
       userId: user.id,
       tenantId: membership.tenantId,
       isSuperAdmin: false,
+      isOrgOwner: !!membership.isOrgOwner,
+      branchId: membership.branchId || null,
       userRole: membership.role,
     });
 

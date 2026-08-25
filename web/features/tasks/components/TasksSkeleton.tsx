@@ -3,7 +3,8 @@ import {
   PageHeaderSkeleton, 
   MetricCardSkeleton, 
   ToolbarSkeleton, 
-  TableSkeleton 
+  TableSkeleton,
+  KanbanSkeleton
 } from "@/shared/components/skeletons";
 import { Skeleton } from "@/shared/ui/skeleton";
 
@@ -42,7 +43,8 @@ function TaskCardSkeleton() {
 }
 
 export function TasksSkeleton({ viewMode = "list" }: { viewMode?: string }) {
-  const isGrid = viewMode === "grid" || viewMode === "cards" || viewMode === "kanban";
+  const isKanban = viewMode === "kanban";
+  const isGrid = viewMode === "grid" || viewMode === "cards";
 
   return (
     <CRMPageContainer>
@@ -62,7 +64,9 @@ export function TasksSkeleton({ viewMode = "list" }: { viewMode?: string }) {
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col">
-          {isGrid ? (
+          {isKanban ? (
+            <KanbanSkeleton />
+          ) : isGrid ? (
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-6">
               {Array.from({ length: 8 }).map((_, i) => (
                 <TaskCardSkeleton key={i} />

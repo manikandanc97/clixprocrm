@@ -22,7 +22,7 @@ import {
 import {
   fetchPlatformUsers,
   updatePlatformUserStatus,
-  toggleSuperAdminRole,
+  transferSuperAdminRole,
   PlatformUser,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
@@ -54,6 +54,9 @@ export default function SuperAdminUsersPage() {
   const [statusFilter, setStatusFilter] = useState<string>("ALL");
   const [superAdminOnly, setSuperAdminOnly] = useState(false);
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
+  const [transferTargetUser, setTransferTargetUser] = useState<PlatformUser | null>(null);
+  const [transferConfirmText, setTransferConfirmText] = useState("");
+  const [isTransferring, setIsTransferring] = useState(false);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -92,28 +95,36 @@ export default function SuperAdminUsersPage() {
     setCurrentPage(1);
   }, [search]);
 
-  const handleToggleSuperAdmin = async (user: PlatformUser) => {
-    const nextState = !user.isSuperAdmin;
-    const confirmMsg = nextState
-      ? `Promote "${user.name || user.email}" to Platform SUPER ADMIN? They will gain unrestricted access across all organizations and system configurations.`
-      : `Revoke Platform Super Admin privileges from "${user.name || user.email}"?`;
-
-    if (!confirm(confirmMsg)) return;
+  const handleExecuteTransfer = async () => {
+    if (!transferTargetUser) return;
+    if (transferConfirmText.trim().toUpperCase() !== "TRANSFER") {
+      toast.error('Please type "TRANSFER" to confirm the platform ownership transfer.');
+      return;
+    }
 
     try {
-      await toggleSuperAdminRole(user.id, nextState);
-      toast.success(
-        `User ${user.name || user.email} ${nextState ? "promoted to Super Admin" : "demoted"}.`
-      );
-      loadUsers();
+      setIsTransferring(true);
+      const res = await transferSuperAdminRole(transferTargetUser.id);
+      toast.success(res.message || `Platform Super Admin ownership transferred successfully.`);
+      setTransferTargetUser(null);
+      setTransferConfirmText("");
+      setSelectedUser(null);
+      await loadUsers();
     } catch (err: any) {
       toast.error(
-        err?.response?.data?.message || err?.message || "Failed to update role."
+        err?.response?.data?.message || err?.message || "Failed to transfer Super Admin ownership."
       );
+    } finally {
+      setIsTransferring(false);
     }
   };
 
   const handleToggleStatus = async (user: PlatformUser) => {
+    if (user.isSuperAdmin) {
+      toast.error("Cannot deactivate or suspend the sole active Platform Super Admin.");
+      return;
+    }
+
     const nextStatus = user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
     const confirmMsg = `Are you sure you want to ${
       nextStatus === "SUSPENDED" ? "suspend" : "activate"
@@ -126,7 +137,7 @@ export default function SuperAdminUsersPage() {
       toast.success(`User status updated to ${nextStatus}.`);
       loadUsers();
     } catch (err: any) {
-      toast.error("Failed to update user status.");
+      toast.error(err?.response?.data?.message || "Failed to update user status.");
     }
   };
 
@@ -408,7 +419,7 @@ export default function SuperAdminUsersPage() {
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"
-                            className="rounded-xl w-48 shadow-lg border-border"
+                            className="rounded-xl w-56 shadow-lg border-border"
                           >
                             <DropdownMenuLabel className="text-xs">
                               Manage Account
@@ -420,22 +431,40 @@ export default function SuperAdminUsersPage() {
                               <FileText className="h-3.5 w-3.5 text-primary" />
                               <span>View User Profile</span>
                             </DropdownMenuItem>
-                            <DropdownMenuSeparator />
-                            <DropdownMenuItem
-                              onClick={() => handleToggleStatus(u)}
-                              className={`text-xs gap-2 cursor-pointer font-medium ${
-                                u.status === "ACTIVE"
-                                  ? "text-rose-500 focus:text-rose-500"
-                                  : "text-emerald-500 focus:text-emerald-500"
-                              }`}
-                            >
-                              <Ban className="h-3.5 w-3.5" />
-                              <span>
-                                {u.status === "ACTIVE"
-                                  ? "Suspend User"
-                                  : "Activate User"}
-                              </span>
-                            </DropdownMenuItem>
+
+                            {!u.isSuperAdmin && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => setTransferTargetUser(u)}
+                                  className="text-xs gap-2 cursor-pointer font-medium text-amber-600 focus:text-amber-600"
+                                >
+                                  <Crown className="h-3.5 w-3.5 text-amber-500" />
+                                  <span>Transfer Super Admin</span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
+
+                            {!u.isSuperAdmin && (
+                              <>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  onClick={() => handleToggleStatus(u)}
+                                  className={`text-xs gap-2 cursor-pointer font-medium ${
+                                    u.status === "ACTIVE"
+                                      ? "text-rose-500 focus:text-rose-500"
+                                      : "text-emerald-500 focus:text-emerald-500"
+                                  }`}
+                                >
+                                  <Ban className="h-3.5 w-3.5" />
+                                  <span>
+                                    {u.status === "ACTIVE"
+                                      ? "Suspend User"
+                                      : "Activate User"}
+                                  </span>
+                                </DropdownMenuItem>
+                              </>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>
@@ -472,7 +501,7 @@ export default function SuperAdminUsersPage() {
           />
         )}
 
-      {/* 5. User Details Modal */}
+      {/* 6. User Details Modal */}
       {selectedUser && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-lg w-full p-6 space-y-5 max-h-[85vh] overflow-y-auto">
@@ -511,8 +540,15 @@ export default function SuperAdminUsersPage() {
                 </div>
                 <div>
                   <span className="text-muted-foreground font-semibold">Platform Role</span>
-                  <p className="font-bold text-emerald-600 mt-1">
-                    {selectedUser.isSuperAdmin ? "SUPER ADMIN" : "Standard User"}
+                  <p className="font-bold text-emerald-600 mt-1 flex items-center gap-1">
+                    {selectedUser.isSuperAdmin ? (
+                      <>
+                        <Crown className="h-3.5 w-3.5" />
+                        SUPER ADMIN (Root)
+                      </>
+                    ) : (
+                      "Standard User"
+                    )}
                   </p>
                 </div>
                 <div>
@@ -564,31 +600,121 @@ export default function SuperAdminUsersPage() {
 
               {/* Action Buttons */}
               <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-border/60">
+                {selectedUser.isSuperAdmin ? (
+                  <span className="text-xs font-semibold text-emerald-600 bg-emerald-500/10 px-3 py-1.5 rounded-xl border border-emerald-500/20 flex items-center gap-1.5">
+                    <Crown className="h-3.5 w-3.5" />
+                    Protected Platform Root Admin
+                  </span>
+                ) : (
+                  <>
+                    <Button
+                      onClick={() => {
+                        const target = selectedUser;
+                        setSelectedUser(null);
+                        setTransferTargetUser(target);
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl text-xs font-semibold text-amber-600 border-amber-500/30 hover:bg-amber-500/10"
+                    >
+                      <Crown className="h-3.5 w-3.5 mr-1 text-amber-500" />
+                      Transfer Super Admin
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        handleToggleStatus(selectedUser);
+                        setSelectedUser(null);
+                      }}
+                      size="sm"
+                      className={`rounded-xl text-xs font-bold ${
+                        selectedUser.status === "ACTIVE"
+                          ? "bg-rose-500 hover:bg-rose-600 text-white"
+                          : "bg-emerald-600 hover:bg-emerald-700 text-white"
+                      }`}
+                    >
+                      {selectedUser.status === "ACTIVE" ? "Suspend Account" : "Activate Account"}
+                    </Button>
+                  </>
+                )}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 7. Atomic Super Admin Transfer Confirmation Modal */}
+      {transferTargetUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2.5 text-amber-600">
+                <Crown className="h-6 w-6" />
+                <h3 className="text-base font-bold text-foreground">
+                  Transfer Platform Ownership
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setTransferTargetUser(null);
+                  setTransferConfirmText("");
+                }}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs text-muted-foreground">
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-foreground space-y-2">
+                <p className="font-bold text-amber-600 flex items-center gap-1.5">
+                  <ShieldCheck className="h-4 w-4" />
+                  Strict Single Super Admin Invariant
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  The platform strictly maintains <strong className="text-foreground">exactly ONE active Super Admin</strong>.
+                  Transferring Super Admin status will atomically grant root platform privileges to:
+                </p>
+                <div className="p-2.5 rounded-lg bg-card border border-border text-foreground font-semibold">
+                  <p>{transferTargetUser.name || "No name"}</p>
+                  <p className="text-xs text-muted-foreground font-mono">{transferTargetUser.email}</p>
+                </div>
+                <p className="text-[11px] text-amber-700 dark:text-amber-400 font-medium">
+                  ⚠️ Your current account will be safely demoted to Standard User. This transaction is atomic and irreversible without the new Super Admin transferring it back.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="font-semibold text-foreground block">
+                  Type <span className="font-mono text-rose-500 font-bold">TRANSFER</span> to confirm:
+                </label>
+                <input
+                  type="text"
+                  value={transferConfirmText}
+                  onChange={(e) => setTransferConfirmText(e.target.value)}
+                  placeholder="TRANSFER"
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-amber-500"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-border/60">
                 <Button
                   onClick={() => {
-                    handleToggleSuperAdmin(selectedUser);
-                    setSelectedUser(null);
+                    setTransferTargetUser(null);
+                    setTransferConfirmText("");
                   }}
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="rounded-xl text-xs font-semibold"
+                  className="rounded-xl text-xs"
                 >
-                  <Crown className="h-3.5 w-3.5 mr-1 text-emerald-600" />
-                  {selectedUser.isSuperAdmin ? "Revoke Super Admin" : "Promote to Super Admin"}
+                  Cancel
                 </Button>
                 <Button
-                  onClick={() => {
-                    handleToggleStatus(selectedUser);
-                    setSelectedUser(null);
-                  }}
+                  onClick={handleExecuteTransfer}
+                  disabled={transferConfirmText.trim().toUpperCase() !== "TRANSFER" || isTransferring}
                   size="sm"
-                  className={`rounded-xl text-xs font-bold ${
-                    selectedUser.status === "ACTIVE"
-                      ? "bg-rose-500 hover:bg-rose-600 text-white"
-                      : "bg-emerald-600 hover:bg-emerald-700 text-white"
-                  }`}
+                  className="rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white"
                 >
-                  {selectedUser.status === "ACTIVE" ? "Suspend Account" : "Activate Account"}
+                  {isTransferring ? "Transferring..." : "Confirm & Transfer Ownership"}
                 </Button>
               </div>
             </div>

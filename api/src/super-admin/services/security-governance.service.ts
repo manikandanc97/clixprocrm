@@ -134,6 +134,22 @@ export class SecurityGovernanceService {
       (process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_TOKEN)
     );
 
+    // Verify RLS dynamically
+    let isRlsVerified = true;
+    try {
+      const rlsCheck: Array<{ cnt: number }> = (await (this.prisma as any).$queryRaw`
+        SELECT COUNT(*)::int as cnt
+        FROM pg_class c
+        JOIN pg_namespace n ON n.oid = c.relnamespace
+        WHERE n.nspname = 'public'
+          AND c.relname = ANY(${this.TENANT_SCOPED_TABLES})
+          AND c.relrowsecurity = true
+      `) || [];
+      isRlsVerified = (rlsCheck[0]?.cnt || 0) > 0;
+    } catch {
+      isRlsVerified = false;
+    }
+
     return [
       // 1. AUTH
       {
@@ -180,9 +196,11 @@ export class SecurityGovernanceService {
         controlId: 'RLS-01',
         category: 'RLS',
         name: 'PostgreSQL FORCE Row Level Security',
-        status: 'VERIFIED',
+        status: isRlsVerified ? 'VERIFIED' : 'NOT_CONFIGURED',
         severity: 'CRITICAL',
-        evidence: 'FORCE RLS active across all 25 tenant-scoped database tables with tenant isolation policies',
+        evidence: isRlsVerified
+          ? 'FORCE RLS active across tenant-scoped database tables with tenant isolation policies'
+          : 'PostgreSQL RLS policies not detected or database unverified',
         lastVerifiedAt: now,
       },
       // 6. AUDIT
@@ -234,7 +252,7 @@ export class SecurityGovernanceService {
         name: 'Emergency Controls & Incident Response Lifecycle',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'Single-use break-glass codes, user/tenant lockdowns, and automated Redis alert deduplication',
+        evidence: 'Single-use break-glass codes, user/tenant lockdowns, and automated alert triage',
         lastVerifiedAt: now,
       },
       // 11. NETWORK
@@ -282,9 +300,11 @@ export class SecurityGovernanceService {
         controlId: 'BCK-01',
         category: 'BACKUP',
         name: 'Zero-Write Disaster Recovery Verification',
-        status: 'VERIFIED',
+        status: isWormConfigured ? 'VERIFIED' : 'NOT_CONFIGURED',
         severity: 'HIGH',
-        evidence: 'AuditDisasterRecoveryService verifies S3 archive restoration against cryptographic hash without write side effects',
+        evidence: isWormConfigured
+          ? 'AuditDisasterRecoveryService verifies S3 archive restoration against cryptographic hash without write side effects'
+          : 'Disaster Recovery S3 backup bucket unconfigured',
         lastVerifiedAt: now,
       },
     ];
@@ -408,7 +428,7 @@ export class SecurityGovernanceService {
       backupReadiness: {
         wormConfigured: isWormConfigured,
         complianceRetentionDays: 365,
-        archiveStatus: isWormConfigured ? 'ACTIVE' : 'UNCONFIGURED',
+        archiveStatus: isWormConfigured ? 'ACTIVE' : 'NOT_CONFIGURED',
       },
       incidentReadiness: {
         openIncidents: incidentsStatus.openIncidents,
@@ -420,28 +440,72 @@ export class SecurityGovernanceService {
   }
 
   /**
-   * Verifies RLS across all 25 tenant tables + confirms global scope of AuditLog.
+   * Verifies RLS across all tenant tables + confirms global scope of AuditLog.
    */
   async getRlsGovernance() {
-    const tableReports = this.TENANT_SCOPED_TABLES.map((table) => ({
-      table,
-      rlsEnabled: true,
-      forceRlsEnabled: true,
-      tenantIsolationPolicy: 'tenant_isolation_policy',
-      status: 'VERIFIED_ACTIVE',
-    }));
+    try {
+      const rlsRows: Array<{ relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }> =
+        (await (this.prisma as any).$queryRaw`
+          SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity
+          FROM pg_class c
+          JOIN pg_namespace n ON n.oid = c.relnamespace
+          WHERE n.nspname = 'public'
+            AND c.relname = ANY(${this.TENANT_SCOPED_TABLES})
+        `) || [];
 
-    return {
-      verifiedTenantTablesCount: this.TENANT_SCOPED_TABLES.length,
-      tables: tableReports,
-      globalAuditLogScoped: {
-        table: 'AuditLog',
-        classification: 'SYSTEM_GLOBAL_IMMUTABLE',
-        rlsStatus: 'GLOBAL_ADVISORY_IMMUTABLE',
-        triggerProtected: true,
-      },
-      verifiedAt: new Date().toISOString(),
-    };
+      const rlsMap = new Map<string, { relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
+        rlsRows.map((r) => [r.relname, r]),
+      );
+
+      const tableReports = this.TENANT_SCOPED_TABLES.map((table) => {
+        const row = rlsMap.get(table);
+        const rlsEnabled = row?.relrowsecurity === true;
+        const forceRlsEnabled = row?.relforcerowsecurity === true;
+        return {
+          table,
+          rlsEnabled,
+          forceRlsEnabled,
+          tenantIsolationPolicy: rlsEnabled ? 'tenant_isolation_policy' : 'UNCONFIGURED',
+          status: rlsEnabled ? 'VERIFIED_ACTIVE' : 'NOT_CONFIGURED',
+        };
+      });
+
+      const verifiedCount = tableReports.filter((t) => t.rlsEnabled).length;
+
+      return {
+        verifiedTenantTablesCount: verifiedCount,
+        totalTenantTablesCount: this.TENANT_SCOPED_TABLES.length,
+        tables: tableReports,
+        globalAuditLogScoped: {
+          table: 'AuditLog',
+          classification: 'SYSTEM_GLOBAL_IMMUTABLE',
+          rlsStatus: 'GLOBAL_ADVISORY_IMMUTABLE',
+          triggerProtected: true,
+        },
+        verifiedAt: new Date().toISOString(),
+      };
+    } catch (err: any) {
+      this.logger.warn(`RLS catalog query fallback: ${err?.message || err}`);
+      const tableReports = this.TENANT_SCOPED_TABLES.map((table) => ({
+        table,
+        rlsEnabled: false,
+        forceRlsEnabled: false,
+        tenantIsolationPolicy: 'UNKNOWN',
+        status: 'UNKNOWN',
+      }));
+      return {
+        verifiedTenantTablesCount: 0,
+        totalTenantTablesCount: this.TENANT_SCOPED_TABLES.length,
+        tables: tableReports,
+        globalAuditLogScoped: {
+          table: 'AuditLog',
+          classification: 'SYSTEM_GLOBAL_IMMUTABLE',
+          rlsStatus: 'GLOBAL_ADVISORY_IMMUTABLE',
+          triggerProtected: true,
+        },
+        verifiedAt: new Date().toISOString(),
+      };
+    }
   }
 
   /**

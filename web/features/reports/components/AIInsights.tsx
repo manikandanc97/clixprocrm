@@ -127,12 +127,10 @@ export default function AIInsights() {
                 className="space-y-3 overflow-hidden"
               >
                 {insights[activeTab].length > 0 ? (
-                  insights[activeTab].map((item: ReturnType<typeof JSON.parse>, index: number) => {
+                  insights[activeTab].map((item: any) => {
                     const Icon = getIcon(activeTab);
-                    
-                    const confidence = Math.max(75, 98 - (index * 7)); 
-                    const priority = index === 0 ? "HIGH" : index === 1 ? "MEDIUM" : "LOW";
-                    const pColors = {
+                    const priority = (item.priority || "MEDIUM").toUpperCase();
+                    const pColors: Record<string, string> = {
                       HIGH: "bg-rose-500/10 text-rose-400 border-rose-500/20",
                       MEDIUM: "bg-amber-500/10 text-amber-400 border-amber-500/20",
                       LOW: "bg-emerald-500/10 text-emerald-400 border-emerald-500/20",
@@ -160,7 +158,7 @@ export default function AIInsights() {
                               <h4 className="font-bold text-[12px] text-white tracking-tight line-clamp-1">
                                 {item.title}
                               </h4>
-                              <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${pColors[priority]}`}>
+                              <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${pColors[priority] || pColors.MEDIUM}`}>
                                 {priority}
                               </span>
                             </div>
@@ -177,19 +175,7 @@ export default function AIInsights() {
                         </div>
 
                         <div className="flex items-center justify-between mt-1 pt-3 border-t border-white/5">
-                          <div className="flex items-center gap-2">
-                            <div className="relative w-6 h-6 flex items-center justify-center bg-white/5 rounded-full border border-white/10">
-                              <svg className="w-full h-full transform -rotate-90 absolute inset-0">
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" className="text-white/5" />
-                                <circle cx="12" cy="12" r="10" stroke="currentColor" strokeWidth="2" fill="none" 
-                                  strokeDasharray={`${(confidence / 100) * 62.83} 62.83`}
-                                  className="text-primary transition-all duration-1000" 
-                                />
-                              </svg>
-                              <span className="text-[7px] font-black text-white relative z-10">{confidence}%</span>
-                            </div>
-                            <span className="text-[9px] font-medium text-white/50 uppercase tracking-widest">Confidence</span>
-                          </div>
+                          <span className="text-[10px] font-semibold text-white/50">Verified AI Insight</span>
                           
                           <button 
                             className="flex items-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"

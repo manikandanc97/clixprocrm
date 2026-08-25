@@ -54,6 +54,9 @@ export class EmployeesService {
           status: u.status,
           role: membership?.role?.name || 'EMPLOYEE',
           roleId: (membership?.role as any)?.id || null,
+          isOrgOwner: !!(membership as any)?.isOrgOwner,
+          branchId: (membership as any)?.branchId || null,
+          reportingManagerId: (membership as any)?.reportingManagerId || null,
           joinedAt: (membership as any)?.joinedAt || u.createdAt,
           createdAt: u.createdAt,
         };
@@ -283,7 +286,14 @@ export class EmployeesService {
         throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
       }
 
-      if (existingUser.role.name === 'ADMIN' && actorRole !== 'ADMIN') {
+      if (existingUser.isOrgOwner && data.role !== undefined && data.role !== existingUser.role?.name) {
+        throw new HttpException(
+          'Cannot demote the active Organization Owner. Transfer ownership first.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
+      if (existingUser.role?.name === 'ADMIN' && actorRole !== 'ADMIN') {
         throw new HttpException(
           'Only an ADMIN can modify an ADMIN',
           HttpStatus.FORBIDDEN,
@@ -350,6 +360,13 @@ export class EmployeesService {
         throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
       }
 
+      if (existingUser.isOrgOwner && status === 'INACTIVE') {
+        throw new HttpException(
+          'Cannot deactivate the active Organization Owner. Transfer ownership first.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
       if (existingUser.role.name === 'ADMIN' && actorRole !== 'ADMIN') {
         throw new HttpException(
           'Only an ADMIN can deactivate an ADMIN',
@@ -389,6 +406,18 @@ export class EmployeesService {
 
   async deleteEmployee(tenantId: string, userId: string, actorRole: string) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const userRecord = await tx.user.findUnique({
+        where: { id: userId },
+        select: { isSuperAdmin: true },
+      });
+
+      if (userRecord?.isSuperAdmin) {
+        throw new HttpException(
+          'Cannot delete the Platform Super Admin from workspace employee management.',
+          HttpStatus.FORBIDDEN,
+        );
+      }
+
       const existingUser = await tx.tenantUser.findFirst({
         where: { userId, tenantId },
         include: { role: true },
@@ -396,6 +425,13 @@ export class EmployeesService {
 
       if (!existingUser) {
         throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
+      }
+
+      if (existingUser.isOrgOwner) {
+        throw new HttpException(
+          'Cannot delete the active Organization Owner. Transfer ownership first.',
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       if (existingUser.role.name === 'ADMIN' && actorRole !== 'ADMIN') {
@@ -457,7 +493,7 @@ export class EmployeesService {
         where: { userId },
       });
 
-      if (remainingMemberships === 0) {
+      if (remainingMemberships === 0 && !userRecord?.isSuperAdmin) {
         await tx.user.delete({
           where: { id: userId },
         });

@@ -8,7 +8,10 @@ import { EmployeesService } from './services/employees.service';
 import { RolesService } from './services/roles.service';
 import { RoleStatsService } from './services/role-stats.service';
 
+import { AuthModule } from '../auth/auth.module';
+
 @Module({
+  imports: [AuthModule],
   controllers: [
     DepartmentsController,
     EmployeesController,
@@ -16,5 +19,6 @@ import { RoleStatsService } from './services/role-stats.service';
     RoleManagementController,
   ],
   providers: [DepartmentsService, EmployeesService, RolesService, RoleStatsService],
+  exports: [RolesService, EmployeesService],
 })
 export class AdminModule {}

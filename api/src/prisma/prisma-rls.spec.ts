@@ -90,8 +90,9 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       });
 
       expect(res).toBe('ALS_QUERY_SUCCESS');
-      expect(executedSqlQueries[executedSqlQueries.length - 2].values).toContain('tenant-als-123');
-      expect(executedSqlQueries[executedSqlQueries.length - 1].values).toContain('false');
+      expect(executedSqlQueries[0].values).toContain('tenant-als-123');
+      expect(executedSqlQueries[1].values).toContain('false');
+      expect(executedSqlQueries[2].values).toContain('user-als-456');
     });
 
     it('withCurrentTenantContext throws explicit error when context is missing', async () => {

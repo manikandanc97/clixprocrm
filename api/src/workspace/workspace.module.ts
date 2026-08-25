@@ -6,10 +6,24 @@ import { SettingsService } from './services/settings.service';
 import { BrandingService } from './services/branding.service';
 import { PrismaModule } from '../prisma/prisma.module';
 
+import { SubscriptionController } from './controllers/subscription.controller';
+import { SubscriptionEntitlementService } from '../common/plans/subscription-entitlement.service';
+
 @Module({
   imports: [PrismaModule],
-  controllers: [WorkspaceController, SettingsController],
-  providers: [WorkspaceService, SettingsService, BrandingService],
-  exports: [WorkspaceService, SettingsService, BrandingService],
+  controllers: [WorkspaceController, SettingsController, SubscriptionController],
+  providers: [
+    WorkspaceService,
+    SettingsService,
+    BrandingService,
+    SubscriptionEntitlementService,
+  ],
+  exports: [
+    WorkspaceService,
+    SettingsService,
+    BrandingService,
+    SubscriptionEntitlementService,
+  ],
 })
 export class WorkspaceModule {}
+

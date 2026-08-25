@@ -29,7 +29,8 @@ import { PlanBadge } from "@/shared/components/PlanBadge";
 import { CRMCard } from "@/shared/components/crm";
 import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
 import { useWorkspace, useUpdateWorkspace, useUploadWorkspaceLogo } from "@/shared/hooks/use-settings";
-import { PageErrorState, ComponentLoadingState } from "@/shared/components/page-states";
+import { PageErrorState } from "@/shared/components/page-states";
+import { WorkspaceSettingsSkeleton } from "./SettingsSkeletons";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -214,7 +215,7 @@ const WorkspaceSettings = () => {
   };
 
   if (loading) {
-    return <ComponentLoadingState label="Loading workspace configuration..." />;
+    return <WorkspaceSettingsSkeleton />;
   }
 
   if (error) {

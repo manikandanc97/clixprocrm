@@ -39,7 +39,7 @@ import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { getRoleBadge } from "@/shared/lib/auth/rbac";
-import { Shield, ArrowLeftRight } from "lucide-react";
+import { Shield, ArrowLeftRight, CreditCard } from "lucide-react";
 
 type ProfileMenuProps = {
   user: { name?: string; email?: string; role?: string; roleName?: string; displayName?: string; avatar?: string | null; } | null;
@@ -146,61 +146,22 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
     <>
       <DropdownMenu>
         <DropdownMenuTrigger asChild>
-        <button 
-          className="relative flex items-center gap-2.5 p-1 sm:py-1 sm:pl-1 sm:pr-2.5 rounded-xl hover:bg-sidebar-accent/50 transition-all duration-200 group outline-none cursor-pointer text-left"
-          aria-label="User Profile Menu"
-        >
-          <div className="relative shrink-0">
-            {user?.avatar ? (
-              // eslint-disable-next-line @next/next/no-img-element
-              <img
-                src={user.avatar}
-                alt={displayName}
-                className="rounded-xl w-[36px] h-[36px] object-cover shadow-sm border border-white/20"
-              />
-            ) : (
-              <div 
-                className="flex justify-center items-center rounded-xl w-[36px] h-[36px] font-bold text-xs text-primary-foreground shadow-sm border border-white/20 transition-all duration-300"
-                style={{
-                  background: "linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 65%, black))"
-                }}
-              >
-                {initials}
-              </div>
-            )}
-            {/* Online Indicator */}
-            <div 
-              className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300"
-              style={{ backgroundColor: "var(--primary)" }}
-            />
-          </div>
-          <div className="hidden sm:flex flex-col min-w-0 pr-0.5 items-start">
-            <span className="text-xs font-semibold text-sidebar-foreground truncate max-w-[120px] leading-tight">
-              {displayName}
-            </span>
-            <div className="mt-0.5">
-              <span className={`inline-flex items-center gap-1 text-[9.5px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border leading-none ${badgeStyle.badge}`}>
-                <RoleIcon className="w-2.5 h-2.5 shrink-0" />
-                {roleDisplay}
-              </span>
-            </div>
-          </div>
-        </button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-68 rounded-xl p-2 shadow-elevated border-border bg-popover/95 backdrop-blur-xl" align="end" sideOffset={8}>
-        <DropdownMenuLabel className="px-3 py-3">
-          <div className="flex items-center gap-3">
+          <button 
+            type="button"
+            className="relative flex items-center gap-2.5 p-1 sm:py-1 sm:pl-1 sm:pr-2.5 rounded-xl hover:bg-sidebar-accent/50 transition-all duration-200 group outline-none cursor-pointer text-left"
+            aria-label="User Profile Menu"
+          >
             <div className="relative shrink-0">
               {user?.avatar ? (
                 // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={user.avatar}
                   alt={displayName}
-                  className="rounded-xl w-10 h-10 object-cover shadow-sm border border-border"
+                  className="rounded-xl w-[36px] h-[36px] object-cover shadow-sm border border-white/20"
                 />
               ) : (
                 <div 
-                  className="flex justify-center items-center rounded-xl w-10 h-10 font-bold text-xs text-primary-foreground shadow-sm border border-white/20"
+                  className="flex justify-center items-center rounded-xl w-[36px] h-[36px] font-bold text-xs text-primary-foreground shadow-sm border border-white/20 transition-all duration-300"
                   style={{
                     background: "linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 65%, black))"
                   }}
@@ -208,52 +169,98 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                   {initials}
                 </div>
               )}
+              {/* Online Indicator */}
+              <div 
+                className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300"
+                style={{ backgroundColor: "var(--primary)" }}
+              />
             </div>
-            <div className="flex flex-col space-y-1 min-w-0 flex-1">
-              <div className="flex items-center justify-between gap-1.5">
-                <p className="text-sm font-bold leading-none truncate">{displayName}</p>
-                <span className={`inline-flex items-center gap-1 text-[8.5px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border shrink-0 leading-none ${badgeStyle.badge}`}>
+            <div className="hidden sm:flex flex-col min-w-0 pr-0.5 items-start">
+              <span className="text-xs font-semibold text-sidebar-foreground truncate max-w-[120px] leading-tight">
+                {displayName}
+              </span>
+              <div className="mt-0.5">
+                <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border leading-none ${badgeStyle.badge}`}>
                   <RoleIcon className="w-2.5 h-2.5 shrink-0" />
                   {roleDisplay}
                 </span>
               </div>
-              <p className="text-[11px] font-medium leading-none text-muted-foreground truncate">
-                {user?.email || "user@clixprocrm.com"}
-              </p>
             </div>
-          </div>
-        </DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        
-        <DropdownMenuGroup>
-          {isSuperAdminPath ? (
-            <>
-              <DropdownMenuItem onClick={() => router.push("/super-admin/settings")} className="cursor-pointer py-2.5 rounded-xl">
-                <Settings className="mr-3 h-4 w-4 text-emerald-600 transition-colors" />
-                <span className="font-semibold text-sm">Platform Settings</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => router.push("/dashboard")} className="cursor-pointer py-2.5 rounded-xl">
-                <ArrowLeftRight className="mr-3 h-4 w-4 text-primary transition-colors" />
-                <span className="font-semibold text-sm">Switch to Tenant CRM</span>
-              </DropdownMenuItem>
-            </>
-          ) : (
-            <>
-              <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer py-2.5 rounded-xl">
-                <Settings className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
-                <span className="font-semibold text-sm">Workspace Settings</span>
-              </DropdownMenuItem>
-              {(user?.role?.toUpperCase() === "SUPER_ADMIN" || user?.role?.toUpperCase() === "SUPERADMIN") && (
-                <DropdownMenuItem onClick={() => router.push("/super-admin")} className="cursor-pointer py-2.5 rounded-xl">
-                  <Shield className="mr-3 h-4 w-4 text-emerald-600 transition-colors" />
-                  <span className="font-semibold text-sm">Super Admin Portal</span>
-                </DropdownMenuItem>
+          </button>
+        </DropdownMenuTrigger>
+
+        <DropdownMenuContent className="w-68 rounded-xl p-2 shadow-elevated border-border bg-popover/95 backdrop-blur-xl" align="end" sideOffset={8}>
+          <DropdownMenuLabel className="px-3 py-3">
+            <div className="flex items-center gap-3">
+              <div className="relative shrink-0">
+                {user?.avatar ? (
+                  // eslint-disable-next-line @next/next/no-img-element
+                  <img
+                    src={user.avatar}
+                    alt={displayName}
+                    className="rounded-xl w-10 h-10 object-cover shadow-sm border border-border"
+                  />
+                ) : (
+                  <div 
+                    className="flex justify-center items-center rounded-xl w-10 h-10 font-bold text-xs text-primary-foreground shadow-sm border border-white/20"
+                    style={{
+                      background: "linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 65%, black))"
+                    }}
+                  >
+                    {initials}
+                  </div>
+                )}
+              </div>
+              <div className="flex flex-col space-y-1 min-w-0 flex-1">
+                <div className="flex items-center justify-between gap-1.5">
+                  <p className="text-sm font-bold leading-none truncate">{displayName}</p>
+                  <span className={`inline-flex items-center gap-1 text-[8.5px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border shrink-0 leading-none ${badgeStyle.badge}`}>
+                    <RoleIcon className="w-2.5 h-2.5 shrink-0" />
+                    {roleDisplay}
+                  </span>
+                </div>
+                <p className="text-[11px] font-medium leading-none text-muted-foreground truncate">
+                  {user?.email || "user@clixprocrm.com"}
+                </p>
+              </div>
+            </div>
+          </DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            
+            <DropdownMenuGroup>
+              {isSuperAdminPath ? (
+                <>
+                  <DropdownMenuItem onClick={() => router.push("/super-admin/settings")} className="cursor-pointer py-2.5 rounded-xl">
+                    <Settings className="mr-3 h-4 w-4 text-emerald-600 transition-colors" />
+                    <span className="font-semibold text-sm">Platform Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/dashboard")} className="cursor-pointer py-2.5 rounded-xl">
+                    <ArrowLeftRight className="mr-3 h-4 w-4 text-primary transition-colors" />
+                    <span className="font-semibold text-sm">Switch to Tenant CRM</span>
+                  </DropdownMenuItem>
+                </>
+              ) : (
+                <>
+                  <DropdownMenuItem onClick={() => router.push("/settings")} className="cursor-pointer py-2.5 rounded-xl">
+                    <Settings className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
+                    <span className="font-semibold text-sm">Workspace Settings</span>
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => router.push("/settings?section=subscription")} className="cursor-pointer py-2.5 rounded-xl">
+                    <CreditCard className="mr-3 h-4 w-4 text-primary transition-colors" />
+                    <span className="font-semibold text-sm">Subscription & Billing</span>
+                  </DropdownMenuItem>
+                  {(user?.role?.toUpperCase() === "SUPER_ADMIN" || user?.role?.toUpperCase() === "SUPERADMIN") && (
+                    <DropdownMenuItem onClick={() => router.push("/super-admin")} className="cursor-pointer py-2.5 rounded-xl">
+                      <Shield className="mr-3 h-4 w-4 text-emerald-600 transition-colors" />
+                      <span className="font-semibold text-sm">Super Admin Portal</span>
+                    </DropdownMenuItem>
+                  )}
+                </>
               )}
-            </>
-          )}
-        </DropdownMenuGroup>
-        
-        <DropdownMenuSeparator />
+            </DropdownMenuGroup>
+            
+            <DropdownMenuSeparator />
+
         
         <DropdownMenuGroup>
           {/* Accent Color Submenu */}
@@ -387,7 +394,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
       </DropdownMenuContent>
     </DropdownMenu>
 
-      <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
+    <AlertDialog open={showLogoutConfirm} onOpenChange={setShowLogoutConfirm}>
         <AlertDialogContent>
           <AlertDialogHeader>
             <AlertDialogTitle>Sign Out</AlertDialogTitle>

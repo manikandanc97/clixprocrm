@@ -19,16 +19,18 @@ import {
 } from "@/shared/components/crm";
 import { FormModal } from "@/shared/components/form-modal";
 
+import { FormSkeleton } from "@/shared/components/skeletons";
+
 const LeadForm = dynamic(() => import("@/features/forms/LeadForm").then((mod) => ({ default: mod.LeadForm })), {
-  loading: () => <div className="h-[300px] skeleton rounded-xl" />,
+  loading: () => <FormSkeleton />,
 });
 const CustomerForm = dynamic(() => import("@/features/forms/CustomerForm").then((mod) => ({ default: mod.CustomerForm })), {
-  loading: () => <div className="h-[300px] skeleton rounded-xl" />,
+  loading: () => <FormSkeleton />,
 });
 
 import { ContactsTable } from "@/features/contacts/components/ContactsTable";
 import { useViewMode } from "@/shared/hooks/useViewMode";
-import { LeadsSkeleton } from "@/features/leads/components/LeadsSkeleton";
+import { ContactsSkeleton } from "@/features/contacts/components/ContactsSkeleton";
 import { BulkImportModal } from "@/features/leads/components/BulkImportModal";
 
 const ContactsPage = () => {
@@ -121,7 +123,7 @@ const ContactsPage = () => {
   }, [combinedContacts, searchQuery, statusFilter]);
 
   if ((leadsLoading || customersLoading) && combinedContacts.length === 0) {
-    return <LeadsSkeleton viewMode={viewMode} />;
+    return <ContactsSkeleton viewMode={viewMode} />;
   }
 
   if ((leadsError || customersError) && combinedContacts.length === 0) {

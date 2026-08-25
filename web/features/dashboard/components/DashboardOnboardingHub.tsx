@@ -11,9 +11,11 @@ import { FormModal } from "@/shared/components/form-modal";
 import { BulkImportModal } from "@/features/leads/components/BulkImportModal";
 import { EmptyState } from "@/shared/components/EmptyState";
 
+import { FormSkeleton } from "@/shared/components/skeletons";
+
 const LeadForm = dynamic(
   () => import("@/features/forms/LeadForm").then((mod) => ({ default: mod.LeadForm })),
-  { loading: () => <div className="h-[300px] skeleton rounded-xl" /> }
+  { loading: () => <FormSkeleton /> }
 );
 
 export default function DashboardOnboardingHub() {

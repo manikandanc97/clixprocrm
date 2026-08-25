@@ -41,7 +41,7 @@ const RecentCustomers = dynamic(() => import("@/features/dashboard/components/Re
 const RevenueChartWidget = () => {
   const { data: analyticsData, isLoading, isError, refetch } = useAnalytics();
   return (
-    <DashboardWidgetWrapper id="revenueChart" title="Revenue Chart" isLoading={isLoading} isError={isError} onRetry={refetch} delay={1.2}>
+    <DashboardWidgetWrapper id="revenueChart" title="Revenue Chart" skeletonType="chart" isLoading={isLoading} isError={isError} onRetry={refetch} delay={1.2}>
       <div className="h-[350px]">
         <RevenueChart data={analyticsData?.revenueOverview?.map(r => ({ name: r.name, total: r.revenue })) || []} />
       </div>
@@ -99,7 +99,7 @@ const RecentCustomersWidget = () => {
 const RevenueTargetWidget = () => {
   const { data, isLoading, isError, refetch } = useDashboardData();
   return (
-    <DashboardWidgetWrapper id="revenueTarget" title="Revenue Target" isLoading={isLoading} isError={isError} onRetry={refetch} delay={1.2}>
+    <DashboardWidgetWrapper id="revenueTarget" title="Revenue Target" skeletonType="donut" isLoading={isLoading} isError={isError} onRetry={refetch} delay={1.2}>
       <RevenueTarget data={data?.revenueTarget ?? null} />
     </DashboardWidgetWrapper>
   );
@@ -224,7 +224,7 @@ const DashboardPage = () => {
               <AIInsights />
             </React.Suspense>
 
-            <DashboardWidgetWrapper id="calendarWidget" title="Calendar" delay={1.3}>
+            <DashboardWidgetWrapper id="calendarWidget" title="Calendar" skeletonType="calendar" delay={1.3}>
               <CalendarWidget />
             </DashboardWidgetWrapper>
           </div>

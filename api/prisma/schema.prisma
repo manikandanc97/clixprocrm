@@ -29,6 +29,13 @@ model Tenant {
   mfaPolicy       String           @default("OPTIONAL")
   securityStatus  String           @default("ACTIVE")
 
+  // Subscription & Billing
+  subscriptionStatus String        @default("ACTIVE")
+  billingCycle       String        @default("monthly")
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  currentPeriodEnd   DateTime?
+
   attachments     Attachment[]
   customers       Customer[]
   departments     Department[]
@@ -51,6 +58,9 @@ model Tenant {
   companies       Company[]
   deals           Deal[]
   invoiceCounter  InvoiceCounter?
+  teams           Team[]
+  teamMembers     TeamMember[]
+  recordShares    RecordShare[]
 }
 
 model User {
@@ -85,6 +95,10 @@ model User {
   completedTasks     Task[]           @relation("TaskCompletedBy")
   ownedMeetings      Meeting[]        @relation("MeetingOwner")
   sessions           UserSession[]
+  ledTeams           Team[]           @relation("TeamLeader")
+  teamMemberships    TeamMember[]
+  sharedRecords      RecordShare[]    @relation("RecordShareRecipient")
+  createdShares      RecordShare[]    @relation("RecordShareCreator")
 }
 
 model TenantUser {
@@ -94,6 +108,8 @@ model TenantUser {
   roleId             String
   departmentId       String?
   reportingManagerId String?
+  branchId           String?
+  isOrgOwner         Boolean      @default(false)
   status             UserStatus   @default(ACTIVE)
   joinedAt           DateTime     @default(now())
   createdAt          DateTime     @default(now())
@@ -109,6 +125,7 @@ model TenantUser {
   @@index([tenantId])
   @@index([userId])
   @@index([departmentId])
+  @@index([tenantId, isOrgOwner])
 }
 
 model Customer {
@@ -138,6 +155,8 @@ model Customer {
   companyRecord  Company?        @relation(fields: [companyId], references: [id])
   deals          Deal[]
   timelineEvents TimelineEvent[]
+  teamId         String?
+  branchId       String?
 
   @@index([tenantId, status])
   @@index([tenantId, deletedAt])
@@ -145,6 +164,7 @@ model Customer {
   @@index([tenantId, assignedToId, deletedAt])
   @@index([assignedToId])
   @@index([tenantId, emailHash])
+  @@index([tenantId, teamId])
 }
 
 model Lead {
@@ -187,6 +207,8 @@ model Lead {
   companyId         String?
   companyRecord     Company?        @relation(fields: [companyId], references: [id])
   deals             Deal[]
+  teamId            String?
+  branchId          String?
 
   @@index([tenantId, stage])
   @@index([tenantId, deletedAt])
@@ -197,6 +219,7 @@ model Lead {
   @@index([customerId])
   @@index([createdAt])
   @@index([tenantId, emailHash])
+  @@index([tenantId, teamId])
 }
 
 model Task {
@@ -235,6 +258,8 @@ model Task {
   tenant             Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   relatedDealId      String?
   relatedDeal        Deal?           @relation("TaskDeal", fields: [relatedDealId], references: [id])
+  teamId             String?
+  branchId           String?
   
   timelineEvents     TimelineEvent[] @relation("TimelineTask")
   attachmentsList    Attachment[]    @relation("TaskAttachment")
@@ -251,6 +276,7 @@ model Task {
   @@index([createdById])
   @@index([relatedLeadId])
   @@index([relatedCustomerId])
+  @@index([tenantId, teamId])
 }
 
 model Quotation {
@@ -279,11 +305,14 @@ model Quotation {
   tasks        Task[]          @relation("TaskQuotation")
   dealId       String?
   deal         Deal?           @relation("QuotationDeal", fields: [dealId], references: [id])
+  teamId       String?
+  branchId     String?
 
   @@unique([tenantId, quoteNumber])
   @@index([customerId])
   @@index([assignedToId])
   @@index([leadId])
+  @@index([tenantId, teamId])
 }
 
 model AuditLog {
@@ -415,10 +444,13 @@ model Department {
 model RolePermission {
   roleId    String
   module    String
-  hasAccess Boolean @default(true)
-  role      Role    @relation(fields: [roleId], references: [id], onDelete: Cascade)
+  action    String?
+  scope     DataScope @default(ORGANIZATION)
+  hasAccess Boolean   @default(true)
+  role      Role      @relation(fields: [roleId], references: [id], onDelete: Cascade)
 
   @@id([roleId, module])
+  @@index([roleId])
 }
 
 model Product {
@@ -492,6 +524,8 @@ model Meeting {
   tasks        Task[]     @relation("TaskMeeting")
   dealId       String?
   deal         Deal?      @relation("MeetingDeal", fields: [dealId], references: [id])
+  teamId       String?
+  branchId     String?
 
   @@index([tenantId])
   @@index([tenantId, startTime, endTime])
@@ -501,6 +535,7 @@ model Meeting {
   @@index([leadId])
   @@index([customerId])
   @@index([quotationId])
+  @@index([tenantId, teamId])
 }
 
 model Notification {
@@ -687,6 +722,15 @@ enum EventVisibility {
   ORGANIZATION
 }
 
+enum DataScope {
+  OWN
+  TEAM
+  SUBORDINATES
+  BRANCH
+  ORGANIZATION
+  SHARED
+}
+
 model TenantAiConfig {
   id                String   @id @default(uuid())
   tenantId          String   @unique
@@ -727,6 +771,8 @@ model AiMessage {
   content        String
   toolCalls      Json?
   tokenCount     Int?
+  modelKey       String?
+  provider       String?
   createdAt      DateTime       @default(now())
   conversation   AiConversation @relation(fields: [conversationId], references: [id], onDelete: Cascade)
 
@@ -792,10 +838,13 @@ model Company {
   deals          Deal[]
   leads          Lead[]
   timelineEvents TimelineEvent[]
+  teamId         String?
+  branchId       String?
 
   @@index([tenantId])
   @@index([ownerId])
   @@index([tenantId, nameHash])
+  @@index([tenantId, teamId])
 }
 
 model Deal {
@@ -829,6 +878,8 @@ model Deal {
   quotations     Quotation[]     @relation("QuotationDeal")
   invoices       Invoice[]       @relation("InvoiceDeal")
   timelineEvents TimelineEvent[] @relation("TimelineDeal")
+  teamId         String?
+  branchId       String?
 
   @@index([tenantId])
   @@index([tenantId, deletedAt])
@@ -840,6 +891,7 @@ model Deal {
   @@index([companyId])
   @@index([customerId])
   @@index([ownerId])
+  @@index([tenantId, teamId])
 }
 
 model InvoiceCounter {
@@ -908,4 +960,185 @@ model UserSession {
   @@index([sessionId])
 }
 
+model Team {
+  id          String       @id @default(uuid())
+  tenantId    String
+  name        String
+  description String?
+  leaderId    String?
+  createdAt   DateTime     @default(now())
+  updatedAt   DateTime     @updatedAt
 
+  tenant      Tenant       @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  leader      User?        @relation("TeamLeader", fields: [leaderId], references: [id])
+  members     TeamMember[]
+
+  @@unique([tenantId, name])
+  @@index([tenantId])
+  @@index([leaderId])
+}
+
+model TeamMember {
+  id        String   @id @default(uuid())
+  tenantId  String
+  teamId    String
+  userId    String
+  role      String   @default("MEMBER")
+  createdAt DateTime @default(now())
+
+  tenant    Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  team      Team     @relation(fields: [teamId], references: [id], onDelete: Cascade)
+  user      User     @relation(fields: [userId], references: [id], onDelete: Cascade)
+
+  @@unique([teamId, userId])
+  @@index([tenantId])
+  @@index([userId])
+}
+
+model RecordShare {
+  id               String    @id @default(uuid())
+  tenantId         String
+  resourceType     String
+  resourceId       String
+  sharedWithUserId String?
+  sharedWithTeamId String?
+  permission       String    @default("view")
+  expiresAt        DateTime?
+  createdAt        DateTime  @default(now())
+  createdById      String?
+
+  tenant           Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  sharedWithUser   User?     @relation("RecordShareRecipient", fields: [sharedWithUserId], references: [id])
+  createdBy        User?     @relation("RecordShareCreator", fields: [createdById], references: [id])
+
+  @@index([tenantId, resourceType, resourceId])
+  @@index([sharedWithUserId])
+  @@index([sharedWithTeamId])
+}
+
+model Plan {
+  id                  String               @id // "free", "starter", "pro", "enterprise"
+  name                String
+  price               String               @default("₹0")
+  priceNum            Decimal              @default(0) @db.Decimal(12, 2)
+  annualPriceNum      Decimal              @default(0) @db.Decimal(12, 2)
+  currency            String               @default("INR")
+  billing             String               @default("per month")
+  pricingMode         String               @default("FIXED") // "FIXED" | "CUSTOM"
+  description         String?
+  features            Json?                // Array of feature descriptions
+  maxUsers            Int                  @default(3)
+  maxLeads            Int                  @default(500)
+  maxContacts         Int                  @default(1000)
+  storageGb           Int                  @default(1)
+  maxApiRequests      Int                  @default(10000)
+  trialDays           Int                  @default(0)
+  billingCycleMonthly Boolean              @default(true)
+  billingCycleAnnual  Boolean              @default(true)
+  highlight           Boolean              @default(false)
+  isActive            Boolean              @default(true)
+  status              String               @default("ACTIVE") // "ACTIVE", "INACTIVE", "ARCHIVED"
+  sortOrder           Int                  @default(0)
+  
+  // AI Subscription Configuration
+  aiEnabled           Boolean              @default(true)
+  aiLevel             String               @default("Standard AI") // "Basic AI", "Standard AI", "Advanced AI", "Premium AI", "Full AI"
+  dailyTokenLimit     Int                  @default(50000)
+  defaultModelId      String?
+  defaultModel        AiModel?             @relation("PlanDefaultAiModel", fields: [defaultModelId], references: [id])
+  
+  createdAt           DateTime             @default(now())
+  updatedAt           DateTime             @updatedAt
+
+  aiEntitlements      PlanAiEntitlement[]
+
+  @@index([status])
+  @@index([sortOrder])
+}
+
+model AiModel {
+  id              String              @id @default(uuid())
+  modelKey        String              @unique // "gemini-1.5-flash", "gemini-2.0-flash", "gpt-4o", etc.
+  displayName     String
+  provider        String              @default("google") // "google", "openai", "anthropic", "xai", "mistral"
+  description     String?
+  contextWindow   Int                 @default(1048576)
+  inputCostPer1k  Decimal             @default(0) @db.Decimal(10, 6)
+  outputCostPer1k Decimal             @default(0) @db.Decimal(10, 6)
+  capabilities    String[]            @default([])
+  status          String              @default("ENABLED") // "ENABLED", "DISABLED", "DEPRECATED", "UNAVAILABLE"
+  isChatModel     Boolean             @default(true)
+  isAvailable     Boolean             @default(true)
+  isDefault       Boolean             @default(false)
+  isFallback      Boolean             @default(false)
+  sortOrder       Int                 @default(0)
+  createdAt       DateTime            @default(now())
+  updatedAt       DateTime            @updatedAt
+
+  planEntitlements PlanAiEntitlement[]
+  usageLogs        AiUsageLog[]
+  defaultForPlans  Plan[]              @relation("PlanDefaultAiModel")
+
+  @@index([isAvailable, sortOrder])
+  @@index([status])
+  @@index([provider, status])
+}
+
+model PlanAiEntitlement {
+  id                   String   @id @default(uuid())
+  planId               String
+  modelId              String
+  capability           String   @default("*") // "*" or specific capability e.g. "chat", "rag", "lead_scoring"
+  maxTokensPerDay      Int?
+  maxTokensPerMonth    Int?
+  maxRequestsPerMinute Int?
+  isEnabled            Boolean  @default(true)
+  createdAt            DateTime @default(now())
+  updatedAt            DateTime @updatedAt
+
+  plan                 Plan     @relation(fields: [planId], references: [id], onDelete: Cascade)
+  model                AiModel  @relation(fields: [modelId], references: [id], onDelete: Cascade)
+
+  @@unique([planId, modelId, capability])
+  @@index([planId])
+  @@index([modelId])
+}
+
+model AiUsageLog {
+  id           String    @id @default(uuid())
+  tenantId     String
+  userId       String
+  modelId      String?
+  modelKey     String
+  capability   String    @default("chat")
+  requestId    String?
+  inputTokens  Int       @default(0)
+  outputTokens Int       @default(0)
+  totalTokens  Int       @default(0)
+  latencyMs    Int       @default(0)
+  status       String    @default("SUCCESS") // "SUCCESS" | "FAILED" | "BLOCKED"
+  errorMessage String?
+  createdAt    DateTime  @default(now())
+
+  model        AiModel?  @relation(fields: [modelId], references: [id], onDelete: SetNull)
+
+  @@index([tenantId, createdAt])
+  @@index([userId, createdAt])
+  @@index([modelKey])
+  @@index([createdAt])
+}
+
+model PlatformConfig {
+  id                       String   @id @default("global")
+  name                     String   @default("ClixProCRM Multi-Tenant Platform")
+  defaultTenantPlan        String   @default("free")
+  maintenanceMode          Boolean  @default(false)
+  allowPublicRegistrations Boolean  @default(true)
+  aiCopilot                Boolean  @default(true)
+  documentRag              Boolean  @default(true)
+  multiCurrency            Boolean  @default(true)
+  defaultAiModelKey        String   @default("gemini-3.6-flash")
+  fallbackAiModelKey       String   @default("gemini-3.6-flash")
+  updatedAt                DateTime @updatedAt
+  updatedBy                String?
+}

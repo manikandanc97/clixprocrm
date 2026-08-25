@@ -17,6 +17,8 @@ import {
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { InvoicesSkeleton } from "@/features/invoices/components/InvoicesSkeleton";
+
 export default function InvoicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -49,17 +51,7 @@ export default function InvoicesPage() {
   };
 
   if (loading && safeInvoices.length === 0) {
-    return (
-      <CRMPageContainer>
-        <CRMPageHeader
-          title="Invoices"
-          subtitle="Generate, send, and track client invoices and payments."
-          icon={Receipt}
-          badge="Billing & Revenue"
-        />
-        <div className="h-[400px] skeleton rounded-xl mt-6" />
-      </CRMPageContainer>
-    );
+    return <InvoicesSkeleton />;
   }
 
   if (error && safeInvoices.length === 0) {

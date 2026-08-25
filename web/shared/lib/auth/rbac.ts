@@ -31,12 +31,65 @@ export type NavItem = {
   title: string;
   href: string;
   icon: React.ComponentType<{ className?: string }>;
+  exact?: boolean;
+  match?: "exact" | "prefix";
+  badge?: string | number;
 };
 
 export type NavGroup = {
   label: string;
   items: NavItem[];
 };
+
+/**
+ * Resolves whether a navigation item is active given the current pathname,
+ * with segment awareness, mutual exclusivity, and longest-prefix priority.
+ */
+export function isNavRouteActive(
+  targetHref: string | undefined,
+  currentPathname: string,
+  allHrefs: string[] = [],
+  exactOnly?: boolean
+): boolean {
+  if (!targetHref || targetHref === "#" || !currentPathname) return false;
+
+  const normalize = (p: string) => {
+    const withoutTrailing = p.length > 1 && p.endsWith("/") ? p.slice(0, -1) : p;
+    return withoutTrailing;
+  };
+
+  const target = normalize(targetHref);
+  const current = normalize(currentPathname);
+
+  // 1. Direct exact match
+  if (current === target) return true;
+
+  // 2. Overview / root dashboard routes should not match loosely as prefixes
+  if (
+    exactOnly ||
+    target === "/super-admin" ||
+    target === "/dashboard" ||
+    target === "/"
+  ) {
+    return false;
+  }
+
+  // 3. Segment-aware prefix check (e.g. /super-admin/security/findings matches /super-admin/security)
+  const isPrefixMatch = current.startsWith(`${target}/`);
+  if (!isPrefixMatch) return false;
+
+  // 4. Mutual exclusivity / longest prefix check:
+  // If there is another sibling or menu item href that provides a longer/more specific match
+  // for currentPathname, this parent item must yield to the more specific item.
+  const hasMoreSpecificMatch = allHrefs.some((otherHref) => {
+    if (!otherHref || otherHref === target || otherHref === "#") return false;
+    const other = normalize(otherHref);
+    const otherMatches = current === other || current.startsWith(`${other}/`);
+    return otherMatches && other.length > target.length;
+  });
+
+  return !hasMoreSpecificMatch;
+}
 
 export const defaultRoleAccess: RoleAccess = {
   roleName: "Employee",
@@ -54,6 +107,8 @@ const legacyRoleMap: Record<string, RoleKey> = {
   "super_admin": CRM_ROLES.SUPER_ADMIN,
   "superadmin": CRM_ROLES.SUPER_ADMIN,
   "admin": CRM_ROLES.ADMIN,
+  "owner": CRM_ROLES.ADMIN,
+  "is_org_owner": CRM_ROLES.ADMIN,
   "sales_manager": CRM_ROLES.MANAGER,
   "sales_executive": CRM_ROLES.SALES,
   "support_executive": CRM_ROLES.SUPPORT,
@@ -86,6 +141,7 @@ export const MODULE_SYNONYMS: Record<string, string[]> = {
   "Tasks": ["tasks", "tasks.read", "tasks.create", "tasks.update", "tasks.delete"],
   "Calendar": ["calendar"],
   "Quotations": ["quotations", "quotations.read", "quotations.create", "quotations.update", "quotations.delete", "quotations.approve"],
+  "ClixPro AI": ["clixpro ai", "clixpro_ai", "ai", "ai.view", "ai.access", "ai.chat", "ai_assistant", "ai assistant", "clixproai"],
   "Reports & Analytics": ["reports & analytics", "reports", "report", "analytics", "reports.read", "reports:read", "reports:view", "reports.view"],
   "Employees": ["employees", "employee", "employees.read", "employees.manage", "employees:view", "employees:manage"],
   "Role Management": ["role management", "roles", "role", "role_management", "roles:manage", "roles:view", "rolemanagement", "role_management.read", "role_management.manage", "roles.read", "roles.manage"],
@@ -111,6 +167,7 @@ export function normalizeToModuleTitle(perm: string): string | null {
 export function hasModuleAccess(itemTitle: string, permissions?: string[], role?: string): boolean {
   const roleKey = normalizeRole(role);
   if (roleKey === CRM_ROLES.SUPER_ADMIN || roleKey === CRM_ROLES.ADMIN) return true;
+  if (itemTitle === "Dashboard" || itemTitle === "ClixPro AI" || itemTitle === "Help Center") return true;
   if (!permissions || permissions.length === 0) return false;
   
   const titleLower = itemTitle.toLowerCase();

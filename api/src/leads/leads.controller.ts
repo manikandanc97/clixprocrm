@@ -32,6 +32,9 @@ import {
 } from '../common/utils/rate-limit.util';
 import { Request } from 'express';
 
+import { PlanLimitGuard } from '../common/plans/plan-feature.guard';
+import { RequirePlanLimit } from '../common/plans/plan-feature.decorator';
+
 @Controller('crm/leads')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)
 export class LeadsController {
@@ -52,6 +55,8 @@ export class LeadsController {
 
   @Post()
   @Roles('ADMIN', 'MANAGER', 'SALES')
+  @UseGuards(PlanLimitGuard)
+  @RequirePlanLimit('maxLeads')
   async createLead(@Req() req: any, @Body() body: CreateLeadDto) {
     const data = await this.leadsService.createLead(
       req.tenantId,

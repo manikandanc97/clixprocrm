@@ -33,15 +33,6 @@ import {
 // import { } from "framer-";
 import { toast } from "sonner";
 
-const chartData = [
-  { name: "Week 1", revenue: 4000, prediction: 4200 },
-  { name: "Week 2", revenue: 3000, prediction: 3500 },
-  { name: "Week 3", revenue: 5000, prediction: 5500 },
-  { name: "Week 4", revenue: 4500, prediction: 6000 },
-  { name: "Week 5", revenue: 6000, prediction: 7500 },
-  { name: "Week 6", revenue: 5500, prediction: 8200 },
-];
-
 import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 
 interface AIRecommendation {
@@ -175,10 +166,10 @@ export default function AiInsightsPage() {
             <CRMCard className="h-[400px] min-h-[400px] p-6 min-w-0">
               <ChartContainer 
                 height="100%" 
-                hasData={!!(insightsData?.forecastData || chartData)}
+                hasData={Boolean(insightsData?.forecastData && insightsData.forecastData.length > 0)}
                 className="w-full h-full"
               >
-                <AreaChart data={insightsData?.forecastData || chartData}>
+                <AreaChart data={insightsData?.forecastData || []}>
                   <defs>
                     <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
                       <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>

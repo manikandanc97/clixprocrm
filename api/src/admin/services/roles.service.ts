@@ -7,9 +7,15 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { invalidateUserTenantCache } from '../../auth/tenant.guard';
 
+import { Optional } from '@nestjs/common';
+import { AuthorizationCacheService } from '../../auth/authorization/authorization-cache.service';
+
 @Injectable()
 export class RolesService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional() private readonly authCache?: AuthorizationCacheService,
+  ) {}
 
   async getRoles(tenantId: string) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
@@ -195,6 +201,9 @@ export class RolesService {
         },
       });
 
+      invalidateUserTenantCache();
+      this.authCache?.invalidateTenant(tenantId);
+
       return newRole;
     });
   }
@@ -327,6 +336,7 @@ export class RolesService {
 
       // Invalidate user tenant cache for all affected users
       invalidateUserTenantCache();
+      this.authCache?.invalidateTenant(tenantId);
 
       // Audit logs
       if (isStatusChanging) {
@@ -410,6 +420,7 @@ export class RolesService {
       });
 
       invalidateUserTenantCache();
+      this.authCache?.invalidateTenant(tenantId);
 
       await tx.auditLog.create({
         data: {

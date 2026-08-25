@@ -5,7 +5,7 @@ import { AuditArchiveService } from '../../common/audit/archive/audit-archive.se
 import { SecurityIncidentsService } from './security-incidents.service';
 import { Redis } from '@upstash/redis';
 
-export type HealthStatus = 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'UNKNOWN';
+export type HealthStatus = 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'NOT_CONFIGURED' | 'UNKNOWN';
 
 export interface ComponentHealth {
   status: HealthStatus;
@@ -131,13 +131,13 @@ export class SecurityOperationsService {
       } catch (rErr: any) {
         redisHealth = {
           status: 'DEGRADED',
-          message: `Redis ping failure (falling back to memory): ${rErr?.message || 'Unreachable'}`,
+          message: `Redis ping failure: ${rErr?.message || 'Unreachable'}`,
         };
       }
     } else {
       redisHealth = {
-        status: 'DEGRADED',
-        message: 'Redis not configured (running in graceful local-fallback mode)',
+        status: 'NOT_CONFIGURED',
+        message: 'Redis not configured (operating with memory fallback)',
       };
     }
 
@@ -177,7 +177,7 @@ export class SecurityOperationsService {
 
       const hasStale = outboxStats.stale > 0 || outboxStats.failed > 5;
       wormHealth = {
-        status: !isS3Configured ? 'DEGRADED' : hasStale ? 'DEGRADED' : 'HEALTHY',
+        status: !isS3Configured ? 'NOT_CONFIGURED' : hasStale ? 'DEGRADED' : 'HEALTHY',
         details: {
           isConfigured: isS3Configured,
           pending: outboxStats.pending,
@@ -251,9 +251,8 @@ export class SecurityOperationsService {
       overallStatus = 'CRITICAL';
     } else if (
       databaseHealth.status === 'DEGRADED' ||
-      redisHealth.status === 'DEGRADED' ||
-      wormHealth.status === 'DEGRADED' ||
-      auditHealth.status === 'DEGRADED'
+      auditHealth.status === 'DEGRADED' ||
+      incidentHealth.status === 'DEGRADED'
     ) {
       overallStatus = 'DEGRADED';
     }
@@ -272,7 +271,7 @@ export class SecurityOperationsService {
         csp: 'HEALTHY',
         ssrf: 'HEALTHY',
         uploadSecurity: 'HEALTHY',
-        rateLimiting: redisHealth.status === 'HEALTHY' ? 'HEALTHY' : 'DEGRADED',
+        rateLimiting: redisHealth.status === 'HEALTHY' ? 'HEALTHY' : 'NOT_CONFIGURED',
       },
       lastCheckedAt: new Date().toISOString(),
     };

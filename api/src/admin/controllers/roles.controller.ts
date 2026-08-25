@@ -53,10 +53,19 @@ const reassignDeleteSchema = z.object({
   replacementRoleId: z.string().min(1, 'Replacement role ID is required'),
 });
 
+import { AuthorizationService } from '../../auth/authorization/authorization.service';
+
+const transferOwnerSchema = z.object({
+  newOwnerUserId: z.string().min(1, 'New owner user ID is required'),
+});
+
 @Controller('crm/roles')
 @UseGuards(SupabaseAuthGuard, TenantGuard, PermissionsGuard, AalGuard)
 export class RolesController {
-  constructor(private readonly rolesService: RolesService) {}
+  constructor(
+    private readonly rolesService: RolesService,
+    private readonly authService: AuthorizationService,
+  ) {}
 
   @Get()
   @Permissions('Roles')
@@ -377,5 +386,48 @@ export class RolesController {
       userAgent,
     );
     return { success: true, message: 'Role duplicated successfully', data };
+  }
+
+  @Post('transfer-owner')
+  async transferOwnership(@Req() req: any, @Body() body: any) {
+    if (!req.isSuperAdmin && !req.isOrgOwner) {
+      throw new HttpException(
+        {
+          success: false,
+          message:
+            'Access denied: Only the active Organization Owner can transfer ownership.',
+        },
+        HttpStatus.FORBIDDEN,
+      );
+    }
+
+    try {
+      const parsed = transferOwnerSchema.parse(body);
+      const ip = getClientIp(req);
+      const userAgent = req.headers['user-agent'] || '';
+      const result = await this.authService.transferOrganizationOwnership(
+        req.tenantId,
+        req.user.id || req.user.sub,
+        parsed.newOwnerUserId,
+        {
+          actorUserId: req.user.id || req.user.sub,
+          ipAddress: ip,
+          userAgent,
+        },
+      );
+      return {
+        success: true,
+        message: 'Organization ownership transferred successfully.',
+        data: result,
+      };
+    } catch (error: any) {
+      if (error instanceof z.ZodError) {
+        throw new HttpException(
+          { success: false, message: (error as any).errors[0].message },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+      throw error;
+    }
   }
 }

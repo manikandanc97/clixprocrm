@@ -130,16 +130,7 @@ async function seedAdminForEmail(
 }
 
 async function main() {
-  const defaultEmails = [
-    process.env.SUPER_ADMIN_EMAIL || 'superadmin@clixprocrm.com',
-    'manibct1817@gmail.com',
-    'gowthamdeveloper94@gmail.com',
-  ];
-
-  // Custom emails from command line args if passed
-  const args = process.argv.slice(2);
-  const emailsToSeed = args.length > 0 ? args : defaultEmails;
-
+  const canonicalEmail = (process.env.SUPER_ADMIN_EMAIL || 'superadmin@clixprocrm.com').toLowerCase().trim();
   const defaultPassword = process.env.SUPER_ADMIN_PASSWORD || 'SuperAdmin@123456';
   const defaultName = process.env.SUPER_ADMIN_NAME || 'ClixPro Platform Admin';
 
@@ -156,16 +147,44 @@ async function main() {
   }
 
   console.log('==========================================');
-  console.log('Seeding / Configuring Super Admin Privileges');
+  console.log('Enforcing Exactly ONE Canonical Super Admin');
   console.log('==========================================');
 
-  for (const email of emailsToSeed) {
-    const name =
-      email === 'superadmin@clixprocrm.com'
-        ? defaultName
-        : email.split('@')[0];
-    await seedAdminForEmail(supabase, email, name, defaultPassword);
+  // 1. Demote any other users currently marked as Super Admin to maintain the invariant
+  const secondaryAdmins = await prisma.user.findMany({
+    where: {
+      isSuperAdmin: true,
+      email: { not: canonicalEmail },
+    },
+  });
+
+  if (secondaryAdmins.length > 0) {
+    console.log(`Found ${secondaryAdmins.length} secondary Super Admin(s). Demoting to standard platform role...`);
+    for (const sec of secondaryAdmins) {
+      await prisma.user.update({
+        where: { id: sec.id },
+        data: { isSuperAdmin: false },
+      });
+      console.log(`  ✓ Safely demoted: ${sec.email} (Preserved tenant memberships and CRM data)`);
+
+      // Demote in Supabase auth metadata if present
+      try {
+        await prisma.$queryRawUnsafe(
+          `UPDATE auth.users 
+           SET raw_user_meta_data = jsonb_set(
+             COALESCE(raw_user_meta_data, '{}'::jsonb), 
+             '{isSuperAdmin}', 
+             'false'::jsonb
+           )
+           WHERE LOWER(email) = LOWER($1);`,
+          sec.email,
+        );
+      } catch {}
+    }
   }
+
+  // 2. Seed the single canonical platform Super Admin
+  await seedAdminForEmail(supabase, canonicalEmail, defaultName, defaultPassword);
 
   // Summary of all Super Admins
   const allSuperAdmins = await prisma.user.findMany({

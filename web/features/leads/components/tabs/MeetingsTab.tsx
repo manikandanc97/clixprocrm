@@ -9,7 +9,7 @@ import { MeetingForm } from "@/features/forms/MeetingForm";
 
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { ViewToggle } from "@/shared/components/crm/ViewToggle";
-import { ListSkeleton } from "@/shared/components/skeletons";
+import { MeetingsSkeleton } from "@/shared/components/skeletons";
 
 export function MeetingsTab({ leadId }: { leadId: string }) {
   const { data: meetingsResp, isLoading } = useLeadMeetings(leadId);
@@ -30,8 +30,8 @@ export function MeetingsTab({ leadId }: { leadId: string }) {
       </div>
 
       {isLoading ? (
-        <div className="pt-4">
-          <ListSkeleton rows={3} />
+        <div className="pt-2">
+          <MeetingsSkeleton items={3} />
         </div>
       ) : meetings.length === 0 ? (
         <EmptyState

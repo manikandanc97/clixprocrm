@@ -169,7 +169,12 @@
   --shadow-glow: 0 0 20px oklch(0.58 0.165 157 / 0.12);
   --shadow-soft:
     0 2px 12px -3px oklch(0 0 0 / 0.06);
-  --shadow-elevated: var(--crm-card-hover-shadow);
+  /* Scrollbar Theme Tokens — Light Mode (Theme Primary Lite) */
+  --scrollbar-thumb: color-mix(in srgb, var(--primary) 32%, var(--border));
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--primary) 68%, transparent);
+  --scrollbar-thumb-active: var(--primary);
+  --scrollbar-track: transparent;
+  --scrollbar-track-hover: color-mix(in srgb, var(--primary) 5%, transparent);
 }
 
 /* ============================================================
@@ -201,6 +206,13 @@
   --border: oklch(0.24 0.018 265);
   --input: oklch(0.24 0.018 265);
   --ring: oklch(0.68 0.16 157);
+
+  /* Scrollbar Theme Tokens — Dark Mode (Theme Primary Lite) */
+  --scrollbar-thumb: color-mix(in srgb, var(--primary) 35%, var(--border));
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--primary) 70%, transparent);
+  --scrollbar-thumb-active: var(--primary);
+  --scrollbar-track: transparent;
+  --scrollbar-track-hover: color-mix(in srgb, var(--primary) 6%, transparent);
 
   /* CRM Specific Tokens Dark */
   --crm-radius-card: 12px;
@@ -498,26 +510,43 @@
     letter-spacing: 0;
   }
 
+  /* ============================================================
+     GLOBAL THEMED MODERN THIN SCROLLBAR (Cross-Browser)
+     ============================================================ */
+  * {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+
+  /* Universal WebKit (Chrome, Edge, Safari, Brave, Opera) */
   ::-webkit-scrollbar {
-    width: 8px;
-    height: 8px;
+    width: 6px;
+    height: 6px;
   }
 
   ::-webkit-scrollbar-track {
-    background: transparent;
+    background: var(--scrollbar-track);
+    border-radius: 9999px;
   }
 
   ::-webkit-scrollbar-thumb {
-    background: oklch(0.85 0.01 255);
-    border-radius: 999px;
-    border: 2px solid transparent;
+    background-color: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 1px solid transparent;
     background-clip: padding-box;
+    transition: background-color 0.2s ease, border-color 0.2s ease;
   }
 
   ::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.75 0.015 255);
-    border: 2px solid transparent;
-    background-clip: padding-box;
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  ::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-active);
+  }
+
+  ::-webkit-scrollbar-corner {
+    background: transparent;
   }
 }
 
@@ -755,6 +784,13 @@
     background-size: 200% 100%;
   }
 
+  @media (prefers-reduced-motion: reduce) {
+    .skeleton {
+      animation: none !important;
+      background-position: 0 0 !important;
+    }
+  }
+
   /* Stat card accents */
   .stat-accent-indigo {
     background: linear-gradient(
@@ -889,13 +925,14 @@
     color: oklch(0.48 0.22 25);
   }
 
-  /* Kanban Specific */
+  /* Kanban & Horizontal Scroll Styling */
   .kanban-board-scroll {
     scrollbar-width: thin;
-    scrollbar-color: var(--border) transparent;
+    scrollbar-color: var(--scrollbar-thumb) transparent;
   }
 
   .kanban-board-scroll::-webkit-scrollbar {
+    width: 6px;
     height: 6px;
   }
 
@@ -904,12 +941,19 @@
   }
 
   .kanban-board-scroll::-webkit-scrollbar-thumb {
-    background: oklch(0.91 0.008 255 / 0.8);
-    border-radius: 10px;
+    background-color: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
   }
 
   .kanban-board-scroll::-webkit-scrollbar-thumb:hover {
-    background: oklch(0.85 0.01 255);
+    background-color: var(--scrollbar-thumb-hover);
+  }
+
+  .kanban-board-scroll::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-active);
   }
 
   .kanban-column-glass {
@@ -1129,13 +1173,83 @@
   .shadow-glow {
     box-shadow: var(--shadow-glow);
   }
-  /* Hide scrollbar utility */
-  .no-scrollbar::-webkit-scrollbar {
-    display: none;
+  /* ============================================================
+     SCROLLBAR UTILITIES
+     ============================================================ */
+  /* Hide scrollbar across all engines */
+  .no-scrollbar::-webkit-scrollbar,
+  .hide-scrollbar::-webkit-scrollbar,
+  .scrollbar-hide::-webkit-scrollbar,
+  .scrollbar-none::-webkit-scrollbar {
+    display: none !important;
+    width: 0 !important;
+    height: 0 !important;
   }
-  .no-scrollbar {
-    -ms-overflow-style: none;
-    scrollbar-width: none;
+  .no-scrollbar,
+  .hide-scrollbar,
+  .scrollbar-hide,
+  .scrollbar-none {
+    -ms-overflow-style: none !important;
+    scrollbar-width: none !important;
+  }
+
+  /* Explicit modern custom scrollbar */
+  .custom-scrollbar,
+  .thin-scrollbar,
+  .scrollbar-thin {
+    scrollbar-width: thin;
+    scrollbar-color: var(--scrollbar-thumb) var(--scrollbar-track);
+  }
+  .custom-scrollbar::-webkit-scrollbar,
+  .thin-scrollbar::-webkit-scrollbar,
+  .scrollbar-thin::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .custom-scrollbar::-webkit-scrollbar-track,
+  .thin-scrollbar::-webkit-scrollbar-track,
+  .scrollbar-thin::-webkit-scrollbar-track {
+    background: var(--scrollbar-track);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb,
+  .thin-scrollbar::-webkit-scrollbar-thumb,
+  .scrollbar-thin::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    border-radius: 9999px;
+    border: 1px solid transparent;
+    background-clip: padding-box;
+    transition: background-color 0.2s ease;
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:hover,
+  .thin-scrollbar::-webkit-scrollbar-thumb:hover,
+  .scrollbar-thin::-webkit-scrollbar-thumb:hover {
+    background-color: var(--scrollbar-thumb-hover);
+  }
+  .custom-scrollbar::-webkit-scrollbar-thumb:active,
+  .thin-scrollbar::-webkit-scrollbar-thumb:active,
+  .scrollbar-thin::-webkit-scrollbar-thumb:active {
+    background-color: var(--scrollbar-thumb-active);
+  }
+
+  /* Primary themed scrollbar */
+  .scrollbar-primary {
+    scrollbar-width: thin;
+    scrollbar-color: var(--primary) transparent;
+  }
+  .scrollbar-primary::-webkit-scrollbar {
+    width: 5px;
+    height: 5px;
+  }
+  .scrollbar-primary::-webkit-scrollbar-track {
+    background: transparent;
+  }
+  .scrollbar-primary::-webkit-scrollbar-thumb {
+    background-color: var(--primary);
+    border-radius: 9999px;
+    opacity: 0.8;
+  }
+  .scrollbar-primary::-webkit-scrollbar-thumb:hover {
+    filter: brightness(1.15);
   }
 }
 

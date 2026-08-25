@@ -9,6 +9,7 @@ import {
   LayoutDashboard,
   Settings,
   ShieldCheck,
+  Sparkles,
   Ticket,
   Users,
   UserSquare2,
@@ -17,13 +18,14 @@ import { CRM_ROLES, type RoleKey } from "./roles";
 import type { NavGroup, NavItem } from "../rbac";
 
 export const navLibrary: Record<string, NavItem> = {
-  dashboard: { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
+  dashboard: { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: true },
   contacts: { title: "Contacts", href: "/contacts", icon: Users },
   companies: { title: "Companies", href: "/companies", icon: Building2 },
   deals: { title: "Deals", href: "/deals", icon: Handshake },
   tasks: { title: "Tasks", href: "/tasks", icon: CheckSquare },
   calendar: { title: "Calendar", href: "/calendar", icon: CalendarDays },
   quotations: { title: "Quotations", href: "/quotations", icon: FileText },
+  ai: { title: "ClixPro AI", href: "/ai", icon: Sparkles },
   reports: { title: "Reports & Analytics", href: "/reports", icon: BarChart3 },
   employees: { title: "Employees", href: "/employees", icon: UserSquare2 },
   roleManagement: {
@@ -54,6 +56,11 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
       label: "Core",
       items: [
         navLibrary.dashboard,
+      ],
+    },
+    {
+      label: "CRM",
+      items: [
         navLibrary.contacts,
         navLibrary.companies,
         navLibrary.deals,
@@ -61,6 +68,10 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.calendar,
         navLibrary.quotations,
       ],
+    },
+    {
+      label: "AI",
+      items: [navLibrary.ai],
     },
     {
       label: "Insights",
@@ -78,8 +89,11 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
   [CRM_ROLES.ADMIN]: [
     {
       label: "Core",
+      items: [navLibrary.dashboard],
+    },
+    {
+      label: "CRM",
       items: [
-        navLibrary.dashboard,
         navLibrary.contacts,
         navLibrary.companies,
         navLibrary.deals,
@@ -87,6 +101,10 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.calendar,
         navLibrary.quotations,
       ],
+    },
+    {
+      label: "AI",
+      items: [navLibrary.ai],
     },
     {
       label: "Insights",
@@ -103,9 +121,12 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
   ],
   [CRM_ROLES.MANAGER]: [
     {
-      label: "Team Workspace",
+      label: "Core",
+      items: [navLibrary.dashboard],
+    },
+    {
+      label: "CRM",
       items: [
-        navLibrary.dashboard,
         navLibrary.contacts,
         navLibrary.companies,
         navLibrary.deals,
@@ -113,6 +134,10 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.calendar,
         navLibrary.quotations,
       ],
+    },
+    {
+      label: "AI",
+      items: [navLibrary.ai],
     },
     {
       label: "Performance",
@@ -121,9 +146,12 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
   ],
   [CRM_ROLES.SALES]: [
     {
-      label: "Sales Workspace",
+      label: "Core",
+      items: [navLibrary.dashboard],
+    },
+    {
+      label: "CRM",
       items: [
-        navLibrary.dashboard,
         navLibrary.contacts,
         navLibrary.companies,
         navLibrary.deals,
@@ -132,27 +160,45 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.quotations,
       ],
     },
+    {
+      label: "AI",
+      items: [navLibrary.ai],
+    },
   ],
   [CRM_ROLES.SUPPORT]: [
     {
+      label: "Core",
+      items: [navLibrary.dashboard],
+    },
+    {
       label: "Support Workspace",
       items: [
-        navLibrary.dashboard,
         navLibrary.contacts,
         navLibrary.supportTickets,
         navLibrary.tasks,
         navLibrary.calendar,
       ],
     },
+    {
+      label: "AI",
+      items: [navLibrary.ai],
+    },
   ],
   [CRM_ROLES.EMPLOYEE]: [
     {
+      label: "Core",
+      items: [navLibrary.dashboard],
+    },
+    {
       label: "Daily Tasks",
       items: [
-        navLibrary.dashboard,
         navLibrary.tasks,
         navLibrary.calendar,
       ],
+    },
+    {
+      label: "AI",
+      items: [navLibrary.ai],
     },
   ],
 };

@@ -1,6 +1,7 @@
 import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SystemModule } from '../system/system.module';
+import { AiModule } from '../ai/ai.module';
 import { PlatformDashboardController } from './controllers/platform-dashboard.controller';
 import { PlatformDashboardService } from './services/platform-dashboard.service';
 import { PlatformOrganizationsController } from './controllers/platform-organizations.controller';
@@ -19,13 +20,17 @@ import { PlatformAuditIntegrityController } from './controllers/platform-audit-i
 import { PlatformSecurityCenterController } from './controllers/platform-security-center.controller';
 import { PlatformSecurityOperationsController } from './controllers/platform-security-operations.controller';
 import { PlatformSecurityGovernanceController } from './controllers/platform-security-governance.controller';
+import { PlatformAiController } from './controllers/platform-ai.controller';
+import { PlatformAiService } from './services/platform-ai.service';
+import { PlatformPlansController } from './controllers/platform-plans.controller';
+import { PlatformPlansService } from './services/platform-plans.service';
 import { EmergencySecurityService } from './services/emergency-security.service';
 import { SecurityIncidentsService } from './services/security-incidents.service';
 import { SecurityOperationsService } from './services/security-operations.service';
 import { SecurityGovernanceService } from './services/security-governance.service';
 
 @Module({
-  imports: [PrismaModule, SystemModule],
+  imports: [PrismaModule, SystemModule, AiModule],
   controllers: [
     PlatformDashboardController,
     PlatformOrganizationsController,
@@ -38,6 +43,8 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformSecurityGovernanceController,
     PlatformSettingsController,
     PlatformModulesController,
+    PlatformAiController,
+    PlatformPlansController,
   ],
   providers: [
     PlatformDashboardService,
@@ -47,6 +54,8 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformAuditLogsService,
     PlatformSettingsService,
     PlatformModulesService,
+    PlatformAiService,
+    PlatformPlansService,
     EmergencySecurityService,
     SecurityIncidentsService,
     SecurityOperationsService,
@@ -60,6 +69,8 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformAuditLogsService,
     PlatformSettingsService,
     PlatformModulesService,
+    PlatformAiService,
+    PlatformPlansService,
     EmergencySecurityService,
     SecurityIncidentsService,
     SecurityOperationsService,
@@ -67,4 +78,5 @@ import { SecurityGovernanceService } from './services/security-governance.servic
   ],
 })
 export class SuperAdminModule {}
+
 

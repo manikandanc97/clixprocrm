@@ -1,12 +1,12 @@
 "use client";
 
 import * as React from "react";
-import { Sparkles, Zap, ShieldCheck, Box } from "lucide-react";
+import { Sparkles, Zap, ShieldCheck, Box, Building2 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
 export interface PlanBadgeProps {
   plan?: string | null;
-  size?: "sm" | "md" | "lg";
+  size?: "xs" | "sm" | "md" | "lg";
   showIcon?: boolean;
   className?: string;
 }
@@ -19,54 +19,64 @@ interface PlanStyleConfig {
   label: string;
 }
 
-const getPlanConfig = (rawPlan?: string | null): PlanStyleConfig => {
+export const getPlanConfig = (rawPlan?: string | null): PlanStyleConfig => {
   const normalized = (rawPlan || "").trim().toLowerCase();
 
-  if (normalized.includes("pro") || normalized.includes("professional")) {
+  if (normalized === "growth" || normalized === "pro" || normalized === "professional") {
     return {
-      bg: "bg-purple-500/10 hover:bg-purple-500/15 dark:bg-purple-500/20",
-      text: "text-purple-700 dark:text-purple-300",
-      border: "border-purple-500/25 dark:border-purple-500/30",
+      bg: "bg-emerald-500/10 hover:bg-emerald-500/15 dark:bg-emerald-500/20",
+      text: "text-emerald-700 dark:text-emerald-300 font-bold",
+      border: "border-emerald-500/30 dark:border-emerald-500/40",
       icon: Sparkles,
-      label: rawPlan?.toUpperCase() === "PRO" ? "PRO" : "Pro",
+      label: "GROWTH",
     };
   }
 
-  if (normalized.includes("enterprise") || normalized.includes("custom") || normalized.includes("business")) {
+  if (normalized === "business") {
+    return {
+      bg: "bg-indigo-500/10 hover:bg-indigo-500/15 dark:bg-indigo-500/20",
+      text: "text-indigo-700 dark:text-indigo-300 font-bold",
+      border: "border-indigo-500/30 dark:border-indigo-500/40",
+      icon: Building2,
+      label: "BUSINESS",
+    };
+  }
+
+  if (normalized === "enterprise" || normalized === "custom") {
     return {
       bg: "bg-amber-500/10 hover:bg-amber-500/15 dark:bg-amber-500/20",
-      text: "text-amber-700 dark:text-amber-300",
-      border: "border-amber-500/25 dark:border-amber-500/30",
+      text: "text-amber-700 dark:text-amber-300 font-bold",
+      border: "border-amber-500/30 dark:border-amber-500/40",
       icon: ShieldCheck,
-      label: "Enterprise",
+      label: "ENTERPRISE",
     };
   }
 
-  if (normalized.includes("starter") || normalized.includes("growth")) {
+  if (normalized === "starter") {
     return {
       bg: "bg-sky-500/10 hover:bg-sky-500/15 dark:bg-sky-500/20",
-      text: "text-sky-700 dark:text-sky-300",
-      border: "border-sky-500/25 dark:border-sky-500/30",
+      text: "text-sky-700 dark:text-sky-300 font-bold",
+      border: "border-sky-500/30 dark:border-sky-500/40",
       icon: Zap,
-      label: "Starter",
+      label: "STARTER",
     };
   }
 
-  if (normalized.includes("free") || normalized.includes("sandbox") || normalized === "") {
+  if (normalized === "free" || normalized === "sandbox" || normalized === "") {
     return {
       bg: "bg-slate-500/10 hover:bg-slate-500/15 dark:bg-slate-500/20",
-      text: "text-slate-700 dark:text-slate-300",
+      text: "text-slate-700 dark:text-slate-300 font-bold",
       border: "border-slate-500/25 dark:border-slate-500/30",
       icon: Box,
-      label: "Free",
+      label: "FREE",
     };
   }
 
   return {
     bg: "bg-muted/80 hover:bg-muted dark:bg-muted/60",
-    text: "text-foreground",
+    text: "text-foreground font-bold",
     border: "border-border",
-    label: rawPlan || "Free",
+    label: (rawPlan || "FREE").toUpperCase(),
   };
 };
 
@@ -80,13 +90,15 @@ export function PlanBadge({
   const Icon = config.icon;
 
   const sizeClasses = {
-    sm: "text-[10px] px-2 py-0.5 gap-1",
-    md: "text-xs px-2.5 py-1 gap-1.5",
-    lg: "text-xs px-3 py-1.5 gap-1.5 font-semibold",
+    xs: "text-[8.5px] px-1.5 py-0.5 gap-1 tracking-wider uppercase leading-none rounded-md",
+    sm: "text-[9.5px] px-2 py-0.5 gap-1 tracking-wider uppercase leading-none rounded-md",
+    md: "text-xs px-2.5 py-1 gap-1.5 rounded-lg",
+    lg: "text-xs px-3 py-1.5 gap-1.5 font-semibold rounded-lg",
   };
 
   const iconSizes = {
-    sm: "h-3 w-3",
+    xs: "h-2.5 w-2.5",
+    sm: "h-2.5 w-2.5",
     md: "h-3.5 w-3.5",
     lg: "h-4 w-4",
   };
@@ -94,7 +106,7 @@ export function PlanBadge({
   return (
     <span
       className={cn(
-        "inline-flex items-center font-bold rounded-lg border shadow-xs transition-colors",
+        "inline-flex items-center border shadow-xs transition-colors",
         config.bg,
         config.text,
         config.border,
@@ -103,17 +115,10 @@ export function PlanBadge({
       )}
     >
       {showIcon && Icon && (
-        <Icon className={cn("shrink-0 opacity-80", iconSizes[size])} />
+        <Icon className={cn("shrink-0 opacity-85", iconSizes[size])} />
       )}
-      <span className="capitalize">{rawDisplayPlan(plan, config.label)}</span>
+      <span>{config.label}</span>
     </span>
   );
 }
 
-function rawDisplayPlan(original?: string | null, fallbackLabel: string = "Free") {
-  if (!original) return fallbackLabel;
-  const upper = original.toUpperCase();
-  if (upper === "PRO") return "PRO";
-  if (upper === "FREE") return "Free";
-  return original.charAt(0).toUpperCase() + original.slice(1);
-}

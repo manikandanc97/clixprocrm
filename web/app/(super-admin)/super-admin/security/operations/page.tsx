@@ -203,12 +203,12 @@ export default function SecurityOperationsPage() {
             <span className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Security Readiness Score</span>
             <div className="flex items-baseline gap-2">
               <span className="text-3xl font-black text-foreground font-mono">
-                {posture?.securityReadinessScore ?? 100}
+                {posture?.securityReadinessScore !== undefined ? posture.securityReadinessScore : "—"}
               </span>
               <span className="text-xs text-muted-foreground">/ 100</span>
             </div>
             <p className="text-[11px] text-emerald-600 font-semibold">
-              {posture?.controlsSummary?.verified ?? 15} of {posture?.controlsSummary?.total ?? 15} Controls Verified
+              {posture?.controlsSummary ? `${posture.controlsSummary.verified} of ${posture.controlsSummary.total} Controls Verified` : "Evaluating security controls..."}
             </p>
           </div>
           <div className="flex flex-col gap-1.5">

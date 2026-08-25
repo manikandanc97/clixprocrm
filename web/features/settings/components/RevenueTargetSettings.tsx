@@ -29,6 +29,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
 import { Label } from "@/shared/ui/label";
+import { Skeleton } from "@/shared/ui/skeleton";
 
 export default function RevenueTargetSettings() {
   const queryClient = useQueryClient();
@@ -188,7 +189,60 @@ export default function RevenueTargetSettings() {
       </CardHeader>
       <CardContent>
         {isLoading ? (
-          <div className="text-center py-12 text-muted-foreground text-sm">Loading targets...</div>
+          <div className="space-y-6">
+            <div className="p-6 border shadow-sm rounded-2xl bg-card space-y-5">
+              <div className="flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
+                <div className="flex items-center gap-4">
+                  <Skeleton className="w-12 h-12 rounded-2xl shrink-0" />
+                  <div className="space-y-2">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-5 w-40" />
+                      <Skeleton className="h-5 w-16 rounded-full" />
+                    </div>
+                    <Skeleton className="h-3 w-48" />
+                  </div>
+                </div>
+                <div className="flex items-center gap-6">
+                  <div className="space-y-1">
+                    <Skeleton className="h-2.5 w-20" />
+                    <Skeleton className="h-6 w-24" />
+                  </div>
+                  <div className="h-8 w-px bg-border" />
+                  <div className="space-y-1">
+                    <Skeleton className="h-2.5 w-16" />
+                    <Skeleton className="h-6 w-24" />
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-2 pt-2">
+                <div className="flex justify-between">
+                  <Skeleton className="h-3 w-28" />
+                  <Skeleton className="h-3 w-12" />
+                </div>
+                <Skeleton className="h-3 w-full rounded-full" />
+              </div>
+            </div>
+
+            <div className="space-y-3">
+              <Skeleton className="h-4 w-36" />
+              <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div className="p-4 rounded-xl border bg-card space-y-3">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-4 w-12 rounded-full" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
+                </div>
+                <div className="p-4 rounded-xl border bg-card space-y-3">
+                  <div className="flex justify-between">
+                    <Skeleton className="h-4 w-28" />
+                    <Skeleton className="h-4 w-12 rounded-full" />
+                  </div>
+                  <Skeleton className="h-2 w-full rounded-full" />
+                </div>
+              </div>
+            </div>
+          </div>
         ) : targets?.length === 0 ? (
           <div className="text-center py-16 flex flex-col items-center justify-center text-muted-foreground border border-dashed rounded-xl bg-card">
             <Target className="w-12 h-12 mb-4 opacity-20" />

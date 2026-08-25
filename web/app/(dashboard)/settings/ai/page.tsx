@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useMemo } from 'react';
 import { Bot, Save, Loader2, Sparkles, Database, Shield, Zap } from 'lucide-react';
 import client from '@/shared/lib/api/client';
 import { Button } from '@/shared/ui/button';
@@ -8,26 +8,49 @@ import { Label } from '@/shared/ui/label';
 import { Input } from '@/shared/ui/input';
 import { Switch } from '@/shared/ui/switch';
 import { CRMPageHeader } from '@/shared/components/crm';
+import { compareFormValues } from '@/shared/hooks/use-dirty-form';
+import { toast } from 'sonner';
 
 export default function AISettingsPage() {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [config, setConfig] = useState<any>(null);
+  const [initialConfig, setInitialConfig] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
+
+  const isDirty = useMemo(() => {
+    if (!config || !initialConfig) return false;
+    return !compareFormValues(initialConfig, config);
+  }, [config, initialConfig]);
 
   useEffect(() => {
     client.get('/ai/settings')
       .then(res => {
         const data = res.data?.data || res.data;
-        if (data?.config) setConfig(data.config);
+        if (data?.config) {
+          setConfig(data.config);
+          setInitialConfig(JSON.parse(JSON.stringify(data.config)));
+        }
+        setLoading(false);
+      })
+      .catch(() => {
+        toast.error("Failed to load AI settings.");
         setLoading(false);
       });
   }, []);
 
   const handleSave = async () => {
-    setSaving(true);
-    await client.put('/ai/settings', config);
-    setSaving(false);
+    if (!isDirty) return;
+    try {
+      setSaving(true);
+      await client.put('/ai/settings', config);
+      setInitialConfig(JSON.parse(JSON.stringify(config)));
+      toast.success("AI configuration saved successfully.");
+    } catch {
+      toast.error("Failed to save AI configuration.");
+    } finally {
+      setSaving(false);
+    }
   };
 
   if (loading) return (
@@ -155,8 +178,8 @@ export default function AISettingsPage() {
       <div className="flex justify-end">
         <Button
           onClick={handleSave}
-          disabled={saving}
-          className="gap-2"
+          disabled={!isDirty || saving}
+          className="gap-2 disabled:opacity-50 disabled:cursor-not-allowed cursor-pointer"
         >
           {saving ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
           {saving ? 'Saving...' : 'Save Configuration'}

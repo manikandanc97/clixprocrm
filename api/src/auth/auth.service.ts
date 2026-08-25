@@ -403,6 +403,17 @@ export class AuthService {
       );
     }
 
+    const userRecord = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: { isSuperAdmin: true },
+    });
+
+    if (userRecord?.isSuperAdmin) {
+      throw new ForbiddenException(
+        'The Platform Super Admin account cannot be deleted through tenant account deletion.',
+      );
+    }
+
     const isAdmin = membership.role.name === 'ADMIN';
 
     try {
@@ -532,6 +543,14 @@ export class AuthService {
 
           // 9. Clean up users who have no other tenant memberships (AuditLog rows preserved)
           for (const uid of userIdsInTenant) {
+            const userObj = await tx.user.findUnique({
+              where: { id: uid },
+              select: { isSuperAdmin: true },
+            });
+            if (userObj?.isSuperAdmin) {
+              continue; // Never delete platform Super Admin
+            }
+
             const otherMemberships = await tx.tenantUser.count({
               where: { userId: uid },
             });

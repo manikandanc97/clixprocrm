@@ -13,14 +13,16 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 
+import { TableSkeleton, KanbanSkeleton } from "@/shared/components/skeletons";
+
 const DealsTable = dynamic(() => import("@/features/deals/components/DealsTable").then(mod => ({ default: mod.DealsTable })), {
-  loading: () => <div className="h-[400px] skeleton rounded-xl" />
+  loading: () => <TableSkeleton rows={8} cols={7} showPagination={true} />
 });
 const DealsGrid = dynamic(() => import("@/features/deals/components/DealsGrid").then(mod => ({ default: mod.DealsGrid })), {
-  loading: () => <div className="h-[400px] skeleton rounded-xl" />
+  loading: () => <TableSkeleton rows={6} cols={4} showPagination={false} />
 });
 const PipelineBoard = dynamic(() => import("@/features/pipeline/components/PipelineBoard"), {
-  loading: () => <div className="h-[600px] w-full skeleton rounded-xl" />
+  loading: () => <KanbanSkeleton />
 });
 
 import { PageErrorState } from "@/shared/components/page-states";

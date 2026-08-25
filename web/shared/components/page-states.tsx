@@ -19,21 +19,23 @@ interface EmptyStateProps {
   message: string;
 }
 
-import { PageHeaderSkeleton, TableSkeleton, FormSkeleton } from "@/shared/components/skeletons";
+import { PageHeaderSkeleton, MetricCardSkeleton, ToolbarSkeleton, TableSkeleton, FormSkeleton } from "@/shared/components/skeletons";
 
 export function PageLoadingState(_props: LoadingStateProps) {
   return (
-    <div className="flex flex-col space-y-6 w-full p-2">
+    <div className="flex flex-col space-y-6 w-full p-2 animate-in fade-in duration-200">
       <PageHeaderSkeleton />
 
       {/* Metrics Grid Skeleton */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Skeleton className="h-[120px] rounded-xl w-full" />
-        <Skeleton className="h-[120px] rounded-xl w-full" />
-        <Skeleton className="h-[120px] rounded-xl w-full hidden md:block" />
+        <MetricCardSkeleton />
+        <MetricCardSkeleton />
+        <MetricCardSkeleton />
       </div>
 
-      <TableSkeleton rows={5} cols={5} />
+      <ToolbarSkeleton />
+
+      <TableSkeleton rows={8} cols={6} showPagination={true} hasAvatar={true} />
     </div>
   );
 }

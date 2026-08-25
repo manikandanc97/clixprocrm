@@ -43,9 +43,16 @@ type AuthUser = {
   description?: string;
 };
 
+export type AuthInitStage =
+  | "connecting"
+  | "restoring"
+  | "loading_data"
+  | "preparing"
+  | "ready";
+
 type AuthStatus = "initializing" | "authenticated" | "unauthenticated";
 
-type AuthContextState = {
+export type AuthContextState = {
   user: AuthUser | null;
   access: RoleAccess;
   token: string | null;
@@ -53,9 +60,12 @@ type AuthContextState = {
   isAuthenticated: boolean;
   isInitializing: boolean;
   isHydrated: boolean;
+  initStage: AuthInitStage;
+  initError: string | null;
   login: (email: string, password: string, staySignedIn?: boolean) => Promise<void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
+  retryInit: () => Promise<void>;
   hasPermission: (permission: string) => boolean;
 };
 
@@ -125,6 +135,10 @@ function buildAccess(user: AuthUser | null): RoleAccess {
     ? user.permissions 
     : getRolePermissions(roleKey);
     
+  if (!allowedRoutes.includes("/ai")) {
+    allowedRoutes.push("/ai");
+  }
+
   if (resolvedPermissions.includes("Help Center") || roleKey === CRM_ROLES.ADMIN || isSuperAdmin) {
     if (!allowedRoutes.includes("/help")) {
       allowedRoutes.push("/help");
@@ -163,6 +177,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const [user, setUser] = useState<AuthUser | null>(null);
   const [loading, setLoading] = useState(false);
   const [isHydrated, setIsHydrated] = useState(false);
+  const [initStage, setInitStage] = useState<AuthInitStage>("connecting");
+  const [initError, setInitError] = useState<string | null>(null);
   // Guard: prevents refreshUser() from running during/after an explicit logout.
   // Without this, a stale getSession() result during signOut can restore auth state.
   const isLoggingOut = useRef(false);
@@ -186,6 +202,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
     setUser(null);
     setStatus("unauthenticated");
+    setInitStage("connecting");
+    setInitError(null);
     setLoading(false);           // Prevent stuck loading state after logout
     setIsHydrated(true);         // Keep hydrated so login page renders immediately (not initializing)
     hasFetched.current = false;  // Allow SIGNED_IN event to re-run refreshUser on next login
@@ -219,6 +237,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     if (isLoggingOut.current) return;
 
     try {
+      setInitError(null);
+      setInitStage("connecting");
+
       let hasSessionLocal = typeof window !== "undefined" ? localStorage.getItem("has_session") : null;
       
       // Fix for OAuth login: Check if Supabase has a session even if localStorage doesn't.
@@ -238,6 +259,9 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       if (isLoggingOut.current) return;
 
       setLoading(true);
+      setInitStage("restoring");
+
+      setInitStage("loading_data");
       const currentUser = await fetchCurrentUser();
 
       // Final guard: if logout happened while fetchCurrentUser was in flight, discard result
@@ -248,8 +272,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setStatus("unauthenticated");
         return;
       }
+      setInitStage("preparing");
       setUser(currentUser);
       setStatus("authenticated");
+      setInitStage("ready");
      
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
@@ -261,12 +287,22 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         setStatus("unauthenticated");
         return;
       }
+      console.warn("Auth initialization issue:", error);
       if (typeof window !== "undefined") localStorage.removeItem("has_session");
+      setInitError(error?.message || "Failed to restore session");
       setStatus("unauthenticated");
     } finally {
       setLoading(false);
     }
   }, []);
+
+  const retryInit = useCallback(async () => {
+    hasFetched.current = false;
+    setInitError(null);
+    setStatus("initializing");
+    setInitStage("connecting");
+    await refreshUser().finally(() => setIsHydrated(true));
+  }, [refreshUser]);
 
 
 
@@ -355,9 +391,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       isAuthenticated: status === "authenticated",
       isInitializing: status === "initializing",
       isHydrated,
+      initStage,
+      initError,
       login,
       logout,
       refreshUser,
+      retryInit,
       hasPermission: (permission: string) => {
         if (!user) return false;
         const roleKey = normalizeRole(user.role);
@@ -366,7 +405,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return hasModuleAccess(permission, access.permissions, user.role);
       },
     };
-  }, [status, user, login, logout, refreshUser, loading, isHydrated, cleanupAuthState]);
+  }, [status, user, login, logout, refreshUser, retryInit, loading, isHydrated, initStage, initError, cleanupAuthState]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

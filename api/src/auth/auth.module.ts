@@ -17,6 +17,10 @@ import { AalGuard } from './aal.guard';
 import { SessionsController } from './sessions.controller';
 import { SessionsService } from './sessions.service';
 
+import { AuthorizationService } from './authorization/authorization.service';
+import { AuthorizationCacheService } from './authorization/authorization-cache.service';
+import { AuthorizationGuard } from './authorization/authorization.guard';
+
 @Module({
   imports: [PrismaModule, WorkspaceModule, NotificationsModule],
   controllers: [AuthController, MfaController, SessionsController],
@@ -25,6 +29,9 @@ import { SessionsService } from './sessions.service';
     MfaService,
     SessionsService,
     EmailService,
+    AuthorizationService,
+    AuthorizationCacheService,
+    AuthorizationGuard,
     SupabaseAuthGuard,
     TenantGuard,
     RolesGuard,
@@ -36,6 +43,9 @@ import { SessionsService } from './sessions.service';
     MfaService,
     SessionsService,
     EmailService,
+    AuthorizationService,
+    AuthorizationCacheService,
+    AuthorizationGuard,
     SupabaseAuthGuard,
     TenantGuard,
     RolesGuard,

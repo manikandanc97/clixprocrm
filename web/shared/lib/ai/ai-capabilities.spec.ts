@@ -30,10 +30,37 @@ describe('CLIXPROCRM AI — Permission-Driven Dynamic Quick Actions (Max 5 Limit
     it('Never displays more than 5 suggestions for any role or permission combination', () => {
       const superAdminActions = getAuthorizedQuickActions(['*'], 'SUPER_ADMIN');
       assert.strictEqual(superAdminActions.length, 5);
+      assert.deepStrictEqual(
+        superAdminActions.map((a) => a.label),
+        [
+          'Platform overview & MRR',
+          'List active organizations',
+          'Recent security audit logs',
+          'Platform users summary',
+          'Subscription plans breakdown',
+        ]
+      );
 
       const allPerms = AI_CAPABILITIES.flatMap((c) => c.requiredPermissions);
       const allPermActions = getAuthorizedQuickActions(allPerms, 'STAFF');
       assert.strictEqual(allPermActions.length, 5);
+    });
+
+    it('SUPER_ADMIN role gets dedicated platform management quick actions instead of sales CRM actions', () => {
+      const superActions = getAuthorizedQuickActions([], 'SUPER_ADMIN');
+      assert.strictEqual(superActions.length, 5);
+
+      const labels = superActions.map((a) => a.label);
+      assert.ok(labels.includes('Platform overview & MRR'));
+      assert.ok(labels.includes('List active organizations'));
+      assert.ok(labels.includes('Recent security audit logs'));
+      assert.ok(labels.includes('Platform users summary'));
+      assert.ok(labels.includes('Subscription plans breakdown'));
+
+      // Must not show irrelevant sales CRM questions to Superadmin
+      assert.ok(!labels.includes('Show my leads'));
+      assert.ok(!labels.includes('Show my pipeline'));
+      assert.ok(!labels.includes('Show my customers'));
     });
 
     it('SALES with LEADS_READ + CUSTOMERS_READ + DEALS_READ shows top 5 authorized questions only', () => {

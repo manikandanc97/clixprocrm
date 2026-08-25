@@ -8,10 +8,10 @@ import { useSidebar } from "@/features/dashboard/components/SidebarContext";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useWorkspace } from "@/shared/hooks/use-settings";
 import { usePlatformNavigation } from "@/shared/hooks/use-platform-navigation";
-import { getRoleMenu } from "@/shared/lib/auth/rbac";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 import { BaseSidebar, BaseSidebarContent } from "@/shared/components/sidebar/BaseSidebar";
 import { ClixProIcon } from "@/shared/ui/logo";
+import { PlanBadgePopover } from "@/shared/components/PlanBadgePopover";
 
 export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
   const pathname = usePathname();
@@ -85,6 +85,7 @@ export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
       header={{
         title: companyName,
         subtitle: "Workspace",
+        badgeElement: <PlanBadgePopover size="xs" />,
         logo: logoElement,
         collapsedTag: "CRM",
       }}
@@ -171,6 +172,7 @@ export default function Sidebar() {
       header={{
         title: companyName,
         subtitle: "Workspace",
+        badgeElement: <PlanBadgePopover size="xs" />,
         logo: logoElement,
         collapsedTag: "CRM",
       }}
@@ -183,3 +185,4 @@ export default function Sidebar() {
     />
   );
 }
+

@@ -9,7 +9,7 @@ import { EmptyState } from "@/shared/components/EmptyState";
 
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { ViewToggle } from "@/shared/components/crm/ViewToggle";
-import { ListSkeleton } from "@/shared/components/skeletons";
+import { NotesSkeleton } from "@/shared/components/skeletons";
 
 export function NotesTab({ leadId }: { leadId: string }) {
   const { data: notesResp, isLoading } = useLeadNotes(leadId);
@@ -54,8 +54,8 @@ export function NotesTab({ leadId }: { leadId: string }) {
       </div>
 
       {isLoading ? (
-        <div className="pt-4">
-          <ListSkeleton rows={3} />
+        <div className="pt-2">
+          <NotesSkeleton items={3} />
         </div>
       ) : sortedNotes.length === 0 ? (
         <EmptyState

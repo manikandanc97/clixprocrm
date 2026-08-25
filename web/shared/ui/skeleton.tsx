@@ -6,6 +6,8 @@ function Skeleton({
 }: React.HTMLAttributes<HTMLDivElement>) {
   return (
     <div
+      role="status"
+      aria-busy="true"
       className={cn("skeleton rounded-md", className)}
       {...props}
     />

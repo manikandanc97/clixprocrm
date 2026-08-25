@@ -14,7 +14,7 @@ const getFileIcon = (fileType: string) => {
 
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { ViewToggle } from "@/shared/components/crm/ViewToggle";
-import { ListSkeleton } from "@/shared/components/skeletons";
+import { AttachmentsSkeleton } from "@/shared/components/skeletons";
 
 export function AttachmentsTab({ leadId }: { leadId: string }) {
   const { data: attachmentsResp, isLoading } = useLeadAttachments(leadId);
@@ -60,8 +60,8 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
       </div>
 
       {isLoading ? (
-        <div className="pt-4">
-          <ListSkeleton rows={3} />
+        <div className="pt-2">
+          <AttachmentsSkeleton items={3} />
         </div>
       ) : attachments.length === 0 ? (
         <EmptyState

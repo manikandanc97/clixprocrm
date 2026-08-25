@@ -4,11 +4,13 @@ import { useState, useMemo, useEffect } from "react";
 import { FileText, Plus, TrendingUp, Clock } from "lucide-react";
 
 import dynamic from "next/dynamic";
+import { TableSkeleton, QuoteFormSkeleton } from "@/shared/components/skeletons";
+
 const QuotationsTable = dynamic(() => import("@/features/quotations/components/QuotationsTable"), {
-  loading: () => <div className="h-[400px] skeleton rounded-xl" />
+  loading: () => <TableSkeleton rows={8} cols={7} showPagination={true} />
 });
 const QuotationsGrid = dynamic(() => import("@/features/quotations/components/QuotationsGrid").then(mod => ({ default: mod.QuotationsGrid })), {
-  loading: () => <div className="h-[400px] skeleton rounded-xl" />
+  loading: () => <TableSkeleton rows={6} cols={4} showPagination={false} />
 });
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { EmptyState } from "@/shared/components/EmptyState";
@@ -28,7 +30,7 @@ import { motion, AnimatePresence } from "framer-motion";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { FormModal } from "@/shared/components/form-modal";
 const QuoteForm = dynamic(() => import("@/features/forms/QuoteForm").then(mod => ({ default: mod.QuoteForm })), {
-  loading: () => <div className="h-[300px] skeleton rounded-xl" />
+  loading: () => <QuoteFormSkeleton />
 });
 import { useSearchParams } from "next/navigation";
 import { QuotationType } from "@/shared/types/quotation";

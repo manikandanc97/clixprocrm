@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Settings,
   Shield,
@@ -24,9 +24,11 @@ import {
   CRMPageContainer,
   CRMPageHeader,
 } from "@/shared/components/crm";
+import { compareFormValues } from "@/shared/hooks/use-dirty-form";
 
 export default function SuperAdminSettingsPage() {
   const [settingsData, setSettingsData] = useState<any>(null);
+  const [initialFormState, setInitialFormState] = useState<any>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 
@@ -39,22 +41,51 @@ export default function SuperAdminSettingsPage() {
   const [documentRagEnabled, setDocumentRagEnabled] = useState(true);
   const [multiCurrencyEnabled, setMultiCurrencyEnabled] = useState(true);
 
+  const currentFormState = useMemo(() => ({
+    platformName,
+    defaultTenantPlan,
+    maintenanceMode,
+    allowPublicRegistrations,
+    aiCopilotEnabled,
+    documentRagEnabled,
+    multiCurrencyEnabled,
+  }), [
+    platformName,
+    defaultTenantPlan,
+    maintenanceMode,
+    allowPublicRegistrations,
+    aiCopilotEnabled,
+    documentRagEnabled,
+    multiCurrencyEnabled,
+  ]);
+
+  const isDirty = useMemo(() => {
+    if (!initialFormState) return false;
+    return !compareFormValues(initialFormState, currentFormState);
+  }, [initialFormState, currentFormState]);
+
   const loadSettings = async () => {
     try {
       setLoading(true);
       const res = await fetchPlatformSettings();
       setSettingsData(res);
-      if (res?.platform) {
-        setPlatformName(res.platform.name || "ClixProCRM Multi-Tenant Platform");
-        setDefaultTenantPlan(res.platform.defaultTenantPlan || "free");
-        setMaintenanceMode(res.platform.maintenanceMode || false);
-        setAllowPublicRegistrations(res.platform.allowPublicRegistrations ?? true);
-      }
-      if (res?.features) {
-        setAiCopilotEnabled(res.features.aiCopilot ?? true);
-        setDocumentRagEnabled(res.features.documentRag ?? true);
-        setMultiCurrencyEnabled(res.features.multiCurrency ?? true);
-      }
+      const loaded = {
+        platformName: res?.platform?.name || "ClixProCRM Multi-Tenant Platform",
+        defaultTenantPlan: res?.platform?.defaultTenantPlan || "free",
+        maintenanceMode: res?.platform?.maintenanceMode || false,
+        allowPublicRegistrations: res?.platform?.allowPublicRegistrations ?? true,
+        aiCopilotEnabled: res?.features?.aiCopilot ?? true,
+        documentRagEnabled: res?.features?.documentRag ?? true,
+        multiCurrencyEnabled: res?.features?.multiCurrency ?? true,
+      };
+      setPlatformName(loaded.platformName);
+      setDefaultTenantPlan(loaded.defaultTenantPlan);
+      setMaintenanceMode(loaded.maintenanceMode);
+      setAllowPublicRegistrations(loaded.allowPublicRegistrations);
+      setAiCopilotEnabled(loaded.aiCopilotEnabled);
+      setDocumentRagEnabled(loaded.documentRagEnabled);
+      setMultiCurrencyEnabled(loaded.multiCurrencyEnabled);
+      setInitialFormState(loaded);
     } catch (err: any) {
       toast.error("Failed to load platform settings.");
     } finally {
@@ -68,6 +99,7 @@ export default function SuperAdminSettingsPage() {
 
   const handleSave = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (!isDirty) return;
     try {
       setSaving(true);
       await updatePlatformSettings({
@@ -83,6 +115,7 @@ export default function SuperAdminSettingsPage() {
           multiCurrency: multiCurrencyEnabled,
         },
       });
+      setInitialFormState(currentFormState);
       toast.success("Platform settings saved successfully.");
     } catch (err: any) {
       toast.error("Failed to update platform settings.");
@@ -307,8 +340,12 @@ export default function SuperAdminSettingsPage() {
         <div className="flex justify-end pt-2">
           <Button
             type="submit"
-            disabled={saving}
-            className="rounded-xl gap-2 bg-emerald-600 hover:bg-emerald-700 text-white font-bold shadow-md text-xs px-6 h-10"
+            disabled={!isDirty || saving}
+            className={`rounded-xl gap-2 font-bold shadow-md text-xs px-6 h-10 transition-all ${
+              !isDirty || saving
+                ? "opacity-50 cursor-not-allowed bg-emerald-600/50 text-white"
+                : "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer"
+            }`}
           >
             <Save className="h-4 w-4" />
             <span>{saving ? "Saving Changes..." : "Save Platform Settings"}</span>

@@ -1,6 +1,7 @@
 import {
   Controller,
   Get,
+  Post,
   Patch,
   Param,
   Body,
@@ -76,6 +77,34 @@ export class PlatformUsersController {
     };
   }
 
+  @Post('transfer-super-admin')
+  async transferSuperAdmin(
+    @Req() req: any,
+    @Body() body: { targetUserId: string },
+  ) {
+    if (!body.targetUserId || typeof body.targetUserId !== 'string') {
+      throw new HttpException(
+        { success: false, message: 'targetUserId is required' },
+        HttpStatus.BAD_REQUEST,
+      );
+    }
+
+    const data = await this.usersService.transferSuperAdmin(
+      body.targetUserId,
+      req.user.id,
+      {
+        ip: req.ip || req.headers?.['x-forwarded-for'],
+        userAgent: req.headers?.['user-agent'],
+      },
+    );
+
+    return {
+      success: true,
+      data,
+      message: data.message,
+    };
+  }
+
   @Patch(':id/super-admin')
   async toggleSuperAdmin(
     @Req() req: any,
@@ -93,11 +122,15 @@ export class PlatformUsersController {
       id,
       body.isSuperAdmin,
       req.user.id,
+      {
+        ip: req.ip || req.headers?.['x-forwarded-for'],
+        userAgent: req.headers?.['user-agent'],
+      },
     );
     return {
       success: true,
       data,
-      message: `User ${body.isSuperAdmin ? 'promoted to' : 'removed from'} Super Admin`,
+      message: `Super Admin ownership transferred successfully`,
     };
   }
 }

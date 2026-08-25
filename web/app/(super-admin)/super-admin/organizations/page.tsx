@@ -51,6 +51,7 @@ import {
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PlanBadge } from "@/shared/components/PlanBadge";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
 
 export default function SuperAdminOrganizationsPage() {
@@ -651,9 +652,36 @@ export default function SuperAdminOrganizationsPage() {
             </div>
 
             {loadingDetails ? (
-              <div className="py-12 text-center">
-                <RefreshCw className="h-6 w-6 animate-spin mx-auto text-primary mb-2" />
-                <p className="text-xs text-muted-foreground">Fetching details...</p>
+              <div className="space-y-6">
+                <div className="grid grid-cols-3 gap-3">
+                  <div className="p-3.5 rounded-xl bg-muted/40 border border-border/40 text-center space-y-2">
+                    <Skeleton className="h-2.5 w-16 mx-auto" />
+                    <Skeleton className="h-6 w-10 mx-auto" />
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-muted/40 border border-border/40 text-center space-y-2">
+                    <Skeleton className="h-2.5 w-16 mx-auto" />
+                    <Skeleton className="h-6 w-10 mx-auto" />
+                  </div>
+                  <div className="p-3.5 rounded-xl bg-muted/40 border border-border/40 text-center space-y-2">
+                    <Skeleton className="h-2.5 w-16 mx-auto" />
+                    <Skeleton className="h-6 w-10 mx-auto" />
+                  </div>
+                </div>
+
+                <div className="space-y-3">
+                  <Skeleton className="h-3.5 w-36" />
+                  <div className="rounded-xl border border-border/60 p-4 space-y-3">
+                    {Array.from({ length: 3 }).map((_, i) => (
+                      <div key={i} className="flex items-center justify-between py-1 border-b border-border/30 last:border-0">
+                        <div className="space-y-1">
+                          <Skeleton className="h-3.5 w-28" />
+                          <Skeleton className="h-2.5 w-36" />
+                        </div>
+                        <Skeleton className="h-5 w-14 rounded-full" />
+                      </div>
+                    ))}
+                  </div>
+                </div>
               </div>
             ) : selectedOrgDetails ? (
               <div className="space-y-6">

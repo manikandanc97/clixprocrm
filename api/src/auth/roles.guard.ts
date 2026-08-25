@@ -21,7 +21,12 @@ export class RolesGuard implements CanActivate {
       return true;
     }
 
-    const { userRole } = context.switchToHttp().getRequest();
+    const request = context.switchToHttp().getRequest();
+    if (request.isSuperAdmin || request.isOrgOwner) {
+      return true;
+    }
+
+    const { userRole } = request;
 
     if (!userRole) {
       throw new ForbiddenException('No role assigned to user');

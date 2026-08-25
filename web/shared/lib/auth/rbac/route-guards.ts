@@ -4,13 +4,18 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
   [CRM_ROLES.SUPER_ADMIN]: [
     "*",
     "/super-admin",
+    "/super-admin/ai",
     "/super-admin/organizations",
+    "/super-admin/modules",
     "/super-admin/users",
     "/super-admin/plans",
     "/super-admin/analytics",
+    "/super-admin/security",
+    "/super-admin/security/operations",
     "/super-admin/audit-logs",
     "/super-admin/settings",
     "/dashboard",
+    "/ai",
     "/contacts",
     "/leads",
     "/customers",
@@ -30,6 +35,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
   ],
   [CRM_ROLES.ADMIN]: [
     "/dashboard",
+    "/ai",
     "/contacts",
     "/leads",
     "/customers",
@@ -45,9 +51,11 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/employees",
     "/role-management",
     "/settings",
+    "/help",
   ],
   [CRM_ROLES.MANAGER]: [
     "/dashboard",
+    "/ai",
     "/contacts",
     "/leads",
     "/customers",
@@ -59,9 +67,12 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/quotations",
     "/reports",
     "/team-performance",
+    "/settings",
+    "/help",
   ],
   [CRM_ROLES.SALES]: [
     "/dashboard",
+    "/ai",
     "/contacts",
     "/my-leads",
     "/customers",
@@ -70,25 +81,38 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/tasks",
     "/calendar",
     "/quotations",
+    "/settings",
+    "/help",
   ],
   [CRM_ROLES.SUPPORT]: [
     "/dashboard",
+    "/ai",
     "/contacts",
     "/customers",
     "/companies",
     "/support-tickets",
     "/tasks",
     "/calendar",
+    "/settings",
+    "/help",
   ],
   [CRM_ROLES.EMPLOYEE]: [
     "/dashboard",
+    "/ai",
     "/tasks",
     "/calendar",
+    "/settings",
+    "/help",
   ],
 };
 
 export function isRouteAllowed(pathname: string, allowedRoutes: string[]): boolean {
   if (pathname === "/" || pathname === "/unauthorized") {
+    return true;
+  }
+
+  // Universal modules accessible to all authenticated workspace users
+  if (pathname === "/ai" || pathname.startsWith("/ai/")) {
     return true;
   }
 

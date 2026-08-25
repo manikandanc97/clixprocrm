@@ -110,11 +110,22 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     label: 'Quotations',
     icon: 'FileText',
     route: '/quotations',
-    group: 'Core',
+    group: 'CRM',
     sortOrder: 7,
     isSystem: true,
     permission: 'Quotations',
     description: 'Proposals, client quotations, and approval workflows',
+  },
+  {
+    key: 'clixpro_ai',
+    label: 'ClixPro AI',
+    icon: 'Sparkles',
+    route: '/ai',
+    group: 'AI',
+    sortOrder: 8,
+    isSystem: true,
+    permission: null,
+    description: 'Enterprise AI Workspace for CRM analysis and action execution',
   },
   {
     key: 'reports',
@@ -122,7 +133,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'BarChart3',
     route: '/reports',
     group: 'Insights',
-    sortOrder: 8,
+    sortOrder: 9,
     isSystem: false,
     permission: 'Reports & Analytics',
     description: 'Revenue performance and conversion analytics',
@@ -222,9 +233,6 @@ export class PlatformModulesService {
   constructor(private readonly prisma: PrismaService) {}
 
   async seedDefaultModulesIfEmpty(): Promise<number> {
-    const count = await this.prisma.platformModule.count();
-    if (count > 0) return count;
-
     for (const mod of DEFAULT_PLATFORM_MODULES) {
       await this.prisma.platformModule.upsert({
         where: { key: mod.key! },

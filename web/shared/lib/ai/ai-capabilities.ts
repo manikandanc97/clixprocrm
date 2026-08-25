@@ -8,6 +8,8 @@ import {
   FileText,
   CheckSquare,
   ShieldCheck,
+  Activity,
+  CreditCard,
   type LucideIcon,
 } from 'lucide-react';
 
@@ -34,8 +36,99 @@ export interface AICapability {
 }
 
 /**
+ * Superadmin / Platform Administrator Capabilities
+ */
+export const SUPER_ADMIN_CAPABILITIES: AICapability[] = [
+  {
+    id: 'platform_analytics',
+    name: 'Platform Analytics & MRR',
+    description: 'Monitor platform overview, active tenant counts, MRR, and ARR revenue',
+    requiredPermissions: ['*'],
+    iconName: 'Activity',
+    icon: Activity,
+    quickActions: [
+      {
+        id: 'super_platform_overview',
+        label: 'Platform overview & MRR',
+        prompt: 'Show platform overview, active tenants count, and MRR metrics.',
+      },
+      {
+        id: 'super_growth_trends',
+        label: 'Tenants growth trend',
+        prompt: 'Show monthly organization growth and user registration trends.',
+      },
+    ],
+  },
+  {
+    id: 'platform_organizations',
+    name: 'Organizations & Tenants',
+    description: 'Manage active, trial, and suspended client organizations',
+    requiredPermissions: ['*'],
+    iconName: 'Building2',
+    icon: Building2,
+    quickActions: [
+      {
+        id: 'super_active_tenants',
+        label: 'List active organizations',
+        prompt: 'List all active organizations, tenant plans, and usage status.',
+      },
+      {
+        id: 'super_suspended_tenants',
+        label: 'Suspended tenants check',
+        prompt: 'Show summary of all active vs suspended organizations.',
+      },
+    ],
+  },
+  {
+    id: 'platform_audit_logs',
+    name: 'Security & Audit Logs',
+    description: 'Inspect platform security logs and admin activity audits',
+    requiredPermissions: ['*'],
+    iconName: 'ShieldCheck',
+    icon: ShieldCheck,
+    quickActions: [
+      {
+        id: 'super_audit_logs',
+        label: 'Recent security audit logs',
+        prompt: 'Show recent platform audit logs and security activities.',
+      },
+    ],
+  },
+  {
+    id: 'platform_users',
+    name: 'Platform Users',
+    description: 'Query users and administrators across the platform',
+    requiredPermissions: ['*'],
+    iconName: 'Users',
+    icon: Users,
+    quickActions: [
+      {
+        id: 'super_platform_users',
+        label: 'Platform users summary',
+        prompt: 'Show total users and administrators across the platform.',
+      },
+    ],
+  },
+  {
+    id: 'platform_plans',
+    name: 'Subscription Plans',
+    description: 'Track tenant distribution across subscription tiers',
+    requiredPermissions: ['*'],
+    iconName: 'CreditCard',
+    icon: CreditCard,
+    quickActions: [
+      {
+        id: 'super_plan_breakdown',
+        label: 'Subscription plans breakdown',
+        prompt: 'Show tenant distribution across Free, Starter, Pro, and Enterprise plans.',
+      },
+    ],
+  },
+];
+
+/**
  * Canonical capability registry mapping backend permissions to AI assistant capabilities
- * and dynamic suggested questions/quick actions.
+ * and dynamic suggested questions/quick actions for workspace CRM users.
  *
  * Architecture:
  *   Authenticated User → Permissions from RBAC → Authorized Capabilities → Dynamic Quick Actions
@@ -289,22 +382,57 @@ export function hasCapabilityAccess(
 export const MAX_QUICK_ACTIONS = 5;
 
 /**
- * Generates dynamic Quick Actions derived strictly from the authenticated user's permissions,
+ * Generates dynamic Quick Actions derived strictly from the authenticated user's role and permissions,
  * capped at a MAXIMUM of 5 most relevant actions.
  *
  * Rules:
- * 1. Derives only actions for capabilities the user has permission to access.
- * 2. Maximum of 5 Quick Actions at any time (never more than 5).
- * 3. Prioritizes the most relevant/frequently useful CRM actions.
+ * 1. Superadmin role receives dedicated Platform & Organization management quick actions.
+ * 2. Workspace users receive actions strictly derived from their authorized CRM capabilities.
+ * 3. Maximum of 5 Quick Actions at any time (never more than 5).
  * 4. Never displays unauthorized actions just to fill slots.
- * 5. If the user has only 2 or 3 applicable capabilities, returns only those without filler.
- * 6. If no capabilities match, returns an empty array to allow the UI to render the graceful fallback.
+ * 5. If no capabilities match, returns an empty array to allow the UI to render graceful fallback.
  */
 export function getAuthorizedQuickActions(
   userPermissions?: string[],
   userRole?: string,
   maxActions: number = MAX_QUICK_ACTIONS
 ): QuickActionItem[] {
+  const normalizedRole = (userRole || '').toUpperCase().trim().replace(/[\s_]+/g, '');
+
+  // 1. Super Admin specific handling: Return Platform Management Quick Actions
+  if (normalizedRole === 'SUPERADMIN') {
+    const superActions: QuickActionItem[] = [];
+    for (const cap of SUPER_ADMIN_CAPABILITIES) {
+      if (superActions.length < maxActions && cap.quickActions[0]) {
+        superActions.push({
+          id: cap.quickActions[0].id,
+          label: cap.quickActions[0].label,
+          prompt: cap.quickActions[0].prompt,
+          capabilityId: cap.id,
+          iconName: cap.iconName,
+        });
+      }
+    }
+    // Fill with secondary actions if space remains
+    if (superActions.length < maxActions) {
+      for (const cap of SUPER_ADMIN_CAPABILITIES) {
+        for (let i = 1; i < cap.quickActions.length; i++) {
+          if (superActions.length < maxActions) {
+            superActions.push({
+              id: cap.quickActions[i].id,
+              label: cap.quickActions[i].label,
+              prompt: cap.quickActions[i].prompt,
+              capabilityId: cap.id,
+              iconName: cap.iconName,
+            });
+          }
+        }
+      }
+    }
+    return superActions.slice(0, maxActions);
+  }
+
+  // 2. Tenant Workspace users: Derive from authorized CRM capabilities
   const authorizedCapabilities = AI_CAPABILITIES.filter((capability) =>
     hasCapabilityAccess(capability.id, userPermissions, userRole)
   );
@@ -352,7 +480,6 @@ export function getAuthorizedQuickActions(
   return prioritizedActions.slice(0, maxActions);
 }
 
-
 /**
  * Helper to get the Lucide icon component for a given capability or icon name.
  */
@@ -372,7 +499,13 @@ export function getCapabilityIcon(iconName: string): LucideIcon {
       return FileText;
     case 'CheckSquare':
       return CheckSquare;
+    case 'Activity':
+      return Activity;
+    case 'CreditCard':
+      return CreditCard;
+    case 'ShieldCheck':
     default:
       return ShieldCheck;
   }
 }
+

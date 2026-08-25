@@ -9,6 +9,8 @@ import { CRMPageContainer, CRMPageHeader } from "@/shared/components/crm";
 import { FileText } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
+import { QuoteFormSkeleton } from "@/shared/components/skeletons";
+
 export default function EditQuotationPage() {
   const params = useParams();
   const router = useRouter();
@@ -27,7 +29,15 @@ export default function EditQuotationPage() {
   if (isLoading) {
     return (
       <CRMPageContainer>
-        <div className="h-[400px] skeleton rounded-xl" />
+        <CRMPageHeader 
+          title="Edit Quotation"
+          subtitle="Update the details of your existing quotation."
+          icon={FileText}
+          badge="Editing"
+        />
+        <div className="mt-8 bg-card border border-border rounded-xl p-6 md:p-8 max-w-4xl">
+          <QuoteFormSkeleton />
+        </div>
       </CRMPageContainer>
     );
   }
