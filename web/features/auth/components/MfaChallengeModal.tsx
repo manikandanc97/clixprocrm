@@ -65,8 +65,10 @@ export const MfaChallengeModal: React.FC<MfaChallengeModalProps> = ({
         await recordMfaAuditEvent("MFA_VERIFIED", {
           factorId: targetFactorId,
         }).catch(() => {});
+        await supabase.auth.refreshSession();
+        window.dispatchEvent(new CustomEvent("clixpro:aal2-verified"));
         setCode("");
-        onSuccess();
+        onSuccess?.();
         onOpenChange(false);
       }
     } catch (err: any) {
@@ -86,8 +88,11 @@ export const MfaChallengeModal: React.FC<MfaChallengeModalProps> = ({
 
       const res = await verifyRecoveryCode(code.trim());
       if (res.success) {
+        const supabase = createClient();
+        await supabase.auth.refreshSession();
+        window.dispatchEvent(new CustomEvent("clixpro:aal2-verified"));
         setCode("");
-        onSuccess();
+        onSuccess?.();
         onOpenChange(false);
       }
     } catch (err: any) {

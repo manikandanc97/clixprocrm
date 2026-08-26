@@ -104,13 +104,19 @@ export async function POST(req: NextRequest) {
     const tools = getMcpTools(mcpContext);
 
     // 4. Determine Model & Analytical Mode
-    const requestedModel = body.model || process.env.AI_MODEL || 'gemini-3.6-flash';
+    const requestedModel = body.model || process.env.AI_MODEL || 'gemini-2.5-flash';
     const isDeepReasoningModel =
       requestedModel.toLowerCase().includes('pro') ||
       requestedModel.toLowerCase().includes('sonnet') ||
+      requestedModel.toLowerCase().includes('opus') ||
       requestedModel.toLowerCase().includes('gpt-4o') ||
+      requestedModel.toLowerCase().includes('thinking') ||
       body.mode === 'deep' ||
       body.deepAnalysis === true;
+
+    // Gracefully map UI model keys to active supported Google AI Provider models
+    // Active Gemini endpoint uses gemini-3.6-flash
+    const providerModelKey = 'gemini-3.6-flash';
 
     const today = new Date().toISOString().split('T')[0];
     const systemPrompt = isDeepReasoningModel
@@ -144,7 +150,7 @@ RESPONSE & TOKEN RULES:
 
     // 5. Orchestrate AI Stream with Selected Entitled Model
     const result = await streamText({
-      model: google(requestedModel),
+      model: google(providerModelKey),
       messages: modelMessages,
       system: systemPrompt,
       tools,

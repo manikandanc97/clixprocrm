@@ -2,18 +2,38 @@
 
 import React, { useState, useRef, useEffect } from 'react';
 import {
-  ArrowUp,
+  ArrowRight,
   Square,
-  Paperclip,
+  Plus,
+  ChevronUp,
+  ChevronRight,
+  Mic,
+  MicOff,
   Sparkles,
-  Users,
-  Briefcase,
-  TrendingUp,
-  Calendar,
-  FileText,
-  HelpCircle,
+  Lock,
+  Zap,
+  Info,
+  Paperclip,
+  CheckCircle2,
 } from 'lucide-react';
-import { SlashCommand } from '../types';
+import { SlashCommand, ModelOption } from '../types';
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/shared/ui/dropdown-menu';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/shared/ui/dialog';
+import { Button } from '@/shared/ui/button';
+import { toast } from 'sonner';
+import { useRouter } from 'next/navigation';
 
 interface AIChatComposerProps {
   onSendMessage: (text: string) => void;
@@ -22,6 +42,10 @@ interface AIChatComposerProps {
   disabled?: boolean;
   placeholder?: string;
   isSuperAdmin?: boolean;
+  entitledModels?: ModelOption[];
+  selectedModel?: string;
+  onSelectModel?: (modelKey: string) => void;
+  planName?: string;
 }
 
 const DEFAULT_SLASH_COMMANDS: SlashCommand[] = [
@@ -62,6 +86,50 @@ const DEFAULT_SLASH_COMMANDS: SlashCommand[] = [
   },
 ];
 
+const FALLBACK_MODELS: ModelOption[] = [
+  {
+    modelKey: 'gemini-2.5-flash',
+    displayName: 'Gemini 2.5 Flash',
+    friendlyLabel: 'Gemini 2.5 Flash',
+    badge: 'Fast',
+    badgeInfo: 'ⓘ',
+    isLocked: false,
+    hasSubmenu: true,
+  },
+  {
+    modelKey: 'gemini-2.5-pro',
+    displayName: 'Gemini 2.5 Pro',
+    friendlyLabel: 'Gemini 2.5 Pro',
+    badge: 'Deep Analysis',
+    badgeInfo: 'ⓘ',
+    isLocked: false,
+    hasSubmenu: true,
+  },
+  {
+    modelKey: 'claude-3-7-sonnet',
+    displayName: 'Claude 3.7 Sonnet (Thinking)',
+    friendlyLabel: 'Claude 3.7 Sonnet',
+    badge: 'Thinking',
+    isLocked: false,
+  },
+  {
+    modelKey: 'gpt-4o',
+    displayName: 'GPT-4o (Omni)',
+    friendlyLabel: 'GPT-4o',
+    badge: 'Omni',
+    isLocked: false,
+  },
+  {
+    modelKey: 'gpt-4o-mini',
+    displayName: 'GPT-4o Mini',
+    friendlyLabel: 'GPT-4o Mini',
+    badge: 'Fast',
+    badgeInfo: 'ⓘ',
+    isLocked: false,
+    hasSubmenu: true,
+  },
+];
+
 export function AIChatComposer({
   onSendMessage,
   isLoading,
@@ -69,13 +137,33 @@ export function AIChatComposer({
   disabled = false,
   placeholder,
   isSuperAdmin = false,
+  entitledModels,
+  selectedModel = 'gemini-3.7-flash',
+  onSelectModel,
+  planName,
 }: AIChatComposerProps) {
+  const router = useRouter();
   const [input, setInput] = useState('');
   const [showSlashMenu, setShowSlashMenu] = useState(false);
   const [selectedSlashIndex, setSelectedSlashIndex] = useState(0);
+  const [isVoiceListening, setIsVoiceListening] = useState(false);
+  const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
+  const [targetUpgradeModel, setTargetUpgradeModel] = useState<ModelOption | null>(null);
+
   const textareaRef = useRef<HTMLTextAreaElement>(null);
   const slashMenuRef = useRef<HTMLDivElement>(null);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const recognitionRef = useRef<any>(null);
+
+  const modelsList = entitledModels && entitledModels.length > 0 ? entitledModels : FALLBACK_MODELS;
+  const currentModelOption =
+    modelsList.find((m) => m.modelKey === selectedModel) ||
+    modelsList[0] || {
+      modelKey: 'gemini-3.7-flash',
+      displayName: 'Gemini 3.7 Flash Medium',
+      friendlyLabel: 'Gemini 3.7 Flash Medium',
+    };
 
   // Auto-grow textarea
   useEffect(() => {
@@ -83,7 +171,7 @@ export function AIChatComposer({
       textareaRef.current.style.height = 'auto';
       textareaRef.current.style.height = `${Math.min(
         textareaRef.current.scrollHeight,
-        160
+        180
       )}px`;
     }
   }, [input]);
@@ -164,6 +252,69 @@ export function AIChatComposer({
           ? `${prev}\n[Attached File: ${fileName}]`
           : `Please analyze this attached file: ${fileName}`
       );
+      toast.success(`Attached "${fileName}"`);
+    }
+  };
+
+  const handleModelChange = (opt: ModelOption) => {
+    if (opt.isLocked) {
+      setTargetUpgradeModel(opt);
+      setIsUpgradeModalOpen(true);
+      return;
+    }
+    if (onSelectModel) {
+      onSelectModel(opt.modelKey);
+    }
+  };
+
+  const toggleVoiceDictation = () => {
+    if (typeof window === 'undefined') return;
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const SpeechRecognition = (window as any).SpeechRecognition || (window as any).webkitSpeechRecognition;
+
+    if (!SpeechRecognition) {
+      toast.info('Voice dictation is not supported in this browser. Please use Google Chrome or Edge.');
+      return;
+    }
+
+    if (isVoiceListening) {
+      if (recognitionRef.current) {
+        recognitionRef.current.stop();
+      }
+      setIsVoiceListening(false);
+      return;
+    }
+
+    try {
+      const recognition = new SpeechRecognition();
+      recognition.continuous = false;
+      recognition.interimResults = false;
+      recognition.lang = 'en-US';
+
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      recognition.onresult = (event: any) => {
+        const transcript = event.results[0][0].transcript;
+        if (transcript) {
+          setInput((prev) => (prev ? `${prev} ${transcript}` : transcript));
+        }
+        setIsVoiceListening(false);
+      };
+
+      recognition.onerror = () => {
+        setIsVoiceListening(false);
+      };
+
+      recognition.onend = () => {
+        setIsVoiceListening(false);
+      };
+
+      recognition.start();
+      recognitionRef.current = recognition;
+      setIsVoiceListening(true);
+      toast.info('Listening... Speak into your microphone');
+    } catch {
+      setIsVoiceListening(false);
     }
   };
 
@@ -195,7 +346,7 @@ export function AIChatComposer({
                   key={cmd.command}
                   type="button"
                   onClick={() => handleSelectSlashCommand(cmd)}
-                  className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-colors text-xs ${
+                  className={`w-full flex items-center gap-2.5 px-2.5 py-2 rounded-xl text-left transition-colors text-xs cursor-pointer ${
                     isSelected
                       ? 'bg-primary/10 text-primary font-medium'
                       : 'text-foreground/80 hover:bg-muted'
@@ -218,68 +369,214 @@ export function AIChatComposer({
       {/* Main Composer Box */}
       <form
         onSubmit={handleSubmit}
-        className="relative bg-card border border-border/80 focus-within:border-primary/60 focus-within:ring-2 focus-within:ring-primary/20 rounded-2xl p-2 sm:p-2.5 shadow-sm transition-all duration-200"
+        className="relative bg-card/95 border border-border/70 focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-primary/15 rounded-xl p-1.5 sm:p-2 shadow-xs transition-all duration-200"
       >
-        <div className="flex items-end gap-2">
-          {/* Attach Button */}
-          <button
-            type="button"
-            onClick={() => fileInputRef.current?.click()}
-            className="p-2 text-muted-foreground hover:text-foreground hover:bg-muted/80 rounded-xl transition-colors shrink-0 mb-0.5"
-            title="Attach file / reference"
-          >
-            <Paperclip className="w-4 h-4" />
-          </button>
+        <div className="flex flex-col gap-0.5">
+          {/* Input Textarea Area */}
+          <div className="px-1">
+            <textarea
+              ref={textareaRef}
+              value={input}
+              onChange={handleInputChange}
+              onKeyDown={handleKeyDown}
+              disabled={disabled}
+              placeholder={
+                placeholder ||
+                (isSuperAdmin
+                  ? 'Ask ClixPro Platform AI... (Type / for quick commands)'
+                  : 'Ask ClixPro AI... (Type / for quick commands)')
+              }
+              rows={1}
+              className="w-full bg-transparent border-none focus:outline-none resize-none min-h-[24px] max-h-36 text-xs sm:text-[13px] text-foreground placeholder:text-muted-foreground/60 leading-snug py-0.5"
+            />
+          </div>
 
-          {/* Input Textarea */}
-          <textarea
-            ref={textareaRef}
-            value={input}
-            onChange={handleInputChange}
-            onKeyDown={handleKeyDown}
-            disabled={disabled}
-            placeholder={
-              placeholder ||
-              (isSuperAdmin
-                ? 'Ask ClixPro Platform AI... (Type / for quick commands)'
-                : 'Ask ClixPro AI... (Type / for quick commands)')
-            }
-            rows={1}
-            className="w-full bg-transparent border-none focus:outline-none resize-none min-h-[38px] max-h-40 py-2 text-xs sm:text-sm text-foreground placeholder-muted-foreground leading-relaxed"
-          />
+          {/* Bottom Controls Bar (Model Selector + Tools + Send Button) */}
+          <div className="flex items-center justify-between pt-0.5 gap-2 select-none">
+            {/* Left side: Plus (+) button & Model selector */}
+            <div className="flex items-center gap-1 min-w-0">
+              {/* Plus Button */}
+              <button
+                type="button"
+                onClick={() => fileInputRef.current?.click()}
+                className="w-6 h-6 flex items-center justify-center text-muted-foreground hover:text-foreground hover:bg-muted/70 rounded-md transition-colors cursor-pointer shrink-0"
+                title="Attach file or context"
+              >
+                <Plus className="w-3.5 h-3.5" />
+              </button>
 
-          {/* Action Button: Send or Stop */}
-          {isLoading ? (
-            <button
-              type="button"
-              onClick={onStop}
-              className="p-2 rounded-xl bg-destructive text-destructive-foreground hover:bg-destructive/90 transition-colors shrink-0 mb-0.5 shadow-2xs"
-              title="Stop generation"
-            >
-              <Square className="w-4 h-4 fill-current" />
-            </button>
-          ) : (
-            <button
-              type="submit"
-              disabled={disabled || !input.trim()}
-              className={`p-2 rounded-xl transition-all shrink-0 mb-0.5 ${
-                input.trim() && !disabled
-                  ? 'bg-primary text-primary-foreground hover:brightness-105 shadow-2xs cursor-pointer'
-                  : 'bg-muted text-muted-foreground/50 cursor-not-allowed'
-              }`}
-              title="Send prompt (Enter)"
-            >
-              <ArrowUp className="w-4 h-4 stroke-[2.5]" />
-            </button>
-          )}
+              {/* Model Selector Dropdown Trigger */}
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button
+                    type="button"
+                    className="h-6 flex items-center gap-1 px-2 rounded-md text-[11px] font-medium text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors cursor-pointer border border-transparent hover:border-border/50 max-w-[220px] sm:max-w-xs truncate group"
+                  >
+                    <span className="truncate">{currentModelOption.displayName}</span>
+                    <ChevronUp className="w-3 h-3 text-muted-foreground group-hover:text-foreground shrink-0 transition-transform duration-150" />
+                  </button>
+                </DropdownMenuTrigger>
+
+                {/* Model Selector Popup Menu */}
+                <DropdownMenuContent
+                  side="top"
+                  align="start"
+                  sideOffset={8}
+                  className="w-72 sm:w-80 p-1.5 rounded-2xl bg-popover text-popover-foreground border border-border/80 shadow-2xl z-50 text-xs animate-in fade-in-0 zoom-in-95 duration-150"
+                >
+                  <div className="px-3 py-1.5 text-xs font-semibold text-muted-foreground tracking-tight select-none">
+                    Model
+                  </div>
+                  <div className="space-y-0.5 mt-0.5">
+                    {modelsList.map((opt) => {
+                      const isSelected = selectedModel === opt.modelKey;
+                      return (
+                        <button
+                          key={opt.modelKey + opt.displayName}
+                          type="button"
+                          onClick={() => handleModelChange(opt)}
+                          className={`w-full flex items-center justify-between px-3 py-2 rounded-xl text-xs transition-all text-left group cursor-pointer ${
+                            isSelected
+                              ? 'bg-muted text-foreground font-semibold shadow-2xs'
+                              : 'text-muted-foreground hover:text-foreground hover:bg-muted/60'
+                          }`}
+                        >
+                          <span className="truncate pr-2">{opt.displayName}</span>
+
+                          <div className="flex items-center gap-1.5 shrink-0">
+                            {opt.badge && (
+                              <span className="text-[10px] px-1.5 py-0.5 rounded-md bg-muted/90 text-muted-foreground font-mono border border-border/40 flex items-center gap-0.5">
+                                {opt.badge}
+                                {opt.badgeInfo && (
+                                  <span className="text-[9px] opacity-75">{opt.badgeInfo}</span>
+                                )}
+                              </span>
+                            )}
+                            {opt.hasSubmenu && (
+                              <ChevronRight className="w-3.5 h-3.5 text-muted-foreground/50 group-hover:text-muted-foreground transition-colors" />
+                            )}
+                            {opt.isLocked && (
+                              <Lock className="w-3.5 h-3.5 text-amber-500 shrink-0" />
+                            )}
+                          </div>
+                        </button>
+                      );
+                    })}
+                  </div>
+                </DropdownMenuContent>
+              </DropdownMenu>
+            </div>
+
+            {/* Right side: Mic voice button + Circular Send/Stop Button */}
+            <div className="flex items-center gap-1 shrink-0">
+              {/* Mic Dictation Button */}
+              <button
+                type="button"
+                onClick={toggleVoiceDictation}
+                className={`w-6 h-6 flex items-center justify-center rounded-md transition-colors cursor-pointer ${
+                  isVoiceListening
+                    ? 'bg-destructive/10 text-destructive animate-pulse'
+                    : 'text-muted-foreground hover:text-foreground hover:bg-muted/70'
+                }`}
+                title={isVoiceListening ? 'Listening... click to stop' : 'Voice input (Dictation)'}
+              >
+                {isVoiceListening ? (
+                  <MicOff className="w-3.5 h-3.5" />
+                ) : (
+                  <Mic className="w-3.5 h-3.5" />
+                )}
+              </button>
+
+              {/* Action Button: Send or Stop */}
+              {isLoading ? (
+                <button
+                  type="button"
+                  onClick={onStop}
+                  className="w-7 h-7 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center shadow-xs transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+                  title="Stop generation"
+                >
+                  <Square className="w-3 h-3 fill-current" />
+                </button>
+              ) : (
+                <button
+                  type="submit"
+                  disabled={disabled || !input.trim()}
+                  className={`w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition-all shrink-0 ${
+                    input.trim() && !disabled
+                      ? 'bg-[#0084FF] hover:bg-[#0070D8] text-white cursor-pointer hover:scale-105 active:scale-95'
+                      : 'bg-muted text-muted-foreground/40 cursor-not-allowed'
+                  }`}
+                  title="Send message (Enter)"
+                >
+                  <ArrowRight className="w-3.5 h-3.5 stroke-[2.5]" />
+                </button>
+              )}
+            </div>
+          </div>
         </div>
       </form>
 
-      {/* Subtle Hint Footer */}
-      <div className="flex items-center justify-between px-2 pt-1.5 text-[10px] text-muted-foreground/70 select-none">
-        <span>Press <kbd className="font-mono bg-muted px-1 py-0.5 rounded border border-border/50">Enter ↵</kbd> to send, <kbd className="font-mono bg-muted px-1 py-0.5 rounded border border-border/50">Shift + Enter</kbd> for new line</span>
-        <span className="hidden sm:inline">Type <kbd className="font-mono bg-muted px-1 py-0.5 rounded border border-border/50">/</kbd> for quick CRM commands</span>
+      {/* Subtle Compact Hint Footer */}
+      <div className="flex items-center justify-between px-1 pt-1 text-[10px] text-muted-foreground/60 select-none">
+        <span>
+          <kbd className="font-mono bg-muted/60 px-1 py-0.2 rounded border border-border/40 text-[9px]">Enter ↵</kbd> to send, <kbd className="font-mono bg-muted/60 px-1 py-0.2 rounded border border-border/40 text-[9px]">Shift + Enter</kbd> for new line
+        </span>
+        <span className="hidden sm:inline">
+          <kbd className="font-mono bg-muted/60 px-1 py-0.2 rounded border border-border/40 text-[9px]">/</kbd> for commands
+        </span>
       </div>
+
+      {/* Tier Upgrade Dialog */}
+      <Dialog open={isUpgradeModalOpen} onOpenChange={setIsUpgradeModalOpen}>
+        <DialogContent className="sm:max-w-md">
+          <DialogHeader>
+            <div className="w-10 h-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary mb-2">
+              <Zap className="w-5 h-5" />
+            </div>
+            <DialogTitle className="text-base font-bold">
+              Upgrade to Unlock {targetUpgradeModel?.displayName}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              {targetUpgradeModel?.description ||
+                'This advanced reasoning model is available exclusively on Growth, Pro, and Enterprise subscription plans.'}
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="bg-muted/40 rounded-xl p-3 border border-border/60 space-y-2 text-xs">
+            <div className="font-semibold text-foreground flex items-center gap-1.5">
+              <Sparkles className="w-3.5 h-3.5 text-primary" />
+              <span>Included with Advanced Tier:</span>
+            </div>
+            <ul className="space-y-1 text-muted-foreground pl-5 list-disc text-[11px]">
+              <li>Extended Thinking & Complex Architecture Reasoning</li>
+              <li>Predictive Lead Scoring & Churn Forecasting</li>
+              <li>Autonomous Multi-step Workflow Automation</li>
+            </ul>
+          </div>
+
+          <DialogFooter className="flex-row gap-2 sm:justify-end">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setIsUpgradeModalOpen(false)}
+              className="flex-1 sm:flex-none text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={() => {
+                setIsUpgradeModalOpen(false);
+                router.push('/pricing');
+              }}
+              className="flex-1 sm:flex-none text-xs gap-1.5 bg-primary text-primary-foreground"
+            >
+              <span>View Plans</span>
+              <ArrowRight className="w-3.5 h-3.5" />
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

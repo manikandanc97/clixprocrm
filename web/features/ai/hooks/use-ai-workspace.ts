@@ -9,6 +9,56 @@ import { toast } from 'sonner';
 import { ChatSession, ModelOption, CrmContextData } from '../types';
 
 export const STORAGE_KEY = 'clixpro_ai_chat_sessions_v1';
+export const STORAGE_KEY_SELECTED_MODEL = 'clixpro_ai_selected_model_v1';
+
+export const DEFAULT_WORKSPACE_MODELS: ModelOption[] = [
+  {
+    modelKey: 'gemini-2.5-flash',
+    displayName: 'Gemini 2.5 Flash',
+    friendlyLabel: 'Gemini 2.5 Flash',
+    badge: 'Fast',
+    badgeInfo: 'ⓘ',
+    description: 'Ultra-fast, economical intelligence for daily conversational CRM tasks.',
+    isLocked: false,
+    hasSubmenu: true,
+  },
+  {
+    modelKey: 'gemini-2.5-pro',
+    displayName: 'Gemini 2.5 Pro',
+    friendlyLabel: 'Gemini 2.5 Pro',
+    badge: 'Deep Analysis',
+    badgeInfo: 'ⓘ',
+    description: 'Deep reasoning, complex document understanding, and multi-step CRM action execution.',
+    isLocked: false,
+    hasSubmenu: true,
+  },
+  {
+    modelKey: 'claude-3-7-sonnet',
+    displayName: 'Claude 3.7 Sonnet (Thinking)',
+    friendlyLabel: 'Claude 3.7 Sonnet',
+    badge: 'Thinking',
+    description: 'Hybrid reasoning and state-of-the-art business analysis.',
+    isLocked: false,
+  },
+  {
+    modelKey: 'gpt-4o',
+    displayName: 'GPT-4o (Omni)',
+    friendlyLabel: 'GPT-4o',
+    badge: 'Omni',
+    description: 'Flagship high-intelligence multimodal model for advanced sales intelligence.',
+    isLocked: false,
+  },
+  {
+    modelKey: 'gpt-4o-mini',
+    displayName: 'GPT-4o Mini',
+    friendlyLabel: 'GPT-4o Mini',
+    badge: 'Fast',
+    badgeInfo: 'ⓘ',
+    description: 'Lightweight, cost-efficient model for fast standard sales responses.',
+    isLocked: false,
+    hasSubmenu: true,
+  },
+];
 
 export function extractMessageText(m: any): string {
   if (!m) return '';
@@ -49,8 +99,8 @@ export function useAIWorkspace() {
   const [activeContext, setActiveContext] = useState<CrmContextData | null>(null);
 
   // Entitled AI Models state
-  const [entitledModels, setEntitledModels] = useState<ModelOption[]>([]);
-  const [selectedModel, setSelectedModel] = useState<string>('gemini-3.6-flash');
+  const [entitledModels, setEntitledModels] = useState<ModelOption[]>(DEFAULT_WORKSPACE_MODELS);
+  const [selectedModel, setSelectedModel] = useState<string>('gemini-2.5-flash');
   const [planName, setPlanName] = useState<string>('');
   const [aiEnabled, setAiEnabled] = useState<boolean>(true);
   const [globalAiEnabled, setGlobalAiEnabled] = useState<boolean>(true);
@@ -85,20 +135,34 @@ export function useAIWorkspace() {
     }
   }, [searchParams]);
 
-  // Load sessions from localStorage
+  // Restore sessions from LocalStorage on mount
   useEffect(() => {
     try {
-      const raw = localStorage.getItem(STORAGE_KEY);
-      if (raw) {
-        const parsed = JSON.parse(raw);
-        if (Array.isArray(parsed)) {
+      const stored = localStorage.getItem(STORAGE_KEY);
+      if (stored) {
+        const parsed = JSON.parse(stored);
+        if (Array.isArray(parsed) && parsed.length > 0) {
           setSessions(parsed);
+          setCurrentSessionId(parsed[0].id);
         }
       }
-    } catch (err) {
-      console.error('[ClixPro AI] Error loading sessions:', err);
+      const storedModel = localStorage.getItem(STORAGE_KEY_SELECTED_MODEL);
+      if (storedModel) {
+        setSelectedModel(storedModel);
+      }
+    } catch (e) {
+      console.warn('[ClixPro AI] LocalStorage load failed:', e);
     }
   }, []);
+
+  // Save selected model
+  useEffect(() => {
+    if (selectedModel) {
+      try {
+        localStorage.setItem(STORAGE_KEY_SELECTED_MODEL, selectedModel);
+      } catch {}
+    }
+  }, [selectedModel]);
 
   const saveSessionsToStorage = useCallback((updatedSessions: ChatSession[]) => {
     setSessions(updatedSessions);
@@ -109,7 +173,7 @@ export function useAIWorkspace() {
     }
   }, []);
 
-  // Fetch model options from backend and map to user-friendly labels
+  // Fetch model options from backend and map dynamically based on Super Admin / Plan Entitlements
   useEffect(() => {
     async function loadModels() {
       try {
@@ -131,54 +195,30 @@ export function useAIWorkspace() {
 
             const rawModels: any[] = Array.isArray(json.data.models) ? json.data.models : [];
 
-            // Find best matching backend keys
-            const fastModelKey =
-              rawModels.find((m) => m.modelKey?.includes('flash') || m.modelKey?.includes('mini'))?.modelKey ||
-              json.data.defaultModelKey ||
-              'gemini-3.6-flash';
+            // Map canonical models dynamically with live backend data and entitlements
+            const mappedModels: ModelOption[] = DEFAULT_WORKSPACE_MODELS.map((canonical) => {
+              const backendModel = rawModels.find(
+                (m) => m.modelKey === canonical.modelKey || m.id === canonical.modelKey
+              );
 
-            const advancedModelKey =
-              rawModels.find((m) => m.modelKey?.includes('pro') || m.modelKey?.includes('sonnet') || m.modelKey?.includes('gpt-4o'))?.modelKey ||
-              'gemini-2.5-pro';
+              // Determine if model is unlocked for current tier:
+              // Free tier gets: Gemini 2.5 Flash and GPT-4o Mini
+              // Paid tiers & SuperAdmin get all 5 models unlocked
+              const isFreeTierModel =
+                canonical.modelKey === 'gemini-2.5-flash' || canonical.modelKey === 'gpt-4o-mini';
+              const isLocked = !isSuperAdmin && !hasAdvancedTier && !isFreeTierModel;
 
-            const tierModels: ModelOption[] = [
-              {
-                modelKey: fastModelKey,
-                displayName: 'Auto (Recommended)',
-                friendlyLabel: 'Auto',
-                description: 'Smart balanced routing for high-speed queries and instant CRM search.',
-                badge: 'Fast',
-                isLocked: false,
-                reasoningEffort: 'standard',
-              },
-              {
-                modelKey: fastModelKey,
-                displayName: 'Fast (Instant Responses)',
-                friendlyLabel: 'Fast',
-                description: 'Token-efficient lightweight intelligence for everyday tasks and summaries.',
-                badge: 'Lightning',
-                isLocked: false,
-                reasoningEffort: 'standard',
-              },
-              {
-                modelKey: advancedModelKey,
-                displayName: 'Advanced (Deep Analysis)',
-                friendlyLabel: 'Advanced',
-                description: hasAdvancedTier
-                  ? 'Deep reasoning, root-cause analysis, and predictive win-rate forecasting.'
-                  : 'Deep reasoning, root-cause diagnostics & predictive CRM intelligence. Upgrade to unlock.',
-                badge: hasAdvancedTier ? 'Deep Analysis' : 'Pro Tier',
-                isLocked: !hasAdvancedTier,
-                requiredPlan: 'Growth / Pro',
-                reasoningEffort: 'deep',
-              },
-            ];
+              return {
+                ...canonical,
+                displayName: backendModel?.displayName || canonical.displayName,
+                description: backendModel?.description || canonical.description,
+                isLocked,
+                requiredPlan: isLocked ? 'Pro / Growth Tier' : undefined,
+              };
+            });
 
-            setEntitledModels(tierModels);
+            setEntitledModels(mappedModels);
 
-            if (json.data.defaultModelKey) {
-              setSelectedModel(json.data.defaultModelKey);
-            }
             if (json.data.planName) {
               setPlanName(json.data.planName);
             }
@@ -287,55 +327,63 @@ export function useAIWorkspace() {
         ? `${firstText.slice(0, 40)}...`
         : firstText || 'New Conversation';
 
-    if (!currentSessionId) {
-      const newSessionId =
-        typeof crypto !== 'undefined' && crypto.randomUUID
-          ? crypto.randomUUID()
-          : `session_${Date.now()}`;
-
-      const newSession: ChatSession = {
-        id: newSessionId,
-        title: sessionTitle,
-        createdAt: Date.now(),
-        updatedAt: Date.now(),
-        context: activeContext?.name || null,
-        messages: messages,
-      };
-
-      setCurrentSessionId(newSessionId);
-      const updated = [newSession, ...sessions.filter((s) => s.id !== newSessionId)];
-      saveSessionsToStorage(updated);
-    } else {
-      const existingIdx = sessions.findIndex((s) => s.id === currentSessionId);
+    setSessions((prevSessions) => {
       let updated: ChatSession[];
+      if (!currentSessionId) {
+        const newSessionId =
+          typeof crypto !== 'undefined' && crypto.randomUUID
+            ? crypto.randomUUID()
+            : `session_${Date.now()}`;
 
-      if (existingIdx !== -1) {
-        const existing = sessions[existingIdx];
-        const updatedSession: ChatSession = {
-          ...existing,
-          title: existing.title === 'New Conversation' ? sessionTitle : existing.title,
-          updatedAt: Date.now(),
-          context: existing.context || (activeContext?.name ? activeContext.name : null),
-          messages: messages,
-        };
-        updated = [
-          updatedSession,
-          ...sessions.filter((s) => s.id !== currentSessionId),
-        ];
-      } else {
         const newSession: ChatSession = {
-          id: currentSessionId,
+          id: newSessionId,
           title: sessionTitle,
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          context: activeContext?.name || null,
+          context: activeContextRef.current?.name || null,
           messages: messages,
         };
-        updated = [newSession, ...sessions];
+
+        setCurrentSessionId(newSessionId);
+        updated = [newSession, ...prevSessions.filter((s) => s.id !== newSessionId)];
+      } else {
+        const existingIdx = prevSessions.findIndex((s) => s.id === currentSessionId);
+
+        if (existingIdx !== -1) {
+          const existing = prevSessions[existingIdx];
+          const updatedSession: ChatSession = {
+            ...existing,
+            title: existing.title === 'New Conversation' ? sessionTitle : existing.title,
+            updatedAt: Date.now(),
+            context:
+              existing.context ||
+              (activeContextRef.current?.name ? activeContextRef.current.name : null),
+            messages: messages,
+          };
+          updated = [
+            updatedSession,
+            ...prevSessions.filter((s) => s.id !== currentSessionId),
+          ];
+        } else {
+          const newSession: ChatSession = {
+            id: currentSessionId,
+            title: sessionTitle,
+            createdAt: Date.now(),
+            updatedAt: Date.now(),
+            context: activeContextRef.current?.name || null,
+            messages: messages,
+          };
+          updated = [newSession, ...prevSessions];
+        }
       }
-      saveSessionsToStorage(updated);
-    }
-  }, [messages, currentSessionId, sessions, activeContext, saveSessionsToStorage]);
+
+      try {
+        localStorage.setItem(STORAGE_KEY, JSON.stringify(updated));
+      } catch {}
+
+      return updated;
+    });
+  }, [messages, currentSessionId]);
 
   const isLoading = status === 'submitted' || status === 'streaming';
 

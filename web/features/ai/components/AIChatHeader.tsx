@@ -41,6 +41,7 @@ interface AIChatHeaderProps {
   isSidebarOpen?: boolean;
   onToggleContextPanel?: () => void;
   isContextPanelOpen?: boolean;
+  onOpenContextTab?: () => void;
   activeContext: CrmContextData | null;
   onClearContext: () => void;
   entitledModels: ModelOption[];
@@ -58,6 +59,7 @@ export function AIChatHeader({
   isSidebarOpen,
   onToggleContextPanel,
   isContextPanelOpen,
+  onOpenContextTab,
   activeContext,
   onClearContext,
   entitledModels,
@@ -93,17 +95,6 @@ export function AIChatHeader({
       <header className="h-14 border-b border-border/60 bg-card/40 backdrop-blur-xs flex items-center justify-between px-3 sm:px-5 shrink-0 select-none z-20">
         {/* Left side */}
         <div className="flex items-center gap-2.5 min-w-0">
-          {/* Toggle history sidebar on mobile/tablet */}
-          {onToggleSidebar && (
-            <button
-              onClick={onToggleSidebar}
-              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors md:hidden"
-              title="Toggle Conversation History"
-            >
-              <PanelLeft className="w-4 h-4" />
-            </button>
-          )}
-
           {/* Title */}
           <div className="flex items-center gap-2 min-w-0">
             <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
@@ -116,10 +107,17 @@ export function AIChatHeader({
 
           {/* CRM Context Badge */}
           {activeContext && (
-            <div className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-medium max-w-[200px] truncate animate-in fade-in duration-200">
+            <div
+              onClick={onOpenContextTab}
+              className="flex items-center gap-1.5 px-2.5 py-0.5 rounded-full bg-primary/10 text-primary border border-primary/20 text-xs font-medium max-w-[200px] truncate animate-in fade-in duration-200 cursor-pointer hover:bg-primary/15 transition-colors"
+              title="Click to view active CRM context in sidebar"
+            >
               <span className="truncate">Context: {activeContext.name}</span>
               <button
-                onClick={onClearContext}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onClearContext();
+                }}
                 className="p-0.5 hover:bg-primary/20 rounded-full transition-colors shrink-0"
                 title="Remove context"
               >
@@ -131,80 +129,27 @@ export function AIChatHeader({
 
         {/* Right side controls */}
         <div className="flex items-center gap-2">
-          {/* Friendly Model Selector (Auto ▾) */}
-          {entitledModels.length > 0 && (
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <button className="flex items-center gap-1.5 px-2.5 py-1 rounded-lg bg-muted/60 hover:bg-muted text-xs font-medium text-foreground transition-colors border border-border/60">
-                  <span className="text-muted-foreground text-[11px]">Model:</span>
-                  <span className="font-semibold text-primary">{friendlyLabel}</span>
-                  <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
-                </button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-64 text-xs p-1.5">
-                <div className="px-2 py-1 text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70 flex items-center justify-between">
-                  <span>AI Intelligence Tier</span>
-                  {planName && (
-                    <span className="text-[9px] font-mono text-primary font-bold">
-                      {planName} Tier
-                    </span>
-                  )}
-                </div>
-                <div className="space-y-1 mt-1">
-                  {entitledModels.map((opt) => {
-                    const isSelected = !opt.isLocked && selectedModel === opt.modelKey;
-                    return (
-                      <div
-                        key={opt.displayName}
-                        onClick={() => handleModelClick(opt)}
-                        className={`flex flex-col items-start py-2 px-2.5 rounded-lg cursor-pointer transition-colors ${
-                          isSelected
-                            ? 'bg-primary/10 text-primary font-medium'
-                            : opt.isLocked
-                            ? 'hover:bg-muted/60 opacity-85'
-                            : 'hover:bg-muted text-foreground'
-                        }`}
-                      >
-                        <div className="flex items-center justify-between w-full">
-                          <div className="flex items-center gap-1.5">
-                            {opt.isLocked && <Lock className="w-3 h-3 text-amber-500 shrink-0" />}
-                            <span className="font-semibold">{opt.displayName}</span>
-                          </div>
-                          {opt.badge && (
-                            <span
-                              className={`text-[9px] font-mono font-bold px-1.5 py-0.2 rounded ${
-                                opt.isLocked
-                                  ? 'bg-amber-500/10 text-amber-600 dark:text-amber-400'
-                                  : 'bg-primary/10 text-primary'
-                              }`}
-                            >
-                              {opt.badge}
-                            </span>
-                          )}
-                        </div>
-                        {opt.description && (
-                          <span className="text-[10px] text-muted-foreground mt-0.5 leading-tight">
-                            {opt.description}
-                          </span>
-                        )}
-                      </div>
-                    );
-                  })}
-                </div>
-              </DropdownMenuContent>
-            </DropdownMenu>
-          )}
-
-          {/* CRM Context Panel Toggle */}
+          {/* Desktop Right Sidebar Toggle */}
           {onToggleContextPanel && (
             <button
               onClick={onToggleContextPanel}
-              className={`p-1.5 rounded-lg transition-colors border ${
+              className={`p-1.5 rounded-lg transition-colors border hidden md:flex items-center justify-center cursor-pointer ${
                 isContextPanelOpen
                   ? 'bg-primary/10 text-primary border-primary/30'
                   : 'text-muted-foreground hover:text-foreground hover:bg-muted/80 border-border/60'
               }`}
-              title={isContextPanelOpen ? 'Hide CRM Context' : 'Show CRM Context'}
+              title={isContextPanelOpen ? 'Collapse Sidebar' : 'Expand Sidebar (Conversations & CRM Context)'}
+            >
+              <PanelRight className="w-4 h-4" />
+            </button>
+          )}
+
+          {/* Mobile Right Sidebar Toggle */}
+          {onToggleSidebar && (
+            <button
+              onClick={onToggleSidebar}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors border border-border/60 flex md:hidden items-center justify-center cursor-pointer"
+              title="Open Conversations & CRM Context"
             >
               <PanelRight className="w-4 h-4" />
             </button>

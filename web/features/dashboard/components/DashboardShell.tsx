@@ -35,9 +35,9 @@ export default function DashboardShell({
       <motion.div
         initial={false}
         animate={{
-          paddingLeft: mounted && isDesktop ? (isCollapsed ? "100px" : "312px") : "0px",
+          paddingLeft: mounted && isDesktop ? (isCollapsed ? "92px" : "276px") : "0px",
         }}
-        transition={{ duration: 0.3, ease: [0.4, 0, 0.2, 1] }}
+        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
         className="flex flex-col flex-1 min-w-0 h-full w-full"
       >
         {/* Topbar is sticky because only <main> below scrolls */}

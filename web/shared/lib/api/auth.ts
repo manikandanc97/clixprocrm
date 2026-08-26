@@ -79,21 +79,6 @@ export const loginUser = async (data: LoginPayload) => {
     localStorage.setItem("has_session", "1");
   }
 
-  // Check if AAL2 MFA verification is required for this user
-  try {
-    const { data: aalData } = await supabase.auth.mfa.getAuthenticatorAssuranceLevel();
-    if (aalData && aalData.currentLevel === 'aal1' && aalData.nextLevel === 'aal2') {
-      return {
-        success: true,
-        message: 'MFA_REQUIRED',
-        mfaRequired: true,
-        data: { user: null },
-      } as any;
-    }
-  } catch {
-    // Continue to normal /auth/me fetch
-  }
-
   // Fetch current user details to return the expected AuthResponse format
   try {
     const meResponse = await client.get<AuthResponse>("/auth/me");

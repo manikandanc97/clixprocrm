@@ -15,12 +15,14 @@ export interface ChatSession {
 export interface ModelOption {
   modelKey: string;
   displayName: string;
-  friendlyLabel: 'Auto' | 'Fast' | 'Advanced' | string;
+  friendlyLabel: string;
   description?: string;
   badge?: string;
+  badgeInfo?: string;
   isLocked?: boolean;
   requiredPlan?: string;
   reasoningEffort?: 'standard' | 'high' | 'deep';
+  hasSubmenu?: boolean;
 }
 
 export interface CrmContextData {

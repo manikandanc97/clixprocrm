@@ -57,6 +57,8 @@ interface AIConversationSidebarProps {
   onToggleArchiveSession: (id: string) => void;
   onClearAllHistory: () => void;
   onCloseMobileDrawer?: () => void;
+  onClose?: () => void;
+  hideHeader?: boolean;
 }
 
 export function AIConversationSidebar({
@@ -72,6 +74,8 @@ export function AIConversationSidebar({
   onToggleArchiveSession,
   onClearAllHistory,
   onCloseMobileDrawer,
+  onClose,
+  hideHeader = false,
 }: AIConversationSidebarProps) {
   const [renamingSessionId, setRenamingSessionId] = useState<string | null>(null);
   const [renameValue, setRenameValue] = useState('');
@@ -136,6 +140,7 @@ export function AIConversationSidebar({
         onClick={() => {
           onSelectSession(session);
           onCloseMobileDrawer?.();
+          onClose?.();
         }}
         className={`group relative flex items-center justify-between px-3 py-2 rounded-xl text-xs cursor-pointer transition-all duration-150 ${
           isActive
@@ -206,35 +211,42 @@ export function AIConversationSidebar({
   const hasAnySessions = groupedSessions.totalCount > 0;
 
   return (
-    <div className="w-full h-full flex flex-col bg-card/60 border-r border-border/60 select-none">
+    <div className="w-full h-full flex flex-col bg-card/60 select-none">
       {/* Top Header & New Chat Button */}
-      <div className="p-3.5 border-b border-border/60 space-y-3">
-        <div className="flex items-center justify-between">
-          <div className="flex items-center gap-2">
-            <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Sparkles className="w-4 h-4" />
+      <div className="p-3 sm:p-3.5 border-b border-border/60 space-y-2.5">
+        {!hideHeader && (
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <Sparkles className="w-4 h-4" />
+              </div>
+              <span className="font-semibold text-sm text-foreground tracking-tight font-display">
+                ClixPro AI
+              </span>
             </div>
-            <span className="font-semibold text-sm text-foreground tracking-tight font-display">
-              ClixPro AI
-            </span>
-          </div>
 
-          {onCloseMobileDrawer && (
-            <button
-              onClick={onCloseMobileDrawer}
-              className="p-1 rounded-lg text-muted-foreground hover:text-foreground md:hidden"
-            >
-              <X className="w-4 h-4" />
-            </button>
-          )}
-        </div>
+            {(onCloseMobileDrawer || onClose) && (
+              <button
+                onClick={() => {
+                  onCloseMobileDrawer?.();
+                  onClose?.();
+                }}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+                title="Close"
+              >
+                <X className="w-4 h-4" />
+              </button>
+            )}
+          </div>
+        )}
 
         <Button
           onClick={() => {
             onStartNewChat();
             onCloseMobileDrawer?.();
+            onClose?.();
           }}
-          className="w-full justify-center gap-2 text-xs font-medium h-9 shadow-xs bg-primary text-primary-foreground hover:brightness-105 rounded-xl"
+          className="w-full justify-center gap-2 text-xs font-medium h-9 shadow-xs bg-primary text-primary-foreground hover:brightness-105 rounded-xl cursor-pointer"
         >
           <SquarePen className="w-3.5 h-3.5" />
           <span>New Chat</span>

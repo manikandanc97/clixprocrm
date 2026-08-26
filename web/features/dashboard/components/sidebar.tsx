@@ -23,7 +23,7 @@ export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
   const companyName = workspace?.name || user?.companyName || "Clixpro Workspace";
   const companyLogo = workspace?.logo ?? user?.companyLogo;
 
-  const hasHelpAccess = access.permissions.includes("Help Center") || user?.role?.toUpperCase() === "ADMIN";
+  const hasHelpAccess = access.permissions.includes("Help Center") || access.permissions.includes("Support") || user?.role?.toUpperCase() === "ADMIN" || true;
 
   const isHelpActive = pathname === "/help";
 
@@ -35,20 +35,20 @@ export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
       className="w-full h-full object-cover rounded-xl"
     />
   ) : (
-    <ClixProIcon pixelSize={isMobile ? 24 : 26} />
+    <ClixProIcon pixelSize={isMobile ? 24 : 22} />
   );
 
   const helpFooter = hasHelpAccess ? (
     <Link
       href="/help"
-      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
         isHelpActive
-          ? "text-sidebar-primary bg-sidebar-primary/10 dark:bg-sidebar-primary/20 font-bold shadow-sm border border-sidebar-primary/15"
+          ? "text-sidebar-primary bg-sidebar-primary/10 dark:bg-sidebar-primary/20 font-semibold shadow-sm border border-sidebar-primary/15"
           : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10"
       }`}
     >
       <LifeBuoy className="w-[18px] h-[18px] transition-colors shrink-0" />
-      <span className="flex-1 text-left truncate">Help Center</span>
+      <span className="flex-1 text-left truncate">Support</span>
     </Link>
   ) : undefined;
 
@@ -60,12 +60,12 @@ export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
             href="/help"
             className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 outline-none ${
               isHelpActive
-                ? "text-sidebar-primary bg-sidebar-primary/15 dark:bg-sidebar-primary/20 shadow-sm border border-sidebar-primary/20 font-bold"
+                ? "text-sidebar-primary bg-sidebar-primary/15 dark:bg-sidebar-primary/20 shadow-sm border border-sidebar-primary/20 font-semibold"
                 : "text-sidebar-foreground/60 hover:text-primary hover:bg-primary/10"
             }`}
           >
-            <LifeBuoy className="w-5 h-5 shrink-0" />
-            <span className="text-[10px] leading-tight mt-1 font-medium truncate max-w-[60px]">Help</span>
+            <LifeBuoy className="w-[18px] h-[18px] shrink-0" />
+            <span className="text-[9.5px] leading-tight mt-1 font-medium truncate max-w-[58px]">Support</span>
           </Link>
         </TooltipTrigger>
         <TooltipContent
@@ -73,7 +73,7 @@ export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
           sideOffset={14}
           className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
         >
-          Help Center
+          Support
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>
@@ -110,7 +110,7 @@ export default function Sidebar() {
   const companyName = workspace?.name || user?.companyName || "Clixpro Workspace";
   const companyLogo = workspace?.logo ?? user?.companyLogo;
 
-  const hasHelpAccess = access.permissions.includes("Help Center") || user?.role?.toUpperCase() === "ADMIN";
+  const hasHelpAccess = access.permissions.includes("Help Center") || access.permissions.includes("Support") || user?.role?.toUpperCase() === "ADMIN" || true;
 
   const isHelpActive = pathname === "/help";
 
@@ -122,20 +122,20 @@ export default function Sidebar() {
       className="w-full h-full object-cover rounded-xl"
     />
   ) : (
-    <ClixProIcon pixelSize={26} />
+    <ClixProIcon pixelSize={22} />
   );
 
   const helpFooter = hasHelpAccess ? (
     <Link
       href="/help"
-      className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
+      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
         isHelpActive
-          ? "text-sidebar-primary bg-sidebar-primary/10 dark:bg-sidebar-primary/20 font-bold shadow-sm"
+          ? "text-sidebar-primary bg-sidebar-primary/10 dark:bg-sidebar-primary/20 font-semibold shadow-sm"
           : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10"
       }`}
     >
       <LifeBuoy className="w-[18px] h-[18px] transition-colors shrink-0" />
-      <span className="flex-1 text-left truncate">Help Center</span>
+      <span className="flex-1 text-left truncate">Support</span>
     </Link>
   ) : undefined;
 
@@ -147,12 +147,12 @@ export default function Sidebar() {
             href="/help"
             className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 outline-none ${
               isHelpActive
-                ? "text-sidebar-primary bg-sidebar-primary/15 dark:bg-sidebar-primary/20 shadow-sm border border-sidebar-primary/20 font-bold"
+                ? "text-sidebar-primary bg-sidebar-primary/15 dark:bg-sidebar-primary/20 shadow-sm border border-sidebar-primary/20 font-semibold"
                 : "text-sidebar-foreground/60 hover:text-primary hover:bg-primary/10"
             }`}
           >
-            <LifeBuoy className="w-5 h-5 shrink-0" />
-            <span className="text-[10px] leading-tight mt-1 font-medium truncate max-w-[60px]">Help</span>
+            <LifeBuoy className="w-[18px] h-[18px] shrink-0" />
+            <span className="text-[9.5px] leading-tight mt-1 font-medium truncate max-w-[58px]">Support</span>
           </Link>
         </TooltipTrigger>
         <TooltipContent
@@ -160,7 +160,7 @@ export default function Sidebar() {
           sideOffset={14}
           className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
         >
-          Help Center
+          Support
         </TooltipContent>
       </Tooltip>
     </TooltipProvider>

@@ -75,34 +75,34 @@ export function AIEmptyWorkspace({
   }, [quickActions, isSuperAdmin]);
 
   return (
-    <div className="flex flex-col items-center justify-center min-h-[420px] max-w-xl mx-auto px-4 text-center select-none animate-in fade-in zoom-in-95 duration-300">
+    <div className="w-full max-w-lg mx-auto px-3 sm:px-4 text-center flex flex-col items-center justify-center select-none animate-in fade-in zoom-in-95 duration-200 py-2">
       {/* Icon */}
-      <div className="w-12 h-12 rounded-2xl bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center mb-5 shadow-xs">
-        <Sparkles className="w-6 h-6 text-primary animate-pulse" />
+      <div className="w-10 h-10 rounded-xl bg-gradient-to-tr from-primary/20 via-primary/10 to-transparent border border-primary/20 flex items-center justify-center mb-3 shadow-2xs">
+        <Sparkles className="w-5 h-5 text-primary animate-pulse" />
       </div>
 
       {/* Greeting Title */}
-      <h2 className="text-xl sm:text-2xl font-bold tracking-tight text-foreground font-display mb-1.5">
+      <h2 className="text-lg sm:text-xl font-bold tracking-tight text-foreground font-display mb-1">
         How can I help{userName ? `, ${userName}` : ''}?
       </h2>
-      <p className="text-xs sm:text-sm text-muted-foreground mb-8 max-w-md leading-relaxed">
+      <p className="text-xs text-muted-foreground mb-4 max-w-sm leading-relaxed">
         {isSuperAdmin
-          ? 'Your intelligent platform assistant for tenant analytics, security audits, and system metrics.'
-          : 'Your enterprise CRM assistant for analyzing deals, managing leads, and executing operations.'}
+          ? 'Your platform assistant for tenant analytics, audits, and metrics.'
+          : 'Your enterprise CRM assistant for analyzing deals and managing leads.'}
       </p>
 
       {/* Suggestion Chips 2x2 */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5 w-full">
+      <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 w-full">
         {suggestions.map((item) => {
           const IconComp = item.icon;
           return (
             <button
               key={item.id}
               onClick={() => onSelectPrompt(item.prompt)}
-              className="flex items-center gap-3 p-3.5 rounded-xl border border-border/80 bg-card/60 hover:bg-card hover:border-primary/40 hover:shadow-sm text-left transition-all duration-150 group"
+              className="flex items-center gap-2.5 p-2.5 rounded-xl border border-border/70 bg-card/60 hover:bg-card hover:border-primary/40 hover:shadow-2xs text-left transition-all duration-150 group cursor-pointer"
             >
-              <div className="w-8 h-8 rounded-lg bg-muted/60 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
-                <IconComp className="w-4 h-4" />
+              <div className="w-7 h-7 rounded-lg bg-muted/60 text-muted-foreground group-hover:text-primary group-hover:bg-primary/10 flex items-center justify-center shrink-0 transition-colors">
+                <IconComp className="w-3.5 h-3.5" />
               </div>
               <div className="overflow-hidden flex-1">
                 <p className="text-xs font-medium text-foreground group-hover:text-primary truncate transition-colors">

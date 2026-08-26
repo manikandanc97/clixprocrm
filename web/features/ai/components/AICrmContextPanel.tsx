@@ -21,6 +21,7 @@ interface AICrmContextPanelProps {
   onClearContext: () => void;
   onSelectPrompt: (prompt: string) => void;
   onClose: () => void;
+  hideHeader?: boolean;
 }
 
 export function AICrmContextPanel({
@@ -28,6 +29,7 @@ export function AICrmContextPanel({
   onClearContext,
   onSelectPrompt,
   onClose,
+  hideHeader = false,
 }: AICrmContextPanelProps) {
   const contextName = activeContext?.name || 'Global CRM Workspace';
 
@@ -59,23 +61,25 @@ export function AICrmContextPanel({
   ];
 
   return (
-    <div className="w-full h-full flex flex-col bg-card/60 border-l border-border/60 select-none">
+    <div className="w-full h-full flex flex-col bg-card/60 select-none">
       {/* Panel Header */}
-      <div className="h-14 px-4 border-b border-border/60 flex items-center justify-between shrink-0">
-        <div className="flex items-center gap-2">
-          <Database className="w-4 h-4 text-primary" />
-          <span className="font-semibold text-xs text-foreground tracking-tight uppercase">
-            CRM Context
-          </span>
+      {!hideHeader && (
+        <div className="h-14 px-4 border-b border-border/60 flex items-center justify-between shrink-0">
+          <div className="flex items-center gap-2">
+            <Database className="w-4 h-4 text-primary" />
+            <span className="font-semibold text-xs text-foreground tracking-tight uppercase">
+              CRM Context
+            </span>
+          </div>
+          <button
+            onClick={onClose}
+            className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
+            title="Close context panel"
+          >
+            <X className="w-4 h-4" />
+          </button>
         </div>
-        <button
-          onClick={onClose}
-          className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-          title="Close context panel"
-        >
-          <X className="w-4 h-4" />
-        </button>
-      </div>
+      )}
 
       {/* Content */}
       <div className="flex-1 overflow-y-auto p-4 space-y-6">

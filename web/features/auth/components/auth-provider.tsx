@@ -349,11 +349,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // refreshUser() at the same time as login()'s own fetchCurrentUser call.
       hasFetched.current = true;
       const response = await loginUser({ email, password, staySignedIn });
-      
-      if ((response as any)?.mfaRequired) {
-        hasFetched.current = false;
-        throw new Error("MFA_REQUIRED");
-      }
 
       if (typeof window !== "undefined") {
         localStorage.setItem("has_session", "1");

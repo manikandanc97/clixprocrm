@@ -196,7 +196,7 @@ export function BaseSidebarContent({
       <motion.div
         initial={false}
         animate={{ opacity: 1 }}
-        className="relative shrink-0 h-[66px] flex items-center bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden"
+        className="relative shrink-0 h-[58px] flex items-center bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden"
       >
         {collapsedState ? (
           <TooltipProvider delayDuration={0}>
@@ -204,10 +204,10 @@ export function BaseSidebarContent({
               <TooltipTrigger asChild>
                 <div
                   onClick={onToggleCollapse}
-                  className={`flex flex-col items-center justify-center w-full h-full p-2 rounded-2xl cursor-pointer group/logo transition-all ${themeClasses.collapsedLogoBox}`}
+                  className={`flex flex-col items-center justify-center w-full h-full p-1.5 rounded-2xl cursor-pointer group/logo transition-all ${themeClasses.collapsedLogoBox}`}
                 >
-                  {header.logo || <ClixProIcon pixelSize={26} />}
-                  <span className={`text-[9px] font-extrabold uppercase mt-1 tracking-wider ${themeClasses.collapsedTag}`}>
+                  {header.logo || <ClixProIcon pixelSize={24} />}
+                  <span className={`text-[8.5px] font-extrabold uppercase mt-0.5 tracking-wider ${themeClasses.collapsedTag}`}>
                     {header.collapsedTag || "CRM"}
                   </span>
                 </div>
@@ -222,21 +222,21 @@ export function BaseSidebarContent({
             </Tooltip>
           </TooltipProvider>
         ) : (
-          <div className="flex items-center justify-between p-3 gap-2 w-full h-full">
-            <div className="flex items-center gap-3 min-w-0">
-              <div className={`flex shrink-0 justify-center items-center rounded-xl w-10 h-10 border shadow-sm ${themeClasses.logoBox}`}>
-                {header.logo || <ClixProIcon pixelSize={26} />}
+          <div className="flex items-center justify-between px-3 py-2.5 gap-2 w-full h-full">
+            <div className="flex items-center gap-2.5 min-w-0">
+              <div className={`flex shrink-0 justify-center items-center rounded-xl w-9 h-9 border shadow-sm ${themeClasses.logoBox}`}>
+                {header.logo || <ClixProIcon pixelSize={22} />}
               </div>
               <AnimatePresence mode="wait">
                 <motion.div
                   key="ws-label"
-                  initial={{ opacity: 0, x: -8 }}
+                  initial={{ opacity: 0, x: -6 }}
                   animate={{ opacity: 1, x: 0 }}
-                  exit={{ opacity: 0, x: -8 }}
-                  transition={{ duration: 0.18 }}
+                  exit={{ opacity: 0, x: -6 }}
+                  transition={{ duration: 0.15 }}
                   className="min-w-0"
                 >
-                  <h1 className="text-sidebar-foreground font-bold text-sm tracking-tight leading-tight truncate max-w-[130px] capitalize">
+                  <h1 className="text-sidebar-foreground font-bold text-[13.5px] tracking-tight leading-tight truncate max-w-[130px] capitalize">
                     {header.title}
                   </h1>
                   <div className="flex items-center mt-0.5 gap-1.5 flex-wrap">
@@ -249,7 +249,7 @@ export function BaseSidebarContent({
                       </span>
                     ) : null}
                     {header.subtitle && (
-                      <span className="text-sidebar-foreground/50 text-[11px] font-medium truncate">
+                      <span className="text-sidebar-foreground/50 text-[10.5px] font-medium truncate">
                         {header.subtitle}
                       </span>
                     )}
@@ -262,7 +262,7 @@ export function BaseSidebarContent({
               <button
                 onClick={onToggleCollapse}
                 aria-label="Collapse Sidebar"
-                className={`shrink-0 flex items-center justify-center w-7 h-7 rounded-lg transition-all duration-200 cursor-pointer ${themeClasses.toggleBtn}`}
+                className={`shrink-0 flex items-center justify-center w-6.5 h-6.5 rounded-lg transition-all duration-200 cursor-pointer ${themeClasses.toggleBtn}`}
               >
                 <ChevronLeft className="w-4 h-4" />
               </button>
@@ -271,37 +271,37 @@ export function BaseSidebarContent({
         )}
       </motion.div>
 
-      {/* ── CARD 2: Navigation Menu & Footer ── */}
+      {/* ── CARD 2: Navigation Menu ── */}
       <motion.div
         initial={false}
         className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden flex flex-col"
       >
         <TooltipProvider delayDuration={0}>
-          <div className={`flex-1 overflow-y-auto kanban-board-scroll pt-3 pb-3 ${collapsedState ? "px-1.5" : "px-3"}`}>
+          <div className={`flex-1 overflow-y-auto kanban-board-scroll pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`}>
             {groups.map((group, groupIdx) => (
-              <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-4" : ""}>
+              <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-3.5" : ""}>
                 <AnimatePresence mode="wait">
                   {!collapsedState && group.label ? (
                     <motion.div
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1 }}
                       exit={{ opacity: 0 }}
-                      className="px-1 mb-2"
+                      className="px-2 mb-1.5"
                     >
-                      <h4 className="text-[10px] font-semibold text-sidebar-foreground/40 uppercase tracking-wider">
+                      <h4 className="text-[10.5px] font-semibold text-sidebar-foreground/45 uppercase tracking-wider">
                         {group.label}
                       </h4>
                     </motion.div>
                   ) : (
                     collapsedState && groupIdx > 0 && (
-                      <div className="my-2 px-2">
+                      <div className="my-2 px-1.5">
                         <div className="h-px bg-sidebar-border/40 w-full" />
                       </div>
                     )
                   )}
                 </AnimatePresence>
 
-                <nav className="flex flex-col gap-1.5">
+                <nav className="flex flex-col gap-1">
                   {group.items.map((item) => {
                     const Icon = item.icon;
                     const isActive = isItemActive(item);
@@ -329,7 +329,7 @@ export function BaseSidebarContent({
                                   }
                                 >
                                   <Icon
-                                    className={`w-5 h-5 shrink-0 transition-colors ${
+                                    className={`w-[18px] h-[18px] shrink-0 transition-colors ${
                                       isActive
                                         ? themeClasses.itemActiveText
                                         : "text-sidebar-foreground/60 group-hover:text-primary"
@@ -337,7 +337,7 @@ export function BaseSidebarContent({
                                   />
                                 </motion.div>
                                 <span
-                                  className={`text-[10px] leading-tight mt-1 text-center font-medium truncate max-w-[60px] ${
+                                  className={`text-[9.5px] leading-tight mt-1 text-center font-medium truncate max-w-[58px] ${
                                     isActive
                                       ? `${themeClasses.itemActiveText} font-bold`
                                       : "text-sidebar-foreground/70 group-hover:text-primary"
@@ -348,7 +348,7 @@ export function BaseSidebarContent({
                                 {isActive && (
                                   <motion.div
                                     layoutId={`${activeLayoutIdPrefix}ActiveIndicator`}
-                                    className={`absolute -left-1.5 top-1/2 -translate-y-1/2 w-[3px] h-6 rounded-r-full ${themeClasses.activePill}`}
+                                    className={`absolute -left-1 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full ${themeClasses.activePill}`}
                                   />
                                 )}
                               </Link>
@@ -370,9 +370,9 @@ export function BaseSidebarContent({
                         <Link
                           href={item.href || "#"}
                           aria-current={isActive ? "page" : undefined}
-                          className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
+                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
                             isActive
-                              ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveBg} font-bold shadow-sm border border-sidebar-primary/15`
+                              ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveBg} font-semibold shadow-sm border border-sidebar-primary/15`
                               : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
                           }`}
                         >
@@ -408,14 +408,19 @@ export function BaseSidebarContent({
             ))}
           </div>
         </TooltipProvider>
-
-        {/* Footer Area */}
-        {(footer || collapsedFooter) && (
-          <div className={`shrink-0 border-t border-sidebar-border/60 ${collapsedState ? "p-1.5" : "px-3 py-2.5"}`}>
-            {collapsedState ? (collapsedFooter || footer) : footer}
-          </div>
-        )}
       </motion.div>
+
+      {/* ── CARD 3: Footer (Standalone Card) ── */}
+      {(footer || collapsedFooter) && (
+        <motion.div
+          initial={false}
+          className={`shrink-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden ${
+            collapsedState ? "p-1.5" : "p-2"
+          }`}
+        >
+          {collapsedState ? (collapsedFooter || footer) : footer}
+        </motion.div>
+      )}
     </>
   );
 }
@@ -426,7 +431,7 @@ export function BaseSidebar(props: BaseSidebarProps) {
   return (
     <motion.div
       initial={false}
-      animate={{ width: isCollapsed ? 78 : 290 }}
+      animate={{ width: isCollapsed ? 72 : 256 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
       className={`hidden md:flex flex-col fixed top-3 left-3 h-[calc(100vh-24px)] z-40 overflow-visible gap-2.5 select-none ${props.className || ""}`}
     >

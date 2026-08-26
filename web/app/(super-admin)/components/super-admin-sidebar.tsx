@@ -159,7 +159,7 @@ export function SuperAdminSidebar() {
       {/* Layout Spacer for main content column */}
       <motion.div
         initial={false}
-        animate={{ width: collapsed ? 100 : 312 }}
+        animate={{ width: collapsed ? 92 : 276 }}
         transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
         className="hidden md:block shrink-0 h-full"
       />
