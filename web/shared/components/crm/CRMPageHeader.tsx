@@ -4,6 +4,7 @@ import { LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { motion } from "framer-motion";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface Action {
   label: string;
@@ -41,7 +42,7 @@ export const CRMPageHeader = ({
         <div className="flex items-center gap-2.5">
           {Icon && (
             <div className={cn("crm-icon-box", iconColor)}>
-              <Icon className="w-4 h-4" />
+              <AppIcon name={title} icon={Icon} size={16} className="w-4 h-4" />
             </div>
           )}
           {badge && (
@@ -76,7 +77,14 @@ export const CRMPageHeader = ({
                 size="sm"
                 className="flex-1 sm:flex-none text-xs font-semibold h-9 px-3.5"
               >
-                {action.icon && <action.icon className="w-3.5 h-3.5 mr-1.5" />}
+                {action.icon && (
+                  <AppIcon
+                    name={action.label}
+                    icon={action.icon}
+                    size={14}
+                    className="w-3.5 h-3.5 mr-1.5 shrink-0"
+                  />
+                )}
                 {action.label}
               </Button>
             );

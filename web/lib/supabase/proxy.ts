@@ -31,9 +31,19 @@ export async function updateSession(request: NextRequest) {
               headers: request.headers,
             },
           })
-          cookiesToSet.forEach(({ name, value, options }) =>
-            supabaseResponse.cookies.set(name, value, options)
-          )
+          const isRememberCookie = request.cookies.get('clixpro_remember_me')?.value === '1'
+          cookiesToSet.forEach(({ name, value, options }) => {
+            const cookieOpts = { ...options }
+            if (cookieOpts.maxAge !== 0) {
+              if (isRememberCookie) {
+                cookieOpts.maxAge = 30 * 24 * 60 * 60
+              } else {
+                delete cookieOpts.maxAge
+                delete cookieOpts.expires
+              }
+            }
+            supabaseResponse.cookies.set(name, value, cookieOpts)
+          })
         },
       },
     }

@@ -4,6 +4,7 @@ import { createClient } from "@/lib/supabase/client";
 interface LoginPayload {
   email: string;
   password: string;
+  rememberMe?: boolean;
   staySignedIn?: boolean;
 }
 
@@ -51,9 +52,23 @@ interface AuthResponse {
 }
 
 export const loginUser = async (data: LoginPayload) => {
+  const rememberMe = Boolean(data.rememberMe ?? data.staySignedIn);
+
+  // Set the persistence flag before establishing the session
+  if (typeof window !== "undefined") {
+    if (rememberMe) {
+      localStorage.setItem("clixpro_remember_me", "1");
+      localStorage.setItem("has_session", "1");
+    } else {
+      localStorage.removeItem("clixpro_remember_me");
+      localStorage.removeItem("has_session");
+      sessionStorage.setItem("clixpro_session_active", "1");
+    }
+  }
+
   // 1. Enforce backend rate limit pre-check
   try {
-    await client.post('/auth/login', { email: data.email });
+    await client.post('/auth/login', { email: data.email, rememberMe });
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   } catch (rateLimitErr: any) {
     if (rateLimitErr?.response?.status === 429) {
@@ -72,11 +87,12 @@ export const loginUser = async (data: LoginPayload) => {
   });
 
   if (error) {
+    if (typeof window !== "undefined") {
+      localStorage.removeItem("clixpro_remember_me");
+      localStorage.removeItem("has_session");
+      sessionStorage.removeItem("clixpro_session_active");
+    }
     throw new Error(error.message);
-  }
-
-  if (typeof window !== "undefined") {
-    localStorage.setItem("has_session", "1");
   }
 
   // Fetch current user details to return the expected AuthResponse format
@@ -232,6 +248,8 @@ export const fetchCurrentUser = async (): Promise<AuthUser | null> => {
 export const logoutUser = async () => {
   if (typeof window !== "undefined") {
     localStorage.removeItem("has_session");
+    localStorage.removeItem("clixpro_remember_me");
+    sessionStorage.removeItem("clixpro_session_active");
   }
   try {
     await client.post('/auth/logout');

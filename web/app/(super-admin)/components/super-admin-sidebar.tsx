@@ -6,29 +6,32 @@ import {
   Activity,
   LayoutDashboard,
   Building2,
-  Users,
+  UserCog,
   CreditCard,
   BarChart3,
-  ScrollText,
+  FileClock,
   Settings,
   Shield,
-  ShieldAlert,
+  ShieldCheck,
   Crown,
   LogOut,
   ArrowLeftRight,
   Layers,
   Sparkles,
   Receipt,
+  Bot,
+  Brain,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 import { BaseSidebar } from "@/shared/components/sidebar/BaseSidebar";
+import { NavAnimatedIcon } from "@/shared/components/sidebar/NavAnimatedIcon";
 import { type NavGroup } from "@/shared/lib/auth/rbac";
 
 const superAdminNavGroups: NavGroup[] = [
   {
-    label: "Platform Control",
+    label: "Overview",
     items: [
       {
         title: "Overview",
@@ -36,21 +39,36 @@ const superAdminNavGroups: NavGroup[] = [
         icon: LayoutDashboard,
         exact: true,
       },
+    ],
+  },
+  {
+    label: "Platform",
+    items: [
+      {
+        title: "ClixPro AI",
+        href: "/super-admin/copilot",
+        icon: Sparkles,
+      },
       {
         title: "Organizations",
         href: "/super-admin/organizations",
         icon: Building2,
       },
       {
+        title: "Platform Users",
+        href: "/super-admin/users",
+        icon: UserCog,
+      },
+      {
         title: "Platform Modules",
         href: "/super-admin/modules",
         icon: Layers,
       },
-      {
-        title: "Platform Users",
-        href: "/super-admin/users",
-        icon: Users,
-      },
+    ],
+  },
+  {
+    label: "Commerce",
+    items: [
       {
         title: "Plans & Packages",
         href: "/super-admin/plans",
@@ -61,20 +79,35 @@ const superAdminNavGroups: NavGroup[] = [
         href: "/super-admin/billing",
         icon: Receipt,
       },
+    ],
+  },
+  {
+    label: "AI Platform",
+    items: [
       {
         title: "AI Models & Tiers",
         href: "/super-admin/ai",
-        icon: Sparkles,
+        icon: Brain,
       },
+    ],
+  },
+  {
+    label: "Insights",
+    items: [
       {
         title: "Analytics",
         href: "/super-admin/analytics",
         icon: BarChart3,
       },
+    ],
+  },
+  {
+    label: "Security & Operations",
+    items: [
       {
         title: "Security Center",
         href: "/super-admin/security",
-        icon: ShieldAlert,
+        icon: ShieldCheck,
       },
       {
         title: "SecOps Telemetry",
@@ -84,8 +117,13 @@ const superAdminNavGroups: NavGroup[] = [
       {
         title: "Audit Logs",
         href: "/super-admin/audit-logs",
-        icon: ScrollText,
+        icon: FileClock,
       },
+    ],
+  },
+  {
+    label: "Configuration",
+    items: [
       {
         title: "Platform Settings",
         href: "/super-admin/settings",

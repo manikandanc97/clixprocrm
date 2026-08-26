@@ -1,12 +1,14 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { ChevronLeft, ChevronsUpDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 import { ClixProIcon } from "@/shared/ui/logo";
+import { NavAnimatedIcon } from "@/shared/components/sidebar/NavAnimatedIcon";
+import { MOTION_EASINGS } from "@/shared/lib/motion";
 import { type NavGroup, type NavItem, isNavRouteActive } from "@/shared/lib/auth/rbac";
 
 export interface SidebarHeaderConfig {
@@ -33,6 +35,195 @@ export interface BaseSidebarProps {
   variant?: "primary" | "emerald";
   activeLayoutIdPrefix?: string;
   className?: string;
+}
+
+interface ItemComponentProps {
+  item: NavItem;
+  isActive: boolean;
+  themeClasses: any;
+  activeLayoutIdPrefix: string;
+}
+
+function MobileNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: ItemComponentProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [clickKey, setClickKey] = useState(0);
+  const Icon = item.icon;
+
+  return (
+    <motion.div
+      whileTap={{ scale: 0.98 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => setClickKey((c) => c + 1)}
+    >
+      <Link
+        href={item.href || "#"}
+        aria-current={isActive ? "page" : undefined}
+        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
+          isActive
+            ? `${themeClasses.itemActiveText} font-semibold shadow-sm`
+            : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
+        }`}
+      >
+        {isActive && (
+          <>
+            <motion.div
+              layoutId={`${activeLayoutIdPrefix}MobileActiveBg`}
+              transition={MOTION_EASINGS.springGlider}
+              className={`absolute inset-0 rounded-xl ${themeClasses.itemActiveBg} border border-sidebar-primary/15`}
+            />
+            <motion.div
+              layoutId={`${activeLayoutIdPrefix}MobileActivePill`}
+              transition={MOTION_EASINGS.springGlider}
+              className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3.5px] h-5 rounded-r-full z-10 ${themeClasses.activePill}`}
+            />
+          </>
+        )}
+        <NavAnimatedIcon
+          icon={Icon}
+          name={item.title}
+          href={item.href}
+          isActive={isActive}
+          isHovered={isHovered}
+          triggerAnimation={clickKey}
+          size={18}
+          className={`w-[18px] h-[18px] shrink-0 transition-colors z-10 ${
+            isActive ? themeClasses.itemActiveText : "text-sidebar-foreground/50 group-hover:text-primary"
+          }`}
+        />
+        <span className="truncate flex-1 z-10">{item.title}</span>
+      </Link>
+    </motion.div>
+  );
+}
+
+function DesktopCollapsedNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: ItemComponentProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [clickKey, setClickKey] = useState(0);
+  const Icon = item.icon;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <motion.div
+          whileTap={{ scale: 0.96 }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={() => setClickKey((c) => c + 1)}
+        >
+          <Link
+            href={item.href || "#"}
+            aria-current={isActive ? "page" : undefined}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-colors duration-150 group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
+              isActive
+                ? `${themeClasses.itemActiveText} font-semibold shadow-sm`
+                : "text-sidebar-foreground/60 hover:text-primary hover:bg-primary/10"
+            }`}
+          >
+            {isActive && (
+              <>
+                <motion.div
+                  layoutId={`${activeLayoutIdPrefix}CollapsedActiveBg`}
+                  transition={MOTION_EASINGS.springGlider}
+                  className={`absolute inset-0 rounded-xl ${themeClasses.itemActiveCollapsedBg}`}
+                />
+                <motion.div
+                  layoutId={`${activeLayoutIdPrefix}CollapsedActiveIndicator`}
+                  transition={MOTION_EASINGS.springGlider}
+                  className={`absolute -left-1 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full z-10 ${themeClasses.activePill}`}
+                />
+              </>
+            )}
+            <NavAnimatedIcon
+              icon={Icon}
+              name={item.title}
+              href={item.href}
+              isActive={isActive}
+              isHovered={isHovered}
+              triggerAnimation={clickKey}
+              size={18}
+              className={`w-[18px] h-[18px] shrink-0 transition-colors z-10 ${
+                isActive
+                  ? themeClasses.itemActiveText
+                  : "text-sidebar-foreground/60 group-hover:text-primary"
+              }`}
+            />
+            <span
+              className={`text-[9.5px] leading-tight mt-1 text-center font-medium truncate max-w-[58px] z-10 transition-colors duration-150 ${
+                isActive
+                  ? `${themeClasses.itemActiveText} font-bold`
+                  : "text-sidebar-foreground/70 group-hover:text-primary"
+              }`}
+            >
+              {item.title}
+            </span>
+          </Link>
+        </motion.div>
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        sideOffset={14}
+        className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
+      >
+        {item.title}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function DesktopExpandedNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: ItemComponentProps) {
+  const [isHovered, setIsHovered] = useState(false);
+  const [clickKey, setClickKey] = useState(0);
+  const Icon = item.icon;
+
+  return (
+    <motion.div
+      whileTap={{ scale: 0.98 }}
+      onMouseEnter={() => setIsHovered(true)}
+      onMouseLeave={() => setIsHovered(false)}
+      onClick={() => setClickKey((c) => c + 1)}
+    >
+      <Link
+        href={item.href || "#"}
+        aria-current={isActive ? "page" : undefined}
+        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
+          isActive
+            ? `${themeClasses.itemActiveText} font-semibold shadow-sm`
+            : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
+        }`}
+      >
+        {isActive && (
+          <>
+            <motion.div
+              layoutId={`${activeLayoutIdPrefix}ActiveBg`}
+              transition={MOTION_EASINGS.springGlider}
+              className={`absolute inset-0 rounded-xl ${themeClasses.itemActiveBg} border border-sidebar-primary/15`}
+            />
+            <motion.div
+              layoutId={`${activeLayoutIdPrefix}ActivePill`}
+              transition={MOTION_EASINGS.springGlider}
+              className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3.5px] h-5 rounded-r-full z-10 ${themeClasses.activePill}`}
+            />
+          </>
+        )}
+        <NavAnimatedIcon
+          icon={Icon}
+          name={item.title}
+          href={item.href}
+          isActive={isActive}
+          isHovered={isHovered}
+          triggerAnimation={clickKey}
+          size={18}
+          className={`w-[18px] h-[18px] transition-colors shrink-0 z-10 ${
+            isActive
+              ? themeClasses.itemActiveText
+              : "text-sidebar-foreground/50 group-hover:text-primary"
+          }`}
+        />
+        <span className="truncate flex-1 z-10">{item.title}</span>
+      </Link>
+    </motion.div>
+  );
 }
 
 export function BaseSidebarContent({
@@ -144,35 +335,15 @@ export function BaseSidebarContent({
                   </div>
                 )}
                 <nav className="space-y-1">
-                  {group.items.map((item) => {
-                    const Icon = item.icon;
-                    const isActive = isItemActive(item);
-                    return (
-                      <Link
-                        key={item.href || item.title}
-                        href={item.href || "#"}
-                        aria-current={isActive ? "page" : undefined}
-                        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-all duration-200 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
-                          isActive
-                            ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveBg} font-bold shadow-sm border border-sidebar-primary/15`
-                            : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
-                        }`}
-                      >
-                        <Icon
-                          className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                            isActive ? themeClasses.itemActiveText : "text-sidebar-foreground/50 group-hover:text-primary"
-                          }`}
-                        />
-                        <span className="truncate flex-1">{item.title}</span>
-                        {isActive && (
-                          <motion.div
-                            layoutId={`${activeLayoutIdPrefix}MobileActivePill`}
-                            className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3.5px] h-5 rounded-r-full ${themeClasses.activePill}`}
-                          />
-                        )}
-                      </Link>
-                    );
-                  })}
+                  {group.items.map((item) => (
+                    <MobileNavItem
+                      key={item.href || item.title}
+                      item={item}
+                      isActive={isItemActive(item)}
+                      themeClasses={themeClasses}
+                      activeLayoutIdPrefix={activeLayoutIdPrefix}
+                    />
+                  ))}
                 </nav>
               </div>
             ))}
@@ -303,103 +474,29 @@ export function BaseSidebarContent({
 
                 <nav className="flex flex-col gap-1">
                   {group.items.map((item) => {
-                    const Icon = item.icon;
                     const isActive = isItemActive(item);
 
                     if (collapsedState) {
                       return (
                         <div key={item.title}>
-                          <Tooltip>
-                            <TooltipTrigger asChild>
-                              <Link
-                                href={item.href || "#"}
-                                aria-current={isActive ? "page" : undefined}
-                                className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
-                                  isActive
-                                    ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveCollapsedBg} font-semibold shadow-sm`
-                                    : "text-sidebar-foreground/60 hover:text-primary hover:bg-primary/10"
-                                }`}
-                              >
-                                <motion.div
-                                  whileTap={{ scale: 0.9 }}
-                                  animate={
-                                    isActive
-                                      ? { scale: [1, 1.06, 1], transition: { duration: 2.5, repeat: Infinity, ease: "easeInOut" } }
-                                      : {}
-                                  }
-                                >
-                                  <Icon
-                                    className={`w-[18px] h-[18px] shrink-0 transition-colors ${
-                                      isActive
-                                        ? themeClasses.itemActiveText
-                                        : "text-sidebar-foreground/60 group-hover:text-primary"
-                                    }`}
-                                  />
-                                </motion.div>
-                                <span
-                                  className={`text-[9.5px] leading-tight mt-1 text-center font-medium truncate max-w-[58px] ${
-                                    isActive
-                                      ? `${themeClasses.itemActiveText} font-bold`
-                                      : "text-sidebar-foreground/70 group-hover:text-primary"
-                                  }`}
-                                >
-                                  {item.title}
-                                </span>
-                                {isActive && (
-                                  <motion.div
-                                    layoutId={`${activeLayoutIdPrefix}ActiveIndicator`}
-                                    className={`absolute -left-1 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full ${themeClasses.activePill}`}
-                                  />
-                                )}
-                              </Link>
-                            </TooltipTrigger>
-                            <TooltipContent
-                              side="right"
-                              sideOffset={14}
-                              className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
-                            >
-                              {item.title}
-                            </TooltipContent>
-                          </Tooltip>
+                          <DesktopCollapsedNavItem
+                            item={item}
+                            isActive={isActive}
+                            themeClasses={themeClasses}
+                            activeLayoutIdPrefix={activeLayoutIdPrefix}
+                          />
                         </div>
                       );
                     }
 
                     return (
                       <div key={item.title}>
-                        <Link
-                          href={item.href || "#"}
-                          aria-current={isActive ? "page" : undefined}
-                          className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
-                            isActive
-                              ? `${themeClasses.itemActiveText} ${themeClasses.itemActiveBg} font-semibold shadow-sm border border-sidebar-primary/15`
-                              : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
-                          }`}
-                        >
-                          {isActive && (
-                            <motion.div
-                              layoutId={`${activeLayoutIdPrefix}ActivePill`}
-                              className={`absolute left-0 top-1/2 -translate-y-1/2 w-[3.5px] h-5 rounded-r-full ${themeClasses.activePill}`}
-                            />
-                          )}
-                          <motion.div
-                            animate={
-                              isActive
-                                ? { scale: [1, 1.05, 1], transition: { duration: 3, repeat: Infinity, ease: "easeInOut" } }
-                                : {}
-                            }
-                            className="shrink-0"
-                          >
-                            <Icon
-                              className={`w-[18px] h-[18px] transition-colors ${
-                                isActive
-                                  ? themeClasses.itemActiveText
-                                  : "text-sidebar-foreground/50 group-hover:text-primary"
-                              }`}
-                            />
-                          </motion.div>
-                          <span className="truncate flex-1">{item.title}</span>
-                        </Link>
+                        <DesktopExpandedNavItem
+                          item={item}
+                          isActive={isActive}
+                          themeClasses={themeClasses}
+                          activeLayoutIdPrefix={activeLayoutIdPrefix}
+                        />
                       </div>
                     );
                   })}

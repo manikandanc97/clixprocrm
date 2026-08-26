@@ -101,6 +101,7 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
           return mockSessions.find((s) => {
             if (where.id && s.id !== where.id) return false;
             if (where.userId && s.userId !== where.userId) return false;
+            if (where.sessionId && s.sessionId !== where.sessionId) return false;
             return true;
           }) || null;
         }),
@@ -178,7 +179,7 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
     sessionsService = new SessionsService(mockPrisma);
     sessionsController = new SessionsController(sessionsService);
     authService = new AuthService(mockPrisma, mockBrandingService);
-    authController = new AuthController(authService);
+    authController = new AuthController(authService, sessionsService);
     supabaseAuthGuard = new SupabaseAuthGuard(mockPrisma);
 
     invalidateSessionCache();
@@ -556,6 +557,99 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
         UnauthorizedException,
       );
       expect(absSess.revokedAt).not.toBeNull();
+    });
+
+    it('should allow active persistent session (Remember Me = ON) to remain valid beyond 24 hours', async () => {
+      const token = createValidTestJwt({
+        sub: 'usr-alice',
+        email: 'alice@example.com',
+        session_id: 'supabase-sess-alice-persistent-1',
+      });
+
+      // Session created 5 days ago with rememberMe: true
+      const persistentSession = {
+        id: 'sess-persist-1',
+        userId: 'usr-alice',
+        sessionId: 'supabase-sess-alice-persistent-1',
+        createdAt: new Date(Date.now() - 5 * 24 * 60 * 60 * 1000), // 5 days ago
+        lastActiveAt: new Date(Date.now() - 10 * 60 * 1000), // 10 min ago
+        expiresAt: new Date(Date.now() + 25 * 24 * 60 * 60 * 1000), // 25 days remaining
+        revokedAt: null,
+        rememberMe: true,
+      };
+      mockSessions.push(persistentSession);
+
+      const context = createMockContext(token);
+      const canActivate = await supabaseAuthGuard.canActivate(context);
+      expect(canActivate).toBe(true);
+      expect(persistentSession.revokedAt).toBeNull();
+    });
+
+    it('should reject persistent session when expired past 30 days (Remember Me = ON)', async () => {
+      const token = createValidTestJwt({
+        sub: 'usr-alice',
+        email: 'alice@example.com',
+        session_id: 'supabase-sess-alice-persistent-expired',
+      });
+
+      // Session created 31 days ago with rememberMe: true
+      const expiredPersistentSession = {
+        id: 'sess-persist-exp',
+        userId: 'usr-alice',
+        sessionId: 'supabase-sess-alice-persistent-expired',
+        createdAt: new Date(Date.now() - 31 * 24 * 60 * 60 * 1000), // 31 days ago
+        lastActiveAt: new Date(Date.now() - 5 * 60 * 1000),
+        expiresAt: new Date(Date.now() - 1 * 24 * 60 * 60 * 1000), // expired 1 day ago
+        revokedAt: null,
+        rememberMe: true,
+      };
+      mockSessions.push(expiredPersistentSession);
+
+      const context = createMockContext(token);
+      await expect(supabaseAuthGuard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
+      expect(expiredPersistentSession.revokedAt).not.toBeNull();
+    });
+
+    it('should revoke active database session on logout and block subsequent requests', async () => {
+      const token = createValidTestJwt({
+        sub: 'usr-alice',
+        email: 'alice@example.com',
+        session_id: 'supabase-sess-alice-logout-test',
+      });
+
+      const logoutSess = {
+        id: 'sess-logout-target',
+        userId: 'usr-alice',
+        sessionId: 'supabase-sess-alice-logout-test',
+        createdAt: new Date(),
+        lastActiveAt: new Date(),
+        expiresAt: null,
+        revokedAt: null,
+        rememberMe: true,
+      };
+      mockSessions.push(logoutSess);
+
+      // 1. Initial request succeeds
+      const context = createMockContext(token);
+      expect(await supabaseAuthGuard.canActivate(context)).toBe(true);
+
+      // 2. Perform logout
+      const req: any = {
+        user: { id: 'usr-alice', sub: 'usr-alice', sessionId: 'supabase-sess-alice-logout-test' },
+        sessionId: 'supabase-sess-alice-logout-test',
+        headers: { 'user-agent': 'Chrome' },
+        ip: '127.0.0.1',
+      };
+      const logoutResult = await authController.logout(req);
+      expect(logoutResult.success).toBe(true);
+      expect(logoutSess.revokedAt).not.toBeNull();
+
+      // 3. Subsequent request with the same token is rejected
+      await expect(supabaseAuthGuard.canActivate(context)).rejects.toThrow(
+        UnauthorizedException,
+      );
     });
   });
 });

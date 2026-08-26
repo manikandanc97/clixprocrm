@@ -1,5 +1,6 @@
 @import "tailwindcss";
 @import "tw-animate-css";
+@import "../shared/styles/button-icons.css";
 
 @custom-variant dark (&:is(.dark *));
 
@@ -1707,4 +1708,6 @@ body:has(.auth-shell) {
 .dark .auth-security-badge {
   color: oklch(0.82 0.03 165 / 0.7);
 }
+
+
 

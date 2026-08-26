@@ -20,6 +20,7 @@ import { NotificationsService } from '../notifications/services/notifications.se
 interface CachedTokenUser {
   user: User & { sessionId?: string };
   sessionId: string;
+  rememberMe?: boolean;
   createdAt: number;
   lastActiveAt: number;
   expiresAt: number;
@@ -159,7 +160,7 @@ export class SupabaseAuthGuard implements CanActivate {
     }
 
     const now = Date.now();
-    const { idleTimeoutMs, absoluteTimeoutMs, lastActiveThrottleMs } = getSessionTimeoutConfig();
+    const { idleTimeoutMs, absoluteTimeoutMs, persistentTimeoutMs, lastActiveThrottleMs } = getSessionTimeoutConfig();
     const cached = tokenUserCache.get(token);
 
     if (cached && cached.expiresAt > now) {
@@ -170,10 +171,12 @@ export class SupabaseAuthGuard implements CanActivate {
       }
 
       // Check timeout on fast cache hit
-      if (now > cached.createdAt + absoluteTimeoutMs) {
-        tokenUserCache.delete(token);
-        revokedSessionsSet.add(cached.sessionId);
-      } else if (now > cached.lastActiveAt + idleTimeoutMs) {
+      const isPersistent = Boolean(cached.rememberMe);
+      const isExpired = isPersistent
+        ? now > cached.createdAt + persistentTimeoutMs
+        : now > cached.createdAt + absoluteTimeoutMs || now > cached.lastActiveAt + idleTimeoutMs;
+
+      if (isExpired) {
         tokenUserCache.delete(token);
         revokedSessionsSet.add(cached.sessionId);
       } else {
@@ -264,6 +267,9 @@ export class SupabaseAuthGuard implements CanActivate {
 
     let sessionCreatedAt = now;
     let sessionLastActiveAt = now;
+    let isSessionRemembered =
+      request.headers['x-remember-me'] === 'true' ||
+      request.headers['x-remember-me'] === '1';
 
     // Check DB for session revocation, absolute timeout, idle timeout, and P4 security status
     if (this.prisma) {
@@ -326,16 +332,37 @@ export class SupabaseAuthGuard implements CanActivate {
             lastActiveAt: true,
             expiresAt: true,
             revokedAt: true,
+            rememberMe: true,
           },
         });
 
         const ip = getClientIp(request);
         const ua = request.headers['user-agent'] || '';
         const deviceInfo = parseUserAgent(ua);
+        const isRememberMeHeader =
+          request.headers['x-remember-me'] === 'true' ||
+          request.headers['x-remember-me'] === '1';
+
+        let isSessionRemembered = false;
 
         if (sessionRecord) {
           sessionCreatedAt = sessionRecord.createdAt.getTime();
           sessionLastActiveAt = sessionRecord.lastActiveAt.getTime();
+          isSessionRemembered = Boolean(sessionRecord.rememberMe);
+
+          // If client passes explicit X-Remember-Me and session is not marked, upgrade session persistence
+          if (isRememberMeHeader && !sessionRecord.rememberMe) {
+            isSessionRemembered = true;
+            await this.prisma.userSession
+              .update({
+                where: { sessionId },
+                data: {
+                  rememberMe: true,
+                  expiresAt: new Date(sessionCreatedAt + persistentTimeoutMs),
+                },
+              })
+              .catch(() => {});
+          }
 
           // 1. Check explicit revocation
           if (sessionRecord.revokedAt) {
@@ -344,12 +371,13 @@ export class SupabaseAuthGuard implements CanActivate {
             throw new UnauthorizedException('Session has been revoked. Please sign in again.');
           }
 
-          // 2. Check absolute timeout expiry
-          const absoluteExpiresAt = sessionCreatedAt + absoluteTimeoutMs;
-          if (
-            now > absoluteExpiresAt ||
-            (sessionRecord.expiresAt && now > sessionRecord.expiresAt.getTime())
-          ) {
+          // 2. Check absolute / persistent timeout expiry
+          const maxSessionLifetime = isSessionRemembered ? persistentTimeoutMs : absoluteTimeoutMs;
+          const effectiveExpiresAt = sessionRecord.expiresAt
+            ? sessionRecord.expiresAt.getTime()
+            : sessionCreatedAt + maxSessionLifetime;
+
+          if (now > sessionCreatedAt + maxSessionLifetime || now > effectiveExpiresAt) {
             revokedSessionsSet.add(sessionId);
             tokenUserCache.delete(token);
             await this.prisma.userSession
@@ -367,6 +395,7 @@ export class SupabaseAuthGuard implements CanActivate {
                   module: 'Security',
                   details: {
                     sessionId: sessionRecord.id,
+                    rememberMe: isSessionRemembered,
                     sessionLifetimeHours: Math.round((now - sessionCreatedAt) / 3600000),
                   },
                   ipAddress: typeof ip === 'string' ? ip : null,
@@ -380,37 +409,39 @@ export class SupabaseAuthGuard implements CanActivate {
             );
           }
 
-          // 3. Check idle timeout expiry
-          const idleExpiresAt = sessionLastActiveAt + idleTimeoutMs;
-          if (now > idleExpiresAt) {
-            revokedSessionsSet.add(sessionId);
-            tokenUserCache.delete(token);
-            await this.prisma.userSession
-              .update({
-                where: { sessionId },
-                data: { revokedAt: new Date() },
-              })
-              .catch(() => {});
+          // 3. Check idle timeout expiry (for non-persistent sessions)
+          if (!isSessionRemembered) {
+            const idleExpiresAt = sessionLastActiveAt + idleTimeoutMs;
+            if (now > idleExpiresAt) {
+              revokedSessionsSet.add(sessionId);
+              tokenUserCache.delete(token);
+              await this.prisma.userSession
+                .update({
+                  where: { sessionId },
+                  data: { revokedAt: new Date() },
+                })
+                .catch(() => {});
 
-            await this.prisma.auditLog
-              .create({
-                data: {
-                  userId: user.id,
-                  action: 'SESSION_EXPIRED_IDLE',
-                  module: 'Security',
-                  details: {
-                    sessionId: sessionRecord.id,
-                    idleMinutes: Math.round((now - sessionLastActiveAt) / 60000),
+              await this.prisma.auditLog
+                .create({
+                  data: {
+                    userId: user.id,
+                    action: 'SESSION_EXPIRED_IDLE',
+                    module: 'Security',
+                    details: {
+                      sessionId: sessionRecord.id,
+                      idleMinutes: Math.round((now - sessionLastActiveAt) / 60000),
+                    },
+                    ipAddress: typeof ip === 'string' ? ip : null,
+                    userAgent: ua || null,
                   },
-                  ipAddress: typeof ip === 'string' ? ip : null,
-                  userAgent: ua || null,
-                },
-              })
-              .catch(() => {});
+                })
+                .catch(() => {});
 
-            throw new UnauthorizedException(
-              'Session has expired due to inactivity. Please sign in again.',
-            );
+              throw new UnauthorizedException(
+                'Session has expired due to inactivity. Please sign in again.',
+              );
+            }
           }
 
           // 4. Valid active session - throttle lastActiveAt updates
@@ -427,6 +458,8 @@ export class SupabaseAuthGuard implements CanActivate {
               .catch(() => {});
           }
         } else {
+          isSessionRemembered = isRememberMeHeader;
+
           // Check prior session history for device matching before registering new session
           const priorMatchingSession = await this.prisma.userSession
             .findFirst({
@@ -471,6 +504,10 @@ export class SupabaseAuthGuard implements CanActivate {
             loginAction = 'LOGIN_SUCCESS';
           }
 
+          const initialExpiresAt = isSessionRemembered
+            ? new Date(now + persistentTimeoutMs)
+            : new Date(now + absoluteTimeoutMs);
+
           // Register new session
           const createdSession = await this.prisma.userSession
             .create({
@@ -483,6 +520,8 @@ export class SupabaseAuthGuard implements CanActivate {
                 browser: deviceInfo.browser,
                 operatingSystem: deviceInfo.operatingSystem,
                 lastActiveAt: new Date(),
+                expiresAt: initialExpiresAt,
+                rememberMe: isSessionRemembered,
               },
             })
             .catch(() => null);
@@ -500,6 +539,7 @@ export class SupabaseAuthGuard implements CanActivate {
                   module: 'Security',
                   details: {
                     sessionId: createdSession.id,
+                    rememberMe: isSessionRemembered,
                     browser: deviceInfo.browser,
                     operatingSystem: deviceInfo.operatingSystem,
                     deviceType: deviceInfo.deviceType,
@@ -643,6 +683,7 @@ export class SupabaseAuthGuard implements CanActivate {
     tokenUserCache.set(token, {
       user,
       sessionId,
+      rememberMe: isSessionRemembered,
       createdAt: sessionCreatedAt,
       lastActiveAt: sessionLastActiveAt,
       expiresAt: now + 60000,

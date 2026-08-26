@@ -5,7 +5,7 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.99] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)]",
   {
     variants: {
       variant: {
@@ -52,13 +52,32 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, onMouseEnter, ...props }, ref) => {
     const Comp = asChild ? Slot.Root : "button";
+
+    const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
+      onMouseEnter?.(e);
+      const iconEls = e.currentTarget.querySelectorAll<HTMLElement>("[data-animate-icon]");
+      iconEls.forEach((el) => {
+        el.dispatchEvent(new CustomEvent("trigger-icon-animation"));
+      });
+    };
+
+    const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
+      props.onMouseLeave?.(e);
+      const iconEls = e.currentTarget.querySelectorAll<HTMLElement>("[data-animate-icon]");
+      iconEls.forEach((el) => {
+        el.dispatchEvent(new CustomEvent("stop-icon-animation"));
+      });
+    };
+
     return (
       <Comp
         data-slot="button"
         className={cn(buttonVariants({ variant, size, className }), "rounded-md")}
         ref={ref}
+        onMouseEnter={handleMouseEnter}
+        onMouseLeave={handleMouseLeave}
         {...props}
       />
     );

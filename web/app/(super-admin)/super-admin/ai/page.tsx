@@ -1,9 +1,12 @@
 "use client";
 
 import React, { useEffect, useState } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import {
   Sparkles,
   Bot,
+  Brain,
   Layers,
   Check,
   X,
@@ -33,6 +36,7 @@ import {
 import { CRMPageContainer, CRMPageHeader } from "@/shared/components/crm";
 
 export default function SuperAdminAiPage() {
+  const router = useRouter();
   const [loading, setLoading] = useState(true);
   const [globalAiEnabled, setGlobalAiEnabled] = useState(true);
   const [plans, setPlans] = useState<PlanAiConfigItem[]>([]);
@@ -197,6 +201,12 @@ export default function SuperAdminAiPage() {
         badge="Enterprise AI Governance"
         actions={[
           {
+            label: "Open ClixPro AI",
+            icon: Sparkles,
+            onClick: () => router.push("/super-admin/copilot"),
+            variant: "default",
+          },
+          {
             label: "Refresh",
             icon: RefreshCw,
             onClick: loadData,
@@ -256,6 +266,30 @@ export default function SuperAdminAiPage() {
             className="data-[state=checked]:bg-emerald-600"
           />
         </div>
+      </div>
+
+      {/* ClixPro AI Quick Launch Banner */}
+      <div className="p-4 sm:p-5 rounded-2xl bg-gradient-to-r from-violet-600/15 via-primary/10 to-indigo-600/15 border border-primary/25 shadow-xs flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+        <div className="space-y-1">
+          <div className="flex items-center gap-2">
+            <Sparkles className="w-4 h-4 text-primary" />
+            <h4 className="text-sm font-bold text-foreground">
+              ClixPro AI Platform Intelligence
+            </h4>
+            <span className="text-[10px] font-extrabold uppercase px-2 py-0.5 rounded-full bg-primary/20 text-primary border border-primary/30">
+              Gemini Deep Reasoning
+            </span>
+          </div>
+          <p className="text-xs text-muted-foreground">
+            Run automated cross-tenant audits, SecOps threat triage, MRR forecasts, and system telemetry diagnosis.
+          </p>
+        </div>
+        <Link href="/super-admin/copilot">
+          <Button size="sm" className="bg-primary text-primary-foreground font-semibold flex items-center gap-1.5 rounded-xl shadow-xs whitespace-nowrap">
+            <Sparkles className="w-3.5 h-3.5" />
+            <span>Launch ClixPro AI</span>
+          </Button>
+        </Link>
       </div>
 
       {/* SECTION 1: AI & PLANS */}

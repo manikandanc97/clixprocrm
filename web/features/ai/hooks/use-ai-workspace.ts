@@ -120,6 +120,9 @@ export function useAIWorkspace() {
     );
   }, [auth?.user, pathname]);
 
+  const isSuperAdminRef = useRef(isSuperAdmin);
+  isSuperAdminRef.current = isSuperAdmin;
+
   // Load URL query context on initial mount
   useEffect(() => {
     const contextParam = searchParams.get('context');
@@ -271,6 +274,7 @@ export function useAIWorkspace() {
               payload = JSON.stringify({
                 ...parsed,
                 model: selectedModelRef.current,
+                isSuperAdmin: isSuperAdminRef.current,
                 context: currentCtx ? { name: currentCtx.name, type: currentCtx.type, id: currentCtx.id } : undefined,
               });
             } catch {}

@@ -48,6 +48,9 @@ client.interceptors.request.use(
       const currency = localStorage.getItem("orbit_currency") || "INR";
       config.headers["X-Currency"] = currency;
       
+      const isRemembered = localStorage.getItem("clixpro_remember_me") === "1";
+      config.headers["X-Remember-Me"] = isRemembered ? "true" : "false";
+
       const supabase = createClient();
       const { data: { session } } = await supabase.auth.getSession();
       

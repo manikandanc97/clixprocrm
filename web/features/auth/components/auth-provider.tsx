@@ -192,6 +192,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const cleanupAuthState = useCallback(() => {
     if (typeof window !== "undefined") {
       localStorage.removeItem("has_session");
+      localStorage.removeItem("clixpro_remember_me");
+      sessionStorage.removeItem("clixpro_session_active");
 
       // Defense-in-depth: remove any body-level styles that Radix dialogs may have
       // leaked if they were unmounted during the auth state transition without
@@ -241,16 +243,19 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setInitStage("connecting");
 
       let hasSessionLocal = typeof window !== "undefined" ? localStorage.getItem("has_session") : null;
+      const isRemembered = typeof window !== "undefined" && localStorage.getItem("clixpro_remember_me") === "1";
+      const isSessionActive = typeof window !== "undefined" && sessionStorage.getItem("clixpro_session_active") === "1";
       
-      // Fix for OAuth login: Check if Supabase has a session even if localStorage doesn't.
-      // Only do this when NOT in a logged-out state to prevent re-hydration after signOut.
+      // Check if Supabase has a valid session
       const { data: { session } } = await createClient().auth.getSession();
-      if (session && !hasSessionLocal && !isLoggingOut.current) {
-        if (typeof window !== "undefined") localStorage.setItem("has_session", "1");
+      if (session && !isLoggingOut.current) {
+        if (isRemembered && typeof window !== "undefined") {
+          localStorage.setItem("has_session", "1");
+        }
         hasSessionLocal = "1";
       }
 
-      if (typeof window !== "undefined" && !hasSessionLocal) {
+      if (typeof window !== "undefined" && !session && !hasSessionLocal) {
         setStatus("unauthenticated");
         return;
       }
@@ -341,18 +346,15 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     };
   }, [cleanupAuthState, refreshUser]);
 
-  const login = useCallback(async (email: string, password: string, staySignedIn?: boolean) => {
+  const login = useCallback(async (email: string, password: string, rememberMe?: boolean) => {
     try {
       setLoading(true);
       // Mark as fetched BEFORE calling signInWithPassword.
       // This prevents the onAuthStateChange(SIGNED_IN) handler from running a competing
       // refreshUser() at the same time as login()'s own fetchCurrentUser call.
       hasFetched.current = true;
-      const response = await loginUser({ email, password, staySignedIn });
+      const response = await loginUser({ email, password, rememberMe });
 
-      if (typeof window !== "undefined") {
-        localStorage.setItem("has_session", "1");
-      }
       setUser(response.data.user);
       setStatus("authenticated");
       

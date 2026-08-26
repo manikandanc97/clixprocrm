@@ -25,6 +25,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { motion } from "framer-motion";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export type CRMModuleType =
   | "leads"
@@ -161,40 +162,42 @@ export const MODULE_PRESETS: Record<
     icon: FolderOpen,
     title: "No documents uploaded",
     description:
-      "Store contracts, presentations, and client files securely.",
-    defaultPrimaryLabel: "Upload File",
-    defaultPrimaryIcon: Upload,
+      "Store client contracts, proposals, and legal agreements securely.",
+    defaultPrimaryLabel: "Upload Document",
+    defaultPrimaryIcon: Plus,
   },
   reports: {
     icon: BarChart3,
-    title: "No reports data yet",
-    description:
-      "Capture leads, close deals, and record sales activities to generate real-time business intelligence and performance reports.",
-    defaultPrimaryLabel: "Go to Dashboard",
-    defaultPrimaryIcon: LayoutDashboard,
-    defaultSecondaryLabel: "Create Lead",
-    defaultSecondaryIcon: Plus,
+    title: "No reports generated",
+    description: "Build custom reports to analyze sales velocity and team metrics.",
+    defaultPrimaryLabel: "Create Report",
+    defaultPrimaryIcon: Plus,
   },
   analytics: {
     icon: BrainCircuit,
-    title: "No analytics data available",
+    title: "No analytics available",
     description:
-      "Start logging leads, activities, and revenue milestones to activate neural forecasts and AI insights.",
-    defaultPrimaryLabel: "Go to Dashboard",
-    defaultPrimaryIcon: LayoutDashboard,
-    defaultSecondaryLabel: "Create Lead",
-    defaultSecondaryIcon: Plus,
+      "Enable analytics integration to see real-time pipeline performance.",
+    defaultPrimaryLabel: "Configure Analytics",
+    defaultPrimaryIcon: Sparkles,
   },
 };
 
-function renderActionBtn(
-  act: EmptyStateAction,
-  isPrimary: boolean,
-  isSmall: boolean,
-  isLarge: boolean
-) {
+function EmptyStateButton({
+  action: act,
+  isPrimary,
+  size,
+}: {
+  action: EmptyStateAction;
+  isPrimary: boolean;
+  size: "default" | "sm" | "lg";
+}) {
   const IconComp = act.icon;
+  const isSmall = size === "sm";
+  const isLarge = size === "lg";
+
   const variant = act.variant || (isPrimary ? "default" : "outline");
+
   const sizeClass = isSmall
     ? "h-8 px-4 text-xs rounded-lg min-w-[110px]"
     : isLarge
@@ -204,11 +207,11 @@ function renderActionBtn(
   const btnContent = (
     <>
       {IconComp && (
-        <IconComp
-          className={cn(
-            isSmall ? "w-3.5 h-3.5 mr-1.5" : "w-4 h-4 mr-2",
-            "shrink-0 transition-transform group-hover:scale-110"
-          )}
+        <AppIcon
+          name={act.label}
+          icon={IconComp}
+          size={isSmall ? 14 : 16}
+          className={isSmall ? "w-3.5 h-3.5 mr-1.5 shrink-0" : "w-4 h-4 mr-2 shrink-0"}
           aria-hidden="true"
         />
       )}
@@ -224,7 +227,7 @@ function renderActionBtn(
         variant={variant}
         disabled={act.disabled}
         className={cn(
-          "font-semibold transition-all duration-200 group active:scale-[0.98]",
+          "font-semibold transition-all duration-200 active:scale-[0.98]",
           isPrimary
             ? "shadow-sm hover:shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
             : "hover:bg-muted/80 border-border/80",
@@ -244,7 +247,7 @@ function renderActionBtn(
       variant={variant}
       disabled={act.disabled}
       className={cn(
-        "font-semibold transition-all duration-200 group active:scale-[0.98]",
+        "font-semibold transition-all duration-200 active:scale-[0.98]",
         isPrimary
           ? "shadow-sm hover:shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
           : "hover:bg-muted/80 border-border/80",
@@ -355,10 +358,11 @@ export function EmptyState({
               isSmall ? "w-10 h-10" : "w-14 h-14"
             )}
           >
-            <Icon
-              className={cn(isSmall ? "w-5 h-5" : "w-7 h-7", "text-primary")}
-              strokeWidth={1.75}
-              aria-hidden="true"
+            <AppIcon
+              name={module || title}
+              icon={Icon}
+              size={isSmall ? 20 : 28}
+              className="text-primary"
             />
           </div>
         </div>
@@ -394,8 +398,8 @@ export function EmptyState({
         {/* Action Buttons */}
         {hasActions && (
           <div className="flex flex-wrap items-center justify-center gap-3 mt-6 shrink-0">
-            {resolvedPrimary && renderActionBtn(resolvedPrimary, true, isSmall, isLarge)}
-            {resolvedSecondary && renderActionBtn(resolvedSecondary, false, isSmall, isLarge)}
+            {resolvedPrimary && <EmptyStateButton action={resolvedPrimary} isPrimary size={size} />}
+            {resolvedSecondary && <EmptyStateButton action={resolvedSecondary} isPrimary={false} size={size} />}
             {children}
           </div>
         )}

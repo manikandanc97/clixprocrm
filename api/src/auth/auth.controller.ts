@@ -14,7 +14,7 @@ import {
 } from '@nestjs/common';
 import { AuthService, invalidateGetMeCache } from './auth.service';
 import { SessionsService } from './sessions.service';
-import { SupabaseAuthGuard, invalidateTokenUserCache } from './supabase.guard';
+import { SupabaseAuthGuard, invalidateTokenUserCache, invalidateSessionCache } from './supabase.guard';
 import { TenantGuard, invalidateUserTenantCache } from './tenant.guard';
 import { AalGuard } from './aal.guard';
 import {
@@ -318,11 +318,26 @@ export class AuthController {
   @UseGuards(SupabaseAuthGuard)
   @Post('logout')
   async logout(@Req() req: any) {
-    const userId = req.user?.id || req.user?.sub;
+    const userId = req?.user?.id || req?.user?.sub;
+    const currentSessionId = req?.sessionId || req?.user?.sessionId;
+    const ip = req?.headers ? getClientIp(req) : '127.0.0.1';
+    const userAgent = req?.headers ? req.headers['user-agent'] : undefined;
+
     if (userId) {
       invalidateTokenUserCache(userId);
       invalidateUserTenantCache(userId);
       invalidateGetMeCache(userId);
+    }
+    if (currentSessionId && userId && this.sessionsService) {
+      invalidateSessionCache(currentSessionId, userId);
+      await this.sessionsService
+        .revokeSessionBySessionId(
+          userId,
+          currentSessionId,
+          typeof ip === 'string' ? ip : undefined,
+          userAgent,
+        )
+        .catch(() => {});
     }
     return { success: true, message: 'Logged out successfully' };
   }

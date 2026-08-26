@@ -18,6 +18,7 @@ export interface FormattedUserSession {
   isCurrent: boolean;
   isRevoked: boolean;
   revokedAt: Date | null;
+  rememberMe?: boolean;
 }
 
 export interface SecurityActivityDto {
@@ -82,6 +83,7 @@ export class SessionsService {
       isCurrent: Boolean(currentSessionId && session.sessionId === currentSessionId),
       isRevoked: Boolean(session.revokedAt),
       revokedAt: session.revokedAt,
+      rememberMe: Boolean((session as any).rememberMe),
     }));
   }
 
@@ -150,6 +152,26 @@ export class SessionsService {
       sessionId: updated.id,
       isCurrent,
     };
+  }
+
+  async revokeSessionBySessionId(
+    userId: string,
+    sessionId: string,
+    reqIp?: string,
+    userAgent?: string,
+  ) {
+    const session = await this.prisma.userSession.findFirst({
+      where: {
+        sessionId,
+        userId,
+      },
+    });
+
+    if (!session) {
+      return null;
+    }
+
+    return this.revokeSession(userId, session.id, sessionId, reqIp, userAgent);
   }
 
   async revokeAllOtherSessions(

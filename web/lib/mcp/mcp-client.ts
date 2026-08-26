@@ -410,6 +410,90 @@ export function getMcpTools(context: McpUserContext) {
         return data;
       },
     }),
+
+    // --- SUPER ADMIN PLATFORM INTELLIGENCE TOOLS ---
+
+    // 15. get_platform_overview (Super Admin Read)
+    get_platform_overview: tool({
+      description: 'Get platform-wide executive metrics: total/active organizations, users, CRM volume, plan distribution, and recent tenants.',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const data = await callCrmApi(context, '/super-admin/dashboard', 'GET');
+        return data;
+      },
+    }),
+
+    // 16. get_platform_analytics (Super Admin Read)
+    get_platform_analytics: tool({
+      description: 'Get platform financial metrics: MRR, ARR in INR, monthly organization and user growth trends, and plan breakdown.',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const data = await callCrmApi(context, '/super-admin/analytics', 'GET');
+        return data;
+      },
+    }),
+
+    // 17. list_platform_organizations (Super Admin Read)
+    list_platform_organizations: tool({
+      description: 'Filter and list tenant organizations across the entire platform with pagination and status/plan filtering.',
+      inputSchema: z.object({
+        search: z.string().optional().describe('Search organization name or slug'),
+        status: z.enum(['ACTIVE', 'SUSPENDED']).optional().describe('Filter by tenant status'),
+        plan: z.string().optional().describe('Filter by subscription plan e.g. free, starter, pro, enterprise'),
+        page: z.number().int().min(1).default(1).optional().describe('Page number'),
+        limit: z.number().int().min(1).max(50).default(10).optional().describe('Max organizations to retrieve'),
+      }),
+      execute: async (args: { search?: string; status?: 'ACTIVE' | 'SUSPENDED'; plan?: string; page?: number; limit?: number }) => {
+        const data = await callCrmApi(context, '/super-admin/organizations', 'GET', undefined, {
+          search: args.search,
+          status: args.status,
+          plan: args.plan,
+          page: args.page || 1,
+          limit: Math.min(Math.max(1, args.limit || 10), 50),
+        });
+        return data;
+      },
+    }),
+
+    // 18. get_platform_security_status (Super Admin Read)
+    get_platform_security_status: tool({
+      description: 'Get platform security telemetry, active threat indicators, emergency status, and secops health.',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const [telemetry, incidents] = await Promise.all([
+          callCrmApi(context, '/super-admin/security/operations/telemetry', 'GET').catch(() => null),
+          callCrmApi(context, '/super-admin/security/incidents', 'GET').catch(() => null),
+        ]);
+        return { telemetry, incidents };
+      },
+    }),
+
+    // 19. get_platform_audit_logs (Super Admin Read)
+    get_platform_audit_logs: tool({
+      description: 'Get recent security audit logs and administrative events across the platform with optional module filter.',
+      inputSchema: z.object({
+        module: z.string().optional().describe('Filter by module (e.g. AUTH, TENANT, USERS, SECURITY, SuperAdminAI)'),
+        limit: z.number().int().min(1).max(50).default(10).optional().describe('Max audit logs to retrieve'),
+      }),
+      execute: async (args: { module?: string; limit?: number }) => {
+        const data = await callCrmApi(context, '/super-admin/audit-logs', 'GET', undefined, {
+          module: args.module,
+          limit: Math.min(Math.max(1, args.limit || 10), 50),
+        });
+        return data;
+      },
+    }),
+
+    // 20. get_platform_ai_metrics (Super Admin Read)
+    get_platform_ai_metrics: tool({
+      description: 'Get AI ecosystem status: global killswitch status, active AI models, plan tier quotas, and token rate limits.',
+      inputSchema: z.object({}),
+      execute: async () => {
+        const data = await callCrmApi(context, '/super-admin/ai/overview', 'GET');
+        return data;
+      },
+    }),
   };
 }
+
 

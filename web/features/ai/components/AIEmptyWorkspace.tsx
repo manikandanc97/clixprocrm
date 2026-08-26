@@ -59,10 +59,10 @@ export function AIEmptyWorkspace({
 
     if (isSuperAdmin) {
       return [
-        { id: '1', label: 'Platform overview & MRR', prompt: 'Show platform overview, active tenants count, and MRR metrics.', icon: Activity },
-        { id: '2', label: 'Tenants growth trend', prompt: 'Show monthly organization growth and user registration trends.', icon: TrendingUp },
-        { id: '3', label: 'List active organizations', prompt: 'List all active organizations, tenant plans, and usage status.', icon: Building2 },
-        { id: '4', label: 'Recent security audit logs', prompt: 'Show recent platform audit logs and security activities.', icon: ShieldCheck },
+        { id: '1', label: 'Show platform overview', prompt: 'Show platform overview, active tenants count, and MRR metrics.', icon: Activity },
+        { id: '2', label: 'Revenue & MRR Forensics', prompt: 'Analyze platform revenue, plan breakdown, and growth velocity.', icon: TrendingUp },
+        { id: '3', label: 'SecOps Threat Triage', prompt: 'Inspect recent platform security audit logs and active telemetry.', icon: ShieldCheck },
+        { id: '4', label: 'Fleet Health & Churn', prompt: 'Perform fleet health audit and scan for suspended organizations.', icon: Building2 },
       ];
     }
 
@@ -87,7 +87,7 @@ export function AIEmptyWorkspace({
       </h2>
       <p className="text-xs text-muted-foreground mb-4 max-w-sm leading-relaxed">
         {isSuperAdmin
-          ? 'Your platform assistant for tenant analytics, audits, and metrics.'
+          ? 'Your executive platform AI assistant for multi-tenant analytics, MRR forensics, and SecOps triage.'
           : 'Your enterprise CRM assistant for analyzing deals and managing leads.'}
       </p>
 

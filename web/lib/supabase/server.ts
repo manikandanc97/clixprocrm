@@ -14,9 +14,19 @@ export async function createClient() {
         },
         setAll(cookiesToSet) {
           try {
-            cookiesToSet.forEach(({ name, value, options }) =>
-              cookieStore.set(name, value, options)
-            )
+            const isRememberCookie = cookieStore.get('clixpro_remember_me')?.value === '1'
+            cookiesToSet.forEach(({ name, value, options }) => {
+              const cookieOpts = { ...options }
+              if (cookieOpts.maxAge !== 0) {
+                if (isRememberCookie) {
+                  cookieOpts.maxAge = 30 * 24 * 60 * 60
+                } else {
+                  delete cookieOpts.maxAge
+                  delete cookieOpts.expires
+                }
+              }
+              cookieStore.set(name, value, cookieOpts)
+            })
           } catch {
             // The `setAll` method was called from a Server Component.
             // This can be ignored if you have middleware refreshing

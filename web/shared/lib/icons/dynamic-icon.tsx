@@ -125,5 +125,5 @@ export function DynamicIcon({
   className?: string;
 }) {
   const IconComponent = getDynamicIcon(name);
-  return <IconComponent className={className} />;
+  return React.createElement(IconComponent, { className });
 }

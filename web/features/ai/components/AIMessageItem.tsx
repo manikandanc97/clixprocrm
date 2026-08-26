@@ -27,13 +27,20 @@ interface AIMessageItemProps {
 function getToolStatusLabel(toolName?: string): string {
   if (!toolName || toolName === 'unknown') return 'ClixPro AI is thinking...';
   const name = toolName.replace(/^tool-/, '').toLowerCase();
+  if (name.includes('platformoverview') || name.includes('platform_overview')) return 'Gathering platform-wide telemetry & tenant stats...';
+  if (name.includes('platformanalytics') || name.includes('platform_analytics') || name.includes('mrr')) return 'Calculating MRR, ARR, and financial growth analytics...';
+  if (name.includes('platformorganization') || name.includes('platform_organization')) return 'Scanning multi-tenant fleet and organizations...';
+  if (name.includes('platformsecurity') || name.includes('platform_security')) return 'Performing SecOps threat triage & telemetry check...';
+  if (name.includes('platformaudit') || name.includes('platform_audit')) return 'Auditing platform security logs and administrative events...';
+  if (name.includes('platformai') || name.includes('platform_ai')) return 'Analyzing AI ecosystem, token burn rates, and quotas...';
+  if (name.includes('diagnosis') || name.includes('deep')) return 'Running comprehensive multi-dimensional platform diagnosis...';
   if (name.includes('lead')) return 'Searching CRM leads...';
   if (name.includes('customer')) return 'Looking up customer accounts...';
   if (name.includes('deal') || name.includes('pipeline')) return 'Analyzing sales pipeline...';
   if (name.includes('task') || name.includes('activity')) return 'Checking tasks & activities...';
   if (name.includes('report') || name.includes('sales')) return 'Compiling sales report analytics...';
   if (name.includes('quotation')) return 'Retrieving quotations & proposals...';
-  return 'Processing CRM request...';
+  return 'Processing CRM intelligence request...';
 }
 
 export function AIMessageItem({ message, onConfirmAction }: AIMessageItemProps) {

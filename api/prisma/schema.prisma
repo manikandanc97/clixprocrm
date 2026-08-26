@@ -1098,6 +1098,7 @@ model UserSession {
   lastActiveAt     DateTime  @default(now())
   expiresAt        DateTime?
   revokedAt        DateTime?
+  rememberMe       Boolean   @default(false)
 
   user             User      @relation(fields: [userId], references: [id], onDelete: Cascade)
 

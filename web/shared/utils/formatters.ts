@@ -5,7 +5,6 @@
  * Import from this file — not from lib/crm-formatters.ts (which re-exports here).
  */
 
-import { useCRMStore } from "@/shared/store/useCRMStore";
 import { LeadStatus } from "@/shared/types/lead";
 import { DealStage } from "@/shared/types/pipeline";
 
