@@ -316,14 +316,14 @@ export default function SuperAdminAuditLogsPage() {
         <div className={cn("crm-table-wrap", (loading || filteredLogs.length === 0) && "crm-table-no-pagination")}>
           <div className="overflow-auto flex-1 min-h-0">
             <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card shadow-xs">
-                <tr className="border-b border-border bg-muted/20 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  <th className="h-12 px-6 py-4 bg-card">Action</th>
-                  <th className="h-12 px-6 py-4 bg-card">Module</th>
-                  <th className="h-12 px-6 py-4 bg-card">Organization</th>
-                  <th className="h-12 px-6 py-4 bg-card">Actor</th>
-                  <th className="h-12 px-6 py-4 bg-card">Timestamp</th>
-                  <th className="h-12 px-6 py-4 text-right bg-card">Details</th>
+              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Action</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Module</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Organization</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Actor</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Timestamp</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Details</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">

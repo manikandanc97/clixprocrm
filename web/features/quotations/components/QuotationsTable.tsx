@@ -144,13 +144,13 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
     <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4">
       <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden">
       <CRMDataTable containerClassName="border-0 shadow-none rounded-none w-full" className="w-full">
-        <CRMTableHeader className="sticky top-0 z-20 bg-card shadow-xs">
-          <CRMTableRow>
+        <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
+          <CRMTableRow className="h-10 sm:h-11">
             <CRMTableHeaderCell 
               className="hidden sm:table-cell cursor-pointer group select-none"
               onClick={() => handleSort("quoteId")}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 Quote No <CRMSortIndicator active={sortConfig?.key === "quoteId"} direction={sortConfig?.direction} />
               </div>
             </CRMTableHeaderCell>
@@ -158,7 +158,7 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
               className="cursor-pointer group select-none bg-card"
               onClick={() => handleSort("client")}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 Customer <CRMSortIndicator active={sortConfig?.key === "client"} direction={sortConfig?.direction} />
               </div>
             </CRMTableHeaderCell>
@@ -169,7 +169,7 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
               className="hidden md:table-cell cursor-pointer group select-none"
               onClick={() => handleSort("amount")}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 Quote Value <CRMSortIndicator active={sortConfig?.key === "amount"} direction={sortConfig?.direction} />
               </div>
             </CRMTableHeaderCell>
@@ -177,7 +177,7 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
               className="cursor-pointer group select-none bg-card"
               onClick={() => handleSort("status")}
             >
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-1.5">
                 Status <CRMSortIndicator active={sortConfig?.key === "status"} direction={sortConfig?.direction} />
               </div>
             </CRMTableHeaderCell>

@@ -190,9 +190,9 @@ export default function AuditLogSettings() {
           </div>
         ) : (
           <div className="mt-3 border rounded-xl overflow-hidden divide-y divide-border/50 text-xs">
-            <div className="grid grid-cols-12 bg-muted/40 px-4 py-2.5 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+            <div className="grid grid-cols-12 bg-card border-b border-border/60 px-4 py-2.5 text-[12px] font-semibold text-muted-foreground uppercase tracking-[0.05em] leading-tight h-10 sm:h-11 items-center">
               <span className="col-span-4">Event / Action</span>
-              <span className="col-span-3">Client & Device</span>
+              <span className="col-span-3">Client &amp; Device</span>
               <span className="col-span-2">IP Address</span>
               <span className="col-span-3 text-right">Timestamp</span>
             </div>

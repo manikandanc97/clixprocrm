@@ -13,12 +13,12 @@ interface CRMDataTableProps {
 export const crmTableStyles = {
   container: "crm-table-wrap",
   table: "w-full border-collapse text-left text-sm",
-  header: "sticky top-0 z-20 border-b border-border bg-card shadow-xs",
+  header: "sticky top-0 z-20 border-b border-border/60 bg-card",
   body: "divide-y divide-border/40",
-  row: "group h-13 border-b border-border/40 align-middle",
+  row: "group h-16 border-b border-border/40 align-middle",
   rowInteractive: "cursor-pointer transition-colors duration-150 hover:bg-muted/[0.03]",
-  cell: "h-13 px-4 sm:px-5 py-3 align-middle text-xs sm:text-sm",
-  headerCell: "h-10 px-4 sm:px-5 py-2.5 text-left text-[11px] font-semibold uppercase tracking-wider text-muted-foreground bg-card",
+  cell: "h-16 px-4 sm:px-6 py-3 align-middle text-sm",
+  headerCell: "h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground bg-card",
 } as const;
 
 export const CRMDataTable = ({
@@ -85,7 +85,7 @@ export const CRMTableHeaderCell = ({
   ...props
 }: React.ThHTMLAttributes<HTMLTableCellElement>) => (
   <th
-    className={cn(crmTableStyles.headerCell, className)}
+    className={cn(crmTableStyles.headerCell, "group", className)}
     {...props}
   >
     {children}

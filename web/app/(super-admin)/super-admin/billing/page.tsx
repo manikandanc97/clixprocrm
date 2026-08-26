@@ -397,15 +397,15 @@ export default function SuperAdminBillingPage() {
 
           <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
             <table className="w-full text-xs">
-              <thead className="bg-muted/50 border-b border-border/80 text-muted-foreground font-semibold">
+              <thead className="sticky top-0 z-20 bg-muted/10 border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
                 <tr>
-                  <th className="py-3 px-4 text-left">Organization</th>
-                  <th className="py-3 px-3 text-left">Plan</th>
-                  <th className="py-3 px-3 text-center">Billing Cycle</th>
-                  <th className="py-3 px-3 text-center">Seats</th>
-                  <th className="py-3 px-3 text-right">Recurring Amount</th>
-                  <th className="py-3 px-3 text-left">Next Renewal</th>
-                  <th className="py-3 px-3 text-center">Status</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 text-left bg-card whitespace-nowrap">Organization</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Plan</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Billing Cycle</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Seats</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Recurring Amount</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Next Renewal</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Status</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
@@ -483,16 +483,16 @@ export default function SuperAdminBillingPage() {
 
           <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
             <table className="w-full text-xs">
-              <thead className="bg-muted/50 border-b border-border/80 text-muted-foreground font-semibold">
+              <thead className="sticky top-0 z-20 bg-muted/10 border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
                 <tr>
-                  <th className="py-3 px-4 text-left">Platform Invoice #</th>
-                  <th className="py-3 px-3 text-left">Organization (Tenant)</th>
-                  <th className="py-3 px-3 text-left">Plan & Seats</th>
-                  <th className="py-3 px-3 text-left">Date</th>
-                  <th className="py-3 px-3 text-right">Tax (GST)</th>
-                  <th className="py-3 px-3 text-right">Total Amount</th>
-                  <th className="py-3 px-3 text-center">Status</th>
-                  <th className="py-3 px-3 text-center">Actions</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 text-left bg-card whitespace-nowrap">Platform Invoice #</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Organization (Tenant)</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Plan &amp; Seats</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Date</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Tax (GST)</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Total Amount</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Status</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">

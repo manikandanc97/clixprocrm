@@ -50,6 +50,8 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
     sortedCustomers,
     selectedIds,
     handleSort,
+    setSort,
+    sortConfig,
     toggleSelectAll,
     toggleSelect,
   } = useCustomers(customers);
@@ -73,14 +75,10 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
       className: "w-[50px]",
     },
     {
-      header: (
-        <div 
-          className="flex items-center gap-2 cursor-pointer group"
-          onClick={() => handleSort("name")}
-        >
-          Customer
-        </div>
-      ),
+      header: "Customer",
+      sortable: true,
+      sortDirection: sortConfig?.key === "name" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("name", dir),
       cell: (customer: CustomerType) => (
         <div className="flex items-center gap-3">
           <Avatar className="w-9 h-9 rounded-xl border border-border">
@@ -105,6 +103,10 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
     },
     {
       header: "Revenue (LTV)",
+      align: "right" as const,
+      sortable: true,
+      sortDirection: sortConfig?.key === "revenueValue" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("revenueValue", dir),
       cell: (customer: CustomerType) => {
         const revenueNum = typeof customer.revenueValue === "number" ? customer.revenueValue : (parseFloat(String(customer.revenue || "0")) || 0);
         const formatted = revenueNum >= 1_00_000
@@ -142,6 +144,7 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
     },
     {
       header: "Actions",
+      align: "right" as const,
       headerClassName: "text-right",
       cell: (customer: CustomerType) => (
         <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>

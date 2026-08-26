@@ -21,6 +21,7 @@ export function useDealsLocal(deals: any[]) {
     });
   }, [deals, sortConfig]);
 
+  /** 3-state: asc -> desc -> null */
   const handleSort = (key: string) => {
     setSortConfig((prev) => {
       if (prev?.key === key) {
@@ -29,6 +30,15 @@ export function useDealsLocal(deals: any[]) {
       }
       return { key, direction: "asc" };
     });
+  };
+
+  /** Direct sort setter (used by DataTableColumnHeader onSort) */
+  const setSort = (key: string, direction: "asc" | "desc" | null) => {
+    if (direction === null) {
+      setSortConfig(null);
+    } else {
+      setSortConfig({ key, direction });
+    }
   };
 
   const toggleSelectAll = () => {
@@ -53,6 +63,7 @@ export function useDealsLocal(deals: any[]) {
     setSelectedIds,
     sortConfig,
     handleSort,
+    setSort,
     toggleSelectAll,
     toggleSelect,
   };

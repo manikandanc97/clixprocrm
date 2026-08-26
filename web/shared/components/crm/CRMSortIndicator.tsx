@@ -1,29 +1,28 @@
-import { ChevronDown, ChevronUp } from "lucide-react";
+import { ArrowUp, ArrowDown, ChevronsUpDown } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 
 interface CRMSortIndicatorProps {
   active: boolean;
   direction?: "asc" | "desc";
+  className?: string;
 }
 
-export function CRMSortIndicator({ active, direction }: CRMSortIndicatorProps) {
+export function CRMSortIndicator({ active, direction, className }: CRMSortIndicatorProps) {
   if (!active) {
-    return <ChevronDown className="h-3 w-3 opacity-20 group-hover:opacity-50" />;
+    return (
+      <ChevronsUpDown
+        className={cn(
+          "h-3.5 w-3.5 text-muted-foreground/30 group-hover:text-muted-foreground/60 transition-colors shrink-0",
+          className
+        )}
+        aria-hidden="true"
+      />
+    );
   }
 
   return direction === "asc" ? (
-    <ChevronUp className="h-3 w-3 text-primary" />
+    <ArrowUp className={cn("h-3.5 w-3.5 text-primary shrink-0", className)} aria-hidden="true" />
   ) : (
-    <ChevronDown className="h-3 w-3 text-primary" />
+    <ArrowDown className={cn("h-3.5 w-3.5 text-primary shrink-0", className)} aria-hidden="true" />
   );
 }
-
-
-
-
-
-
-
-
-
-
-

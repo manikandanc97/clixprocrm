@@ -235,6 +235,13 @@ export const transferSuperAdminRole = async (targetUserId: string) => {
   return response.data;
 };
 
+export const deletePlatformUser = async (id: string) => {
+  const response = await client.delete<{ success: boolean; data: any; message: string }>(
+    `/super-admin/users/${id}`
+  );
+  return response.data;
+};
+
 export const fetchPlatformAnalytics = async (): Promise<PlatformAnalyticsData> => {
   const response = await client.get<{ success: boolean; data: PlatformAnalyticsData }>(
     "/super-admin/analytics"

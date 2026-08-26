@@ -676,14 +676,14 @@ export default function SuperAdminModulesPage() {
 
           <div className="overflow-auto max-h-[calc(100vh-250px)] min-h-[320px]">
             <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card shadow-xs">
-                <tr className="border-b border-border bg-muted/20 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  <th className="h-12 px-4 py-4 w-16 text-center bg-card">Order</th>
-                  <th className="h-12 px-4 py-4 bg-card">Menu & Route</th>
-                  <th className="h-12 px-4 py-4 bg-card">Group & Description</th>
-                  <th className="h-12 px-4 py-4 text-center bg-card">Access Level</th>
-                  <th className="h-12 px-4 py-4 text-center bg-card">Status</th>
-                  <th className="h-12 px-4 py-4 text-right bg-card">Quick Navigation</th>
+              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                  <th className="h-10 sm:h-11 px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">Order</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Menu & Route</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Group & Description</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Access Level</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Status</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Quick Navigation</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">
@@ -812,15 +812,15 @@ export default function SuperAdminModulesPage() {
         ) : (
           <div className="overflow-auto flex-1 min-h-0">
             <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card shadow-xs">
-                <tr className="border-b border-border bg-muted/20 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  <th className="h-12 px-3 py-4 w-16 text-center bg-card">Order</th>
-                  <th className="h-12 px-4 py-4 bg-card">Module & Route</th>
-                  <th className="h-12 px-4 py-4 bg-card">Category & Access</th>
-                  <th className="h-12 px-4 py-4 text-center bg-card">Type</th>
-                  <th className="h-12 px-4 py-4 text-center bg-card">Global Status</th>
-                  <th className="h-12 px-4 py-4 text-center bg-card">Sidebar Nav</th>
-                  <th className="h-12 px-4 py-4 text-right bg-card">Actions</th>
+              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                  <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">Order</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Module & Route</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Category & Access</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Type</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Global Status</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Sidebar Nav</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">

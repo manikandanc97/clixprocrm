@@ -22,6 +22,7 @@ export function useCustomers(customers: CustomerType[]) {
     });
   }, [customers, sortConfig]);
 
+  /** 3-state: asc -> desc -> null */
   const handleSort = (key: keyof CustomerType) => {
     setSortConfig((prev) => {
       if (prev?.key === key) {
@@ -30,6 +31,15 @@ export function useCustomers(customers: CustomerType[]) {
       }
       return { key, direction: "asc" };
     });
+  };
+
+  /** Direct sort setter (used by DataTableColumnHeader onSort) */
+  const setSort = (key: keyof CustomerType, direction: "asc" | "desc" | null) => {
+    if (direction === null) {
+      setSortConfig(null);
+    } else {
+      setSortConfig({ key, direction });
+    }
   };
 
   const toggleSelectAll = () => {
@@ -54,11 +64,8 @@ export function useCustomers(customers: CustomerType[]) {
     setSelectedIds,
     sortConfig,
     handleSort,
+    setSort,
     toggleSelectAll,
     toggleSelect,
   };
 }
-
-
-
-

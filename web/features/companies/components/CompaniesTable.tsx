@@ -7,7 +7,6 @@ import { useBulkDeleteCompanies } from "@/shared/hooks/use-crm";
 import {
   MoreVertical,
   Trash2,
-  ChevronDown,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -48,6 +47,8 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
     sortedCompanies,
     selectedIds,
     handleSort,
+    setSort,
+    sortConfig,
     toggleSelectAll,
     toggleSelect,
   } = useCompanies(companies);
@@ -73,14 +74,10 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
       className: "w-[50px]",
     },
     {
-      header: (
-        <div 
-          className="flex items-center gap-2 cursor-pointer group"
-          onClick={() => handleSort("name")}
-        >
-          Company
-        </div>
-      ),
+      header: "Company",
+      sortable: true,
+      sortDirection: sortConfig?.key === "name" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("name", dir),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => (
         <div className="flex items-center gap-3">
@@ -98,6 +95,7 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
     },
     {
       header: "Status",
+      align: "left" as const,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => (
         <StatusBadge 
@@ -108,6 +106,7 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
     },
     {
       header: "Customers",
+      align: "right" as const,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => {
         const count = company._count?.customers || 0;
@@ -120,6 +119,7 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
     },
     {
       header: "Deals",
+      align: "right" as const,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => {
         const count = company._count?.deals || 0;
@@ -132,6 +132,7 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
     },
     {
       header: "Actions",
+      align: "right" as const,
       headerClassName: "text-right",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => (

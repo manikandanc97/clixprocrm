@@ -247,10 +247,10 @@ export function TableSkeleton({
       <div className="w-full overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-border bg-muted/40 h-12">
+            <tr className="border-b border-border/60 bg-muted/20 h-10 sm:h-11">
               {Array.from({ length: cols }).map((_, i) => (
-                <th key={i} className="px-6 py-3.5 text-left">
-                  <Skeleton className="h-3 w-20" />
+                <th key={i} className="px-4 sm:px-6 py-3 text-left">
+                  <Skeleton className="h-2.5 w-20" />
                 </th>
               ))}
             </tr>

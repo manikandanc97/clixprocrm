@@ -109,7 +109,7 @@ export default function PipelinesStagesSettings() {
 
         {/* Stage List */}
         <div className="mt-4 space-y-2.5">
-          <div className="grid grid-cols-12 px-3 py-2 text-[11px] font-bold text-muted-foreground uppercase tracking-wider bg-muted/30 rounded-lg">
+          <div className="grid grid-cols-12 px-3 py-2 text-[12px] font-semibold text-muted-foreground uppercase tracking-[0.05em] leading-tight bg-card border border-border/60 rounded-lg h-10 sm:h-11 items-center">
             <span className="col-span-6">Stage Name</span>
             <span className="col-span-3 text-center">Win Probability (%)</span>
             <span className="col-span-2 text-center">SLA (Days)</span>

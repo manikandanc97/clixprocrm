@@ -63,8 +63,8 @@ export const PipelineTable: React.FC<PipelineTableProps> = ({ items, onSelectDea
     <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4">
       <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden flex-1">
         <CRMDataTable containerClassName="border-0 shadow-none rounded-none flex-auto h-full overflow-auto" className="w-full">
-          <CRMTableHeader className="sticky top-0 z-20 bg-card shadow-xs">
-            <CRMTableRow>
+          <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
+            <CRMTableRow className="h-10 sm:h-11">
               <CRMTableHeaderCell className="bg-card">Deal Name</CRMTableHeaderCell>
               <CRMTableHeaderCell className="bg-card">Company</CRMTableHeaderCell>
               <CRMTableHeaderCell className="bg-card">Stage</CRMTableHeaderCell>

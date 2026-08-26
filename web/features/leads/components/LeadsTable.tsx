@@ -48,6 +48,7 @@ import { useLeads } from "../hooks/useLeads";
 import { Badge } from "@/shared/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { LeadEmptyState } from "./LeadEmptyState";
+import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
 
 interface LeadsTableProps {
   leads: LeadType[];
@@ -108,6 +109,7 @@ const LeadsTable = ({
     selectedIds,
     setSelectedIds,
     handleSort,
+    setSort,
     sortConfig,
     filters,
     hasActiveFilters,
@@ -254,28 +256,10 @@ const LeadsTable = ({
       className: "w-[40px] pr-0",
     },
     {
-      header: (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-1 cursor-pointer hover:text-foreground text-muted-foreground transition-colors text-xs font-semibold uppercase tracking-wider group">
-              Lead Information
-              <ChevronDown className={cn("w-3 h-3 transition-opacity", sortConfig?.key === "name" ? "opacity-100 text-primary" : "opacity-0 group-hover:opacity-100")} />
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-40">
-            <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Sort By</div>
-            {[
-              { label: "A to Z", val: "asc" },
-              { label: "Z to A", val: "desc" }
-            ].map(s => (
-              <DropdownMenuItem key={s.val} onClick={() => handleSort("name", s.val as ReturnType<typeof JSON.parse>)} className="text-xs cursor-pointer">
-                {s.label}
-                {sortConfig?.key === "name" && sortConfig.direction === s.val && <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      header: "Lead Information",
+      sortable: true,
+      sortDirection: sortConfig?.key === "name" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("name", dir),
       cell: (lead: LeadType) => (
         <div className="flex items-center gap-3 py-1 cursor-pointer group" onClick={(e) => { e.stopPropagation(); setDetailsLeadId(lead.id); }}>
           <Avatar className="w-10 h-10 rounded-full border border-border shadow-sm group-hover:border-primary/50 transition-colors">
@@ -302,7 +286,7 @@ const LeadsTable = ({
     },
     {
       header: (
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Stage</div>
+        <div className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">Stage</div>
       ),
       cell: (lead: LeadType) => (
         <StatusBadge 
@@ -316,7 +300,7 @@ const LeadsTable = ({
       header: (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-1 cursor-pointer hover:text-foreground text-muted-foreground transition-colors text-xs font-semibold uppercase tracking-wider group">
+            <div className="flex items-center gap-1 cursor-pointer hover:text-foreground text-muted-foreground transition-colors text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight group">
               Priority
               <ChevronDown className={cn("w-3 h-3 transition-opacity", filters.priority !== "All Priorities" ? "opacity-100 text-primary" : "opacity-0 group-hover:opacity-100")} />
             </div>
@@ -342,7 +326,7 @@ const LeadsTable = ({
     },
     {
       header: (
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Phone</div>
+        <div className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">Phone</div>
       ),
       cell: (lead: LeadType) => (
         <div className="flex items-center gap-1.5 text-xs font-medium text-foreground">
@@ -353,28 +337,11 @@ const LeadsTable = ({
       className: "w-[130px]",
     },
     {
-      header: (
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-1 cursor-pointer hover:text-foreground text-muted-foreground transition-colors text-xs font-semibold uppercase tracking-wider group">
-              Deal Value
-              <ChevronDown className={cn("w-3 h-3 transition-opacity", sortConfig?.key === "valueAmount" ? "opacity-100 text-primary" : "opacity-0 group-hover:opacity-100")} />
-            </div>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start" className="w-40">
-            <div className="px-2 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">Sort By</div>
-            {[
-              { label: "High to Low", val: "desc" },
-              { label: "Low to High", val: "asc" }
-            ].map(s => (
-              <DropdownMenuItem key={s.val} onClick={() => handleSort("valueAmount", s.val as ReturnType<typeof JSON.parse>)} className="text-xs cursor-pointer">
-                {s.label}
-                {sortConfig?.key === "valueAmount" && sortConfig.direction === s.val && <CheckCircle2 className="w-3.5 h-3.5 ml-auto text-primary" />}
-              </DropdownMenuItem>
-            ))}
-          </DropdownMenuContent>
-        </DropdownMenu>
-      ),
+      header: "Deal Value",
+      align: "right" as const,
+      sortable: true,
+      sortDirection: sortConfig?.key === "valueAmount" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("valueAmount", dir),
       cell: (lead: LeadType) => {
         const prob = lead.probability || 0;
         const val = lead.valueAmount ? formatCurrency(lead.valueAmount) : formatCurrency(Number(String(lead.value).replace(/[^0-9.-]+/g,"")));
@@ -391,7 +358,7 @@ const LeadsTable = ({
       header: (
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <div className="flex items-center gap-1 cursor-pointer hover:text-foreground text-muted-foreground transition-colors text-xs font-semibold uppercase tracking-wider group">
+            <div className="flex items-center gap-1 cursor-pointer hover:text-foreground text-muted-foreground transition-colors text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight group">
               Activity
               <ChevronDown className={cn("w-3 h-3 transition-opacity", (filters.activity !== "All Activity" || sortConfig?.key === "activity") ? "opacity-100 text-primary" : "opacity-0 group-hover:opacity-100")} />
             </div>
@@ -481,7 +448,7 @@ const LeadsTable = ({
     },
     {
       header: (
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-center">Notes</div>
+        <div className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground text-center">Notes</div>
       ),
       cell: (lead: LeadType) => {
         const count = lead.notesCount || 0;
@@ -507,7 +474,7 @@ const LeadsTable = ({
     },
     {
       header: (
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground">Meetings</div>
+        <div className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">Meetings</div>
       ),
       cell: (lead: LeadType) => {
         const meeting = lead.upcomingMeeting;
@@ -534,7 +501,7 @@ const LeadsTable = ({
     },
     {
       header: (
-        <div className="text-xs font-semibold uppercase tracking-wider text-muted-foreground text-right">Actions</div>
+        <div className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground text-right">Actions</div>
       ),
       headerClassName: "text-right",
       cell: (lead: LeadType) => (
@@ -736,3 +703,5 @@ const LeadsTable = ({
 };
 
 export default LeadsTable;
+
+

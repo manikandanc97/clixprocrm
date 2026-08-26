@@ -303,14 +303,14 @@ export default function SecurityCenterPage() {
         <div className="crm-table-wrap">
           <div className="overflow-auto flex-1 min-h-0">
             <table className="w-full text-left text-xs">
-              <thead className="sticky top-0 z-20 bg-card text-muted-foreground font-semibold uppercase tracking-wider text-[11px] border-b border-border/60 shadow-xs">
+              <thead className="sticky top-0 z-20 bg-card border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
                 <tr>
-                  <th className="py-3.5 px-4 bg-card">Incident #</th>
-                  <th className="py-3.5 px-4 bg-card">Severity</th>
-                  <th className="py-3.5 px-4 bg-card">Status</th>
-                  <th className="py-3.5 px-4 bg-card">Title</th>
-                  <th className="py-3.5 px-4 bg-card">Detected</th>
-                  <th className="py-3.5 px-4 text-right bg-card">Actions</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 sm:px-6 text-left bg-card whitespace-nowrap">Incident #</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 sm:px-6 text-left bg-card whitespace-nowrap">Severity</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 sm:px-6 text-left bg-card whitespace-nowrap">Status</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 sm:px-6 text-left bg-card">Title</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 sm:px-6 text-left bg-card whitespace-nowrap">Detected</th>
+                  <th className="h-10 sm:h-11 py-2.5 px-4 sm:px-6 text-right bg-card whitespace-nowrap">Actions</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">

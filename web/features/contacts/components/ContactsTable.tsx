@@ -50,6 +50,23 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
     );
   };
 
+  // Sort state
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+  const setSort = (key: string, dir: "asc" | "desc" | null) => {
+    setSortConfig(dir === null ? null : { key, direction: dir });
+  };
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const sortedContacts: any[] = sortConfig
+    ? [...contacts].sort((a: any, b: any) => {
+        const aVal = a[sortConfig.key] ?? "";
+        const bVal = b[sortConfig.key] ?? "";
+        if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      })
+    : contacts;
+
   const columns = [
     {
       header: (
@@ -70,6 +87,9 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
     },
     {
       header: "Contact",
+      sortable: true,
+      sortDirection: sortConfig?.key === "name" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("name", dir),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (contact: any) => (
         <div className="flex items-center gap-3">
@@ -145,6 +165,10 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
     },
     {
       header: "Value / Revenue",
+      align: "right" as const,
+      sortable: true,
+      sortDirection: sortConfig?.key === "valueAmount" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("valueAmount", dir),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (contact: any) => {
         const val = contact.valueAmount ?? contact.revenueValue ?? 0;
@@ -175,6 +199,7 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
     },
     {
       header: "Actions",
+      align: "right" as const,
       headerClassName: "text-right",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (contact: any) => (
@@ -220,8 +245,8 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const totalPages = Math.ceil(contacts.length / rowsPerPage) || 1;
-  const paginatedContacts = contacts.slice(
+  const totalPages = Math.ceil(sortedContacts.length / rowsPerPage) || 1;
+  const paginatedContacts = sortedContacts.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -235,14 +260,14 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
           rowClassName="h-16 hover:bg-muted/30 transition-colors"
           emptyTitle="No contacts found"
           emptyDescription="No contacts match the current search or filters."
-          hasPagination={contacts.length > 0}
+          hasPagination={sortedContacts.length > 0}
         />
       </div>
 
       <CRMPagination
         currentPage={currentPage}
         totalPages={totalPages}
-        totalItems={contacts.length}
+        totalItems={sortedContacts.length}
         rowsPerPage={rowsPerPage}
         onPageChange={setCurrentPage}
         onRowsPerPageChange={setRowsPerPage}

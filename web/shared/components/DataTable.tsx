@@ -11,16 +11,27 @@ import {
 } from "@/shared/ui/table";
 import { cn } from "@/shared/lib/utils";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { LucideIcon } from "lucide-react";
+
+export interface DataTableColumn<T> {
+  header: string | React.ReactNode;
+  cell: (item: T) => React.ReactNode;
+  className?: string;
+  headerClassName?: string;
+  /** Semantic alignment for this column */
+  align?: "left" | "center" | "right";
+  /** Whether this column supports sorting */
+  sortable?: boolean;
+  /** Current sort direction */
+  sortDirection?: SortDirection;
+  /** Called when user clicks sort on this column */
+  onSort?: (direction: SortDirection) => void;
+}
 
 interface DataTableProps<T> {
   data: T[];
-  columns: {
-    header: string | React.ReactNode;
-    cell: (item: T) => React.ReactNode;
-    className?: string;
-    headerClassName?: string;
-  }[];
+  columns: DataTableColumn<T>[];
   onRowClick?: (item: T) => void;
   className?: string;
   wrapperClassName?: string;
@@ -64,16 +75,33 @@ export function DataTable<T>({
 
   return (
     <Table className={cn("min-w-full", className)} wrapperClassName={cn(!hasPagination && "crm-table-no-pagination", wrapperClassName)}>
-      <TableHeader className="sticky top-0 z-20 bg-card shadow-xs">
-        <TableRow className="hover:bg-transparent border-b">
-          {columns.map((column, index) => (
-            <TableHead 
-              key={index} 
-              className={cn("bg-card text-muted-foreground", column.headerClassName, column.className)}
-            >
-              {column.header}
-            </TableHead>
-          ))}
+      <TableHeader>
+        <TableRow className="hover:bg-transparent">
+          {columns.map((column, index) => {
+            const alignClass = column.align === "right"
+              ? "text-right"
+              : column.align === "center"
+              ? "text-center"
+              : "text-left";
+            return (
+              <TableHead
+                key={index}
+                className={cn(alignClass, column.headerClassName, column.className)}
+              >
+                {typeof column.header === "string" ? (
+                  <DataTableColumnHeader
+                    title={column.header}
+                    align={column.align ?? "left"}
+                    sortable={column.sortable}
+                    sortDirection={column.sortDirection}
+                    onSort={column.onSort}
+                  />
+                ) : (
+                  column.header
+                )}
+              </TableHead>
+            );
+          })}
         </TableRow>
       </TableHeader>
       <TableBody>
@@ -87,17 +115,24 @@ export function DataTable<T>({
                 typeof rowClassName === "function" ? rowClassName(item) : rowClassName
               )}
             >
-              {columns.map((column, colIndex) => (
-                <TableCell key={colIndex} className={column.className}>
-                  {column.cell(item)}
-                </TableCell>
-              ))}
+              {columns.map((column, colIndex) => {
+                const cellAlignClass = column.align === "right"
+                  ? "text-right"
+                  : column.align === "center"
+                  ? "text-center"
+                  : undefined;
+                return (
+                  <TableCell key={colIndex} className={cn(column.className, cellAlignClass)}>
+                    {column.cell(item)}
+                  </TableCell>
+                );
+              })}
             </TableRow>
           ))
         ) : (
           <TableRow className="hover:bg-transparent border-0">
-            <TableCell 
-              colSpan={columns.length} 
+            <TableCell
+              colSpan={columns.length}
               className="p-4 text-center text-muted-foreground border-0"
             >
               {renderEmptyState()}

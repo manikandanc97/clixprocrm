@@ -133,8 +133,8 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
 
       <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden">
         <CRMDataTable containerClassName="border-0 shadow-none rounded-none w-full" className="w-full">
-          <CRMTableHeader className="sticky top-0 z-20 bg-card shadow-xs">
-            <CRMTableRow className="h-14 border-b border-border/30 bg-muted/20">
+          <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
+            <CRMTableRow className="h-10 sm:h-11">
               <CRMTableHeaderCell className="w-[52px] px-5">
                 <Checkbox 
                   checked={paginatedTasks.length > 0 && selectedTasks.size === paginatedTasks.length}
@@ -142,28 +142,28 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                   className="rounded-md border-muted-foreground/20" 
                 />
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="px-4">
                 Task
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[130px] px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="w-[130px] px-4">
                 Status
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[120px] px-4 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="w-[120px] px-4 text-center">
                 Priority
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[150px] px-4 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="w-[150px] px-4 text-center">
                 Due Date
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[160px] px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="w-[160px] px-4">
                 Related Record
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[140px] px-4 text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="w-[140px] px-4">
                 Owner
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[120px] px-4 text-center text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="w-[120px] px-4 text-center">
                 Last Updated
               </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[80px] px-5 text-right text-[10px] font-bold uppercase tracking-[0.18em] text-muted-foreground/60">
+              <CRMTableHeaderCell className="w-[80px] px-5 text-right">
                 Actions
               </CRMTableHeaderCell>
             </CRMTableRow>

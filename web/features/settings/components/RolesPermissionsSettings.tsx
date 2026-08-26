@@ -164,16 +164,16 @@ export default function RolesPermissionsSettings() {
         {/* Roles Matrix Table */}
         <div className="mt-5 border rounded-xl overflow-x-auto divide-y divide-border/50">
           <table className="w-full text-left text-xs min-w-[700px]">
-            <thead className="bg-muted/40 text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
+            <thead className="sticky top-0 z-10 bg-card border-b border-border/60 text-[12px] font-semibold text-muted-foreground uppercase tracking-[0.05em] leading-tight">
               <tr>
-                <th className="py-3 px-4 font-bold">Role</th>
-                <th className="py-3 px-3 text-center">Dashboard</th>
-                <th className="py-3 px-3 text-center">Leads & Deals</th>
-                <th className="py-3 px-3 text-center">Pipeline</th>
-                <th className="py-3 px-3 text-center">Quotations</th>
-                <th className="py-3 px-3 text-center">Reports</th>
-                <th className="py-3 px-3 text-center">Employees</th>
-                <th className="py-3 px-3 text-center">Settings</th>
+                <th className="h-10 sm:h-11 py-2.5 px-4 font-semibold text-left whitespace-nowrap">Role</th>
+                <th className="h-10 sm:h-11 py-2.5 px-3 text-center whitespace-nowrap">Dashboard</th>
+                <th className="h-10 sm:h-11 py-2.5 px-3 text-center whitespace-nowrap">Leads &amp; Deals</th>
+                <th className="h-10 sm:h-11 py-2.5 px-3 text-center whitespace-nowrap">Pipeline</th>
+                <th className="h-10 sm:h-11 py-2.5 px-3 text-center whitespace-nowrap">Quotations</th>
+                <th className="h-10 sm:h-11 py-2.5 px-3 text-center whitespace-nowrap">Reports</th>
+                <th className="h-10 sm:h-11 py-2.5 px-3 text-center whitespace-nowrap">Employees</th>
+                <th className="h-10 sm:h-11 py-2.5 px-3 text-center whitespace-nowrap">Settings</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40 font-medium">

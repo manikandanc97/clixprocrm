@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Users,
   Search,
@@ -12,6 +12,8 @@ import {
   Building2,
   Download,
   FileText,
+  Trash2,
+  AlertTriangle,
   X,
   ChevronLeft,
   ChevronRight,
@@ -23,6 +25,7 @@ import {
   fetchPlatformUsers,
   updatePlatformUserStatus,
   transferSuperAdminRole,
+  deletePlatformUser,
   PlatformUser,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
@@ -57,6 +60,9 @@ export default function SuperAdminUsersPage() {
   const [transferTargetUser, setTransferTargetUser] = useState<PlatformUser | null>(null);
   const [transferConfirmText, setTransferConfirmText] = useState("");
   const [isTransferring, setIsTransferring] = useState(false);
+  const [deleteTargetUser, setDeleteTargetUser] = useState<PlatformUser | null>(null);
+  const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isDeleting, setIsDeleting] = useState(false);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
@@ -67,8 +73,6 @@ export default function SuperAdminUsersPage() {
       setLoading(true);
       const res = await fetchPlatformUsers({
         limit: 1000,
-        status: statusFilter === "ALL" ? undefined : statusFilter,
-        isSuperAdmin: superAdminOnly ? true : undefined,
       });
       setUsers(res.users || []);
     } catch (err: any) {
@@ -80,7 +84,6 @@ export default function SuperAdminUsersPage() {
 
   useEffect(() => {
     loadUsers();
-    setCurrentPage(1);
 
     const handleAal2Verified = () => {
       loadUsers();
@@ -89,11 +92,11 @@ export default function SuperAdminUsersPage() {
     return () => {
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
-  }, [statusFilter, superAdminOnly]);
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, statusFilter, superAdminOnly]);
 
   const handleExecuteTransfer = async () => {
     if (!transferTargetUser) return;
@@ -116,6 +119,30 @@ export default function SuperAdminUsersPage() {
       );
     } finally {
       setIsTransferring(false);
+    }
+  };
+
+  const handleExecuteDelete = async () => {
+    if (!deleteTargetUser) return;
+    if (deleteConfirmText.trim().toUpperCase() !== "DELETE") {
+      toast.error('Please type "DELETE" to confirm permanent account deletion.');
+      return;
+    }
+
+    try {
+      setIsDeleting(true);
+      const res = await deletePlatformUser(deleteTargetUser.id);
+      toast.success(res.message || `User account deleted successfully.`);
+      setDeleteTargetUser(null);
+      setDeleteConfirmText("");
+      setSelectedUser(null);
+      await loadUsers();
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || err?.message || "Failed to delete user account."
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -171,17 +198,34 @@ export default function SuperAdminUsersPage() {
     toast.success("Users exported successfully.");
   };
 
-  const totalSuperAdmins = users.filter((u) => u.isSuperAdmin).length;
-  const totalActiveUsers = users.filter((u) => u.status === "ACTIVE").length;
+  const totalSuperAdmins = useMemo(
+    () => users.filter((u) => u.isSuperAdmin).length,
+    [users]
+  );
+  const totalActiveUsers = useMemo(
+    () => users.filter((u) => u.status === "ACTIVE").length,
+    [users]
+  );
 
-  const filteredUsers = users.filter((u) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      (u.name && u.name.toLowerCase().includes(q)) ||
-      u.email.toLowerCase().includes(q)
-    );
-  });
+  const filteredUsers = useMemo(() => {
+    return users.filter((u) => {
+      // 1. Super Admin Filter
+      if (superAdminOnly && !u.isSuperAdmin) {
+        return false;
+      }
+      // 2. Status Filter
+      if (statusFilter !== "ALL" && u.status !== statusFilter) {
+        return false;
+      }
+      // 3. Search Query Filter
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        (u.name && u.name.toLowerCase().includes(q)) ||
+        u.email.toLowerCase().includes(q)
+      );
+    });
+  }, [users, search, statusFilter, superAdminOnly]);
 
   const totalPages = Math.max(1, Math.ceil(filteredUsers.length / rowsPerPage));
   const paginatedUsers = filteredUsers.slice(
@@ -289,14 +333,14 @@ export default function SuperAdminUsersPage() {
       <div className={cn("crm-table-wrap", (loading || filteredUsers.length === 0) && "crm-table-no-pagination")}>
         <div className="overflow-auto flex-1 min-h-0">
           <table className="w-full text-left text-sm border-collapse">
-            <thead className="sticky top-0 z-20 bg-card shadow-xs">
-              <tr className="border-b border-border bg-muted/20 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                <th className="h-12 px-6 py-4 bg-card">User</th>
-                <th className="h-12 px-6 py-4 bg-card">Platform Role</th>
-                <th className="h-12 px-6 py-4 bg-card">Organizations & Role</th>
-                <th className="h-12 px-6 py-4 bg-card">Account Status</th>
-                <th className="h-12 px-6 py-4 bg-card">Created Date</th>
-                <th className="h-12 px-6 py-4 text-right bg-card">Actions</th>
+            <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+              <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">User</th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Platform Role</th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card">Organizations &amp; Role</th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Status</th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Created Date</th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/50">
@@ -345,14 +389,14 @@ export default function SuperAdminUsersPage() {
                     </td>
 
                     {/* Platform Role */}
-                    <td className="px-6 py-4">
+                    <td className="px-6 py-4 whitespace-nowrap">
                       {u.isSuperAdmin ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold shadow-sm">
-                          <Crown className="h-3.5 w-3.5" />
+                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold shadow-sm whitespace-nowrap">
+                          <Crown className="h-3.5 w-3.5 shrink-0" />
                           SUPER ADMIN
                         </span>
                       ) : (
-                        <span className="text-xs text-muted-foreground font-medium">
+                        <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
                           Standard User
                         </span>
                       )}
@@ -437,7 +481,7 @@ export default function SuperAdminUsersPage() {
                                 <DropdownMenuSeparator />
                                 <DropdownMenuItem
                                   onClick={() => setTransferTargetUser(u)}
-                                  className="text-xs gap-2 cursor-pointer font-medium text-amber-600 focus:text-amber-600"
+                                  className="text-xs gap-2 cursor-pointer font-medium text-amber-600 focus:text-amber-600 focus:bg-amber-500/10 hover:text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 dark:focus:text-amber-400 dark:focus:bg-amber-500/20 not-data-[variant=destructive]:focus:**:!text-amber-600 not-data-[variant=destructive]:hover:**:!text-amber-600"
                                 >
                                   <Crown className="h-3.5 w-3.5 text-amber-500" />
                                   <span>Transfer Super Admin</span>
@@ -448,20 +492,32 @@ export default function SuperAdminUsersPage() {
                             {!u.isSuperAdmin && (
                               <>
                                 <DropdownMenuSeparator />
+                                {u.status === "ACTIVE" ? (
+                                  <DropdownMenuItem
+                                    variant="destructive"
+                                    onClick={() => handleToggleStatus(u)}
+                                    className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
+                                  >
+                                    <Ban className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
+                                    <span>Suspend User</span>
+                                  </DropdownMenuItem>
+                                ) : (
+                                  <DropdownMenuItem
+                                    onClick={() => handleToggleStatus(u)}
+                                    className="text-xs gap-2 cursor-pointer font-medium text-emerald-600 focus:text-emerald-600 focus:bg-emerald-500/10 hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400 dark:focus:text-emerald-400 dark:focus:bg-emerald-500/20"
+                                  >
+                                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
+                                    <span>Activate User</span>
+                                  </DropdownMenuItem>
+                                )}
+                                <DropdownMenuSeparator />
                                 <DropdownMenuItem
-                                  onClick={() => handleToggleStatus(u)}
-                                  className={`text-xs gap-2 cursor-pointer font-medium ${
-                                    u.status === "ACTIVE"
-                                      ? "text-rose-500 focus:text-rose-500"
-                                      : "text-emerald-500 focus:text-emerald-500"
-                                  }`}
+                                  variant="destructive"
+                                  onClick={() => setDeleteTargetUser(u)}
+                                  className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
                                 >
-                                  <Ban className="h-3.5 w-3.5" />
-                                  <span>
-                                    {u.status === "ACTIVE"
-                                      ? "Suspend User"
-                                      : "Activate User"}
-                                  </span>
+                                  <Trash2 className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
+                                  <span>Delete User</span>
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -530,7 +586,7 @@ export default function SuperAdminUsersPage() {
             <div className="space-y-4 text-xs">
               <div className="grid grid-cols-2 gap-3 p-3.5 rounded-xl bg-muted/40 border border-border/40">
                 <div>
-                  <span className="text-muted-foreground font-semibold">Account Status</span>
+                  <span className="text-muted-foreground font-semibold">Status</span>
                   <div className="mt-1">
                     <StatusBadge
                       status={selectedUser.status === "ACTIVE" ? "Active" : selectedUser.status === "SUSPENDED" ? "Suspended" : "Inactive"}
@@ -619,6 +675,19 @@ export default function SuperAdminUsersPage() {
                     >
                       <Crown className="h-3.5 w-3.5 mr-1 text-amber-500" />
                       Transfer Super Admin
+                    </Button>
+                    <Button
+                      onClick={() => {
+                        const target = selectedUser;
+                        setSelectedUser(null);
+                        setDeleteTargetUser(target);
+                      }}
+                      variant="outline"
+                      size="sm"
+                      className="rounded-xl text-xs font-semibold text-rose-600 border-rose-500/30 hover:bg-rose-500/10"
+                    >
+                      <Trash2 className="h-3.5 w-3.5 mr-1 text-rose-500" />
+                      Delete Account
                     </Button>
                     <Button
                       onClick={() => {
@@ -715,6 +784,84 @@ export default function SuperAdminUsersPage() {
                   className="rounded-xl text-xs font-bold bg-amber-600 hover:bg-amber-700 text-white"
                 >
                   {isTransferring ? "Transferring..." : "Confirm & Transfer Ownership"}
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+      {/* 8. User Account Deletion Confirmation Modal */}
+      {deleteTargetUser && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/70 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div className="flex items-center justify-between border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2.5 text-rose-600">
+                <Trash2 className="h-6 w-6" />
+                <h3 className="text-base font-bold text-foreground">
+                  Delete User Account
+                </h3>
+              </div>
+              <button
+                onClick={() => {
+                  setDeleteTargetUser(null);
+                  setDeleteConfirmText("");
+                }}
+                className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
+              >
+                <X className="h-5 w-5" />
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs text-muted-foreground">
+              <div className="p-3.5 rounded-xl bg-rose-500/10 border border-rose-500/20 text-foreground space-y-2">
+                <p className="font-bold text-rose-600 flex items-center gap-1.5">
+                  <AlertTriangle className="h-4 w-4" />
+                  Permanent Account Deletion
+                </p>
+                <p className="text-xs text-muted-foreground leading-relaxed">
+                  You are about to permanently delete the user account:
+                </p>
+                <div className="p-2.5 rounded-lg bg-card border border-border text-foreground font-semibold">
+                  <p>{deleteTargetUser.name || "No name"}</p>
+                  <p className="text-xs text-muted-foreground font-mono">{deleteTargetUser.email}</p>
+                </div>
+                <p className="text-[11px] text-rose-700 dark:text-rose-400 font-medium">
+                  ⚠️ This action will remove all organization memberships, revoke active sessions, and dissociate assigned CRM records. This action cannot be undone.
+                </p>
+              </div>
+
+              <div className="space-y-2">
+                <label className="font-semibold text-foreground block">
+                  Type <span className="font-mono text-rose-600 font-bold">DELETE</span> to confirm:
+                </label>
+                <input
+                  type="text"
+                  value={deleteConfirmText}
+                  onChange={(e) => setDeleteConfirmText(e.target.value)}
+                  placeholder="DELETE"
+                  className="w-full px-3 py-2 rounded-xl bg-background border border-border text-foreground font-mono text-sm focus:outline-none focus:ring-2 focus:ring-rose-500"
+                />
+              </div>
+
+              <div className="pt-3 flex items-center justify-end gap-2.5 border-t border-border/60">
+                <Button
+                  onClick={() => {
+                    setDeleteTargetUser(null);
+                    setDeleteConfirmText("");
+                  }}
+                  variant="ghost"
+                  size="sm"
+                  className="rounded-xl text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  onClick={handleExecuteDelete}
+                  disabled={deleteConfirmText.trim().toUpperCase() !== "DELETE" || isDeleting}
+                  size="sm"
+                  className="rounded-xl text-xs font-bold bg-rose-600 hover:bg-rose-700 text-white"
+                >
+                  {isDeleting ? "Deleting..." : "Permanently Delete User"}
                 </Button>
               </div>
             </div>

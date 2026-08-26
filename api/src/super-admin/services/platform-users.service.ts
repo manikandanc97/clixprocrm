@@ -325,4 +325,184 @@ export class PlatformUsersService {
       );
     }
   }
+
+  async deleteUser(
+    id: string,
+    adminActorId: string,
+    reqInfo: { ip?: string; userAgent?: string } = {},
+  ) {
+    const user = await this.prisma.user.findUnique({
+      where: { id },
+    });
+
+    if (!user) {
+      throw new NotFoundException('User not found.');
+    }
+
+    if (user.isSuperAdmin) {
+      throw new ForbiddenException(
+        'Cannot delete the active Platform Super Admin. Transfer platform ownership to another user first.',
+      );
+    }
+
+    if (user.id === adminActorId) {
+      throw new ForbiddenException('Cannot delete your own account while logged in as Super Admin.');
+    }
+
+    await this.prisma.$transaction(
+      async (tx) => {
+        // 1. Clear reporting manager pointers where this user's TenantUser is referenced
+        const tenantUsers = await tx.tenantUser.findMany({
+          where: { userId: id },
+          select: { id: true },
+        });
+        const tenantUserIds = tenantUsers.map((tu) => tu.id);
+
+        if (tenantUserIds.length > 0) {
+          await tx.tenantUser.updateMany({
+            where: { reportingManagerId: { in: tenantUserIds } },
+            data: { reportingManagerId: null },
+          });
+        }
+
+        // 2. Delete memberships & sessions
+        await tx.tenantUser.deleteMany({ where: { userId: id } });
+        await tx.userSession.deleteMany({ where: { userId: id } });
+        await tx.mfaRecoveryCode.deleteMany({ where: { userId: id } });
+        await tx.teamMember.deleteMany({ where: { userId: id } });
+        await tx.team.updateMany({ where: { leaderId: id }, data: { leaderId: null } });
+        await tx.recordShare.deleteMany({
+          where: { OR: [{ sharedWithUserId: id }, { createdById: id }] },
+        });
+
+        // 3. Delete AI messages & conversations
+        await tx.aiMessage.deleteMany({
+          where: { conversation: { userId: id } },
+        });
+        await tx.aiConversation.deleteMany({
+          where: { userId: id },
+        });
+
+        // 4. Nullify foreign keys on CRM entities
+        await tx.customer.updateMany({
+          where: { assignedToId: id },
+          data: { assignedToId: null },
+        });
+        await tx.lead.updateMany({
+          where: { assignedToId: id },
+          data: { assignedToId: null },
+        });
+        await tx.lead.updateMany({
+          where: { createdById: id },
+          data: { createdById: null },
+        });
+        await tx.lead.updateMany({
+          where: { updatedById: id },
+          data: { updatedById: null },
+        });
+        await tx.task.updateMany({
+          where: { assignedToId: id },
+          data: { assignedToId: null },
+        });
+        await tx.task.updateMany({
+          where: { createdById: id },
+          data: { createdById: null },
+        });
+        await tx.task.updateMany({
+          where: { completedById: id },
+          data: { completedById: null },
+        });
+        await tx.meeting.updateMany({
+          where: { assignedToId: id },
+          data: { assignedToId: null },
+        });
+        await tx.meeting.updateMany({
+          where: { ownerId: id },
+          data: { ownerId: null },
+        });
+        await tx.deal.updateMany({
+          where: { ownerId: id },
+          data: { ownerId: null },
+        });
+        await tx.company.updateMany({
+          where: { ownerId: id },
+          data: { ownerId: null },
+        });
+        await tx.quotation.updateMany({
+          where: { assignedToId: id },
+          data: { assignedToId: null },
+        });
+        await tx.invoice.updateMany({
+          where: { createdById: id },
+          data: { createdById: null },
+        });
+        await tx.payment.updateMany({
+          where: { createdById: id },
+          data: { createdById: null },
+        });
+
+        // 5. Delete or nullify timeline events, notes, attachments, notifications
+        await tx.timelineEvent.updateMany({
+          where: { userId: id },
+          data: { userId: null },
+        });
+        await tx.note.deleteMany({ where: { userId: id } });
+        await tx.attachment.deleteMany({ where: { userId: id } });
+        await tx.notification.deleteMany({ where: { userId: id } });
+
+        // 6. Nullify audit log references before deleting user (since foreign key has NoAction)
+        await tx.auditLog.updateMany({
+          where: { userId: id },
+          data: { userId: null },
+        });
+        await tx.auditLog.updateMany({
+          where: { targetUserId: id },
+          data: { targetUserId: null },
+        });
+
+        // 7. Delete User from database
+        await tx.user.delete({
+          where: { id },
+        });
+
+        // 8. Create sealed audit log for user deletion
+        await this.prisma.createSealedAuditLog(
+          {
+            userId: adminActorId,
+            targetUserId: null,
+            action: 'USER_DELETED',
+            module: 'SuperAdmin',
+            details: {
+              deletedUserId: id,
+              deletedUserEmail: user.email,
+              deletedUserName: user.name,
+              deletedAt: new Date().toISOString(),
+            },
+            ipAddress: reqInfo.ip || null,
+            userAgent: reqInfo.userAgent || null,
+          },
+          tx,
+        );
+      },
+      { timeout: 20000 },
+    );
+
+    // 9. Remove from Supabase auth.users if available
+    try {
+      await this.prisma.$queryRawUnsafe(
+        `DELETE FROM auth.users WHERE id = $1::uuid;`,
+        id,
+      );
+    } catch {}
+
+    // 10. Cache invalidation
+    invalidateTokenUserCache(id);
+    invalidateUserTenantCache(id);
+    invalidateGetMeCache(id);
+
+    return {
+      success: true,
+      message: `User account "${user.name || user.email}" was permanently deleted.`,
+    };
+  }
 }

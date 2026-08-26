@@ -403,13 +403,13 @@ export default function SuperAdminDashboardPage() {
 
           <div className="overflow-auto rounded-xl border border-border/60">
             <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card shadow-xs">
-                <tr className="border-b border-border bg-muted/20 text-xs font-bold text-muted-foreground uppercase tracking-wider">
-                  <th className="h-11 px-4 bg-card">Organization</th>
-                  <th className="h-11 px-4 bg-card">Plan</th>
-                  <th className="h-11 px-4 bg-card">Users</th>
-                  <th className="h-11 px-4 bg-card">Status</th>
-                  <th className="h-11 px-4 text-right bg-card">Created</th>
+              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                <tr className="text-[12px] font-semibold text-muted-foreground uppercase tracking-[0.05em] leading-tight">
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Organization</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Plan</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Users</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Status</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Created</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">

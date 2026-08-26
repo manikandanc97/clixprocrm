@@ -252,5 +252,88 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
         ),
       );
     });
+
+    it('should REJECT Super Admin deleting the platform Super Admin account via platformUsersService', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        id: 'super-admin-1',
+        isSuperAdmin: true,
+        name: 'Root Admin',
+        email: 'root@clixpro.com',
+      });
+
+      await expect(
+        platformUsersService.deleteUser('super-admin-1', 'super-admin-2'),
+      ).rejects.toThrow(
+        new ForbiddenException(
+          'Cannot delete the active Platform Super Admin. Transfer platform ownership to another user first.',
+        ),
+      );
+    });
+
+    it('should REJECT Super Admin deleting their own logged-in account', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        id: 'super-admin-1',
+        isSuperAdmin: false,
+        name: 'Root Admin',
+        email: 'root@clixpro.com',
+      });
+
+      await expect(
+        platformUsersService.deleteUser('super-admin-1', 'super-admin-1'),
+      ).rejects.toThrow(
+        new ForbiddenException(
+          'Cannot delete your own account while logged in as Super Admin.',
+        ),
+      );
+    });
+
+    it('should successfully delete a standard user and record sealed audit log', async () => {
+      mockPrisma.user.findUnique.mockResolvedValueOnce({
+        id: 'user-to-delete',
+        isSuperAdmin: false,
+        name: 'Regular User',
+        email: 'regular@example.com',
+      });
+
+      mockPrisma.tenantUser.findMany = jest.fn().mockResolvedValueOnce([]);
+      mockPrisma.userSession = { deleteMany: jest.fn() };
+      mockPrisma.mfaRecoveryCode = { deleteMany: jest.fn() };
+      mockPrisma.teamMember = { deleteMany: jest.fn() };
+      mockPrisma.team = { updateMany: jest.fn() };
+      mockPrisma.recordShare = { deleteMany: jest.fn() };
+      mockPrisma.aiMessage = { deleteMany: jest.fn() };
+      mockPrisma.aiConversation = { deleteMany: jest.fn() };
+      mockPrisma.customer = { updateMany: jest.fn() };
+      mockPrisma.lead = { updateMany: jest.fn() };
+      mockPrisma.task = { updateMany: jest.fn() };
+      mockPrisma.meeting = { updateMany: jest.fn() };
+      mockPrisma.deal = { updateMany: jest.fn() };
+      mockPrisma.company = { updateMany: jest.fn() };
+      mockPrisma.quotation = { updateMany: jest.fn() };
+      mockPrisma.invoice = { updateMany: jest.fn() };
+      mockPrisma.payment = { updateMany: jest.fn() };
+      mockPrisma.timelineEvent = { updateMany: jest.fn() };
+      mockPrisma.note = { deleteMany: jest.fn() };
+      mockPrisma.attachment = { deleteMany: jest.fn() };
+      mockPrisma.notification = { deleteMany: jest.fn() };
+      mockPrisma.auditLog.updateMany = jest.fn();
+
+      const result = await platformUsersService.deleteUser('user-to-delete', 'super-admin-1');
+
+      expect(result.success).toBe(true);
+      expect(result.message).toContain('permanently deleted');
+      expect(mockPrisma.createSealedAuditLog).toHaveBeenCalledWith(
+        expect.objectContaining({
+          userId: 'super-admin-1',
+          action: 'USER_DELETED',
+          module: 'SuperAdmin',
+          details: expect.objectContaining({
+            deletedUserId: 'user-to-delete',
+            deletedUserEmail: 'regular@example.com',
+          }),
+        }),
+        expect.anything(),
+      );
+    });
   });
 });

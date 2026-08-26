@@ -52,6 +52,8 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
     sortedDeals,
     selectedIds,
     handleSort,
+    setSort,
+    sortConfig,
     toggleSelectAll,
     toggleSelect,
   } = useDealsLocal(deals);
@@ -75,14 +77,10 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
       className: "w-[50px]",
     },
     {
-      header: (
-        <div 
-          className="flex items-center gap-2 cursor-pointer group"
-          onClick={() => handleSort("name")}
-        >
-          Deal Name
-        </div>
-      ),
+      header: "Deal Name",
+      sortable: true,
+      sortDirection: sortConfig?.key === "name" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("name", dir),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (deal: any) => (
         <div className="flex items-center gap-3">
@@ -100,6 +98,10 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
     },
     {
       header: "Value",
+      align: "right" as const,
+      sortable: true,
+      sortDirection: sortConfig?.key === "value" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("value", dir),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (deal: any) => {
         return (
@@ -132,6 +134,7 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
     },
     {
       header: "Actions",
+      align: "right" as const,
       headerClassName: "text-right",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (deal: any) => (

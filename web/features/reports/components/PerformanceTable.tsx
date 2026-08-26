@@ -93,13 +93,13 @@ const PerformanceTable = ({ performance }: PerformanceTableProps) => {
             <>
               <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden">
                 <CRMDataTable containerClassName="border-0 shadow-none rounded-none w-full" className="w-full">
-                  <CRMTableHeader className="sticky top-0 z-20 bg-card shadow-xs">
-                    <CRMTableRow>
+                  <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
+                    <CRMTableRow className="h-10 sm:h-11">
                       <CRMTableHeaderCell 
                         className="cursor-pointer group select-none bg-card"
                         onClick={() => handleSort("name")}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           Team Member <CRMSortIndicator active={sortConfig?.key === "name"} direction={sortConfig?.direction} />
                         </div>
                       </CRMTableHeaderCell>
@@ -107,7 +107,7 @@ const PerformanceTable = ({ performance }: PerformanceTableProps) => {
                         className="cursor-pointer group select-none"
                         onClick={() => handleSort("dealsClosed")}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           Deals Closed <CRMSortIndicator active={sortConfig?.key === "dealsClosed"} direction={sortConfig?.direction} />
                         </div>
                       </CRMTableHeaderCell>
@@ -116,7 +116,7 @@ const PerformanceTable = ({ performance }: PerformanceTableProps) => {
                         className="cursor-pointer group select-none bg-card"
                         onClick={() => handleSort("conversionRate")}
                       >
-                        <div className="flex items-center gap-2">
+                        <div className="flex items-center gap-1.5">
                           Conversion <CRMSortIndicator active={sortConfig?.key === "conversionRate"} direction={sortConfig?.direction} />
                         </div>
                       </CRMTableHeaderCell>

@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   Query,
@@ -131,6 +132,26 @@ export class PlatformUsersController {
       success: true,
       data,
       message: `Super Admin ownership transferred successfully`,
+    };
+  }
+
+  @Delete(':id')
+  async deleteUser(
+    @Req() req: any,
+    @Param('id') id: string,
+  ) {
+    const data = await this.usersService.deleteUser(
+      id,
+      req.user.id,
+      {
+        ip: req.ip || req.headers?.['x-forwarded-for'],
+        userAgent: req.headers?.['user-agent'],
+      },
+    );
+    return {
+      success: true,
+      data,
+      message: data.message || 'User deleted successfully',
     };
   }
 }

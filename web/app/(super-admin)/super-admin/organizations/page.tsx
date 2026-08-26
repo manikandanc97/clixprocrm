@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   Building2,
   Plus,
@@ -53,6 +53,7 @@ import { PlanBadge } from "@/shared/components/PlanBadge";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
+import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
 
 export default function SuperAdminOrganizationsPage() {
   const [organizations, setOrganizations] = useState<PlatformOrganization[]>([]);
@@ -77,6 +78,12 @@ export default function SuperAdminOrganizationsPage() {
   const [selectedOrgDetails, setSelectedOrgDetails] = useState<any>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
+  // Sort state
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+  const setSort = (key: string, dir: "asc" | "desc" | null) => {
+    setSortConfig(dir === null ? null : { key, direction: dir });
+  };
+
   // Delete Confirmation State
   const [orgToDelete, setOrgToDelete] = useState<PlatformOrganization | null>(null);
   const [deleting, setDeleting] = useState(false);
@@ -86,7 +93,6 @@ export default function SuperAdminOrganizationsPage() {
       setLoading(true);
       const res = await fetchPlatformOrganizations({
         limit: 1000,
-        plan: planFilter === "ALL" ? undefined : planFilter,
       });
       setOrganizations(res.organizations || []);
     } catch (err: any) {
@@ -98,7 +104,6 @@ export default function SuperAdminOrganizationsPage() {
 
   useEffect(() => {
     loadOrganizations();
-    setCurrentPage(1);
 
     const handleAal2Verified = () => {
       loadOrganizations();
@@ -107,11 +112,11 @@ export default function SuperAdminOrganizationsPage() {
     return () => {
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
-  }, [planFilter]);
+  }, []);
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search]);
+  }, [search, planFilter]);
 
   const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -208,14 +213,36 @@ export default function SuperAdminOrganizationsPage() {
     toast.success("Organizations exported successfully.");
   };
 
-  const totalActive = organizations.filter((o) => o.status === "ACTIVE").length;
-  const totalPro = organizations.filter((o) => o.plan?.toLowerCase() === "pro" || o.plan?.toLowerCase() === "enterprise").length;
+  const totalActive = useMemo(
+    () => organizations.filter((o) => o.status === "ACTIVE").length,
+    [organizations]
+  );
+  const totalPro = useMemo(
+    () =>
+      organizations.filter(
+        (o) =>
+          o.plan?.toLowerCase() === "pro" ||
+          o.plan?.toLowerCase() === "enterprise"
+      ).length,
+    [organizations]
+  );
 
-  const filteredOrganizations = organizations.filter((org) => {
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return org.name.toLowerCase().includes(q) || org.slug.toLowerCase().includes(q);
-  });
+  const filteredOrganizations = useMemo(() => {
+    const filtered = organizations.filter((org) => {
+      if (planFilter !== "ALL" && org.plan?.toLowerCase() !== planFilter.toLowerCase()) return false;
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return org.name.toLowerCase().includes(q) || org.slug.toLowerCase().includes(q);
+    });
+    if (!sortConfig) return filtered;
+    return [...filtered].sort((a: any, b: any) => {
+      const aVal = (a as any)[sortConfig.key] ?? "";
+      const bVal = (b as any)[sortConfig.key] ?? "";
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [organizations, search, planFilter, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrganizations.length / rowsPerPage));
   const paginatedOrganizations = filteredOrganizations.slice(
@@ -312,15 +339,29 @@ export default function SuperAdminOrganizationsPage() {
         <div className={cn("crm-table-wrap", (loading || filteredOrganizations.length === 0) && "crm-table-no-pagination")}>
           <div className="overflow-auto flex-1 min-h-0">
             <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card shadow-xs">
-                <tr className="border-b border-border bg-muted/20 text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                  <th className="h-12 px-6 py-4 bg-card">Organization</th>
-                  <th className="h-12 px-6 py-4 bg-card">Plan</th>
-                  <th className="h-12 px-6 py-4 bg-card">Users</th>
-                  <th className="h-12 px-6 py-4 bg-card">CRM Activity</th>
-                  <th className="h-12 px-6 py-4 bg-card">Status</th>
-                  <th className="h-12 px-6 py-4 bg-card">Created Date</th>
-                  <th className="h-12 px-6 py-4 text-right bg-card">Actions</th>
+              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none" onClick={() => setSort("name", sortConfig?.key === "name" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}>
+                    <DataTableColumnHeader title="Organization" sortable sortDirection={sortConfig?.key === "name" ? sortConfig.direction : null} onSort={(d) => setSort("name", d)} />
+                  </th>
+                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+                    <DataTableColumnHeader title="Plan" sortable sortDirection={sortConfig?.key === "plan" ? sortConfig.direction : null} onSort={(d) => setSort("plan", d)} />
+                  </th>
+                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap cursor-pointer select-none">
+                    <DataTableColumnHeader title="Users" align="right" sortable sortDirection={sortConfig?.key === "userCount" ? sortConfig.direction : null} onSort={(d) => setSort("userCount", d)} />
+                  </th>
+                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader title="CRM Activity" />
+                  </th>
+                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader title="Status" />
+                  </th>
+                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+                    <DataTableColumnHeader title="Created Date" sortable sortDirection={sortConfig?.key === "createdAt" ? sortConfig.direction : null} onSort={(d) => setSort("createdAt", d)} />
+                  </th>
+                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                    <DataTableColumnHeader title="Actions" align="right" />
+                  </th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/50">

@@ -131,18 +131,26 @@ export function useLeads(leads: LeadType[]) {
       setSortConfig({ key: key as ReturnType<typeof JSON.parse>, direction });
       return;
     }
-    
     // Default toggles for simple sorts if no specific direction is provided
     setSortConfig((prev) => {
       if (prev?.key === key) {
         if (key === "name") return prev.direction === "asc" ? { key, direction: "desc" } : null;
-        if (key === "valueAmount") return prev.direction === "desc" ? { key, direction: "asc" } : null;
+        if (key === "valueAmount") return prev.direction === "asc" ? { key, direction: "desc" } : null;
       }
       if (key === "name") return { key, direction: "asc" };
-      if (key === "valueAmount") return { key, direction: "desc" };
+      if (key === "valueAmount") return { key, direction: "asc" };
       if (key === "activity") return { key, direction: "newest" };
       return null;
     });
+  };
+
+  /** Direct sort setter (used by DataTableColumnHeader onSort) */
+  const setSort = (key: NonNullable<SortConfig>["key"], direction: "asc" | "desc" | null) => {
+    if (direction === null) {
+      setSortConfig(null);
+    } else {
+      setSortConfig({ key: key as ReturnType<typeof JSON.parse>, direction });
+    }
   };
 
   const updateFilter = (key: keyof FilterConfig, value: string) => {
@@ -222,6 +230,7 @@ export function useLeads(leads: LeadType[]) {
     updateFilter,
     clearFilters,
     handleSort,
+    setSort,
     toggleSelectAll,
     toggleSelect,
     toggleExpand,
