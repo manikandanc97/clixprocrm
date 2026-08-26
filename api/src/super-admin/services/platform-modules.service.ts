@@ -230,31 +230,54 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
 
 @Injectable()
 export class PlatformModulesService {
+  private isSeeded = false;
+
   constructor(private readonly prisma: PrismaService) {}
 
   async seedDefaultModulesIfEmpty(): Promise<number> {
-    for (const mod of DEFAULT_PLATFORM_MODULES) {
-      await this.prisma.platformModule.upsert({
-        where: { key: mod.key! },
-        create: {
-          key: mod.key!,
-          label: mod.label,
-          icon: mod.icon || 'Layers',
-          route: mod.route,
-          group: mod.group || 'Core',
-          sortOrder: mod.sortOrder ?? 0,
-          isEnabled: mod.isEnabled ?? true,
-          isVisible: mod.isVisible ?? true,
-          isSystem: mod.isSystem ?? false,
-          permission: mod.permission || null,
-          badge: mod.badge || null,
-          description: mod.description || null,
-        },
-        update: {},
-      });
+    if (this.isSeeded) {
+      return DEFAULT_PLATFORM_MODULES.length;
     }
 
-    return DEFAULT_PLATFORM_MODULES.length;
+    try {
+      const existingCount = await this.prisma.platformModule.count();
+      if (existingCount >= DEFAULT_PLATFORM_MODULES.length) {
+        this.isSeeded = true;
+        return existingCount;
+      }
+
+      // Check which default modules are missing and insert only those
+      const existingModules = await this.prisma.platformModule.findMany({
+        select: { key: true },
+      });
+      const existingKeys = new Set(existingModules.map((m) => m.key));
+
+      const missing = DEFAULT_PLATFORM_MODULES.filter((m) => !existingKeys.has(m.key!));
+      if (missing.length > 0) {
+        await this.prisma.platformModule.createMany({
+          data: missing.map((mod) => ({
+            key: mod.key!,
+            label: mod.label,
+            icon: mod.icon || 'Layers',
+            route: mod.route,
+            group: mod.group || 'Core',
+            sortOrder: mod.sortOrder ?? 0,
+            isEnabled: mod.isEnabled ?? true,
+            isVisible: mod.isVisible ?? true,
+            isSystem: mod.isSystem ?? false,
+            permission: mod.permission || null,
+            badge: mod.badge || null,
+            description: mod.description || null,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      this.isSeeded = true;
+      return DEFAULT_PLATFORM_MODULES.length;
+    } catch {
+      return DEFAULT_PLATFORM_MODULES.length;
+    }
   }
 
   async listModules(filters?: {
@@ -286,20 +309,21 @@ export class PlatformModulesService {
       ];
     }
 
-    const modules = await this.prisma.platformModule.findMany({
-      where,
-      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-      include: {
-        children: {
-          orderBy: { sortOrder: 'asc' },
+    const [modules, totalCount, enabledCount, disabledCount, systemCount] = await Promise.all([
+      this.prisma.platformModule.findMany({
+        where,
+        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+        include: {
+          children: {
+            orderBy: { sortOrder: 'asc' },
+          },
         },
-      },
-    });
-
-    const totalCount = await this.prisma.platformModule.count();
-    const enabledCount = await this.prisma.platformModule.count({ where: { isEnabled: true } });
-    const disabledCount = await this.prisma.platformModule.count({ where: { isEnabled: false } });
-    const systemCount = await this.prisma.platformModule.count({ where: { isSystem: true } });
+      }),
+      this.prisma.platformModule.count(),
+      this.prisma.platformModule.count({ where: { isEnabled: true } }),
+      this.prisma.platformModule.count({ where: { isEnabled: false } }),
+      this.prisma.platformModule.count({ where: { isSystem: true } }),
+    ]);
 
     return {
       modules,

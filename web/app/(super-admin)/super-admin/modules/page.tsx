@@ -25,7 +25,6 @@ import {
   Globe,
   Tag,
   AlertTriangle,
-  Loader2,
   Check,
   ChevronRight,
   Info,
@@ -81,6 +80,7 @@ import {
   DynamicIcon,
 } from "@/shared/lib/icons/dynamic-icon";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { Skeleton } from "@/shared/ui/skeleton";
 
 const SUPER_ADMIN_NAV_MENUS = [
   {
@@ -241,6 +241,99 @@ const SUPER_ADMIN_NAV_MENUS = [
   },
 ];
 
+/* -------------------------------------------------------------------------- */
+/*  Inline table-only skeleton — used when page is mounted but data is loading */
+/* -------------------------------------------------------------------------- */
+function PlatformModulesTableSkeleton() {
+  return (
+    <div className="overflow-auto flex-1 min-h-0 rounded-xl border border-border/60 bg-card shadow-sm">
+      <table className="w-full text-left text-sm border-collapse">
+        <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+          <tr className="h-10 sm:h-11">
+            <th className="px-3 sm:px-4 py-2.5 w-16">
+              <Skeleton className="h-2.5 w-10 mx-auto" />
+            </th>
+            <th className="px-4 sm:px-6 py-2.5">
+              <Skeleton className="h-2.5 w-24" />
+            </th>
+            <th className="px-4 sm:px-6 py-2.5">
+              <Skeleton className="h-2.5 w-28" />
+            </th>
+            <th className="px-4 sm:px-6 py-2.5 text-center">
+              <Skeleton className="h-2.5 w-10 mx-auto" />
+            </th>
+            <th className="px-4 sm:px-6 py-2.5 text-center">
+              <Skeleton className="h-2.5 w-24 mx-auto" />
+            </th>
+            <th className="px-4 sm:px-6 py-2.5 text-center">
+              <Skeleton className="h-2.5 w-20 mx-auto" />
+            </th>
+            <th className="px-4 sm:px-6 py-2.5 text-right">
+              <Skeleton className="h-2.5 w-14 ml-auto" />
+            </th>
+          </tr>
+        </thead>
+        <tbody className="divide-y divide-border/50">
+          {Array.from({ length: 8 }).map((_, i) => (
+            <tr key={i} className="h-16 border-b border-border/50">
+              {/* Order: up/number/down */}
+              <td className="px-3 py-4 w-16 text-center">
+                <div className="flex items-center justify-center gap-1">
+                  <Skeleton className="w-5 h-5 rounded-md" />
+                  <Skeleton className="w-4 h-3.5" />
+                  <Skeleton className="w-5 h-5 rounded-md" />
+                </div>
+              </td>
+              {/* Module & Route: icon + name + badge + route */}
+              <td className="px-4 py-4">
+                <div className="flex items-center gap-3">
+                  <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
+                  <div className="space-y-1.5 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-3.5 w-28" />
+                      <Skeleton className="h-4 w-12 rounded-full" />
+                    </div>
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-32 rounded" />
+                      <Skeleton className="h-3 w-16" />
+                    </div>
+                  </div>
+                </div>
+              </td>
+              {/* Category & Access */}
+              <td className="px-4 py-4">
+                <div className="flex flex-col gap-1 items-start">
+                  <Skeleton className="h-5 w-24 rounded-lg" />
+                  <Skeleton className="h-4 w-20 rounded" />
+                </div>
+              </td>
+              {/* Type */}
+              <td className="px-4 py-4 text-center">
+                <Skeleton className="h-5 w-14 rounded-full mx-auto" />
+              </td>
+              {/* Global Status */}
+              <td className="px-4 py-4 text-center">
+                <div className="flex items-center justify-center gap-2">
+                  <Skeleton className="h-5 w-9 rounded-full" />
+                  <Skeleton className="h-3.5 w-8" />
+                </div>
+              </td>
+              {/* Sidebar Nav */}
+              <td className="px-4 py-4 text-center">
+                <Skeleton className="h-6 w-20 rounded-lg mx-auto" />
+              </td>
+              {/* Actions */}
+              <td className="px-4 py-4 text-right">
+                <Skeleton className="h-8 w-8 rounded-lg ml-auto" />
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 export default function SuperAdminModulesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
@@ -290,17 +383,41 @@ export default function SuperAdminModulesPage() {
   const [moduleToDelete, setModuleToDelete] = useState<PlatformModule | null>(null);
   const [deleting, setDeleting] = useState(false);
 
+  // Error State & AAL2
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [aal2Required, setAal2Required] = useState(false);
+
   // Reorder State
   const [reordering, setReordering] = useState(false);
 
   const loadModules = async () => {
     try {
       setLoading(true);
+      setLoadError(null);
+      setAal2Required(false);
       const res = await fetchPlatformModules();
       setModules(res.modules || []);
       setStats(res.stats || { total: 0, enabled: 0, disabled: 0, system: 0 });
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to load platform modules.");
+      const errData = err?.response?.data;
+      const isAal =
+        errData?.code === "AAL2_REQUIRED" ||
+        String(errData?.message || "").includes("AAL2") ||
+        (err?.response?.status === 403 && String(errData?.message || "").includes("MFA"));
+
+      if (isAal) {
+        setAal2Required(true);
+        const aalMsg = "MFA verification required: AAL2 session assurance required for Super Admin platform access.";
+        setLoadError(aalMsg);
+        toast.error(aalMsg);
+        if (typeof window !== "undefined") {
+          window.dispatchEvent(new CustomEvent("clixpro:aal2-required"));
+        }
+      } else {
+        const msg = errData?.message || err?.message || "Failed to load platform modules.";
+        setLoadError(msg);
+        toast.error(msg);
+      }
     } finally {
       setLoading(false);
     }
@@ -308,6 +425,17 @@ export default function SuperAdminModulesPage() {
 
   useEffect(() => {
     loadModules();
+
+    const handleAal2Verified = () => {
+      setAal2Required(false);
+      setLoadError(null);
+      loadModules();
+    };
+
+    window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
+    return () => {
+      window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
+    };
   }, []);
 
   useEffect(() => {
@@ -590,6 +718,64 @@ export default function SuperAdminModulesPage() {
         ]}
       />
 
+      {/* AAL2 Security Elevation Alert Banner */}
+      {aal2Required && (
+        <div className="rounded-2xl p-4 bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-amber-500/20 text-amber-600 dark:text-amber-400 shrink-0">
+              <ShieldAlert className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-foreground">
+                MFA Verification Required (AAL2 Assurance)
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                Elevated session authentication is required to manage platform navigation and CRM modules.
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                window.dispatchEvent(new CustomEvent("clixpro:aal2-required"));
+              }
+            }}
+            className="bg-amber-600 hover:bg-amber-700 text-white font-semibold text-xs shrink-0 cursor-pointer"
+          >
+            Verify MFA Now
+          </Button>
+        </div>
+      )}
+
+      {/* General Error Banner */}
+      {loadError && !aal2Required && (
+        <div className="rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30 flex items-center justify-between gap-4">
+          <div className="flex items-center gap-3">
+            <div className="p-2 rounded-xl bg-rose-500/20 text-rose-600 dark:text-rose-400 shrink-0">
+              <AlertTriangle className="w-5 h-5" />
+            </div>
+            <div>
+              <h4 className="text-sm font-bold text-foreground">
+                Unable to Load Platform Modules
+              </h4>
+              <p className="text-xs text-muted-foreground mt-0.5">
+                {loadError}
+              </p>
+            </div>
+          </div>
+          <Button
+            size="sm"
+            variant="outline"
+            onClick={loadModules}
+            className="font-semibold text-xs shrink-0 cursor-pointer"
+          >
+            <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
+            Retry
+          </Button>
+        </div>
+      )}
+
       {/* 2. KPI Metrics Grid */}
       <CRMMetricsGrid cols={4}>
         <CRMMetricCard
@@ -789,10 +975,7 @@ export default function SuperAdminModulesPage() {
           {/* 4. Modules Data Table */}
           <div className={cn("crm-table-wrap", (loading || filteredModules.length === 0) && "crm-table-no-pagination")}>
         {loading ? (
-          <div className="flex flex-col items-center justify-center py-20 text-muted-foreground">
-            <Loader2 className="w-8 h-8 animate-spin text-emerald-600 mb-3" />
-            <p className="text-sm font-medium">Loading platform modules...</p>
-          </div>
+          <PlatformModulesTableSkeleton />
         ) : filteredModules.length === 0 ? (
           <div className="p-12">
             <EmptyState
