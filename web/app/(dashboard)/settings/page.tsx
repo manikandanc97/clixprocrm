@@ -23,6 +23,7 @@ import SessionsSettings from "@/features/settings/components/SessionsSettings";
 import AuditLogSettings from "@/features/settings/components/AuditLogSettings";
 import HelpCenterSettings from "@/features/settings/components/HelpCenterSettings";
 import ContactSupportSettings from "@/features/settings/components/ContactSupportSettings";
+import { InvoiceSettings } from "@/features/settings/components/InvoiceSettings";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { CRMPageContainer } from "@/shared/components/crm";
@@ -121,6 +122,8 @@ const SettingsPage = () => {
         return <RolesPermissionsSettings />;
       case "billing":
         return <SubscriptionSettings />;
+      case "invoicing":
+        return <InvoiceSettings />;
 
       // Sales
       case "sales-preferences":

@@ -141,6 +141,7 @@ export const MODULE_SYNONYMS: Record<string, string[]> = {
   "Tasks": ["tasks", "tasks.read", "tasks.create", "tasks.update", "tasks.delete"],
   "Calendar": ["calendar"],
   "Quotations": ["quotations", "quotations.read", "quotations.create", "quotations.update", "quotations.delete", "quotations.approve"],
+  "Invoices": ["invoices", "invoices.read", "invoices.create", "invoices.update", "invoices.delete", "invoices.send", "invoices.payment", "billing", "invoice"],
   "ClixPro AI": ["clixpro ai", "clixpro_ai", "ai", "ai.view", "ai.access", "ai.chat", "ai_assistant", "ai assistant", "clixproai"],
   "Reports & Analytics": ["reports & analytics", "reports", "report", "analytics", "reports.read", "reports:read", "reports:view", "reports.view"],
   "Employees": ["employees", "employee", "employees.read", "employees.manage", "employees:view", "employees:manage"],

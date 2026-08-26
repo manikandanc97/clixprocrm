@@ -1135,5 +1135,171 @@ export const fetchAiUsageTelemetry = async (
   return response.data;
 };
 
+// ==========================================
+// Super Admin Platform SaaS Billing API
+// ==========================================
+
+export interface PlatformBillingOverviewData {
+  kpis: {
+    mrr: number;
+    mrrFormatted: string;
+    arr: number;
+    arrFormatted: string;
+    totalRevenue: number;
+    totalRevenueFormatted: string;
+    paidRevenue: number;
+    paidRevenueFormatted: string;
+    pendingRevenue: number;
+    pendingRevenueFormatted: string;
+    overdueRevenue: number;
+    overdueRevenueFormatted: string;
+    totalRefunds: number;
+    totalRefundsFormatted: string;
+    activeSubscriptions: number;
+    totalSubscriptions: number;
+    totalOrganizations: number;
+  };
+  planDistribution: Array<{ count: number; name: string; revenue: number }>;
+  monthlyTrend: Array<{ month: string; revenue: number; invoicesCount: number }>;
+  config: any;
+}
+
+export interface PlatformSubscriptionItem {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  tenantLogo?: string | null;
+  planId: string;
+  planName: string;
+  billingCycle: string;
+  seats: number;
+  status: string;
+  unitPrice: number;
+  recurringAmount: number;
+  recurringAmountFormatted: string;
+  currency: string;
+  currentPeriodStart: string;
+  currentPeriodEnd: string;
+  trialStart?: string | null;
+  trialEnd?: string | null;
+  cancelAtPeriodEnd: boolean;
+  latestInvoice?: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlatformInvoiceItemData {
+  id: string;
+  tenantId: string;
+  tenantName: string;
+  tenantLogo?: string | null;
+  tenantGstin?: string | null;
+  subscriptionId?: string | null;
+  invoiceNumber: string;
+  planName: string;
+  billingCycle: string;
+  seats: number;
+  invoiceDate: string;
+  dueDate: string;
+  currency: string;
+  subtotal: number;
+  taxRate: number;
+  taxAmount: number;
+  totalAmount: number;
+  totalAmountFormatted: string;
+  paidAmount: number;
+  paidAmountFormatted: string;
+  status: string;
+  paymentStatus: string;
+  paidAt?: string | null;
+  createdAt: string;
+}
+
+export const fetchPlatformBillingOverview = async (): Promise<PlatformBillingOverviewData> => {
+  const response = await client.get<{ success: boolean; data: PlatformBillingOverviewData }>(
+    "/super-admin/billing/overview"
+  );
+  return response.data.data;
+};
+
+export const fetchPlatformSubscriptions = async (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  planId?: string;
+  status?: string;
+}) => {
+  const response = await client.get<{
+    success: boolean;
+    subscriptions: PlatformSubscriptionItem[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }>("/super-admin/billing/subscriptions", { params });
+  return response.data;
+};
+
+export const createOrUpdatePlatformSubscription = async (data: {
+  tenantId: string;
+  planId: string;
+  billingCycle?: "monthly" | "annual";
+  seats?: number;
+  status?: string;
+}) => {
+  const response = await client.post<{ success: boolean; data: any }>(
+    "/super-admin/billing/subscriptions",
+    data
+  );
+  return response.data;
+};
+
+export const fetchPlatformInvoices = async (params?: {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+  paymentStatus?: string;
+  tenantId?: string;
+}) => {
+  const response = await client.get<{
+    success: boolean;
+    invoices: PlatformInvoiceItemData[];
+    pagination: { page: number; limit: number; total: number; totalPages: number };
+  }>("/super-admin/billing/invoices", { params });
+  return response.data;
+};
+
+export const fetchPlatformInvoiceById = async (id: string) => {
+  const response = await client.get<{ success: boolean; data: any }>(
+    `/super-admin/billing/invoices/${id}`
+  );
+  return response.data.data;
+};
+
+export const processPlatformRefund = async (
+  invoiceId: string,
+  data: { amount: number; reason: string; paymentId?: string }
+) => {
+  const response = await client.post<{ success: boolean; data: any }>(
+    `/super-admin/billing/invoices/${invoiceId}/refund`,
+    data
+  );
+  return response.data;
+};
+
+export const fetchPlatformBillingSettings = async () => {
+  const response = await client.get<{ success: boolean; data: any }>(
+    "/super-admin/billing/settings"
+  );
+  return response.data.data;
+};
+
+export const updatePlatformBillingSettings = async (data: any) => {
+  const response = await client.put<{ success: boolean; data: any }>(
+    "/super-admin/billing/settings",
+    data
+  );
+  return response.data.data;
+};
+
+
 
 

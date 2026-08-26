@@ -18,6 +18,7 @@ export const PERMISSION_MODULES = {
   TASKS: 'Tasks',
   CALENDAR: 'Calendar',
   QUOTATIONS: 'Quotations',
+  INVOICES: 'Invoices',
 
   // Insights
   REPORTS: 'Reports',
@@ -58,6 +59,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionModule[]> = {
     PERMISSION_MODULES.TASKS,
     PERMISSION_MODULES.CALENDAR,
     PERMISSION_MODULES.QUOTATIONS,
+    PERMISSION_MODULES.INVOICES,
     PERMISSION_MODULES.REPORTS,
     PERMISSION_MODULES.EMPLOYEES,
     PERMISSION_MODULES.ROLES,
@@ -77,9 +79,9 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionModule[]> = {
     PERMISSION_MODULES.TASKS,
     PERMISSION_MODULES.CALENDAR,
     PERMISSION_MODULES.QUOTATIONS,
+    PERMISSION_MODULES.INVOICES,
     PERMISSION_MODULES.REPORTS,
     PERMISSION_MODULES.EMPLOYEES,
-    // No: Roles, Settings, Organization, Integrations, AuditLogs
   ],
 
   SALES: [
@@ -91,7 +93,7 @@ export const SYSTEM_ROLE_PERMISSIONS: Record<string, PermissionModule[]> = {
     PERMISSION_MODULES.TASKS,
     PERMISSION_MODULES.CALENDAR,
     PERMISSION_MODULES.QUOTATIONS,
-    // No: Reports, Employees, Roles, Settings, Organization, Integrations, AuditLogs
+    PERMISSION_MODULES.INVOICES,
   ],
 
   EMPLOYEE: [

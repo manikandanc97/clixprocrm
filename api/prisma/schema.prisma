@@ -41,6 +41,12 @@ model Tenant {
   departments     Department[]
   invitations     Invitation[]
   invoices        Invoice[]
+  payments        Payment[]
+  invoiceSettings TenantInvoiceSettings?
+  platformSubscriptions PlatformSubscription[]
+  platformInvoices PlatformInvoice[]
+  platformPayments PlatformPayment[]
+  platformRefunds  PlatformRefund[]
   leads           Lead[]
   meetings        Meeting[]
   notes           Note[]
@@ -87,6 +93,8 @@ model User {
   assignedQuotations Quotation[]      @relation("QuotationAssignedTo")
   assignedTasks      Task[]           @relation("TaskAssignedTo")
   createdTasks       Task[]           @relation("TaskCreatedBy")
+  createdInvoices    Invoice[]        @relation("InvoiceCreatedBy")
+  createdPayments    Payment[]        @relation("PaymentCreatedBy")
   memberships        TenantUser[]
   timelineEvents     TimelineEvent[]  @relation("TimelineEventActor")
   aiConversations    AiConversation[]
@@ -150,6 +158,7 @@ model Customer {
   leads          Lead[]          @relation("LeadCustomer")
   meetings       Meeting[]
   quotations     Quotation[]
+  invoices       Invoice[]
   tasks          Task[]          @relation("TaskCustomer")
   companyId      String?
   companyRecord  Company?        @relation(fields: [companyId], references: [id])
@@ -303,6 +312,7 @@ model Quotation {
   lead         Lead            @relation(fields: [leadId], references: [id], onDelete: Cascade)
   tenant       Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
   tasks        Task[]          @relation("TaskQuotation")
+  invoices     Invoice[]
   dealId       String?
   deal         Deal?           @relation("QuotationDeal", fields: [dealId], references: [id])
   teamId       String?
@@ -469,22 +479,153 @@ model Product {
 }
 
 model Invoice {
-  id            String    @id @default(uuid())
-  tenantId      String
-  customerId    String
-  invoiceNumber String?
-  amount        Decimal   @default(0) @db.Decimal(12, 2)
-  status        String    @default("DRAFT")
-  dueDate       DateTime?
-  createdAt     DateTime  @default(now())
-  updatedAt     DateTime  @updatedAt
-  tenant        Tenant    @relation(fields: [tenantId], references: [id], onDelete: Cascade)
-  dealId        String?
-  deal          Deal?     @relation("InvoiceDeal", fields: [dealId], references: [id])
+  id                      String          @id @default(uuid())
+  tenantId                String
+  customerId              String?
+  companyId               String?
+  dealId                  String?
+  quotationId             String?
+  invoiceNumber           String?
+  invoiceDate             DateTime        @default(now())
+  dueDate                 DateTime?
+  currency                String          @default("INR")
+  paymentTerms            String?         @default("DUE_ON_RECEIPT")
+  status                  String          @default("DRAFT") // DRAFT, SENT, VIEWED, PARTIALLY_PAID, PAID, OVERDUE, CANCELLED, VOID, REFUNDED
+
+  // Precise monetary representation
+  amount                  Decimal         @default(0) @db.Decimal(12, 2) // Legacy compatibility alias for totalAmount
+  subtotal                Decimal         @default(0) @db.Decimal(12, 2)
+  discountType            String?         // "PERCENTAGE" | "FIXED"
+  discountValue           Decimal?        @default(0) @db.Decimal(12, 2)
+  discountAmount          Decimal         @default(0) @db.Decimal(12, 2)
+  taxableAmount           Decimal         @default(0) @db.Decimal(12, 2)
+  cgstAmount              Decimal         @default(0) @db.Decimal(12, 2)
+  sgstAmount              Decimal         @default(0) @db.Decimal(12, 2)
+  igstAmount              Decimal         @default(0) @db.Decimal(12, 2)
+  otherTaxAmount          Decimal         @default(0) @db.Decimal(12, 2)
+  roundOff                Decimal         @default(0) @db.Decimal(12, 2)
+  totalAmount             Decimal         @default(0) @db.Decimal(12, 2)
+  paidAmount              Decimal         @default(0) @db.Decimal(12, 2)
+  balanceAmount           Decimal         @default(0) @db.Decimal(12, 2)
+
+  // Details and terms
+  notes                   String?
+  termsAndConditions      String?
+  customerBillingAddress  Json?
+  orgBillingAddress       Json?
+  pdfUrl                  String?
+
+  // Audit and lifecycle timestamps
+  createdById             String?
+  sentAt                  DateTime?
+  viewedAt                DateTime?
+  paidAt                  DateTime?
+  cancelledAt             DateTime?
+  createdAt               DateTime        @default(now())
+  updatedAt               DateTime        @updatedAt
+
+  // Relations
+  tenant                  Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  customer                Customer?       @relation(fields: [customerId], references: [id])
+  company                 Company?        @relation(fields: [companyId], references: [id])
+  deal                    Deal?           @relation("InvoiceDeal", fields: [dealId], references: [id])
+  quotation               Quotation?      @relation(fields: [quotationId], references: [id])
+  createdBy               User?           @relation("InvoiceCreatedBy", fields: [createdById], references: [id])
+  items                   InvoiceItem[]
+  payments                Payment[]
+  timelineEvents          TimelineEvent[]
 
   @@unique([tenantId, invoiceNumber])
   @@index([tenantId])
   @@index([customerId])
+  @@index([companyId])
+  @@index([dealId])
+  @@index([status])
+  @@index([dueDate])
+  @@index([tenantId, status])
+  @@index([tenantId, createdAt])
+}
+
+model InvoiceItem {
+  id             String   @id @default(uuid())
+  invoiceId      String
+  productId      String?
+  name           String
+  description    String?
+  quantity       Decimal  @default(1) @db.Decimal(10, 2)
+  unit           String?  @default("unit")
+  unitPrice      Decimal  @default(0) @db.Decimal(12, 2)
+  discountType   String?  // "PERCENTAGE" | "FIXED"
+  discountValue  Decimal? @default(0) @db.Decimal(12, 2)
+  discountAmount Decimal  @default(0) @db.Decimal(12, 2)
+  taxRate        Decimal  @default(0) @db.Decimal(6, 2)
+  taxAmount      Decimal  @default(0) @db.Decimal(12, 2)
+  lineTotal      Decimal  @default(0) @db.Decimal(12, 2)
+  sortOrder      Int      @default(0)
+  createdAt      DateTime @default(now())
+  updatedAt      DateTime @updatedAt
+
+  invoice        Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+
+  @@index([invoiceId])
+  @@index([productId])
+}
+
+model Payment {
+  id              String   @id @default(uuid())
+  tenantId        String
+  invoiceId       String
+  paymentNumber   String
+  amount          Decimal  @default(0) @db.Decimal(12, 2)
+  currency        String   @default("INR")
+  paymentMethod   String   @default("BANK_TRANSFER") // CASH, BANK_TRANSFER, UPI, CARD, CHEQUE, OTHER
+  paymentDate     DateTime @default(now())
+  referenceNumber String?  // UTR / Transaction ID / Cheque #
+  notes           String?
+  status          String   @default("SUCCESS") // SUCCESS, PENDING, FAILED, REFUNDED
+  receiptUrl      String?
+  createdById     String?
+  createdAt       DateTime @default(now())
+  updatedAt       DateTime @updatedAt
+
+  tenant          Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoice         Invoice  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  createdBy       User?    @relation("PaymentCreatedBy", fields: [createdById], references: [id])
+
+  @@unique([tenantId, paymentNumber])
+  @@index([tenantId])
+  @@index([invoiceId])
+  @@index([paymentDate])
+  @@index([status])
+}
+
+model TenantInvoiceSettings {
+  id                 String   @id @default(uuid())
+  tenantId           String   @unique
+  invoicePrefix      String   @default("INV")
+  nextInvoiceNumber  Int      @default(1)
+  financialYear      String?  @default("2026-2027")
+  gstin              String?
+  pan                String?
+  legalName          String?
+  billingAddress     String?
+  city               String?
+  state              String?
+  postalCode         String?
+  country            String?  @default("India")
+  bankName           String?
+  accountNumber      String?
+  ifscCode           String?
+  accountHolderName  String?
+  upiId              String?
+  defaultNotes       String?  @default("Thank you for doing business with us.")
+  defaultTerms       String?  @default("Payment is due within 15 days of invoice date.")
+  taxType            String   @default("GST") // GST, VAT, NONE
+  defaultTaxRate     Decimal  @default(18.0) @db.Decimal(6, 2)
+  createdAt          DateTime @default(now())
+  updatedAt          DateTime @updatedAt
+
+  tenant             Tenant   @relation(fields: [tenantId], references: [id], onDelete: Cascade)
 }
 
 model Meeting {
@@ -608,15 +749,18 @@ model TimelineEvent {
   companyId   String?
   customerId  String?
   taskId      String?
+  invoiceId   String?
   metadata    Json?
   
   deal        Deal?     @relation("TimelineDeal", fields: [dealId], references: [id], onDelete: Cascade)
   company     Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
   customer    Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
   task        Task?     @relation("TimelineTask", fields: [taskId], references: [id], onDelete: Cascade)
+  invoice     Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
 
   @@index([tenantId])
   @@index([leadId])
+  @@index([invoiceId])
   @@index([tenantId, leadId])
   @@index([tenantId, createdAt])
 }
@@ -836,6 +980,7 @@ model Company {
   owner          User?           @relation(fields: [ownerId], references: [id])
   customers      Customer[]
   deals          Deal[]
+  invoices       Invoice[]
   leads          Lead[]
   timelineEvents TimelineEvent[]
   teamId         String?
@@ -1141,4 +1286,158 @@ model PlatformConfig {
   fallbackAiModelKey       String   @default("gemini-3.6-flash")
   updatedAt                DateTime @updatedAt
   updatedBy                String?
+}
+
+// ----------------------------------------------------
+// Super Admin Platform SaaS Billing Models
+// ----------------------------------------------------
+
+model PlatformSubscription {
+  id                 String            @id @default(uuid())
+  tenantId           String
+  planId             String
+  billingCycle       String            @default("monthly") // monthly | annual
+  seats              Int               @default(1)
+  status             String            @default("ACTIVE") // ACTIVE, TRIALING, PAST_DUE, CANCELLED, EXPIRED, SUSPENDED
+  unitPrice          Decimal           @default(0) @db.Decimal(12, 2)
+  recurringAmount    Decimal           @default(0) @db.Decimal(12, 2)
+  currency           String            @default("INR")
+  currentPeriodStart DateTime          @default(now())
+  currentPeriodEnd   DateTime
+  trialStart         DateTime?
+  trialEnd           DateTime?
+  cancelAtPeriodEnd  Boolean           @default(false)
+  cancelledAt        DateTime?
+  createdAt          DateTime          @default(now())
+  updatedAt          DateTime          @updatedAt
+
+  tenant             Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  invoices           PlatformInvoice[]
+
+  @@index([tenantId])
+  @@index([status])
+}
+
+model PlatformInvoice {
+  id                 String                @id @default(uuid())
+  tenantId           String
+  subscriptionId     String?
+  invoiceNumber      String                @unique // CP-INV-YYYY-XXXXXX
+  planName           String
+  billingCycle       String                @default("monthly")
+  seats              Int                   @default(1)
+  invoiceDate        DateTime              @default(now())
+  dueDate            DateTime
+  currency           String                @default("INR")
+  subtotal           Decimal               @default(0) @db.Decimal(12, 2)
+  discountAmount     Decimal               @default(0) @db.Decimal(12, 2)
+  taxRate            Decimal               @default(18.0) @db.Decimal(6, 2)
+  taxAmount          Decimal               @default(0) @db.Decimal(12, 2)
+  totalAmount        Decimal               @default(0) @db.Decimal(12, 2)
+  paidAmount         Decimal               @default(0) @db.Decimal(12, 2)
+  status             String                @default("PAID") // DRAFT, PENDING, PAID, OVERDUE, CANCELLED, REFUNDED, VOID
+  paymentStatus      String                @default("PAID") // UNPAID, PROCESSING, PAID, FAILED, REFUNDED, PARTIALLY_REFUNDED
+  pdfUrl             String?
+  paidAt             DateTime?
+  createdAt          DateTime              @default(now())
+  updatedAt          DateTime              @updatedAt
+
+  tenant             Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  subscription       PlatformSubscription? @relation(fields: [subscriptionId], references: [id], onDelete: SetNull)
+  items              PlatformInvoiceItem[]
+  payments           PlatformPayment[]
+  refunds            PlatformRefund[]
+
+  @@index([tenantId])
+  @@index([status])
+  @@index([paymentStatus])
+  @@index([invoiceDate])
+}
+
+model PlatformInvoiceItem {
+  id                String          @id @default(uuid())
+  platformInvoiceId String
+  description       String
+  quantity          Int             @default(1)
+  unitPrice         Decimal         @default(0) @db.Decimal(12, 2)
+  taxAmount         Decimal         @default(0) @db.Decimal(12, 2)
+  totalAmount       Decimal         @default(0) @db.Decimal(12, 2)
+  createdAt         DateTime        @default(now())
+
+  platformInvoice   PlatformInvoice @relation(fields: [platformInvoiceId], references: [id], onDelete: Cascade)
+
+  @@index([platformInvoiceId])
+}
+
+model PlatformPayment {
+  id                   String           @id @default(uuid())
+  platformInvoiceId    String
+  tenantId             String
+  paymentNumber        String           @unique // CP-PAY-YYYY-XXXXXX
+  gatewayTransactionId String?
+  gatewayProvider      String           @default("MANUAL") // MANUAL, RAZORPAY, STRIPE, BANK_WIRE
+  amount               Decimal          @default(0) @db.Decimal(12, 2)
+  currency             String           @default("INR")
+  paymentMethod        String           @default("CARD") // CARD, UPI, NETBANKING, WIRE_TRANSFER, WALLET
+  status               String           @default("SUCCESS") // PENDING, PROCESSING, SUCCESS, FAILED, REFUNDED
+  paymentDate          DateTime         @default(now())
+  notes                String?
+  rawGatewayResponse   Json?
+  createdAt            DateTime         @default(now())
+
+  tenant               Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  platformInvoice      PlatformInvoice  @relation(fields: [platformInvoiceId], references: [id], onDelete: Cascade)
+  refunds              PlatformRefund[]
+
+  @@index([tenantId])
+  @@index([platformInvoiceId])
+  @@index([status])
+  @@index([paymentDate])
+}
+
+model PlatformRefund {
+  id                String          @id @default(uuid())
+  platformInvoiceId String
+  platformPaymentId String?
+  tenantId          String
+  refundNumber      String          @unique // CP-REF-YYYY-XXXXXX
+  amount            Decimal         @default(0) @db.Decimal(12, 2)
+  currency          String          @default("INR")
+  reason            String
+  status            String          @default("COMPLETED") // PENDING, COMPLETED, FAILED
+  processedBy       String?
+  createdAt         DateTime        @default(now())
+
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  platformInvoice   PlatformInvoice @relation(fields: [platformInvoiceId], references: [id], onDelete: Cascade)
+  platformPayment   PlatformPayment? @relation(fields: [platformPaymentId], references: [id])
+
+  @@index([tenantId])
+  @@index([platformInvoiceId])
+  @@index([platformPaymentId])
+}
+
+model PlatformBillingConfig {
+  id               String   @id @default("global")
+  companyLegalName String   @default("ClixPro Technologies Pvt. Ltd.")
+  billingAddress   String?  @default("Level 4, Cyber City, Phase II")
+  city             String?  @default("Bengaluru")
+  state            String?  @default("Karnataka")
+  postalCode       String?  @default("560100")
+  country          String?  @default("India")
+  gstin            String?  @default("29AAAAA0000A1Z5")
+  pan              String?  @default("AAAAA0000A")
+  invoicePrefix    String   @default("CP-INV")
+  currency         String   @default("INR")
+  taxRate          Decimal  @default(18.0) @db.Decimal(6, 2)
+  paymentTermsDays Int      @default(15)
+  bankName         String?  @default("HDFC Bank")
+  accountNumber    String?  @default("50200012345678")
+  ifscCode         String?  @default("HDFC0001234")
+  accountHolder    String?  @default("ClixPro Technologies Private Limited")
+  upiId            String?  @default("clixpro@hdfcbank")
+  paymentGateway   String   @default("RAZORPAY")
+  webhookSecret    String?
+  updatedAt        DateTime @updatedAt
+  updatedBy        String?
 }

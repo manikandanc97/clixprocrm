@@ -1,8 +1,25 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Receipt, Plus, IndianRupee, Clock, CheckCircle2, AlertCircle } from "lucide-react";
-import { useInvoices } from "@/shared/hooks/use-crm";
+import {
+  Receipt,
+  Plus,
+  IndianRupee,
+  Clock,
+  CheckCircle2,
+  AlertCircle,
+  MoreVertical,
+  Eye,
+  CreditCard,
+  Printer,
+  Mail,
+  Trash2,
+  Send,
+  Building2,
+  Calendar,
+  FileSpreadsheet,
+} from "lucide-react";
+import { useInvoices } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/components/EmptyState";
@@ -14,47 +31,108 @@ import {
   CRMPageContainer,
   CRMMetricsGrid,
 } from "@/shared/components/crm";
-import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
-
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 import { InvoicesSkeleton } from "@/features/invoices/components/InvoicesSkeleton";
+import { CreateInvoiceModal } from "@/features/invoices/components/CreateInvoiceModal";
+import { InvoiceDetailModal } from "@/features/invoices/components/InvoiceDetailModal";
+import { RecordPaymentModal } from "@/features/invoices/components/RecordPaymentModal";
+import { motion, AnimatePresence } from "framer-motion";
 
 export default function InvoicesPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
+  const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
+  const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
+  const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
+  const [paymentTargetInvoice, setPaymentTargetInvoice] = useState<any | null>(null);
+  const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
+
   const { formatCurrency } = useCurrency();
 
-  const { data, isLoading: loading, error, refetch } = useInvoices();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const safeInvoices: any[] = useMemo(() => {
-    if (Array.isArray(data)) return data;
-    if (data && Array.isArray((data as any).invoices)) return (data as any).invoices;
-    return [];
-  }, [data]);
+  const { data, isLoading: loading, error, refetch } = useInvoices({
+    search: searchQuery || undefined,
+    status: statusFilter !== "all" ? statusFilter : undefined,
+  });
 
-  const filteredInvoices = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return safeInvoices.filter((inv: any) => {
-      const q = searchQuery.toLowerCase();
-      const matchesSearch =
-        !q ||
-        inv.invoiceNumber?.toLowerCase().includes(q) ||
-        inv.client?.toLowerCase().includes(q);
-      const matchesStatus =
-        statusFilter === "all" || inv.status?.toLowerCase() === statusFilter.toLowerCase();
-      return matchesSearch && matchesStatus;
-    });
-  }, [safeInvoices, searchQuery, statusFilter]);
-
-  const handleCreateInvoice = () => {
-    toast.info("Invoice creation modal coming soon.");
+  const invoices = data?.invoices || [];
+  const stats = data?.stats || {
+    totalInvoiced: 0,
+    totalPaid: 0,
+    totalPending: 0,
+    totalOverdue: 0,
+    paidCount: 0,
+    pendingCount: 0,
+    overdueCount: 0,
+    totalCount: 0,
   };
 
-  if (loading && safeInvoices.length === 0) {
+  const getStatusBadge = (st: string) => {
+    switch (st?.toUpperCase()) {
+      case "PAID":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+            <CheckCircle2 className="w-3 h-3" /> PAID
+          </span>
+        );
+      case "PARTIALLY_PAID":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
+            <Clock className="w-3 h-3" /> PARTIALLY PAID
+          </span>
+        );
+      case "OVERDUE":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20">
+            <AlertCircle className="w-3 h-3" /> OVERDUE
+          </span>
+        );
+      case "SENT":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
+            <Send className="w-3 h-3" /> SENT
+          </span>
+        );
+      case "CANCELLED":
+      case "VOID":
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/15 text-slate-500 border border-slate-500/20">
+            VOID
+          </span>
+        );
+      default:
+        return (
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-muted text-muted-foreground border border-border">
+            DRAFT
+          </span>
+        );
+    }
+  };
+
+  const handleOpenDetail = (id: string) => {
+    setSelectedInvoiceId(id);
+    setIsDetailModalOpen(true);
+  };
+
+  const handleOpenPayment = (inv: any) => {
+    setPaymentTargetInvoice(inv);
+    setIsPaymentModalOpen(true);
+  };
+
+  const handlePrintPdf = (id: string) => {
+    window.open(`/api/crm/invoices/${id}/pdf`, "_blank");
+  };
+
+  if (loading && invoices.length === 0) {
     return <InvoicesSkeleton />;
   }
 
-  if (error && safeInvoices.length === 0) {
+  if (error && invoices.length === 0) {
     return (
       <PageErrorState
         title="Invoices unavailable"
@@ -66,135 +144,247 @@ export default function InvoicesPage() {
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalBilled = safeInvoices.reduce((acc: number, inv: any) => acc + (Number(inv.total) || 0), 0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const paidCount = safeInvoices.filter((i: any) => i.status === "PAID").length;
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const pendingCount = safeInvoices.filter((i: any) => i.status === "PENDING" || i.status === "SENT").length;
-
   return (
     <CRMPageContainer>
       <CRMPageHeader
         title="Invoices"
-        subtitle="Generate, send, and track client invoices and payment status in real-time."
+        subtitle="Manage customer invoices, track payments, and calculate GST tax breakdowns."
         icon={Receipt}
         badge="Billing & Revenue"
         actions={[
           {
             label: "Create Invoice",
             icon: Plus,
-            onClick: handleCreateInvoice,
+            onClick: () => setIsCreateModalOpen(true),
             variant: "default",
           },
         ]}
       />
 
-      {safeInvoices.length === 0 ? (
-        <div className="flex-1 min-h-0 flex flex-col pt-2">
-          <EmptyState
-            module="invoices"
-            action={{
-              label: "Create Invoice",
-              onClick: handleCreateInvoice,
-              icon: Plus,
-            }}
+      {/* Metrics Row */}
+      <div className="shrink-0">
+        <CRMMetricsGrid cols={4} className="gap-4">
+          <CRMMetricCard
+            title="Total Invoiced"
+            value={formatCurrency(stats.totalInvoiced)}
+            change={`${stats.totalCount} invoices`}
+            trend="up"
+            icon={IndianRupee}
+            color="indigo"
+            delay={0.1}
           />
-        </div>
-      ) : (
-        <>
-          <div className="shrink-0">
-            <CRMMetricsGrid cols={4} className="gap-4">
-              <CRMMetricCard
-                title="Total Invoiced"
-                value={formatCurrency(totalBilled)}
-                change="0%"
-                trend="up"
-                icon={IndianRupee}
-                color="indigo"
-                delay={0.1}
-              />
-              <CRMMetricCard
-                title="Paid Invoices"
-                value={paidCount}
-                change="0%"
-                trend="up"
-                icon={CheckCircle2}
-                color="emerald"
-                delay={0.2}
-              />
-              <CRMMetricCard
-                title="Pending Payment"
-                value={pendingCount}
-                change="0%"
-                trend="neutral"
-                icon={Clock}
-                color="orange"
-                delay={0.3}
-              />
-              <CRMMetricCard
-                title="Overdue"
-                value={0}
-                change="0%"
-                trend="neutral"
-                icon={AlertCircle}
-                color="pink"
-                delay={0.4}
-              />
-            </CRMMetricsGrid>
-          </div>
+          <CRMMetricCard
+            title="Collected Revenue"
+            value={formatCurrency(stats.totalPaid)}
+            change={`${stats.paidCount} paid`}
+            trend="up"
+            icon={CheckCircle2}
+            color="emerald"
+            delay={0.2}
+          />
+          <CRMMetricCard
+            title="Pending Payment"
+            value={formatCurrency(stats.totalPending)}
+            change={`${stats.pendingCount} pending`}
+            trend="neutral"
+            icon={Clock}
+            color="orange"
+            delay={0.3}
+          />
+          <CRMMetricCard
+            title="Overdue"
+            value={formatCurrency(stats.totalOverdue)}
+            change={`${stats.overdueCount} overdue`}
+            trend={stats.overdueCount > 0 ? "down" : "neutral"}
+            icon={AlertCircle}
+            color="pink"
+            delay={0.4}
+          />
+        </CRMMetricsGrid>
+      </div>
 
-          <div className="flex-1 flex flex-col gap-4 min-h-0">
-            <CRMToolbar
-              searchQuery={searchQuery}
-              setSearchQuery={setSearchQuery}
-              placeholder="Search invoices by number, client..."
-            >
-              <div className="flex items-center gap-2">
-                {["All", "Paid", "Pending", "Overdue", "Draft"].map((status) => (
-                  <Button
-                    key={status}
-                    variant={statusFilter === status.toLowerCase() ? "secondary" : "ghost"}
-                    size="sm"
-                    onClick={() => setStatusFilter(status.toLowerCase())}
-                    className="h-9 px-3 text-xs font-semibold"
-                  >
-                    {status}
-                  </Button>
-                ))}
+      {/* Toolbar & Filters */}
+      <div className="flex-1 flex flex-col gap-4 min-h-0">
+        <CRMToolbar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          placeholder="Search invoices by number, client, company..."
+        >
+          <div className="flex items-center gap-1.5 flex-wrap">
+            {[
+              { id: "all", label: "All" },
+              { id: "draft", label: "Draft" },
+              { id: "sent", label: "Sent" },
+              { id: "partially_paid", label: "Partially Paid" },
+              { id: "paid", label: "Paid" },
+              { id: "overdue", label: "Overdue" },
+            ].map((tab) => (
+              <Button
+                key={tab.id}
+                variant={statusFilter === tab.id ? "secondary" : "ghost"}
+                size="sm"
+                onClick={() => setStatusFilter(tab.id)}
+                className="h-8 px-3 text-xs font-semibold"
+              >
+                {tab.label}
+              </Button>
+            ))}
+          </div>
+        </CRMToolbar>
+
+        {/* Invoice Records Table */}
+        <div className="flex-1 min-h-0 flex flex-col" data-testid="invoices-list">
+          {invoices.length === 0 ? (
+            <EmptyState
+              icon={Receipt}
+              title="No invoices found"
+              description="No customer invoices match the selected filter or search."
+              action={{
+                label: "Create Invoice",
+                onClick: () => setIsCreateModalOpen(true),
+                icon: Plus,
+              }}
+            />
+          ) : (
+            <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden flex flex-col flex-1">
+              <div className="overflow-x-auto flex-1">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted/50 border-b border-border/80 text-muted-foreground font-semibold">
+                    <tr>
+                      <th className="py-3 px-4 text-left">Invoice #</th>
+                      <th className="py-3 px-4 text-left">Customer / Company</th>
+                      <th className="py-3 px-3 text-left">Invoice Date</th>
+                      <th className="py-3 px-3 text-left">Due Date</th>
+                      <th className="py-3 px-3 text-right">Total Amount</th>
+                      <th className="py-3 px-3 text-right">Paid</th>
+                      <th className="py-3 px-3 text-right">Balance</th>
+                      <th className="py-3 px-3 text-center">Status</th>
+                      <th className="py-3 px-3 w-[60px]"></th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/60">
+                    {invoices.map((inv: any) => (
+                      <tr
+                        key={inv.id}
+                        onClick={() => handleOpenDetail(inv.id)}
+                        className="hover:bg-muted/30 transition-colors cursor-pointer group"
+                      >
+                        <td className="py-3 px-4 font-mono font-bold text-foreground">
+                          {inv.invoiceNumber}
+                        </td>
+                        <td className="py-3 px-4">
+                          <div className="font-semibold text-foreground">
+                            {inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned"}
+                          </div>
+                          {inv.customer?.name && inv.company?.name && (
+                            <div className="text-[11px] text-muted-foreground">{inv.customer.name}</div>
+                          )}
+                        </td>
+                        <td className="py-3 px-3 text-muted-foreground">
+                          {new Date(inv.invoiceDate).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td className="py-3 px-3 text-muted-foreground">
+                          {inv.dueDate
+                            ? new Date(inv.dueDate).toLocaleDateString("en-IN", {
+                                day: "2-digit",
+                                month: "short",
+                                year: "numeric",
+                              })
+                            : "On Receipt"}
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono font-bold text-foreground">
+                          {formatCurrency(inv.totalAmount, inv.currency)}
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
+                          {inv.paidAmount > 0 ? formatCurrency(inv.paidAmount, inv.currency) : "-"}
+                        </td>
+                        <td className="py-3 px-3 text-right font-mono font-bold text-foreground">
+                          {formatCurrency(inv.balanceAmount, inv.currency)}
+                        </td>
+                        <td className="py-3 px-3 text-center">
+                          {getStatusBadge(inv.status)}
+                        </td>
+                        <td
+                          className="py-3 px-3 text-center"
+                          onClick={(e) => e.stopPropagation()}
+                        >
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                className="h-7 w-7 p-0 rounded-lg hover:bg-muted"
+                              >
+                                <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent align="end" className="w-44 text-xs">
+                              <DropdownMenuItem
+                                onClick={() => handleOpenDetail(inv.id)}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <Eye className="w-3.5 h-3.5 text-primary" /> View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={() => handlePrintPdf(inv.id)}
+                                className="gap-2 cursor-pointer"
+                              >
+                                <Printer className="w-3.5 h-3.5 text-muted-foreground" /> Print / PDF
+                              </DropdownMenuItem>
+                              {inv.balanceAmount > 0 && inv.status !== "CANCELLED" && (
+                                <DropdownMenuItem
+                                  onClick={() => handleOpenPayment(inv)}
+                                  className="gap-2 cursor-pointer text-emerald-600 font-semibold"
+                                >
+                                  <CreditCard className="w-3.5 h-3.5" /> Record Payment
+                                </DropdownMenuItem>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </td>
+                      </tr>
+                    ))}
+                  </tbody>
+                </table>
               </div>
-            </CRMToolbar>
-
-            <div className="flex-1 min-h-0 flex flex-col" data-testid="invoices-list">
-              <AnimatePresence mode="wait">
-                {filteredInvoices.length > 0 ? (
-                  <motion.div
-                    initial={{ opacity: 0 }}
-                    animate={{ opacity: 1 }}
-                    exit={{ opacity: 0 }}
-                    className="flex-1 flex flex-col min-h-0"
-                  >
-                    {/* Table will render when records exist */}
-                  </motion.div>
-                ) : (
-                  <EmptyState
-                    icon={Receipt}
-                    title="No invoices found"
-                    description="No invoices match the current search or status filter."
-                    action={{
-                      label: "Clear Filters",
-                      onClick: () => {
-                        setSearchQuery("");
-                        setStatusFilter("all");
-                      },
-                      variant: "outline",
-                    }}
-                  />
-                )}
-              </AnimatePresence>
             </div>
-          </div>
-        </>
+          )}
+        </div>
+      </div>
+
+      {/* Modals */}
+      <CreateInvoiceModal
+        isOpen={isCreateModalOpen}
+        onClose={() => {
+          setIsCreateModalOpen(false);
+          refetch();
+        }}
+      />
+
+      <InvoiceDetailModal
+        invoiceId={selectedInvoiceId}
+        isOpen={isDetailModalOpen}
+        onClose={() => {
+          setIsDetailModalOpen(false);
+          setSelectedInvoiceId(null);
+          refetch();
+        }}
+      />
+
+      {paymentTargetInvoice && (
+        <RecordPaymentModal
+          isOpen={isPaymentModalOpen}
+          onClose={() => {
+            setIsPaymentModalOpen(false);
+            setPaymentTargetInvoice(null);
+            refetch();
+          }}
+          invoice={paymentTargetInvoice}
+        />
       )}
     </CRMPageContainer>
   );

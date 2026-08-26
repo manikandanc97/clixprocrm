@@ -7,6 +7,7 @@ import {
   Users,
   ShieldCheck,
   CreditCard,
+  Receipt,
   TrendingUp,
   Target,
   Kanban,
@@ -121,7 +122,7 @@ export const SETTINGS_NAVIGATION: SettingsCategory[] = [
       },
       {
         id: "billing",
-        label: "Subscription & Billing",
+        label: "Subscription & Plan",
         icon: CreditCard,
         description: "Manage your plan, billing and subscription details.",
         aliases: ["subscription"],
@@ -130,6 +131,22 @@ export const SETTINGS_NAVIGATION: SettingsCategory[] = [
           const r = normalizeRole(role);
           if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN) return true;
           return permissions.includes(PERMISSIONS.SETTINGS_MANAGE) || permissions.includes("billing.manage");
+        },
+      },
+      {
+        id: "invoicing",
+        label: "Invoicing & GST Settings",
+        icon: Receipt,
+        description: "Configure customer invoice prefix, numbering, tax GST details, and bank accounts.",
+        aliases: ["invoice-settings", "invoices-config"],
+        isAuthorized: ({ role, permissions, isSuperAdmin }) => {
+          if (isSuperAdmin) return true;
+          const r = normalizeRole(role);
+          if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN) return true;
+          return (
+            permissions.includes(PERMISSIONS.INVOICES_UPDATE) ||
+            permissions.includes(PERMISSIONS.SETTINGS_MANAGE)
+          );
         },
       },
     ],

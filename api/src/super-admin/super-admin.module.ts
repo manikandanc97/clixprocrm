@@ -24,6 +24,8 @@ import { PlatformAiController } from './controllers/platform-ai.controller';
 import { PlatformAiService } from './services/platform-ai.service';
 import { PlatformPlansController } from './controllers/platform-plans.controller';
 import { PlatformPlansService } from './services/platform-plans.service';
+import { PlatformBillingController } from './controllers/platform-billing.controller';
+import { PlatformBillingService } from './services/platform-billing.service';
 import { EmergencySecurityService } from './services/emergency-security.service';
 import { SecurityIncidentsService } from './services/security-incidents.service';
 import { SecurityOperationsService } from './services/security-operations.service';
@@ -45,6 +47,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformModulesController,
     PlatformAiController,
     PlatformPlansController,
+    PlatformBillingController,
   ],
   providers: [
     PlatformDashboardService,
@@ -56,6 +59,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformModulesService,
     PlatformAiService,
     PlatformPlansService,
+    PlatformBillingService,
     EmergencySecurityService,
     SecurityIncidentsService,
     SecurityOperationsService,
@@ -71,6 +75,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformModulesService,
     PlatformAiService,
     PlatformPlansService,
+    PlatformBillingService,
     EmergencySecurityService,
     SecurityIncidentsService,
     SecurityOperationsService,
@@ -78,5 +83,3 @@ import { SecurityGovernanceService } from './services/security-governance.servic
   ],
 })
 export class SuperAdminModule {}
-
-

@@ -7,6 +7,7 @@ import {
   FileText,
   Handshake,
   LayoutDashboard,
+  Receipt,
   Settings,
   ShieldCheck,
   Sparkles,
@@ -25,6 +26,7 @@ export const navLibrary: Record<string, NavItem> = {
   tasks: { title: "Tasks", href: "/tasks", icon: CheckSquare },
   calendar: { title: "Calendar", href: "/calendar", icon: CalendarDays },
   quotations: { title: "Quotations", href: "/quotations", icon: FileText },
+  invoices: { title: "Invoices", href: "/invoices", icon: Receipt },
   ai: { title: "ClixPro AI", href: "/ai", icon: Sparkles },
   reports: { title: "Reports & Analytics", href: "/reports", icon: BarChart3 },
   employees: { title: "Employees", href: "/employees", icon: UserSquare2 },
@@ -67,6 +69,7 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.tasks,
         navLibrary.calendar,
         navLibrary.quotations,
+        navLibrary.invoices,
       ],
     },
     {
@@ -100,6 +103,7 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.tasks,
         navLibrary.calendar,
         navLibrary.quotations,
+        navLibrary.invoices,
       ],
     },
     {
@@ -133,6 +137,7 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.tasks,
         navLibrary.calendar,
         navLibrary.quotations,
+        navLibrary.invoices,
       ],
     },
     {
@@ -158,6 +163,7 @@ export const roleMenuConfig: Record<RoleKey, NavGroup[]> = {
         navLibrary.tasks,
         navLibrary.calendar,
         navLibrary.quotations,
+        navLibrary.invoices,
       ],
     },
     {

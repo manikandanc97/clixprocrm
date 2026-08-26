@@ -50,7 +50,7 @@ export default function CreateNewMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="flex items-center gap-2 bg-primary bg-gradient-to-b from-white/15 to-transparent text-primary-foreground px-3.5 sm:px-4 h-[40px] rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md outline-none cursor-pointer">
+        <button className="flex items-center gap-2 bg-primary bg-gradient-to-b from-white/15 to-transparent text-primary-foreground px-3.5 sm:px-4 h-[38px] rounded-xl font-semibold text-xs md:text-sm transition-all duration-200 shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 hover:-translate-y-0.5 active:translate-y-0 active:shadow-md outline-none cursor-pointer">
           <Plus className="w-4 h-4 shrink-0" strokeWidth={2.2} />
           <span className="hidden sm:inline font-semibold tracking-wide">Create New</span>
         </button>

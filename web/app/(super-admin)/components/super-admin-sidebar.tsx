@@ -18,6 +18,7 @@ import {
   ArrowLeftRight,
   Layers,
   Sparkles,
+  Receipt,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -51,9 +52,14 @@ const superAdminNavGroups: NavGroup[] = [
         icon: Users,
       },
       {
-        title: "Plans & Billing",
+        title: "Plans & Packages",
         href: "/super-admin/plans",
         icon: CreditCard,
+      },
+      {
+        title: "Billing & Revenue",
+        href: "/super-admin/billing",
+        icon: Receipt,
       },
       {
         title: "AI Models & Tiers",
