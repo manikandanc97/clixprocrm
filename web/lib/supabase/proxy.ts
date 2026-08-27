@@ -54,13 +54,27 @@ export async function updateSession(request: NextRequest) {
     data: { user },
   } = await supabase.auth.getUser()
 
-  const isPublicRoute =
+  const isPublicAuthRoute =
     request.nextUrl.pathname.startsWith('/login') ||
     request.nextUrl.pathname.startsWith('/register') ||
     request.nextUrl.pathname.startsWith('/forgot-password') ||
-    request.nextUrl.pathname.startsWith('/reset-password') ||
+    request.nextUrl.pathname.startsWith('/reset-password')
+
+  const isPublicRoute =
+    isPublicAuthRoute ||
     request.nextUrl.pathname.startsWith('/onboarding') ||
     request.nextUrl.pathname.startsWith('/account-deleted')
+
+  // If already authenticated and trying to access login/register, redirect to dashboard
+  if (user && isPublicAuthRoute) {
+    const url = request.nextUrl.clone()
+    url.pathname = '/dashboard'
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value)
+    })
+    return redirectResponse
+  }
 
   if (!user && !isPublicRoute) {
     if (request.nextUrl.pathname.startsWith('/api/')) {
@@ -69,7 +83,11 @@ export async function updateSession(request: NextRequest) {
     // no user, redirect the unauthenticated user to the login page
     const url = request.nextUrl.clone()
     url.pathname = '/login'
-    return NextResponse.redirect(url)
+    const redirectResponse = NextResponse.redirect(url)
+    supabaseResponse.cookies.getAll().forEach((cookie) => {
+      redirectResponse.cookies.set(cookie.name, cookie.value)
+    })
+    return redirectResponse
   }
 
   return supabaseResponse

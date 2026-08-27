@@ -1,195 +1,25 @@
 /* ============================================================
-   ENTERPRISE BUTTON ICON MICRO-ANIMATIONS
-   High-performance GPU Micro-Interactions for All CRM Buttons
+   ENTERPRISE BUTTON & ICON SMOOTH MICRO-INTERACTIONS
+   Native GPU-accelerated micro-interactions harmonized with @animateicons/react
    ============================================================ */
 
-/* Base SVG and Path Transition Tokens */
-button svg,
-[data-slot="button"] svg,
-[role="button"] svg,
-.group:hover svg,
-.group\/button:hover svg {
-  transition: transform 0.26s cubic-bezier(0.16, 1, 0.3, 1), opacity 0.26s ease !important;
-  transform-origin: center center !important;
+/* Ensure smooth pointer and scaling behavior for interactive icons */
+[data-animate-icon="true"] {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+  vertical-align: middle;
 }
 
-/* 1. Plus / Add — 90deg smooth turn */
-button:hover .lucide-plus,
-button:hover .lucide-plus-circle,
-[data-slot="button"]:hover .lucide-plus,
-[data-slot="button"]:hover .lucide-plus-circle,
-.group:hover .lucide-plus,
-.group\/button:hover .lucide-plus {
-  transform: rotate(90deg) !important;
+[data-animate-icon="true"] svg {
+  overflow: visible;
 }
 
-/* 2. UserPlus / Add Lead / Create User — Smooth upward pop */
-button:hover .lucide-user-plus,
-[data-slot="button"]:hover .lucide-user-plus,
-.group:hover .lucide-user-plus,
-.group\/button:hover .lucide-user-plus {
-  transform: translateY(-2.5px) !important;
-}
-
-/* 3. Upload / Import — Arrow glides smoothly upward */
-button:hover .lucide-upload,
-button:hover .lucide-upload-cloud,
-[data-slot="button"]:hover .lucide-upload,
-[data-slot="button"]:hover .lucide-upload-cloud,
-.group:hover .lucide-upload,
-.group\/button:hover .lucide-upload {
-  transform: translateY(-3px) !important;
-}
-
-/* 4. Download / Export — Arrow glides smoothly downward */
-button:hover .lucide-download,
-button:hover .lucide-arrow-down-to-line,
-[data-slot="button"]:hover .lucide-download,
-.group:hover .lucide-download,
-.group\/button:hover .lucide-download {
-  transform: translateY(3px) !important;
-}
-
-/* 5. Trash / Delete — Tactile lid shake/tilt */
-button:hover .lucide-trash,
-button:hover .lucide-trash-2,
-[data-slot="button"]:hover .lucide-trash,
-[data-slot="button"]:hover .lucide-trash-2,
-.group:hover .lucide-trash,
-.group\/button:hover .lucide-trash {
-  transform: rotate(-14deg) !important;
-}
-
-/* 6. Refresh / Sync — 180deg smooth spin */
-button:hover .lucide-refresh-cw,
-button:hover .lucide-rotate-cw,
-button:hover .lucide-refresh-ccw,
-[data-slot="button"]:hover .lucide-refresh-cw,
-[data-slot="button"]:hover .lucide-rotate-cw,
-.group:hover .lucide-refresh-cw,
-.group\/button:hover .lucide-refresh-cw {
-  transform: rotate(180deg) !important;
-}
-
-/* 7. Search — Magnifier tilt & zoom */
-button:hover .lucide-search,
-[data-slot="button"]:hover .lucide-search,
-.group:hover .lucide-search,
-.group\/button:hover .lucide-search {
-  transform: rotate(12deg) !important;
-}
-
-/* 8. Filter / Sliders — Funnel lift */
-button:hover .lucide-filter,
-button:hover .lucide-sliders,
-button:hover .lucide-sliders-horizontal,
-[data-slot="button"]:hover .lucide-filter,
-.group:hover .lucide-filter,
-.group\/button:hover .lucide-filter {
-  transform: translateY(-2px) !important;
-}
-
-/* 9. Edit / Pencil — Drafting tilt */
-button:hover .lucide-pencil,
-button:hover .lucide-edit,
-button:hover .lucide-square-pen,
-[data-slot="button"]:hover .lucide-pencil,
-[data-slot="button"]:hover .lucide-square-pen,
-.group:hover .lucide-pencil,
-.group\/button:hover .lucide-pencil {
-  transform: rotate(18deg) translateY(-1px) !important;
-}
-
-/* 10. Copy / Duplicate — Diagonal slide */
-button:hover .lucide-copy,
-button:hover .lucide-clipboard,
-[data-slot="button"]:hover .lucide-copy,
-.group:hover .lucide-copy,
-.group\/button:hover .lucide-copy {
-  transform: translate(2px, -2px) !important;
-}
-
-/* 11. Send / Mail — Forward glide */
-button:hover .lucide-send,
-button:hover .lucide-send-horizontal,
-[data-slot="button"]:hover .lucide-send,
-.group:hover .lucide-send,
-.group\/button:hover .lucide-send {
-  transform: translate(3px, -3px) rotate(4deg) !important;
-}
-
-/* 12. Arrow / Chevron Right — Rightward glide */
-button:hover .lucide-arrow-right,
-button:hover .lucide-chevron-right,
-button:hover .lucide-move-right,
-[data-slot="button"]:hover .lucide-arrow-right,
-[data-slot="button"]:hover .lucide-chevron-right,
-.group:hover .lucide-arrow-right,
-.group\/button:hover .lucide-arrow-right {
-  transform: translateX(3.5px) !important;
-}
-
-/* 13. Arrow / Chevron Left — Leftward glide */
-button:hover .lucide-arrow-left,
-button:hover .lucide-chevron-left,
-button:hover .lucide-move-left,
-[data-slot="button"]:hover .lucide-arrow-left,
-[data-slot="button"]:hover .lucide-chevron-left,
-.group:hover .lucide-arrow-left,
-.group\/button:hover .lucide-arrow-left {
-  transform: translateX(-3.5px) !important;
-}
-
-/* 14. Check / Save — Confirmation pulse */
-button:hover .lucide-check,
-button:hover .lucide-check-circle,
-button:hover .lucide-check-check,
-[data-slot="button"]:hover .lucide-check,
-.group:hover .lucide-check,
-.group\/button:hover .lucide-check {
-  transform: translateY(-1px) !important;
-}
-
-/* 15. Sparkles / AI — Star rotation */
-button:hover .lucide-sparkles,
-button:hover .lucide-bot,
-[data-slot="button"]:hover .lucide-sparkles,
-.group:hover .lucide-sparkles,
-.group\/button:hover .lucide-sparkles {
-  transform: rotate(20deg) !important;
-}
-
-/* 16. Settings — Cog rotation */
-button:hover .lucide-settings,
-button:hover .lucide-cog,
-[data-slot="button"]:hover .lucide-settings,
-.group:hover .lucide-settings,
-.group\/button:hover .lucide-settings {
-  transform: rotate(45deg) !important;
-}
-
-/* 17. Calendar — Pin nod down */
-button:hover .lucide-calendar,
-button:hover .lucide-calendar-days,
-[data-slot="button"]:hover .lucide-calendar-days,
-.group:hover .lucide-calendar-days,
-.group\/button:hover .lucide-calendar-days {
-  transform: translateY(-2px) !important;
-}
-
-/* 18. External Link — Arrow lifts diagonally */
-button:hover .lucide-external-link,
-[data-slot="button"]:hover .lucide-external-link,
-.group:hover .lucide-external-link,
-.group\/button:hover .lucide-external-link {
-  transform: translate(2px, -2px) !important;
-}
-
-/* 19. Close / X — 90deg turn */
-button:hover .lucide-x,
-button:hover .lucide-x-circle,
-[data-slot="button"]:hover .lucide-x,
-.group:hover .lucide-x,
-.group\/button:hover .lucide-x {
-  transform: rotate(90deg) !important;
+/* Subtle button interactive feedback */
+button:hover [data-animate-icon="true"],
+[data-slot="button"]:hover [data-animate-icon="true"],
+[role="button"]:hover [data-animate-icon="true"],
+.group:hover [data-animate-icon="true"] {
+  will-change: transform;
 }

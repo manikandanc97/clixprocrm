@@ -16,6 +16,7 @@ import {
   Edit2,
   RefreshCw
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -513,20 +514,20 @@ const LeadsTable = ({
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 shadow-lg border-border/50">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDetailsLeadId(lead.id); }} className="gap-2 text-xs cursor-pointer"><User className="w-3.5 h-3.5" /> View Details</DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingLead(lead); }} className="gap-2 text-xs cursor-pointer"><Edit2 className="w-3.5 h-3.5" /> Edit Lead</DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => handleAction(e, "Email Draft", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><Mail className="w-3.5 h-3.5" /> Send Email</DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => handleAction(e, "Call Initiated", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><Phone className="w-3.5 h-3.5" /> Log Call</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDetailsLeadId(lead.id); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="view" size={15} /> View Details</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="edit" size={15} /> Edit Lead</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => handleAction(e, "Email Draft", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><AppIcon name="mail" size={15} /> Send Email</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => handleAction(e, "Call Initiated", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><AppIcon name="phone" size={15} /> Log Call</DropdownMenuItem>
               <DropdownMenuSeparator />
               
               {lead.stage === LeadStatus.WON && (
                 <>
                   <DropdownMenuItem onClick={(e) => { e.stopPropagation(); if(lead.customerId) router.push(`/customers/${lead.customerId}`); else toast.error("Customer ID not found"); }} className="gap-2 text-xs text-blue-600 focus:text-blue-700 cursor-pointer">
-                    <User className="w-3.5 h-3.5" /> View Customer
+                    <AppIcon name="contacts" size={15} /> View Customer
                   </DropdownMenuItem>
                   {lead.isConverted && (
                     <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConvertLead(lead); }} className="gap-2 text-xs text-emerald-600 focus:text-emerald-700 cursor-pointer">
-                      <CheckCircle2 className="w-3.5 h-3.5" /> View Deal Conversion
+                      <AppIcon name="check" size={15} /> View Deal Conversion
                     </DropdownMenuItem>
                   )}
                 </>
@@ -534,28 +535,28 @@ const LeadsTable = ({
 
               {lead.stage !== LeadStatus.WON && lead.stage !== LeadStatus.LOST && (
                 <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConvertLead(lead); }} className="gap-2 text-xs text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 dark:focus:bg-emerald-950 cursor-pointer font-medium">
-                  <CheckCircle2 className="w-3.5 h-3.5" /> Convert to Deal
+                  <AppIcon name="deals" size={15} /> Convert to Deal
                 </DropdownMenuItem>
               )}
 
               {lead.stage === LeadStatus.LOST ? (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setStageTransitionLead(lead); }} className="gap-2 text-xs cursor-pointer"><RefreshCw className="w-3.5 h-3.5" /> Reopen Lead</DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setStageTransitionLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="refresh" size={15} /> Reopen Lead</DropdownMenuItem>
               ) : lead.stage !== LeadStatus.WON ? (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setStageTransitionLead(lead); }} className="gap-2 text-xs cursor-pointer"><RefreshCw className="w-3.5 h-3.5" /> Move Stage</DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setStageTransitionLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="refresh" size={15} /> Move Stage</DropdownMenuItem>
               ) : null}
 
               <DropdownMenuSeparator />
 
               {lead.stage !== LeadStatus.LOST && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setTaskLead(lead); }} className="gap-2 text-xs cursor-pointer"><CheckCircle2 className="w-3.5 h-3.5" /> Create Task</DropdownMenuItem>
+                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setTaskLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="tasks" size={15} /> Create Task</DropdownMenuItem>
               )}
               
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setMeetingLead(lead); }} className="gap-2 text-xs cursor-pointer"><Calendar className="w-3.5 h-3.5" /> Schedule Meeting</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setMeetingLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="calendar" size={15} /> Schedule Meeting</DropdownMenuItem>
               
               {lead.stage !== LeadStatus.LOST && (
                 <>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAction(e, "Email Draft", lead.name, lead); }} className="gap-2 text-xs cursor-pointer"><Mail className="w-3.5 h-3.5" /> Send Email</DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAction(e, "Call Initiated", lead.name, lead); }} className="gap-2 text-xs cursor-pointer"><Phone className="w-3.5 h-3.5" /> Call</DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAction(e, "Email Draft", lead.name, lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="mail" size={15} /> Send Email</DropdownMenuItem>
+                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAction(e, "Call Initiated", lead.name, lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="phone" size={15} /> Call</DropdownMenuItem>
                 </>
               )}
 
@@ -563,9 +564,9 @@ const LeadsTable = ({
               <DropdownMenuItem 
                 onClick={(e) => { e.stopPropagation(); setDeletingLead(lead); }}
                 variant="destructive"
-                className="gap-2 text-xs cursor-pointer"
+                className="gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
               >
-                <Trash2 className="w-3.5 h-3.5" /> Delete Lead
+                <AppIcon name="trash" size={15} className="text-destructive" /> Delete Lead
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

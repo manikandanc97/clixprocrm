@@ -9,6 +9,7 @@ import {
   Trash2, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight,
   Pencil, Link2, UserPlus, Loader2
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -267,7 +268,7 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/70 p-1.5 shadow-premium">
                       <DropdownMenuItem onClick={() => onTaskClick(task)} className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer">
-                        <Eye className="h-4 w-4" /> View
+                        <AppIcon name="eye" size={15} /> <span>View</span>
                       </DropdownMenuItem>
                       {canEditTask(task) && (
                         <>
@@ -275,7 +276,7 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                             onClick={() => onEditTask?.(task)}
                             className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer"
                           >
-                            <Pencil className="h-4 w-4" /> Edit
+                            <AppIcon name="edit" size={15} /> <span>Edit</span>
                           </DropdownMenuItem>
                           <DropdownMenuItem 
                             onClick={(e) => {
@@ -292,24 +293,24 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                             {updatingTaskId === task.id ? (
                               <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
                             ) : (
-                              <CheckCircle2 className="h-4 w-4" /> 
+                              <AppIcon name="check" size={15} /> 
                             )}
-                            {task.status === "COMPLETED" ? "Reopen Task" : "Mark Complete"}
+                            <span>{task.status === "COMPLETED" ? "Reopen Task" : "Mark Complete"}</span>
                           </DropdownMenuItem>
                         </>
                       )}
                       <DropdownMenuItem onClick={() => onScheduleMeeting?.(task)} className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer">
-                        <Calendar className="h-4 w-4" /> Schedule Meeting
+                        <AppIcon name="calendar" size={15} /> <span>Schedule Meeting</span>
                       </DropdownMenuItem>
                       {canDeleteTask && (
                         <>
                           <DropdownMenuSeparator />
                           <DropdownMenuItem 
                             variant="destructive" 
-                            className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer"
+                            className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer text-destructive focus:text-destructive"
                             onClick={() => setTaskToDelete(task)}
                           >
-                            <Trash2 className="h-4 w-4" /> Delete
+                            <AppIcon name="trash" size={15} className="text-destructive" /> <span>Delete</span>
                           </DropdownMenuItem>
                         </>
                       )}

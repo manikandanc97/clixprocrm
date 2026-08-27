@@ -1,5 +1,6 @@
 import { useState } from "react";
 import { Search, Filter, ArrowUpDown, X } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
@@ -40,7 +41,9 @@ export function PipelineToolbar({ onSearch, onSort, onFilter }: PipelineToolbarP
   return (
     <div className="flex flex-col sm:flex-row gap-3 mb-6 items-center justify-between">
       <div className="relative w-full sm:max-w-[300px]">
-        <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+        <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
+          <AppIcon icon={Search} name="search" size={16} />
+        </div>
         <Input 
           placeholder="Search deals..." 
           value={searchValue}
@@ -56,7 +59,7 @@ export function PipelineToolbar({ onSearch, onSort, onFilter }: PipelineToolbarP
             }}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
           >
-            <X className="h-4 w-4" />
+            <AppIcon icon={X} name="close" size={14} />
             <span className="sr-only">Clear search</span>
           </button>
         )}
@@ -66,7 +69,7 @@ export function PipelineToolbar({ onSearch, onSort, onFilter }: PipelineToolbarP
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="h-10 bg-card border-border flex-1 sm:flex-none">
-              <Filter className="w-4 h-4 mr-2" />
+              <AppIcon icon={Filter} name="filter" size={15} className="mr-2" />
               Filter
             </Button>
           </DropdownMenuTrigger>
@@ -82,7 +85,7 @@ export function PipelineToolbar({ onSearch, onSort, onFilter }: PipelineToolbarP
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
             <Button variant="outline" className="h-10 bg-card border-border flex-1 sm:flex-none">
-              <ArrowUpDown className="w-4 h-4 mr-2" />
+              <AppIcon icon={ArrowUpDown} name="filter" size={15} className="mr-2" />
               Sort
             </Button>
           </DropdownMenuTrigger>

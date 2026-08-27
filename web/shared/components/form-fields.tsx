@@ -25,6 +25,7 @@ import { Calendar } from "@/shared/ui/calendar";
 import { cn } from "@/shared/lib/utils";
 import { format } from "date-fns";
 import { CalendarIcon } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface BaseFieldProps {
   name: string;
@@ -138,7 +139,7 @@ export const FormDatePicker = ({ name, label, placeholder, description, classNam
                   ) : (
                     <span>{placeholder || "Pick a date"}</span>
                   )}
-                  <CalendarIcon className="ml-auto h-4 w-4 opacity-50" />
+                  <AppIcon name="calendar" icon={CalendarIcon} size={16} className="ml-auto h-4 w-4 opacity-50" />
                 </Button>
               </FormControl>
             </PopoverTrigger>

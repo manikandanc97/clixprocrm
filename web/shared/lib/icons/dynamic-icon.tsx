@@ -45,8 +45,9 @@ import {
   FileBox,
   FolderKanban,
   Contact,
-  LucideIcon,
+  type LucideIcon,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export const ICON_REGISTRY: Record<string, LucideIcon> = {
   LayoutDashboard,
@@ -120,10 +121,12 @@ export function getDynamicIcon(iconName?: string | null): LucideIcon {
 export function DynamicIcon({
   name,
   className,
+  size = 18,
 }: {
   name?: string | null;
   className?: string;
+  size?: number;
 }) {
   const IconComponent = getDynamicIcon(name);
-  return React.createElement(IconComponent, { className });
+  return <AppIcon icon={IconComponent} name={name || undefined} size={size} className={className} />;
 }

@@ -8,6 +8,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff, Mail, Lock, ArrowRight } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 import { parseApiErrors } from "@/shared/lib/api/error";
 import { signInWithGoogle, openGoogleAuthPopup, fetchCurrentUser } from "@/shared/lib/api/auth";
@@ -145,8 +146,15 @@ export default function LoginPage() {
       setLoading(true);
       setFieldErrors({});
       setGeneralError(null);
-      await login(email, password, staySignedIn);
-      // Redirect is handled by PublicRoute once auth state is confirmed.
+      const loggedUser = await login(email, password, staySignedIn);
+      
+      const isSuperAdmin =
+        loggedUser?.role?.toUpperCase() === "SUPER_ADMIN" ||
+        loggedUser?.role?.toUpperCase() === "SUPER ADMIN" ||
+        (loggedUser as any)?.isSuperAdmin === true;
+
+      const targetRoute = isSuperAdmin ? "/super-admin" : "/dashboard";
+      router.replace(targetRoute);
     } catch (error: any) {
       const { fieldErrors, generalError } = parseApiErrors(error, "Login failed");
       setFieldErrors(fieldErrors);
@@ -179,7 +187,7 @@ export default function LoginPage() {
           </Label>
           <div className="relative">
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-              <Mail className="h-4 w-4" />
+              <AppIcon name="mail" icon={Mail} size={16} />
             </div>
             <Input
               id="email"
@@ -215,7 +223,7 @@ export default function LoginPage() {
           </div>
           <div className="relative">
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-              <Lock className="h-4 w-4" />
+              <AppIcon name="lock" icon={Lock} size={16} />
             </div>
             <Input
               id="password"
@@ -234,7 +242,11 @@ export default function LoginPage() {
               onClick={() => setShowPassword(!showPassword)}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
             >
-              {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+              {showPassword ? (
+                <AppIcon name="eyeOff" icon={EyeOff} size={16} />
+              ) : (
+                <AppIcon name="eye" icon={Eye} size={16} />
+              )}
             </button>
           </div>
           {fieldErrors.password && (
@@ -277,7 +289,7 @@ export default function LoginPage() {
           ) : (
             <>
               <span>Sign In</span>
-              <ArrowRight className="h-4 w-4" />
+              <AppIcon name="arrowRight" icon={ArrowRight} size={16} />
             </>
           )}
         </Button>

@@ -56,13 +56,12 @@ export const loginUser = async (data: LoginPayload) => {
 
   // Set the persistence flag before establishing the session
   if (typeof window !== "undefined") {
+    localStorage.setItem("has_session", "1");
+    sessionStorage.setItem("clixpro_session_active", "1");
     if (rememberMe) {
       localStorage.setItem("clixpro_remember_me", "1");
-      localStorage.setItem("has_session", "1");
     } else {
       localStorage.removeItem("clixpro_remember_me");
-      localStorage.removeItem("has_session");
-      sessionStorage.setItem("clixpro_session_active", "1");
     }
   }
 

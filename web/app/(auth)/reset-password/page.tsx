@@ -4,6 +4,7 @@ import { useState, Suspense } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import { Lock, ArrowRight, Loader2, Eye, EyeOff } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -58,7 +59,7 @@ function ResetPasswordForm() {
         </Label>
         <div className="relative">
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-            <Lock className="h-4 w-4" />
+            <AppIcon name="lock" icon={Lock} size={16} />
           </div>
           <Input
             id="newPassword"
@@ -75,7 +76,11 @@ function ResetPasswordForm() {
             onClick={() => setShowPassword(!showPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
           >
-            {showPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showPassword ? (
+              <AppIcon name="eyeOff" icon={EyeOff} size={16} />
+            ) : (
+              <AppIcon name="eye" icon={Eye} size={16} />
+            )}
           </button>
         </div>
       </div>
@@ -87,7 +92,7 @@ function ResetPasswordForm() {
         </Label>
         <div className="relative">
           <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-            <Lock className="h-4 w-4" />
+            <AppIcon name="lock" icon={Lock} size={16} />
           </div>
           <Input
             id="confirmPassword"
@@ -104,7 +109,11 @@ function ResetPasswordForm() {
             onClick={() => setShowConfirmPassword(!showConfirmPassword)}
             className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
           >
-            {showConfirmPassword ? <EyeOff className="h-4 w-4" /> : <Eye className="h-4 w-4" />}
+            {showConfirmPassword ? (
+              <AppIcon name="eyeOff" icon={EyeOff} size={16} />
+            ) : (
+              <AppIcon name="eye" icon={Eye} size={16} />
+            )}
           </button>
         </div>
       </div>
@@ -123,7 +132,7 @@ function ResetPasswordForm() {
         ) : (
           <>
             <span>Reset Password</span>
-            <ArrowRight className="h-4 w-4" />
+            <AppIcon name="arrowRight" icon={ArrowRight} size={16} />
           </>
         )}
       </Button>

@@ -14,6 +14,7 @@ import {
   ChevronsLeft,
   ChevronsRight,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { 
@@ -161,20 +162,20 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => onEdit?.(customer)}>
-                <User className="size-3.5 mr-2" /> Edit Customer
+                <AppIcon name="edit" size={14} className="mr-2" /> Edit Customer
               </DropdownMenuItem>
               {customer.email && (
                 <DropdownMenuItem onClick={() => window.open(`mailto:${customer.email}`)}>
-                  <Mail className="size-3.5 mr-2" /> Send Email
+                  <AppIcon name="mail" size={14} className="mr-2" /> Send Email
                 </DropdownMenuItem>
               )}
-              <DropdownMenuItem><ExternalLink className="size-3.5 mr-2" /> Open Portal</DropdownMenuItem>
+              <DropdownMenuItem><AppIcon name="externalLink" size={14} className="mr-2" /> Open Portal</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-rose-600 focus:text-rose-600"
                 onClick={() => onDelete?.(customer.id)}
               >
-                <Trash2 className="size-3.5 mr-2" /> Delete
+                <AppIcon name="trash" size={14} className="mr-2 text-rose-600" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -241,7 +242,7 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
                  <Button 
                    variant="ghost" 
                    size="sm" 
-                   className="hover:bg-background/10 h-9 whitespace-nowrap text-rose-400 hover:text-rose-300" 
+                   className="hover:bg-background/10 h-9 whitespace-nowrap text-rose-400 hover:text-rose-300 gap-1.5" 
                    onClick={() => {
                      if (confirm(`Are you sure you want to delete ${selectedIds.length} customers?`)) {
                        bulkDelete(selectedIds, {
@@ -253,7 +254,7 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
                      }
                    }}
                  >
-                   <Trash2 className="size-4 mr-2" /> Delete
+                   <AppIcon name="trash" size={15} className="text-rose-400" /> <span>Delete</span>
                  </Button>
                </div>
             </div>

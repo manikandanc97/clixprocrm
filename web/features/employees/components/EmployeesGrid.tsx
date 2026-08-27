@@ -10,6 +10,7 @@ import {
   Mail, 
   Calendar
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { 
@@ -89,17 +90,17 @@ export const EmployeesGrid: React.FC<EmployeesGridProps> = ({
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-48 rounded-xl">
                 <DropdownMenuItem onClick={() => onViewDetails(emp)} className="text-xs font-medium cursor-pointer">
-                  <User className="w-3.5 h-3.5 mr-2" /> View Details
+                  <AppIcon name="view" size={14} className="mr-2" /> View Details
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onEdit(emp)} className="text-xs font-medium cursor-pointer">
-                  <Edit2 className="w-3.5 h-3.5 mr-2" /> Edit Employee
+                  <AppIcon name="edit" size={14} className="mr-2" /> Edit Employee
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 <DropdownMenuItem onClick={() => onToggleStatus(emp)} className="text-xs font-medium cursor-pointer">
-                  <Power className="w-3.5 h-3.5 mr-2" /> {emp.status === "ACTIVE" ? "Deactivate" : "Activate"}
+                  <AppIcon name="security" size={14} className="mr-2" /> {emp.status === "ACTIVE" ? "Deactivate" : "Activate"}
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => onDelete(emp)} className="text-xs font-medium cursor-pointer text-destructive focus:text-destructive">
-                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete Employee
+                  <AppIcon name="trash" size={14} className="mr-2 text-destructive" /> Delete Employee
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>

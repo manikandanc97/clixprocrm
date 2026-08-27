@@ -12,9 +12,10 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
   beforeEach(async () => {
     prismaMock = {
       plan: {
+        count: jest.fn().mockResolvedValue(0),
         findMany: jest.fn(),
         findUnique: jest.fn(),
-        create: jest.fn(),
+        create: jest.fn().mockImplementation((args) => Promise.resolve({ id: args.data.id, ...args.data })),
         update: jest.fn(),
         upsert: jest.fn().mockResolvedValue({ id: 'plan-1' }),
         updateMany: jest.fn(),
@@ -28,6 +29,7 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
         findUnique: jest.fn(),
       },
       planAiEntitlement: {
+        create: jest.fn().mockResolvedValue({ id: 'ent-1' }),
         upsert: jest.fn(),
         updateMany: jest.fn(),
       },
@@ -54,14 +56,23 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
     jest.clearAllMocks();
   });
 
-  describe('1. Auto-seeding 4 Canonical Primary Plans', () => {
-    it('should upsert all 4 canonical plans when database initializes', async () => {
+  describe('1. Auto-seeding Canonical Primary Plans', () => {
+    it('should create canonical plans ONLY when database has 0 plans', async () => {
+      prismaMock.plan.count.mockResolvedValue(0);
       prismaMock.aiModel.findFirst.mockResolvedValue({ id: 'model-gemini-1' });
 
       await service.seedCanonicalPlansIfEmpty();
 
-      // Should check and upsert 4 plans: starter, growth, business, enterprise
-      expect(prismaMock.plan.upsert).toHaveBeenCalledTimes(4);
+      expect(prismaMock.plan.create).toHaveBeenCalledTimes(5);
+    });
+
+    it('should NOT create or modify plans when database already has plans', async () => {
+      prismaMock.plan.count.mockResolvedValue(5);
+
+      await service.seedCanonicalPlansIfEmpty();
+
+      expect(prismaMock.plan.create).not.toHaveBeenCalled();
+      expect(prismaMock.plan.update).not.toHaveBeenCalled();
     });
   });
 

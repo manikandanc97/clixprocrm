@@ -21,6 +21,7 @@ import {
   ChevronsRight,
   ChevronDown,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   fetchPlatformOrganizations,
   createPlatformOrganization,
@@ -464,7 +465,7 @@ export default function SuperAdminOrganizationsPage() {
                                 onClick={() => handleOpenDetails(org.id)}
                                 className="text-xs gap-2 cursor-pointer font-medium"
                               >
-                                <FileText className="h-3.5 w-3.5 text-primary" />
+                                <AppIcon name="quotations" size={14} className="text-primary" />
                                 <span>View Overview</span>
                               </DropdownMenuItem>
                               <DropdownMenuSeparator />
@@ -473,7 +474,7 @@ export default function SuperAdminOrganizationsPage() {
                                 onClick={() => setOrgToDelete(org)}
                                 className="text-xs gap-2 cursor-pointer font-semibold text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
                               >
-                                <Trash2 className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
+                                <AppIcon name="trash" size={14} className="text-rose-600 dark:text-rose-400" />
                                 <span className="text-rose-600 dark:text-rose-400">Delete Workspace</span>
                               </DropdownMenuItem>
                             </DropdownMenuContent>
@@ -671,14 +672,14 @@ export default function SuperAdminOrganizationsPage() {
                   size="sm"
                   className="text-destructive hover:bg-destructive/10 hover:text-destructive text-xs font-semibold gap-1.5 h-8 px-2.5 rounded-lg"
                 >
-                  <Trash2 className="h-3.5 w-3.5" />
+                  <AppIcon name="trash" size={14} className="text-destructive" />
                   <span>Delete</span>
                 </Button>
                 <button
                   onClick={() => setDetailsModalOpen(false)}
                   className="p-1 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted"
                 >
-                  <X className="h-5 w-5" />
+                  <AppIcon name="close" size={16} />
                 </button>
               </div>
             </div>

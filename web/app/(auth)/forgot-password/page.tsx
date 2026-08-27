@@ -3,6 +3,7 @@
 import { useState } from "react";
 import Link from "next/link";
 import { Mail, ArrowRight, Loader2 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -50,7 +51,7 @@ export default function ForgotPasswordPage() {
           </Label>
           <div className="relative">
             <div className="absolute left-3.5 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-              <Mail className="h-4 w-4" />
+              <AppIcon name="mail" icon={Mail} size={16} />
             </div>
             <Input
               id="email"
@@ -79,7 +80,7 @@ export default function ForgotPasswordPage() {
           ) : (
             <>
               <span>Send Reset Link</span>
-              <ArrowRight className="h-4 w-4" />
+              <AppIcon name="arrowRight" icon={ArrowRight} size={16} />
             </>
           )}
         </Button>

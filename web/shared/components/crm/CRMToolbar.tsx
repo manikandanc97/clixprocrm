@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { motion } from "framer-motion";
 import { ViewToggle, ViewOption } from "./ViewToggle";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface CRMToolbarProps {
   searchQuery: string;
@@ -62,7 +63,9 @@ export const CRMToolbar = ({
     >
       <div className="flex w-full flex-1 items-center gap-3 sm:w-auto">
         <div className="relative flex-1 sm:max-w-md group">
-          <Search className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground group-focus-within:text-primary transition-colors" />
+          <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground group-focus-within:text-primary transition-colors pointer-events-none">
+            <AppIcon icon={Search} name="search" size={16} />
+          </div>
           <Input
             value={searchQuery}
             onChange={(e) => setSearchQuery(e.target.value)}
@@ -75,7 +78,7 @@ export const CRMToolbar = ({
               onClick={() => setSearchQuery("")}
               className="absolute right-3 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground focus:outline-none"
             >
-              <X className="h-4 w-4" />
+              <AppIcon icon={X} name="close" size={14} />
               <span className="sr-only">Clear search</span>
             </button>
           )}
@@ -83,8 +86,8 @@ export const CRMToolbar = ({
         
         {onFilterClick && (
           <Button variant="outline" size="sm" onClick={onFilterClick} className="gap-2">
-            <Filter className="w-4 h-4" />
-            Filters
+            <AppIcon icon={Filter} name="filter" size={15} />
+            <span>Filters</span>
           </Button>
         )}
       </div>
@@ -103,15 +106,3 @@ export const CRMToolbar = ({
     </motion.div>
   );
 };
-
-
-
-
-
-
-
-
-
-
-
-

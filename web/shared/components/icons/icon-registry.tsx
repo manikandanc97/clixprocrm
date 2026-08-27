@@ -5,16 +5,23 @@ import { motion, useReducedMotion } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
+  User,
   UserCog,
   UserCheck,
   UserPlus,
   CalendarDays,
+  Calendar,
   CheckCheck,
   Check,
+  CircleCheck,
+  CirclePlus,
   FileText,
   Receipt,
   Sparkles,
   ChartColumn,
+  ChartBar,
+  ChartLine,
+  ChartPie,
   Settings,
   Headset,
   ShieldCheck,
@@ -26,12 +33,14 @@ import {
   History,
   FileClock,
   Bell,
+  BellDot,
   Mail,
   Search,
   Filter,
   SlidersHorizontal,
   Plus,
   Trash2,
+  Trash,
   RefreshCw,
   Download,
   Upload,
@@ -39,12 +48,40 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronLeft,
+  ChevronDown,
+  ChevronUp,
   Pencil,
   Copy,
   Send,
   Eye,
   EyeOff,
   ExternalLink,
+  Phone,
+  PhoneCall,
+  Globe,
+  Lock,
+  Key,
+  Folder,
+  FolderOpen,
+  File,
+  FilePlus,
+  Tag,
+  Bookmark,
+  Heart,
+  Star,
+  Pin,
+  Info,
+  ClockAlert,
+  TriangleAlert,
+  HandCoins,
+  DollarSign,
+  BadgeDollarSign,
+  Store,
+  House,
+  Boxes,
+  MessageCircle,
+  X,
+  Menu,
 } from "@animateicons/react/lucide";
 import { Building2, Handshake, BriefcaseBusiness, type LucideIcon } from "lucide-react";
 
@@ -52,6 +89,7 @@ export type IconName =
   | "dashboard"
   | "contacts"
   | "leads"
+  | "user"
   | "userPlus"
   | "platformUsers"
   | "companies"
@@ -101,6 +139,10 @@ export type IconName =
   | "back"
   | "chevronRight"
   | "chevronLeft"
+  | "chevronDown"
+  | "chevronUp"
+  | "chevronsLeft"
+  | "chevronsRight"
   | "edit"
   | "pencil"
   | "copy"
@@ -111,12 +153,26 @@ export type IconName =
   | "check"
   | "save"
   | "externalLink"
+  | "phone"
+  | "globe"
+  | "lock"
+  | "key"
+  | "folder"
+  | "file"
+  | "tag"
+  | "bookmark"
+  | "star"
+  | "info"
+  | "alert"
+  | "close"
+  | "menu"
+  | "message"
   | "default";
 
 export interface AppIconProps {
   name?: string;
   href?: string;
-  icon?: LucideIcon | React.ComponentType<{ className?: string; size?: number }>;
+  icon?: LucideIcon | React.ComponentType<{ className?: string; size?: number; [key: string]: any }>;
   size?: number;
   className?: string;
   active?: boolean;
@@ -127,30 +183,84 @@ export interface AppIconProps {
 }
 
 export function resolveIconName(name?: string, href?: string, IconComponent?: any): IconName {
-  const iconDisp = (IconComponent?.displayName || IconComponent?.name || "").toLowerCase();
+  const iconDisp = (
+    IconComponent?.displayName ||
+    IconComponent?.name ||
+    IconComponent?.render?.displayName ||
+    IconComponent?.render?.name ||
+    ""
+  ).toLowerCase();
   const nameText = (name || "").toLowerCase();
   const hrefText = (href || "").toLowerCase();
   const pathParts = hrefText.split(/[\/?#]/).filter(Boolean);
   const lastPathPart = pathParts[pathParts.length - 1] || "";
   const text = `${nameText} ${hrefText}`.trim();
 
-  // 1. Match specific IconComponent name first if available
+  // 1. Direct IconComponent name matches
+  if (iconDisp.includes("trash")) return "trash";
+  if (iconDisp.includes("pencil") || iconDisp.includes("edit") || iconDisp.includes("squarepen")) return "edit";
   if (iconDisp.includes("userplus")) return "userPlus";
   if (iconDisp.includes("usercog") || iconDisp.includes("usersround")) return "platformUsers";
   if (iconDisp.includes("usercheck") || iconDisp.includes("usersquare")) return "employees";
+  if (iconDisp.includes("users") || iconDisp.includes("contact") || iconDisp.includes("user")) return "contacts";
   if (iconDisp.includes("activity")) return "telemetry";
   if (iconDisp.includes("scroll") || iconDisp.includes("fileclock") || iconDisp.includes("history")) return "auditLogs";
   if (iconDisp.includes("layers") || iconDisp.includes("boxes")) return "modules";
   if (iconDisp.includes("creditcard") || iconDisp.includes("package")) return "plans";
   if (iconDisp.includes("receipt") || iconDisp.includes("banknote")) return "invoices";
-  if (iconDisp.includes("sparkle") || iconDisp.includes("bot")) return "ai";
-  if (iconDisp.includes("chart") || iconDisp.includes("barchart")) return "reports";
+  if (iconDisp.includes("sparkle") || iconDisp.includes("bot") || iconDisp.includes("brain")) return "ai";
+  if (iconDisp.includes("chart") || iconDisp.includes("barchart") || iconDisp.includes("trending")) return "reports";
   if (iconDisp.includes("shieldalert") || iconDisp.includes("shieldcheck") || iconDisp.includes("shield")) return "security";
-  if (iconDisp.includes("setting") || iconDisp.includes("sliders")) return "settings";
+  if (iconDisp.includes("setting") || iconDisp.includes("cog")) return "settings";
+  if (iconDisp.includes("download") || iconDisp.includes("arrowdowntoline")) return "download";
+  if (iconDisp.includes("upload") || iconDisp.includes("uploadcloud")) return "upload";
+  if (iconDisp.includes("refresh") || iconDisp.includes("rotate") || iconDisp.includes("sync")) return "refresh";
+  if (iconDisp.includes("search")) return "search";
+  if (iconDisp.includes("filter") || iconDisp.includes("slider") || iconDisp.includes("arrowupdown")) return "filter";
+  if (iconDisp.includes("plus") || iconDisp.includes("circleplus")) return "plus";
+  if (iconDisp.includes("copy") || iconDisp.includes("clipboard")) return "copy";
+  if (iconDisp.includes("mail") || iconDisp.includes("envelope") || iconDisp.includes("inbox")) return "mail";
+  if (iconDisp.includes("phone")) return "phone";
+  if (iconDisp.includes("bell")) return "notifications";
+  if (iconDisp.includes("eyeoff")) return "eyeOff";
+  if (iconDisp.includes("eye")) return "eye";
+  if (iconDisp.includes("check")) return "check";
+  if (iconDisp.includes("externallink") || iconDisp.includes("link")) return "externalLink";
+  if (iconDisp.includes("calendar")) return "calendar";
+  if (iconDisp.includes("file") || iconDisp.includes("filetext")) return "quotations";
+  if (iconDisp.includes("building") || iconDisp.includes("company")) return "companies";
+  if (iconDisp.includes("handshake") || iconDisp.includes("deal")) return "deals";
+  if (iconDisp.includes("chevronright") || iconDisp.includes("chevronsright")) return "chevronRight";
+  if (iconDisp.includes("chevronleft") || iconDisp.includes("chevronsleft")) return "chevronLeft";
+  if (iconDisp.includes("chevrondown")) return "chevronDown";
+  if (iconDisp.includes("chevronup")) return "chevronUp";
+  if (iconDisp.includes("arrowright")) return "arrowRight";
+  if (iconDisp.includes("arrowleft")) return "arrowLeft";
+  if (iconDisp.includes("lock")) return "lock";
+  if (iconDisp.includes("key")) return "key";
+  if (iconDisp.includes("folder")) return "folder";
+  if (iconDisp.includes("tag")) return "tag";
+  if (iconDisp.includes("bookmark")) return "bookmark";
+  if (iconDisp.includes("star")) return "star";
+  if (iconDisp.includes("info")) return "info";
+  if (iconDisp.includes("alert") || iconDisp.includes("trianglealert")) return "alert";
+  if (iconDisp.includes("close") || iconDisp.includes("x")) return "close";
+  if (iconDisp.includes("menu")) return "menu";
 
   // 2. High-specificity route, action, and keyword resolution
-  if (text.includes("bulk upload") || text.includes("import") || text.includes("upload")) return "upload";
-  if (text.includes("add lead") || text.includes("create lead") || text.includes("add customer") || text.includes("userplus") || text.includes("new user")) return "userPlus";
+  if (text.includes("trash") || text.includes("delete") || text.includes("remove") || text.includes("destroy")) return "trash";
+  if (text.includes("edit") || text.includes("pencil") || text.includes("modify") || text.includes("rename")) return "edit";
+  if (text.includes("bulk upload") || text.includes("import") || text.includes("upload") || text.includes("import data") || text.includes("import leads") || text.includes("csv")) return "upload";
+  if (text.includes("download") || text.includes("export") || text.includes("export data") || text.includes("save report")) return "download";
+  if (text.includes("refresh") || text.includes("sync") || text.includes("reload") || text.includes("re-fetch")) return "refresh";
+  if (text.includes("lead") || text.includes("add lead") || text.includes("create lead") || text.includes("create first lead") || text.includes("new lead") || text.includes("userplus") || text.includes("new user") || text.includes("invite")) return "userPlus";
+  if (text.includes("deal") || text.includes("pipeline") || text.includes("handshake") || lastPathPart === "deals") return "deals";
+  if (text.includes("task") || text.includes("todo") || text.includes("checklist") || lastPathPart === "tasks") return "tasks";
+  if (text.includes("quotation") || text.includes("proposal") || text.includes("quote") || lastPathPart === "quotations") return "quotations";
+  if (text.includes("invoice") || text.includes("receipt") || text.includes("billing") || text.includes("revenue") || lastPathPart === "billing" || lastPathPart === "invoices") return "invoices";
+  if (text.includes("compan") || text.includes("organization") || lastPathPart === "companies" || lastPathPart === "organizations") return "companies";
+  if (text.includes("contact") || text.includes("customer") || lastPathPart === "contacts" || lastPathPart === "customers") return "contacts";
+  if (text.includes("plus") || text.includes("add") || text.includes("create") || text.includes("new")) return "plus";
 
   // Modules & Navigation
   if (text.includes("module") || text.includes("layer") || lastPathPart === "modules") return "modules";
@@ -162,62 +272,53 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (text.includes("audit") || text.includes("log") || text.includes("scroll") || text.includes("history") || lastPathPart === "audit-logs") return "auditLogs";
 
   // Settings
-  if (text.includes("setting") || lastPathPart === "settings") return "settings";
+  if (text.includes("setting") || lastPathPart === "settings" || text.includes("preference") || text.includes("config")) return "settings";
 
   // Platform Users & Employee Roles
   if (text.includes("platform user") || (text.includes("user") && !text.includes("contact") && !text.includes("lead") && lastPathPart === "users")) return "platformUsers";
   if (text.includes("employee") || text.includes("staff") || text.includes("member") || lastPathPart === "employees") return "employees";
 
-  // Security & Permissions (strictly match security/permission contexts, not global super-admin paths)
+  // Security & Permissions
   if (text.includes("security") || text.includes("role") || text.includes("permission") || lastPathPart === "security" || lastPathPart === "role-management") return "security";
 
   // Billing, Invoicing & Plans
   if (text.includes("payment") || text.includes("plan") || text.includes("package") || lastPathPart === "plans") return "plans";
-  if (text.includes("invoice") || text.includes("receipt") || text.includes("billing") || text.includes("revenue") || lastPathPart === "billing" || lastPathPart === "invoices") return "invoices";
 
   // AI
-  if (text.includes("ai") || text.includes("sparkle") || text.includes("clixpro ai") || text.includes("model") || text.includes("tier") || lastPathPart === "ai") return "ai";
+  if (text.includes("ai") || text.includes("sparkle") || text.includes("clixpro ai") || text.includes("neural") || text.includes("intelligence") || text.includes("model") || text.includes("tier") || lastPathPart === "ai") return "ai";
 
   // Reporting & Analytics
   if (text.includes("team-performance") || text.includes("team performance") || lastPathPart === "team-performance") return "teamPerformance";
-  if (text.includes("report") || text.includes("analytics") || text.includes("performance") || lastPathPart === "reports" || lastPathPart === "analytics" || lastPathPart === "performance") return "reports";
+  if (text.includes("report") || text.includes("analytics") || text.includes("performance") || text.includes("stats") || text.includes("metric") || lastPathPart === "reports" || lastPathPart === "analytics" || lastPathPart === "performance") return "reports";
 
   // Support & Help
   if (text.includes("ticket") || lastPathPart === "support-tickets") return "supportTickets";
-  if (text.includes("help") || text.includes("support") || text.includes("buoy") || lastPathPart === "help") return "support";
+  if (text.includes("help") || text.includes("support") || text.includes("buoy") || text.includes("faq") || lastPathPart === "help") return "support";
 
   // Tasks & Calendars
   if (text.includes("attendance") || lastPathPart === "attendance") return "attendance";
-  if (text.includes("calendar") || lastPathPart === "calendar") return "calendar";
-  if (text.includes("quotation") || text.includes("proposal") || text.includes("quote") || lastPathPart === "quotations") return "quotations";
-  if (text.includes("task") || text.includes("todo") || lastPathPart === "tasks") return "tasks";
-
-  // CRM Entities
-  if (text.includes("compan") || text.includes("organization") || lastPathPart === "companies" || lastPathPart === "organizations") return "companies";
-  if (text.includes("deal") || text.includes("pipeline") || text.includes("handshake") || lastPathPart === "deals") return "deals";
-  if (text.includes("contact") || text.includes("lead") || lastPathPart === "contacts" || lastPathPart === "leads") return "contacts";
+  if (text.includes("calendar") || text.includes("meeting") || text.includes("schedule") || text.includes("event") || lastPathPart === "calendar") return "calendar";
 
   // Navigation Utilities
-  if (text.includes("notification") || text.includes("bell")) return "notifications";
-  if (text.includes("mail") || text.includes("email")) return "mail";
-  if (text.includes("search")) return "search";
-  if (text.includes("filter")) return "filter";
-  if (text.includes("slider")) return "sliders";
-  if (text.includes("plus") || text.includes("add") || text.includes("create") || text.includes("new")) return "plus";
-  if (text.includes("trash") || text.includes("delete") || text.includes("remove")) return "trash";
-  if (text.includes("refresh") || text.includes("sync") || text.includes("reload")) return "refresh";
-  if (text.includes("download") || text.includes("export")) return "download";
-  if (text.includes("arrowright") || text.includes("next")) return "arrowRight";
-  if (text.includes("arrowleft") || text.includes("back") || text.includes("prev")) return "arrowLeft";
+  if (text.includes("notification") || text.includes("bell") || text.includes("alert")) return "notifications";
+  if (text.includes("mail") || text.includes("email") || text.includes("inbox")) return "mail";
+  if (text.includes("phone") || text.includes("call")) return "phone";
+  if (text.includes("search") || text.includes("find") || text.includes("lookup")) return "search";
+  if (text.includes("filter") || text.includes("sort") || text.includes("slider")) return "filter";
+  if (text.includes("arrowright") || text.includes("next") || text.includes("forward")) return "arrowRight";
+  if (text.includes("arrowleft") || text.includes("back") || text.includes("prev") || text.includes("previous")) return "arrowLeft";
   if (text.includes("chevronright")) return "chevronRight";
   if (text.includes("chevronleft")) return "chevronLeft";
-  if (text.includes("edit") || text.includes("pencil") || text.includes("update")) return "edit";
-  if (text.includes("copy") || text.includes("duplicate")) return "copy";
-  if (text.includes("send")) return "send";
+  if (text.includes("chevrondown")) return "chevronDown";
+  if (text.includes("chevronup")) return "chevronUp";
+  if (text.includes("copy") || text.includes("duplicate") || text.includes("clone")) return "copy";
+  if (text.includes("send") || text.includes("share")) return "send";
   if (text.includes("eyeoff") || text.includes("hide")) return "eyeOff";
-  if (text.includes("eye") || text.includes("view") || text.includes("show")) return "eye";
-  if (text.includes("check") || text.includes("save") || text.includes("done")) return "check";
+  if (text.includes("eye") || text.includes("view") || text.includes("show") || text.includes("preview")) return "eye";
+  if (text.includes("check") || text.includes("save") || text.includes("done") || text.includes("confirm") || text.includes("submit") || text.includes("apply")) return "check";
   if (text.includes("externallink") || text.includes("link")) return "externalLink";
+  if (text.includes("close") || text.includes("cancel") || text.includes("dismiss")) return "close";
+  if (text.includes("menu")) return "menu";
 
   // Dashboard / Overview
   if (text.includes("dashboard") || text.includes("overview") || hrefText === "/dashboard" || hrefText === "/super-admin") return "dashboard";
@@ -258,7 +359,7 @@ export function AppIcon({
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    iconRef.current?.stopAnimation();
+    iconRef.current?.stopAnimation?.();
     setIsFallbackAnimating(false);
   }, []);
 
@@ -270,15 +371,15 @@ export function AppIcon({
       timerRef.current = null;
     }
 
-    iconRef.current?.startAnimation();
+    iconRef.current?.startAnimation?.();
     setIsFallbackAnimating(true);
 
-    // Auto-reset back to rest state cleanly after one cycle
+    // Auto-reset back to rest state cleanly after one complete cycle
     timerRef.current = setTimeout(() => {
-      iconRef.current?.stopAnimation();
+      iconRef.current?.stopAnimation?.();
       setIsFallbackAnimating(false);
       timerRef.current = null;
-    }, Math.max(550, Math.round(duration * 1000)));
+    }, Math.max(600, Math.round(duration * 1000)));
   }, [duration, reducedMotion]);
 
   // Handle explicit triggerAnimation key changes
@@ -293,7 +394,7 @@ export function AppIcon({
     }
   }, [triggerAnimation, playOneShotAnimation]);
 
-  // Handle hover state cleanly
+  // Handle prop-driven hover state cleanly
   useEffect(() => {
     if (isHovered) {
       playOneShotAnimation();
@@ -311,22 +412,40 @@ export function AppIcon({
     };
   }, []);
 
-  // Listen for parent button hover & custom trigger/stop events
+  // Listen for parent interactive element hover (button, link, row, dropdown item)
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
 
-    const handleCustomTrigger = () => {
-      playOneShotAnimation();
-    };
+    const parentInteractive = el.closest(
+      'button, a, [role="button"], [role="menuitem"], [data-slot="button"], tr, .group, [data-interactive], .relative, [data-slot="form-item"], .form-item, label'
+    );
 
-    const handleCustomStop = () => {
-      stopCurrentAnimation();
-    };
+    const onEnter = () => playOneShotAnimation();
+    const onLeave = () => stopCurrentAnimation();
+
+    if (parentInteractive) {
+      parentInteractive.addEventListener("mouseenter", onEnter);
+      parentInteractive.addEventListener("mouseleave", onLeave);
+      parentInteractive.addEventListener("focusin", onEnter);
+      parentInteractive.addEventListener("focusout", onLeave);
+      parentInteractive.addEventListener("click", onEnter);
+    }
+
+    const handleCustomTrigger = () => playOneShotAnimation();
+    const handleCustomStop = () => stopCurrentAnimation();
 
     el.addEventListener("trigger-icon-animation", handleCustomTrigger);
     el.addEventListener("stop-icon-animation", handleCustomStop);
+
     return () => {
+      if (parentInteractive) {
+        parentInteractive.removeEventListener("mouseenter", onEnter);
+        parentInteractive.removeEventListener("mouseleave", onLeave);
+        parentInteractive.removeEventListener("focusin", onEnter);
+        parentInteractive.removeEventListener("focusout", onLeave);
+        parentInteractive.removeEventListener("click", onEnter);
+      }
       el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
       el.removeEventListener("stop-icon-animation", handleCustomStop);
     };
@@ -337,6 +456,12 @@ export function AppIcon({
     size,
     duration,
     className: `shrink-0 select-none ${className}`,
+    onMouseEnter: () => {
+      playOneShotAnimation();
+    },
+    onMouseLeave: () => {
+      stopCurrentAnimation();
+    },
   };
 
   const renderIcon = () => {
@@ -346,6 +471,8 @@ export function AppIcon({
       case "contacts":
       case "leads":
         return <Users {...props} />;
+      case "user":
+        return <User {...props} />;
       case "platformUsers":
         return <UserCog {...props} />;
       case "userPlus":
@@ -392,6 +519,8 @@ export function AppIcon({
         return <Bell {...props} />;
       case "mail":
         return <Mail {...props} />;
+      case "phone":
+        return <Phone {...props} />;
       case "search":
         return <Search {...props} />;
       case "filter":
@@ -423,6 +552,10 @@ export function AppIcon({
         return <ChevronRight {...props} />;
       case "chevronLeft":
         return <ChevronLeft {...props} />;
+      case "chevronDown":
+        return <ChevronDown {...props} />;
+      case "chevronUp":
+        return <ChevronUp {...props} />;
       case "edit":
       case "pencil":
         return <Pencil {...props} />;
@@ -440,6 +573,30 @@ export function AppIcon({
         return <Check {...props} />;
       case "externalLink":
         return <ExternalLink {...props} />;
+      case "lock":
+        return <Lock {...props} />;
+      case "key":
+        return <Key {...props} />;
+      case "folder":
+        return <Folder {...props} />;
+      case "file":
+        return <File {...props} />;
+      case "tag":
+        return <Tag {...props} />;
+      case "bookmark":
+        return <Bookmark {...props} />;
+      case "star":
+        return <Star {...props} />;
+      case "info":
+        return <Info {...props} />;
+      case "alert":
+        return <TriangleAlert {...props} />;
+      case "close":
+        return <X {...props} />;
+      case "menu":
+        return <Menu {...props} />;
+      case "message":
+        return <MessageCircle {...props} />;
 
       // Animated Lucide Icons with smooth micro-interaction
       case "companies":
@@ -447,7 +604,7 @@ export function AppIcon({
           <motion.div
             animate={
               !reducedMotion && (isFallbackAnimating || isHovered)
-                ? { scaleY: [1, 1.1, 0.96, 1], y: [0, -1, 0] }
+                ? { scaleY: [1, 1.08, 0.96, 1], y: [0, -1.5, 0] }
                 : { scaleY: 1, y: 0 }
             }
             style={{ transformOrigin: "bottom center" }}
@@ -491,7 +648,19 @@ export function AppIcon({
 
       default:
         if (FallbackIcon) {
-          return <FallbackIcon size={size} className={`shrink-0 select-none ${className}`} />;
+          return (
+            <motion.div
+              animate={
+                !reducedMotion && (isFallbackAnimating || isHovered)
+                  ? { scale: [1, 1.14, 0.96, 1], rotate: [0, -5, 5, 0], y: [0, -1, 0] }
+                  : { scale: 1, rotate: 0, y: 0 }
+              }
+              transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
+              className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+            >
+              <FallbackIcon size={size} className={className} />
+            </motion.div>
+          );
         }
         return null;
     }
@@ -502,6 +671,8 @@ export function AppIcon({
       ref={containerRef}
       data-animate-icon="true"
       onClick={onClick}
+      onMouseEnter={() => playOneShotAnimation()}
+      onMouseLeave={() => stopCurrentAnimation()}
       className="inline-flex shrink-0 items-center justify-center"
     >
       {renderIcon()}

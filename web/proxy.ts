@@ -25,18 +25,6 @@ export async function proxy(request: NextRequest) {
     return;
   }
 
-  const isPublicPath = publicPaths.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
-  );
-
-  const isPublicApiPath = publicApiPaths.some(
-    (path) => pathname === path || pathname.startsWith(`${path}/`)
-  );
-
-  if (isPublicPath || isPublicApiPath) {
-    return;
-  }
-
   // Update session and verify authentication via Supabase
   return await updateSession(request);
 }

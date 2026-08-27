@@ -12,6 +12,7 @@ import {
   ChevronsRight,
   Edit
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { 
@@ -152,14 +153,14 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-48">
               <DropdownMenuItem onClick={() => onEdit?.(deal)}>
-                <Edit className="size-3.5 mr-2" /> Edit Deal
+                <AppIcon name="edit" size={14} className="mr-2" /> Edit Deal
               </DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 
                 className="text-rose-600 focus:text-rose-600"
                 onClick={() => onDelete?.(deal.id)}
               >
-                <Trash2 className="size-3.5 mr-2" /> Delete
+                <AppIcon name="trash" size={14} className="mr-2 text-rose-600" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
@@ -232,7 +233,7 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
                 </Button>
                 <Button 
                   size="sm" 
-                  className="h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-none border-none font-semibold px-4 rounded-xl"
+                  className="h-8 bg-destructive hover:bg-destructive/90 text-destructive-foreground shadow-none border-none font-semibold px-4 rounded-xl gap-1.5"
                   onClick={() => {
                     if (confirm(`Are you sure you want to delete ${selectedIds.length} deals?`)) {
                       onDelete?.(selectedIds.join(','));
@@ -240,7 +241,7 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
                     }
                   }}
                 >
-                  <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                  <AppIcon name="trash" size={15} className="text-destructive-foreground" /> <span>Delete</span>
                 </Button>
               </div>
             </div>

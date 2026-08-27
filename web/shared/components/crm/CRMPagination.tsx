@@ -16,6 +16,7 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { cn } from "@/shared/lib/utils";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export interface CRMPaginationProps {
   currentPage: number;
@@ -78,7 +79,7 @@ export function CRMPagination({
                 className="h-8 gap-1 font-semibold text-xs rounded-lg"
               >
                 {rowsPerPage}{" "}
-                <ChevronDown className="w-3.5 h-3.5 text-muted-foreground" />
+                <AppIcon icon={ChevronDown} name="chevronDown" size={14} className="text-muted-foreground" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="min-w-[4.5rem]">
@@ -113,7 +114,7 @@ export function CRMPagination({
             aria-label="First page"
             title="First page"
           >
-            <ChevronsLeft className="w-4 h-4" />
+            <AppIcon icon={ChevronsLeft} name="chevronLeft" size={16} />
           </Button>
 
           {/* Previous Page */}
@@ -126,7 +127,7 @@ export function CRMPagination({
             aria-label="Previous page"
             title="Previous page"
           >
-            <ChevronLeft className="w-4 h-4" />
+            <AppIcon icon={ChevronLeft} name="chevronLeft" size={16} />
           </Button>
 
           {/* Page indicator */}
@@ -144,7 +145,7 @@ export function CRMPagination({
             aria-label="Next page"
             title="Next page"
           >
-            <ChevronRight className="w-4 h-4" />
+            <AppIcon icon={ChevronRight} name="chevronRight" size={16} />
           </Button>
 
           {/* Last Page */}
@@ -157,7 +158,7 @@ export function CRMPagination({
             aria-label="Last page"
             title="Last page"
           >
-            <ChevronsRight className="w-4 h-4" />
+            <AppIcon icon={ChevronsRight} name="chevronRight" size={16} />
           </Button>
         </div>
       </div>

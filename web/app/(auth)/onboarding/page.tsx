@@ -1,7 +1,8 @@
 "use client";
 
 import { useState, useRef } from "react";
-import { Loader2, ArrowRight, UploadCloud, ImagePlus, X, Sparkles } from "lucide-react";
+import { Loader2, ArrowRight, UploadCloud, ImagePlus, X, Sparkles, Crop } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "next/navigation";
 
@@ -14,7 +15,6 @@ import { fetchDashboardData } from "@/shared/lib/api/crm";
 import { extractErrorMessage } from "@/shared/lib/api/error";
 import { extractDominantColorClient } from "@/shared/lib/utils/color-utils";
 import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
-import { Crop } from "lucide-react";
 import { toast } from "sonner";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
@@ -229,7 +229,7 @@ export default function OnboardingPage() {
             </Label>
             {detectedColor && (
               <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground animate-fadeIn">
-                <Sparkles className="w-3.5 h-3.5 text-primary" />
+                <AppIcon name="ai" icon={Sparkles} size={14} className="text-primary" />
                 <span>Detected Color:</span>
                 <span
                   className="inline-block w-3.5 h-3.5 rounded-full border border-black/10 shadow-sm"
@@ -278,7 +278,7 @@ export default function OnboardingPage() {
                     onClick={() => fileInputRef.current?.click()}
                     disabled={loading}
                   >
-                    <ImagePlus className="w-3 h-3 mr-1 text-primary" />
+                    <AppIcon name="upload" icon={ImagePlus} size={12} className="mr-1 text-primary" />
                     Change
                   </Button>
                   <Button
@@ -289,7 +289,7 @@ export default function OnboardingPage() {
                     onClick={handleOpenCropForCurrentLogo}
                     disabled={loading}
                   >
-                    <Crop className="w-3 h-3 mr-1 text-primary" />
+                    <AppIcon name="edit" icon={Crop} size={12} className="mr-1 text-primary" />
                     Crop
                   </Button>
                   <Button
@@ -300,7 +300,7 @@ export default function OnboardingPage() {
                     onClick={handleRemoveLogo}
                     disabled={loading}
                   >
-                    <X className="w-3 h-3 mr-1" />
+                    <AppIcon name="close" icon={X} size={12} className="mr-1" />
                     Remove
                   </Button>
                 </div>
@@ -319,7 +319,7 @@ export default function OnboardingPage() {
               }`}
             >
               <div className="w-10 h-10 rounded-xl bg-primary/10 text-primary flex items-center justify-center transition-transform group-hover:scale-110">
-                <UploadCloud className="w-5 h-5" />
+                <AppIcon name="upload" icon={UploadCloud} size={20} />
               </div>
               <div>
                 <p className="text-xs font-semibold text-foreground">
@@ -358,7 +358,7 @@ export default function OnboardingPage() {
           ) : (
             <>
               <span>Create Workspace</span>
-              <ArrowRight className="h-4 w-4" />
+              <AppIcon name="arrowRight" icon={ArrowRight} size={16} />
             </>
           )}
         </Button>

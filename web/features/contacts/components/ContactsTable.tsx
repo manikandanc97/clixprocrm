@@ -12,6 +12,7 @@ import {
   ChevronsRight,
   Phone,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import {
@@ -223,13 +224,13 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
                   else onEditCustomer?.(contact.raw);
                 }}
               >
-                <User className="w-3.5 h-3.5 mr-2" /> Edit {contact.type}
+                <AppIcon name="edit" size={14} className="mr-2" /> Edit {contact.type}
               </DropdownMenuItem>
               {contact.email && (
                 <DropdownMenuItem
                   onClick={() => window.open(`mailto:${contact.email}`)}
                 >
-                  <Mail className="w-3.5 h-3.5 mr-2" /> Send Email
+                  <AppIcon name="mail" size={14} className="mr-2" /> Send Email
                 </DropdownMenuItem>
               )}
               <DropdownMenuSeparator />
@@ -242,7 +243,7 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
                   }
                 }}
               >
-                <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                <AppIcon name="trash" size={14} className="mr-2 text-rose-600" /> Delete
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

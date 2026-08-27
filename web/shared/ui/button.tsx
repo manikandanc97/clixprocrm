@@ -5,7 +5,7 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "group group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)]",
+  "group group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[&_svg]:scale-110 group-hover:[&_svg]:-translate-y-[0.5px] active:[&_svg]:scale-95",
   {
     variants: {
       variant: {
@@ -52,7 +52,7 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, onMouseEnter, ...props }, ref) => {
+  ({ className, variant, size, asChild = false, onMouseEnter, onMouseLeave, ...props }, ref) => {
     const Comp = asChild ? Slot.Root : "button";
 
     const handleMouseEnter = (e: React.MouseEvent<HTMLButtonElement>) => {
@@ -64,7 +64,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
     };
 
     const handleMouseLeave = (e: React.MouseEvent<HTMLButtonElement>) => {
-      props.onMouseLeave?.(e);
+      onMouseLeave?.(e);
       const iconEls = e.currentTarget.querySelectorAll<HTMLElement>("[data-animate-icon]");
       iconEls.forEach((el) => {
         el.dispatchEvent(new CustomEvent("stop-icon-animation"));

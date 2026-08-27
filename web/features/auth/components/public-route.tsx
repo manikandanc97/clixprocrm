@@ -42,7 +42,7 @@ export default function PublicRoute({ children }: PublicRouteProps) {
 
   // During init or when redirecting authenticated user, show loading screen instead of blank null
   if (isInitializing || isAuthenticated) {
-    return <AuthLoadingScreen />;
+    return <AuthLoadingScreen error={null} stage={isAuthenticated ? "ready" : undefined} />;
   }
 
   return <>{children}</>;

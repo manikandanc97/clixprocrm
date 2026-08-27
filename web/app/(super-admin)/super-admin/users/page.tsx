@@ -21,6 +21,7 @@ import {
   ChevronsRight,
   ChevronDown,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   fetchPlatformUsers,
   updatePlatformUserStatus,
@@ -463,7 +464,7 @@ export default function SuperAdminUsersPage() {
                               onClick={() => setSelectedUser(u)}
                               className="text-xs gap-2 cursor-pointer font-medium"
                             >
-                              <FileText className="h-3.5 w-3.5 text-primary" />
+                              <AppIcon name="quotations" size={14} className="text-primary" />
                               <span>View User Profile</span>
                             </DropdownMenuItem>
 
@@ -474,7 +475,7 @@ export default function SuperAdminUsersPage() {
                                   onClick={() => setTransferTargetUser(u)}
                                   className="text-xs gap-2 cursor-pointer font-medium text-amber-600 focus:text-amber-600 focus:bg-amber-500/10 hover:text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 dark:focus:text-amber-400 dark:focus:bg-amber-500/20 not-data-[variant=destructive]:focus:**:!text-amber-600 not-data-[variant=destructive]:hover:**:!text-amber-600"
                                 >
-                                  <Crown className="h-3.5 w-3.5 text-amber-500" />
+                                  <AppIcon name="security" size={14} className="text-amber-500" />
                                   <span>Transfer Super Admin</span>
                                 </DropdownMenuItem>
                               </>
@@ -489,7 +490,7 @@ export default function SuperAdminUsersPage() {
                                     onClick={() => handleToggleStatus(u)}
                                     className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
                                   >
-                                    <Ban className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
+                                    <AppIcon name="close" size={14} className="text-rose-500 dark:text-rose-400" />
                                     <span>Suspend User</span>
                                   </DropdownMenuItem>
                                 ) : (
@@ -497,7 +498,7 @@ export default function SuperAdminUsersPage() {
                                     onClick={() => handleToggleStatus(u)}
                                     className="text-xs gap-2 cursor-pointer font-medium text-emerald-600 focus:text-emerald-600 focus:bg-emerald-500/10 hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400 dark:focus:text-emerald-400 dark:focus:bg-emerald-500/20"
                                   >
-                                    <ShieldCheck className="h-3.5 w-3.5 text-emerald-500 dark:text-emerald-400" />
+                                    <AppIcon name="security" size={14} className="text-emerald-500 dark:text-emerald-400" />
                                     <span>Activate User</span>
                                   </DropdownMenuItem>
                                 )}
@@ -507,7 +508,7 @@ export default function SuperAdminUsersPage() {
                                   onClick={() => setDeleteTargetUser(u)}
                                   className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
                                 >
-                                  <Trash2 className="h-3.5 w-3.5 text-rose-500 dark:text-rose-400" />
+                                  <AppIcon name="trash" size={14} className="text-rose-500 dark:text-rose-400" />
                                   <span>Delete User</span>
                                 </DropdownMenuItem>
                               </>

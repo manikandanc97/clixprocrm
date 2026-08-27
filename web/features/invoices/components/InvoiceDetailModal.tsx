@@ -5,21 +5,18 @@ import {
   X,
   Printer,
   Mail,
-  Receipt,
-  Trash2,
-  CheckCircle2,
   Clock,
-  AlertCircle,
   Building2,
   User,
   Calendar,
-  Send,
-  Download,
   CreditCard,
   History,
-  FileText,
-  Copy,
+  CheckCircle2,
+  AlertCircle,
+  Send,
+  Receipt,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { useInvoiceDetails, useUpdateInvoice, useDeleteInvoice, useDeletePayment, useSendInvoiceEmail } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
@@ -431,7 +428,7 @@ export function InvoiceDetailModal({
                                     title="Delete Payment"
                                     className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                                   >
-                                    <Trash2 className="w-3.5 h-3.5" />
+                                    <AppIcon name="trash" size={14} className="text-destructive" />
                                   </button>
                                 </td>
                               </tr>
@@ -482,7 +479,7 @@ export function InvoiceDetailModal({
               disabled={isDeletingInvoice || (invoice?.payments && invoice.payments.length > 0)}
               className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive gap-1.5 font-semibold"
             >
-              <Trash2 className="w-3.5 h-3.5" /> Delete Invoice
+              <AppIcon name="trash" size={14} className="text-destructive" /> Delete Invoice
             </Button>
             <Button
               variant="outline"

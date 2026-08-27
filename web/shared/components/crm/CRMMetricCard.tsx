@@ -7,6 +7,7 @@ import { cn } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { ChartContainer } from "../charts/ChartContainer";
 import { motion } from "framer-motion";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Types & Config
@@ -290,7 +291,7 @@ export const CRMMetricCard = ({
               "flex shrink-0 size-9 sm:size-10 items-center justify-center",
               "rounded-lg border",
               "transition-all duration-300",
-              "group-hover:scale-105 group-hover:rotate-2",
+              "group-hover:scale-105",
               // Premium icon glow on hover
               "group-hover:shadow-[0_3px_10px_-3px_currentColor]",
               t.iconBg,
@@ -298,7 +299,7 @@ export const CRMMetricCard = ({
               iconColor // optional override
             )}
           >
-            <Icon className="h-4.5 w-4.5 stroke-[2]" />
+            <AppIcon icon={Icon} name={title} size={18} />
           </div>
         )}
       </div>

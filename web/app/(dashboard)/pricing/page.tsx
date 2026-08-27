@@ -58,6 +58,7 @@ export default function PricingPage() {
     subscription,
     plan: currentPlan,
     usage,
+    availablePlans,
     calculateQuote,
     changePlan,
     isChangingPlan,
@@ -88,19 +89,21 @@ export default function PricingPage() {
   const activePlanId = normalizePlanId(subscription?.planId || "free");
   const currentActiveUsers = usage?.users?.current ?? 1;
 
+  const displayPlans = availablePlans && availablePlans.length > 0 ? availablePlans : Object.values(CANONICAL_PLANS);
+
   // Pre-select plan if passed in query param
   useEffect(() => {
-    if (highlightParam && CANONICAL_PLANS[highlightParam.toLowerCase()]) {
-      const p = CANONICAL_PLANS[highlightParam.toLowerCase()];
-      if (p.id !== activePlanId) {
-        if (p.pricingMode === "CUSTOM") {
+    if (highlightParam) {
+      const match = displayPlans.find((p) => p.id.toLowerCase() === highlightParam.toLowerCase());
+      if (match && match.id !== activePlanId) {
+        if (match.pricingMode === "CUSTOM") {
           setEnterpriseModalOpen(true);
         } else {
-          handleOpenUpgradeModal(p);
+          handleOpenUpgradeModal(match);
         }
       }
     }
-  }, [highlightParam, activePlanId]);
+  }, [highlightParam, activePlanId, displayPlans]);
 
   const handleOpenUpgradeModal = async (planItem: PlanDefinition) => {
     if (!canManageBilling) {
@@ -271,11 +274,11 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* 5 PRICING CARDS IN BALANCED GRID */}
+        {/* DYNAMIC PRICING CARDS IN BALANCED GRID */}
         <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch">
-          {Object.values(CANONICAL_PLANS).map((planItem) => {
+          {displayPlans.map((planItem) => {
             const isCurrent = planItem.id === activePlanId;
-            const isGrowth = planItem.id === "growth";
+            const isGrowth = planItem.recommended || planItem.id === "growth";
             const pricingInfo = formatPlanDisplayPrice(planItem, billingCycle);
 
             const isUpgrade = planItem.displayOrder > currentPlan.displayOrder;

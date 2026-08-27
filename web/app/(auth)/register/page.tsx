@@ -3,6 +3,7 @@
 import { useState, useEffect } from "react";
 import Link from "next/link";
 import { Loader2, Eye, EyeOff, User, Building2, Mail, Lock, ArrowRight } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 import { registerUser, signInWithGoogle, openGoogleAuthPopup, fetchCurrentUser } from "@/shared/lib/api/auth";
 import { parseApiErrors } from "@/shared/lib/api/error";
@@ -196,7 +197,7 @@ export default function RegisterPage() {
             </Label>
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                <User className="h-4 w-4" />
+                <AppIcon name="user" icon={User} size={16} />
               </div>
               <Input
                 id="name"
@@ -222,7 +223,7 @@ export default function RegisterPage() {
             </Label>
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                <Building2 className="h-4 w-4" />
+                <AppIcon name="companies" icon={Building2} size={16} />
               </div>
               <Input
                 id="companyName"
@@ -249,7 +250,7 @@ export default function RegisterPage() {
           </Label>
           <div className="relative">
             <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-              <Mail className="h-4 w-4" />
+              <AppIcon name="mail" icon={Mail} size={16} />
             </div>
             <Input
               id="email"
@@ -277,7 +278,7 @@ export default function RegisterPage() {
             </Label>
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                <Lock className="h-4 w-4" />
+                <AppIcon name="lock" icon={Lock} size={16} />
               </div>
               <Input
                 id="password"
@@ -295,7 +296,11 @@ export default function RegisterPage() {
                 onClick={() => setShowPassword(!showPassword)}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
               >
-                {showPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {showPassword ? (
+                  <AppIcon name="eyeOff" icon={EyeOff} size={15} />
+                ) : (
+                  <AppIcon name="eye" icon={Eye} size={15} />
+                )}
               </button>
             </div>
             {fieldErrors.password && (
@@ -310,7 +315,7 @@ export default function RegisterPage() {
             </Label>
             <div className="relative">
               <div className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none">
-                <Lock className="h-4 w-4" />
+                <AppIcon name="lock" icon={Lock} size={16} />
               </div>
               <Input
                 id="confirmPassword"
@@ -328,7 +333,11 @@ export default function RegisterPage() {
                 onClick={() => setShowConfirmPassword(!showConfirmPassword)}
                 className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground transition-colors p-1 rounded-md"
               >
-                {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
+                {showConfirmPassword ? (
+                  <AppIcon name="eyeOff" icon={EyeOff} size={15} />
+                ) : (
+                  <AppIcon name="eye" icon={Eye} size={15} />
+                )}
               </button>
             </div>
             {fieldErrors.confirmPassword && (
@@ -355,7 +364,7 @@ export default function RegisterPage() {
           ) : (
             <>
               <span>Create Account</span>
-              <ArrowRight className="h-4 w-4" />
+              <AppIcon name="arrowRight" icon={ArrowRight} size={16} />
             </>
           )}
         </Button>

@@ -119,15 +119,16 @@ const legacyRoleMap: Record<string, RoleKey> = {
 export function normalizeRole(role?: string): RoleKey {
   if (!role) return CRM_ROLES.EMPLOYEE;
   
-  role = role.toUpperCase();
+  const upper = role.trim().toUpperCase();
   // Try direct match
-  if (Object.values(CRM_ROLES).includes(role as RoleKey)) {
-    return role as RoleKey;
+  if (Object.values(CRM_ROLES).includes(upper as RoleKey)) {
+    return upper as RoleKey;
   }
 
+  const lower = role.trim().toLowerCase();
   // Try legacy map
-  if (role in legacyRoleMap) {
-    return legacyRoleMap[role];
+  if (lower in legacyRoleMap) {
+    return legacyRoleMap[lower];
   }
 
   return CRM_ROLES.EMPLOYEE;

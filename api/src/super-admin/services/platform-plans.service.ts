@@ -124,9 +124,15 @@ export class PlatformPlansService {
   ) {}
 
   /**
-   * Auto-seeds the 5 canonical primary plans if the database is missing any of them.
+   * Auto-seeds the initial canonical plans ONLY if the database has 0 plans.
+   * If plans already exist, this method is a strict NO-OP to preserve Super Admin edits and deletions.
    */
   async seedCanonicalPlansIfEmpty(): Promise<void> {
+    const planCount = await (this.prisma as any).plan.count();
+    if (planCount > 0) {
+      return;
+    }
+
     const canonicalPlans = Object.values(CANONICAL_PLANS).map((p) => ({
       id: p.id,
       name: p.name,
@@ -162,46 +168,17 @@ export class PlatformPlansService {
     });
 
     for (const plan of canonicalPlans) {
-      await (this.prisma as any).plan.upsert({
-        where: { id: plan.id },
-        update: {
-          name: plan.name,
-          price: plan.price,
-          priceNum: plan.priceNum,
-          annualPriceNum: plan.annualPriceNum,
-          currency: plan.currency,
-          billing: plan.billing,
-          pricingMode: plan.pricingMode,
-          description: plan.description,
-          features: plan.features,
-          maxUsers: plan.maxUsers,
-          maxLeads: plan.maxLeads,
-          maxContacts: plan.maxContacts,
-          storageGb: plan.storageGb,
-          maxApiRequests: plan.maxApiRequests,
-          highlight: plan.highlight,
-          sortOrder: plan.sortOrder,
-          aiLevel: plan.aiLevel,
-          dailyTokenLimit: plan.dailyTokenLimit,
-        },
-        create: {
+      const created = await (this.prisma as any).plan.create({
+        data: {
           ...plan,
           defaultModelId: defaultChatModel?.id || null,
         },
       });
 
       if (defaultChatModel) {
-        await (this.prisma as any).planAiEntitlement.upsert({
-          where: {
-            planId_modelId_capability: {
-              planId: plan.id,
-              modelId: defaultChatModel.id,
-              capability: '*',
-            },
-          },
-          update: { isEnabled: true, maxTokensPerDay: plan.dailyTokenLimit },
-          create: {
-            planId: plan.id,
+        await (this.prisma as any).planAiEntitlement.create({
+          data: {
+            planId: created.id,
             modelId: defaultChatModel.id,
             capability: '*',
             isEnabled: true,

@@ -23,6 +23,7 @@ import {
   Check,
   X
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useRouter } from "next/navigation";
 import { 
   DropdownMenu, 
@@ -300,47 +301,47 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end" className="w-48">
                       <DropdownMenuItem onClick={() => setSelectedQuote(quote)}>
-                        <ExternalLink className="w-3.5 h-3.5 mr-2" /> View Details
+                        <AppIcon name="view" size={14} className="mr-2" /> View Details
                       </DropdownMenuItem>
 
                       <DropdownMenuItem onClick={() => router.push(`?edit=${quote.id}`)}>
-                        <Edit className="w-3.5 h-3.5 mr-2" /> Edit Quote
+                        <AppIcon name="edit" size={14} className="mr-2" /> Edit Quote
                       </DropdownMenuItem>
 
                       <DropdownMenuItem onClick={() => handleAction("Download", quote)}>
-                        <Download className="w-3.5 h-3.5 mr-2" /> Download PDF
+                        <AppIcon name="download" size={14} className="mr-2" /> Download PDF
                       </DropdownMenuItem>
                       
                       <DropdownMenuItem onClick={() => handleAction("Duplicate", quote)}>
-                        <Copy className="w-3.5 h-3.5 mr-2" /> Duplicate
+                        <AppIcon name="copy" size={14} className="mr-2" /> Duplicate
                       </DropdownMenuItem>
 
                       <DropdownMenuSeparator />
 
                       {quote.status !== "SENT" && (
                         <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "SENT" })}>
-                          <Send className="w-3.5 h-3.5 mr-2" /> Mark as Sent
+                          <AppIcon name="send" size={14} className="mr-2" /> Mark as Sent
                         </DropdownMenuItem>
                       )}
                       {quote.status !== "ACCEPTED" && (
                         <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "ACCEPTED" })} className="text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50">
-                          <Check className="w-3.5 h-3.5 mr-2" /> Mark as Accepted
+                          <AppIcon name="check" size={14} className="mr-2 text-emerald-600" /> Mark as Accepted
                         </DropdownMenuItem>
                       )}
                       {quote.status !== "REJECTED" && (
                         <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "REJECTED" })} className="text-rose-600 focus:text-rose-600 focus:bg-rose-50">
-                          <X className="w-3.5 h-3.5 mr-2" /> Mark as Rejected
+                          <AppIcon name="close" size={14} className="mr-2 text-rose-600" /> Mark as Rejected
                         </DropdownMenuItem>
                       )}
                       {quote.status !== "DRAFT" && (
                         <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "DRAFT" })}>
-                          <FileText className="w-3.5 h-3.5 mr-2" /> Mark as Draft
+                          <AppIcon name="quotations" size={14} className="mr-2" /> Mark as Draft
                         </DropdownMenuItem>
                       )}
 
                       <DropdownMenuSeparator />
                       <DropdownMenuItem onClick={(e) => handleDelete(e, quote)} variant="destructive">
-                        <Trash2 className="w-3.5 h-3.5 mr-2" /> Delete
+                        <AppIcon name="trash" size={14} className="mr-2 text-destructive" /> Delete
                       </DropdownMenuItem>
                     </DropdownMenuContent>
                   </DropdownMenu>

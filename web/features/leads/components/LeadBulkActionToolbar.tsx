@@ -2,8 +2,8 @@
 
 import React from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Mail, Edit2, Trash2, X } from "lucide-react";
 import { Button } from "@/shared/ui/button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface LeadBulkActionToolbarProps {
   selectedIds: string[];
@@ -43,33 +43,33 @@ export function LeadBulkActionToolbar({
                 onClick={onClearSelection}
                 className="h-8 w-8 p-0 md:hidden text-muted hover:text-background"
               >
-                <X className="w-4 h-4" />
+                <AppIcon name="close" size={16} />
               </Button>
             </div>
             <div className="flex items-center gap-2 w-full md:w-auto overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-background/70 hover:text-background hover:bg-background/10 h-9 whitespace-nowrap"
+                className="text-background/70 hover:text-background hover:bg-background/10 h-9 whitespace-nowrap gap-1.5"
                 onClick={onBulkEmail}
               >
-                <Mail className="size-4 mr-2" /> Email
+                <AppIcon name="mail" size={16} /> <span>Email</span>
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="text-background/70 hover:text-background hover:bg-background/10 h-9 whitespace-nowrap"
+                className="text-background/70 hover:text-background hover:bg-background/10 h-9 whitespace-nowrap gap-1.5"
                 onClick={onBulkUpdateStage}
               >
-                <Edit2 className="size-4 mr-2" /> Update Stage
+                <AppIcon name="edit" size={16} /> <span>Update Stage</span>
               </Button>
               <Button
                 variant="ghost"
                 size="sm"
-                className="hover:bg-background/10 h-9 whitespace-nowrap text-rose-400 hover:text-rose-300"
+                className="hover:bg-background/10 h-9 whitespace-nowrap text-rose-400 hover:text-rose-300 gap-1.5"
                 onClick={onBulkDelete}
               >
-                <Trash2 className="size-4 mr-2" /> Delete
+                <AppIcon name="trash" size={16} className="text-rose-400" /> <span>Delete</span>
               </Button>
               <Button
                 variant="ghost"
@@ -77,7 +77,7 @@ export function LeadBulkActionToolbar({
                 onClick={onClearSelection}
                 className="h-9 w-9 p-0 hidden md:flex text-muted hover:text-background"
               >
-                <X className="size-4" />
+                <AppIcon name="close" size={16} />
               </Button>
             </div>
           </div>

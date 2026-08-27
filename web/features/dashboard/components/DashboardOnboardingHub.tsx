@@ -4,6 +4,7 @@ import React, { useState } from "react";
 import dynamic from "next/dynamic";
 import { motion } from "framer-motion";
 import { Sparkles, UserPlus, Upload, Plus } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useQueryClient } from "@tanstack/react-query";
@@ -54,7 +55,7 @@ export default function DashboardOnboardingHub() {
         <div className="relative z-10 flex flex-col lg:flex-row lg:items-center justify-between gap-3.5 sm:gap-5">
           <div className="max-w-2xl space-y-2">
             <div className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider bg-primary/15 text-primary border border-primary/25">
-              <Sparkles className="w-3 h-3" />
+              <AppIcon name="ai" icon={Sparkles} size={12} className="w-3 h-3" />
               Workspace Setup
             </div>
             <h1 className="text-lg sm:text-xl font-bold text-white tracking-tight">
@@ -71,7 +72,7 @@ export default function DashboardOnboardingHub() {
               onClick={() => setIsLeadModalOpen(true)}
               className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 sm:px-6 h-10 sm:h-10.5 rounded-xl shadow-md transition-all active:scale-[0.98]"
             >
-              <UserPlus className="w-4 h-4 mr-2" />
+              <AppIcon name="userPlus" icon={UserPlus} size={16} className="w-4 h-4 mr-2" />
               Create First Lead
             </Button>
             <Button
@@ -79,7 +80,7 @@ export default function DashboardOnboardingHub() {
               variant="outline"
               className="border-white/20 bg-white/5 text-white hover:bg-white/10 font-bold px-4 sm:px-5 h-10 sm:h-10.5 rounded-xl transition-all"
             >
-              <Upload className="w-4 h-4 mr-2" />
+              <AppIcon name="upload" icon={Upload} size={16} className="w-4 h-4 mr-2" />
               Import Data
             </Button>
           </div>

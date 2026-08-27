@@ -62,7 +62,7 @@ export type AuthContextState = {
   isHydrated: boolean;
   initStage: AuthInitStage;
   initError: string | null;
-  login: (email: string, password: string, staySignedIn?: boolean) => Promise<void>;
+  login: (email: string, password: string, staySignedIn?: boolean) => Promise<AuthUser | null | void>;
   logout: () => void;
   refreshUser: () => Promise<void>;
   retryInit: () => Promise<void>;
@@ -349,6 +349,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
   const login = useCallback(async (email: string, password: string, rememberMe?: boolean) => {
     try {
       setLoading(true);
+      setInitError(null);
+      setInitStage("connecting");
       // Mark as fetched BEFORE calling signInWithPassword.
       // This prevents the onAuthStateChange(SIGNED_IN) handler from running a competing
       // refreshUser() at the same time as login()'s own fetchCurrentUser call.
@@ -357,9 +359,16 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       setUser(response.data.user);
       setStatus("authenticated");
+      setInitStage("ready");
+      setInitError(null);
+      setIsHydrated(true);
+      if (typeof window !== "undefined") {
+        localStorage.setItem("has_session", "1");
+      }
       
       // Clear cache to ensure fresh data for the new user
       await queryClient.clear();
+      return response.data.user;
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // If login fails, reset hasFetched so a retry can proceed cleanly

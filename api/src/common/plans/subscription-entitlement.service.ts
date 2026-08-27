@@ -118,6 +118,121 @@ export class SubscriptionEntitlementService {
   constructor(private readonly prisma: PrismaService) {}
 
   /**
+   * Dynamically resolves a plan definition from the database with graceful in-memory fallback.
+   */
+  async resolvePlanDefinition(rawPlanId?: string | null): Promise<PlanDefinition> {
+    const cleanId = (rawPlanId || 'free').toLowerCase().trim();
+    try {
+      const dbPlan = await (this.prisma as any).plan.findFirst({
+        where: {
+          OR: [
+            { id: { equals: cleanId, mode: 'insensitive' } },
+            { name: { equals: cleanId, mode: 'insensitive' } },
+          ],
+        },
+      });
+
+      if (dbPlan) {
+        const parseLimit = (val?: number) => (val === undefined || val >= 1000000 ? -1 : val);
+        return {
+          id: dbPlan.id,
+          name: dbPlan.name,
+          price: dbPlan.price || `₹${dbPlan.priceNum?.toLocaleString() || 0}`,
+          priceNum: Number(dbPlan.priceNum || 0),
+          annualPriceNum: Number(dbPlan.annualPriceNum || (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0)),
+          currency: dbPlan.currency || 'INR',
+          billingInterval: 'month',
+          pricingMode: (dbPlan.pricingMode as any) || (dbPlan.priceNum === 0 && dbPlan.id !== 'free' ? 'CUSTOM' : 'FIXED'),
+          target: dbPlan.description || '',
+          description: dbPlan.description || '',
+          recommended: Boolean(dbPlan.highlight),
+          badge: dbPlan.highlight ? 'MOST POPULAR' : undefined,
+          displayOrder: dbPlan.sortOrder || 0,
+          isActive: dbPlan.isActive !== false && dbPlan.status !== 'INACTIVE' && dbPlan.status !== 'ARCHIVED',
+          limits: {
+            maxUsers: parseLimit(dbPlan.maxUsers),
+            maxContacts: parseLimit(dbPlan.maxContacts),
+            maxLeads: parseLimit(dbPlan.maxLeads),
+            maxDeals: parseLimit(dbPlan.maxDeals ?? dbPlan.maxLeads),
+            maxAutomations: parseLimit(dbPlan.maxAutomations ?? 100),
+            storageGb: dbPlan.storageGb || 10,
+            maxApiRequests: parseLimit(dbPlan.maxApiRequests),
+            dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
+          },
+          features: Array.isArray(dbPlan.features) ? dbPlan.features : [],
+          featureDescriptions: Array.isArray(dbPlan.features) ? dbPlan.features : [],
+          aiConfig: {
+            enabled: dbPlan.aiEnabled !== false,
+            level: (dbPlan.aiLevel as any) || 'Standard AI',
+            dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
+          },
+        };
+      }
+    } catch (err: any) {
+      this.logger.debug(`Failed to fetch dynamic plan '${cleanId}' from database, using fallback: ${err.message}`);
+    }
+
+    return getPlanDefinition(cleanId);
+  }
+
+  /**
+   * Retrieves all active platform plans from the database.
+   */
+  async getAvailablePlans(): Promise<PlanDefinition[]> {
+    try {
+      const dbPlans = await (this.prisma as any).plan.findMany({
+        where: {
+          status: 'ACTIVE',
+        },
+        orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
+      });
+
+      if (dbPlans && dbPlans.length > 0) {
+        return dbPlans.map((dbPlan: any) => {
+          const parseLimit = (val?: number) => (val === undefined || val >= 1000000 ? -1 : val);
+          return {
+            id: dbPlan.id,
+            name: dbPlan.name,
+            price: dbPlan.price || `₹${dbPlan.priceNum?.toLocaleString() || 0}`,
+            priceNum: Number(dbPlan.priceNum || 0),
+            annualPriceNum: Number(dbPlan.annualPriceNum || (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0)),
+            currency: dbPlan.currency || 'INR',
+            billingInterval: 'month',
+            pricingMode: (dbPlan.pricingMode as any) || (dbPlan.priceNum === 0 && dbPlan.id !== 'free' ? 'CUSTOM' : 'FIXED'),
+            target: dbPlan.description || '',
+            description: dbPlan.description || '',
+            recommended: Boolean(dbPlan.highlight),
+            badge: dbPlan.highlight ? 'MOST POPULAR' : undefined,
+            displayOrder: dbPlan.sortOrder || 0,
+            isActive: true,
+            limits: {
+              maxUsers: parseLimit(dbPlan.maxUsers),
+              maxContacts: parseLimit(dbPlan.maxContacts),
+              maxLeads: parseLimit(dbPlan.maxLeads),
+              maxDeals: parseLimit(dbPlan.maxDeals ?? dbPlan.maxLeads),
+              maxAutomations: parseLimit(dbPlan.maxAutomations ?? 100),
+              storageGb: dbPlan.storageGb || 10,
+              maxApiRequests: parseLimit(dbPlan.maxApiRequests),
+              dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
+            },
+            features: Array.isArray(dbPlan.features) ? dbPlan.features : [],
+            featureDescriptions: Array.isArray(dbPlan.features) ? dbPlan.features : [],
+            aiConfig: {
+              enabled: dbPlan.aiEnabled !== false,
+              level: (dbPlan.aiLevel as any) || 'Standard AI',
+              dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
+            },
+          };
+        });
+      }
+    } catch (err: any) {
+      this.logger.debug(`Failed to fetch available plans from DB, using fallback: ${err.message}`);
+    }
+
+    return Object.values(CANONICAL_PLANS);
+  }
+
+  /**
    * Retrieves complete subscription details, plan limits, live usage, and active seats for a workspace tenant.
    */
   async getWorkspaceSubscription(tenantId: string): Promise<WorkspaceSubscriptionDetails> {
@@ -141,8 +256,10 @@ export class SubscriptionEntitlementService {
       throw new NotFoundException(`Workspace tenant '${tenantId}' not found.`);
     }
 
-    const planId = normalizePlanId(tenant.plan);
-    const planDef = getPlanDefinition(planId);
+    const [planDef, availablePlans] = await Promise.all([
+      this.resolvePlanDefinition(tenant.plan),
+      this.getAvailablePlans(),
+    ]);
 
     // Query live resource counts in parallel for accurate usage reporting
     const [userCount, contactCount, leadCount, dealCount] = await Promise.all([
@@ -224,7 +341,7 @@ export class SubscriptionEntitlementService {
       plan: planDef,
       usage,
       entitledFeatures: planDef.features,
-      availablePlans: Object.values(CANONICAL_PLANS),
+      availablePlans,
     };
   }
 
@@ -246,8 +363,10 @@ export class SubscriptionEntitlementService {
       throw new NotFoundException(`Tenant '${tenantId}' not found.`);
     }
 
-    const currentPlanDef = getPlanDefinition(tenant.plan);
-    const targetPlanDef = getPlanDefinition(targetPlanId);
+    const [currentPlanDef, targetPlanDef] = await Promise.all([
+      this.resolvePlanDefinition(tenant.plan),
+      this.resolvePlanDefinition(targetPlanId),
+    ]);
 
     const activeUsersCount = await this.prisma.tenantUser.count({
       where: { tenantId, status: 'ACTIVE' },
@@ -343,7 +462,7 @@ export class SubscriptionEntitlementService {
       return false;
     }
 
-    const planDef = getPlanDefinition(tenant.plan);
+    const planDef = await this.resolvePlanDefinition(tenant.plan);
     return planDef.features.includes(featureKey);
   }
 
@@ -357,9 +476,10 @@ export class SubscriptionEntitlementService {
         where: { id: tenantId },
         select: { plan: true },
       });
-      const planDef = getPlanDefinition(tenant?.plan);
+      const planDef = await this.resolvePlanDefinition(tenant?.plan);
+      const availablePlans = await this.getAvailablePlans();
       
-      const recommendedPlan = Object.values(CANONICAL_PLANS).find((p) =>
+      const recommendedPlan = availablePlans.find((p) =>
         p.features.includes(featureKey),
       );
 
@@ -390,7 +510,7 @@ export class SubscriptionEntitlementService {
     });
 
     if (!tenant) return;
-    const planDef = getPlanDefinition(tenant.plan);
+    const planDef = await this.resolvePlanDefinition(tenant.plan);
     const maxLimit = planDef.limits[limitKey];
 
     if (maxLimit === -1) return; // Unlimited for enterprise
@@ -428,11 +548,10 @@ export class SubscriptionEntitlementService {
     billingCycle: 'monthly' | 'annual' = 'monthly',
     seats?: number,
   ) {
-    const normalized = normalizePlanId(targetPlanId);
-    const planDef = getPlanDefinition(normalized);
+    const planDef = await this.resolvePlanDefinition(targetPlanId);
 
     // Calculate quote to validate seats and authoritative amounts
-    const quote = await this.calculateQuote(tenantId, normalized, seats, billingCycle);
+    const quote = await this.calculateQuote(tenantId, planDef.id, seats, billingCycle);
 
     const now = new Date();
     const periodEnd = new Date(now);

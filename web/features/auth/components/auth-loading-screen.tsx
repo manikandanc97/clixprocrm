@@ -88,13 +88,13 @@ export default function AuthLoadingScreen({
 
   // Setup safety timeout to prevent infinite stuck loading screens
   useEffect(() => {
-    if (rawError) return;
+    if (rawError || currentStage === "ready") return;
     const timer = setTimeout(() => {
       setHasTimedOut(true);
     }, timeoutMs);
 
     return () => clearTimeout(timer);
-  }, [rawError, timeoutMs]);
+  }, [rawError, currentStage, timeoutMs]);
 
   const handleRetry = async () => {
     setIsRetrying(true);
