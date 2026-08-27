@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { Users, UserPlus, Star, Filter, Upload } from "lucide-react";
+import { Users, UserPlus, Star, Filter, Upload, Settings } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { motion, AnimatePresence } from "framer-motion";
@@ -20,6 +20,8 @@ import {
 import { FormModal } from "@/shared/components/form-modal";
 
 import { FormSkeleton } from "@/shared/components/skeletons";
+import { LeadContextualSettings } from "@/features/leads/components/LeadContextualSettings";
+import { ContactContextualSettings } from "@/features/contacts/components/ContactContextualSettings";
 
 const LeadForm = dynamic(() => import("@/features/forms/LeadForm").then((mod) => ({ default: mod.LeadForm })), {
   loading: () => <FormSkeleton />,
@@ -54,10 +56,23 @@ const ContactsPage = () => {
   const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
   const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
   const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedLead, setSelectedLead] = useState<any>(null);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedCustomer, setSelectedCustomer] = useState<any>(null);
+
+  // Sync customize query param
+  useEffect(() => {
+    const cust = searchParams.get("customize");
+    if (cust) {
+      if (cust !== "true") {
+        setCustomizeDefaultSection(cust);
+      }
+      setIsCustomizeOpen(true);
+    }
+  }, [searchParams]);
 
   // Sync state back to URL if filter changes
   useEffect(() => {
@@ -146,6 +161,12 @@ const ContactsPage = () => {
         icon={Users}
         badge="Unified Contacts"
         actions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+            variant: "outline",
+          },
           {
             label: "Bulk Upload",
             icon: Upload,
@@ -243,7 +264,7 @@ const ContactsPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-4 min-h-0">
+          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
             <CRMToolbar
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -375,6 +396,20 @@ const ContactsPage = () => {
           refetchCustomers();
         }}
       />
+
+      {statusFilter === "lead" ? (
+        <LeadContextualSettings
+          open={isCustomizeOpen}
+          onOpenChange={setIsCustomizeOpen}
+          defaultSection={customizeDefaultSection || "sources"}
+        />
+      ) : (
+        <ContactContextualSettings
+          open={isCustomizeOpen}
+          onOpenChange={setIsCustomizeOpen}
+          defaultSection={customizeDefaultSection || "fields"}
+        />
+      )}
     </CRMPageContainer>
   );
 };

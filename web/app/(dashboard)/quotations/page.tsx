@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useMemo, useEffect } from "react";
-import { FileText, Plus, TrendingUp, Clock } from "lucide-react";
+import { FileText, Plus, TrendingUp, Clock, Settings } from "lucide-react";
 
 import dynamic from "next/dynamic";
 import { TableSkeleton, QuoteFormSkeleton } from "@/shared/components/skeletons";
@@ -34,6 +34,7 @@ const QuoteForm = dynamic(() => import("@/features/forms/QuoteForm").then(mod =>
 });
 import { useSearchParams } from "next/navigation";
 import { QuotationType } from "@/shared/types/quotation";
+import { QuotationContextualSettings } from "@/features/quotations/components/QuotationContextualSettings";
 
 const QuotationsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
@@ -48,7 +49,19 @@ const QuotationsPage = () => {
 
   const searchParams = useSearchParams();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>();
   const [editQuote, setEditQuote] = useState<QuotationType | null>(null);
+
+  useEffect(() => {
+    const cust = searchParams.get("customize");
+    if (cust) {
+      if (cust !== "true") {
+        setCustomizeDefaultSection(cust);
+      }
+      setIsCustomizeOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     const editId = searchParams.get("edit");
@@ -125,6 +138,12 @@ const QuotationsPage = () => {
         badge="Sales Intelligence"
         actions={[
           {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+            variant: "outline",
+          },
+          {
             label: "Create Quote",
             icon: Plus,
             onClick: handleCreateQuote,
@@ -187,7 +206,7 @@ const QuotationsPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-4 min-h-0">
+          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
             <CRMToolbar 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -260,6 +279,12 @@ const QuotationsPage = () => {
           onCancel={() => setIsAddModalOpen(false)} 
         />
       </FormModal>
+
+      <QuotationContextualSettings
+        open={isCustomizeOpen}
+        onOpenChange={setIsCustomizeOpen}
+        defaultSection={customizeDefaultSection || "templates"}
+      />
     </CRMPageContainer>
   );
 };

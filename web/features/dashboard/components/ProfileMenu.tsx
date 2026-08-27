@@ -4,10 +4,9 @@ import { useState } from "react";
 import { 
   Settings, 
   LogOut, 
-  Palette,
-  Check,
-  Type,
-  Search
+  Palette, 
+  Check, 
+  Type 
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -32,7 +31,14 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
-import { useSettings, AccentColor, FontFamily } from "./SettingsContext";
+import { 
+  useSettings, 
+  AccentColor, 
+  FontFamily, 
+  ACCENT_PRESETS, 
+  ALL_GOOGLE_FONTS, 
+  isFontSelected 
+} from "./SettingsContext";
 import { toValidHex7 } from "@/shared/lib/utils/color-utils";
 
 import { useRouter, usePathname } from "next/navigation";
@@ -40,86 +46,19 @@ import { useAuth } from "@/features/auth/components/auth-provider";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { getRoleBadge } from "@/shared/lib/auth/rbac";
 import { Shield, ArrowLeftRight, CreditCard } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { cn } from "@/shared/lib/utils";
 
 type ProfileMenuProps = {
   user: { name?: string; email?: string; role?: string; roleName?: string; displayName?: string; avatar?: string | null; } | null;
   initials: string;
 };
 
-const ACCENTS: { label: string; value: AccentColor; color: string }[] = [
-  { label: "Emerald", value: "emerald", color: "bg-emerald-500" },
-  { label: "Blue", value: "blue", color: "bg-blue-500" },
-  { label: "Indigo", value: "indigo", color: "bg-indigo-500" },
-  { label: "Violet", value: "violet", color: "bg-violet-500" },
-  { label: "Purple", value: "purple", color: "bg-purple-500" },
-  { label: "Red", value: "red", color: "bg-red-500" },
-  { label: "Teal", value: "teal", color: "bg-teal-500" },
-  { label: "Cyan", value: "cyan", color: "bg-cyan-500" },
-  { label: "Amber", value: "amber", color: "bg-amber-500" },
-  { label: "Rose", value: "rose", color: "bg-rose-500" },
-];
-
-const ALL_GOOGLE_FONTS: { name: string; category: string }[] = [
-  // Popular Sans-Serif
-  { name: "Inter", category: "Sans-Serif" },
-  { name: "Roboto", category: "Sans-Serif" },
-  { name: "Poppins", category: "Sans-Serif" },
-  { name: "Open Sans", category: "Sans-Serif" },
-  { name: "Montserrat", category: "Sans-Serif" },
-  { name: "Lato", category: "Sans-Serif" },
-  { name: "Nunito", category: "Sans-Serif" },
-  { name: "Raleway", category: "Sans-Serif" },
-  { name: "Plus Jakarta Sans", category: "SaaS UI" },
-  { name: "Outfit", category: "Geometric" },
-  { name: "DM Sans", category: "Clean" },
-  { name: "Rubik", category: "Rounded" },
-  { name: "Ubuntu", category: "Modern" },
-  { name: "Work Sans", category: "Grotesque" },
-  { name: "Quicksand", category: "Soft" },
-  { name: "Barlow", category: "Grotesk" },
-  { name: "Fira Sans", category: "Tech" },
-  { name: "Kanit", category: "Modern" },
-  { name: "Manrope", category: "SaaS" },
-  { name: "Urbanist", category: "Geometric" },
-  { name: "Geist", category: "Developer" },
-
-  // Display & Futuristic
-  { name: "Space Grotesk", category: "Display" },
-  { name: "Oswald", category: "Condensed" },
-  { name: "Syne", category: "Experimental" },
-  { name: "Bebas Neue", category: "Display" },
-  { name: "Anton", category: "Impact" },
-  { name: "Righteous", category: "Futuristic" },
-  { name: "Lexend", category: "Readable" },
-
-  // Serif & Luxury
-  { name: "Playfair Display", category: "Luxury Serif" },
-  { name: "Lora", category: "Serif" },
-  { name: "Merriweather", category: "Editorial" },
-  { name: "Cinzel", category: "Classic Serif" },
-  { name: "Cormorant Garamond", category: "Elegant Serif" },
-  { name: "Bitter", category: "Slab Serif" },
-
-  // Handwriting & Creative
-  { name: "Dancing Script", category: "Cursive" },
-  { name: "Caveat", category: "Handwriting" },
-  { name: "Pacifico", category: "Fun" },
-  { name: "Shadows Into Light", category: "Handwriting" },
-  { name: "Great Vibes", category: "Script" },
-  { name: "Permanent Marker", category: "Marker" },
-
-  // Monospace & Tech
-  { name: "Fira Code", category: "Monospace" },
-  { name: "JetBrains Mono", category: "Monospace" },
-  { name: "Inconsolata", category: "Monospace" },
-  { name: "Roboto Mono", category: "Monospace" },
-  { name: "Space Mono", category: "Monospace" },
-  { name: "Source Code Pro", category: "Monospace" },
-];
-
 export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
   const [showLogoutConfirm, setShowLogoutConfirm] = useState(false);
   const [fontSearch, setFontSearch] = useState("");
+  const [fontSearchTrigger, setFontSearchTrigger] = useState(0);
+  const [isFontSearchFocused, setIsFontSearchFocused] = useState(false);
   const { accentColor, setAccentColor, fontFamily, setFontFamily } = useSettings();
   const router = useRouter();
   const pathname = usePathname();
@@ -275,7 +214,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                   Color Presets
                 </div>
                 <div className="grid grid-cols-2 gap-1">
-                  {ACCENTS.map((item) => (
+                  {ACCENT_PRESETS.map((item) => (
                     <DropdownMenuItem 
                       key={item.value} 
                       onClick={() => setAccentColor(item.value)}
@@ -309,7 +248,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                     </div>
                     <input 
                       type="color" 
-                      value={toValidHex7(accentColor)}
+                      value={toValidHex7(accentColor)} 
                       onChange={(e) => setAccentColor(e.target.value)}
                       className="w-7 h-7 rounded-full border-0 p-0 cursor-pointer bg-transparent outline-none"
                     />
@@ -329,13 +268,32 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
               <DropdownMenuSubContent className="w-64 rounded-xl p-2 shadow-elevated border-border bg-popover/95 backdrop-blur-xl">
                 {/* Search Input Bar */}
                 <div className="p-1 mb-1.5 border-b border-border/50">
-                  <div className="relative flex items-center">
-                    <Search className="w-3.5 h-3.5 absolute left-2.5 text-muted-foreground pointer-events-none" />
+                  <div className="relative flex items-center group">
+                    <div className="absolute left-2.5 z-10 flex items-center justify-center pointer-events-none">
+                      <AppIcon 
+                        name="search" 
+                        size={13} 
+                        className={cn(
+                          "transition-colors duration-200", 
+                          isFontSearchFocused ? "text-primary" : "text-muted-foreground group-hover:text-foreground"
+                        )}
+                        triggerAnimation={fontSearchTrigger}
+                        isHovered={isFontSearchFocused}
+                      />
+                    </div>
                     <input
                       type="text"
                       placeholder="Search Google Fonts..."
                       value={fontSearch}
-                      onChange={(e) => setFontSearch(e.target.value)}
+                      onFocus={() => {
+                        setIsFontSearchFocused(true);
+                        setFontSearchTrigger((prev) => prev + 1);
+                      }}
+                      onBlur={() => setIsFontSearchFocused(false)}
+                      onChange={(e) => {
+                        setFontSearch(e.target.value);
+                        setFontSearchTrigger((prev) => prev + 1);
+                      }}
                       onKeyDown={(e) => e.stopPropagation()}
                       className="w-full bg-muted/50 hover:bg-muted/70 focus:bg-background text-xs pl-8 pr-2 py-1.5 rounded-lg border border-border/60 outline-none focus:ring-1 focus:ring-primary transition-all placeholder:text-muted-foreground"
                     />
@@ -344,11 +302,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
 
                 <div className="max-h-64 overflow-y-auto space-y-0.5 pr-0.5 custom-scrollbar">
                   {filteredFonts.map((item) => {
-                    const currentLower = (fontFamily || "").toLowerCase();
-                    const itemLower = item.name.toLowerCase();
-                    const isSelected = currentLower === itemLower || 
-                      (currentLower === "sans" && itemLower === "inter") ||
-                      (currentLower === "jakarta" && itemLower === "plus jakarta sans");
+                    const isSelected = isFontSelected(fontFamily, item.name);
 
                     return (
                       <DropdownMenuItem 

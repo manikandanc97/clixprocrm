@@ -271,7 +271,7 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
           rowClassName="h-16 hover:bg-muted/30 transition-colors"
           emptyTitle="No contacts found"
           emptyDescription="No contacts match the current search or filters."
-          hasPagination={sortedContacts.length > 0}
+          hasPagination={sortedContacts.length > rowsPerPage}
         />
       </div>
 

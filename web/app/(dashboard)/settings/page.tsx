@@ -1,21 +1,15 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import SettingsHeader from "@/features/settings/components/SettingsHeader";
 import SettingsSidebar from "@/features/settings/components/SettingsSidebar";
 import ProfileSettings from "@/features/settings/components/ProfileSettings";
-import PersonalizationSettings from "@/features/settings/components/PersonalizationSettings";
 import NotificationsSettings from "@/features/settings/components/NotificationsSettings";
 import WorkspaceSettings from "@/features/settings/components/WorkspaceSettings";
 import WorkspaceMembersSettings from "@/features/settings/components/WorkspaceMembersSettings";
 import RolesPermissionsSettings from "@/features/settings/components/RolesPermissionsSettings";
 import SubscriptionSettings from "@/features/settings/components/SubscriptionSettings";
-import SalesPreferencesSettings from "@/features/settings/components/SalesPreferencesSettings";
-import RevenueTargetSettings from "@/features/settings/components/RevenueTargetSettings";
-import PipelinesStagesSettings from "@/features/settings/components/PipelinesStagesSettings";
-import LeadSourcesSettings from "@/features/settings/components/LeadSourcesSettings";
-import AISettings from "@/features/settings/components/AISettings";
 import AutomationSettings from "@/features/settings/components/AutomationSettings";
 import IntegrationsSettings from "@/features/settings/components/IntegrationsSettings";
 import SecuritySettings from "@/features/settings/components/SecuritySettings";
@@ -23,7 +17,6 @@ import SessionsSettings from "@/features/settings/components/SessionsSettings";
 import AuditLogSettings from "@/features/settings/components/AuditLogSettings";
 import HelpCenterSettings from "@/features/settings/components/HelpCenterSettings";
 import ContactSupportSettings from "@/features/settings/components/ContactSupportSettings";
-import { InvoiceSettings } from "@/features/settings/components/InvoiceSettings";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { CRMPageContainer } from "@/shared/components/crm";
@@ -47,7 +40,30 @@ const SettingsPage = () => {
   const rawSectionParam = searchParams.get("section");
   const canonicalInitial = resolveCanonicalSectionId(rawSectionParam);
 
-  const [activeSection, setActiveSection] = useState<string>(canonicalInitial);
+  const [activeSection, setActiveSection] = useState<string>(
+    canonicalInitial.endsWith("_redirect") ? "profile" : canonicalInitial
+  );
+
+  // Handle backward-compatibility redirects for migrated contextual settings
+  useEffect(() => {
+    if (!rawSectionParam) return;
+    const resolved = resolveCanonicalSectionId(rawSectionParam);
+    if (resolved === "invoicing_redirect") {
+      router.replace("/invoices?customize=true");
+    } else if (resolved === "ai_settings_redirect") {
+      router.replace("/ai?customize=true");
+    } else if (resolved === "preferences_redirect") {
+      router.replace("/settings?section=profile");
+    } else if (resolved === "pipelines_redirect") {
+      router.replace("/deals?customize=pipelines");
+    } else if (resolved === "lead_sources_redirect") {
+      router.replace("/contacts?status=lead&customize=sources");
+    } else if (resolved === "sales_preferences_redirect") {
+      router.replace("/deals?customize=probability");
+    } else if (resolved === "revenue_targets_redirect") {
+      router.replace("/reports?customize=targets");
+    }
+  }, [rawSectionParam, router]);
 
   // Validate permission and fallback to first permitted section if unauthorized
   useEffect(() => {
@@ -77,7 +93,7 @@ const SettingsPage = () => {
   useEffect(() => {
     if (rawSectionParam) {
       const canonical = resolveCanonicalSectionId(rawSectionParam);
-      if (canonical !== activeSection) {
+      if (!canonical.endsWith("_redirect") && canonical !== activeSection) {
         setActiveSection(canonical);
       }
     } else if (activeSection !== "profile") {
@@ -90,7 +106,10 @@ const SettingsPage = () => {
     const handlePopState = () => {
       const params = new URLSearchParams(window.location.search);
       const s = params.get("section");
-      setActiveSection(resolveCanonicalSectionId(s));
+      const canonical = resolveCanonicalSectionId(s);
+      if (!canonical.endsWith("_redirect")) {
+        setActiveSection(canonical);
+      }
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
@@ -98,6 +117,7 @@ const SettingsPage = () => {
 
   const handleSectionChange = useCallback((section: string) => {
     const canonical = resolveCanonicalSectionId(section);
+    if (canonical.endsWith("_redirect")) return;
     setActiveSection(canonical);
     const newUrl = canonical === "profile" ? "/settings" : `/settings?section=${canonical}`;
     window.history.pushState({ section: canonical }, "", newUrl);
@@ -105,11 +125,9 @@ const SettingsPage = () => {
 
   const renderSection = () => {
     switch (activeSection) {
-      // Personal
+      // My Account
       case "profile":
         return <ProfileSettings />;
-      case "preferences":
-        return <PersonalizationSettings />;
       case "notifications":
         return <NotificationsSettings />;
 
@@ -120,30 +138,18 @@ const SettingsPage = () => {
         return <WorkspaceMembersSettings />;
       case "roles":
         return <RolesPermissionsSettings />;
+
+      // Business & Billing
       case "billing":
         return <SubscriptionSettings />;
-      case "invoicing":
-        return <InvoiceSettings />;
 
-      // Sales
-      case "sales-preferences":
-        return <SalesPreferencesSettings />;
-      case "revenue-targets":
-        return <RevenueTargetSettings />;
-      case "pipelines":
-        return <PipelinesStagesSettings />;
-      case "lead-sources":
-        return <LeadSourcesSettings />;
-
-      // Automation & AI
-      case "ai-settings":
-        return <AISettings />;
-      case "automation":
-        return <AutomationSettings />;
+      // Automation & Integrations
       case "integrations":
         return <IntegrationsSettings />;
+      case "automation":
+        return <AutomationSettings />;
 
-      // Security
+      // Security & Governance
       case "security-privacy":
         return <SecuritySettings />;
       case "sessions":
@@ -179,9 +185,9 @@ const SettingsPage = () => {
       </div>
 
       {/* Body - Independent scrolling on desktop */}
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-6 lg:gap-8 lg:overflow-hidden">
-        {/* Secondary Sidebar Navigation (280px) */}
-        <div className="w-full lg:w-[280px] shrink-0 lg:h-full lg:overflow-y-auto pr-1.5 custom-scrollbar">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 lg:gap-5.5 lg:overflow-hidden">
+        {/* Secondary Sidebar Navigation (240px) */}
+        <div className="w-full lg:w-[240px] shrink-0 lg:h-full lg:overflow-y-auto pr-1 custom-scrollbar">
           <SettingsSidebar
             activeSection={activeSection}
             onSectionChange={handleSectionChange}
@@ -191,7 +197,7 @@ const SettingsPage = () => {
         {/* Content Column */}
         <div
           ref={contentRef}
-          className="flex-1 min-w-0 lg:h-full lg:overflow-y-auto pr-2 pb-2 custom-scrollbar"
+          className="flex-1 min-w-0 lg:h-full lg:overflow-y-auto pr-1.5 pb-2 custom-scrollbar"
         >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div

@@ -60,8 +60,12 @@ export async function updateSession(request: NextRequest) {
     request.nextUrl.pathname.startsWith('/forgot-password') ||
     request.nextUrl.pathname.startsWith('/reset-password')
 
+  const isPublicApiRoute =
+    request.nextUrl.pathname.startsWith('/api/auth/callback')
+
   const isPublicRoute =
     isPublicAuthRoute ||
+    isPublicApiRoute ||
     request.nextUrl.pathname.startsWith('/onboarding') ||
     request.nextUrl.pathname.startsWith('/account-deleted')
 

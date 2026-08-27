@@ -186,7 +186,7 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
           columns={columns}
           rowClassName="h-16 hover:bg-muted/30 transition-colors"
           onRowClick={(row) => onEdit?.(row)}
-          hasPagination={sortedCompanies.length > 0}
+          hasPagination={sortedCompanies.length > rowsPerPage}
         />
       </div>
 

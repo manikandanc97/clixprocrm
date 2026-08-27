@@ -33,7 +33,7 @@ export const CompaniesGrid = ({ companies, onEdit, onDelete }: CompaniesGridProp
   );
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 gap-3.5 sm:gap-4">
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4 p-4 lg:p-6 bg-muted/20">
         {paginatedCompanies.map((company, i) => {
           const status = company.status || "ACTIVE";

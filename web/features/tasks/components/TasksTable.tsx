@@ -38,6 +38,7 @@ import {
   CRMTableRow,
   CRMPagination,
 } from "@/shared/components/crm";
+import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { cn } from "@/shared/lib/utils";
 import { useUpdateTask, useDeleteTask } from "@/shared/hooks/use-crm";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -58,10 +59,47 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
   const { hasPermission, user } = useAuth();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
+    key: "",
+    direction: null,
+  });
   const [selectedTasks, setSelectedTasks] = useState<Set<string>>(new Set());
   const [updatingTaskId, setUpdatingTaskId] = useState<string | null>(null);
   const [taskToDelete, setTaskToDelete] = useState<TaskType | null>(null);
   const [isDeleting, setIsDeleting] = useState(false);
+
+  const handleSort = (key: string, direction: SortDirection) => {
+    setSortConfig({ key, direction });
+  };
+
+  const sortedTasks = [...tasks].sort((a, b) => {
+    if (!sortConfig.direction) return 0;
+    const dir = sortConfig.direction === "asc" ? 1 : -1;
+
+    if (sortConfig.key === "title") {
+      return (a.title || "").localeCompare(b.title || "") * dir;
+    }
+    if (sortConfig.key === "status") {
+      return (a.status || "").localeCompare(b.status || "") * dir;
+    }
+    if (sortConfig.key === "priority") {
+      const priorityWeight: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
+      const weightA = priorityWeight[a.priority] || 0;
+      const weightB = priorityWeight[b.priority] || 0;
+      return (weightA - weightB) * dir;
+    }
+    if (sortConfig.key === "dueDate") {
+      const dateA = a.dueDate ? new Date(a.dueDate).getTime() : 0;
+      const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
+      return (dateA - dateB) * dir;
+    }
+    if (sortConfig.key === "owner") {
+      const ownerA = a.assignedTo?.name || "";
+      const ownerB = b.assignedTo?.name || "";
+      return ownerA.localeCompare(ownerB) * dir;
+    }
+    return 0;
+  });
 
   const canEditTask = (task: TaskType) => 
     hasPermission(PERMISSIONS.TASKS_UPDATE) || 
@@ -70,8 +108,8 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
   
   const canDeleteTask = hasPermission(PERMISSIONS.TASKS_DELETE);
 
-  const totalPages = Math.ceil(tasks.length / rowsPerPage);
-  const paginatedTasks = tasks.slice(
+  const totalPages = Math.ceil(sortedTasks.length / rowsPerPage);
+  const paginatedTasks = sortedTasks.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -104,7 +142,7 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
   };
 
   return (
-    <div className="flex-auto flex flex-col min-h-0 relative">
+    <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4">
       <AnimatePresence>
         {selectedTasks.size > 0 && (
           <motion.div
@@ -132,8 +170,8 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
         )}
       </AnimatePresence>
 
-      <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden">
-        <CRMDataTable containerClassName="border-0 shadow-none rounded-none w-full" className="w-full">
+      <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden flex-1 min-h-0">
+        <CRMDataTable hasPagination={sortedTasks.length > rowsPerPage} containerClassName="border-0 shadow-none rounded-none w-full flex-1 min-h-0 h-full" className="w-full">
           <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
             <CRMTableRow className="h-10 sm:h-11">
               <CRMTableHeaderCell className="w-[52px] px-5">
@@ -144,22 +182,49 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                 />
               </CRMTableHeaderCell>
               <CRMTableHeaderCell className="px-4">
-                Task
+                <DataTableColumnHeader
+                  title="Task"
+                  sortable
+                  sortDirection={sortConfig.key === "title" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("title", dir)}
+                />
               </CRMTableHeaderCell>
               <CRMTableHeaderCell className="w-[130px] px-4">
-                Status
+                <DataTableColumnHeader
+                  title="Status"
+                  sortable
+                  sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("status", dir)}
+                />
               </CRMTableHeaderCell>
               <CRMTableHeaderCell className="w-[120px] px-4 text-center">
-                Priority
+                <DataTableColumnHeader
+                  title="Priority"
+                  align="center"
+                  sortable
+                  sortDirection={sortConfig.key === "priority" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("priority", dir)}
+                />
               </CRMTableHeaderCell>
               <CRMTableHeaderCell className="w-[150px] px-4 text-center">
-                Due Date
+                <DataTableColumnHeader
+                  title="Due Date"
+                  align="center"
+                  sortable
+                  sortDirection={sortConfig.key === "dueDate" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("dueDate", dir)}
+                />
               </CRMTableHeaderCell>
               <CRMTableHeaderCell className="w-[160px] px-4">
                 Related Record
               </CRMTableHeaderCell>
               <CRMTableHeaderCell className="w-[140px] px-4">
-                Owner
+                <DataTableColumnHeader
+                  title="Owner"
+                  sortable
+                  sortDirection={sortConfig.key === "owner" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("owner", dir)}
+                />
               </CRMTableHeaderCell>
               <CRMTableHeaderCell className="w-[120px] px-4 text-center">
                 Last Updated

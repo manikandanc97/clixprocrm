@@ -14,6 +14,7 @@ import {
   ArrowRight,
   CheckCircle2,
   Zap,
+  Settings,
 } from 'lucide-react';
 import { ModelOption, CrmContextData } from '../types';
 import {
@@ -42,6 +43,7 @@ interface AIChatHeaderProps {
   onToggleContextPanel?: () => void;
   isContextPanelOpen?: boolean;
   onOpenContextTab?: () => void;
+  onOpenSettings?: () => void;
   activeContext: CrmContextData | null;
   onClearContext: () => void;
   entitledModels: ModelOption[];
@@ -60,6 +62,7 @@ export function AIChatHeader({
   onToggleContextPanel,
   isContextPanelOpen,
   onOpenContextTab,
+  onOpenSettings,
   activeContext,
   onClearContext,
   entitledModels,
@@ -129,6 +132,17 @@ export function AIChatHeader({
 
         {/* Right side controls */}
         <div className="flex items-center gap-2">
+          {/* AI Contextual Settings Button */}
+          {onOpenSettings && (
+            <button
+              onClick={onOpenSettings}
+              className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors border border-border/60 flex items-center justify-center cursor-pointer"
+              title="AI Workspace Settings"
+            >
+              <Settings className="w-4 h-4" />
+            </button>
+          )}
+
           {/* Desktop Right Sidebar Toggle */}
           {onToggleContextPanel && (
             <button
@@ -166,6 +180,12 @@ export function AIChatHeader({
               </button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 text-xs">
+              {onOpenSettings && (
+                <DropdownMenuItem onClick={onOpenSettings} className="gap-2 cursor-pointer">
+                  <Settings className="w-3.5 h-3.5 text-muted-foreground" />
+                  AI Settings
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem onClick={onCopyTranscript} disabled={!hasMessages}>
                 <Copy className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
                 Copy Transcript

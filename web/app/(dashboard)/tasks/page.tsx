@@ -11,6 +11,7 @@ import {
   Calendar as CalendarIcon,
   GanttChart,
   CheckCircle2,
+  Settings,
 } from "lucide-react";
 
 import { Grid } from "lucide-react";
@@ -44,6 +45,7 @@ import { MeetingForm } from "@/features/forms/MeetingForm";
 import { CreateTaskModal } from "@/features/tasks/components/CreateTaskModal";
 import { EditTaskModal } from "@/features/tasks/components/EditTaskModal";
 import { useSearchParams } from "next/navigation";
+import { TaskContextualSettings } from "@/features/tasks/components/TaskContextualSettings";
 
 const VIEW_MODES = [
   { id: "list", icon: List, label: "List" },
@@ -72,6 +74,18 @@ const TasksPage = () => {
   const [meetingTask, setMeetingTask] = useState<TaskType | null>(null);
   const [taskToEdit, setTaskToEdit] = useState<TaskType | null>(null);
   const [isAddModalOpen, setIsAddModalOpen] = useState(searchParams.get("new") === "true");
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>();
+
+  useEffect(() => {
+    const cust = searchParams.get("customize");
+    if (cust) {
+      if (cust !== "true") {
+        setCustomizeDefaultSection(cust);
+      }
+      setIsCustomizeOpen(true);
+    }
+  }, [searchParams]);
 
   const { tasks, setTasks } = useCRMStore();
   const safeTasks = useMemo(() => (Array.isArray(tasks) ? tasks : []), [tasks]);
@@ -157,6 +171,12 @@ const TasksPage = () => {
         icon={CheckSquare}
         badge="Productivity"
         actions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+            variant: "outline",
+          },
           { label: "New Task", icon: Plus, onClick: handleNewTask, variant: "default" },
         ]}
       />
@@ -216,7 +236,7 @@ const TasksPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-4 min-h-0">
+          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
             {/* Toolbar */}
             <CRMToolbar
               searchQuery={searchQuery}
@@ -328,6 +348,12 @@ const TasksPage = () => {
           onCancel={() => setMeetingTask(null)}
         />
       </FormModal>
+
+      <TaskContextualSettings
+        open={isCustomizeOpen}
+        onOpenChange={setIsCustomizeOpen}
+        defaultSection={customizeDefaultSection || "types"}
+      />
     </CRMPageContainer>
   );
 };

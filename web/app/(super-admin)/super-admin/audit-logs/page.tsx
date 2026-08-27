@@ -37,6 +37,7 @@ import {
   CRMPagination,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { cn } from "@/shared/lib/utils";
 import {
   DropdownMenu,
@@ -164,6 +165,15 @@ export default function SuperAdminAuditLogsPage() {
 
   const modules = Array.from(new Set(logs.map((l) => l.module).filter(Boolean)));
 
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
+    key: "",
+    direction: null,
+  });
+
+  const handleSort = (key: string, direction: SortDirection) => {
+    setSortConfig({ key, direction });
+  };
+
   const filteredLogs = logs.filter((l) => {
     if (!search) return true;
     const q = search.toLowerCase();
@@ -176,8 +186,34 @@ export default function SuperAdminAuditLogsPage() {
     );
   });
 
-  const totalPages = Math.max(1, Math.ceil(filteredLogs.length / rowsPerPage));
-  const paginatedLogs = filteredLogs.slice(
+  const sortedLogs = [...filteredLogs].sort((a, b) => {
+    if (!sortConfig.direction) return 0;
+    const dir = sortConfig.direction === "asc" ? 1 : -1;
+
+    if (sortConfig.key === "action") {
+      return (a.action || "").localeCompare(b.action || "") * dir;
+    }
+    if (sortConfig.key === "module") {
+      return (a.module || "").localeCompare(b.module || "") * dir;
+    }
+    if (sortConfig.key === "organization") {
+      return (a.organizationName || "").localeCompare(b.organizationName || "") * dir;
+    }
+    if (sortConfig.key === "actor") {
+      const nameA = a.actor || a.actorEmail || "";
+      const nameB = b.actor || b.actorEmail || "";
+      return nameA.localeCompare(nameB) * dir;
+    }
+    if (sortConfig.key === "createdAt") {
+      const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+      const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+      return (dateA - dateB) * dir;
+    }
+    return 0;
+  });
+
+  const totalPages = Math.max(1, Math.ceil(sortedLogs.length / rowsPerPage));
+  const paginatedLogs = sortedLogs.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -313,16 +349,51 @@ export default function SuperAdminAuditLogsPage() {
         </CRMToolbar>
 
         {/* 4. Standard CRM Data Table */}
-        <div className={cn("crm-table-wrap", (loading || filteredLogs.length === 0) && "crm-table-no-pagination")}>
+        <div className={cn("crm-table-wrap", (loading || sortedLogs.length <= rowsPerPage) && "crm-table-no-pagination")}>
           <div className="overflow-auto flex-1 min-h-0">
             <table className="w-full text-left text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                 <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Action</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Module</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Organization</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Actor</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Timestamp</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Action"
+                      sortable
+                      sortDirection={sortConfig.key === "action" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("action", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Module"
+                      sortable
+                      sortDirection={sortConfig.key === "module" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("module", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Organization"
+                      sortable
+                      sortDirection={sortConfig.key === "organization" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("organization", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Actor"
+                      sortable
+                      sortDirection={sortConfig.key === "actor" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("actor", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Timestamp"
+                      sortable
+                      sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("createdAt", dir)}
+                    />
+                  </th>
                   <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Details</th>
                 </tr>
               </thead>

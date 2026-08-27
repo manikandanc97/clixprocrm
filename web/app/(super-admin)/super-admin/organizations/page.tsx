@@ -48,6 +48,7 @@ import {
   CRMMetricCard,
   CRMToolbar,
   CRMPagination,
+  CRMRoleBadge,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PlanBadge } from "@/shared/components/PlanBadge";
@@ -337,7 +338,7 @@ export default function SuperAdminOrganizationsPage() {
         </CRMToolbar>
 
         {/* 4. Standard CRM Data Table */}
-        <div className={cn("crm-table-wrap", (loading || filteredOrganizations.length === 0) && "crm-table-no-pagination")}>
+        <div className={cn("crm-table-wrap", (loading || filteredOrganizations.length <= rowsPerPage) && "crm-table-no-pagination")}>
           <div className="overflow-auto flex-1 min-h-0">
             <table className="w-full text-left text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
@@ -769,8 +770,8 @@ export default function SuperAdminOrganizationsPage() {
                                 <p className="font-semibold text-foreground">{m.name}</p>
                                 <p className="text-[11px] text-muted-foreground">{m.email}</p>
                               </td>
-                              <td className="py-2.5 px-4 font-bold text-primary">
-                                {m.role}
+                              <td className="py-2.5 px-4">
+                                <CRMRoleBadge role={m.role} size="xs" />
                               </td>
                               <td className="py-2.5 px-4">
                                 <StatusBadge

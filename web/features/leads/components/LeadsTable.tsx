@@ -617,7 +617,7 @@ const LeadsTable = ({
           rowClassName="h-16 hover:bg-muted/30 transition-colors"
           emptyTitle="No leads found"
           emptyDescription="No leads match the current search or filters."
-          hasPagination={sortedLeads.length > 0}
+          hasPagination={sortedLeads.length > rowsPerPage}
         />
       </div>
 

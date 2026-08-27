@@ -12,11 +12,12 @@ import {
   CheckSquare,
   ShieldAlert,
   Save,
-  CheckCircle2,
+  Check,
 } from "lucide-react";
 import { CRMCard } from "@/shared/components/crm";
 import { Button } from "@/shared/ui/button";
 import { Switch } from "@/shared/ui/switch";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 
 interface NotificationConfig {
@@ -76,35 +77,35 @@ export default function NotificationsSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-3.5">
       {/* Delivery Channels */}
-      <CRMCard>
-        <div className="flex items-center justify-between pb-4 border-b border-border/50">
+      <CRMCard className="p-3.5 sm:p-4.5">
+        <div className="flex items-center justify-between pb-3 border-b border-border/50">
           <div>
-            <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-              <Bell className="w-4 h-4 text-primary" />
+            <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+              <AppIcon name="notifications" icon={Bell} size={15} className="text-primary" />
               Delivery Channels
             </h3>
-            <p className="text-xs text-muted-foreground font-medium mt-0.5">
+            <p className="text-[11.5px] text-muted-foreground font-medium mt-0.5">
               Select how you prefer to receive notifications and alerts across devices.
             </p>
           </div>
           {saved && (
-            <span className="text-xs text-primary font-medium flex items-center gap-1">
-              <CheckCircle2 className="w-3.5 h-3.5" /> Saved
+            <span className="text-[11px] text-primary font-semibold flex items-center gap-1">
+              <AppIcon name="check" icon={Check} size={13} /> Saved
             </span>
           )}
         </div>
 
-        <div className="divide-y divide-border/40">
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <Mail className="w-4 h-4" />
+        <div className="divide-y divide-border/30">
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <AppIcon name="mail" icon={Mail} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Email Notifications</p>
-                <p className="text-xs text-muted-foreground">Receive critical alerts and activity summaries in your inbox.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">Email Notifications</p>
+                <p className="text-[11px] text-muted-foreground">Receive critical alerts and activity summaries in your inbox.</p>
               </div>
             </div>
             <Switch
@@ -113,14 +114,14 @@ export default function NotificationsSettings() {
             />
           </div>
 
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <Smartphone className="w-4 h-4" />
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <AppIcon icon={Smartphone} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">In-App Banner Alerts</p>
-                <p className="text-xs text-muted-foreground">Show real-time toast and notification drawer updates while working.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">In-App Banner Alerts</p>
+                <p className="text-[11px] text-muted-foreground">Show real-time toast and notification drawer updates while working.</p>
               </div>
             </div>
             <Switch
@@ -129,14 +130,14 @@ export default function NotificationsSettings() {
             />
           </div>
 
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <Volume2 className="w-4 h-4" />
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <AppIcon icon={Volume2} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Notification Sound Chime</p>
-                <p className="text-xs text-muted-foreground">Play an audible sound when new leads or messages arrive.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">Notification Sound Chime</p>
+                <p className="text-[11px] text-muted-foreground">Play an audible sound when new leads or messages arrive.</p>
               </div>
             </div>
             <Switch
@@ -148,26 +149,26 @@ export default function NotificationsSettings() {
       </CRMCard>
 
       {/* Activity & Workflow Triggers */}
-      <CRMCard>
-        <div className="pb-4 border-b border-border/50">
-          <h3 className="text-base font-bold text-foreground flex items-center gap-2">
-            <Sparkles className="w-4 h-4 text-primary" />
+      <CRMCard className="p-3.5 sm:p-4.5">
+        <div className="pb-3 border-b border-border/50">
+          <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+            <AppIcon name="ai" icon={Sparkles} size={15} className="text-primary" />
             Activity & Event Alerts
           </h3>
-          <p className="text-xs text-muted-foreground font-medium mt-0.5">
+          <p className="text-[11.5px] text-muted-foreground font-medium mt-0.5">
             Fine-tune which events trigger immediate notifications.
           </p>
         </div>
 
-        <div className="divide-y divide-border/40">
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
-                <Users className="w-4 h-4" />
+        <div className="divide-y divide-border/30">
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
+                <AppIcon name="contacts" icon={Users} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Lead Assignments</p>
-                <p className="text-xs text-muted-foreground">Alert immediately when a new lead is assigned to you.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">Lead Assignments</p>
+                <p className="text-[11px] text-muted-foreground">Alert immediately when a new lead is assigned to you.</p>
               </div>
             </div>
             <Switch
@@ -176,14 +177,14 @@ export default function NotificationsSettings() {
             />
           </div>
 
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
-                <Handshake className="w-4 h-4" />
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
+                <AppIcon name="deals" icon={Handshake} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Deal Stage Movements</p>
-                <p className="text-xs text-muted-foreground">Notify when monitored deals change stage or are marked Won/Lost.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">Deal Stage Movements</p>
+                <p className="text-[11px] text-muted-foreground">Notify when monitored deals change stage or are marked Won/Lost.</p>
               </div>
             </div>
             <Switch
@@ -192,14 +193,14 @@ export default function NotificationsSettings() {
             />
           </div>
 
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
-                <CheckSquare className="w-4 h-4" />
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
+                <AppIcon name="tasks" icon={CheckSquare} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Task Reminders & Overdue Alerts</p>
-                <p className="text-xs text-muted-foreground">Reminders 15 minutes before tasks and overdue notifications.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">Task Reminders & Overdue Alerts</p>
+                <p className="text-[11px] text-muted-foreground">Reminders 15 minutes before tasks and overdue notifications.</p>
               </div>
             </div>
             <Switch
@@ -208,14 +209,14 @@ export default function NotificationsSettings() {
             />
           </div>
 
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
-                <Sparkles className="w-4 h-4" />
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
+                <AppIcon name="ai" icon={Sparkles} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">AI Daily Briefing & Insights</p>
-                <p className="text-xs text-muted-foreground">Receive daily AI summaries of top priorities and actionable deals.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">AI Daily Briefing & Insights</p>
+                <p className="text-[11px] text-muted-foreground">Receive daily AI summaries of top priorities and actionable deals.</p>
               </div>
             </div>
             <Switch
@@ -224,14 +225,14 @@ export default function NotificationsSettings() {
             />
           </div>
 
-          <div className="py-3.5 flex items-center justify-between">
-            <div className="flex items-center gap-3">
-              <div className="w-8 h-8 rounded-lg bg-muted flex items-center justify-center text-muted-foreground">
-                <ShieldAlert className="w-4 h-4" />
+          <div className="py-2.5 flex items-center justify-between group">
+            <div className="flex items-center gap-2.5">
+              <div className="w-7 h-7 rounded-lg bg-muted/60 flex items-center justify-center text-muted-foreground group-hover:text-primary transition-colors">
+                <AppIcon name="security" icon={ShieldAlert} size={14} />
               </div>
               <div>
-                <p className="text-sm font-semibold text-foreground">Security & Login Alerts</p>
-                <p className="text-xs text-muted-foreground">Instant notifications for new logins, password changes, and MFA events.</p>
+                <p className="text-xs sm:text-sm font-semibold text-foreground">Security & Login Alerts</p>
+                <p className="text-[11px] text-muted-foreground">Instant notifications for new logins, password changes, and MFA events.</p>
               </div>
             </div>
             <Switch
@@ -241,9 +242,9 @@ export default function NotificationsSettings() {
           </div>
         </div>
 
-        <div className="mt-5 pt-4 border-t border-border/50 flex justify-end">
-          <Button onClick={handleSaveAll} className="gap-2 text-xs font-semibold">
-            <Save className="w-3.5 h-3.5" /> Save Preferences
+        <div className="mt-3.5 pt-3 border-t border-border/50 flex justify-end">
+          <Button onClick={handleSaveAll} className="group h-8 px-3.5 text-xs font-semibold gap-1.5 shadow-xs">
+            <AppIcon name="save" icon={Save} size={13} /> Save Preferences
           </Button>
         </div>
       </CRMCard>

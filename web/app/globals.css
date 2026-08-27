@@ -597,34 +597,11 @@
 
   .crm-table-wrap,
   .crm-table-container {
-    @apply overflow-hidden rounded-2xl border border-border bg-card shadow-card flex flex-col min-h-0 flex-1;
-    position: sticky;
-    top: calc(var(--crm-toolbar-h, 58px) + 14px);
-    z-index: 20;
-    height: calc(100vh - var(--crm-toolbar-h, 58px) - 200px);
-    max-height: calc(100vh - var(--crm-toolbar-h, 58px) - 200px);
-    min-height: 260px;
-  }
-
-  @media (min-width: 640px) {
-    .crm-table-wrap,
-    .crm-table-container {
-      top: calc(var(--crm-toolbar-h, 58px) + 16px);
-      height: calc(100vh - var(--crm-toolbar-h, 58px) - 200px);
-      max-height: calc(100vh - var(--crm-toolbar-h, 58px) - 200px);
-    }
+    @apply overflow-hidden rounded-2xl border border-border bg-card shadow-card flex flex-col w-full flex-1 min-h-0 h-full;
   }
 
   .crm-table-no-pagination {
-    height: calc(100vh - var(--crm-toolbar-h, 58px) - 128px) !important;
-    max-height: calc(100vh - var(--crm-toolbar-h, 58px) - 128px) !important;
-  }
-
-  @media (min-width: 640px) {
-    .crm-table-no-pagination {
-      height: calc(100vh - var(--crm-toolbar-h, 58px) - 128px) !important;
-      max-height: calc(100vh - var(--crm-toolbar-h, 58px) - 128px) !important;
-    }
+    @apply w-full flex-1 min-h-0 h-full;
   }
 
   .crm-table-th {

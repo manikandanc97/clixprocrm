@@ -10,7 +10,10 @@ import {
   Edit2,
   Trash2,
   Power,
-  Loader2
+  Loader2,
+  UserCheck,
+  Building2,
+  CalendarOff
 } from "lucide-react";
 import { 
   CRMPageContainer, 
@@ -26,11 +29,13 @@ import {
   CRMTableHeaderCell,
   CRMToolbar,
   CRMStatusBadge,
+  CRMRoleBadge,
   ActivityTimeline,
   CRMPageSection,
   CRMPagination,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { Button } from "@/shared/ui/button";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { 
@@ -61,6 +66,20 @@ import { useEffect } from "react";
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { EmployeesGrid } from "@/features/employees/components/EmployeesGrid";
 import { AnimatePresence, motion } from "framer-motion";
+
+const STAT_ICONS: Record<string, typeof Users> = {
+  "Total Employees": Users,
+  "Active Now": UserCheck,
+  "Departments": Building2,
+  "On Leave": CalendarOff,
+};
+
+const STAT_COLORS: Record<string, "indigo" | "emerald" | "orange" | "violet"> = {
+  "Total Employees": "indigo",
+  "Active Now": "emerald",
+  "Departments": "orange",
+  "On Leave": "violet",
+};
 
 const getSafeStr = (val: unknown) => (typeof val === 'string' ? val : typeof val === 'object' && val !== null ? (val as Record<string, unknown>).name as string || '' : String(val || ''));
 
@@ -98,6 +117,14 @@ export default function EmployeesPage() {
 
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
+    key: "",
+    direction: null,
+  });
+
+  const handleSort = (key: string, direction: SortDirection) => {
+    setSortConfig({ key, direction });
+  };
 
   const filteredEmployees = employees.filter(emp => {
     const nameMatch = getSafeStr(emp.name).toLowerCase().includes(searchQuery.toLowerCase());
@@ -106,8 +133,27 @@ export default function EmployeesPage() {
     return nameMatch || emailMatch || roleMatch;
   });
 
-  const totalPages = Math.ceil(filteredEmployees.length / rowsPerPage) || 1;
-  const paginatedEmployees = filteredEmployees.slice(
+  const sortedEmployees = [...filteredEmployees].sort((a, b) => {
+    if (!sortConfig.direction) return 0;
+    const dir = sortConfig.direction === "asc" ? 1 : -1;
+
+    if (sortConfig.key === "name") {
+      return getSafeStr(a.name).localeCompare(getSafeStr(b.name)) * dir;
+    }
+    if (sortConfig.key === "role") {
+      return getSafeStr(a.role).localeCompare(getSafeStr(b.role)) * dir;
+    }
+    if (sortConfig.key === "status") {
+      return getSafeStr(a.status).localeCompare(getSafeStr(b.status)) * dir;
+    }
+    if (sortConfig.key === "createdAt") {
+      return (new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()) * dir;
+    }
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedEmployees.length / rowsPerPage) || 1;
+  const paginatedEmployees = sortedEmployees.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -138,24 +184,29 @@ export default function EmployeesPage() {
       />
 
       {/* Stats Grid */}
-      <CRMMetricsGrid cols={3}>
-        {employeeStats.map((stat, i) => {
-          const colors = ["indigo", "emerald", "orange"] as const;
-          return (
-            <MetricCard
-              key={i}
-              {...stat}
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              color={(stat as any).color || colors[i % colors.length]}
-              delay={i * 0.1}
-            />
-          );
-        })}
-      </CRMMetricsGrid>
+      <div className="shrink-0">
+        <CRMMetricsGrid cols={4}>
+          {employeeStats.map((stat, i) => {
+            const defaultColors = ["indigo", "emerald", "orange", "violet"] as const;
+            const icon = STAT_ICONS[stat.title] || Users;
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            const color = (stat as any).color || STAT_COLORS[stat.title] || defaultColors[i % defaultColors.length];
+            return (
+              <MetricCard
+                key={i}
+                {...stat}
+                icon={icon}
+                color={color}
+                delay={i * 0.1}
+              />
+            );
+          })}
+        </CRMMetricsGrid>
+      </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-8">
+      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 flex-1 min-h-0">
         {/* Main Table Area */}
-        <div className="lg:col-span-3 space-y-6">
+        <div className="lg:col-span-3 flex flex-col gap-3.5 sm:gap-4 min-h-0 flex-1">
           <CRMToolbar 
             searchQuery={searchQuery}
             setSearchQuery={setSearchQuery}
@@ -170,15 +221,44 @@ export default function EmployeesPage() {
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
+              className="flex-1 flex flex-col min-h-0 gap-3.5 sm:gap-4"
             >
               {viewMode === "list" || viewMode === "table" ? (
-                <DataTable>
+                <DataTable hasPagination={sortedEmployees.length > rowsPerPage}>
                   <CRMTableHeader>
                     <CRMTableRow>
-                      <CRMTableHeaderCell>Employee</CRMTableHeaderCell>
-                      <CRMTableHeaderCell>Role</CRMTableHeaderCell>
-                      <CRMTableHeaderCell>Status</CRMTableHeaderCell>
-                      <CRMTableHeaderCell>Joined Date</CRMTableHeaderCell>
+                      <CRMTableHeaderCell>
+                        <DataTableColumnHeader
+                          title="Employee"
+                          sortable
+                          sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
+                          onSort={(dir) => handleSort("name", dir)}
+                        />
+                      </CRMTableHeaderCell>
+                      <CRMTableHeaderCell>
+                        <DataTableColumnHeader
+                          title="Role"
+                          sortable
+                          sortDirection={sortConfig.key === "role" ? sortConfig.direction : null}
+                          onSort={(dir) => handleSort("role", dir)}
+                        />
+                      </CRMTableHeaderCell>
+                      <CRMTableHeaderCell>
+                        <DataTableColumnHeader
+                          title="Status"
+                          sortable
+                          sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
+                          onSort={(dir) => handleSort("status", dir)}
+                        />
+                      </CRMTableHeaderCell>
+                      <CRMTableHeaderCell>
+                        <DataTableColumnHeader
+                          title="Joined Date"
+                          sortable
+                          sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
+                          onSort={(dir) => handleSort("createdAt", dir)}
+                        />
+                      </CRMTableHeaderCell>
                       <CRMTableHeaderCell className="text-right">Actions</CRMTableHeaderCell>
                     </CRMTableRow>
                   </CRMTableHeader>
@@ -204,7 +284,7 @@ export default function EmployeesPage() {
                             </div>
                           </CRMTableCell>
                           <CRMTableCell>
-                            <span className="text-sm font-semibold capitalize">{getSafeStr(emp.role).toLowerCase()}</span>
+                            <CRMRoleBadge role={emp.role} />
                           </CRMTableCell>
                           <CRMTableCell>
                             <CRMStatusBadge tone={emp.status === 'ACTIVE' ? 'success' : 'warning'}>
@@ -274,7 +354,7 @@ export default function EmployeesPage() {
                     )}
                   </CRMTableBody>
                 </DataTable>
-              ) : filteredEmployees.length > 0 ? (
+              ) : sortedEmployees.length > 0 ? (
                 <EmployeesGrid
                   employees={paginatedEmployees}
                   onViewDetails={(emp) => { setSelectedEmployee(emp); setIsViewModalOpen(true); }}
@@ -299,7 +379,7 @@ export default function EmployeesPage() {
               <CRMPagination
                 currentPage={currentPage}
                 totalPages={totalPages}
-                totalItems={filteredEmployees.length}
+                totalItems={sortedEmployees.length}
                 rowsPerPage={rowsPerPage}
                 onPageChange={setCurrentPage}
                 onRowsPerPageChange={(size) => {
@@ -403,7 +483,9 @@ export default function EmployeesPage() {
               </div>
               <div>
                 <label className="text-xs font-bold text-muted-foreground uppercase">Role</label>
-                <div className="font-medium capitalize">{getSafeStr(selectedEmployee.role).toLowerCase()}</div>
+                <div className="mt-1">
+                  <CRMRoleBadge role={selectedEmployee.role} size="md" />
+                </div>
               </div>
               <div>
                 <label className="text-xs font-bold text-muted-foreground uppercase">Status</label>

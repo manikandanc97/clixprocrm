@@ -2,34 +2,44 @@
 
 import { useState, useMemo, useRef, useEffect } from "react";
 import { 
-  User, 
-  Mail, 
-  ShieldCheck, 
-  CheckCircle2, 
-  Phone, 
-  Save, 
   Loader2, 
-  AlertTriangle, 
-  Trash2,
-  ImagePlus,
-  Camera
+  Camera,
+  Upload,
+  User as UserIcon,
+  Mail as MailIcon,
+  Phone as PhoneIcon,
+  ShieldCheck as ShieldCheckIcon,
+  Check as CheckIcon,
+  AlertTriangle as AlertTriangleIcon,
+  Trash2 as Trash2Icon,
+  Save as SaveIcon,
+  Pencil,
+  X,
 } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogHeader,
+  DialogTitle,
+} from "@/shared/ui/dialog";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { CRMCard } from "@/shared/components/crm";
 import { useMutation } from "@tanstack/react-query";
 import { updateProfile, uploadUserAvatar } from "@/shared/lib/api/auth";
 import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
 import { DeleteAccountModal } from "./DeleteAccountModal";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
 function formatRole(role?: string) {
-  if (!role) return "";
+  if (!role) return "Member";
   return role
     .split(/[\s_-]+/)
     .filter(Boolean)
@@ -50,6 +60,7 @@ function getInitials(name?: string) {
 const ProfileSettings = () => {
   const { user, refreshUser } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
+  const [editModalOpen, setEditModalOpen] = useState(false);
 
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [isDragging, setIsDragging] = useState(false);
@@ -79,6 +90,7 @@ const ProfileSettings = () => {
     mutationFn: updateProfile,
     onSuccess: () => {
       void refreshUser();
+      setEditModalOpen(false);
       toast.success("Profile details updated successfully!");
     },
     onError: (err: any) => {
@@ -172,17 +184,22 @@ const ProfileSettings = () => {
     }
   };
 
-  const handleSave = () => {
+  const handleOpenEditModal = () => {
+    setFormData({
+      name: user?.name || "",
+      email: user?.email || "",
+      phone: user?.phone || "",
+    });
+    setEditModalOpen(true);
+  };
+
+  const handleSaveModal = (e: React.FormEvent) => {
+    e.preventDefault();
     mutation.mutate(formData);
   };
 
-  const hasChanges =
-    formData.name !== (user?.name || "") ||
-    formData.email !== (user?.email || "") ||
-    formData.phone !== (user?.phone || "");
-
   return (
-    <div className="space-y-5">
+    <div className="space-y-3.5">
       {/* Hidden File Input */}
       <input
         ref={fileInputRef}
@@ -205,217 +222,217 @@ const ProfileSettings = () => {
       />
 
       {/* Profile Identity Card */}
-      <CRMCard>
-        <div className="flex flex-col sm:flex-row gap-5 items-center sm:items-start">
-          {/* Avatar Upload Dropzone Box */}
-          <div
-            onDragOver={handleDragOver}
-            onDragLeave={handleDragLeave}
-            onDrop={handleDrop}
-            onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
-            className={`relative group cursor-pointer w-20 h-20 sm:w-22 sm:h-22 rounded-2xl border-2 transition-all flex items-center justify-center overflow-hidden bg-card/80 backdrop-blur-sm shadow-inner shrink-0 ${
-              isDragging
-                ? "border-primary bg-primary/10 ring-4 ring-primary/20 scale-[1.02]"
-                : "border-dashed border-border/80 hover:border-primary/60 hover:bg-muted/40"
-            }`}
-          >
-            {uploadingAvatar ? (
-              <div className="flex flex-col items-center justify-center p-2 text-center gap-1">
-                <Loader2 className="w-5 h-5 animate-spin text-primary" />
-                <span className="text-[9px] font-semibold text-muted-foreground">Uploading...</span>
-              </div>
-            ) : user?.avatar ? (
-              <div className="relative w-full h-full flex items-center justify-center">
-                {/* eslint-disable-next-line @next/next/no-img-element */}
-                <img
-                  src={user.avatar}
-                  alt={user.name || "Profile Photo"}
-                  className="w-full h-full object-cover transition-transform group-hover:scale-105"
-                />
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white rounded-2xl gap-0.5">
-                  <ImagePlus className="w-4 h-4" />
-                  <span className="text-[9px] font-semibold">Change</span>
+      <CRMCard className="p-3.5 sm:p-4.5">
+        <div className="flex flex-col sm:flex-row items-center justify-between gap-4">
+          {/* Left section: Avatar + Name & Email */}
+          <div className="flex items-center gap-3.5 min-w-0 w-full sm:w-auto">
+            {/* Compact Modern Avatar Box */}
+            <div
+              onDragOver={handleDragOver}
+              onDragLeave={handleDragLeave}
+              onDrop={handleDrop}
+              onClick={() => !uploadingAvatar && fileInputRef.current?.click()}
+              className={`relative group cursor-pointer w-13 h-13 sm:w-14 sm:h-14 rounded-xl border transition-all flex items-center justify-center overflow-hidden bg-muted/40 backdrop-blur-sm shadow-xs shrink-0 ${
+                isDragging
+                  ? "border-primary bg-primary/10 ring-2 ring-primary/20 scale-[1.02]"
+                  : "border-border/70 hover:border-primary/60 hover:bg-muted/60"
+              }`}
+            >
+              {uploadingAvatar ? (
+                <div className="flex flex-col items-center justify-center p-1 text-center gap-0.5">
+                  <Loader2 className="w-4 h-4 animate-spin text-primary" />
+                  <span className="text-[8px] font-semibold text-muted-foreground">Uploading</span>
                 </div>
-              </div>
-            ) : (
-              <div className="relative w-full h-full flex items-center justify-center">
-                <div className="bg-gradient-to-br from-primary to-primary/60 text-primary-foreground text-xl font-bold w-full h-full rounded-2xl flex items-center justify-center select-none">
-                  {initials}
+              ) : user?.avatar ? (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  {/* eslint-disable-next-line @next/next/no-img-element */}
+                  <img
+                    src={user.avatar}
+                    alt={user.name || "Profile Photo"}
+                    className="w-full h-full object-cover transition-transform group-hover:scale-105"
+                  />
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white rounded-xl gap-0.5">
+                    <AppIcon name="upload" icon={Upload} size={13} className="text-white" />
+                    <span className="text-[8.5px] font-semibold">Change</span>
+                  </div>
                 </div>
-                <div className="absolute inset-0 bg-black/50 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white rounded-2xl gap-0.5">
-                  <Camera className="w-4 h-4" />
-                  <span className="text-[9px] font-semibold">Upload</span>
+              ) : (
+                <div className="relative w-full h-full flex items-center justify-center">
+                  <div className="bg-gradient-to-br from-primary to-primary/70 text-primary-foreground text-base sm:text-lg font-bold w-full h-full rounded-xl flex items-center justify-center select-none shadow-xs">
+                    {initials}
+                  </div>
+                  <div className="absolute inset-0 bg-black/60 opacity-0 group-hover:opacity-100 transition-opacity flex flex-col items-center justify-center text-white rounded-xl gap-0.5">
+                    <AppIcon icon={Camera} size={13} className="text-white" />
+                    <span className="text-[8.5px] font-semibold">Upload</span>
+                  </div>
                 </div>
-              </div>
-            )}
-          </div>
+              )}
+            </div>
 
-          <div className="flex-1 space-y-2 text-center sm:text-left min-w-0">
-            <div>
-              <div className="flex flex-col sm:flex-row items-center sm:items-start gap-2 mb-1">
-                <h2 className="text-xl font-bold tracking-tight text-foreground truncate">
+            {/* Name and Email */}
+            <div className="min-w-0 flex-1">
+              <div className="flex items-center gap-1.5">
+                <h2 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
                   {user?.name || "User Name"}
                 </h2>
                 {completion === 100 && (
-                  <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10 border-none rounded-md px-2 py-0.5 text-[9px] font-bold uppercase tracking-widest">
+                  <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10 border-none rounded-md px-1.5 py-0.2 text-[8.5px] font-bold uppercase tracking-widest">
                     Verified
                   </Badge>
                 )}
               </div>
-              <p className="text-sm text-muted-foreground font-medium truncate">{user?.email}</p>
+              <p className="text-xs text-muted-foreground font-medium truncate">{user?.email}</p>
             </div>
+          </div>
 
-            <div className="flex flex-wrap justify-center sm:justify-start items-center gap-3 pt-0.5">
-              <div className="flex items-center gap-1.5 text-[10px] font-semibold text-muted-foreground uppercase tracking-widest">
-                <ShieldCheck className="w-3.5 h-3.5 text-primary" />
+          {/* Right section: Admin Badge + Upload Button + Remove + File format info */}
+          <div className="flex flex-col items-start sm:items-end gap-1 shrink-0 w-full sm:w-auto">
+            <div className="flex flex-wrap items-center gap-2">
+              <div className="inline-flex items-center gap-1.5 px-2.5 py-1 rounded-md bg-primary/10 text-primary text-[11px] font-semibold tracking-wide border border-primary/15">
+                <AppIcon name="security" icon={ShieldCheckIcon} size={13} className="text-primary" />
                 {formatRole(user?.role)}
               </div>
 
-              <div className="h-3 w-px bg-border/60 hidden sm:block" />
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                className="group h-7.5 text-xs font-semibold px-2.5 rounded-md border-border/70 hover:bg-muted/70 hover:border-primary/40 transition-colors shadow-2xs"
+                onClick={() => fileInputRef.current?.click()}
+                disabled={uploadingAvatar}
+              >
+                <AppIcon name="upload" icon={Upload} size={12} className="mr-1 text-primary group-hover:text-primary transition-colors" />
+                {user?.avatar ? "Change Photo" : "Upload Photo"}
+              </Button>
 
-              <div className="flex items-center gap-2">
+              {user?.avatar && (
                 <Button
                   type="button"
-                  variant="outline"
+                  variant="ghost"
                   size="sm"
-                  className="h-7 text-xs font-semibold px-2.5 rounded-lg border-border/60 hover:bg-muted/60"
-                  onClick={() => fileInputRef.current?.click()}
+                  className="group h-7.5 text-xs font-semibold px-2 rounded-md text-destructive hover:text-destructive hover:bg-destructive/10 transition-colors"
+                  onClick={handleRemoveAvatar}
                   disabled={uploadingAvatar}
                 >
-                  <ImagePlus className="w-3.5 h-3.5 mr-1 text-primary" />
-                  {user?.avatar ? "Change Photo" : "Upload Photo"}
+                  <AppIcon name="trash" icon={Trash2Icon} size={12} className="mr-1" />
+                  Remove
                 </Button>
-                {user?.avatar && (
-                  <Button
-                    type="button"
-                    variant="ghost"
-                    size="sm"
-                    className="h-7 text-xs font-semibold px-2.5 rounded-lg text-rose-500 hover:text-rose-600 hover:bg-rose-500/10"
-                    onClick={handleRemoveAvatar}
-                    disabled={uploadingAvatar}
-                  >
-                    <Trash2 className="w-3.5 h-3.5 mr-1" />
-                    Remove
-                  </Button>
-                )}
-              </div>
+              )}
             </div>
-            <p className="text-[10.5px] text-muted-foreground pt-0.5">
+
+            <p className="text-[10px] text-muted-foreground/70 pr-0.5">
               PNG, JPG, or WebP (max 5MB)
             </p>
           </div>
         </div>
       </CRMCard>
 
-      {/* Personal Details */}
-      <CRMCard>
-        <div className="mb-5 flex items-center justify-between">
+      {/* Enterprise Personal Details Overview Card with Inline Profile Completion */}
+      <CRMCard className="p-3.5 sm:p-4.5">
+        <div className="mb-3.5 flex flex-col sm:flex-row sm:items-center justify-between gap-2.5 pb-3 border-b border-border/50">
           <div>
-            <h3 className="text-base font-bold tracking-tight text-foreground">Personal Details</h3>
-            <p className="text-xs text-muted-foreground font-medium mt-0.5">
-              Update your personal information and how it&apos;s displayed.
+            <div className="flex items-center gap-2">
+              <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground">Personal Information</h3>
+              <Badge variant="outline" className="text-[9.5px] font-semibold text-muted-foreground bg-muted/40 border-border/60 px-1.5 py-0">
+                Verified Credentials
+              </Badge>
+            </div>
+            <p className="text-[11.5px] text-muted-foreground font-medium mt-0.5">
+              Your personal credentials and contact details across the CRM.
             </p>
           </div>
-          <Button 
-            size="sm" 
-            onClick={handleSave} 
-            disabled={!hasChanges || mutation.isPending}
-            className="flex items-center gap-2 font-semibold shadow-sm"
-          >
-            {mutation.isPending ? <Loader2 className="w-4 h-4 animate-spin" /> : <Save className="w-4 h-4" />}
-            Save Changes
-          </Button>
+
+          <div className="flex items-center gap-2.5 shrink-0">
+            {/* Inline Sleek Profile Completion Indicator */}
+            <div className="flex items-center gap-2 px-2.5 py-1 rounded-lg bg-muted/40 border border-border/60 shadow-2xs">
+              <div className="w-5 h-5 rounded-md bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
+                <AppIcon name="check" icon={CheckIcon} size={11} className="text-emerald-600" />
+              </div>
+              <div className="flex flex-col gap-0.5">
+                <div className="flex items-center justify-between gap-2">
+                  <span className="text-[10px] font-semibold text-muted-foreground">Profile</span>
+                  <span className="text-[10px] font-bold text-primary">{completion}%</span>
+                </div>
+                <div className="w-16 h-1 bg-muted rounded-full overflow-hidden">
+                  <div
+                    className="bg-gradient-to-r from-emerald-500 to-primary h-full transition-all duration-500 rounded-full"
+                    style={{ width: `${completion}%` }}
+                  />
+                </div>
+              </div>
+            </div>
+
+            {/* Edit Profile Button that triggers the modal */}
+            <Button 
+              type="button"
+              variant="outline"
+              size="sm" 
+              onClick={handleOpenEditModal} 
+              className="group h-7.5 px-3 text-xs font-semibold rounded-lg border-border/70 hover:bg-muted/70 hover:border-primary/40 transition-colors shadow-2xs flex items-center gap-1.5"
+            >
+              <AppIcon name="edit" icon={Pencil} size={12} className="text-primary group-hover:text-primary transition-colors" />
+              Edit Details
+            </Button>
+          </div>
         </div>
 
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">Display Name</Label>
-            <div className="relative group">
-              <User className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-              <Input
-                value={formData.name}
-                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
-                placeholder="Full name"
-                className="pl-9 h-10 rounded-lg border-border/60 bg-muted/30 focus:bg-card focus:border-primary/30 transition-all font-medium"
-              />
+        {/* Enterprise Detail Grid */}
+        <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5 pt-0.5">
+          {/* Tile 1: Full Name */}
+          <div className="p-3 rounded-xl bg-muted/20 border border-border/60 hover:bg-muted/30 transition-colors space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-primary/10 text-primary flex items-center justify-center shrink-0">
+                <AppIcon name="user" icon={UserIcon} size={13} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Display Name</span>
             </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">Email Address</Label>
-            <div className="relative group">
-              <Mail className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-              <Input
-                value={formData.email}
-                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                placeholder="email@company.com"
-                className="pl-9 h-10 rounded-lg border-border/60 bg-muted/30 focus:bg-card focus:border-primary/30 transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">Phone Number</Label>
-            <div className="relative group">
-              <Phone className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
-              <Input
-                value={formData.phone}
-                onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
-                placeholder="+1 (555) 000-0000"
-                className="pl-9 h-10 rounded-lg border-border/60 bg-muted/30 focus:bg-card focus:border-primary/30 transition-all"
-              />
-            </div>
-          </div>
-
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-muted-foreground">Workspace Role</Label>
-            <div className="relative group">
-              <ShieldCheck className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors" />
-              <Input
-                value={formatRole(user?.role)}
-                readOnly
-                className="pl-9 h-10 rounded-lg border-border/60 cursor-not-allowed text-muted-foreground italic bg-muted/50"
-              />
-            </div>
-          </div>
-        </div>
-      </CRMCard>
-
-      {/* Completion Widget */}
-      <CRMCard className="flex items-center justify-between">
-        <div className="flex items-center gap-4">
-          <div className="w-9 h-9 rounded-lg bg-primary/10 flex items-center justify-center shrink-0">
-            <CheckCircle2 className="w-4.5 h-4.5 text-primary" />
-          </div>
-          <div>
-            <h4 className="font-bold text-foreground text-sm tracking-tight">Profile Completion</h4>
-            <p className="text-[11px] text-muted-foreground font-medium mt-0.5">
-              Your profile is {completion}% complete.{completion < 100 ? " Add missing details to reach 100%." : ""}
+            <p className="text-xs sm:text-[13px] font-semibold text-foreground truncate pl-8">
+              {user?.name || "Not provided"}
             </p>
           </div>
-        </div>
-        <div className="hidden md:block w-28 shrink-0">
-          <div className="w-full h-1.5 bg-muted rounded-full overflow-hidden">
-            <div className="bg-primary rounded-full h-full transition-all duration-500" style={{ width: `${completion}%` }} />
+
+          {/* Tile 2: Email Address */}
+          <div className="p-3 rounded-xl bg-muted/20 border border-border/60 hover:bg-muted/30 transition-colors space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
+                <AppIcon name="mail" icon={MailIcon} size={13} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Email Address</span>
+            </div>
+            <p className="text-xs sm:text-[13px] font-semibold text-foreground truncate pl-8 flex items-center gap-1">
+              <span className="truncate">{user?.email || "Not configured"}</span>
+            </p>
           </div>
-          <p className="text-right text-[9px] font-bold text-primary mt-1">{completion}%</p>
+
+          {/* Tile 3: Phone Number */}
+          <div className="p-3 rounded-xl bg-muted/20 border border-border/60 hover:bg-muted/30 transition-colors space-y-1.5">
+            <div className="flex items-center gap-2">
+              <div className="w-6 h-6 rounded-md bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <AppIcon name="phone" icon={PhoneIcon} size={13} />
+              </div>
+              <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground">Phone Number</span>
+            </div>
+            <p className="text-xs sm:text-[13px] font-semibold text-foreground truncate pl-8">
+              {user?.phone || <span className="text-muted-foreground/60 italic font-normal text-xs">Not provided</span>}
+            </p>
+          </div>
         </div>
       </CRMCard>
 
       {/* Danger Zone */}
-      <CRMCard className="border-destructive/30 bg-destructive/5 overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold tracking-tight text-destructive flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-destructive" />
+      <CRMCard className="p-3.5 sm:p-4 border-destructive/20 bg-destructive/[0.03] overflow-hidden">
+        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+          <div className="space-y-0.5">
+            <div className="flex items-center gap-1.5">
+              <h3 className="text-xs sm:text-sm font-bold tracking-tight text-destructive flex items-center gap-1.5">
+                <AppIcon name="alert" icon={AlertTriangleIcon} size={14} className="text-destructive" />
                 Danger Zone
               </h3>
-              <Badge variant="destructive" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5">
+              <Badge variant="destructive" className="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-destructive/10 text-destructive border border-destructive/20">
                 Irreversible
               </Badge>
             </div>
-            <p className="text-xs text-muted-foreground font-medium">
+            <p className="text-[11px] text-muted-foreground font-medium">
               Permanently delete your account, workspace, and all associated CRM records.
             </p>
           </div>
@@ -423,13 +440,126 @@ const ProfileSettings = () => {
             variant="destructive"
             size="sm"
             onClick={() => setShowDeleteModal(true)}
-            className="font-bold text-xs gap-2 shrink-0 h-9 px-4 shadow-sm"
+            className="group font-semibold text-xs gap-1.5 shrink-0 h-8 px-3 shadow-xs"
           >
-            <Trash2 className="w-4 h-4" />
+            <AppIcon name="trash" icon={Trash2Icon} size={12} />
             Delete Account
           </Button>
         </div>
       </CRMCard>
+
+      {/* Enterprise Edit Profile Details Popup Modal */}
+      <Dialog open={editModalOpen} onOpenChange={setEditModalOpen}>
+        <DialogContent className="sm:max-w-md border-border bg-card p-0 overflow-hidden shadow-2xl rounded-2xl">
+          <div className="p-5 pb-3.5 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center shrink-0 text-primary">
+                <AppIcon name="edit" icon={Pencil} size={16} />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-bold text-foreground">
+                  Edit Personal Details
+                </DialogTitle>
+                <DialogDescription className="text-[11.5px] text-muted-foreground mt-0.5">
+                  Update your personal profile information and contact details.
+                </DialogDescription>
+              </div>
+            </div>
+          </div>
+
+          <form onSubmit={handleSaveModal} className="px-5 py-4 space-y-3.5">
+            {/* Field: Display Name */}
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold text-foreground/80 uppercase tracking-wider">
+                Display Name
+              </Label>
+              <div className="relative group">
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/70 group-focus-within:text-primary transition-colors pointer-events-none flex items-center justify-center">
+                  <AppIcon name="user" icon={UserIcon} size={14} />
+                </div>
+                <Input
+                  value={formData.name}
+                  onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
+                  placeholder="Full Name"
+                  required
+                  className="pl-8.5 h-9 text-xs sm:text-sm rounded-lg border-border/70 bg-muted/20 hover:bg-muted/30 focus:bg-background focus:border-primary/40 transition-all font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Field: Email Address */}
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold text-foreground/80 uppercase tracking-wider">
+                Email Address
+              </Label>
+              <div className="relative group">
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/70 group-focus-within:text-primary transition-colors pointer-events-none flex items-center justify-center">
+                  <AppIcon name="mail" icon={MailIcon} size={14} />
+                </div>
+                <Input
+                  value={formData.email}
+                  onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                  placeholder="email@company.com"
+                  required
+                  type="email"
+                  className="pl-8.5 h-9 text-xs sm:text-sm rounded-lg border-border/70 bg-muted/20 hover:bg-muted/30 focus:bg-background focus:border-primary/40 transition-all font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Field: Phone Number */}
+            <div className="space-y-1">
+              <Label className="text-[11px] font-semibold text-foreground/80 uppercase tracking-wider">
+                Phone Number
+              </Label>
+              <div className="relative group">
+                <div className="absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground/70 group-focus-within:text-primary transition-colors pointer-events-none flex items-center justify-center">
+                  <AppIcon name="phone" icon={PhoneIcon} size={14} />
+                </div>
+                <Input
+                  value={formData.phone}
+                  onChange={(e) => setFormData(prev => ({ ...prev, phone: e.target.value }))}
+                  placeholder="+1 (555) 000-0000"
+                  className="pl-8.5 h-9 text-xs sm:text-sm rounded-lg border-border/70 bg-muted/20 hover:bg-muted/30 focus:bg-background focus:border-primary/40 transition-all font-medium"
+                />
+              </div>
+            </div>
+
+            {/* Modal Footer */}
+            <div className="p-3.5 px-5 bg-muted/30 border-t border-border/70 flex flex-row items-center justify-end gap-2.5 -mx-5 -mb-4 mt-4">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setEditModalOpen(false)}
+                disabled={mutation.isPending}
+                className="group rounded-lg text-xs font-semibold h-8 px-3.5 border-border/80 hover:bg-muted gap-1.5"
+              >
+                <AppIcon name="close" icon={X} size={12} className="text-muted-foreground group-hover:text-foreground transition-colors" />
+                Cancel
+              </Button>
+              <Button
+                type="submit"
+                size="sm"
+                disabled={mutation.isPending}
+                className="group rounded-lg text-xs font-bold gap-1.5 h-8 px-4 shadow-xs"
+              >
+                {mutation.isPending ? (
+                  <>
+                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                    Saving Changes...
+                  </>
+                ) : (
+                  <>
+                    <AppIcon name="save" icon={SaveIcon} size={13} />
+                    Save Changes
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
 
       <DeleteAccountModal
         open={showDeleteModal}

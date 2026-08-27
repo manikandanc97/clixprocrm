@@ -28,13 +28,13 @@ export const CRMDataTable = ({
   hasPagination = true,
 }: CRMDataTableProps) => {
   return (
-    <CRMCard noPadding withAccent={false} className={cn(crmTableStyles.container, !hasPagination && "crm-table-no-pagination", containerClassName)}>
+    <div className={cn(crmTableStyles.container, !hasPagination && "crm-table-no-pagination", containerClassName)}>
       <div className="overflow-auto flex-1 min-h-0">
         <table className={cn(crmTableStyles.table, className)}>
           {children}
         </table>
       </div>
-    </CRMCard>
+    </div>
   );
 };
 

@@ -2,7 +2,7 @@
 
 import React, { useMemo } from "react";
 import { cn } from "@/shared/lib/utils";
-import { ChevronRight, ChevronDown } from "lucide-react";
+import { ChevronRight } from "lucide-react";
 import { motion } from "framer-motion";
 import { NavAnimatedIcon } from "@/shared/components/sidebar/NavAnimatedIcon";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -50,7 +50,7 @@ function SettingsNavItem({
       }}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "w-full group relative flex items-center gap-3 px-3 py-2 text-[14px] rounded-lg transition-colors duration-150 text-left outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
+        "w-full group relative flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] rounded-lg transition-colors duration-150 text-left outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
         isActive
           ? "text-primary font-semibold"
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium"
@@ -65,7 +65,7 @@ function SettingsNavItem({
           />
           <motion.div
             layoutId="settings-active-indicator"
-            className="absolute left-0 w-1 h-5 bg-primary rounded-r-full z-10"
+            className="absolute left-0 w-0.5 h-4.5 bg-primary rounded-r-full z-10"
             transition={{ type: "spring", stiffness: 450, damping: 36, mass: 0.8 }}
           />
         </>
@@ -76,9 +76,9 @@ function SettingsNavItem({
         isActive={isActive}
         isHovered={isHovered}
         triggerAnimation={clickKey}
-        size={18}
+        size={16}
         className={cn(
-          "w-[18px] h-[18px] shrink-0 transition-colors z-10",
+          "w-4 h-4 shrink-0 transition-colors z-10",
           isActive
             ? "text-primary"
             : "text-muted-foreground/80 group-hover:text-foreground"
@@ -86,7 +86,7 @@ function SettingsNavItem({
       />
       <span className="flex-1 truncate text-left z-10">{item.label}</span>
       {isActive && (
-        <ChevronRight className="w-3.5 h-3.5 text-primary/70 shrink-0 z-10" />
+        <ChevronRight className="w-3 h-3 text-primary/70 shrink-0 z-10" />
       )}
     </motion.button>
   );
@@ -109,26 +109,26 @@ const SettingsSidebar = React.memo(({ activeSection, onSectionChange }: Settings
   return (
     <div className="w-full">
       {/* Mobile / Tablet Dropdown Navigation (< lg) */}
-      <div className="lg:hidden mb-4">
-        <label className="block text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-1.5">
+      <div className="lg:hidden mb-3">
+        <label className="block text-[10.5px] font-bold uppercase tracking-wider text-muted-foreground mb-1">
           Select Settings Category
         </label>
         <Select value={canonicalActive} onValueChange={onSectionChange}>
-          <SelectTrigger className="w-full h-11 bg-card border-border text-sm font-medium">
+          <SelectTrigger className="w-full h-9 bg-card border-border text-xs font-medium">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="max-h-80">
             {categories.map((cat) => (
               <SelectGroup key={cat.id}>
-                <SelectLabel className="text-[10px] font-black tracking-wider uppercase text-muted-foreground px-2 py-1.5">
+                <SelectLabel className="text-[9.5px] font-bold tracking-wider uppercase text-muted-foreground px-2 py-1">
                   {cat.title}
                 </SelectLabel>
                 {cat.items.map((item) => {
                   const Icon = item.icon;
                   return (
-                    <SelectItem key={item.id} value={item.id} className="text-xs font-medium py-2">
+                    <SelectItem key={item.id} value={item.id} className="text-xs font-medium py-1.5">
                       <div className="flex items-center gap-2">
-                        <Icon className="w-4 h-4 text-primary shrink-0" />
+                        <Icon className="w-3.5 h-3.5 text-primary shrink-0" />
                         <span>{item.label}</span>
                       </div>
                     </SelectItem>
@@ -141,10 +141,10 @@ const SettingsSidebar = React.memo(({ activeSection, onSectionChange }: Settings
       </div>
 
       {/* Desktop Sticky Secondary Sidebar (>= lg) */}
-      <div className="hidden lg:flex flex-col gap-6 pb-2 pr-1">
+      <div className="hidden lg:flex flex-col gap-4.5 pb-2 pr-1">
         {categories.map((category) => (
-          <div key={category.id} className="space-y-1">
-            <p className="px-3 text-[10.5px] font-bold text-muted-foreground uppercase tracking-[0.14em] mb-2 select-none">
+          <div key={category.id} className="space-y-0.5">
+            <p className="px-2.5 text-[10px] font-bold text-muted-foreground/75 uppercase tracking-[0.13em] mb-1.5 select-none">
               {category.title}
             </p>
             <div className="space-y-0.5">

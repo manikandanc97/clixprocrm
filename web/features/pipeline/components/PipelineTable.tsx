@@ -32,6 +32,7 @@ import {
   CRMTableHeaderCell,
   CRMPagination,
 } from "@/shared/components/crm";
+import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { cn } from "@/shared/lib/utils";
 
@@ -44,9 +45,47 @@ export const PipelineTable: React.FC<PipelineTableProps> = ({ items, onSelectDea
   const { formatCurrency } = useCurrency();
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
+    key: "",
+    direction: null,
+  });
 
-  const totalPages = Math.ceil(items.length / rowsPerPage);
-  const paginatedItems = items.slice(
+  const handleSort = (key: string, direction: SortDirection) => {
+    setSortConfig({ key, direction });
+  };
+
+  const sortedItems = [...items].sort((a, b) => {
+    if (!sortConfig.direction) return 0;
+    const dir = sortConfig.direction === "asc" ? 1 : -1;
+
+    if (sortConfig.key === "name") {
+      return (a.name || "").localeCompare(b.name || "") * dir;
+    }
+    if (sortConfig.key === "company") {
+      return (a.company || "").localeCompare(b.company || "") * dir;
+    }
+    if (sortConfig.key === "stage") {
+      return (a.stage || "").localeCompare(b.stage || "") * dir;
+    }
+    if (sortConfig.key === "priority") {
+      const priorityWeight: Record<string, number> = { High: 3, Medium: 2, Low: 1 };
+      const weightA = priorityWeight[a.priority] || 0;
+      const weightB = priorityWeight[b.priority] || 0;
+      return (weightA - weightB) * dir;
+    }
+    if (sortConfig.key === "value") {
+      const valA = a.valueAmount ?? (Number(String(a.value || "0").replace(/[^0-9.-]+/g, "")) || 0);
+      const valB = b.valueAmount ?? (Number(String(b.value || "0").replace(/[^0-9.-]+/g, "")) || 0);
+      return (valA - valB) * dir;
+    }
+    if (sortConfig.key === "winProbability") {
+      return ((a.probability || 0) - (b.probability || 0)) * dir;
+    }
+    return 0;
+  });
+
+  const totalPages = Math.ceil(sortedItems.length / rowsPerPage);
+  const paginatedItems = sortedItems.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -62,15 +101,57 @@ export const PipelineTable: React.FC<PipelineTableProps> = ({ items, onSelectDea
   return (
     <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4">
       <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden flex-1">
-        <CRMDataTable containerClassName="border-0 shadow-none rounded-none flex-auto h-full overflow-auto" className="w-full">
+        <CRMDataTable hasPagination={sortedItems.length > rowsPerPage} containerClassName="border-0 shadow-none rounded-none flex-auto h-full overflow-auto" className="w-full">
           <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
             <CRMTableRow className="h-10 sm:h-11">
-              <CRMTableHeaderCell className="bg-card">Deal Name</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="bg-card">Company</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="bg-card">Stage</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="bg-card">Priority</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="bg-card">Value</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="bg-card">Win Probability</CRMTableHeaderCell>
+              <CRMTableHeaderCell className="bg-card">
+                <DataTableColumnHeader
+                  title="Deal Name"
+                  sortable
+                  sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("name", dir)}
+                />
+              </CRMTableHeaderCell>
+              <CRMTableHeaderCell className="bg-card">
+                <DataTableColumnHeader
+                  title="Company"
+                  sortable
+                  sortDirection={sortConfig.key === "company" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("company", dir)}
+                />
+              </CRMTableHeaderCell>
+              <CRMTableHeaderCell className="bg-card">
+                <DataTableColumnHeader
+                  title="Stage"
+                  sortable
+                  sortDirection={sortConfig.key === "stage" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("stage", dir)}
+                />
+              </CRMTableHeaderCell>
+              <CRMTableHeaderCell className="bg-card">
+                <DataTableColumnHeader
+                  title="Priority"
+                  sortable
+                  sortDirection={sortConfig.key === "priority" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("priority", dir)}
+                />
+              </CRMTableHeaderCell>
+              <CRMTableHeaderCell className="bg-card">
+                <DataTableColumnHeader
+                  title="Value"
+                  sortable
+                  sortDirection={sortConfig.key === "value" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("value", dir)}
+                />
+              </CRMTableHeaderCell>
+              <CRMTableHeaderCell className="bg-card">
+                <DataTableColumnHeader
+                  title="Win Probability"
+                  sortable
+                  sortDirection={sortConfig.key === "winProbability" ? sortConfig.direction : null}
+                  onSort={(dir) => handleSort("winProbability", dir)}
+                />
+              </CRMTableHeaderCell>
               <CRMTableHeaderCell className="text-right bg-card">Actions</CRMTableHeaderCell>
             </CRMTableRow>
           </CRMTableHeader>

@@ -58,7 +58,7 @@ export const CustomersGrid: React.FC<CustomersGridProps> = ({ customers, onEdit,
   };
 
   return (
-    <div className="flex-1 flex flex-col min-h-0">
+    <div className="flex-1 flex flex-col min-h-0 gap-3.5 sm:gap-4">
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 pb-6">
         {paginatedCustomers.map((customer, idx) => {
           const revenueNum = typeof customer.revenueValue === "number" ? customer.revenueValue : (parseFloat(String(customer.revenue || "0")) || 0);

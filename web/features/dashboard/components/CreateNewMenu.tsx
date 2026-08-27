@@ -29,7 +29,7 @@ export default function CreateNewMenu() {
     { label: "New Deal", iconName: "deals", iconColor: "text-rose-500", path: "/pipeline?new=true", permission: PERMISSIONS.PIPELINE_CREATE },
     { label: "New Meeting", iconName: "calendar", iconColor: "text-orange-500", onClick: () => openModal("meeting"), permission: "leads.view" },
     { label: "New Employee", iconName: "employees", iconColor: "text-indigo-500", path: "/employees?new=true", permission: PERMISSIONS.EMPLOYEES_MANAGE },
-    { label: "New Role", iconName: "roles", iconColor: "text-slate-500", path: "/role-management?new=true", permission: PERMISSIONS.ROLES_MANAGE },
+    { label: "New Role", iconName: "roles", iconColor: "text-slate-500", path: "/settings?section=roles&new=true", permission: PERMISSIONS.ROLES_MANAGE },
   ].filter((action) => hasPermission(action.permission));
 
   if (actions.length === 0) {

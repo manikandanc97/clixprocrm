@@ -202,7 +202,7 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
           columns={columns}
           rowClassName="h-16 hover:bg-muted/30 transition-colors"
           onRowClick={() => {}}
-          hasPagination={sortedCustomers.length > 0}
+          hasPagination={sortedCustomers.length > rowsPerPage}
         />
       </div>
 

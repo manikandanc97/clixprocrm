@@ -1,6 +1,7 @@
-'use client';
+"use client";
 
 import React, { useState, useRef, useEffect } from 'react';
+import { useSearchParams } from 'next/navigation';
 import { useAuth } from '@/features/auth/components/auth-provider';
 import { useAIWorkspace, extractMessageText } from '@/features/ai/hooks/use-ai-workspace';
 import { AIConversationSidebar } from '@/features/ai/components/AIConversationSidebar';
@@ -9,6 +10,7 @@ import { AIEmptyWorkspace } from '@/features/ai/components/AIEmptyWorkspace';
 import { AIMessageItem } from '@/features/ai/components/AIMessageItem';
 import { AIChatComposer } from '@/features/ai/components/AIChatComposer';
 import { AICrmContextPanel } from '@/features/ai/components/AICrmContextPanel';
+import { AIContextualSettings } from '@/features/ai/components/AIContextualSettings';
 import { CRMPageContainer } from '@/shared/components/crm';
 import { toast } from 'sonner';
 
@@ -16,9 +18,18 @@ import { MessageSquare, Database, X } from 'lucide-react';
 
 export default function AIWorkspacePage() {
   const { user } = useAuth();
+  const searchParams = useSearchParams();
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState<'chats' | 'context'>('chats');
+  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+
+  useEffect(() => {
+    const cust = searchParams.get('customize');
+    if (cust === 'true' || cust === 'settings') {
+      setIsSettingsOpen(true);
+    }
+  }, [searchParams]);
 
   const {
     messages,
@@ -232,6 +243,7 @@ export default function AIWorkspacePage() {
               setActiveRightTab('context');
               setIsRightSidebarOpen(true);
             }}
+            onOpenSettings={() => setIsSettingsOpen(true)}
             activeContext={activeContext}
             onClearContext={clearContext}
             entitledModels={entitledModels}
@@ -349,6 +361,11 @@ export default function AIWorkspacePage() {
           </div>
         </div>
       </div>
+
+      <AIContextualSettings
+        open={isSettingsOpen}
+        onOpenChange={setIsSettingsOpen}
+      />
     </CRMPageContainer>
   );
 }

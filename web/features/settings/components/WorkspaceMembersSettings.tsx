@@ -13,7 +13,7 @@ import {
   Clock,
   Sparkles,
 } from "lucide-react";
-import { CRMCard } from "@/shared/components/crm";
+import { CRMCard, CRMRoleBadge } from "@/shared/components/crm";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
@@ -184,8 +184,8 @@ export default function WorkspaceMembersSettings() {
                 </div>
               </div>
 
-              <div className="col-span-3">
-                <p className="font-medium text-foreground">{member.role}</p>
+              <div className="col-span-3 flex flex-col items-start gap-1">
+                <CRMRoleBadge role={member.role} size="xs" />
                 <p className="text-[11px] text-muted-foreground">{member.department}</p>
               </div>
 

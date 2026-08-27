@@ -46,8 +46,10 @@ import {
   CRMMetricCard,
   CRMToolbar,
   CRMPagination,
+  CRMRoleBadge,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
+import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { cn } from "@/shared/lib/utils";
 
@@ -208,6 +210,15 @@ export default function SuperAdminUsersPage() {
     [users]
   );
 
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
+    key: "",
+    direction: null,
+  });
+
+  const handleSort = (key: string, direction: SortDirection) => {
+    setSortConfig({ key, direction });
+  };
+
   const filteredUsers = useMemo(() => {
     return users.filter((u) => {
       // 1. Super Admin Filter
@@ -228,8 +239,35 @@ export default function SuperAdminUsersPage() {
     });
   }, [users, search, statusFilter, superAdminOnly]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / rowsPerPage));
-  const paginatedUsers = filteredUsers.slice(
+  const sortedUsers = useMemo(() => {
+    return [...filteredUsers].sort((a, b) => {
+      if (!sortConfig.direction) return 0;
+      const dir = sortConfig.direction === "asc" ? 1 : -1;
+
+      if (sortConfig.key === "name") {
+        const nameA = a.name || a.email || "";
+        const nameB = b.name || b.email || "";
+        return nameA.localeCompare(nameB) * dir;
+      }
+      if (sortConfig.key === "role") {
+        const roleA = a.isSuperAdmin ? "SUPER_ADMIN" : "USER";
+        const roleB = b.isSuperAdmin ? "SUPER_ADMIN" : "USER";
+        return roleA.localeCompare(roleB) * dir;
+      }
+      if (sortConfig.key === "status") {
+        return (a.status || "").localeCompare(b.status || "") * dir;
+      }
+      if (sortConfig.key === "createdAt") {
+        const dateA = a.createdAt ? new Date(a.createdAt).getTime() : 0;
+        const dateB = b.createdAt ? new Date(b.createdAt).getTime() : 0;
+        return (dateA - dateB) * dir;
+      }
+      return 0;
+    });
+  }, [filteredUsers, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / rowsPerPage));
+  const paginatedUsers = sortedUsers.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
@@ -331,16 +369,44 @@ export default function SuperAdminUsersPage() {
       </CRMToolbar>
 
       {/* 4. Standard CRM Data Table */}
-      <div className={cn("crm-table-wrap", (loading || filteredUsers.length === 0) && "crm-table-no-pagination")}>
+      <div className={cn("crm-table-wrap", (loading || sortedUsers.length <= rowsPerPage) && "crm-table-no-pagination")}>
         <div className="overflow-auto flex-1 min-h-0">
           <table className="w-full text-left text-sm border-collapse">
             <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
               <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">User</th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Platform Role</th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                  <DataTableColumnHeader
+                    title="User"
+                    sortable
+                    sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
+                    onSort={(dir) => handleSort("name", dir)}
+                  />
+                </th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                  <DataTableColumnHeader
+                    title="Platform Role"
+                    sortable
+                    sortDirection={sortConfig.key === "role" ? sortConfig.direction : null}
+                    onSort={(dir) => handleSort("role", dir)}
+                  />
+                </th>
                 <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card">Organizations &amp; Role</th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Status</th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Created Date</th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                  <DataTableColumnHeader
+                    title="Status"
+                    sortable
+                    sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
+                    onSort={(dir) => handleSort("status", dir)}
+                  />
+                </th>
+                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                  <DataTableColumnHeader
+                    title="Created Date"
+                    sortable
+                    sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
+                    onSort={(dir) => handleSort("createdAt", dir)}
+                  />
+                </th>
                 <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
               </tr>
             </thead>
@@ -410,13 +476,11 @@ export default function SuperAdminUsersPage() {
                           {u.organizations.map((org: any) => (
                             <div
                               key={org.tenantId}
-                              className="inline-flex items-center gap-1 px-2.5 py-1 rounded-lg bg-muted/60 border border-border text-xs"
+                              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-muted/60 border border-border text-xs"
                             >
                               <Building2 className="h-3 w-3 text-muted-foreground" />
                               <span className="font-semibold text-foreground">{org.name}</span>
-                              <span className="text-[10px] text-emerald-600 font-bold">
-                                ({org.role})
-                              </span>
+                              <CRMRoleBadge role={org.role} size="xs" />
                             </div>
                           ))}
                         </div>
@@ -632,9 +696,7 @@ export default function SuperAdminUsersPage() {
                           </p>
                         </div>
                         <div className="text-right">
-                          <span className="px-2.5 py-1 rounded-lg bg-emerald-500/10 text-emerald-600 font-bold text-[10px] border border-emerald-500/20">
-                            {org.role}
-                          </span>
+                          <CRMRoleBadge role={org.role} size="xs" />
                         </div>
                       </div>
                     ))

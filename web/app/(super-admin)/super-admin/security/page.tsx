@@ -374,16 +374,18 @@ export default function SecurityCenterPage() {
             </table>
           </div>
 
-          <div className="p-3 border-t border-border/60">
-            <CRMPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={filteredIncidents.length}
-              rowsPerPage={rowsPerPage}
-              onPageChange={setCurrentPage}
-              onRowsPerPageChange={setRowsPerPage}
-            />
-          </div>
+          {filteredIncidents.length > rowsPerPage && (
+            <div className="p-3 border-t border-border/60">
+              <CRMPagination
+                currentPage={currentPage}
+                totalPages={totalPages}
+                totalItems={filteredIncidents.length}
+                rowsPerPage={rowsPerPage}
+                onPageChange={setCurrentPage}
+                onRowsPerPageChange={setRowsPerPage}
+              />
+            </div>
+          )}
         </div>
 
       {/* Incident Details & Resolution Modal */}

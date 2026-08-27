@@ -7,7 +7,8 @@ import {
   BrainCircuit,
   MessageSquare,
   BarChart3,
-  Lightbulb
+  Lightbulb,
+  Settings,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { 
@@ -19,6 +20,7 @@ import {
   ActivityTimeline,
   CRMPageSection
 } from "@/shared/components/crm";
+import { AIContextualSettings } from "@/features/ai/components/AIContextualSettings";
 import { Button } from "@/shared/ui/button";
 import { useAiInsights } from "@/shared/hooks/use-dashboard";
 import { AISkeleton } from "./AISkeleton";
@@ -58,11 +60,12 @@ interface InsightStat {
 import { EmptyState } from "@/shared/components/EmptyState";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, UserPlus } from "lucide-react";
-import React, { useMemo } from "react";
+import React, { useState, useMemo } from "react";
 
 export default function AiInsightsPage() {
   const router = useRouter();
   const { data: insightsData, isLoading: loading } = useAiInsights();
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
   const recommendations = insightsData?.recommendations || [];
   const aiStats = insightsData?.stats || [];
@@ -95,6 +98,14 @@ export default function AiInsightsPage() {
           badge="Neural Engine v4.2"
           icon={BrainCircuit}
           iconColor="text-indigo-500"
+          actions={[
+            {
+              label: "Customize",
+              icon: Settings,
+              onClick: () => setIsCustomizeOpen(true),
+              variant: "outline",
+            },
+          ]}
         />
 
         <div className="flex-1 min-h-0 flex flex-col pt-2">
@@ -115,6 +126,11 @@ export default function AiInsightsPage() {
             }}
           />
         </div>
+
+        <AIContextualSettings
+          open={isCustomizeOpen}
+          onOpenChange={setIsCustomizeOpen}
+        />
       </CRMPageContainer>
     );
   }
@@ -128,6 +144,12 @@ export default function AiInsightsPage() {
         icon={BrainCircuit}
         iconColor="text-indigo-500"
         actions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+            variant: "outline",
+          },
           {
             label: "Export AI Report",
             icon: BarChart3,
@@ -317,6 +339,11 @@ export default function AiInsightsPage() {
           </CRMCard>
         </div>
       </div>
+
+      <AIContextualSettings
+        open={isCustomizeOpen}
+        onOpenChange={setIsCustomizeOpen}
+      />
     </CRMPageContainer>
   );
 }

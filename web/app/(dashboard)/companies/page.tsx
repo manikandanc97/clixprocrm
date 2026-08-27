@@ -2,7 +2,8 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Building2, Plus, Factory, Briefcase } from "lucide-react";
+import { Building2, Plus, Factory, Briefcase, Settings } from "lucide-react";
+import { useSearchParams } from "next/navigation";
 
 import dynamic from "next/dynamic";
 import { TableSkeleton } from "@/shared/components/skeletons";
@@ -24,6 +25,7 @@ import {
 } from "@/shared/components/crm";
 import { FormModal } from "@/shared/components/form-modal";
 import { CompanyForm } from "@/features/forms/CompanyForm";
+import { CompanyContextualSettings } from "@/features/companies/components/CompanyContextualSettings";
 
 const CompaniesGrid = dynamic(() => import("@/features/companies/components/CompaniesGrid").then(mod => ({ default: mod.CompaniesGrid })), {
   loading: () => <TableSkeleton rows={6} cols={4} showPagination={false} />
@@ -41,6 +43,10 @@ const CompaniesPage = () => {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedCompany, setSelectedCompany] = useState<any | null>(null);
 
+  const searchParams = useSearchParams();
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>();
+
   const { mutate: deleteCompany } = useDeleteCompany();
 
   const handleDelete = (id: string) => {
@@ -48,6 +54,16 @@ const CompaniesPage = () => {
       deleteCompany(id);
     }
   };
+
+  useEffect(() => {
+    const cust = searchParams.get("customize");
+    if (cust) {
+      if (cust !== "true") {
+        setCustomizeDefaultSection(cust);
+      }
+      setIsCustomizeOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -108,6 +124,12 @@ const CompaniesPage = () => {
         badge="Account Management"
         actions={[
           {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+            variant: "outline",
+          },
+          {
             label: "New Company",
             icon: Plus,
             onClick: handleNewCompany,
@@ -161,7 +183,7 @@ const CompaniesPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-4 min-h-0">
+          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
             <CRMToolbar 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -251,6 +273,12 @@ const CompaniesPage = () => {
           onCancel={() => { setIsAddModalOpen(false); setSelectedCompany(null); }} 
         />
       </FormModal>
+
+      <CompanyContextualSettings
+        open={isCustomizeOpen}
+        onOpenChange={setIsCustomizeOpen}
+        defaultSection={customizeDefaultSection || "industries"}
+      />
     </CRMPageContainer>
   );
 };

@@ -1,14 +1,18 @@
 "use client";
 
-import { useState } from "react";
-import { BarChart3, Download, Calendar, TrendingUp, Users, IndianRupee, Target, RefreshCcw } from "lucide-react";
+import { useState, useEffect, useMemo } from "react";
+import { BarChart3, Download, Calendar, TrendingUp, Users, IndianRupee, Target, RefreshCcw, Settings, X } from "lucide-react";
 import dynamic from "next/dynamic";
+import { useSearchParams } from "next/navigation";
 import { PageErrorState } from "@/shared/components/page-states";
 import { ReportsSkeleton } from "@/features/reports/components/ReportsSkeleton";
 import { useReports } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { CRMPageHeader, CRMMetricCard, CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
+import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/shared/ui/sheet";
+import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
+import RevenueTargetSettings from "@/features/settings/components/RevenueTargetSettings";
 
 const RevenueChart = dynamic(() => import("@/features/reports/components/RevenueChart"));
 const ConversionChart = dynamic(() => import("@/features/reports/components/ConversionChart"));
@@ -26,15 +30,24 @@ const AIInsights = dynamic(() => import("@/features/reports/components/AIInsight
 import { EmptyState } from "@/shared/components/EmptyState";
 import { useRouter } from "next/navigation";
 import { LayoutDashboard, UserPlus } from "lucide-react";
-import React, { useMemo } from "react";
+import React from "react";
 
 const ReportsPage = () => {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const [filters, setFilters] = useState<{ startDate?: string, endDate?: string, assignedToId?: string }>({});
+  const [isTargetsConfigOpen, setIsTargetsConfigOpen] = useState(false);
   
   const { data, isLoading: loading, error, refetch, isFetching } = useReports(filters);
   
   const { CurrencyIcon } = useCurrency();
+
+  useEffect(() => {
+    const cust = searchParams.get("customize");
+    if (cust === "targets" || cust === "true") {
+      setIsTargetsConfigOpen(true);
+    }
+  }, [searchParams]);
 
   const hasReportsData = useMemo(() => {
     if (!data) return false;
@@ -187,11 +200,16 @@ const ReportsPage = () => {
         badge="Business Intelligence"
         actions={[
           {
+            label: "Targets",
+            icon: Target,
+            onClick: () => setIsTargetsConfigOpen(true),
+            variant: "outline",
+          },
+          {
             label: "Refresh",
             icon: RefreshCcw,
             onClick: handleRefresh,
             variant: "outline",
-            // spinning if fetching
           },
           {
             label: "This Month",
@@ -300,6 +318,34 @@ const ReportsPage = () => {
         
         <PerformanceTable performance={data?.performance || []} />
       </div>
+
+      {/* Revenue Targets Configuration Drawer */}
+      <Sheet open={isTargetsConfigOpen} onOpenChange={setIsTargetsConfigOpen}>
+        <SheetContent
+          side="right"
+          className="p-0 sm:max-w-2xl md:max-w-3xl lg:max-w-4xl w-full flex flex-col h-full bg-background border-l border-border/80 shadow-2xl z-50"
+        >
+          <SheetHeader className="px-6 py-4.5 border-b border-border/60 bg-muted/20">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
+                  <Target className="w-4.5 h-4.5" />
+                </div>
+                <div>
+                  <SheetTitle className="text-base font-bold">Revenue Targets</SheetTitle>
+                  <SheetDescription className="text-xs text-muted-foreground">
+                    Set and manage monthly, quarterly, and annual sales quotas and milestones.
+                  </SheetDescription>
+                </div>
+              </div>
+            </div>
+          </SheetHeader>
+
+          <div className="flex-1 min-h-0 overflow-y-auto p-6 custom-scrollbar">
+            <RevenueTargetSettings />
+          </div>
+        </SheetContent>
+      </Sheet>
     </CRMPageContainer>
   );
 };

@@ -187,7 +187,7 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
           columns={columns}
           rowClassName="h-16 hover:bg-muted/30 transition-colors"
           onRowClick={(row) => onEdit?.(row)}
-          hasPagination={sortedDeals.length > 0}
+          hasPagination={sortedDeals.length > rowsPerPage}
         />
       </div>
 

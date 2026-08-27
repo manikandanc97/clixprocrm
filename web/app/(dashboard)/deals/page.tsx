@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Handshake, Plus, TrendingUp, Target, Banknote, List, Grid, GitBranch, Filter, ArrowUpDown } from "lucide-react";
+import { Handshake, Plus, TrendingUp, Target, Banknote, List, Grid, GitBranch, Filter, ArrowUpDown, Settings } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -42,6 +42,7 @@ import { DealForm } from "@/features/forms/DealForm";
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { formatCurrency } from "@/lib/crm-formatters";
 import { useCRMStore } from "@/shared/store/useCRMStore";
+import { DealContextualSettings } from "@/features/deals/components/DealContextualSettings";
 
 const DealsPage = () => {
   const searchParams = useSearchParams();
@@ -84,9 +85,21 @@ const DealsPage = () => {
   const safePipelineItems = Array.isArray(pipelineItems) ? pipelineItems : [];
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
+  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>();
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const [selectedDeal, setSelectedDeal] = useState<any | null>(null);
   const [preselectedStage, setPreselectedStage] = useState<string | undefined>();
+
+  useEffect(() => {
+    const cust = searchParams.get("customize");
+    if (cust) {
+      if (cust !== "true") {
+        setCustomizeDefaultSection(cust);
+      }
+      setIsCustomizeOpen(true);
+    }
+  }, [searchParams]);
 
   useEffect(() => {
     if (searchParams.get("new") === "true") {
@@ -172,6 +185,12 @@ const DealsPage = () => {
         badge="Sales Operations"
         actions={[
           {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+            variant: "outline",
+          },
+          {
             label: "New Deal",
             icon: Plus,
             onClick: () => handleNewDeal(),
@@ -228,7 +247,7 @@ const DealsPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-4 min-h-0">
+          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
             <CRMToolbar 
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}
@@ -382,6 +401,12 @@ const DealsPage = () => {
           onCancel={() => { setIsAddModalOpen(false); setSelectedDeal(null); }} 
         />
       </FormModal>
+
+      <DealContextualSettings
+        open={isCustomizeOpen}
+        onOpenChange={setIsCustomizeOpen}
+        defaultSection={customizeDefaultSection || "pipelines"}
+      />
     </CRMPageContainer>
   );
 };

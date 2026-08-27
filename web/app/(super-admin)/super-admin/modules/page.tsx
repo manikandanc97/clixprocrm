@@ -53,6 +53,7 @@ import {
   CRMToolbar,
   CRMPagination,
 } from "@/shared/components/crm";
+import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -483,11 +484,41 @@ export default function SuperAdminModulesPage() {
     });
   }, [modules, search, groupFilter, statusFilter]);
 
-  const totalPages = Math.max(1, Math.ceil(filteredModules.length / rowsPerPage));
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
+    key: "",
+    direction: null,
+  });
+
+  const handleSort = (key: string, direction: SortDirection) => {
+    setSortConfig({ key, direction });
+  };
+
+  const sortedModules = useMemo(() => {
+    return [...filteredModules].sort((a, b) => {
+      if (!sortConfig.direction) return 0;
+      const dir = sortConfig.direction === "asc" ? 1 : -1;
+
+      if (sortConfig.key === "order") {
+        return ((a.sortOrder ?? 0) - (b.sortOrder ?? 0)) * dir;
+      }
+      if (sortConfig.key === "label") {
+        return (a.label || "").localeCompare(b.label || "") * dir;
+      }
+      if (sortConfig.key === "group") {
+        return (a.group || "").localeCompare(b.group || "") * dir;
+      }
+      if (sortConfig.key === "isEnabled") {
+        return ((a.isEnabled ? 1 : 0) - (b.isEnabled ? 1 : 0)) * dir;
+      }
+      return 0;
+    });
+  }, [filteredModules, sortConfig]);
+
+  const totalPages = Math.max(1, Math.ceil(sortedModules.length / rowsPerPage));
   const paginatedModules = useMemo(() => {
     const start = (currentPage - 1) * rowsPerPage;
-    return filteredModules.slice(start, start + rowsPerPage);
-  }, [filteredModules, currentPage, rowsPerPage]);
+    return sortedModules.slice(start, start + rowsPerPage);
+  }, [sortedModules, currentPage, rowsPerPage]);
 
   // Open Create Modal
   const handleOpenCreate = () => {
@@ -974,7 +1005,7 @@ export default function SuperAdminModulesPage() {
           </CRMToolbar>
 
           {/* 4. Modules Data Table */}
-          <div className={cn("crm-table-wrap", (loading || filteredModules.length === 0) && "crm-table-no-pagination")}>
+          <div className={cn("crm-table-wrap", (loading || filteredModules.length <= rowsPerPage) && "crm-table-no-pagination")}>
         {loading ? (
           <PlatformModulesTableSkeleton />
         ) : filteredModules.length === 0 ? (
@@ -998,11 +1029,41 @@ export default function SuperAdminModulesPage() {
             <table className="w-full text-left text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                 <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                  <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">Order</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Module & Route</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Category & Access</th>
+                  <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Order"
+                      align="center"
+                      sortable
+                      sortDirection={sortConfig.key === "order" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("order", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Module & Route"
+                      sortable
+                      sortDirection={sortConfig.key === "label" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("label", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Category & Access"
+                      sortable
+                      sortDirection={sortConfig.key === "group" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("group", dir)}
+                    />
+                  </th>
                   <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Type</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Global Status</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Global Status"
+                      align="center"
+                      sortable
+                      sortDirection={sortConfig.key === "isEnabled" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("isEnabled", dir)}
+                    />
+                  </th>
                   <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Sidebar Nav</th>
                   <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
                 </tr>
@@ -1012,7 +1073,7 @@ export default function SuperAdminModulesPage() {
                   const Icon = getDynamicIcon(mod.icon);
                   const globalIndex = (currentPage - 1) * rowsPerPage + pageIndex;
                   const isFirst = globalIndex === 0;
-                  const isLast = globalIndex === filteredModules.length - 1;
+                  const isLast = globalIndex === sortedModules.length - 1;
 
                   return (
                     <tr
@@ -1246,11 +1307,11 @@ export default function SuperAdminModulesPage() {
       </div>
 
       {/* Pagination */}
-      {!loading && filteredModules.length > 0 && (
+      {!loading && sortedModules.length > 0 && (
         <CRMPagination
           currentPage={currentPage}
           totalPages={totalPages}
-          totalItems={filteredModules.length}
+          totalItems={sortedModules.length}
           rowsPerPage={rowsPerPage}
           onPageChange={setCurrentPage}
           onRowsPerPageChange={setRowsPerPage}

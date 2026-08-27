@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { AlertTriangle, Loader2, Trash2 } from "lucide-react";
+import { Loader2, AlertTriangle, Trash2 } from "lucide-react";
 import {
   Dialog,
   DialogContent,
@@ -18,6 +18,7 @@ import { useCRMStore } from "@/shared/store/useCRMStore";
 import { useQueryClient } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useWorkspace } from "@/shared/hooks/use-settings";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface DeleteAccountModalProps {
   open: boolean;
@@ -92,14 +93,12 @@ export function DeleteAccountModal({
       useCRMStore.getState().reset();
 
       // 3. Immediately hard redirect directly to /account-deleted
-      // Calling window.location.replace prevents router.replace('/login') race from ProtectedRoute
       if (typeof window !== "undefined") {
         window.location.replace("/account-deleted");
       }
     } catch (error: any) {
       setIsDeleting(false);
 
-      // Distinguish network timeout / connection abort from explicit server failures
       const isNetworkTimeout =
         error?.code === "ECONNABORTED" ||
         error?.message?.toLowerCase().includes("timeout") ||
@@ -124,16 +123,16 @@ export function DeleteAccountModal({
     <Dialog open={open} onOpenChange={handleClose}>
       <DialogContent className="sm:max-w-md border-border bg-card p-0 overflow-hidden shadow-2xl rounded-2xl">
         {/* Danger Header Banner */}
-        <div className="p-6 pb-4">
-          <div className="flex items-center gap-3.5 mb-3">
-            <div className="w-10 h-10 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0 text-destructive">
-              <AlertTriangle className="w-5 h-5" />
+        <div className="p-5 pb-3.5">
+          <div className="flex items-center gap-3 mb-2.5">
+            <div className="w-9 h-9 rounded-xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0 text-destructive">
+              <AppIcon name="alert" icon={AlertTriangle} size={18} className="text-destructive" />
             </div>
             <div>
-              <DialogTitle className="text-lg font-bold text-foreground">
+              <DialogTitle className="text-base font-bold text-foreground">
                 Delete Account
               </DialogTitle>
-              <p className="text-[11px] text-destructive font-semibold uppercase tracking-wider mt-0.5">
+              <p className="text-[10.5px] text-destructive font-semibold uppercase tracking-wider mt-0.5">
                 Danger Zone · Irreversible Action
               </p>
             </div>
@@ -143,18 +142,18 @@ export function DeleteAccountModal({
           </DialogDescription>
         </div>
 
-        <div className="px-6 space-y-4 pb-1">
+        <div className="px-5 space-y-3.5 pb-1">
           {/* Warning Callout Box */}
-          <div className="p-3.5 rounded-xl bg-destructive/5 border border-destructive/20 text-destructive text-xs leading-relaxed font-medium flex items-start gap-2.5">
-            <AlertTriangle className="w-4 h-4 shrink-0 mt-0.5 text-destructive" />
+          <div className="p-3 rounded-xl bg-destructive/5 border border-destructive/20 text-destructive text-xs leading-relaxed font-medium flex items-start gap-2.5">
+            <AppIcon name="alert" icon={AlertTriangle} size={14} className="shrink-0 mt-0.5 text-destructive" />
             <span>
               This action cannot be undone. Your account and related data will be permanently deleted and cannot be recovered.
             </span>
           </div>
 
           {/* Verification Input 1 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-foreground">
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold text-foreground/80">
               To confirm, type <span className="font-mono font-bold text-destructive">“{companyName}”</span>
             </Label>
             <Input
@@ -162,7 +161,7 @@ export function DeleteAccountModal({
               onChange={(e) => setConfirm1(e.target.value)}
               placeholder={companyName}
               disabled={isDeleting}
-              className={`h-10 text-xs rounded-lg font-mono transition-all ${
+              className={`h-9 text-xs rounded-lg font-mono transition-all ${
                 isFirstValid
                   ? "border-emerald-500/80 bg-emerald-500/5 focus:border-emerald-500 focus:ring-emerald-500/20"
                   : "border-border/80 bg-muted/30 focus:bg-card focus:border-destructive focus:ring-destructive/20"
@@ -173,8 +172,8 @@ export function DeleteAccountModal({
           </div>
 
           {/* Verification Input 2 */}
-          <div className="space-y-1.5">
-            <Label className="text-xs font-semibold text-foreground">
+          <div className="space-y-1">
+            <Label className="text-[11px] font-semibold text-foreground/80">
               To confirm, type <span className="font-mono font-bold text-destructive">“delete my account”</span>
             </Label>
             <Input
@@ -182,7 +181,7 @@ export function DeleteAccountModal({
               onChange={(e) => setConfirm2(e.target.value)}
               placeholder="delete my account"
               disabled={isDeleting}
-              className={`h-10 text-xs rounded-lg font-mono transition-all ${
+              className={`h-9 text-xs rounded-lg font-mono transition-all ${
                 isSecondValid
                   ? "border-emerald-500/80 bg-emerald-500/5 focus:border-emerald-500 focus:ring-emerald-500/20"
                   : "border-border/80 bg-muted/30 focus:bg-card focus:border-destructive focus:ring-destructive/20"
@@ -193,16 +192,17 @@ export function DeleteAccountModal({
           </div>
         </div>
 
-        {/* Footer with clean padding and generous bottom space */}
-        <div className="p-4 px-6 bg-muted/30 border-t border-border/70 flex flex-row items-center justify-end gap-3 mt-4">
+        {/* Footer */}
+        <div className="p-3.5 px-5 bg-muted/30 border-t border-border/70 flex flex-row items-center justify-end gap-2.5 mt-3">
           <Button
             type="button"
             variant="outline"
             size="sm"
             onClick={handleClose}
             disabled={isDeleting}
-            className="rounded-lg text-xs font-semibold h-9 px-4 border-border/80 hover:bg-muted"
+            className="group rounded-lg text-xs font-semibold h-8 px-3.5 border-border/80 hover:bg-muted gap-1.5"
           >
+            <AppIcon name="close" size={12} className="text-muted-foreground group-hover:text-foreground transition-colors" />
             Cancel
           </Button>
           <Button
@@ -211,7 +211,7 @@ export function DeleteAccountModal({
             size="sm"
             onClick={handleDelete}
             disabled={!canDelete || isDeleting}
-            className="rounded-lg text-xs font-bold gap-2 h-9 px-4 shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
+            className="group rounded-lg text-xs font-bold gap-1.5 h-8 px-3.5 shadow-sm transition-all disabled:opacity-40 disabled:cursor-not-allowed"
           >
             {isDeleting ? (
               <>
@@ -220,7 +220,7 @@ export function DeleteAccountModal({
               </>
             ) : (
               <>
-                <Trash2 className="w-3.5 h-3.5" />
+                <AppIcon name="trash" icon={Trash2} size={13} />
                 Delete Account
               </>
             )}

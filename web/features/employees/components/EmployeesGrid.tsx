@@ -20,7 +20,7 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator
 } from "@/shared/ui/dropdown-menu";
-import { CRMCard, CRMStatusBadge } from "@/shared/components/crm";
+import { CRMCard, CRMStatusBadge, CRMRoleBadge } from "@/shared/components/crm";
 
 interface EmployeesGridProps {
   employees: ReturnType<typeof JSON.parse>[];
@@ -56,11 +56,13 @@ export const EmployeesGrid: React.FC<EmployeesGridProps> = ({
                     {emp.name ? emp.name.charAt(0).toUpperCase() : "E"}
                   </AvatarFallback>
                 </Avatar>
-                <div>
+                <div className="space-y-1">
                   <h3 className="font-bold text-foreground group-hover:text-primary transition-colors text-base tracking-tight cursor-pointer" onClick={() => onViewDetails(emp)}>
                     {emp.name}
                   </h3>
-                  <p className="text-xs font-semibold capitalize text-muted-foreground">{getSafeStr(emp.role).toLowerCase()}</p>
+                  <div>
+                    <CRMRoleBadge role={emp.role} size="xs" />
+                  </div>
                 </div>
               </div>
 
