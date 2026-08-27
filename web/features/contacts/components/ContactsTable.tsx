@@ -99,7 +99,13 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground leading-none mb-1 group-hover:text-primary transition-colors">
+            <span
+              onClick={() => {
+                if (contact.type === "Lead") onEditLead?.(contact.raw);
+                else onEditCustomer?.(contact.raw);
+              }}
+              className="text-sm font-bold text-foreground leading-none mb-1 group-hover:text-primary transition-colors cursor-pointer"
+            >
               {contact.name}
             </span>
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
@@ -203,10 +209,7 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
       headerClassName: "text-right",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (contact: any) => (
-        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary">
-            <Mail className="w-3.5 h-3.5" />
-          </Button>
+        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
@@ -222,6 +225,13 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
               >
                 <User className="w-3.5 h-3.5 mr-2" /> Edit {contact.type}
               </DropdownMenuItem>
+              {contact.email && (
+                <DropdownMenuItem
+                  onClick={() => window.open(`mailto:${contact.email}`)}
+                >
+                  <Mail className="w-3.5 h-3.5 mr-2" /> Send Email
+                </DropdownMenuItem>
+              )}
               <DropdownMenuSeparator />
               <DropdownMenuItem
                 className="text-rose-600 focus:text-rose-600"

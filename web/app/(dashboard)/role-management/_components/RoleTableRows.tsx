@@ -90,7 +90,10 @@ export function RoleTableRows({
                   className="w-3 h-3 rounded-full flex-shrink-0 shadow-xs ring-2 ring-background"
                   style={{ backgroundColor: getRoleColor(role) }}
                 />
-                <div className="font-bold text-sm tracking-tight text-foreground">
+                <div
+                  onClick={() => onViewRole(role)}
+                  className="font-bold text-sm tracking-tight text-foreground hover:text-primary cursor-pointer transition-colors"
+                >
                   {role.name}
                 </div>
               </div>

@@ -29,6 +29,7 @@ import {
   ChevronRight,
   Info,
   MoreHorizontal,
+  Loader2,
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -1164,17 +1165,7 @@ export default function SuperAdminModulesPage() {
 
                       {/* Actions Menu */}
                       <td className="px-4 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={() => handleOpenEdit(mod)}
-                            className="h-8 px-2.5 text-xs rounded-lg hover:bg-muted font-semibold gap-1 text-muted-foreground hover:text-foreground cursor-pointer"
-                          >
-                            <Edit2 className="w-3.5 h-3.5" />
-                            <span>Edit</span>
-                          </Button>
-
+                        <div className="flex items-center justify-end">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button

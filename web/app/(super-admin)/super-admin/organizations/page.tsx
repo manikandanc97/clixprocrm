@@ -445,16 +445,7 @@ export default function SuperAdminOrganizationsPage() {
 
                       {/* Actions Menu */}
                       <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end gap-1.5">
-                          <Button
-                            onClick={() => handleOpenDetails(org.id)}
-                            variant="ghost"
-                            size="sm"
-                            className="h-8 px-3 text-xs rounded-lg hover:bg-muted font-semibold"
-                          >
-                            Details
-                          </Button>
-
+                        <div className="flex items-center justify-end">
                           <DropdownMenu>
                             <DropdownMenuTrigger asChild>
                               <Button

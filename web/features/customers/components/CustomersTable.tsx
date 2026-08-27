@@ -86,7 +86,12 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
             <AvatarFallback className="font-bold text-[10px]">{customer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground leading-none mb-1">{customer.name}</span>
+            <span
+              onClick={() => onEdit?.(customer)}
+              className="text-sm font-bold text-foreground leading-none mb-1 hover:text-primary cursor-pointer transition-colors"
+            >
+              {customer.name}
+            </span>
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{customer.company}</span>
           </div>
         </div>
@@ -147,10 +152,7 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
       align: "right" as const,
       headerClassName: "text-right",
       cell: (customer: CustomerType) => (
-        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-primary">
-            <Mail className="size-3.5" />
-          </Button>
+        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
@@ -161,6 +163,11 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
               <DropdownMenuItem onClick={() => onEdit?.(customer)}>
                 <User className="size-3.5 mr-2" /> Edit Customer
               </DropdownMenuItem>
+              {customer.email && (
+                <DropdownMenuItem onClick={() => window.open(`mailto:${customer.email}`)}>
+                  <Mail className="size-3.5 mr-2" /> Send Email
+                </DropdownMenuItem>
+              )}
               <DropdownMenuItem><ExternalLink className="size-3.5 mr-2" /> Open Portal</DropdownMenuItem>
               <DropdownMenuSeparator />
               <DropdownMenuItem 

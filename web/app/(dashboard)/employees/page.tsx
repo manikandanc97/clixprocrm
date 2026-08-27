@@ -193,7 +193,12 @@ export default function EmployeesPage() {
                                 <AvatarFallback>{emp.name.charAt(0)}</AvatarFallback>
                               </Avatar>
                               <div>
-                                <div className="font-bold text-sm tracking-tight">{emp.name}</div>
+                                <div
+                                  onClick={() => { setSelectedEmployee(emp); setIsViewModalOpen(true); }}
+                                  className="font-bold text-sm tracking-tight text-foreground hover:text-primary cursor-pointer transition-colors"
+                                >
+                                  {emp.name}
+                                </div>
                                 <div className="text-[10px] text-muted-foreground font-medium">{emp.email}</div>
                               </div>
                             </div>

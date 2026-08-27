@@ -87,7 +87,12 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground leading-none mb-1">{company.name}</span>
+            <span
+              onClick={() => onEdit?.(company)}
+              className="text-sm font-bold text-foreground leading-none mb-1 hover:text-primary cursor-pointer transition-colors"
+            >
+              {company.name}
+            </span>
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{company.industry || "No Industry"}</span>
           </div>
         </div>

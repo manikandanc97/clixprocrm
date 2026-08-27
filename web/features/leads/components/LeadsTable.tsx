@@ -505,21 +505,19 @@ const LeadsTable = ({
       ),
       headerClassName: "text-right",
       cell: (lead: LeadType) => (
-        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors" onClick={(e) => handleAction(e, "Email Draft", lead.name, lead)}>
-            <Mail className="w-4 h-4" />
-          </Button>
-          <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-emerald-600 hover:bg-emerald-50 transition-colors" onClick={(e) => handleAction(e, "Call Initiated", lead.name, lead)}>
-            <Phone className="w-4 h-4" />
-          </Button>
+        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-slate-400 hover:text-foreground hover:bg-muted ml-1">
+              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted">
                 <MoreVertical className="w-4 h-4" />
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 shadow-lg border-border/50">
+              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDetailsLeadId(lead.id); }} className="gap-2 text-xs cursor-pointer"><User className="w-3.5 h-3.5" /> View Details</DropdownMenuItem>
               <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingLead(lead); }} className="gap-2 text-xs cursor-pointer"><Edit2 className="w-3.5 h-3.5" /> Edit Lead</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => handleAction(e, "Email Draft", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><Mail className="w-3.5 h-3.5" /> Send Email</DropdownMenuItem>
+              <DropdownMenuItem onClick={(e) => handleAction(e, "Call Initiated", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><Phone className="w-3.5 h-3.5" /> Log Call</DropdownMenuItem>
+              <DropdownMenuSeparator />
               
               {lead.stage === LeadStatus.WON && (
                 <>

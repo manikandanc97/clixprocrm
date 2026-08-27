@@ -165,20 +165,11 @@ export const QuotationsGrid: React.FC<QuotationsGridProps> = ({ quotations }) =>
               </div>
             </div>
 
-            <div className="flex items-center justify-between gap-2 pt-2 border-t border-border/40">
-              <Button 
-                variant="outline" 
-                size="sm" 
-                className="h-9 font-bold text-xs rounded-xl flex-1"
-                onClick={() => setSelectedQuote(quote)}
-              >
-                <ExternalLink className="w-3.5 h-3.5 mr-1.5" /> Preview Quote
-              </Button>
-
+            <div className="flex items-center justify-end gap-2 pt-2 border-t border-border/40">
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <Button variant="outline" className="h-9 w-9 p-0 rounded-xl">
-                    <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
+                  <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground">
+                    <MoreHorizontal className="w-4 h-4" />
                   </Button>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end" className="w-48 rounded-xl">

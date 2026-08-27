@@ -147,10 +147,6 @@ export const TasksGrid: React.FC<TasksGridProps> = ({ tasks, onTaskClick }) => {
                 <Calendar className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>{task.dueDate}</span>
               </div>
-
-              <Button variant="ghost" size="sm" onClick={() => onTaskClick(task)} className="h-8 font-bold text-xs rounded-lg gap-1 text-primary">
-                Details <ChevronRight className="w-3.5 h-3.5" />
-              </Button>
             </div>
           </CRMCard>
         ))}

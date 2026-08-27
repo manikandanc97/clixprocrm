@@ -129,7 +129,10 @@ const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
 
       {/* Title & Company */}
       <div className="flex flex-col gap-0.5 mt-0.5">
-        <h3 className="font-bold text-foreground group-hover:text-primary transition-colors text-sm truncate">
+        <h3
+          onClick={(e) => { e.stopPropagation(); onSelect?.(); }}
+          className="font-bold text-foreground group-hover:text-primary transition-colors text-sm truncate cursor-pointer"
+        >
           {item.name}
         </h3>
         {item.company && item.company !== item.name && (

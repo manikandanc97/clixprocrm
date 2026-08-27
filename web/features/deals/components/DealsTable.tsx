@@ -90,7 +90,12 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col">
-            <span className="text-sm font-bold text-foreground leading-none mb-1">{deal.name}</span>
+            <span
+              onClick={() => onEdit?.(deal)}
+              className="text-sm font-bold text-foreground leading-none mb-1 hover:text-primary cursor-pointer transition-colors"
+            >
+              {deal.name}
+            </span>
             <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{deal.company?.name || "No Company"}</span>
           </div>
         </div>
