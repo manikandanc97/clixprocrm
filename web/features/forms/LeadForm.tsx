@@ -13,6 +13,8 @@ import { useCreateLead, useUpdateLead } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { LeadStatus } from "@/shared/types/lead";
 
+import { AppIcon } from "@/shared/components/icons/icon-registry";
+
 const leadSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
   company: z.string().min(2, "Company must be at least 2 characters"),
@@ -113,19 +115,20 @@ export const LeadForm = ({ initialData, initialStage, onSuccess, onCancel }: Lea
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput name="name" label="Full Name" placeholder="e.g. John Doe" />
-          <FormInput name="company" label="Company" placeholder="e.g. Acme Corp" />
+          <FormInput name="name" label="Full Name" placeholder="Enter full name" />
+          <FormInput name="company" label="Company" placeholder="Enter company name" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput name="email" label="Email Address" placeholder="john@example.com" />
-          <FormInput name="phone" label="Phone Number" placeholder="+91 98765 43210" />
+          <FormInput name="email" label="Email Address" placeholder="Enter email address" />
+          <FormInput name="phone" label="Phone Number" placeholder="Enter phone number" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect 
             name="status" 
             label="Status" 
+            placeholder="Select status"
             options={[
               { label: "New Lead", value: "NEW" },
               { label: "Contacted", value: "CONTACTED" },
@@ -137,6 +140,7 @@ export const LeadForm = ({ initialData, initialStage, onSuccess, onCancel }: Lea
           <FormSelect 
             name="priority" 
             label="Priority" 
+            placeholder="Select priority"
             options={[
               { label: "Low", value: "LOW" },
               { label: "Medium", value: "MEDIUM" },
@@ -146,12 +150,13 @@ export const LeadForm = ({ initialData, initialStage, onSuccess, onCancel }: Lea
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput name="value" label={`Estimated Value (${currencySymbol})`} placeholder="5000" />
-          <FormDatePicker name="followUpAt" label="Follow-up Date" />
+          <FormInput name="value" label={`Estimated Value (${currencySymbol})`} placeholder="Enter estimated value" />
+          <FormDatePicker name="followUpAt" label="Follow-up Date" placeholder="Select follow-up date" />
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

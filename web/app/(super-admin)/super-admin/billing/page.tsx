@@ -752,7 +752,7 @@ export default function SuperAdminBillingPage() {
                 <Textarea
                   rows={2}
                   required
-                  placeholder="e.g. Plan downgrade requested by organization admin..."
+                  placeholder="Enter reason for refund..."
                   value={refundReason}
                   onChange={(e) => setRefundReason(e.target.value)}
                   className="text-xs resize-none"

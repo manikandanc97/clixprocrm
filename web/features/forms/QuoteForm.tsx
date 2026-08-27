@@ -12,7 +12,7 @@ import { FormSubmitButton } from "@/shared/components/form-submit-button";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateQuotation, useUpdateQuotation, useLeads } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
-import { Plus, Trash2, ArrowRight, ArrowLeft } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { LeadType } from "@/shared/types/lead";
 import { QuotationType } from "@/shared/types/quotation";
 
@@ -178,8 +178,9 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                 label: `${l.company || l.name} (${formatCurrency(l.valueAmount || Number(String(l.value).replace(/[^0-9.-]+/g,"")))})`,
                 value: l.id
               }))} 
+              placeholder="Select related deal"
             />
-            <FormInput name="client" label="Customer / Company Name *" placeholder="Auto-filled from Deal" />
+            <FormInput name="client" label="Customer / Company Name *" placeholder="Enter customer or company name" />
           </div>
         )}
 
@@ -200,7 +201,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                       name={`items.${index}.name`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormControl><Input placeholder="Product/Service Description" {...field} className="h-9" /></FormControl>
+                          <FormControl><Input placeholder="Enter product or service description" {...field} className="h-9" /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -249,7 +250,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                     onClick={() => remove(index)}
                     disabled={fields.length === 1}
                   >
-                    <Trash2 className="w-4 h-4" />
+                    <AppIcon name="trash" size={16} />
                   </Button>
                 </div>
               ))}
@@ -262,7 +263,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
               className="w-full h-9 border-dashed mt-2"
               onClick={() => append({ name: "", quantity: 1, price: 0, discount: 0 })}
             >
-              <Plus className="w-4 h-4 mr-2" /> Add Item
+              <AppIcon name="plus" size={16} className="mr-2" /> Add Item
             </Button>
 
             <div className="p-4 bg-muted/40 rounded-xl mt-4 border border-border">
@@ -293,6 +294,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
             <FormDatePicker 
               name="validTill" 
               label="Valid Until *" 
+              placeholder="Select validity date"
               disabled={(date) => date < new Date(new Date().setHours(0,0,0,0))} 
             />
             <FormField
@@ -318,17 +320,18 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
         <div className="flex justify-between pt-6 border-t border-border">
           {step > 1 ? (
             <Button type="button" variant="outline" onClick={prevStep} className="h-10">
-              <ArrowLeft className="w-4 h-4 mr-2" /> Back
+              <AppIcon name="arrowLeft" size={16} className="mr-2" /> Back
             </Button>
           ) : (
             <Button type="button" variant="ghost" onClick={onCancel} className="h-10 text-muted-foreground">
+              <AppIcon name="close" size={15} className="mr-1.5" />
               Cancel
             </Button>
           )}
 
           {step < 3 ? (
             <Button type="button" onClick={nextStep} className="h-10 px-8">
-              Continue <ArrowRight className="w-4 h-4 ml-2" />
+              Continue <AppIcon name="arrowRight" size={16} className="ml-2" />
             </Button>
           ) : (
             <FormSubmitButton

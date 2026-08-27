@@ -5,7 +5,7 @@ import { Dialog as DialogPrimitive } from "radix-ui"
 
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
-import { XIcon } from "lucide-react"
+import { AppIcon } from "@/shared/components/icons/icon-registry"
 
 function Dialog({
   ...props
@@ -75,7 +75,7 @@ function DialogContent({
               className="absolute top-2 right-2"
               size="icon-sm"
             >
-              <XIcon />
+              <AppIcon name="close" size={16} />
               <span className="sr-only">Close</span>
             </Button>
           </DialogPrimitive.Close>
@@ -116,7 +116,10 @@ function DialogFooter({
       {children}
       {showCloseButton && (
         <DialogPrimitive.Close asChild>
-          <Button variant="outline">Close</Button>
+          <Button variant="outline">
+            <AppIcon name="close" size={15} className="mr-1.5" />
+            Close
+          </Button>
         </DialogPrimitive.Close>
       )}
     </div>

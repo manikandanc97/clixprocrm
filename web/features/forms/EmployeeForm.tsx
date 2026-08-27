@@ -9,6 +9,7 @@ import { Input } from "@/shared/ui/input";
 import { FormInput, FormSelect } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createEmployee, updateEmployee } from "@/shared/lib/api/crm";
@@ -198,19 +199,21 @@ export const EmployeeForm = ({ initialData, onSuccess, onCancel }: EmployeeFormP
           </span>
         </div>
 
-        <FormInput name="name" label="Name" placeholder="Name" />
+        <FormInput name="name" label="Name" placeholder="Enter full name" />
         
-        <FormInput name="email" label="Email" placeholder="Email" />
+        <FormInput name="email" label="Email" placeholder="Enter email address" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect 
             name="role" 
             label="Role" 
+            placeholder="Select role"
             options={roleOptions} 
           />
           <FormSelect 
             name="status" 
             label="Status" 
+            placeholder="Select status"
             options={[
               { label: "Active", value: "ACTIVE" },
               { label: "Inactive", value: "INACTIVE" },
@@ -227,7 +230,7 @@ export const EmployeeForm = ({ initialData, onSuccess, onCancel }: EmployeeFormP
               <FormLabel>Temporary Password</FormLabel>
               <div className="flex items-center gap-2">
                 <FormControl>
-                  <Input type="text" placeholder="••••••••" className="flex-1" {...field} />
+                  <Input type="text" placeholder="Enter or generate temporary password" className="flex-1" {...field} />
                 </FormControl>
                 <Button 
                   type="button" 
@@ -235,7 +238,7 @@ export const EmployeeForm = ({ initialData, onSuccess, onCancel }: EmployeeFormP
                   onClick={generatePassword} 
                   className="shrink-0 bg-primary/5 hover:bg-primary/10 border-primary/20 text-primary"
                 >
-                  <Key className="w-4 h-4 mr-2" />
+                  <AppIcon name="key" size={16} className="mr-2" />
                   Generate Password
                 </Button>
               </div>
@@ -246,6 +249,7 @@ export const EmployeeForm = ({ initialData, onSuccess, onCancel }: EmployeeFormP
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

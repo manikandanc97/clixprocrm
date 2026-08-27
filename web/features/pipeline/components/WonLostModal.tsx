@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { PipelineLeadType, DealStage } from "@/shared/types/pipeline";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -160,9 +161,12 @@ export function WonLostModal({ isOpen, onClose, type, deal, onSubmit, isLoading 
           </div>
 
           <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={showLoading} className="w-full sm:w-auto">Cancel</Button>
+            <Button type="button" variant="outline" onClick={onClose} disabled={showLoading} className="w-full sm:w-auto">
+              <AppIcon name="close" size={15} className="mr-1.5" />
+              Cancel
+            </Button>
             <Button type="submit" disabled={showLoading} variant={type === DealStage.WON ? "default" : "destructive"} className="w-full sm:w-auto gap-2">
-              {showLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : type === DealStage.WON ? <Trophy className="w-4 h-4" /> : <XCircle className="w-4 h-4" />}
+              {showLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : type === DealStage.WON ? <AppIcon name="star" size={16} /> : <AppIcon name="close" size={16} />}
               {showLoading ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>

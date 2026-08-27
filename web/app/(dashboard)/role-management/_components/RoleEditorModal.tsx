@@ -99,7 +99,7 @@ export function RoleEditorModal({
                   onChange={(e) =>
                     setFormData({ ...formData, name: e.target.value })
                   }
-                  placeholder="e.g. Senior Account Executive"
+                  placeholder="Enter role title"
                   disabled={editingRole?.isSystem}
                   className="h-10"
                 />

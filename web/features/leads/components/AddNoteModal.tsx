@@ -9,7 +9,7 @@ import { useCRMStore } from "@/shared/store/useCRMStore";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { NoteType } from "@/shared/types/lead";
 import { toast } from "sonner";
-import { Paperclip, User } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface AddNoteModalProps {
   isOpen: boolean;
@@ -82,7 +82,7 @@ export function AddNoteModal({ isOpen, onOpenChange, leadId }: AddNoteModalProps
             <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Title (Optional)</Label>
             <Input 
               name="title"
-              placeholder="e.g. Follow-up Call Notes"
+              placeholder="Enter note title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
               className="h-10 text-sm"
@@ -101,7 +101,7 @@ export function AddNoteModal({ isOpen, onOpenChange, leadId }: AddNoteModalProps
 
           <div className="grid grid-cols-2 gap-4">
             <div className="space-y-1.5">
-              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5"><User className="w-3 h-3" /> Mention User (Optional)</Label>
+              <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5"><AppIcon name="user" size={13} /> Mention User (Optional)</Label>
               <Input 
                 name="mention"
                 placeholder="@username"
@@ -120,16 +120,18 @@ export function AddNoteModal({ isOpen, onOpenChange, leadId }: AddNoteModalProps
           
           <div className="pt-2">
             <Button variant="outline" size="sm" className="w-full h-9 border-dashed text-xs text-muted-foreground gap-2">
-              <Paperclip className="w-3.5 h-3.5" /> Attach File (Optional)
+              <AppIcon name="file" size={14} /> Attach File (Optional)
             </Button>
           </div>
         </div>
 
         <DialogFooter className="px-6 py-4 border-t border-border bg-muted/10 flex items-center justify-end gap-2 sm:space-x-0">
           <Button variant="ghost" size="sm" onClick={handleClose} className="h-9 px-4 text-xs font-semibold">
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <Button size="sm" onClick={handleSave} className="h-9 px-6 text-xs font-bold rounded-lg shadow-sm">
+            <AppIcon name="check" size={15} className="mr-1.5" />
             Save Note
           </Button>
         </DialogFooter>

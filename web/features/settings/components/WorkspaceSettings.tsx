@@ -513,7 +513,7 @@ const WorkspaceSettings = () => {
               <Building2 className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 value={formData.name}
-                placeholder="e.g. Silent Build Inc."
+                placeholder="Enter company or workspace name"
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, name: e.target.value }))
                 }
@@ -530,7 +530,7 @@ const WorkspaceSettings = () => {
               <Hash className="absolute left-3 top-1/2 -translate-y-1/2 w-4 h-4 text-muted-foreground transition-colors group-focus-within:text-primary" />
               <Input
                 value={formData.taxId}
-                placeholder="e.g. GSTIN / EIN / VAT"
+                placeholder="Enter GSTIN / EIN / VAT number"
                 onChange={(e) =>
                   setFormData((prev) => ({ ...prev, taxId: e.target.value }))
                 }

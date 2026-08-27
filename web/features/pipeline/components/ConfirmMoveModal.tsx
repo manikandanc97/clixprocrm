@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { PipelineLeadType } from "@/shared/types/pipeline";
 import { Loader2 } from "lucide-react";
 
@@ -63,10 +64,11 @@ export function ConfirmMoveModal({ isOpen, onClose, deal, targetStage, onSubmit,
 
         <DialogFooter className="mt-4">
           <Button variant="outline" onClick={onClose} disabled={showLoading}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <Button variant="default" onClick={handleLocalSubmit} disabled={showLoading} className="gap-2">
-            {showLoading && <Loader2 className="w-4 h-4 animate-spin" />}
+            {showLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <AppIcon name="check" size={15} />}
             {showLoading ? "Confirming..." : "Confirm"}
           </Button>
         </DialogFooter>

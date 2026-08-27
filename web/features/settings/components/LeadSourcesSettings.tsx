@@ -121,13 +121,13 @@ export default function LeadSourcesSettings() {
         {/* Add Source Form */}
         <form onSubmit={handleAddSource} className="mt-5 p-3.5 rounded-xl border border-dashed flex flex-col sm:flex-row items-center gap-3">
           <Input
-            placeholder="New source channel (e.g. YouTube Podcast)..."
+            placeholder="Enter source channel name..."
             value={newSourceName}
             onChange={(e) => setNewSourceName(e.target.value)}
             className="text-xs h-9 flex-1"
           />
           <Input
-            placeholder="Category (e.g. Social, Partner)..."
+            placeholder="Enter category..."
             value={newSourceCat}
             onChange={(e) => setNewSourceCat(e.target.value)}
             className="text-xs h-9 w-44"

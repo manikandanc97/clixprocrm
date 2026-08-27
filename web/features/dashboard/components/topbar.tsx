@@ -7,6 +7,7 @@ import { useAuth } from "@/features/auth/components/auth-provider";
 import ProfileMenu from "./ProfileMenu";
 import NotificationPanel from "./NotificationPanel";
 import CreateNewMenu from "./CreateNewMenu";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/shared/ui/sheet";
 import { SidebarContent } from "./sidebar";
 import { Button } from "@/shared/ui/button";
@@ -43,8 +44,8 @@ export default function Topbar() {
         <div className="flex flex-1 items-center gap-2.5 max-w-full md:max-w-[460px]">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>
             <SheetTrigger asChild>
-              <Button variant="ghost" size="icon" className="md:hidden shrink-0 w-9 h-9 rounded-xl hover:bg-sidebar-accent/60 text-sidebar-foreground/70">
-                <Menu className="w-5 h-5" />
+              <Button variant="ghost" size="icon" className="md:hidden shrink-0 w-9 h-9 rounded-lg hover:bg-sidebar-accent/60 text-sidebar-foreground/70 cursor-pointer">
+                <AppIcon name="menu" size={18} />
                 <span className="sr-only">Toggle menu</span>
               </Button>
             </SheetTrigger>

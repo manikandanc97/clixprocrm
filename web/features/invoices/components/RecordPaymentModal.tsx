@@ -198,7 +198,7 @@ export function RecordPaymentModal({
             <div>
               <Label className="text-xs font-semibold text-foreground mb-1.5">Reference # (UTR / Cheque #)</Label>
               <Input
-                placeholder="e.g. UTR123456789"
+                placeholder="Enter UTR or transaction reference"
                 value={referenceNumber}
                 onChange={(e) => setReferenceNumber(e.target.value)}
                 className="h-9 text-xs font-mono"

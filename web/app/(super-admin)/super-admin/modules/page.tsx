@@ -1288,7 +1288,7 @@ export default function SuperAdminModulesPage() {
                 </Label>
                 <Input
                   id="module-label"
-                  placeholder="e.g. Products & Catalog"
+                  placeholder="Enter display label"
                   value={formLabel}
                   onChange={(e) => handleLabelChange(e.target.value)}
                   required
@@ -1302,7 +1302,7 @@ export default function SuperAdminModulesPage() {
                 </Label>
                 <Input
                   id="module-key"
-                  placeholder="e.g. products_catalog"
+                  placeholder="Enter unique key identifier"
                   value={formKey}
                   onChange={(e) => setFormKey(e.target.value)}
                   disabled={editingModule?.isSystem}
@@ -1320,7 +1320,7 @@ export default function SuperAdminModulesPage() {
                 </Label>
                 <Input
                   id="module-route"
-                  placeholder="e.g. /products"
+                  placeholder="Enter route path (/path)"
                   value={formRoute}
                   onChange={(e) => setFormRoute(e.target.value)}
                   required
@@ -1406,7 +1406,7 @@ export default function SuperAdminModulesPage() {
                 </Label>
                 <Input
                   id="module-permission"
-                  placeholder="e.g. Products or products.read"
+                  placeholder="Enter RBAC permission key"
                   value={formPermission}
                   onChange={(e) => setFormPermission(e.target.value)}
                   className="h-9 rounded-xl text-xs font-mono"
@@ -1419,7 +1419,7 @@ export default function SuperAdminModulesPage() {
                 </Label>
                 <Input
                   id="module-badge"
-                  placeholder="e.g. New, Beta, Pro"
+                  placeholder="Enter badge label (New, Beta, Pro, etc.)"
                   value={formBadge}
                   onChange={(e) => setFormBadge(e.target.value)}
                   className="h-9 rounded-xl text-xs"

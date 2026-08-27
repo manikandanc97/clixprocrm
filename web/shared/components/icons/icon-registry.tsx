@@ -177,10 +177,95 @@ export interface AppIconProps {
   className?: string;
   active?: boolean;
   isHovered?: boolean;
+  disableHover?: boolean;
   triggerAnimation?: number | string;
   duration?: number;
   onClick?: (e: React.MouseEvent) => void;
 }
+
+const CANONICAL_ICONS: Record<string, IconName> = {
+  dashboard: "dashboard",
+  contacts: "contacts",
+  leads: "leads",
+  user: "user",
+  userplus: "userPlus",
+  platformusers: "platformUsers",
+  companies: "companies",
+  deals: "deals",
+  tasks: "tasks",
+  calendar: "calendar",
+  attendance: "attendance",
+  quotations: "quotations",
+  invoices: "invoices",
+  billing: "billing",
+  ai: "ai",
+  reports: "reports",
+  analytics: "analytics",
+  performance: "performance",
+  teamperformance: "teamPerformance",
+  employees: "employees",
+  roles: "roles",
+  rolemanagement: "roleManagement",
+  security: "security",
+  settings: "settings",
+  support: "support",
+  help: "help",
+  supporttickets: "supportTickets",
+  modules: "modules",
+  telemetry: "telemetry",
+  auditlogs: "auditLogs",
+  plans: "plans",
+  packages: "packages",
+  notifications: "notifications",
+  mail: "mail",
+  search: "search",
+  filter: "filter",
+  sliders: "sliders",
+  plus: "plus",
+  add: "add",
+  trash: "trash",
+  delete: "delete",
+  refresh: "refresh",
+  sync: "sync",
+  download: "download",
+  export: "export",
+  upload: "upload",
+  import: "import",
+  arrowright: "arrowRight",
+  next: "next",
+  arrowleft: "arrowLeft",
+  back: "back",
+  chevronright: "chevronRight",
+  chevronleft: "chevronLeft",
+  chevrondown: "chevronDown",
+  chevronup: "chevronUp",
+  chevronsleft: "chevronsLeft",
+  chevronsright: "chevronsRight",
+  edit: "edit",
+  pencil: "pencil",
+  copy: "copy",
+  send: "send",
+  eye: "eye",
+  view: "view",
+  eyeoff: "eyeOff",
+  check: "check",
+  save: "save",
+  externallink: "externalLink",
+  phone: "phone",
+  globe: "globe",
+  lock: "lock",
+  key: "key",
+  folder: "folder",
+  file: "file",
+  tag: "tag",
+  bookmark: "bookmark",
+  star: "star",
+  info: "info",
+  alert: "alert",
+  close: "close",
+  menu: "menu",
+  message: "message",
+};
 
 export function resolveIconName(name?: string, href?: string, IconComponent?: any): IconName {
   const iconDisp = (
@@ -196,13 +281,20 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   const lastPathPart = pathParts[pathParts.length - 1] || "";
   const text = `${nameText} ${hrefText}`.trim();
 
-  // 1. Direct IconComponent name matches
+  // 1. Direct canonical name lookup
+  const cleanName = nameText.replace(/[-_\s]/g, "");
+  if (cleanName && CANONICAL_ICONS[cleanName]) {
+    return CANONICAL_ICONS[cleanName];
+  }
+
+  // 2. Direct IconComponent name matches
   if (iconDisp.includes("trash")) return "trash";
   if (iconDisp.includes("pencil") || iconDisp.includes("edit") || iconDisp.includes("squarepen")) return "edit";
   if (iconDisp.includes("userplus")) return "userPlus";
   if (iconDisp.includes("usercog") || iconDisp.includes("usersround")) return "platformUsers";
   if (iconDisp.includes("usercheck") || iconDisp.includes("usersquare")) return "employees";
-  if (iconDisp.includes("users") || iconDisp.includes("contact") || iconDisp.includes("user")) return "contacts";
+  if (iconDisp.includes("users") || iconDisp.includes("contact")) return "contacts";
+  if (iconDisp.includes("user")) return "user";
   if (iconDisp.includes("activity")) return "telemetry";
   if (iconDisp.includes("scroll") || iconDisp.includes("fileclock") || iconDisp.includes("history")) return "auditLogs";
   if (iconDisp.includes("layers") || iconDisp.includes("boxes")) return "modules";
@@ -247,12 +339,13 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (iconDisp.includes("close") || iconDisp.includes("x")) return "close";
   if (iconDisp.includes("menu")) return "menu";
 
-  // 2. High-specificity route, action, and keyword resolution
+  // 3. High-specificity route, action, and keyword resolution
   if (text.includes("trash") || text.includes("delete") || text.includes("remove") || text.includes("destroy")) return "trash";
   if (text.includes("edit") || text.includes("pencil") || text.includes("modify") || text.includes("rename")) return "edit";
   if (text.includes("bulk upload") || text.includes("import") || text.includes("upload") || text.includes("import data") || text.includes("import leads") || text.includes("csv")) return "upload";
   if (text.includes("download") || text.includes("export") || text.includes("export data") || text.includes("save report")) return "download";
   if (text.includes("refresh") || text.includes("sync") || text.includes("reload") || text.includes("re-fetch")) return "refresh";
+  if (text.includes("tag") || text.includes("status") || text.includes("stage")) return "tag";
   if (text.includes("lead") || text.includes("add lead") || text.includes("create lead") || text.includes("create first lead") || text.includes("new lead") || text.includes("userplus") || text.includes("new user") || text.includes("invite")) return "userPlus";
   if (text.includes("deal") || text.includes("pipeline") || text.includes("handshake") || lastPathPart === "deals") return "deals";
   if (text.includes("task") || text.includes("todo") || text.includes("checklist") || lastPathPart === "tasks") return "tasks";
@@ -277,6 +370,7 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   // Platform Users & Employee Roles
   if (text.includes("platform user") || (text.includes("user") && !text.includes("contact") && !text.includes("lead") && lastPathPart === "users")) return "platformUsers";
   if (text.includes("employee") || text.includes("staff") || text.includes("member") || lastPathPart === "employees") return "employees";
+  if (text.includes("user") || text.includes("fullname") || text.includes("full name")) return "user";
 
   // Security & Permissions
   if (text.includes("security") || text.includes("role") || text.includes("permission") || lastPathPart === "security" || lastPathPart === "role-management") return "security";
@@ -300,7 +394,8 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (text.includes("calendar") || text.includes("meeting") || text.includes("schedule") || text.includes("event") || lastPathPart === "calendar") return "calendar";
 
   // Navigation Utilities
-  if (text.includes("notification") || text.includes("bell") || text.includes("alert")) return "notifications";
+  if (text.includes("notification") || text.includes("bell")) return "notifications";
+  if (text.includes("alert") || text.includes("warning") || text.includes("priority")) return "alert";
   if (text.includes("mail") || text.includes("email") || text.includes("inbox")) return "mail";
   if (text.includes("phone") || text.includes("call")) return "phone";
   if (text.includes("search") || text.includes("find") || text.includes("lookup")) return "search";
@@ -317,6 +412,15 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (text.includes("eye") || text.includes("view") || text.includes("show") || text.includes("preview")) return "eye";
   if (text.includes("check") || text.includes("save") || text.includes("done") || text.includes("confirm") || text.includes("submit") || text.includes("apply")) return "check";
   if (text.includes("externallink") || text.includes("link")) return "externalLink";
+  if (text.includes("lock") || text.includes("password")) return "lock";
+  if (text.includes("key") || text.includes("secret") || text.includes("token")) return "key";
+  if (text.includes("folder")) return "folder";
+  if (text.includes("file") || text.includes("document")) return "file";
+  if (text.includes("bookmark")) return "bookmark";
+  if (text.includes("star") || text.includes("rating")) return "star";
+  if (text.includes("info")) return "info";
+  if (text.includes("globe") || text.includes("website") || text.includes("domain")) return "globe";
+  if (text.includes("message") || text.includes("chat") || text.includes("comment")) return "message";
   if (text.includes("close") || text.includes("cancel") || text.includes("dismiss")) return "close";
   if (text.includes("menu")) return "menu";
 
@@ -343,6 +447,7 @@ export function AppIcon({
   className = "",
   active = false,
   isHovered = false,
+  disableHover = false,
   triggerAnimation,
   duration = 0.65,
   onClick,
@@ -396,12 +501,12 @@ export function AppIcon({
 
   // Handle prop-driven hover state cleanly
   useEffect(() => {
-    if (isHovered) {
+    if (!disableHover && isHovered) {
       playOneShotAnimation();
     } else {
       stopCurrentAnimation();
     }
-  }, [isHovered, playOneShotAnimation, stopCurrentAnimation]);
+  }, [isHovered, disableHover, playOneShotAnimation, stopCurrentAnimation]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -412,7 +517,7 @@ export function AppIcon({
     };
   }, []);
 
-  // Listen for parent interactive element hover (button, link, row, dropdown item)
+  // Listen for parent interactive element hover / click / focus
   useEffect(() => {
     const el = containerRef.current;
     if (!el) return;
@@ -421,15 +526,26 @@ export function AppIcon({
       'button, a, [role="button"], [role="menuitem"], [data-slot="button"], tr, .group, [data-interactive], .relative, [data-slot="form-item"], .form-item, label'
     );
 
-    const onEnter = () => playOneShotAnimation();
-    const onLeave = () => stopCurrentAnimation();
+    const onEnter = () => {
+      if (!disableHover) {
+        playOneShotAnimation();
+      }
+    };
+    const onLeave = () => {
+      if (!disableHover) {
+        stopCurrentAnimation();
+      }
+    };
+    const onFocusOrClick = () => playOneShotAnimation();
 
     if (parentInteractive) {
-      parentInteractive.addEventListener("mouseenter", onEnter);
-      parentInteractive.addEventListener("mouseleave", onLeave);
-      parentInteractive.addEventListener("focusin", onEnter);
+      if (!disableHover) {
+        parentInteractive.addEventListener("mouseenter", onEnter);
+        parentInteractive.addEventListener("mouseleave", onLeave);
+      }
+      parentInteractive.addEventListener("focusin", onFocusOrClick);
       parentInteractive.addEventListener("focusout", onLeave);
-      parentInteractive.addEventListener("click", onEnter);
+      parentInteractive.addEventListener("click", onFocusOrClick);
     }
 
     const handleCustomTrigger = () => playOneShotAnimation();
@@ -440,16 +556,18 @@ export function AppIcon({
 
     return () => {
       if (parentInteractive) {
-        parentInteractive.removeEventListener("mouseenter", onEnter);
-        parentInteractive.removeEventListener("mouseleave", onLeave);
-        parentInteractive.removeEventListener("focusin", onEnter);
+        if (!disableHover) {
+          parentInteractive.removeEventListener("mouseenter", onEnter);
+          parentInteractive.removeEventListener("mouseleave", onLeave);
+        }
+        parentInteractive.removeEventListener("focusin", onFocusOrClick);
         parentInteractive.removeEventListener("focusout", onLeave);
-        parentInteractive.removeEventListener("click", onEnter);
+        parentInteractive.removeEventListener("click", onFocusOrClick);
       }
       el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
       el.removeEventListener("stop-icon-animation", handleCustomStop);
     };
-  }, [playOneShotAnimation, stopCurrentAnimation]);
+  }, [playOneShotAnimation, stopCurrentAnimation, disableHover]);
 
   const props = {
     ref: iconRef,
@@ -457,10 +575,10 @@ export function AppIcon({
     duration,
     className: `shrink-0 select-none ${className}`,
     onMouseEnter: () => {
-      playOneShotAnimation();
+      if (!disableHover) playOneShotAnimation();
     },
     onMouseLeave: () => {
-      stopCurrentAnimation();
+      if (!disableHover) stopCurrentAnimation();
     },
   };
 
@@ -524,8 +642,6 @@ export function AppIcon({
       case "search":
         return <Search {...props} />;
       case "filter":
-        return <Filter {...props} />;
-      case "sliders":
         return <SlidersHorizontal {...props} />;
       case "plus":
       case "add":
@@ -671,8 +787,12 @@ export function AppIcon({
       ref={containerRef}
       data-animate-icon="true"
       onClick={onClick}
-      onMouseEnter={() => playOneShotAnimation()}
-      onMouseLeave={() => stopCurrentAnimation()}
+      onMouseEnter={() => {
+        if (!disableHover) playOneShotAnimation();
+      }}
+      onMouseLeave={() => {
+        if (!disableHover) stopCurrentAnimation();
+      }}
       className="inline-flex shrink-0 items-center justify-center"
     >
       {renderIcon()}

@@ -201,7 +201,7 @@ export default function OnboardingPage() {
           <Input
             id="companyName"
             type="text"
-            placeholder="e.g. Acme Corp or Growth Labs"
+            placeholder="Enter company or workspace name"
             className={`rounded-xl h-11 transition-all ${
               error ? "border-destructive focus-visible:ring-destructive" : ""
             }`}

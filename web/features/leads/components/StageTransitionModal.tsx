@@ -5,6 +5,7 @@ import { LeadStatus, LeadType } from "@/shared/types/lead";
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { LEAD_STATUS_LABELS } from "@/lib/crm-formatters";
 import { cn } from "@/shared/lib/utils";
 
@@ -70,6 +71,7 @@ export function StageTransitionModal({ isOpen, onClose, lead, onSelectTargetStag
 
         <DialogFooter>
           <Button variant="outline" onClick={onClose}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <Button 
@@ -77,6 +79,7 @@ export function StageTransitionModal({ isOpen, onClose, lead, onSelectTargetStag
             onClick={handleConfirm} 
             disabled={!selectedStage || selectedStage === lead.stage}
           >
+            <AppIcon name="arrowRight" size={15} className="mr-1.5" />
             Continue
           </Button>
         </DialogFooter>

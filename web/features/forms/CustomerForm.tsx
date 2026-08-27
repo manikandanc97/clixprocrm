@@ -8,6 +8,7 @@ import { Form } from "@/shared/ui/form";
 import { FormInput, FormSelect } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateCustomer, useUpdateCustomer } from "@/shared/hooks/use-crm";
 import { CustomerType } from "@/shared/types/customer";
@@ -83,27 +84,29 @@ export const CustomerForm = ({ initialData, onSuccess, onCancel }: CustomerFormP
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput name="name" label="Customer Name" placeholder="e.g. Alice Johnson" />
-          <FormInput name="company" label="Company Name" placeholder="e.g. Global Tech" />
+          <FormInput name="name" label="Customer Name" placeholder="Enter customer name" />
+          <FormInput name="company" label="Company Name" placeholder="Enter company name" />
         </div>
         
-        <FormInput name="email" label="Email Address" placeholder="alice@example.com" />
+        <FormInput name="email" label="Email Address" placeholder="Enter email address" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect 
             name="status" 
             label="Client Status" 
+            placeholder="Select client status"
             options={[
               { label: "Active", value: "ACTIVE" },
               { label: "Premium", value: "PREMIUM" },
               { label: "Inactive", value: "INACTIVE" },
             ]} 
           />
-          <FormInput name="revenue" label={`Annual Revenue (${currencySymbol})`} placeholder="50000" />
+          <FormInput name="revenue" label={`Annual Revenue (${currencySymbol})`} placeholder="Enter annual revenue" />
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

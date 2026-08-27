@@ -7,6 +7,7 @@ import { Form } from "@/shared/ui/form";
 import { FormInput, FormDatePicker, FormTextarea } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateMeeting } from "@/shared/hooks/use-crm";
 import { Tabs, TabsList, TabsTrigger } from "@/shared/ui/tabs";
@@ -128,13 +129,14 @@ export const MeetingForm = ({
           </TabsList>
           
           <div className="mt-6 space-y-6">
-            <FormInput name="title" label="Meeting Title" placeholder="e.g. Discovery Call" />
+            <FormInput name="title" label="Meeting Title" placeholder="Enter meeting title" />
             
             <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
               {activeTab === "schedule" ? (
                 <FormDatePicker 
                   name="date" 
                   label="Date" 
+                  placeholder="Select meeting date"
                   disabled={(date) => {
                     const today = new Date();
                     today.setHours(0, 0, 0, 0);
@@ -145,6 +147,7 @@ export const MeetingForm = ({
                 <FormDatePicker 
                   name="date" 
                   label="Date" 
+                  placeholder="Select meeting date"
                   disabled={(date) => {
                     const tomorrow = new Date();
                     tomorrow.setHours(24, 0, 0, 0);
@@ -153,13 +156,13 @@ export const MeetingForm = ({
                 />
               )}
               
-              <FormInput name="time" label="Time (e.g., 10:00 AM)" placeholder="10:00 AM" />
+              <FormInput name="time" label="Time" placeholder="Select or enter time" />
             </div>
 
             {activeTab === "log" && (
               <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                <FormInput name="duration" label="Duration (minutes)" placeholder="30" />
-                <FormInput name="outcome" label="Outcome" placeholder="e.g. Discussed pricing" />
+                <FormInput name="duration" label="Duration (minutes)" placeholder="Enter duration in minutes" />
+                <FormInput name="outcome" label="Outcome" placeholder="Enter meeting outcome" />
               </div>
             )}
             
@@ -173,6 +176,7 @@ export const MeetingForm = ({
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

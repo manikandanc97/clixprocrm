@@ -11,6 +11,7 @@ import GlobalSearch from "@/features/dashboard/components/GlobalSearch";
 import CurrencySwitcher from "@/features/dashboard/components/CurrencySwitcher";
 import NotificationPanel from "@/features/dashboard/components/NotificationPanel";
 import ThemeToggle from "@/features/dashboard/components/ThemeToggle";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,
@@ -50,49 +51,58 @@ export function SuperAdminHeader() {
             <DropdownMenuTrigger asChild>
               <Button
                 size="sm"
-                className="bg-primary hover:bg-primary/90 text-primary-foreground font-semibold rounded-xl px-3.5 sm:px-4 h-[38px] text-xs md:text-sm shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 gap-1.5 transition-all cursor-pointer"
+                className="gap-1.5 font-semibold text-xs sm:text-sm px-3 sm:px-3.5 h-9 cursor-pointer"
               >
-                <Plus className="w-4 h-4 shrink-0" strokeWidth={2.2} />
+                <AppIcon name="plus" size={15} />
                 <span className="hidden sm:inline font-semibold">Create New</span>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56 rounded-xl p-1.5 shadow-xl border-border bg-popover/95 backdrop-blur-xl">
-              <DropdownMenuLabel className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1.5">
+              <DropdownMenuLabel className="text-[10px] font-black uppercase tracking-[0.2em] text-muted-foreground px-2.5 py-1.5">
                 Platform Quick Actions
               </DropdownMenuLabel>
-              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2">
-                <Link href="/super-admin/organizations?create=true" className="flex items-center gap-2.5">
-                  <Building2 className="w-4 h-4 text-emerald-600" />
+              <DropdownMenuSeparator className="my-1" />
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2 px-2.5 hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary group">
+                <Link href="/super-admin/organizations?create=true" className="flex items-center gap-2.5 w-full">
+                  <div className="w-7 h-7 rounded-lg bg-muted/80 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
+                    <AppIcon name="companies" size={15} className="text-emerald-600" />
+                  </div>
                   <div>
-                    <p className="font-bold text-foreground">New Organization</p>
+                    <p className="font-bold text-foreground group-hover:text-primary group-focus:text-primary transition-colors text-xs">New Organization</p>
                     <p className="text-[10px] text-muted-foreground">Provision tenant workspace</p>
                   </div>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2">
-                <Link href="/super-admin/users" className="flex items-center gap-2.5">
-                  <Crown className="w-4 h-4 text-purple-600" />
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2 px-2.5 hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary group">
+                <Link href="/super-admin/users" className="flex items-center gap-2.5 w-full">
+                  <div className="w-7 h-7 rounded-lg bg-muted/80 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
+                    <AppIcon name="platformUsers" size={15} className="text-purple-600" />
+                  </div>
                   <div>
-                    <p className="font-bold text-foreground">Platform User</p>
+                    <p className="font-bold text-foreground group-hover:text-primary group-focus:text-primary transition-colors text-xs">Platform User</p>
                     <p className="text-[10px] text-muted-foreground">Manage admin privileges</p>
                   </div>
                 </Link>
               </DropdownMenuItem>
-              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2">
-                <Link href="/super-admin/modules?add=true" className="flex items-center gap-2.5">
-                  <Plus className="w-4 h-4 text-blue-600" />
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2 px-2.5 hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary group">
+                <Link href="/super-admin/modules?add=true" className="flex items-center gap-2.5 w-full">
+                  <div className="w-7 h-7 rounded-lg bg-muted/80 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
+                    <AppIcon name="modules" size={15} className="text-blue-600" />
+                  </div>
                   <div>
-                    <p className="font-bold text-foreground">Add Menu / Module</p>
+                    <p className="font-bold text-foreground group-hover:text-primary group-focus:text-primary transition-colors text-xs">Add Menu / Module</p>
                     <p className="text-[10px] text-muted-foreground">Configure navigation route</p>
                   </div>
                 </Link>
               </DropdownMenuItem>
               <DropdownMenuSeparator className="my-1" />
-              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2">
-                <Link href="/super-admin/plans" className="flex items-center gap-2.5">
-                  <ExternalLink className="w-4 h-4 text-amber-600" />
+              <DropdownMenuItem asChild className="cursor-pointer rounded-lg text-xs py-2 px-2.5 hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary group">
+                <Link href="/super-admin/plans" className="flex items-center gap-2.5 w-full">
+                  <div className="w-7 h-7 rounded-lg bg-muted/80 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
+                    <AppIcon name="plans" size={15} className="text-amber-600" />
+                  </div>
                   <div>
-                    <p className="font-bold text-foreground">Pricing & Tiers</p>
+                    <p className="font-bold text-foreground group-hover:text-primary group-focus:text-primary transition-colors text-xs">Pricing & Tiers</p>
                     <p className="text-[10px] text-muted-foreground">Configure subscription plans</p>
                   </div>
                 </Link>

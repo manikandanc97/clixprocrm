@@ -15,7 +15,7 @@ export default function ThemeToggle() {
   if (!mounted) {
     return (
       <button
-        className="flex items-center justify-center w-9 h-9 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
+        className="flex items-center justify-center w-9 h-9 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors"
         aria-label="Toggle theme"
       >
         <Sun className="h-4 w-4 opacity-50" />
@@ -28,14 +28,14 @@ export default function ThemeToggle() {
   return (
     <button
       onClick={() => setTheme(isDark ? "light" : "dark")}
-      className="flex items-center justify-center w-9 h-9 rounded-xl text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-colors cursor-pointer"
+      className="flex items-center justify-center w-9 h-9 rounded-lg text-sidebar-foreground/70 hover:text-sidebar-foreground hover:bg-sidebar-accent/60 transition-all cursor-pointer group outline-none"
       title={`Switch to ${isDark ? "light" : "dark"} mode`}
       aria-label="Toggle theme"
     >
       {isDark ? (
-        <Sun className="h-4 w-4 text-amber-400 transition-transform duration-200 hover:rotate-45" />
+        <Sun className="h-4 w-4 text-amber-400 transition-all duration-300 group-hover:rotate-90 group-hover:scale-110" />
       ) : (
-        <Moon className="h-4 w-4 text-slate-700 dark:text-slate-200 transition-transform duration-200 hover:-rotate-12" />
+        <Moon className="h-4 w-4 text-slate-700 dark:text-slate-200 transition-all duration-300 group-hover:-rotate-20 group-hover:scale-110" />
       )}
     </button>
   );

@@ -8,6 +8,7 @@ import { Form } from "@/shared/ui/form";
 import { FormInput, FormSelect, FormDatePicker, FormTextarea } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateTask } from "@/shared/hooks/use-crm";
 
@@ -67,27 +68,29 @@ export const TaskForm = ({ onSuccess, onCancel }: TaskFormProps) => {
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
-        <FormInput name="title" label="Task Title" placeholder="e.g. Follow up with client" />
+        <FormInput name="title" label="Task Title" placeholder="Enter task title" />
         
-        <FormTextarea name="description" label="Description" placeholder="Add some details about the task..." />
+        <FormTextarea name="description" label="Description" placeholder="Enter task description..." />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect 
             name="priority" 
             label="Priority" 
+            placeholder="Select priority"
             options={[
               { label: "High", value: "HIGH" },
               { label: "Medium", value: "MEDIUM" },
               { label: "Low", value: "LOW" },
             ]} 
           />
-          <FormDatePicker name="dueDate" label="Due Date" />
+          <FormDatePicker name="dueDate" label="Due Date" placeholder="Select due date" />
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect 
             name="status" 
             label="Initial Status" 
+            placeholder="Select initial status"
             options={[
               { label: "Pending", value: "PENDING" },
               { label: "In Progress", value: "IN_PROGRESS" },
@@ -97,6 +100,7 @@ export const TaskForm = ({ onSuccess, onCancel }: TaskFormProps) => {
           <FormSelect 
             name="assignedToId" 
             label="Assigned To" 
+            placeholder="Select assignee"
             options={[
               { label: "Unassigned", value: "unassigned" },
               { label: "Current User", value: "me" }
@@ -105,11 +109,12 @@ export const TaskForm = ({ onSuccess, onCancel }: TaskFormProps) => {
         </div>
 
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormDatePicker name="reminderAt" label="Reminder" />
+          <FormDatePicker name="reminderAt" label="Reminder" placeholder="Select reminder date" />
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Button type="button" variant="outline" onClick={onCancel} disabled={createTask.isPending}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

@@ -546,7 +546,7 @@ export default function SuperAdminOrganizationsPage() {
                 </Label>
                 <Input
                   id="orgName"
-                  placeholder="e.g. Acme Global Enterprises"
+                  placeholder="Enter organization name"
                   value={newOrgName}
                   onChange={(e) => {
                     setNewOrgName(e.target.value);
@@ -567,7 +567,7 @@ export default function SuperAdminOrganizationsPage() {
                 </Label>
                 <Input
                   id="orgSlug"
-                  placeholder="e.g. acme-global"
+                  placeholder="Enter workspace slug"
                   value={newOrgSlug}
                   onChange={(e) => setNewOrgSlug(e.target.value)}
                   className="rounded-xl h-10 font-mono text-xs"

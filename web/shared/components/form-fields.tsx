@@ -24,8 +24,34 @@ import { Button } from "@/shared/ui/button";
 import { Calendar } from "@/shared/ui/calendar";
 import { cn } from "@/shared/lib/utils";
 import { format } from "date-fns";
-import { CalendarIcon } from "lucide-react";
+import { CalendarIcon, type LucideIcon } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
+
+function resolveFormFieldIcon(name?: string, label?: string, type?: string): string | undefined {
+  const n = (name || "").toLowerCase();
+  const l = (label || "").toLowerCase();
+  const t = (type || "").toLowerCase();
+  const combined = `${n} ${l} ${t}`;
+
+  if (t === "email" || combined.includes("email") || combined.includes("mail")) return "mail";
+  if (t === "password" || combined.includes("password")) return "lock";
+  if (t === "tel" || combined.includes("phone") || combined.includes("mobile")) return "phone";
+  if (combined.includes("company") || combined.includes("organization") || combined.includes("client")) return "companies";
+  if (combined.includes("name") || combined.includes("customer") || combined.includes("user") || combined.includes("assignee") || combined.includes("owner") || combined.includes("contact")) return "user";
+  if (combined.includes("value") || combined.includes("price") || combined.includes("revenue") || combined.includes("amount") || combined.includes("budget") || combined.includes("cost") || combined.includes("rate")) return "plans";
+  if (combined.includes("probability") || combined.includes("percent")) return "filter";
+  if (t === "date" || t === "datetime-local" || combined.includes("date") || combined.includes("followup") || combined.includes("follow-up") || combined.includes("time") || combined.includes("duration")) return "calendar";
+  if (combined.includes("status") || combined.includes("stage")) return "tag";
+  if (combined.includes("priority")) return "alert";
+  if (combined.includes("role")) return "security";
+  if (combined.includes("task") || combined.includes("title") || combined.includes("subject")) return "tasks";
+  if (combined.includes("deal")) return "deals";
+  if (combined.includes("website") || combined.includes("url") || combined.includes("link")) return "externalLink";
+  if (combined.includes("industry") || combined.includes("department")) return "teamPerformance";
+  if (combined.includes("note") || combined.includes("summary") || combined.includes("outcome") || combined.includes("description")) return "quotations";
+  
+  return undefined;
+}
 
 interface BaseFieldProps {
   name: string;
@@ -34,19 +60,52 @@ interface BaseFieldProps {
   description?: string;
   className?: string;
   type?: string;
+  icon?: LucideIcon | React.ComponentType<any>;
+  iconName?: string;
+  hideIcon?: boolean;
 }
 
-export const FormInput = ({ name, label, placeholder, description, className, type }: BaseFieldProps) => {
+export const FormInput = ({
+  name,
+  label,
+  placeholder,
+  description,
+  className,
+  type,
+  icon,
+  iconName,
+  hideIcon = false,
+}: BaseFieldProps) => {
   const { control } = useFormContext();
+  const resolvedIconName = !hideIcon ? (iconName || resolveFormFieldIcon(name, label, type)) : undefined;
+
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={className}>
+        <FormItem className={cn("group", className)}>
           <FormLabel>{label}</FormLabel>
           <FormControl>
-            <Input type={type} placeholder={placeholder} {...field} />
+            <div className="relative flex items-center w-full">
+              {(icon || resolvedIconName) && (
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
+                  <AppIcon
+                    name={resolvedIconName}
+                    icon={icon}
+                    size={16}
+                    disableHover={true}
+                    className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
+                  />
+                </div>
+              )}
+              <Input
+                type={type}
+                placeholder={placeholder}
+                className={cn((icon || resolvedIconName) ? "pl-9" : "")}
+                {...field}
+              />
+            </div>
           </FormControl>
           {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
@@ -56,15 +115,37 @@ export const FormInput = ({ name, label, placeholder, description, className, ty
   );
 };
 
-export const FormTextarea = ({ name, label, placeholder, description, className }: BaseFieldProps) => {
+export const FormTextarea = ({
+  name,
+  label,
+  placeholder,
+  description,
+  className,
+  icon,
+  iconName,
+  hideIcon = false,
+}: BaseFieldProps) => {
   const { control } = useFormContext();
+  const resolvedIconName = !hideIcon ? (iconName || resolveFormFieldIcon(name, label)) : undefined;
+
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={className}>
-          <FormLabel>{label}</FormLabel>
+        <FormItem className={cn("group", className)}>
+          <div className="flex items-center justify-between">
+            <FormLabel>{label}</FormLabel>
+            {(icon || resolvedIconName) && (
+              <AppIcon
+                name={resolvedIconName}
+                icon={icon}
+                size={14}
+                disableHover={true}
+                className="text-muted-foreground/60 group-focus-within:text-primary transition-colors"
+              />
+            )}
+          </div>
           <FormControl>
             <Textarea placeholder={placeholder} className="min-h-32" {...field} />
           </FormControl>
@@ -80,20 +161,45 @@ interface FormSelectProps extends BaseFieldProps {
   options: { label: string; value: string }[];
 }
 
-export const FormSelect = ({ name, label, placeholder, description, options, className }: FormSelectProps) => {
+export const FormSelect = ({
+  name,
+  label,
+  placeholder,
+  description,
+  options,
+  className,
+  icon,
+  iconName,
+  hideIcon = false,
+}: FormSelectProps) => {
   const { control } = useFormContext();
+  const resolvedIconName = !hideIcon ? (iconName || resolveFormFieldIcon(name, label)) : undefined;
+
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={className}>
+        <FormItem className={cn("group", className)}>
           <FormLabel>{label}</FormLabel>
           <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
             <FormControl>
-              <SelectTrigger className={cn("w-full", className)}>
-                <SelectValue placeholder={placeholder} />
-              </SelectTrigger>
+              <div className="relative flex items-center w-full">
+                {(icon || resolvedIconName) && (
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
+                    <AppIcon
+                      name={resolvedIconName}
+                      icon={icon}
+                      size={16}
+                      disableHover={true}
+                      className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
+                    />
+                  </div>
+                )}
+                <SelectTrigger className={cn("w-full", (icon || resolvedIconName) ? "pl-9" : "", className)}>
+                  <SelectValue placeholder={placeholder} />
+                </SelectTrigger>
+              </div>
             </FormControl>
             <SelectContent>
               {options.map((opt) => (
@@ -115,14 +221,23 @@ interface FormDatePickerProps extends BaseFieldProps {
   disabled?: (date: Date) => boolean;
 }
 
-export const FormDatePicker = ({ name, label, placeholder, description, className, disabled }: FormDatePickerProps) => {
+export const FormDatePicker = ({
+  name,
+  label,
+  placeholder,
+  description,
+  className,
+  disabled,
+  icon,
+  iconName,
+}: FormDatePickerProps) => {
   const { control } = useFormContext();
   return (
     <FormField
       control={control}
       name={name}
       render={({ field }) => (
-        <FormItem className={cn("flex flex-col", className)}>
+        <FormItem className={cn("flex flex-col group", className)}>
           <FormLabel>{label}</FormLabel>
           <Popover>
             <PopoverTrigger asChild>
@@ -130,16 +245,18 @@ export const FormDatePicker = ({ name, label, placeholder, description, classNam
                 <Button
                   variant={"outline"}
                   className={cn(
-                    "w-full pl-3 text-left font-normal",
+                    "w-full pl-3 text-left font-normal justify-between",
                     !field.value && "text-muted-foreground"
                   )}
                 >
-                  {field.value ? (
-                    format(field.value, "PPP")
-                  ) : (
-                    <span>{placeholder || "Pick a date"}</span>
-                  )}
-                  <AppIcon name="calendar" icon={CalendarIcon} size={16} className="ml-auto h-4 w-4 opacity-50" />
+                  <span className="truncate">{field.value ? format(field.value, "PPP") : (placeholder || "Select date")}</span>
+                  <AppIcon
+                    name={iconName || "calendar"}
+                    icon={icon || CalendarIcon}
+                    size={16}
+                    disableHover={true}
+                    className="ml-auto h-4 w-4 opacity-70 group-focus-within:opacity-100 group-focus-within:text-primary transition-opacity"
+                  />
                 </Button>
               </FormControl>
             </PopoverTrigger>

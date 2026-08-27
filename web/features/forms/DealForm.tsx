@@ -8,6 +8,7 @@ import { Form } from "@/shared/ui/form";
 import { FormInput, FormSelect } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateDeal, useUpdateDeal, useCompanies, useCustomers, useLeads } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
@@ -102,17 +103,19 @@ export const DealForm = ({ initialData, initialStage, onSuccess, onCancel }: Dea
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
-        <FormInput name="name" label="Deal Name" placeholder="e.g. Website Redesign" />
+        <FormInput name="name" label="Deal Name" placeholder="Enter deal name" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect 
             name="companyId" 
             label="Company" 
+            placeholder="Select company"
             options={[{ label: "Select Company (Optional)", value: "none" }, ...companyOptions]} 
           />
           <FormSelect 
             name="customerId" 
             label="Customer" 
+            placeholder="Select customer"
             options={[{ label: "Select Customer (Optional)", value: "none" }, ...customerOptions]} 
           />
         </div>
@@ -121,15 +124,17 @@ export const DealForm = ({ initialData, initialStage, onSuccess, onCancel }: Dea
           <FormSelect 
             name="leadId" 
             label="Lead" 
+            placeholder="Select lead"
             options={[{ label: "Select Lead (Optional)", value: "none" }, ...leadOptions]} 
           />
-          <FormInput name="value" label={`Deal Value (${currencySymbol})`} placeholder="10000" />
+          <FormInput name="value" label={`Deal Value (${currencySymbol})`} placeholder="Enter deal value" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
           <FormSelect 
             name="stage" 
             label="Stage" 
+            placeholder="Select stage"
             options={[
               { label: "New", value: "NEW" },
               { label: "Qualified", value: "QUALIFIED" },
@@ -139,13 +144,14 @@ export const DealForm = ({ initialData, initialStage, onSuccess, onCancel }: Dea
               { label: "Lost", value: "LOST" },
             ]} 
           />
-          <FormInput name="probability" label="Probability (%)" placeholder="50" />
+          <FormInput name="probability" label="Probability (%)" placeholder="Enter win probability (%)" />
         </div>
 
-        <FormInput type="date" name="expectedCloseDate" label="Expected Close Date" />
+        <FormInput type="date" name="expectedCloseDate" label="Expected Close Date" placeholder="Select expected close date" />
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

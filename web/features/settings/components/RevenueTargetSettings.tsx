@@ -429,7 +429,7 @@ export default function RevenueTargetSettings() {
                     <Input 
                       value={formData.name} 
                       onChange={(e) => setFormData({ ...formData, name: e.target.value })} 
-                      placeholder="e.g. Q3 Global Sales Target" 
+                      placeholder="Enter sales target name" 
                     />
                   </div>
                   <div className="space-y-2">
@@ -465,7 +465,7 @@ export default function RevenueTargetSettings() {
                       className="pl-12"
                       value={formData.value} 
                       onChange={(e) => setFormData({ ...formData, value: e.target.value })} 
-                      placeholder="e.g. 50000" 
+                      placeholder="Enter target amount" 
                     />
                   </div>
                   <p className="text-[10px] text-muted-foreground mt-1">Currency is inherited from global settings.</p>

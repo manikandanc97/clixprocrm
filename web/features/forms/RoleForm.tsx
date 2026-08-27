@@ -8,6 +8,7 @@ import { Form } from "@/shared/ui/form";
 import { FormInput, FormTextarea } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { toast } from "sonner";
 import { Shield } from "lucide-react";
@@ -55,7 +56,7 @@ export const RoleForm = ({ onSuccess, onCancel }: RoleFormProps) => {
         <FormInput 
           name="name" 
           label="Role Name" 
-          placeholder="e.g. Compliance Auditor" 
+          placeholder="Enter role title" 
         />
         
         <FormTextarea 
@@ -65,7 +66,7 @@ export const RoleForm = ({ onSuccess, onCancel }: RoleFormProps) => {
         />
 
         <div className="bg-primary/5 p-4 rounded-xl border border-primary/10 flex items-start gap-3">
-          <Shield className="w-5 h-5 text-primary mt-0.5" />
+          <AppIcon name="security" size={20} className="text-primary mt-0.5" />
           <div>
             <h5 className="text-sm font-bold text-primary">Initial Permissions</h5>
             <p className="text-xs text-muted-foreground leading-relaxed mt-1">
@@ -76,6 +77,7 @@ export const RoleForm = ({ onSuccess, onCancel }: RoleFormProps) => {
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
           <Button type="button" variant="outline" onClick={onCancel}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

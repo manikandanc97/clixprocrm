@@ -16,6 +16,7 @@ import { Textarea } from "@/shared/ui/textarea";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useUpdateTask, useEmployees } from "@/shared/hooks/use-crm";
@@ -233,7 +234,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
           <div className="shrink-0 bg-muted/20 border-b border-border p-6 pb-4">
             <div className="flex items-center gap-3">
               <div className="size-10 rounded-xl bg-primary/10 border border-primary/20 flex items-center justify-center text-primary shrink-0">
-                <CheckSquare className="size-5" />
+                <AppIcon name="tasks" size={20} />
               </div>
               <div className="flex-1 min-w-0">
                 <DialogTitle className="text-base font-bold text-foreground tracking-tight">
@@ -251,10 +252,9 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
               {/* ── TAB BAR ── */}
               <div className="flex border-b border-border bg-background px-6 shrink-0">
                 {[
-                  { key: "general" as const, label: "General", icon: FileText },
-                  { key: "checklist" as const, label: "Checklist", icon: ListTodo },
+                  { key: "general" as const, label: "General", iconName: "file" },
+                  { key: "checklist" as const, label: "Checklist", iconName: "tasks" },
                 ].map((tab) => {
-                  const Icon = tab.icon;
                   const isActive = activeTab === tab.key;
                   return (
                     <button
@@ -268,7 +268,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                           : "border-transparent text-muted-foreground hover:text-foreground",
                       )}
                     >
-                      <Icon className="size-3.5" />
+                      <AppIcon name={tab.iconName} size={14} />
                       {tab.label}
                       {tab.key === "checklist" && checklistFields.length > 0 && (
                         <span className="ml-1 text-[9px] font-bold bg-primary/10 text-primary rounded-full size-4 inline-flex items-center justify-center">
@@ -296,7 +296,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                           </Label>
                           <FormControl>
                             <Input
-                              placeholder="e.g. Follow up with Acme Corp"
+                              placeholder="Enter task title"
                               className="h-10 text-sm font-medium"
                               autoFocus
                               {...field}
@@ -318,7 +318,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                           </Label>
                           <FormControl>
                             <Textarea
-                              placeholder="Brief notes or context..."
+                              placeholder="Enter task description or context..."
                               className="resize-none min-h-[72px] text-sm"
                               {...field}
                             />
@@ -446,6 +446,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                     disabled={isPending}
                     className="h-9 px-4 text-xs font-semibold"
                   >
+                    <AppIcon name="close" size={15} className="mr-1.5" />
                     Cancel
                   </Button>
                   <FormSubmitButton

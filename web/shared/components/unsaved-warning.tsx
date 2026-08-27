@@ -9,6 +9,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface UnsavedWarningProps {
   open: boolean;
@@ -28,8 +29,12 @@ export const UnsavedWarning = ({ open, onOpenChange, onConfirm, onCancel }: Unsa
           </AlertDialogDescription>
         </AlertDialogHeader>
         <AlertDialogFooter>
-          <AlertDialogCancel onClick={onCancel}>Stay</AlertDialogCancel>
+          <AlertDialogCancel onClick={onCancel}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
+            Stay
+          </AlertDialogCancel>
           <AlertDialogAction onClick={onConfirm} className="bg-destructive text-destructive-foreground hover:bg-destructive/90">
+            <AppIcon name="arrowRight" size={15} className="mr-1.5" />
             Leave
           </AlertDialogAction>
         </AlertDialogFooter>

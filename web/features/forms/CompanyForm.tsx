@@ -8,6 +8,7 @@ import { Form } from "@/shared/ui/form";
 import { FormInput, FormSelect } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateCompany, useUpdateCompany } from "@/shared/hooks/use-crm";
 
@@ -66,21 +67,22 @@ export const CompanyForm = ({ initialData, onSuccess, onCancel }: CompanyFormPro
   return (
     <Form {...form}>
       <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6 p-1">
-        <FormInput name="name" label="Company Name" placeholder="e.g. Acme Corp" />
+        <FormInput name="name" label="Company Name" placeholder="Enter company name" />
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput name="industry" label="Industry" placeholder="e.g. Software" />
-          <FormInput name="website" label="Website" placeholder="https://acme.com" />
+          <FormInput name="industry" label="Industry" placeholder="Enter industry" />
+          <FormInput name="website" label="Website" placeholder="https://example.com" />
         </div>
         
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          <FormInput name="email" label="Email Address" placeholder="contact@acme.com" />
-          <FormInput name="phone" label="Phone Number" placeholder="+1234567890" />
+          <FormInput name="email" label="Email Address" placeholder="Enter email address" />
+          <FormInput name="phone" label="Phone Number" placeholder="Enter phone number" />
         </div>
 
         <FormSelect 
           name="status" 
           label="Status" 
+          placeholder="Select status"
           options={[
             { label: "Active", value: "ACTIVE" },
             { label: "Inactive", value: "INACTIVE" },
@@ -89,6 +91,7 @@ export const CompanyForm = ({ initialData, onSuccess, onCancel }: CompanyFormPro
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
+            <AppIcon name="close" size={15} className="mr-1.5" />
             Cancel
           </Button>
           <FormSubmitButton

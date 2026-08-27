@@ -2,9 +2,10 @@
 
 import { useState, useEffect, useRef } from "react";
 import { useRouter } from "next/navigation";
-import { Search, Command as CommandIcon, User, Building, CheckSquare, KanbanSquare, Loader2, X } from "lucide-react";
+import { Command as CommandIcon, Search, User, Building, CheckSquare, KanbanSquare, Loader2, X } from "lucide-react";
 import { useGlobalSearch } from "@/shared/hooks/use-dashboard";
 import { GlobalSearchResult } from "@/shared/lib/api/crm";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export default function GlobalSearch() {
   const [isOpen, setIsOpen] = useState(false);
@@ -69,10 +70,14 @@ export default function GlobalSearch() {
       {!isOpen ? (
         <button 
           onClick={openSearch}
-          className="w-full flex items-center justify-between bg-sidebar-accent/50 hover:bg-sidebar-accent/80 border border-sidebar-border/60 hover:border-sidebar-border px-3.5 h-[38px] rounded-xl transition-all duration-200 group outline-none cursor-pointer"
+          className="w-full flex items-center justify-between bg-sidebar-accent/40 hover:bg-sidebar-accent/70 border border-sidebar-border/60 hover:border-sidebar-border px-3 h-9 rounded-lg transition-all duration-200 group outline-none cursor-pointer"
         >
           <div className="flex items-center gap-2.5 min-w-0">
-            <Search className="w-4 h-4 text-sidebar-foreground/50 group-hover:text-primary transition-colors shrink-0" strokeWidth={1.75} />
+            <AppIcon 
+              name="search" 
+              size={15} 
+              className="text-sidebar-foreground/50 group-hover:text-primary transition-colors shrink-0" 
+            />
             <span className="text-sidebar-foreground/60 group-hover:text-sidebar-foreground text-xs md:text-sm font-medium tracking-tight truncate">Search leads, customers, tasks...</span>
           </div>
           <kbd className="hidden sm:inline-flex items-center gap-1 px-2 py-0.5 text-[10px] font-semibold text-sidebar-foreground/50 bg-background/60 rounded-md border border-sidebar-border/60">
@@ -80,8 +85,8 @@ export default function GlobalSearch() {
           </kbd>
         </button>
       ) : (
-        <div className="w-full flex items-center bg-background border border-primary px-3 h-[38px] rounded-xl shadow-[0_0_0_3px_rgba(var(--primary),0.12)] outline-none relative z-50">
-          <Search className="w-4 h-4 text-primary shrink-0" strokeWidth={1.75} />
+        <div className="w-full flex items-center bg-background border border-primary px-3 h-9 rounded-lg shadow-[0_0_0_3px_rgba(var(--primary),0.12)] outline-none relative z-50">
+          <AppIcon name="search" size={15} className="text-primary shrink-0" />
           <input
             ref={inputRef}
             autoFocus

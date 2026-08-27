@@ -428,7 +428,7 @@ export default function SuperAdminAiPage() {
                               setEditingConfig({ ...editingConfig, aiLevel: e.target.value })
                             }
                             className="h-8 text-xs font-medium rounded-lg"
-                            placeholder="e.g. Advanced AI"
+                            placeholder="Enter AI access level"
                           />
                         </div>
 

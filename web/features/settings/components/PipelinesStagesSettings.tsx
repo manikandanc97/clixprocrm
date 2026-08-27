@@ -166,7 +166,7 @@ export default function PipelinesStagesSettings() {
         {/* Add Stage Form */}
         <form onSubmit={handleAddStage} className="mt-5 p-3.5 rounded-xl border border-dashed flex flex-col sm:flex-row items-center gap-3">
           <Input
-            placeholder="New stage name (e.g. Technical Review)..."
+            placeholder="Enter new stage name..."
             value={newStageName}
             onChange={(e) => setNewStageName(e.target.value)}
             className="text-xs h-9 flex-1"

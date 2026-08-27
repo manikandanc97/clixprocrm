@@ -666,7 +666,7 @@ export default function SuperAdminPlansPage() {
                             setEditingPlan({ ...editingPlan, name: e.target.value })
                           }
                           className="rounded-xl h-10 font-semibold"
-                          placeholder="e.g. Enterprise Plus"
+                          placeholder="Enter plan name"
                           required
                         />
                       </div>
@@ -683,7 +683,7 @@ export default function SuperAdminPlansPage() {
                               })
                             }
                             className="rounded-xl h-10 font-mono text-xs"
-                            placeholder="e.g. enterprise-plus (auto-generated if empty)"
+                            placeholder="Enter plan slug (auto-generated if empty)"
                           />
                         </div>
                       ) : (
@@ -709,7 +709,7 @@ export default function SuperAdminPlansPage() {
                           })
                         }
                         className="rounded-xl h-10"
-                        placeholder="e.g. For scaling enterprises requiring high AI tokens and API access"
+                        placeholder="Enter plan description..."
                       />
                     </div>
 
@@ -868,7 +868,7 @@ export default function SuperAdminPlansPage() {
                             })
                           }
                           className="rounded-xl h-10"
-                          placeholder="e.g. 14 days"
+                          placeholder="Enter trial duration in days"
                         />
                       </div>
 

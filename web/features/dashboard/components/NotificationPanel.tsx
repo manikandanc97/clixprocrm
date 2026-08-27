@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo } from "react";
-import { Bell, Check, Clock, UserPlus, FileCheck, AlertCircle, Settings, Calendar, IndianRupee, Briefcase } from "lucide-react";
+import { Check, Clock, Bell } from "lucide-react";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -10,7 +10,7 @@ import {
 import { formatDistanceToNow, parseISO } from "date-fns";
 import { motion, AnimatePresence } from "framer-motion";
 import { useNotifications, useMarkNotificationRead, useMarkAllNotificationsRead } from "@/shared/hooks/use-dashboard";
-import { useCurrency } from "@/shared/hooks/use-currency";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { EmptyState } from "@/shared/components/EmptyState";
 
@@ -59,7 +59,6 @@ export default function NotificationPanel() {
   const { data, isLoading: loading } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
-  const { CurrencyIcon } = useCurrency();
 
   const notifications = useMemo(() => {
     if (!data?.notifications) return [];
@@ -81,23 +80,30 @@ export default function NotificationPanel() {
   const getIcon = (type: Notification["type"]) => {
     switch (type) {
       case "lead": 
-      case "lead_assigned": return <UserPlus className="w-4 h-4 text-emerald-500" />;
-      case "quote": return <FileCheck className="w-4 h-4 text-blue-500" />;
-      case "task_due": return <AlertCircle className="w-4 h-4 text-amber-500" />;
-      case "task_completed": return <Check className="w-4 h-4 text-emerald-500" />;
-      case "customer_added": return <Briefcase className="w-4 h-4 text-blue-500" />;
-      case "invoice_paid": return <CurrencyIcon className="w-4 h-4 text-emerald-600" />;
-      case "meeting_reminder": return <Calendar className="w-4 h-4 text-violet-500" />;
-      case "employee_added": return <UserPlus className="w-4 h-4 text-amber-600" />;
-      default: return <Settings className="w-4 h-4 text-muted-foreground" />;
+      case "lead_assigned": return <AppIcon name="userPlus" size={16} className="text-emerald-500" />;
+      case "quote": return <AppIcon name="quotations" size={16} className="text-blue-500" />;
+      case "task_due": return <AppIcon name="alert" size={16} className="text-amber-500" />;
+      case "task_completed": return <AppIcon name="check" size={16} className="text-emerald-500" />;
+      case "customer_added": return <AppIcon name="contacts" size={16} className="text-blue-500" />;
+      case "invoice_paid": return <AppIcon name="invoices" size={16} className="text-emerald-600" />;
+      case "meeting_reminder": return <AppIcon name="calendar" size={16} className="text-violet-500" />;
+      case "employee_added": return <AppIcon name="employees" size={16} className="text-amber-600" />;
+      default: return <AppIcon name="settings" size={16} className="text-muted-foreground" />;
     }
   };
 
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <button className="relative flex items-center justify-center w-9 h-9 hover:bg-sidebar-accent/60 rounded-xl transition-all duration-200 text-sidebar-foreground/70 hover:text-sidebar-foreground group outline-none cursor-pointer">
-          <Bell className="w-4 h-4 transition-colors group-hover:text-foreground" strokeWidth={1.75} />
+        <button 
+          className="relative flex items-center justify-center w-9 h-9 hover:bg-sidebar-accent/60 rounded-lg transition-all duration-200 text-sidebar-foreground/70 hover:text-sidebar-foreground group outline-none cursor-pointer"
+          aria-label="Notifications"
+        >
+          <AppIcon 
+            name="notifications" 
+            size={17} 
+            className="transition-transform duration-300 group-hover:rotate-[14deg] group-hover:scale-110" 
+          />
           {unreadCount > 0 && (
             <span className="top-1.5 right-1.5 absolute flex h-2 w-2">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-destructive/60 opacity-75"></span>
