@@ -466,6 +466,7 @@ export function AppIcon({
   const reducedMotion = useReducedMotion();
   const [isFallbackAnimating, setIsFallbackAnimating] = useState(false);
   const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const isFormFieldRef = useRef(false);
 
   const stopCurrentAnimation = useCallback(() => {
     if (timerRef.current) {
@@ -507,14 +508,14 @@ export function AppIcon({
     }
   }, [triggerAnimation, playOneShotAnimation]);
 
-  // Handle prop-driven hover state cleanly
+  // Handle prop-driven hover state cleanly (only if hover not disabled and not a form field)
   useEffect(() => {
-    if (!disableHover && isHovered) {
+    if (!disableHover && !isFormFieldRef.current && isHovered) {
       playOneShotAnimation();
-    } else {
+    } else if (!isHovered && !isFallbackAnimating) {
       stopCurrentAnimation();
     }
-  }, [isHovered, disableHover, playOneShotAnimation, stopCurrentAnimation]);
+  }, [isHovered, disableHover, isFallbackAnimating, playOneShotAnimation, stopCurrentAnimation]);
 
   // Cleanup on unmount
   useEffect(() => {
@@ -530,47 +531,106 @@ export function AppIcon({
     const el = containerRef.current;
     if (!el) return;
 
-    // Detect if this icon is inside or attached to a form field / input / textarea / select
-    const formContainer = el.closest(
-      '[data-slot="form-item"], .form-item, [data-form-field], label'
-    ) || (el.closest('.relative, .group')?.querySelector('input, textarea, select') ? el.closest('.relative, .group') : null);
+    // Helper to find associated form input or field wrapper
+    const findAssociatedField = () => {
+      // 1. Search in closest relative or control wrapper
+      const relativeParent = el.closest('.relative, [data-slot="control"], .form-control');
+      if (relativeParent) {
+        const input = relativeParent.querySelector<HTMLElement>('input, textarea, select, [role="combobox"], [role="textbox"], button[aria-haspopup="dialog"]');
+        if (input) return { fieldWrapper: relativeParent as HTMLElement, inputEl: input };
+      }
 
-    const isFormField = Boolean(
-      disableHover ||
-      formContainer ||
-      el.parentElement?.querySelector('input, textarea, select')
-    );
+      // 2. Search in closest form-item, label, or field container
+      const formItem = el.closest('[data-slot="form-item"], .form-item, [data-form-field], label, .space-y-1\\.5, .space-y-2, .space-y-1, .space-y-3, .space-y-4');
+      if (formItem) {
+        const input = formItem.querySelector<HTMLElement>('input, textarea, select, [role="combobox"], [role="textbox"]');
+        if (input) return { fieldWrapper: formItem as HTMLElement, inputEl: input };
+      }
+
+      // 3. Search in parent container
+      if (el.parentElement) {
+        const input = el.parentElement.querySelector<HTMLElement>('input, textarea, select, [role="combobox"], [role="textbox"]');
+        if (input) return { fieldWrapper: el.parentElement as HTMLElement, inputEl: input };
+      }
+
+      // 4. If inside a form element and disableHover is set
+      if (disableHover && el.closest('form, fieldset')) {
+        return { fieldWrapper: el.parentElement as HTMLElement, inputEl: null };
+      }
+
+      return null;
+    };
+
+    const fieldInfo = findAssociatedField();
+    const isField = Boolean(fieldInfo || disableHover);
+    isFormFieldRef.current = isField;
 
     const parentInteractive = el.closest(
       'button, a, [role="button"], [role="menuitem"], [data-slot="button"], tr, [data-interactive]'
     );
 
+    const handleCustomTrigger = () => playOneShotAnimation();
+    const handleCustomStop = () => stopCurrentAnimation();
+
+    el.addEventListener("trigger-icon-animation", handleCustomTrigger);
+    el.addEventListener("stop-icon-animation", handleCustomStop);
+
+    // 1. Form field interaction: strictly ONLY animate when clicking or focusing this specific field
+    if (fieldInfo && (fieldInfo.inputEl || fieldInfo.fieldWrapper)) {
+      const handleFieldFocusOrClick = () => {
+        playOneShotAnimation();
+      };
+
+      const targetInput = fieldInfo.inputEl;
+      const targetWrapper = fieldInfo.fieldWrapper;
+
+      if (targetInput) {
+        targetInput.addEventListener("focus", handleFieldFocusOrClick);
+        targetInput.addEventListener("click", handleFieldFocusOrClick);
+        targetInput.addEventListener("pointerdown", handleFieldFocusOrClick);
+      }
+
+      if (targetWrapper && targetWrapper !== targetInput) {
+        targetWrapper.addEventListener("click", handleFieldFocusOrClick);
+      }
+
+      // Clicking directly on the icon inside the field
+      const handleIconClick = () => {
+        if (targetInput) {
+          targetInput.focus();
+        }
+        playOneShotAnimation();
+      };
+      el.addEventListener("click", handleIconClick);
+
+      return () => {
+        if (targetInput) {
+          targetInput.removeEventListener("focus", handleFieldFocusOrClick);
+          targetInput.removeEventListener("click", handleFieldFocusOrClick);
+          targetInput.removeEventListener("pointerdown", handleFieldFocusOrClick);
+        }
+        if (targetWrapper && targetWrapper !== targetInput) {
+          targetWrapper.removeEventListener("click", handleFieldFocusOrClick);
+        }
+        el.removeEventListener("click", handleIconClick);
+        el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
+        el.removeEventListener("stop-icon-animation", handleCustomStop);
+      };
+    }
+
+    // 2. Buttons / Links / Navigation: animate on hover and click
     const onEnter = () => {
-      if (!disableHover) {
+      if (!disableHover && !isFormFieldRef.current) {
         playOneShotAnimation();
       }
     };
     const onLeave = () => {
-      if (!disableHover) {
+      if (!disableHover && !isFormFieldRef.current) {
         stopCurrentAnimation();
       }
     };
     const onFocusOrClick = () => playOneShotAnimation();
 
-    // 1. Form field interaction: animate on hover, focus, click on the input or wrapper
-    if (formContainer) {
-      const inputEl = formContainer.querySelector('input, textarea, select');
-      if (inputEl) {
-        inputEl.addEventListener("focus", onFocusOrClick);
-        inputEl.addEventListener("click", onFocusOrClick);
-      }
-      formContainer.addEventListener("mouseenter", onEnter);
-      formContainer.addEventListener("mouseleave", onLeave);
-      formContainer.addEventListener("focusin", onFocusOrClick);
-      formContainer.addEventListener("click", onFocusOrClick);
-    }
-
-    // 2. Buttons / Links / Navigation: animate on hover and click
     if (parentInteractive) {
       if (!disableHover) {
         parentInteractive.addEventListener("mouseenter", onEnter);
@@ -581,24 +641,7 @@ export function AppIcon({
       parentInteractive.addEventListener("click", onFocusOrClick);
     }
 
-    const handleCustomTrigger = () => playOneShotAnimation();
-    const handleCustomStop = () => stopCurrentAnimation();
-
-    el.addEventListener("trigger-icon-animation", handleCustomTrigger);
-    el.addEventListener("stop-icon-animation", handleCustomStop);
-
     return () => {
-      if (formContainer) {
-        const inputEl = formContainer.querySelector('input, textarea, select');
-        if (inputEl) {
-          inputEl.removeEventListener("focus", onFocusOrClick);
-          inputEl.removeEventListener("click", onFocusOrClick);
-        }
-        formContainer.removeEventListener("mouseenter", onEnter);
-        formContainer.removeEventListener("mouseleave", onLeave);
-        formContainer.removeEventListener("focusin", onFocusOrClick);
-        formContainer.removeEventListener("click", onFocusOrClick);
-      }
       if (parentInteractive) {
         if (!disableHover) {
           parentInteractive.removeEventListener("mouseenter", onEnter);
@@ -619,12 +662,12 @@ export function AppIcon({
     duration,
     className: `shrink-0 select-none ${className}`,
     onMouseEnter: () => {
-      if (!disableHover) {
+      if (!disableHover && !isFormFieldRef.current) {
         playOneShotAnimation();
       }
     },
     onMouseLeave: () => {
-      if (!disableHover) stopCurrentAnimation();
+      if (!disableHover && !isFormFieldRef.current) stopCurrentAnimation();
     },
   };
 
@@ -765,7 +808,7 @@ export function AppIcon({
         return (
           <motion.div
             animate={
-              !reducedMotion && (isFallbackAnimating || isHovered)
+              !reducedMotion && (isFallbackAnimating || (!disableHover && !isFormFieldRef.current && isHovered))
                 ? { scaleY: [1, 1.08, 0.96, 1], y: [0, -1.5, 0] }
                 : { scaleY: 1, y: 0 }
             }
@@ -781,7 +824,7 @@ export function AppIcon({
         return (
           <motion.div
             animate={
-              !reducedMotion && (isFallbackAnimating || isHovered)
+              !reducedMotion && (isFallbackAnimating || (!disableHover && !isFormFieldRef.current && isHovered))
                 ? { rotate: [0, -6, 4, -1, 0], scale: [1, 1.05, 0.98, 1] }
                 : { rotate: 0, scale: 1 }
             }
@@ -797,7 +840,7 @@ export function AppIcon({
         return (
           <motion.div
             animate={
-              !reducedMotion && (isFallbackAnimating || isHovered)
+              !reducedMotion && (isFallbackAnimating || (!disableHover && !isFormFieldRef.current && isHovered))
                 ? { y: [0, -2, 0.4, 0], scale: [1, 1.04, 0.98, 1] }
                 : { y: 0, scale: 1 }
             }
@@ -812,7 +855,7 @@ export function AppIcon({
         return (
           <motion.div
             animate={
-              !reducedMotion && (isFallbackAnimating || isHovered)
+              !reducedMotion && (isFallbackAnimating || (!disableHover && !isFormFieldRef.current && isHovered))
                 ? { scale: [1, 1.1, 0.96, 1], y: [0, -1.5, 0] }
                 : { scale: 1, y: 0 }
             }
@@ -828,7 +871,7 @@ export function AppIcon({
           return (
             <motion.div
               animate={
-                !reducedMotion && (isFallbackAnimating || isHovered)
+                !reducedMotion && (isFallbackAnimating || (!disableHover && !isFormFieldRef.current && isHovered))
                   ? { scale: [1, 1.14, 0.96, 1], rotate: [0, -5, 5, 0], y: [0, -1, 0] }
                   : { scale: 1, rotate: 0, y: 0 }
               }
@@ -849,17 +892,19 @@ export function AppIcon({
       data-animate-icon="true"
       onClick={onClick}
       onMouseEnter={() => {
-        if (!disableHover) {
+        if (!disableHover && !isFormFieldRef.current) {
           const el = containerRef.current;
           const isFormField = Boolean(
+            disableHover ||
             el?.closest('[data-slot="form-item"], .form-item, [data-form-field], label') ||
-            el?.closest('.relative, .group')?.querySelector('input, textarea, select')
+            el?.closest('.relative, .group')?.querySelector('input, textarea, select, [role="combobox"], [role="textbox"]') ||
+            el?.parentElement?.querySelector('input, textarea, select, [role="combobox"], [role="textbox"]')
           );
           if (!isFormField) playOneShotAnimation();
         }
       }}
       onMouseLeave={() => {
-        if (!disableHover) stopCurrentAnimation();
+        if (!disableHover && !isFormFieldRef.current) stopCurrentAnimation();
       }}
       className="inline-flex shrink-0 items-center justify-center"
     >
