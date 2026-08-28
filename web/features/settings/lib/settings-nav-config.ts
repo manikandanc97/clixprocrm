@@ -13,8 +13,6 @@ import {
   ShieldAlert,
   Laptop,
   History,
-  BookOpen,
-  LifeBuoy,
   type LucideIcon,
 } from "lucide-react";
 import { CRM_ROLES, normalizeRole, PERMISSIONS } from "@/shared/lib/auth/rbac";
@@ -126,25 +124,6 @@ export const SETTINGS_NAVIGATION: SettingsCategory[] = [
       },
     ],
   },
-  {
-    id: "support",
-    title: "Support",
-    items: [
-      {
-        id: "help-center",
-        label: "Help Center",
-        icon: BookOpen,
-        description: "Access CRM documentation, tutorials, and user guides.",
-        aliases: ["help"],
-      },
-      {
-        id: "contact-support",
-        label: "Contact Support",
-        icon: LifeBuoy,
-        description: "Submit support tickets and reach out to the customer success team.",
-      },
-    ],
-  },
 ];
 
 /**
@@ -162,6 +141,7 @@ export function resolveCanonicalSectionId(rawSectionId: string | null | undefine
   }
 
   // Handle migrated contextual settings redirects
+  if (needle === "help-center" || needle === "help" || needle === "contact-support" || needle === "support") return "help_redirect";
   if (needle === "billing" || needle === "subscription" || needle === "plan" || needle === "plans" || needle === "pricing" || needle === "upgrade") return "pricing_redirect";
   if (needle === "roles" || needle === "roles-permissions" || needle === "role-management" || needle === "role" || needle === "permissions") return "roles_redirect";
   if (needle === "members" || needle === "workspace-members" || needle === "membership" || needle === "team" || needle === "employees-settings") return "members_redirect";

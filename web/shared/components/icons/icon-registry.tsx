@@ -83,7 +83,7 @@ import {
   X,
   Menu,
 } from "@animateicons/react/lucide";
-import { Building2, Handshake, BriefcaseBusiness, type LucideIcon } from "lucide-react";
+import { Building2, Handshake, BriefcaseBusiness, Laptop, type LucideIcon } from "lucide-react";
 
 export type IconName =
   | "dashboard"
@@ -116,6 +116,7 @@ export type IconName =
   | "modules"
   | "telemetry"
   | "auditLogs"
+  | "sessions"
   | "plans"
   | "packages"
   | "notifications"
@@ -214,6 +215,9 @@ const CANONICAL_ICONS: Record<string, IconName> = {
   modules: "modules",
   telemetry: "telemetry",
   auditlogs: "auditLogs",
+  sessions: "sessions",
+  devices: "sessions",
+  laptop: "sessions",
   plans: "plans",
   packages: "packages",
   notifications: "notifications",
@@ -296,6 +300,7 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (iconDisp.includes("users") || iconDisp.includes("contact")) return "contacts";
   if (iconDisp.includes("user")) return "user";
   if (iconDisp.includes("activity")) return "telemetry";
+  if (iconDisp.includes("laptop") || iconDisp.includes("monitor") || iconDisp.includes("device")) return "sessions";
   if (iconDisp.includes("scroll") || iconDisp.includes("fileclock") || iconDisp.includes("history")) return "auditLogs";
   if (iconDisp.includes("layers") || iconDisp.includes("boxes")) return "modules";
   if (iconDisp.includes("creditcard") || iconDisp.includes("package")) return "plans";
@@ -361,8 +366,11 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   // Telemetry & Operations
   if (text.includes("telemetry") || text.includes("operation") || text.includes("secops") || lastPathPart === "operations") return "telemetry";
 
+  // Sessions & Devices
+  if (text.includes("session") || text.includes("device") || text.includes("laptop") || lastPathPart === "sessions") return "sessions";
+
   // Audit Logs & Activity History
-  if (text.includes("audit") || text.includes("log") || text.includes("scroll") || text.includes("history") || lastPathPart === "audit-logs") return "auditLogs";
+  if (text.includes("audit") || text.includes("audit log") || text.includes("activity log") || text.includes("auditlog") || text.includes("scroll") || text.includes("history") || lastPathPart === "audit-logs" || lastPathPart === "audit-log") return "auditLogs";
 
   // Settings
   if (text.includes("setting") || lastPathPart === "settings" || text.includes("preference") || text.includes("config")) return "settings";
@@ -797,6 +805,21 @@ export function AppIcon({
             className="shrink-0 select-none flex items-center justify-center pointer-events-none"
           >
             <BriefcaseBusiness size={size} className={className} />
+          </motion.div>
+        );
+
+      case "sessions":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && (isFallbackAnimating || isHovered)
+                ? { scale: [1, 1.1, 0.96, 1], y: [0, -1.5, 0] }
+                : { scale: 1, y: 0 }
+            }
+            transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            <Laptop size={size} className={className} />
           </motion.div>
         );
 

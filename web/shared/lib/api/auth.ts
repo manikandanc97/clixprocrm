@@ -422,9 +422,72 @@ export const signInWithGoogle = async (
 
   activeOAuthPopup = popup;
 
-  // Add sleek loading indicator inside the popup while waiting for oauthUrl
+  // Add sleek loading indicator inside the popup with timeout fallback
   try {
-    popup.document.write(`<!DOCTYPE html><html><head><title>Connecting to Google...</title><meta name="viewport" content="width=device-width,initial-scale=1"><style>body{margin:0;display:flex;align-items:center;justify-content:center;height:100vh;background:#0b0f19;color:#f8fafc;font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,sans-serif;text-align:center}.spinner{width:32px;height:32px;border:3px solid rgba(255,255,255,0.1);border-top:3px solid #10b981;border-radius:50%;animation:s 0.8s linear infinite;margin:0 auto 16px}@keyframes s{to{transform:rotate(360deg)}}p{font-size:14px;color:#94a3b8;margin:0}</style></head><body><div><div class="spinner"></div><p>Connecting to Google...</p></div></body></html>`);
+    popup.document.write(`<!DOCTYPE html>
+<html>
+<head>
+  <title>Connecting to Google...</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      background: #0b0f19;
+      color: #f8fafc;
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      text-align: center;
+      padding: 24px;
+      box-sizing: border-box;
+    }
+    .spinner {
+      width: 32px;
+      height: 32px;
+      border: 3px solid rgba(255,255,255,0.1);
+      border-top: 3px solid #10b981;
+      border-radius: 50%;
+      animation: s 0.8s linear infinite;
+      margin: 0 auto 16px;
+    }
+    @keyframes s { to { transform: rotate(360deg); } }
+    h3 { font-size: 16px; margin: 0 0 8px; font-weight: 600; color: #f8fafc; }
+    p { font-size: 13px; color: #94a3b8; margin: 0 0 16px; line-height: 1.5; }
+    .btn {
+      display: none;
+      padding: 8px 16px;
+      background: #10b981;
+      color: #ffffff;
+      border-radius: 8px;
+      font-size: 13px;
+      font-weight: 500;
+      text-decoration: none;
+      border: none;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <div>
+    <div id="sp" class="spinner"></div>
+    <h3 id="t">Connecting to Google...</h3>
+    <p id="sub">Please wait while we redirect to Google authentication.</p>
+    <a id="retryBtn" class="btn" href="#">Continue Directly</a>
+  </div>
+  <script>
+    setTimeout(function() {
+      var btn = document.getElementById('retryBtn');
+      var sub = document.getElementById('sub');
+      if (btn && sub) {
+        sub.innerText = "If redirection is taking longer than usual, click below:";
+        btn.style.display = "inline-block";
+      }
+    }, 6000);
+  </script>
+</body>
+</html>`);
     popup.document.close();
   } catch {
     // Ignore cross-origin write errors
@@ -464,6 +527,10 @@ export const signInWithGoogle = async (
 
   // Navigate the popup window to Google OAuth URL
   try {
+    const retryBtn = popup.document?.getElementById("retryBtn") as HTMLAnchorElement | null;
+    if (retryBtn) {
+      retryBtn.href = oauthUrl;
+    }
     popup.location.href = oauthUrl;
   } catch {
     try {
@@ -593,13 +660,18 @@ export const signInWithGoogle = async (
       }
     }, 600);
 
-    // Timeout fallback (5 minutes) if the popup is closed or abandoned without completing
+    // Timeout fallback (45 seconds) to prevent infinite loading state
     timeoutTimer = setTimeout(() => {
       if (!resolved) {
         cleanup();
-        reject(new Error("Google sign-in timed out. Please try again."));
+        try {
+          popup?.close();
+        } catch {
+          // Ignore close error
+        }
+        reject(new Error("Google sign-in timed out. Please check your connection or try again."));
       }
-    }, 5 * 60 * 1000);
+    }, 45 * 1000);
   });
 };
 

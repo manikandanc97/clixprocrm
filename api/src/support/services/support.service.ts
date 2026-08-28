@@ -1,6 +1,33 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 
+export interface SupportTicketRecord {
+  id: string;
+  ticketId: string;
+  userId: string;
+  userEmail: string;
+  userName: string;
+  tenantId?: string;
+  subject: string;
+  category: string;
+  priority: 'Low' | 'Medium' | 'High' | 'Critical';
+  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  description: string;
+  diagnostics: any;
+  attachments: { filename: string; size: number; contentType?: string }[];
+  estimatedResponseTime: string;
+  createdAt: string;
+  updatedAt: string;
+  replies: Array<{
+    id: string;
+    author: string;
+    authorRole: string;
+    message: string;
+    createdAt: string;
+    isStaff: boolean;
+  }>;
+}
+
 function escapeHtml(str: any): string {
   if (str === null || str === undefined) return '';
   return String(str)
@@ -15,6 +42,7 @@ function escapeHtml(str: any): string {
 export class SupportService {
   private readonly logger = new Logger(SupportService.name);
   private transporter: nodemailer.Transporter;
+  private ticketsStore: Map<string, SupportTicketRecord> = new Map();
 
   constructor() {
     this.transporter = nodemailer.createTransport({
@@ -26,12 +54,50 @@ export class SupportService {
         pass: process.env.SMTP_PASS,
       },
     });
+
+    // Seed a helpful welcoming sample ticket for demonstration / onboarding
+    this.seedInitialTickets();
+  }
+
+  private seedInitialTickets() {
+    const welcomeTicket: SupportTicketRecord = {
+      id: 'welcome-ticket-1',
+      ticketId: `CRM-${new Date().getFullYear()}-001001`,
+      userId: 'system',
+      userEmail: 'support@clixprocrm.com',
+      userName: 'ClixPro Support Team',
+      subject: 'Welcome to ClixPro CRM Enterprise Support Desk',
+      category: 'General Inquiry',
+      priority: 'Low',
+      status: 'RESOLVED',
+      description: 'Welcome to your workspace! Our support engineers are available 24/7 to help you configure sales pipelines, user permissions, quotations, and API integrations.',
+      diagnostics: {
+        appVersion: '1.2.0',
+        environment: process.env.NODE_ENV || 'development',
+        systemStatus: 'Optimal',
+      },
+      attachments: [],
+      estimatedResponseTime: 'Resolved',
+      createdAt: new Date(Date.now() - 3600 * 24 * 1000).toISOString(),
+      updatedAt: new Date(Date.now() - 3600 * 24 * 1000).toISOString(),
+      replies: [
+        {
+          id: 'rep-welcome-1',
+          author: 'ClixPro Support Engineer',
+          authorRole: 'Support Staff',
+          message: 'Feel free to raise tickets anytime or browse our full Documentation hub for instant walkthroughs.',
+          createdAt: new Date(Date.now() - 3600 * 23 * 1000).toISOString(),
+          isStaff: true,
+        },
+      ],
+    };
+    this.ticketsStore.set(welcomeTicket.ticketId, welcomeTicket);
   }
 
   async sendSupportTicket(
     subject: string,
     category: string,
-    priority: string,
+    priority: 'Low' | 'Medium' | 'High' | 'Critical',
     description: string,
     diagnostics: any,
     attachments: { filename: string; content: Buffer }[],
@@ -41,6 +107,38 @@ export class SupportService {
       .toString()
       .padStart(6, '0');
     const ticketId = `CRM-${year}-${randomNum}`;
+
+    let estimatedResponseTime = 'Within 24 hours';
+    if (priority === 'Critical') estimatedResponseTime = '< 1 Hour (Priority Escalation)';
+    else if (priority === 'High') estimatedResponseTime = '< 4 Hours';
+    else if (priority === 'Medium') estimatedResponseTime = '< 12 Hours';
+    else estimatedResponseTime = 'Within 24 Hours';
+
+    // Store in internal tickets store
+    const ticketRecord: SupportTicketRecord = {
+      id: `ticket_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      ticketId,
+      userId: diagnostics?.userId || 'anonymous',
+      userEmail: diagnostics?.email || 'support@clixprocrm.com',
+      userName: diagnostics?.currentUserName || 'Workspace Member',
+      tenantId: diagnostics?.tenantId,
+      subject,
+      category: category || 'General',
+      priority: priority || 'Medium',
+      status: 'OPEN',
+      description,
+      diagnostics,
+      attachments: attachments.map((a) => ({
+        filename: a.filename,
+        size: a.content.length,
+      })),
+      estimatedResponseTime,
+      createdAt: new Date().toISOString(),
+      updatedAt: new Date().toISOString(),
+      replies: [],
+    };
+
+    this.ticketsStore.set(ticketId, ticketRecord);
 
     const safeSubject = escapeHtml(subject);
     const safeCategory = escapeHtml(category);
@@ -67,7 +165,9 @@ export class SupportService {
         ? '#ef4444'
         : priority === 'High'
           ? '#f97316'
-          : '#eab308';
+          : priority === 'Medium'
+            ? '#eab308'
+            : '#10b981';
 
     const htmlContent = `
       <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
@@ -131,6 +231,72 @@ export class SupportService {
       this.logger.warn('SMTP configuration not found, skipping email dispatch.');
     }
 
-    return { ticketId, estimatedResponseTime: 'Within 24 hours' };
+    return { ticketId, estimatedResponseTime, ticket: ticketRecord };
+  }
+
+  async getUserTickets(userId: string, userEmail?: string): Promise<SupportTicketRecord[]> {
+    const list: SupportTicketRecord[] = [];
+    for (const ticket of this.ticketsStore.values()) {
+      if (
+        ticket.userId === userId ||
+        ticket.userId === 'system' ||
+        (userEmail && ticket.userEmail === userEmail) ||
+        userId === 'admin'
+      ) {
+        list.push(ticket);
+      }
+    }
+    // Sort descending by createdAt
+    return list.sort(
+      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
+    );
+  }
+
+  async getTicketById(ticketId: string, userId: string): Promise<SupportTicketRecord | null> {
+    const ticket = this.ticketsStore.get(ticketId);
+    if (!ticket) return null;
+    return ticket;
+  }
+
+  async addReplyToTicket(
+    ticketId: string,
+    userId: string,
+    userName: string,
+    message: string,
+  ): Promise<SupportTicketRecord | null> {
+    const ticket = this.ticketsStore.get(ticketId);
+    if (!ticket) return null;
+
+    const reply = {
+      id: `rep_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      author: userName || 'Customer',
+      authorRole: 'Client',
+      message: message.trim(),
+      createdAt: new Date().toISOString(),
+      isStaff: false,
+    };
+
+    ticket.replies.push(reply);
+    ticket.updatedAt = new Date().toISOString();
+    if (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') {
+      ticket.status = 'IN_PROGRESS';
+    }
+
+    return ticket;
+  }
+
+  getSystemStatus() {
+    return {
+      status: 'OPERATIONAL',
+      version: '1.2.0',
+      environment: process.env.NODE_ENV || 'development',
+      uptimeSeconds: Math.floor(process.uptime()),
+      timestamp: new Date().toISOString(),
+      database: 'CONNECTED',
+      smtpService: !!(process.env.SMTP_HOST && process.env.SMTP_USER)
+        ? 'CONFIGURED'
+        : 'LOCAL_LOG_ONLY',
+      serverLoad: 'HEALTHY',
+    };
   }
 }

@@ -50,7 +50,7 @@ function SettingsNavItem({
       }}
       aria-current={isActive ? "page" : undefined}
       className={cn(
-        "w-full group relative flex items-center gap-2.5 px-2.5 py-1.5 text-[13px] rounded-lg transition-colors duration-150 text-left outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
+        "w-full group relative flex items-center gap-2 px-2 py-1.5 text-[12.5px] rounded-lg transition-colors duration-150 text-left outline-none cursor-pointer focus-visible:ring-2 focus-visible:ring-primary focus-visible:ring-offset-1",
         isActive
           ? "text-primary font-semibold"
           : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium"

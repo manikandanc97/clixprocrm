@@ -113,6 +113,28 @@ describe('Core CRM Services RLS Phase 2 - Tenant Context Integration & Isolation
           aggregate: jest.fn().mockResolvedValue({ _sum: { value: 5000 } }),
         },
         customer: {
+          findFirst: jest.fn().mockImplementation(({ where }) => {
+            if (currentTenant !== 'tenant-a') return Promise.resolve(null);
+            return Promise.resolve({
+              id: where?.id || 'cust-1',
+              name: enc.encrypt('Customer 1'),
+              company: enc.encrypt('Customer Corp'),
+              email: enc.encrypt('cust@corp.com'),
+              companyId: 'comp-1',
+              tenantId: 'tenant-a',
+            });
+          }),
+          findUnique: jest.fn().mockImplementation(({ where }) => {
+            if (currentTenant !== 'tenant-a') return Promise.resolve(null);
+            return Promise.resolve({
+              id: where?.id || 'cust-1',
+              name: enc.encrypt('Customer 1'),
+              company: enc.encrypt('Customer Corp'),
+              email: enc.encrypt('cust@corp.com'),
+              companyId: 'comp-1',
+              tenantId: 'tenant-a',
+            });
+          }),
           findMany: jest.fn().mockImplementation(({ where }) => {
             if (currentTenant !== 'tenant-a') return Promise.resolve([]);
             return Promise.resolve([
@@ -362,10 +384,20 @@ describe('Core CRM Services RLS Phase 2 - Tenant Context Integration & Isolation
           findFirst: jest.fn().mockResolvedValue(null),
           create: jest.fn().mockResolvedValue({ id: 'comp-1' }),
         },
+        tenantInvoiceSettings: {
+          findUnique: jest.fn().mockResolvedValue({ defaultTaxRate: 18, state: 'Karnataka' }),
+        },
+        tenant: {
+          findUnique: jest.fn().mockResolvedValue({ id: 'tenant-a', name: 'Tenant A', currency: 'INR' }),
+        },
       };
 
       return callback(mockTx);
     });
+
+    (prismaService as any).tenant = {
+      findUnique: jest.fn().mockResolvedValue({ id: 'tenant-a', currency: 'INR' }),
+    };
   });
 
   describe('1. Leads Services (LeadsService, Query, Convert)', () => {

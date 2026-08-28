@@ -2,6 +2,7 @@ import {
   Injectable,
   NotFoundException,
   BadRequestException,
+  Optional,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
@@ -11,6 +12,7 @@ import { UpdateLeadDto } from '../dto/update-lead.dto';
 import { LeadsQueryService } from './leads.query.service';
 import { LeadsConvertService } from './leads.convert.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import { StorageService } from '../../common/services/storage.service';
 
 /**
  * @file leads/services/leads.service.ts
@@ -36,6 +38,7 @@ export class LeadsService {
     private readonly leadsQueryService: LeadsQueryService,
     private readonly leadsConvertService: LeadsConvertService,
     private readonly enc: EncryptionService,
+    @Optional() private readonly storageService?: StorageService,
   ) {}
 
   // ─── Query Delegation ───────────────────────────────────────────────────────
@@ -454,6 +457,53 @@ export class LeadsService {
       });
 
       return attachment;
+    });
+  }
+
+  async uploadAndCreateLeadAttachment(
+    tenantId: string,
+    leadId: string,
+    userId: string,
+    fileBuffer: Buffer,
+    originalFilename: string,
+    mimeType?: string,
+  ) {
+    if (!this.storageService) {
+      throw new BadRequestException('Storage service is unavailable');
+    }
+
+    // 1. Upload to Supabase Storage bucket: crm-attachments/{tenantId}/leads/{leadId}/...
+    const uploadResult = await this.storageService.uploadAttachment(
+      tenantId,
+      `leads/${leadId}`,
+      fileBuffer,
+      originalFilename,
+      mimeType,
+    );
+
+    // 2. Persist database record with real Supabase Storage URL
+    return this.createLeadAttachment(tenantId, leadId, userId, {
+      fileName: uploadResult.fileName,
+      fileUrl: uploadResult.storageUrl,
+      fileSize: uploadResult.fileSize,
+      fileType: uploadResult.fileType,
+    });
+  }
+
+  async deleteLeadAttachment(tenantId: string, leadId: string, attachmentId: string) {
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const attachment = await tx.attachment.findUnique({
+        where: { id: attachmentId, tenantId, leadId },
+      });
+      if (!attachment) {
+        throw new NotFoundException('Attachment not found');
+      }
+
+      await tx.attachment.delete({
+        where: { id: attachmentId },
+      });
+
+      return { success: true };
     });
   }
 

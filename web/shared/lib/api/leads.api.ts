@@ -67,6 +67,38 @@ export function createLeadAttachment(leadId: string, data: any) {
   return unwrapResponse<any>(client.post(`/crm/leads/${leadId}/attachments`, data));
 }
 
+export async function uploadLeadAttachment(
+  leadId: string,
+  fileOrData: File | { fileData: string; fileName: string; fileType?: string }
+) {
+  if (fileOrData instanceof File) {
+    const base64Data = await new Promise<string>((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onload = () => resolve(reader.result as string);
+      reader.onerror = (err) => reject(err);
+      reader.readAsDataURL(fileOrData);
+    });
+
+    return unwrapResponse<any>(
+      client.post(`/crm/leads/${leadId}/attachments`, {
+        fileData: base64Data,
+        fileName: fileOrData.name,
+        fileType: fileOrData.type,
+      })
+    );
+  }
+
+  return unwrapResponse<any>(
+    client.post(`/crm/leads/${leadId}/attachments`, fileOrData)
+  );
+}
+
+export function deleteLeadAttachment(leadId: string, attachmentId: string) {
+  return unwrapResponse<any>(
+    client.delete(`/crm/leads/${leadId}/attachments/${attachmentId}`)
+  );
+}
+
 export function fetchLeadMeetings(leadId: string) {
   return unwrapResponse<any>(client.get(`/crm/leads/${leadId}/meetings`));
 }

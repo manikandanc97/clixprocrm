@@ -43,6 +43,8 @@ import {
   fetchLeadTimeline,
   fetchLeadAttachments,
   createLeadAttachment,
+  uploadLeadAttachment,
+  deleteLeadAttachment,
   fetchLeadMeetings,
   createLeadMeeting,
   fetchInvoicesData,
@@ -916,6 +918,43 @@ export function useCreateLeadAttachment() {
     },
     onError: (error: Error) => {
       toast.error(error.message || "Failed to add attachment");
+    },
+  });
+}
+
+export function useUploadLeadAttachment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({
+      leadId,
+      file,
+    }: {
+      leadId: string;
+      file: File | { fileData: string; fileName: string; fileType?: string };
+    }) => uploadLeadAttachment(leadId, file),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["leadAttachments", variables.leadId] });
+      queryClient.invalidateQueries({ queryKey: ["leadTimeline", variables.leadId] });
+      toast.success("File uploaded to storage successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to upload file to storage");
+    },
+  });
+}
+
+export function useDeleteLeadAttachment() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: ({ leadId, attachmentId }: { leadId: string; attachmentId: string }) =>
+      deleteLeadAttachment(leadId, attachmentId),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["leadAttachments", variables.leadId] });
+      queryClient.invalidateQueries({ queryKey: ["leadTimeline", variables.leadId] });
+      toast.success("Attachment deleted successfully");
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete attachment");
     },
   });
 }

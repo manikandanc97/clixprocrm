@@ -12,8 +12,6 @@ import IntegrationsSettings from "@/features/settings/components/IntegrationsSet
 import SecuritySettings from "@/features/settings/components/SecuritySettings";
 import SessionsSettings from "@/features/settings/components/SessionsSettings";
 import AuditLogSettings from "@/features/settings/components/AuditLogSettings";
-import HelpCenterSettings from "@/features/settings/components/HelpCenterSettings";
-import ContactSupportSettings from "@/features/settings/components/ContactSupportSettings";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { CRMPageContainer } from "@/shared/components/crm";
@@ -65,6 +63,8 @@ const SettingsPage = () => {
       router.replace("/deals?customize=probability");
     } else if (resolved === "revenue_targets_redirect") {
       router.replace("/reports?customize=targets");
+    } else if (resolved === "help_redirect") {
+      router.replace("/help");
     }
   }, [rawSectionParam, router]);
 
@@ -154,12 +154,6 @@ const SettingsPage = () => {
       case "audit-log":
         return <AuditLogSettings />;
 
-      // Support
-      case "help-center":
-        return <HelpCenterSettings />;
-      case "contact-support":
-        return <ContactSupportSettings />;
-
       default:
         return <ProfileSettings />;
     }
@@ -183,8 +177,8 @@ const SettingsPage = () => {
 
       {/* Body - Independent scrolling on desktop */}
       <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 lg:gap-5.5 lg:overflow-hidden">
-        {/* Secondary Sidebar Navigation (240px) */}
-        <div className="w-full lg:w-[240px] shrink-0 lg:h-full lg:overflow-y-auto pr-1 custom-scrollbar">
+        {/* Secondary Sidebar Navigation (200px) */}
+        <div className="w-full lg:w-[200px] shrink-0 lg:h-full lg:overflow-y-auto pr-1 custom-scrollbar">
           <SettingsSidebar
             activeSection={activeSection}
             onSectionChange={handleSectionChange}

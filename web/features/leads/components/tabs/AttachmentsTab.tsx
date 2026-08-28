@@ -1,44 +1,52 @@
 import React, { useRef } from "react";
 import { Button } from "@/shared/ui/button";
-import { Paperclip, Download, UploadCloud, File, FileText, Image as ImageIcon } from "lucide-react";
+import { Download, UploadCloud, File, FileText, Image as ImageIcon, Trash2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
-import { useLeadAttachments, useCreateLeadAttachment } from "@/shared/hooks/use-crm";
+import { useLeadAttachments, useUploadLeadAttachment, useDeleteLeadAttachment } from "@/shared/hooks/use-crm";
 import { formatBytes } from "@/shared/lib/utils";
 import { EmptyState } from "@/shared/components/EmptyState";
-
-const getFileIcon = (fileType: string) => {
-  if (fileType.includes("image")) return <ImageIcon className="w-8 h-8 text-blue-500" />;
-  if (fileType.includes("pdf")) return <FileText className="w-8 h-8 text-rose-500" />;
-  return <File className="w-8 h-8 text-muted-foreground" />;
-};
-
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { ViewToggle } from "@/shared/components/crm/ViewToggle";
 import { AttachmentsSkeleton } from "@/shared/components/skeletons";
+
+const getFileIcon = (fileType: string) => {
+  if (fileType?.includes("image")) return <ImageIcon className="w-8 h-8 text-blue-500" />;
+  if (fileType?.includes("pdf")) return <FileText className="w-8 h-8 text-rose-500" />;
+  return <File className="w-8 h-8 text-muted-foreground" />;
+};
 
 export function AttachmentsTab({ leadId }: { leadId: string }) {
   const { data: attachmentsResp, isLoading } = useLeadAttachments(leadId);
   const attachments = attachmentsResp?.data || [];
   const [viewMode, setViewMode] = useViewMode("documents", "grid");
   
-  const createAttachment = useCreateLeadAttachment();
+  const uploadAttachment = useUploadLeadAttachment();
+  const deleteAttachment = useDeleteLeadAttachment();
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
     if (!file) return;
 
-    // Simulate upload for now
-    const dummyUrl = URL.createObjectURL(file);
-    createAttachment.mutate({
-      leadId,
-      data: {
-        fileName: file.name,
-        fileSize: file.size,
-        fileType: file.type,
-        fileUrl: dummyUrl, // In real app, upload to storage first
+    uploadAttachment.mutate(
+      {
+        leadId,
+        file,
+      },
+      {
+        onSettled: () => {
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        },
       }
-    });
+    );
+  };
+
+  const handleDelete = (attachmentId: string) => {
+    if (confirm("Are you sure you want to remove this attachment?")) {
+      deleteAttachment.mutate({ leadId, attachmentId });
+    }
   };
 
   return (
@@ -47,8 +55,23 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
         <h3 className="text-sm font-bold text-foreground">Files & Documents</h3>
         <div className="flex items-center gap-3">
           <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
-          <Button onClick={() => fileInputRef.current?.click()} size="sm" className="gap-2" disabled={createAttachment.isPending}>
-            <UploadCloud className="w-4 h-4" /> {createAttachment.isPending ? "Uploading..." : "Upload File"}
+          <Button
+            onClick={() => fileInputRef.current?.click()}
+            size="sm"
+            className="gap-2"
+            disabled={uploadAttachment.isPending}
+          >
+            {uploadAttachment.isPending ? (
+              <>
+                <Loader2 className="w-4 h-4 animate-spin" />
+                <span>Uploading...</span>
+              </>
+            ) : (
+              <>
+                <UploadCloud className="w-4 h-4" />
+                <span>Upload File</span>
+              </>
+            )}
           </Button>
           <input 
             type="file" 
@@ -90,11 +113,22 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
                 </div>
               </div>
 
-              <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" asChild>
-                <a href={attachment.fileUrl} target="_blank" rel="noreferrer" download>
-                  <Download className="w-4 h-4" />
-                </a>
-              </Button>
+              <div className="flex items-center gap-1">
+                <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" asChild>
+                  <a href={attachment.fileUrl} target="_blank" rel="noreferrer" download={attachment.fileName}>
+                    <Download className="w-4 h-4" />
+                  </a>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => handleDelete(attachment.id)}
+                  disabled={deleteAttachment.isPending}
+                >
+                  <Trash2 className="w-4 h-4" />
+                </Button>
+              </div>
             </div>
           ))}
         </div>
@@ -117,9 +151,18 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
               
               <div className="flex items-center gap-1 opacity-0 group-hover:opacity-100 transition-opacity">
                 <Button variant="ghost" size="icon" className="h-8 w-8 text-muted-foreground hover:text-foreground hover:bg-muted" asChild>
-                  <a href={attachment.fileUrl} target="_blank" rel="noreferrer" download>
+                  <a href={attachment.fileUrl} target="_blank" rel="noreferrer" download={attachment.fileName}>
                     <Download className="w-4 h-4" />
                   </a>
+                </Button>
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  className="h-8 w-8 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                  onClick={() => handleDelete(attachment.id)}
+                  disabled={deleteAttachment.isPending}
+                >
+                  <Trash2 className="w-4 h-4" />
                 </Button>
               </div>
             </div>

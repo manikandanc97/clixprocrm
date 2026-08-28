@@ -138,6 +138,7 @@ function buildModelMocks() {
     notification: {
       findUnique: jest.fn(),
       findMany: jest.fn().mockResolvedValue([]),
+      create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'notif-1', ...data })),
       update: jest.fn(),
       updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       count: jest.fn().mockResolvedValue(0),

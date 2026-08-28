@@ -25,6 +25,9 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       deal: {
         count: jest.fn(),
       },
+      attachment: {
+        aggregate: jest.fn().mockResolvedValue({ _sum: { fileSize: 0 } }),
+      },
       user: {
         findUnique: jest.fn(),
       },

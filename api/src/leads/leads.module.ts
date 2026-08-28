@@ -5,6 +5,7 @@ import { LeadsService } from './services/leads.service';
 import { LeadsImportService } from './services/leads.import.service';
 import { LeadsQueryService } from './services/leads.query.service';
 import { LeadsConvertService } from './services/leads.convert.service';
+import { StorageService } from '../common/services/storage.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { ActivitiesModule } from '../activities/activities.module';
 
@@ -16,8 +17,9 @@ import { ActivitiesModule } from '../activities/activities.module';
     LeadsImportService,
     LeadsQueryService,
     LeadsConvertService,
+    StorageService,
   ],
-  exports: [LeadsService, LeadsQueryService, LeadsConvertService],
+  exports: [LeadsService, LeadsQueryService, LeadsConvertService, StorageService],
 })
 export class LeadsModule {}
 

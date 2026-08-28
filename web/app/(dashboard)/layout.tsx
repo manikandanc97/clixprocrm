@@ -10,6 +10,7 @@ import { DashboardCelebration } from "@/components/celebration";
 import { MfaChallengeModal } from "@/features/auth/components/MfaChallengeModal";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
+import { useRealtimeNotifications } from "@/shared/hooks/use-realtime-notifications";
 
 export default function DashboardLayout({
   children,
@@ -18,6 +19,9 @@ export default function DashboardLayout({
 }) {
   const [showMfaModal, setShowMfaModal] = useState(false);
   const queryClient = useQueryClient();
+
+  // Active Supabase Realtime subscription for live notifications across the dashboard
+  useRealtimeNotifications();
 
   useEffect(() => {
     // 1. Listen for global AAL2_REQUIRED events triggered by API calls

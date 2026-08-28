@@ -189,11 +189,80 @@ export class LeadsController {
     }
     await incrementRateLimit(identifier, RATE_LIMITS.FILE_UPLOAD);
 
+    // 1. If base64 file data is passed in JSON payload
+    if (body?.fileData) {
+      const base64Data = body.fileData.includes(';base64,')
+        ? body.fileData.split(';base64,')[1]
+        : body.fileData;
+      const fileBuffer = Buffer.from(base64Data, 'base64');
+      const filename = body.fileName || 'attachment';
+      const fileType = body.fileType || 'application/octet-stream';
+
+      const data = await this.leadsService.uploadAndCreateLeadAttachment(
+        req.tenantId,
+        id,
+        req.user.sub,
+        fileBuffer,
+        filename,
+        fileType,
+      );
+      return { success: true, data };
+    }
+
+    // 2. If multipart/form-data upload
+    if (typeof req.isMultipart === 'function' && req.isMultipart()) {
+      try {
+        const file = await req.file();
+        if (file) {
+          const fileBuffer = await file.toBuffer();
+          const filename = file.filename || 'attachment';
+          const fileType = file.mimetype || 'application/octet-stream';
+
+          const data = await this.leadsService.uploadAndCreateLeadAttachment(
+            req.tenantId,
+            id,
+            req.user.sub,
+            fileBuffer,
+            filename,
+            fileType,
+          );
+          return { success: true, data };
+        }
+      } catch (err: any) {
+        throw new HttpException(
+          {
+            success: false,
+            error: {
+              code: 'BAD_REQUEST',
+              message: `Failed to process multipart upload: ${err?.message || err}`,
+            },
+          },
+          HttpStatus.BAD_REQUEST,
+        );
+      }
+    }
+
+    // 3. Fallback: Pre-uploaded or URL-provided metadata
     const data = await this.leadsService.createLeadAttachment(
       req.tenantId,
       id,
       req.user.sub,
       body,
+    );
+    return { success: true, data };
+  }
+
+  @Delete(':id/attachments/:attachmentId')
+  @Roles('ADMIN', 'MANAGER', 'SALES')
+  async deleteLeadAttachment(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Param('attachmentId') attachmentId: string,
+  ) {
+    const data = await this.leadsService.deleteLeadAttachment(
+      req.tenantId,
+      id,
+      attachmentId,
     );
     return { success: true, data };
   }
