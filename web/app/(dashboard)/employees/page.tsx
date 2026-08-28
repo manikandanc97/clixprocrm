@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { 
   Users, 
   UserPlus, 
@@ -42,7 +42,7 @@ import {
   DropdownMenu, 
   DropdownMenuContent, 
   DropdownMenuItem, 
-  DropdownMenuTrigger,
+  DropdownMenuTrigger, 
   DropdownMenuSeparator,
 } from "@/shared/ui/dropdown-menu";
 import { 
@@ -61,7 +61,6 @@ import { FormModal } from "@/shared/components/form-modal";
 import { EmployeesSkeleton } from "@/features/employees/components/EmployeesSkeleton";
 import { EmployeeForm } from "@/features/forms/EmployeeForm";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
 
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { EmployeesGrid } from "@/features/employees/components/EmployeesGrid";
@@ -105,7 +104,6 @@ export default function EmployeesPage() {
 
   useEffect(() => {
     if (searchParams.get("new") === "true") {
-      // Avoid synchronous setState during render/effect cycle that might cause cascading renders
       const timer = setTimeout(() => {
         setIsAddModalOpen(true);
         const newUrl = window.location.pathname;
@@ -394,28 +392,30 @@ export default function EmployeesPage() {
         </div>
 
         {/* Sidebar */}
-        <div className="space-y-8">
-          <CRMPageSection title="Recent Activity">
-            <CRMCard className="p-6">
-              <ActivityTimeline items={employeeActivities} />
-              <Button variant="ghost" className="w-full mt-6 text-[10px] font-bold uppercase tracking-widest text-primary h-9">
+        <div className="flex flex-col gap-3.5 sm:gap-4 min-h-0">
+          <CRMPageSection title="Recent Activity" className="flex-1 min-h-0 flex flex-col">
+            <CRMCard className="p-4 flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
+              <div className="overflow-y-auto flex-1 sidebar-scroll pr-1">
+                <ActivityTimeline items={employeeActivities.slice(0, 4)} />
+              </div>
+              <Button variant="ghost" className="w-full mt-3 text-[10px] font-bold uppercase tracking-widest text-primary h-8 shrink-0">
                 View All Activity
               </Button>
             </CRMCard>
           </CRMPageSection>
 
-          <CRMPageSection title="Performance Overview">
-            <CRMCard className="p-5 space-y-4">
+          <CRMPageSection title="Performance Overview" className="shrink-0">
+            <CRMCard className="p-4 space-y-3">
               <div className="flex items-center justify-between">
-                <div className="text-xs font-bold uppercase tracking-wider text-muted-foreground">Top Dept</div>
+                <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Top Dept</div>
                 <TrendingUp className="w-4 h-4 text-emerald-500" />
               </div>
               <div>
-                <h4 className="text-lg font-bold tracking-tight">Sales Team</h4>
+                <h4 className="text-base font-bold tracking-tight">Sales Team</h4>
                 <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Average Performance: 96%</p>
               </div>
               <div className="pt-2 border-t border-border/50">
-                <div className="flex items-center gap-3">
+                <div className="flex items-center gap-2.5">
                   <div className="flex -space-x-2">
                     {[1, 2, 3].map(i => (
                       <Avatar key={i} className="h-6 w-6 border-2 border-background">
@@ -426,7 +426,7 @@ export default function EmployeesPage() {
                   <span className="text-[10px] font-bold text-muted-foreground">+5 more</span>
                 </div>
               </div>
-              <Button className="w-full h-9 bg-primary/10 hover:bg-primary/20 text-primary border-none text-xs font-bold">
+              <Button className="w-full h-8 bg-primary/10 hover:bg-primary/20 text-primary border-none text-xs font-bold">
                 Analytics Report
               </Button>
             </CRMCard>

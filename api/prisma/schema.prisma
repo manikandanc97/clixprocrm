@@ -78,6 +78,7 @@ model User {
   status             UserStatus       @default(ACTIVE)
   securityStatus     String           @default("ACTIVE")
   isSuperAdmin       Boolean          @default(false)
+  notificationPrefs  Json?
   deletedAt          DateTime?
   createdAt          DateTime         @default(now())
   updatedAt          DateTime         @updatedAt

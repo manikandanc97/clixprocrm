@@ -15,11 +15,15 @@ export class PrismaSeedService implements OnModuleInit {
   }
 
   async runCanonicalSeed() {
-    await this.seedCanonicalPlans();
-    await this.seedCanonicalAiModels();
-    await this.seedCanonicalEntitlements();
-    await this.seedPlatformConfig();
-    this.logger.log('Canonical Plans, AI Models, and Entitlements synchronized successfully.');
+    try {
+      await this.seedCanonicalPlans();
+      await this.seedCanonicalAiModels();
+      await this.seedCanonicalEntitlements();
+      await this.seedPlatformConfig();
+      this.logger.log('Canonical Plans, AI Models, and Entitlements synchronized successfully.');
+    } catch (err: any) {
+      this.logger.warn(`Canonical seed encountered non-fatal error: ${err?.message || err}`);
+    }
   }
 
   async seedCanonicalPlans() {
@@ -460,54 +464,66 @@ export class PrismaSeedService implements OnModuleInit {
       },
     };
 
-    for (const [planId, config] of Object.entries(planEntitlements)) {
-      const plan = await (this.prisma as any).plan.findUnique({
-        where: { id: planId },
-        include: { defaultModel: true },
-      });
+    try {
+      // Fetch all existing entitlements in 1 query
+      const existingList = await (this.prisma as any).planAiEntitlement.findMany();
+      const existingKeys = new Set(existingList.map((e: any) => `${e.planId}_${e.modelId}_${e.capability}`));
 
-      if (!plan) continue;
+      const toCreate: any[] = [];
+      const defaultModelUpdates: { planId: string; modelId: string }[] = [];
 
-      // Ensure allowed model entitlements exist
-      for (const modelKey of config.allowedModelKeys) {
-        const model = modelMap.get(modelKey);
-        if (!model) continue;
+      for (const [planId, config] of Object.entries(planEntitlements)) {
+        const plan = await (this.prisma as any).plan.findUnique({
+          where: { id: planId },
+          select: { id: true, defaultModelId: true },
+        });
 
-        for (const capability of config.capabilities) {
-          const existingEnt = await (this.prisma as any).planAiEntitlement.findUnique({
-            where: {
-              planId_modelId_capability: {
-                planId,
-                modelId: model.id,
-                capability,
-              },
-            },
-          });
+        if (!plan) continue;
 
-          if (!existingEnt) {
-            await (this.prisma as any).planAiEntitlement.create({
-              data: {
+        // Ensure allowed model entitlements exist
+        for (const modelKey of config.allowedModelKeys) {
+          const model = modelMap.get(modelKey);
+          if (!model) continue;
+
+          for (const capability of config.capabilities) {
+            const key = `${planId}_${model.id}_${capability}`;
+            if (!existingKeys.has(key)) {
+              toCreate.push({
                 planId,
                 modelId: model.id,
                 capability,
                 isEnabled: true,
                 maxTokensPerDay: config.maxTokensPerDay,
-              },
-            });
+              });
+              existingKeys.add(key);
+            }
+          }
+        }
+
+        // If plan has no defaultModelId assigned yet, set the canonical initial default
+        if (!plan.defaultModelId) {
+          const defaultModel = modelMap.get(config.defaultModelKey) || modelMap.get('gemini-2.5-flash');
+          if (defaultModel) {
+            defaultModelUpdates.push({ planId, modelId: defaultModel.id });
           }
         }
       }
 
-      // If plan has no defaultModelId assigned yet, set the canonical initial default
-      if (!plan.defaultModelId) {
-        const defaultModel = modelMap.get(config.defaultModelKey) || modelMap.get('gemini-2.5-flash');
-        if (defaultModel) {
-          await (this.prisma as any).plan.update({
-            where: { id: planId },
-            data: { defaultModelId: defaultModel.id },
-          });
-        }
+      if (toCreate.length > 0) {
+        await (this.prisma as any).planAiEntitlement.createMany({
+          data: toCreate,
+          skipDuplicates: true,
+        });
       }
+
+      for (const update of defaultModelUpdates) {
+        await (this.prisma as any).plan.update({
+          where: { id: update.planId },
+          data: { defaultModelId: update.modelId },
+        });
+      }
+    } catch (err: any) {
+      this.logger.warn(`AI Entitlements seed skipped: ${err?.message || err}`);
     }
   }
 

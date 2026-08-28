@@ -155,7 +155,6 @@ export class MfaController {
 
   @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard, AalGuard)
   @Roles('ADMIN')
-  @RequireAal('aal2')
   @Patch('crm/settings/mfa-policy')
   async updateMfaPolicy(@Req() req: any, @Body() body: any) {
     const actorUserId = req.user.id || req.user.sub;

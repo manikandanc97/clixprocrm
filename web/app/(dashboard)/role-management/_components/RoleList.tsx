@@ -348,37 +348,39 @@ export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => 
   if (isLoading) return <RoleManagementSkeleton />;
 
   return (
-    <div className="space-y-6">
+    <div className="flex-1 flex flex-col min-h-0 gap-3.5 sm:gap-4">
       {/* ── Standard CRMMetricsGrid matching Contacts & Employees ── */}
-      <CRMMetricsGrid cols={3}>
-        <CRMMetricCard
-          title="Total Roles"
-          value={stats.total}
-          change="0%"
-          trend="up"
-          icon={Shield}
-          color="indigo"
-          delay={0.1}
-        />
-        <CRMMetricCard
-          title="Custom Roles"
-          value={stats.custom}
-          change="Custom"
-          trend="up"
-          icon={ShieldCheck}
-          color="emerald"
-          delay={0.2}
-        />
-        <CRMMetricCard
-          title="Assigned Users"
-          value={stats.totalAssignedUsers}
-          change="Members"
-          trend="up"
-          icon={Users}
-          color="orange"
-          delay={0.3}
-        />
-      </CRMMetricsGrid>
+      <div className="shrink-0">
+        <CRMMetricsGrid cols={3}>
+          <CRMMetricCard
+            title="Total Roles"
+            value={stats.total}
+            change="0%"
+            trend="up"
+            icon={Shield}
+            color="indigo"
+            delay={0.1}
+          />
+          <CRMMetricCard
+            title="Custom Roles"
+            value={stats.custom}
+            change="Custom"
+            trend="up"
+            icon={ShieldCheck}
+            color="emerald"
+            delay={0.2}
+          />
+          <CRMMetricCard
+            title="Assigned Users"
+            value={stats.totalAssignedUsers}
+            change="Members"
+            trend="up"
+            icon={Users}
+            color="orange"
+            delay={0.3}
+          />
+        </CRMMetricsGrid>
+      </div>
 
       {/* ── Standard CRMToolbar with Search & Action ── */}
       <CRMToolbar
@@ -399,27 +401,29 @@ export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => 
       </CRMToolbar>
 
       {/* ── Standard DataTable ── */}
-      <DataTable>
-        <CRMTableHeader>
-          <CRMTableRow>
-            <CRMTableHeaderCell className="w-[32%]">Role Name</CRMTableHeaderCell>
-            <CRMTableHeaderCell className="w-[18%]">Assigned Users</CRMTableHeaderCell>
-            <CRMTableHeaderCell className="w-[45%]">Permission Modules</CRMTableHeaderCell>
-            <CRMTableHeaderCell className="w-[5%] text-right">Actions</CRMTableHeaderCell>
-          </CRMTableRow>
-        </CRMTableHeader>
-        <CRMTableBody>
-          <RoleTableRows
-            roles={paginatedRoles}
-            canManageRoles={canManageRoles}
-            currentUserRole={currentUserRole}
-            getRoleColor={getRoleColor}
-            onViewRole={handleOpenView}
-            onEditRole={handleOpenEdit}
-            onDeleteRole={handleOpenDelete}
-          />
-        </CRMTableBody>
-      </DataTable>
+      <div className="flex-1 min-h-0 flex flex-col">
+        <DataTable hasPagination={filteredRoles.length > rowsPerPage}>
+          <CRMTableHeader>
+            <CRMTableRow>
+              <CRMTableHeaderCell className="w-[32%]">Role Name</CRMTableHeaderCell>
+              <CRMTableHeaderCell className="w-[18%]">Assigned Users</CRMTableHeaderCell>
+              <CRMTableHeaderCell className="w-[45%]">Permission Modules</CRMTableHeaderCell>
+              <CRMTableHeaderCell className="w-[5%] text-right">Actions</CRMTableHeaderCell>
+            </CRMTableRow>
+          </CRMTableHeader>
+          <CRMTableBody>
+            <RoleTableRows
+              roles={paginatedRoles}
+              canManageRoles={canManageRoles}
+              currentUserRole={currentUserRole}
+              getRoleColor={getRoleColor}
+              onViewRole={handleOpenView}
+              onEditRole={handleOpenEdit}
+              onDeleteRole={handleOpenDelete}
+            />
+          </CRMTableBody>
+        </DataTable>
+      </div>
 
       <CRMPagination
         currentPage={currentPage}

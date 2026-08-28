@@ -102,7 +102,19 @@ export interface NotificationCategoryType {
 }
 
 export interface NotificationSettingsDataType {
-  channels: NotificationChannelType[];
-  categories: NotificationCategoryType[];
-  realtimePulseEnabled: boolean;
+  channels?: NotificationChannelType[];
+  categories?: NotificationCategoryType[];
+  realtimePulseEnabled?: boolean;
+  emailAlerts?: boolean;
+  inAppAlerts?: boolean;
+  soundEnabled?: boolean;
+  browserPush?: boolean;
+  leadAssignment?: boolean;
+  dealUpdates?: boolean;
+  taskReminders?: boolean;
+  invoiceAlerts?: boolean;
+  meetingAlerts?: boolean;
+  aiBriefing?: boolean;
+  weeklyDigest?: boolean;
+  securityAlerts?: boolean;
 }

@@ -9,7 +9,6 @@ import {
   CreditCard,
   Receipt,
   Sparkles,
-  Zap,
   Boxes,
   ShieldAlert,
   Laptop,
@@ -75,89 +74,23 @@ export const SETTINGS_NAVIGATION: SettingsCategory[] = [
           return permissions.includes(PERMISSIONS.SETTINGS_MANAGE) || permissions.includes("settings.general");
         },
       },
-      {
-        id: "members",
-        label: "Workspace Members",
-        icon: Users,
-        description: "Manage team members, invites, and departmental assignments.",
-        aliases: ["team", "employees-settings"],
-        isAuthorized: ({ role, permissions, isSuperAdmin }) => {
-          if (isSuperAdmin) return true;
-          const r = normalizeRole(role);
-          if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN || r === CRM_ROLES.MANAGER) return true;
-          return (
-            permissions.includes(PERMISSIONS.EMPLOYEES_READ) ||
-            permissions.includes(PERMISSIONS.EMPLOYEES_MANAGE) ||
-            permissions.includes(PERMISSIONS.SETTINGS_MANAGE)
-          );
-        },
-      },
-      {
-        id: "roles",
-        label: "Roles & Permissions",
-        icon: ShieldCheck,
-        description: "Control role access levels, governance, and permission scopes.",
-        aliases: ["role-management", "roles-permissions"],
-        isAuthorized: ({ role, permissions, isSuperAdmin }) => {
-          if (isSuperAdmin) return true;
-          const r = normalizeRole(role);
-          if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN) return true;
-          return (
-            permissions.includes(PERMISSIONS.ROLES_READ) ||
-            permissions.includes(PERMISSIONS.ROLES_MANAGE) ||
-            permissions.includes(PERMISSIONS.SETTINGS_MANAGE)
-          );
-        },
-      },
     ],
   },
   {
-    id: "business",
-    title: "Business & Billing",
-    items: [
-      {
-        id: "billing",
-        label: "Subscription & Plan",
-        icon: CreditCard,
-        description: "Manage your plan, seat quotas, and subscription details.",
-        aliases: ["subscription"],
-        isAuthorized: ({ role, permissions, isSuperAdmin }) => {
-          if (isSuperAdmin) return true;
-          const r = normalizeRole(role);
-          if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN) return true;
-          return permissions.includes(PERMISSIONS.SETTINGS_MANAGE) || permissions.includes("billing.manage");
-        },
-      },
-    ],
-  },
-  {
-    id: "automation-integrations",
-    title: "Automation & Integrations",
+    id: "integrations-group",
+    title: "Integrations & API",
     items: [
       {
         id: "integrations",
         label: "Integrations & API",
         icon: Boxes,
         description: "Manage connected services, API keys, and third-party integrations.",
-        aliases: ["api-keys", "webhooks"],
+        aliases: ["api-keys", "webhooks", "automation", "workflows"],
         isAuthorized: ({ role, permissions, isSuperAdmin }) => {
           if (isSuperAdmin) return true;
           const r = normalizeRole(role);
           if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN) return true;
           return permissions.includes(PERMISSIONS.SETTINGS_MANAGE) || permissions.includes("integrations.manage");
-        },
-      },
-      {
-        id: "automation",
-        label: "Automation Workflows",
-        icon: Zap,
-        description: "Configure automated workflows, webhook actions, and trigger rules.",
-        aliases: ["workflows"],
-        isAuthorized: ({ role, permissions, isSuperAdmin }) => {
-          if (isSuperAdmin) return true;
-          const r = normalizeRole(role);
-          if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN || r === CRM_ROLES.MANAGER) return true;
-          return permissions.includes(PERMISSIONS.SETTINGS_MANAGE) || permissions.includes("automation.manage");
         },
       },
     ],
@@ -170,7 +103,7 @@ export const SETTINGS_NAVIGATION: SettingsCategory[] = [
         id: "security-privacy",
         label: "Security & Privacy",
         icon: ShieldAlert,
-        description: "Manage passwords, two-factor authentication, and security policies.",
+        description: "Manage two-factor authentication (2FA), workspace security policies, and privacy controls.",
         aliases: ["security"],
       },
       {
@@ -229,6 +162,9 @@ export function resolveCanonicalSectionId(rawSectionId: string | null | undefine
   }
 
   // Handle migrated contextual settings redirects
+  if (needle === "billing" || needle === "subscription" || needle === "plan" || needle === "plans" || needle === "pricing" || needle === "upgrade") return "pricing_redirect";
+  if (needle === "roles" || needle === "roles-permissions" || needle === "role-management" || needle === "role" || needle === "permissions") return "roles_redirect";
+  if (needle === "members" || needle === "workspace-members" || needle === "membership" || needle === "team" || needle === "employees-settings") return "members_redirect";
   if (needle === "preferences" || needle === "personalization") return "preferences_redirect";
   if (needle === "invoicing" || needle === "invoice-settings" || needle === "invoices-config" || needle === "gst-settings") return "invoicing_redirect";
   if (needle === "ai" || needle === "ai-settings" || needle === "intelligence") return "ai_settings_redirect";

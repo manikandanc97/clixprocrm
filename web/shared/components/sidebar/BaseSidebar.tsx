@@ -324,7 +324,7 @@ export function BaseSidebarContent({
         </div>
 
         <TooltipProvider delayDuration={0}>
-          <div className="flex-1 overflow-y-auto kanban-board-scroll px-3 pb-4">
+          <div className="flex-1 overflow-y-auto sidebar-scroll px-3 pb-4">
             {groups.map((group, groupIdx) => (
               <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-4" : ""}>
                 {group.label && (
@@ -448,7 +448,7 @@ export function BaseSidebarContent({
         className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden flex flex-col"
       >
         <TooltipProvider delayDuration={0}>
-          <div className={`flex-1 overflow-y-auto kanban-board-scroll pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`}>
+          <div className={`flex-1 overflow-y-auto sidebar-scroll pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`}>
             {groups.map((group, groupIdx) => (
               <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-3.5" : ""}>
                 <AnimatePresence mode="wait">

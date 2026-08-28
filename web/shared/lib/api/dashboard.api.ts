@@ -86,6 +86,18 @@ export function markAllNotificationsAsRead() {
   return unwrapResponse<void>(client.patch("/crm/notifications/mark-all"));
 }
 
+export function deleteNotification(id: string) {
+  return unwrapResponse<void>(client.delete(`/crm/notifications/${id}`));
+}
+
+export function clearAllReadNotifications() {
+  return unwrapResponse<void>(client.delete("/crm/notifications/clear-read"));
+}
+
+export function createTestNotification() {
+  return unwrapResponse<any>(client.post("/crm/notifications/test"));
+}
+
 export function fetchAiInsights() {
   return unwrapResponse<AiInsightsDataType>(client.get("/crm/ai-insights"));
 }

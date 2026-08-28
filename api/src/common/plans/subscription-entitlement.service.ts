@@ -262,7 +262,7 @@ export class SubscriptionEntitlementService {
     ]);
 
     // Query live resource counts in parallel for accurate usage reporting
-    const [userCount, contactCount, leadCount, dealCount] = await Promise.all([
+    const [userCount, contactCount, leadCount, dealCount, attachmentAgg] = await Promise.all([
       this.prisma.tenantUser.count({
         where: { tenantId, status: 'ACTIVE' },
       }),
@@ -274,6 +274,10 @@ export class SubscriptionEntitlementService {
       }),
       this.prisma.deal.count({
         where: { tenantId, deletedAt: null },
+      }),
+      this.prisma.attachment.aggregate({
+        where: { tenantId },
+        _sum: { fileSize: true },
       }),
     ]);
 
@@ -298,14 +302,17 @@ export class SubscriptionEntitlementService {
       };
     };
 
+    const totalBytes = attachmentAgg._sum.fileSize || 0;
+    const storageGbUsed = Number((totalBytes / (1024 * 1024 * 1024)).toFixed(3));
+
     const usage: WorkspaceUsageStats = {
       users: calculateLimit(userCount, planDef.limits.maxUsers),
       contacts: calculateLimit(contactCount, planDef.limits.maxContacts),
       leads: calculateLimit(leadCount, planDef.limits.maxLeads),
       deals: calculateLimit(dealCount, planDef.limits.maxDeals),
       automations: calculateLimit(0, planDef.limits.maxAutomations),
-      storageGb: calculateLimit(0.1, planDef.limits.storageGb),
-      apiRequests: calculateLimit(12, planDef.limits.maxApiRequests),
+      storageGb: calculateLimit(storageGbUsed, planDef.limits.storageGb),
+      apiRequests: calculateLimit(0, planDef.limits.maxApiRequests),
     };
 
     // Calculate trial days remaining if in trial mode
@@ -590,42 +597,33 @@ export class SubscriptionEntitlementService {
 
     if (!tenant) return [];
 
-    const planDef = getPlanDefinition(tenant.plan);
-    const currency = tenant.currency || 'INR';
+    // Query real platform invoices from database
+    const dbInvoices = await this.prisma.platformInvoice.findMany({
+      where: { tenantId },
+      orderBy: { invoiceDate: 'desc' },
+      take: 50,
+    });
 
-    // If free tier, no paid invoices exist yet
-    if (planDef.id === 'free') {
-      return [];
+    if (dbInvoices && dbInvoices.length > 0) {
+      return dbInvoices.map((inv) => ({
+        id: inv.id,
+        invoiceNumber: inv.invoiceNumber,
+        date: inv.invoiceDate.toLocaleDateString('en-US', {
+          month: 'short',
+          day: 'numeric',
+          year: 'numeric',
+        }),
+        description: `${inv.planName} Plan (${inv.billingCycle === 'annual' ? 'Annual' : 'Monthly'})`,
+        planName: inv.planName,
+        seats: inv.seats,
+        amount: Number(inv.totalAmount || 0),
+        currency: inv.currency,
+        status: (inv.paymentStatus === 'PAID' ? 'PAID' : inv.status === 'PAID' ? 'PAID' : 'PENDING') as any,
+        downloadUrl: inv.pdfUrl,
+      }));
     }
 
-    const activeUsers = await this.prisma.tenantUser.count({
-      where: { tenantId, status: 'ACTIVE' },
-    });
-    const seats = Math.max(activeUsers, 1);
-    const unitPrice = tenant.billingCycle === 'annual' ? planDef.annualPriceNum : planDef.priceNum;
-    const amount = unitPrice * seats;
-
-    const invoiceDate = new Date();
-    const formattedDate = invoiceDate.toLocaleDateString('en-US', {
-      month: 'short',
-      day: 'numeric',
-      year: 'numeric',
-    });
-
-    return [
-      {
-        id: `inv_${tenantId.slice(0, 8)}_current`,
-        invoiceNumber: `INV-${new Date().getFullYear()}-${tenantId.slice(0, 4).toUpperCase()}`,
-        date: formattedDate,
-        description: `${planDef.name} Plan (${tenant.billingCycle === 'annual' ? 'Annual' : 'Monthly'})`,
-        planName: planDef.name,
-        seats,
-        amount,
-        currency,
-        status: 'PAID',
-        downloadUrl: null,
-      },
-    ];
+    return [];
   }
 
   /**

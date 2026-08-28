@@ -40,18 +40,6 @@ export class SettingsController {
     return { success: true, data: updated };
   }
 
-  @Get('security')
-  @Roles('ADMIN', 'MANAGER', 'USER')
-  async getSecuritySettings() {
-    return {
-      success: true,
-      data: {
-        activeSessions: [],
-        loginHistory: [],
-      },
-    };
-  }
-
   @Get('ai')
   @Roles('ADMIN', 'MANAGER')
   async getAiSettings(@Req() req: any) {
@@ -84,6 +72,27 @@ export class SettingsController {
   async updateAiSettings(@Req() req: any, @Body() data: any) {
     const updated = await this.settingsService.updateAiSettings(
       req.tenantId,
+      data,
+    );
+    return { success: true, data: updated };
+  }
+
+  @Get('notifications')
+  @Roles('ADMIN', 'MANAGER', 'USER', 'EMPLOYEE')
+  async getNotificationSettings(@Req() req: any) {
+    const data = await this.settingsService.getNotificationSettings(
+      req.tenantId,
+      req.user.id,
+    );
+    return { success: true, data };
+  }
+
+  @Patch('notifications')
+  @Roles('ADMIN', 'MANAGER', 'USER', 'EMPLOYEE')
+  async updateNotificationSettings(@Req() req: any, @Body() data: any) {
+    const updated = await this.settingsService.updateNotificationSettings(
+      req.tenantId,
+      req.user.id,
       data,
     );
     return { success: true, data: updated };

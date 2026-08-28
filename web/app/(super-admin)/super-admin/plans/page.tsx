@@ -785,9 +785,6 @@ export default function SuperAdminPlansPage() {
                           className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
                         >
                           <option value="INR">INR (₹) - Indian Rupee</option>
-                          <option value="USD">USD ($) - US Dollar</option>
-                          <option value="EUR">EUR (€) - Euro</option>
-                          <option value="GBP">GBP (£) - British Pound</option>
                         </select>
                       </div>
 

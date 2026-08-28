@@ -433,10 +433,6 @@ export function CreateInvoiceModal({
                 </SelectTrigger>
                 <SelectContent>
                   <SelectItem value="INR" className="text-xs">INR (₹)</SelectItem>
-                  <SelectItem value="USD" className="text-xs">USD ($)</SelectItem>
-                  <SelectItem value="EUR" className="text-xs">EUR (€)</SelectItem>
-                  <SelectItem value="GBP" className="text-xs">GBP (£)</SelectItem>
-                  <SelectItem value="AED" className="text-xs">AED (د.إ)</SelectItem>
                 </SelectContent>
               </Select>
             </div>

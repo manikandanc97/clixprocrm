@@ -8,19 +8,23 @@ import {
 
 export function RoleManagementSkeleton() {
   return (
-    <div className="space-y-6">
+    <div className="flex-1 flex flex-col min-h-0 gap-3.5 sm:gap-4">
       {/* 3 Metric Cards */}
-      <CRMMetricsGrid cols={3}>
-        <MetricCardSkeleton />
-        <MetricCardSkeleton />
-        <MetricCardSkeleton />
-      </CRMMetricsGrid>
+      <div className="shrink-0">
+        <CRMMetricsGrid cols={3}>
+          <MetricCardSkeleton />
+          <MetricCardSkeleton />
+          <MetricCardSkeleton />
+        </CRMMetricsGrid>
+      </div>
 
       {/* Toolbar */}
       <ToolbarSkeleton />
 
       {/* Roles Table (6 columns: Role, Priority, Permissions, Users, Status, Actions) */}
-      <TableSkeleton rows={6} cols={6} showPagination={true} hasAvatar={true} />
+      <div className="flex-1 min-h-0 flex flex-col">
+        <TableSkeleton rows={6} cols={6} showPagination={true} hasAvatar={true} />
+      </div>
     </div>
   );
 }

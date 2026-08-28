@@ -7,10 +7,7 @@ import SettingsSidebar from "@/features/settings/components/SettingsSidebar";
 import ProfileSettings from "@/features/settings/components/ProfileSettings";
 import NotificationsSettings from "@/features/settings/components/NotificationsSettings";
 import WorkspaceSettings from "@/features/settings/components/WorkspaceSettings";
-import WorkspaceMembersSettings from "@/features/settings/components/WorkspaceMembersSettings";
-import RolesPermissionsSettings from "@/features/settings/components/RolesPermissionsSettings";
 import SubscriptionSettings from "@/features/settings/components/SubscriptionSettings";
-import AutomationSettings from "@/features/settings/components/AutomationSettings";
 import IntegrationsSettings from "@/features/settings/components/IntegrationsSettings";
 import SecuritySettings from "@/features/settings/components/SecuritySettings";
 import SessionsSettings from "@/features/settings/components/SessionsSettings";
@@ -48,7 +45,13 @@ const SettingsPage = () => {
   useEffect(() => {
     if (!rawSectionParam) return;
     const resolved = resolveCanonicalSectionId(rawSectionParam);
-    if (resolved === "invoicing_redirect") {
+    if (resolved === "pricing_redirect") {
+      router.replace("/pricing");
+    } else if (resolved === "roles_redirect") {
+      router.replace("/role-management");
+    } else if (resolved === "members_redirect") {
+      router.replace("/employees");
+    } else if (resolved === "invoicing_redirect") {
       router.replace("/invoices?customize=true");
     } else if (resolved === "ai_settings_redirect") {
       router.replace("/ai?customize=true");
@@ -134,20 +137,14 @@ const SettingsPage = () => {
       // Workspace
       case "general":
         return <WorkspaceSettings />;
-      case "members":
-        return <WorkspaceMembersSettings />;
-      case "roles":
-        return <RolesPermissionsSettings />;
 
       // Business & Billing
       case "billing":
         return <SubscriptionSettings />;
 
-      // Automation & Integrations
+      // Integrations & API
       case "integrations":
         return <IntegrationsSettings />;
-      case "automation":
-        return <AutomationSettings />;
 
       // Security & Governance
       case "security-privacy":

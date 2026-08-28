@@ -225,7 +225,7 @@ export default function SubscriptionSettings() {
               <div className="w-full bg-background rounded-full h-1.5 overflow-hidden border border-border/40">
                 <div
                   className="bg-primary h-full rounded-full transition-all"
-                  style={{ width: `${Math.min(100, usage?.users?.percentage ?? 10)}%` }}
+                  style={{ width: `${Math.min(100, usage?.users?.percentage ?? 0)}%` }}
                 />
               </div>
             </div>
@@ -247,7 +247,7 @@ export default function SubscriptionSettings() {
               <div className="w-full bg-background rounded-full h-1.5 overflow-hidden border border-border/40">
                 <div
                   className="bg-sky-500 h-full rounded-full transition-all"
-                  style={{ width: `${Math.min(100, usage?.contacts?.percentage ?? 5)}%` }}
+                  style={{ width: `${Math.min(100, usage?.contacts?.percentage ?? 0)}%` }}
                 />
               </div>
             </div>
@@ -269,7 +269,7 @@ export default function SubscriptionSettings() {
               <div className="w-full bg-background rounded-full h-1.5 overflow-hidden border border-border/40">
                 <div
                   className="bg-indigo-500 h-full rounded-full transition-all"
-                  style={{ width: `${Math.min(100, usage?.leads?.percentage ?? 5)}%` }}
+                  style={{ width: `${Math.min(100, usage?.leads?.percentage ?? 0)}%` }}
                 />
               </div>
             </div>
@@ -282,7 +282,7 @@ export default function SubscriptionSettings() {
                   Storage
                 </span>
                 <span className="font-bold text-foreground">
-                  {usage?.storageGb?.current ?? 0.1} GB /{" "}
+                  {usage?.storageGb?.current ?? 0} GB /{" "}
                   {currentPlan.limits.storageGb === -1
                     ? "Unlimited"
                     : `${currentPlan.limits.storageGb} GB`}
@@ -291,7 +291,7 @@ export default function SubscriptionSettings() {
               <div className="w-full bg-background rounded-full h-1.5 overflow-hidden border border-border/40">
                 <div
                   className="bg-emerald-500 h-full rounded-full transition-all"
-                  style={{ width: `${Math.min(100, usage?.storageGb?.percentage ?? 5)}%` }}
+                  style={{ width: `${Math.min(100, usage?.storageGb?.percentage ?? 0)}%` }}
                 />
               </div>
             </div>

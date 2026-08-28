@@ -104,6 +104,36 @@ export function useMarkAllNotificationsRead() {
   });
 }
 
+export function useDeleteNotification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: (id: string) => import("@/shared/lib/api/dashboard.api").then((m) => m.deleteNotification(id)),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    }
+  });
+}
+
+export function useClearAllReadNotifications() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => import("@/shared/lib/api/dashboard.api").then((m) => m.clearAllReadNotifications()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    }
+  });
+}
+
+export function useCreateTestNotification() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: () => import("@/shared/lib/api/dashboard.api").then((m) => m.createTestNotification()),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["notifications"] });
+    }
+  });
+}
+
 export function useAiInsights() {
   const { isAuthenticated, isHydrated } = useAuth();
   return useQuery({

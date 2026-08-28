@@ -17,7 +17,7 @@ export default function RoleManagementPage() {
         icon={Shield}
       />
 
-      <div className="mt-6">
+      <div className="flex-1 min-h-0 flex flex-col">
         <RoleList />
       </div>
     </CRMPageContainer>

@@ -5,28 +5,19 @@ import {
   ShieldCheck,
   ShieldAlert,
   AlertTriangle,
-  Trash2,
   QrCode,
   KeyRound,
   Copy,
   Download,
   CheckCircle2,
-  RefreshCw,
   Lock,
   ArrowRight,
   Loader2,
   Building2,
-  Laptop,
-  Smartphone,
-  Tablet,
-  Globe,
-  LogOut,
-  Monitor,
-  Clock,
-  Eye,
-  EyeOff,
-  Activity,
-  UserCheck,
+  BellRing,
+  FileDown,
+  RefreshCw,
+  Info,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CRMCard } from "@/shared/components/crm";
@@ -35,12 +26,17 @@ import { SecuritySettingsSkeleton } from "./SettingsSkeletons";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/ui/dialog";
-import { DeleteAccountModal } from "./DeleteAccountModal";
+import { Switch } from "@/shared/ui/switch";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/shared/ui/dialog";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { createClient } from "@/lib/supabase/client";
-import { changePassword } from "@/shared/lib/api/auth";
 import {
   getMfaStatus,
   generateRecoveryCodes,
@@ -49,37 +45,24 @@ import {
   updateTenantMfaPolicy,
   RecoveryCodesResponse,
 } from "@/shared/lib/api/mfa.api";
-import {
-  fetchUserSessions,
-  revokeUserSession,
-  revokeAllOtherSessions,
-  fetchSecurityActivity,
-  UserSessionDto,
-  SecurityActivityDto,
-} from "@/shared/lib/api/sessions.api";
+import { exportUserData } from "@/shared/lib/api/privacy.api";
+import client from "@/shared/lib/api/client";
+import { toast } from "sonner";
 
-
-const SecuritySettings = () => {
+export default function SecuritySettings() {
   const queryClient = useQueryClient();
   const { user } = useAuth();
-  const isAdmin = user?.role === "admin" || user?.role === "ADMIN" || user?.role === "super_admin" || user?.role === "SUPER_ADMIN";
+  const isAdmin =
+    user?.role === "admin" ||
+    user?.role === "ADMIN" ||
+    user?.role === "super_admin" ||
+    user?.role === "SUPER_ADMIN";
 
-  const [showDeleteModal, setShowDeleteModal] = useState(false);
+  // Modals state
   const [showEnrollModal, setShowEnrollModal] = useState(false);
   const [showDisableModal, setShowDisableModal] = useState(false);
   const [showRecoveryModal, setShowRecoveryModal] = useState(false);
-  const [showRevokeAllModal, setShowRevokeAllModal] = useState(false);
-  const [showChangePasswordModal, setShowChangePasswordModal] = useState(false);
-  const [revokingSessionId, setRevokingSessionId] = useState<string | null>(null);
-
-  // Change Password state
-  const [newPassword, setNewPassword] = useState("");
-  const [confirmPassword, setConfirmPassword] = useState("");
-  const [showNewPassword, setShowNewPassword] = useState(false);
-  const [showConfirmPassword, setShowConfirmPassword] = useState(false);
-  const [passwordLoading, setPasswordLoading] = useState(false);
-  const [passwordError, setPasswordError] = useState<string | null>(null);
-  const [passwordSuccess, setPasswordSuccess] = useState<string | null>(null);
+  const [showRegenerateConfirmModal, setShowRegenerateConfirmModal] = useState(false);
 
   // Enrollment flow state
   const [enrollStep, setEnrollStep] = useState<"qr" | "codes" | "verify">("qr");
@@ -89,6 +72,7 @@ const SecuritySettings = () => {
     secret: string;
   } | null>(null);
   const [generatedCodes, setGeneratedCodes] = useState<string[]>([]);
+  const [hasConfirmedSavedCodes, setHasConfirmedSavedCodes] = useState(false);
   const [verifyOtp, setVerifyOtp] = useState("");
   const [enrollLoading, setEnrollLoading] = useState(false);
   const [enrollError, setEnrollError] = useState<string | null>(null);
@@ -99,217 +83,75 @@ const SecuritySettings = () => {
   const [disableLoading, setDisableLoading] = useState(false);
   const [disableError, setDisableError] = useState<string | null>(null);
 
-  // Fetch MFA Status
+  // Privacy export state
+  const [isExporting, setIsExporting] = useState(false);
+
+  // 1. Fetch Real MFA Status
   const {
     data: mfaStatus,
-    isLoading,
-    error,
-    refetch,
+    isLoading: isMfaLoading,
+    error: mfaError,
+    refetch: refetchMfa,
   } = useQuery({
     queryKey: ["mfa-status"],
     queryFn: getMfaStatus,
     staleTime: 30000,
   });
 
-  // Fetch Active Sessions
+  // 2. Fetch Security Notification Preferences
   const {
-    data: sessionsData,
-    isLoading: sessionsLoading,
-    error: sessionsError,
+    data: notificationData,
+    isLoading: isNotifLoading,
   } = useQuery({
-    queryKey: ["auth-sessions"],
-    queryFn: fetchUserSessions,
-    staleTime: 15000,
-  });
-
-  // Session Mutations
-  const revokeMutation = useMutation({
-    mutationFn: (sessionId: string) => revokeUserSession(sessionId),
-    onMutate: (sessionId) => {
-      setRevokingSessionId(sessionId);
+    queryKey: ["notification-settings"],
+    queryFn: async () => {
+      const res = await client.get<{ success: boolean; data: any }>("/crm/settings/notifications");
+      return res.data.data;
     },
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["auth-sessions"] });
-      void queryClient.invalidateQueries({ queryKey: ["security-activity"] });
-      setRevokingSessionId(null);
-    },
-    onError: (err: any) => {
-      setRevokingSessionId(null);
-      alert(err?.response?.data?.message || err?.message || "Failed to revoke session");
-    },
-  });
-
-  const revokeAllMutation = useMutation({
-    mutationFn: () => revokeAllOtherSessions(),
-    onSuccess: () => {
-      void queryClient.invalidateQueries({ queryKey: ["auth-sessions"] });
-      void queryClient.invalidateQueries({ queryKey: ["security-activity"] });
-      setShowRevokeAllModal(false);
-    },
-    onError: (err: any) => {
-      alert(err?.response?.data?.message || err?.message || "Failed to revoke sessions");
-    },
-  });
-
-  // Security Activity state & query
-  const [activityPage, setActivityPage] = useState(1);
-  const [allActivities, setAllActivities] = useState<SecurityActivityDto[]>([]);
-
-  const {
-    data: activityData,
-    isLoading: activityLoading,
-    isError: activityError,
-    refetch: refetchActivity,
-  } = useQuery({
-    queryKey: ["security-activity", activityPage],
-    queryFn: () => fetchSecurityActivity(activityPage, 20),
     staleTime: 30000,
   });
 
-  React.useEffect(() => {
-    if (activityData?.activity) {
-      if (activityPage === 1) {
-        setAllActivities(activityData.activity);
-      } else {
-        setAllActivities((prev) => {
-          const existingIds = new Set(prev.map((a) => a.id));
-          const newItems = activityData.activity.filter((a) => !existingIds.has(a.id));
-          return [...prev, ...newItems];
-        });
-      }
-    }
-  }, [activityData, activityPage]);
-
-  const getActivityVisuals = (action: string) => {
-    switch (action) {
-      case "NEW_DEVICE_LOGIN":
-        return {
-          icon: <ShieldAlert className="w-4 h-4 text-amber-500" />,
-          bgColor: "bg-amber-500/10",
-          title: "New Sign-In Detected",
-        };
-      case "LOGIN_SUCCESS":
-        return {
-          icon: <UserCheck className="w-4 h-4 text-emerald-500" />,
-          bgColor: "bg-emerald-500/10",
-          title: "Sign-In Successful",
-        };
-      case "LOGIN_FAILED":
-        return {
-          icon: <AlertTriangle className="w-4 h-4 text-rose-500" />,
-          bgColor: "bg-rose-500/10",
-          title: "Failed Sign-In Attempt",
-        };
-      case "MFA_VERIFIED":
-        return {
-          icon: <ShieldCheck className="w-4 h-4 text-emerald-500" />,
-          bgColor: "bg-emerald-500/10",
-          title: "MFA Challenge Verified",
-        };
-      case "MFA_ENROLLED":
-        return {
-          icon: <ShieldCheck className="w-4 h-4 text-primary" />,
-          bgColor: "bg-primary/10",
-          title: "MFA Enrolled",
-        };
-      case "MFA_DISABLED":
-        return {
-          icon: <AlertTriangle className="w-4 h-4 text-amber-500" />,
-          bgColor: "bg-amber-500/10",
-          title: "MFA Disabled",
-        };
-      case "MFA_CHALLENGE_FAILED":
-      case "AAL2_REQUIRED_DENIED":
-        return {
-          icon: <AlertTriangle className="w-4 h-4 text-rose-500" />,
-          bgColor: "bg-rose-500/10",
-          title: "MFA Verification Failed",
-        };
-      case "MFA_RECOVERY_CODE_GENERATED":
-      case "MFA_RECOVERY_CODE_VERIFIED":
-        return {
-          icon: <KeyRound className="w-4 h-4 text-purple-500" />,
-          bgColor: "bg-purple-500/10",
-          title: "Recovery Code Used",
-        };
-      case "PASSWORD_CHANGED":
-      case "PASSWORD_RESET":
-        return {
-          icon: <KeyRound className="w-4 h-4 text-blue-500" />,
-          bgColor: "bg-blue-500/10",
-          title: "Password Changed",
-        };
-      case "SESSION_REVOKED":
-      case "SESSION_REVOKED_REMOTE":
-        return {
-          icon: <LogOut className="w-4 h-4 text-muted-foreground" />,
-          bgColor: "bg-muted",
-          title: "Session Revoked",
-        };
-      case "ALL_OTHER_SESSIONS_REVOKED":
-        return {
-          icon: <LogOut className="w-4 h-4 text-amber-500" />,
-          bgColor: "bg-amber-500/10",
-          title: "All Other Sessions Revoked",
-        };
-      case "SESSION_EXPIRED_IDLE":
-      case "SESSION_EXPIRED_ABSOLUTE":
-        return {
-          icon: <Clock className="w-4 h-4 text-muted-foreground" />,
-          bgColor: "bg-muted",
-          title: "Session Expired",
-        };
-      default:
-        return {
-          icon: <Activity className="w-4 h-4 text-primary" />,
-          bgColor: "bg-primary/10",
-          title: action.replace(/_/g, " "),
-        };
-    }
-  };
-
-
-  const getDeviceIcon = (deviceType: string) => {
-    switch (deviceType.toLowerCase()) {
-      case "mobile":
-        return <Smartphone className="w-4 h-4" />;
-      case "tablet":
-        return <Tablet className="w-4 h-4" />;
-      case "desktop":
-      default:
-        return <Laptop className="w-4 h-4" />;
-    }
-  };
-
-  const formatSessionTime = (isoString: string) => {
-    try {
-      const date = new Date(isoString);
-      const now = new Date();
-      const diffSec = Math.floor((now.getTime() - date.getTime()) / 1000);
-      if (diffSec < 60) return "Active just now";
-      if (diffSec < 3600) return `Active ${Math.floor(diffSec / 60)}m ago`;
-      if (diffSec < 86400) return `Active ${Math.floor(diffSec / 3600)}h ago`;
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric", hour: "2-digit", minute: "2-digit" });
-    } catch {
-      return isoString;
-    }
-  };
-
-  // Organization policy mutation
+  // Organization MFA Policy Mutation
   const policyMutation = useMutation({
     mutationFn: (policy: "OPTIONAL" | "REQUIRED") => updateTenantMfaPolicy(policy),
-    onSuccess: () => {
+    onSuccess: (data) => {
+      toast.success(data?.message || "Organization MFA policy updated successfully");
       void queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
+    },
+    onError: (err: any) => {
+      toast.error(
+        err?.response?.data?.message || err?.message || "Failed to update organization MFA policy"
+      );
     },
   });
 
-  // Start Enrollment Wizard
+  // Notification Preference Mutation
+  const notifMutation = useMutation({
+    mutationFn: async (enabled: boolean) => {
+      const res = await client.patch<{ success: boolean; data: any }>("/crm/settings/notifications", {
+        securityAlerts: enabled,
+      });
+      return res.data.data;
+    },
+    onSuccess: () => {
+      toast.success("Security notification preference updated");
+      void queryClient.invalidateQueries({ queryKey: ["notification-settings"] });
+    },
+    onError: (err: any) => {
+      toast.error(
+        err?.response?.data?.message || err?.message || "Failed to update notification settings"
+      );
+    },
+  });
+
+  // Start Enrollment Wizard Flow
   const handleStartEnrollment = async () => {
     try {
       setEnrollLoading(true);
       setEnrollError(null);
       setEnrollStep("qr");
       setVerifyOtp("");
+      setHasConfirmedSavedCodes(false);
       const supabase = createClient();
 
       // 1. Enroll TOTP factor in Supabase Auth
@@ -334,13 +176,15 @@ const SecuritySettings = () => {
 
       setShowEnrollModal(true);
     } catch (err: any) {
-      setEnrollError(err?.message || "Could not start 2FA setup. Please try again.");
+      const msg = err?.message || "Could not start 2FA setup. Please try again.";
+      setEnrollError(msg);
+      toast.error(msg);
     } finally {
       setEnrollLoading(false);
     }
   };
 
-  // Complete Enrollment
+  // Complete Enrollment Verification
   const handleConfirmEnrollment = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!enrollData || !verifyOtp.trim()) return;
@@ -363,63 +207,82 @@ const SecuritySettings = () => {
         throw new Error(verifyErr?.message || "Invalid authentication code. Please check and try again.");
       }
 
+      // Record successful enrollment in audit log
       await recordMfaAuditEvent("MFA_ENROLLED", {
         factorId: enrollData.factorId,
       }).catch(() => {});
 
+      toast.success("Two-Factor Authentication activated successfully!");
       await queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
       setShowEnrollModal(false);
     } catch (err: any) {
-      setEnrollError(err?.message || "Verification failed. Please ensure the code is current.");
+      setEnrollError(err?.message || "Verification failed. Please check the code in your authenticator app.");
     } finally {
       setEnrollLoading(false);
     }
   };
 
-  // Handle Disable MFA
+  // Handle Disable MFA Flow
   const handleDisableMfa = async () => {
     try {
       setDisableLoading(true);
       setDisableError(null);
 
       await disableMfa();
+      toast.success("Two-Factor Authentication disabled.");
       await queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
       setShowDisableModal(false);
     } catch (err: any) {
-      setDisableError(err?.response?.data?.message || err?.message || "Failed to disable 2FA.");
+      const msg = err?.response?.data?.message || err?.message || "Failed to disable 2FA.";
+      setDisableError(msg);
+      toast.error(msg);
     } finally {
       setDisableLoading(false);
     }
   };
 
-  // Handle Change Password
-  const handleChangePassword = async (e: React.FormEvent) => {
-    e.preventDefault();
-    if (newPassword.length < 6) {
-      setPasswordError("Password must be at least 6 characters long.");
-      return;
-    }
-    if (newPassword !== confirmPassword) {
-      setPasswordError("Passwords do not match.");
-      return;
-    }
-
+  // Handle Regenerating Recovery Codes
+  const handleRegenerateCodes = async () => {
     try {
-      setPasswordLoading(true);
-      setPasswordError(null);
-      await changePassword(newPassword);
-      setPasswordSuccess("Password updated successfully. All other active sessions have been signed out.");
-      await queryClient.invalidateQueries({ queryKey: ["auth-sessions"] });
-      setTimeout(() => {
-        setShowChangePasswordModal(false);
-        setPasswordSuccess(null);
-        setNewPassword("");
-        setConfirmPassword("");
-      }, 1500);
+      setEnrollLoading(true);
+      const res = await generateRecoveryCodes();
+      setGeneratedCodes(res.recoveryCodes || []);
+      setShowRegenerateConfirmModal(false);
+      setShowRecoveryModal(true);
+      toast.success("Fresh backup recovery codes generated.");
+      await queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
     } catch (err: any) {
-      setPasswordError(err?.response?.data?.message || err?.message || "Failed to update password.");
+      toast.error(err?.response?.data?.message || err?.message || "Failed to generate backup codes");
     } finally {
-      setPasswordLoading(false);
+      setEnrollLoading(false);
+    }
+  };
+
+  // Handle Real Privacy Data Export
+  const handleExportData = async () => {
+    try {
+      setIsExporting(true);
+      const data = await exportUserData();
+
+      // Trigger browser download of real JSON payload
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+        JSON.stringify(data, null, 2)
+      )}`;
+      const downloadAnchor = document.createElement("a");
+      const timestamp = new Date().toISOString().split("T")[0];
+      downloadAnchor.setAttribute("href", jsonString);
+      downloadAnchor.setAttribute("download", `clixprocrm-personal-data-${timestamp}.json`);
+      document.body.appendChild(downloadAnchor);
+      downloadAnchor.click();
+      downloadAnchor.remove();
+
+      toast.success("Personal data archive exported successfully.");
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message || err?.message || "Failed to export personal data archive."
+      );
+    } finally {
+      setIsExporting(false);
     }
   };
 
@@ -427,6 +290,7 @@ const SecuritySettings = () => {
   const handleCopyCodes = () => {
     navigator.clipboard.writeText(generatedCodes.join("\n"));
     setCopiedCodes(true);
+    toast.success("Recovery codes copied to clipboard");
     setTimeout(() => setCopiedCodes(false), 2000);
   };
 
@@ -441,17 +305,17 @@ const SecuritySettings = () => {
     document.body.removeChild(element);
   };
 
-  if (isLoading) {
+  if (isMfaLoading) {
     return <SecuritySettingsSkeleton />;
   }
 
-  if (error) {
+  if (mfaError) {
     return (
       <PageErrorState
         title="Security settings unavailable"
-        message={(error as Error).message}
+        message={(mfaError as Error).message}
         onRetry={() => {
-          void refetch();
+          void refetchMfa();
         }}
       />
     );
@@ -459,531 +323,313 @@ const SecuritySettings = () => {
 
   const isMfaActive = mfaStatus?.hasVerifiedFactor === true;
   const isOrgEnforced = mfaStatus?.isEnforcedByOrg === true;
+  const recoveryCodesLeft = mfaStatus?.recoveryCodesRemaining ?? 0;
+  const securityAlertsEnabled = notificationData?.securityAlerts ?? true;
 
   return (
-    <div className="space-y-5">
-      <div className="mb-5">
+    <div className="space-y-6">
+      {/* Section Header */}
+      <div className="pb-1">
         <h3 className="text-base font-bold tracking-tight text-foreground">Security & Privacy</h3>
         <p className="text-xs text-muted-foreground font-medium mt-0.5">
-          Manage your enterprise authentication, two-factor verification, and access controls.
+          Manage account two-factor verification, organization security policies, and personal privacy controls.
         </p>
       </div>
 
-      <div className="grid grid-cols-1 xl:grid-cols-2 gap-5">
-        {/* 2FA / MFA Management Card */}
-        <CRMCard>
-          <div className="flex items-center justify-between gap-2 mb-5">
-            <div className="flex items-center gap-2">
-              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                <ShieldCheck className="w-4 h-4" />
-              </div>
-              <div>
-                <h3 className="text-sm font-bold tracking-tight text-foreground">Two-Factor Authentication (2FA)</h3>
-                <p className="text-[11px] text-muted-foreground font-medium">TOTP authenticator app verification</p>
-              </div>
-            </div>
-            <Badge
-              variant={isMfaActive ? "default" : "secondary"}
-              className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ${
-                isMfaActive ? "bg-emerald-500/15 text-emerald-500 border-emerald-500/20" : ""
-              }`}
-            >
-              {isMfaActive ? "Enabled (AAL2)" : "Disabled"}
-            </Badge>
-          </div>
-
-          <div className="p-4 bg-muted/30 rounded-lg border border-border/50 flex flex-col gap-4">
-            <div className="flex items-start gap-3">
-              <Lock className="w-5 h-5 text-primary shrink-0 mt-0.5" />
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-foreground">
-                  {isMfaActive ? "Authenticator Protection Active" : "Protect Your Account with 2FA"}
-                </h4>
-                <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
-                  {isMfaActive
-                    ? "Your account requires a 6-digit TOTP verification code from Google Authenticator, Authy, or 1Password when signing in."
-                    : "Add an extra layer of security. In addition to your password, you will need to enter a 6-digit code from your authenticator app."}
-                </p>
-              </div>
-            </div>
-
-            {isOrgEnforced && (
-              <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-md flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-medium">
-                <ShieldAlert className="w-4 h-4 shrink-0" />
-                <span>Two-factor authentication is required by your organization policy.</span>
-              </div>
-            )}
-
-            <div className="pt-2 flex flex-wrap items-center gap-3 border-t border-border/40">
-              {isMfaActive ? (
-                <>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={() => setShowDisableModal(true)}
-                    className="font-bold text-xs gap-1.5 h-8 text-destructive hover:text-destructive"
-                  >
-                    Disable 2FA
-                  </Button>
-                  <Button
-                    variant="outline"
-                    size="sm"
-                    onClick={async () => {
-                      try {
-                        const res = await generateRecoveryCodes();
-                        setGeneratedCodes(res.recoveryCodes || []);
-                        setShowRecoveryModal(true);
-                      } catch (err: any) {
-                        alert(err?.message || "Failed to generate backup codes");
-                      }
-                    }}
-                    className="font-bold text-xs gap-1.5 h-8"
-                  >
-                    <KeyRound className="w-3.5 h-3.5" />
-                    View Backup Codes
-                  </Button>
-                </>
-              ) : (
-                <Button
-                  variant="default"
-                  size="sm"
-                  onClick={handleStartEnrollment}
-                  disabled={enrollLoading}
-                  className="font-bold text-xs gap-2 h-8"
-                >
-                  {enrollLoading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : (
-                    <QrCode className="w-3.5 h-3.5" />
-                  )}
-                  Enable 2FA
-                </Button>
-              )}
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  setPasswordError(null);
-                  setPasswordSuccess(null);
-                  setNewPassword("");
-                  setConfirmPassword("");
-                  setShowChangePasswordModal(true);
-                }}
-                className="font-bold text-xs gap-1.5 h-8"
-              >
-                <Lock className="w-3.5 h-3.5" />
-                Change Password
-              </Button>
-            </div>
-          </div>
-        </CRMCard>
-
-        {/* Organization MFA Policy Card (Admins Only) */}
-        {isAdmin && (
-          <CRMCard>
-            <div className="flex items-center justify-between gap-2 mb-5">
-              <div className="flex items-center gap-2">
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* 1. Account Security (2FA) */}
+        <CRMCard className="flex flex-col justify-between">
+          <div>
+            <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-border/50">
+              <div className="flex items-center gap-3">
                 <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-                  <Building2 className="w-4 h-4" />
+                  <ShieldCheck className="w-4 h-4" />
                 </div>
                 <div>
-                  <h3 className="text-sm font-bold tracking-tight text-foreground">Organization 2FA Policy</h3>
-                  <p className="text-[11px] text-muted-foreground font-medium">Tenant-wide security requirements</p>
+                  <h4 className="text-sm font-bold tracking-tight text-foreground">Two-Factor Authentication</h4>
+                  <p className="text-[11px] text-muted-foreground font-medium">TOTP authenticator app verification</p>
                 </div>
               </div>
-              <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5">
-                Admin Control
+              <Badge
+                variant={isMfaActive ? "default" : "secondary"}
+                className={`text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 ${
+                  isMfaActive
+                    ? "bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                    : ""
+                }`}
+              >
+                {isMfaActive ? "Enabled" : "Disabled"}
               </Badge>
             </div>
 
-            <div className="p-4 bg-muted/30 rounded-lg border border-border/50 flex flex-col gap-4">
-              <div className="space-y-1">
-                <h4 className="text-xs font-bold text-foreground">MFA Enforcement Policy</h4>
+            <div className="p-4 bg-muted/30 rounded-xl border border-border/50 space-y-3">
+              <div className="flex items-start gap-3">
+                <Lock className="w-4.5 h-4.5 text-primary shrink-0 mt-0.5" />
+                <div className="space-y-1">
+                  <h5 className="text-xs font-bold text-foreground">
+                    {isMfaActive ? "Authenticator Protection Active" : "Protect Your Account with 2FA"}
+                  </h5>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+                    {isMfaActive
+                      ? "Your account requires a 6-digit TOTP verification code from your authenticator app (Google Authenticator, Authy, or 1Password) during login."
+                      : "Add an extra layer of protection. In addition to your password, you will need to enter a 6-digit code from your authenticator app."}
+                  </p>
+                </div>
+              </div>
+
+              {isOrgEnforced && (
+                <div className="p-3 bg-amber-500/10 border border-amber-500/20 rounded-lg flex items-center gap-2 text-amber-600 dark:text-amber-400 text-xs font-medium">
+                  <ShieldAlert className="w-4 h-4 shrink-0" />
+                  <span>Two-factor authentication is required by your workspace security policy.</span>
+                </div>
+              )}
+
+              {isMfaActive && (
+                <div className="flex items-center justify-between pt-2 text-xs border-t border-border/40">
+                  <span className="text-muted-foreground font-medium">Backup Recovery Codes:</span>
+                  <Badge variant="outline" className="text-[10px] font-bold font-mono">
+                    {recoveryCodesLeft} Available
+                  </Badge>
+                </div>
+              )}
+            </div>
+          </div>
+
+          <div className="pt-4 mt-4 flex items-center gap-3 border-t border-border/50">
+            {isMfaActive ? (
+              <>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowRegenerateConfirmModal(true)}
+                  className="font-bold text-xs gap-1.5 h-8.5"
+                >
+                  <KeyRound className="w-3.5 h-3.5" />
+                  Regenerate Backup Codes
+                </Button>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setShowDisableModal(true)}
+                  className="font-bold text-xs gap-1.5 h-8.5 text-destructive hover:text-destructive hover:bg-destructive/10"
+                >
+                  Disable 2FA
+                </Button>
+              </>
+            ) : (
+              <Button
+                variant="default"
+                size="sm"
+                onClick={handleStartEnrollment}
+                disabled={enrollLoading}
+                className="font-bold text-xs gap-2 h-8.5"
+              >
+                {enrollLoading ? (
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                ) : (
+                  <QrCode className="w-3.5 h-3.5" />
+                )}
+                Enable 2FA
+              </Button>
+            )}
+          </div>
+        </CRMCard>
+
+        {/* 2. Workspace Security Policy (Admins Only) */}
+        {isAdmin ? (
+          <CRMCard className="flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-border/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold tracking-tight text-foreground">Organization MFA Policy</h4>
+                    <p className="text-[11px] text-muted-foreground font-medium">Workspace-wide authentication rule</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 text-primary border-primary/20 bg-primary/5">
+                  Admin Policy
+                </Badge>
+              </div>
+
+              <div className="p-4 bg-muted/30 rounded-xl border border-border/50 space-y-3">
+                <div className="space-y-1">
+                  <h5 className="text-xs font-bold text-foreground">MFA Enforcement Level</h5>
+                  <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+                    Select whether workspace members can optionally configure 2FA or are strictly required to use it.
+                  </p>
+                </div>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
+                  <button
+                    type="button"
+                    onClick={() => policyMutation.mutate("OPTIONAL")}
+                    disabled={policyMutation.isPending}
+                    className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 ${
+                      mfaStatus?.orgMfaPolicy === "OPTIONAL"
+                        ? "border-primary bg-primary/5 text-foreground shadow-sm"
+                        : "border-border/60 hover:border-border text-muted-foreground bg-background/50"
+                    }`}
+                  >
+                    <span className="text-xs font-bold flex items-center justify-between">
+                      Optional MFA
+                      {mfaStatus?.orgMfaPolicy === "OPTIONAL" && (
+                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                      )}
+                    </span>
+                    <span className="text-[10px] font-medium text-muted-foreground leading-snug">
+                      Members choose whether to enable 2FA on their own account.
+                    </span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => policyMutation.mutate("REQUIRED")}
+                    disabled={policyMutation.isPending}
+                    className={`p-3 rounded-xl border text-left transition-all flex flex-col gap-1 ${
+                      mfaStatus?.orgMfaPolicy === "REQUIRED"
+                        ? "border-primary bg-primary/5 text-foreground shadow-sm"
+                        : "border-border/60 hover:border-border text-muted-foreground bg-background/50"
+                    }`}
+                  >
+                    <span className="text-xs font-bold flex items-center justify-between">
+                      Required MFA
+                      {mfaStatus?.orgMfaPolicy === "REQUIRED" && (
+                        <CheckCircle2 className="w-4 h-4 text-primary shrink-0" />
+                      )}
+                    </span>
+                    <span className="text-[10px] font-medium text-muted-foreground leading-snug">
+                      Mandatory two-factor enrollment for all workspace members.
+                    </span>
+                  </button>
+                </div>
+              </div>
+            </div>
+
+            <div className="pt-4 mt-4 flex items-center justify-between text-xs text-muted-foreground border-t border-border/50">
+              <span className="flex items-center gap-1.5">
+                <Info className="w-3.5 h-3.5 text-primary" />
+                Changes apply instantly across all member sessions.
+              </span>
+              {policyMutation.isPending && (
+                <span className="flex items-center gap-1 text-primary font-medium">
+                  <Loader2 className="w-3 h-3 animate-spin" />
+                  Saving...
+                </span>
+              )}
+            </div>
+          </CRMCard>
+        ) : (
+          /* Non-Admin Informational Card */
+          <CRMCard className="flex flex-col justify-between">
+            <div>
+              <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-border/50">
+                <div className="flex items-center gap-3">
+                  <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                    <Building2 className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="text-sm font-bold tracking-tight text-foreground">Workspace Policy</h4>
+                    <p className="text-[11px] text-muted-foreground font-medium">Organization security status</p>
+                  </div>
+                </div>
+                <Badge variant="outline" className="text-[10px] font-bold">
+                  {mfaStatus?.orgMfaPolicy === "REQUIRED" ? "MFA Required" : "MFA Optional"}
+                </Badge>
+              </div>
+
+              <div className="p-4 bg-muted/30 rounded-xl border border-border/50 space-y-2">
+                <h5 className="text-xs font-bold text-foreground">
+                  {mfaStatus?.orgMfaPolicy === "REQUIRED"
+                    ? "Organization-Wide MFA Requirement"
+                    : "Standard Workspace Policy"}
+                </h5>
                 <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
-                  When enabled, all administrators and workspace members will be required to verify 2FA.
+                  {mfaStatus?.orgMfaPolicy === "REQUIRED"
+                    ? "Your workspace administrator has mandated two-factor authentication for all team members to protect CRM data."
+                    : "Two-factor authentication is optional for your workspace. You may enable it independently for enhanced personal account safety."}
                 </p>
               </div>
+            </div>
 
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 pt-1">
-                <button
-                  type="button"
-                  onClick={() => policyMutation.mutate("OPTIONAL")}
-                  disabled={policyMutation.isPending}
-                  className={`p-3 rounded-lg border text-left transition-all flex flex-col gap-1 ${
-                    mfaStatus?.orgMfaPolicy === "OPTIONAL"
-                      ? "border-primary bg-primary/5 text-foreground"
-                      : "border-border/60 hover:border-border text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xs font-bold flex items-center justify-between">
-                    Optional MFA
-                    {mfaStatus?.orgMfaPolicy === "OPTIONAL" && <CheckCircle2 className="w-4 h-4 text-primary" />}
-                  </span>
-                  <span className="text-[11px] font-medium text-muted-foreground">
-                    Users can choose whether to enable 2FA
-                  </span>
-                </button>
-
-                <button
-                  type="button"
-                  onClick={() => policyMutation.mutate("REQUIRED")}
-                  disabled={policyMutation.isPending}
-                  className={`p-3 rounded-lg border text-left transition-all flex flex-col gap-1 ${
-                    mfaStatus?.orgMfaPolicy === "REQUIRED"
-                      ? "border-primary bg-primary/5 text-foreground"
-                      : "border-border/60 hover:border-border text-muted-foreground"
-                  }`}
-                >
-                  <span className="text-xs font-bold flex items-center justify-between">
-                    Required MFA
-                    {mfaStatus?.orgMfaPolicy === "REQUIRED" && <CheckCircle2 className="w-4 h-4 text-primary" />}
-                  </span>
-                  <span className="text-[11px] font-medium text-muted-foreground">
-                    Enforce AAL2 2FA for workspace operations
-                  </span>
-                </button>
-              </div>
+            <div className="pt-4 mt-4 text-[11px] text-muted-foreground border-t border-border/50">
+              Contact your workspace administrator to modify organization policies.
             </div>
           </CRMCard>
         )}
       </div>
 
-      {/* Active Sessions & Device Registry Card */}
-      <CRMCard>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Monitor className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold tracking-tight text-foreground">Active Sessions & Devices</h3>
-                {sessionsData?.activeCount !== undefined && (
-                  <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5">
-                    {sessionsData.activeCount} Active
-                  </Badge>
-                )}
+      {/* 3. Security Notifications & 4. Privacy and Data */}
+      <div className="grid grid-cols-1 xl:grid-cols-2 gap-6">
+        {/* Security Notifications Card */}
+        <CRMCard>
+          <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <BellRing className="w-4 h-4" />
               </div>
-              <p className="text-[11px] text-muted-foreground font-medium">
-                Manage your authenticated devices. Sessions expire after 30 minutes of inactivity or 24 hours maximum duration.
-              </p>
+              <div>
+                <h4 className="text-sm font-bold tracking-tight text-foreground">Security Notifications</h4>
+                <p className="text-[11px] text-muted-foreground font-medium">Automated login and verification alerts</p>
+              </div>
             </div>
           </div>
 
-          {sessionsData?.sessions && sessionsData.sessions.filter((s) => !s.isCurrent && !s.isRevoked).length > 0 && (
+          <div className="p-4 bg-muted/30 rounded-xl border border-border/50 flex items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h5 className="text-xs font-bold text-foreground">Security & Login Alerts</h5>
+              <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+                Receive instant email and in-app alerts for unrecognized device logins, password modifications, and MFA state changes.
+              </p>
+            </div>
+            <Switch
+              checked={securityAlertsEnabled}
+              onCheckedChange={(checked) => notifMutation.mutate(checked)}
+              disabled={isNotifLoading || notifMutation.isPending}
+            />
+          </div>
+        </CRMCard>
+
+        {/* Privacy & Data Card */}
+        <CRMCard>
+          <div className="flex items-center justify-between gap-2 mb-4 pb-3 border-b border-border/50">
+            <div className="flex items-center gap-3">
+              <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
+                <FileDown className="w-4 h-4" />
+              </div>
+              <div>
+                <h4 className="text-sm font-bold tracking-tight text-foreground">Privacy & Personal Data</h4>
+                <p className="text-[11px] text-muted-foreground font-medium">Data portability and GDPR / DPDP records</p>
+              </div>
+            </div>
+          </div>
+
+          <div className="p-4 bg-muted/30 rounded-xl border border-border/50 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div className="space-y-1">
+              <h5 className="text-xs font-bold text-foreground">Export Personal Account Data</h5>
+              <p className="text-[11px] text-muted-foreground leading-relaxed font-medium">
+                Download a machine-readable JSON archive of your personal profile, activity history, and security metadata.
+              </p>
+            </div>
             <Button
               variant="outline"
               size="sm"
-              onClick={() => setShowRevokeAllModal(true)}
-              className="font-bold text-xs gap-1.5 h-8 text-destructive hover:text-destructive shrink-0"
+              onClick={handleExportData}
+              disabled={isExporting}
+              className="font-bold text-xs gap-1.5 h-8.5 shrink-0"
             >
-              <LogOut className="w-3.5 h-3.5" />
-              Sign Out All Other Sessions
-            </Button>
-          )}
-        </div>
-
-        {sessionsLoading ? (
-          <div className="py-8 flex items-center justify-center text-xs text-muted-foreground font-medium">
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            Loading active sessions...
-          </div>
-        ) : sessionsError ? (
-          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-xs font-medium">
-            Failed to load active sessions. Please refresh the page.
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {sessionsData?.sessions && sessionsData.sessions.length > 0 ? (
-              sessionsData.sessions.map((session) => (
-                <div
-                  key={session.id}
-                  className={`p-3.5 rounded-lg border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                    session.isCurrent
-                      ? "border-primary/40 bg-primary/[0.03]"
-                      : session.isRevoked
-                      ? "border-border/30 bg-muted/20 opacity-60"
-                      : "border-border/60 bg-muted/30 hover:border-border"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${
-                        session.isCurrent
-                          ? "bg-primary/10 text-primary"
-                          : session.isRevoked
-                          ? "bg-muted text-muted-foreground"
-                          : "bg-background border border-border/60 text-foreground"
-                      }`}
-                    >
-                      {getDeviceIcon(session.deviceType)}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="text-xs font-bold text-foreground">
-                          {session.browser} on {session.operatingSystem}
-                        </span>
-                        {session.isCurrent && (
-                          <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
-                            This Device
-                          </Badge>
-                        )}
-                        {session.isRevoked && (
-                          <Badge variant="secondary" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
-                            Revoked
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground font-medium">
-                        {session.ipAddress && <span>IP: {session.ipAddress}</span>}
-                        <span>•</span>
-                        <span>{session.isCurrent ? "Active now" : formatSessionTime(session.lastActiveAt)}</span>
-                        <span>•</span>
-                        <span>Signed in {new Date(session.createdAt).toLocaleDateString()}</span>
-                      </div>
-                    </div>
-                  </div>
-
-                  {!session.isCurrent && !session.isRevoked && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => revokeMutation.mutate(session.id)}
-                      disabled={revokingSessionId === session.id}
-                      className="text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive h-8 px-3 shrink-0"
-                    >
-                      {revokingSessionId === session.id ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
-                      ) : (
-                        <LogOut className="w-3.5 h-3.5 mr-1" />
-                      )}
-                      Revoke
-                    </Button>
-                  )}
-                </div>
-              ))
-            ) : (
-              <div className="p-4 bg-muted/20 rounded-lg text-center text-xs text-muted-foreground font-medium">
-                No session records found.
-              </div>
-            )}
-          </div>
-        )}
-      </CRMCard>
-
-      {/* Security Activity Card */}
-      <CRMCard>
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 mb-5">
-          <div className="flex items-center gap-2">
-            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">
-              <Activity className="w-4 h-4" />
-            </div>
-            <div>
-              <div className="flex items-center gap-2">
-                <h3 className="text-sm font-bold tracking-tight text-foreground">
-                  Security Activity
-                </h3>
-                {activityData?.total !== undefined && (
-                  <Badge variant="outline" className="text-[10px] font-bold px-2 py-0.5">
-                    {activityData.total} Events
-                  </Badge>
-                )}
-              </div>
-              <p className="text-[11px] text-muted-foreground font-medium">
-                Recent sign-ins, device changes, and security events for your account.
-              </p>
-            </div>
-          </div>
-
-          <Button
-            variant="ghost"
-            size="sm"
-            onClick={() => void refetchActivity()}
-            disabled={activityLoading}
-            className="text-xs font-bold gap-1.5 h-8 text-muted-foreground hover:text-foreground shrink-0"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${activityLoading ? "animate-spin" : ""}`} />
-            Refresh
-          </Button>
-        </div>
-
-        {activityLoading && allActivities.length === 0 ? (
-          <div className="py-8 flex items-center justify-center text-xs text-muted-foreground font-medium">
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            Loading security activity...
-          </div>
-        ) : activityError && allActivities.length === 0 ? (
-          <div className="p-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-xs font-medium flex items-center justify-between">
-            <span>Failed to load security activity. Please try again.</span>
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void refetchActivity()}
-              className="text-xs h-7 px-2"
-            >
-              Retry
+              {isExporting ? (
+                <Loader2 className="w-3.5 h-3.5 animate-spin" />
+              ) : (
+                <Download className="w-3.5 h-3.5" />
+              )}
+              {isExporting ? "Exporting..." : "Export My Data"}
             </Button>
           </div>
-        ) : allActivities.length === 0 ? (
-          <div className="py-8 px-4 border border-dashed rounded-lg text-center space-y-1">
-            <div className="w-9 h-9 rounded-full bg-muted flex items-center justify-center mx-auto mb-2 text-muted-foreground">
-              <ShieldCheck className="w-4 h-4" />
-            </div>
-            <p className="text-xs font-bold text-foreground">No security activity yet</p>
-            <p className="text-[11px] text-muted-foreground font-medium max-w-sm mx-auto">
-              Your recent sign-ins and account security events will appear here.
-            </p>
-          </div>
-        ) : (
-          <div className="space-y-3">
-            {allActivities.map((activity) => {
-              const visuals = getActivityVisuals(activity.action);
-              const isRemoteActiveSession =
-                !activity.isCurrent && !activity.isRevoked && Boolean(activity.sessionId);
-
-              return (
-                <div
-                  key={activity.id}
-                  className={`p-3.5 rounded-lg border transition-all flex flex-col sm:flex-row sm:items-center justify-between gap-3 ${
-                    activity.isCurrent
-                      ? "border-primary/40 bg-primary/[0.03]"
-                      : activity.isRevoked
-                      ? "border-border/30 bg-muted/20 opacity-70"
-                      : "border-border/60 bg-muted/30 hover:border-border"
-                  }`}
-                >
-                  <div className="flex items-start gap-3">
-                    <div
-                      className={`w-8 h-8 rounded-md flex items-center justify-center shrink-0 mt-0.5 ${visuals.bgColor}`}
-                    >
-                      {visuals.icon}
-                    </div>
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2 flex-wrap">
-                        <span className="text-xs font-bold text-foreground">
-                          {visuals.title}
-                        </span>
-                        {activity.isCurrent && (
-                          <Badge className="bg-emerald-500/15 text-emerald-500 border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
-                            This Device
-                          </Badge>
-                        )}
-                        {activity.isRevoked && (
-                          <Badge
-                            variant="secondary"
-                            className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2"
-                          >
-                            Session Revoked
-                          </Badge>
-                        )}
-                        {activity.action === "NEW_DEVICE_LOGIN" && (
-                          <Badge className="bg-amber-500/15 text-amber-500 border-amber-500/20 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
-                            New Device
-                          </Badge>
-                        )}
-                      </div>
-                      <div className="flex flex-wrap items-center gap-x-3 gap-y-1 text-[11px] text-muted-foreground font-medium">
-                        {(activity.browser || activity.operatingSystem) && (
-                          <>
-                            <span>
-                              {activity.browser || "Unknown Browser"} on{" "}
-                              {activity.operatingSystem || "Unknown OS"}
-                              {activity.deviceType ? ` • ${activity.deviceType}` : ""}
-                            </span>
-                            <span>•</span>
-                          </>
-                        )}
-                        <span>
-                          {new Date(activity.createdAt).toLocaleDateString("en-US", {
-                            month: "short",
-                            day: "numeric",
-                            year: "numeric",
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
-                        </span>
-                        {activity.ipAddress && (
-                          <>
-                            <span>•</span>
-                            <span>IP: {activity.ipAddress}</span>
-                          </>
-                        )}
-                      </div>
-                    </div>
-                  </div>
-
-                  {isRemoteActiveSession && (
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => revokeMutation.mutate(activity.sessionId!)}
-                      disabled={revokingSessionId === activity.sessionId}
-                      className="text-xs font-bold text-destructive hover:bg-destructive/10 hover:text-destructive h-8 px-3 shrink-0 self-start sm:self-auto"
-                    >
-                      {revokingSessionId === activity.sessionId ? (
-                        <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" />
-                      ) : (
-                        <LogOut className="w-3.5 h-3.5 mr-1" />
-                      )}
-                      Revoke
-                    </Button>
-                  )}
-                </div>
-              );
-            })}
-
-            {/* Load More Pagination Button */}
-            {allActivities.length < (activityData?.total || 0) && (
-              <div className="pt-2 flex justify-center">
-                <Button
-                  variant="outline"
-                  size="sm"
-                  onClick={() => setActivityPage((p) => p + 1)}
-                  disabled={activityLoading}
-                  className="text-xs font-bold gap-1.5 h-8"
-                >
-                  {activityLoading ? (
-                    <Loader2 className="w-3.5 h-3.5 animate-spin" />
-                  ) : null}
-                  Load More Activity ({allActivities.length} of {activityData?.total})
-                </Button>
-              </div>
-            )}
-          </div>
-        )}
-      </CRMCard>
-
-      {/* Danger Zone */}
-      <CRMCard className="border-destructive/30 bg-destructive/5 overflow-hidden">
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <h3 className="text-base font-bold tracking-tight text-destructive flex items-center gap-2">
-                <AlertTriangle className="w-4 h-4 text-destructive" />
-                Danger Zone
-              </h3>
-              <Badge variant="destructive" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.5">
-                Irreversible
-              </Badge>
-            </div>
-            <p className="text-xs text-muted-foreground font-medium">
-              Permanently delete your account, workspace, and all associated CRM records.
-            </p>
-          </div>
-          <Button
-            variant="destructive"
-            size="sm"
-            onClick={() => setShowDeleteModal(true)}
-            className="font-bold text-xs gap-2 shrink-0 h-9 px-4 shadow-sm"
-          >
-            <Trash2 className="w-4 h-4" />
-            Delete Account
-          </Button>
-        </div>
-      </CRMCard>
-
-      {/* Delete Account Modal */}
-      <DeleteAccountModal open={showDeleteModal} onOpenChange={setShowDeleteModal} />
+        </CRMCard>
+      </div>
 
       {/* 2FA Enrollment Wizard Modal */}
       <Dialog open={showEnrollModal} onOpenChange={setShowEnrollModal}>
@@ -1041,7 +687,7 @@ const SecuritySettings = () => {
                 <div className="space-y-1">
                   <p className="text-[11px] font-bold text-foreground">Scan with Google Authenticator or 1Password</p>
                   <p className="text-[10px] text-muted-foreground">
-                    Or enter this manual configuration secret key:
+                    Or enter this manual secret key into your app:
                   </p>
                   {enrollData?.secret && (
                     <div className="flex items-center justify-center gap-2 mt-1">
@@ -1103,6 +749,22 @@ const SecuritySettings = () => {
                 ))}
               </div>
 
+              <div className="flex items-center gap-2 p-2 bg-muted/20 rounded-lg border border-border/50">
+                <input
+                  type="checkbox"
+                  id="confirmSavedCodes"
+                  checked={hasConfirmedSavedCodes}
+                  onChange={(e) => setHasConfirmedSavedCodes(e.target.checked)}
+                  className="h-4 w-4 rounded border-gray-300 text-primary focus:ring-primary cursor-pointer"
+                />
+                <label
+                  htmlFor="confirmSavedCodes"
+                  className="text-xs font-medium text-foreground cursor-pointer select-none"
+                >
+                  I have safely stored these recovery codes
+                </label>
+              </div>
+
               <div className="flex items-center justify-between gap-2 pt-1">
                 <div className="flex items-center gap-2">
                   <Button variant="outline" size="sm" onClick={handleCopyCodes} className="font-bold text-xs gap-1 h-8">
@@ -1114,7 +776,12 @@ const SecuritySettings = () => {
                     Download .txt
                   </Button>
                 </div>
-                <Button size="sm" onClick={() => setEnrollStep("verify")} className="font-bold text-xs gap-1.5 h-8">
+                <Button
+                  size="sm"
+                  onClick={() => setEnrollStep("verify")}
+                  disabled={!hasConfirmedSavedCodes}
+                  className="font-bold text-xs gap-1.5 h-8"
+                >
                   Next: Verify Code
                   <ArrowRight className="w-3.5 h-3.5" />
                 </Button>
@@ -1165,7 +832,7 @@ const SecuritySettings = () => {
         </DialogContent>
       </Dialog>
 
-      {/* Disable 2FA Modal */}
+      {/* Disable 2FA Confirmation Modal */}
       <Dialog open={showDisableModal} onOpenChange={setShowDisableModal}>
         <DialogContent className="sm:max-w-md border-border bg-card">
           <DialogHeader className="space-y-1">
@@ -1174,7 +841,7 @@ const SecuritySettings = () => {
               Disable Two-Factor Authentication
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground font-medium">
-              Disabling 2FA reduces your account security. Are you sure you want to disable it?
+              Disabling 2FA removes the TOTP requirement and invalidates all active recovery codes. Are you sure you want to proceed?
             </DialogDescription>
           </DialogHeader>
 
@@ -1202,16 +869,51 @@ const SecuritySettings = () => {
         </DialogContent>
       </Dialog>
 
-      {/* View Recovery Codes Modal */}
+      {/* Regenerate Recovery Codes Confirmation Modal */}
+      <Dialog open={showRegenerateConfirmModal} onOpenChange={setShowRegenerateConfirmModal}>
+        <DialogContent className="sm:max-w-md border-border bg-card">
+          <DialogHeader className="space-y-1">
+            <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <KeyRound className="w-4 h-4 text-primary" />
+              Regenerate Backup Recovery Codes
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground font-medium">
+              Generating new backup codes will permanently invalidate all previously generated codes. Make sure to save the new codes.
+            </DialogDescription>
+          </DialogHeader>
+
+          <DialogFooter className="pt-3">
+            <Button
+              variant="outline"
+              size="sm"
+              onClick={() => setShowRegenerateConfirmModal(false)}
+              className="h-9 text-xs"
+            >
+              Cancel
+            </Button>
+            <Button
+              size="sm"
+              onClick={handleRegenerateCodes}
+              disabled={enrollLoading}
+              className="font-bold text-xs gap-1.5 h-9"
+            >
+              {enrollLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <RefreshCw className="w-3.5 h-3.5" />}
+              Regenerate Codes
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* View / Fresh Recovery Codes Modal */}
       <Dialog open={showRecoveryModal} onOpenChange={setShowRecoveryModal}>
         <DialogContent className="sm:max-w-md border-border bg-card">
           <DialogHeader className="space-y-1">
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <KeyRound className="w-4 h-4 text-primary" />
-              Your Backup Recovery Codes
+              New Backup Recovery Codes
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground font-medium">
-              Each backup code can be used once to sign in if you lose your authenticator app.
+              Store these single-use recovery codes in a secure location. Each code can be used once.
             </DialogDescription>
           </DialogHeader>
 
@@ -1243,151 +945,6 @@ const SecuritySettings = () => {
           </div>
         </DialogContent>
       </Dialog>
-
-      {/* Sign Out All Other Sessions Confirmation Modal */}
-      <Dialog open={showRevokeAllModal} onOpenChange={setShowRevokeAllModal}>
-        <DialogContent className="sm:max-w-md border-border bg-card">
-          <DialogHeader className="space-y-1.5">
-            <div className="w-9 h-9 rounded-xl bg-destructive/10 flex items-center justify-center mb-1 text-destructive">
-              <LogOut className="w-4.5 h-4.5" />
-            </div>
-            <DialogTitle className="text-base font-bold text-foreground">
-              Sign Out All Other Sessions?
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground leading-relaxed font-medium">
-              This will immediately revoke access from all other devices and browsers logged into your account. Your current session on this device will remain active.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="flex items-center justify-end gap-3 pt-4 border-t border-border">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => setShowRevokeAllModal(false)}
-              disabled={revokeAllMutation.isPending}
-              className="text-xs font-bold"
-            >
-              Cancel
-            </Button>
-            <Button
-              variant="destructive"
-              size="sm"
-              onClick={() => revokeAllMutation.mutate()}
-              disabled={revokeAllMutation.isPending}
-              className="text-xs font-bold gap-1.5"
-            >
-              {revokeAllMutation.isPending && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-              Sign Out All Other Devices
-            </Button>
-          </div>
-        </DialogContent>
-      </Dialog>
-
-      {/* Change Password Dialog Modal */}
-      <Dialog open={showChangePasswordModal} onOpenChange={setShowChangePasswordModal}>
-        <DialogContent className="sm:max-w-md border-border bg-card">
-          <DialogHeader className="space-y-1.5">
-            <div className="w-9 h-9 rounded-xl bg-primary/10 flex items-center justify-center mb-1 text-primary">
-              <Lock className="w-4.5 h-4.5" />
-            </div>
-            <DialogTitle className="text-base font-bold text-foreground">
-              Change Password
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground leading-relaxed font-medium">
-              Update your account password. For your security, changing your password will automatically sign out all other active devices.
-            </DialogDescription>
-          </DialogHeader>
-
-          {passwordError && (
-            <div className="p-3 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-xs font-medium">
-              {passwordError}
-            </div>
-          )}
-
-          {passwordSuccess && (
-            <div className="p-3 bg-emerald-500/10 border border-emerald-500/20 rounded-lg text-emerald-600 dark:text-emerald-400 text-xs font-medium flex items-center gap-2">
-              <CheckCircle2 className="w-4 h-4 shrink-0" />
-              <span>{passwordSuccess}</span>
-            </div>
-          )}
-
-          <form onSubmit={handleChangePassword} className="space-y-3.5 pt-1">
-            <div className="space-y-1.5">
-              <Label htmlFor="changeNewPassword" className="text-xs font-semibold text-foreground/80">
-                New Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="changeNewPassword"
-                  type={showNewPassword ? "text" : "password"}
-                  value={newPassword}
-                  onChange={(e) => setNewPassword(e.target.value)}
-                  placeholder="Enter new password (min 6 chars)"
-                  className="pr-10 h-10 text-xs rounded-lg"
-                  required
-                  disabled={passwordLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowNewPassword(!showNewPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                >
-                  {showNewPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="space-y-1.5">
-              <Label htmlFor="changeConfirmPassword" className="text-xs font-semibold text-foreground/80">
-                Confirm New Password
-              </Label>
-              <div className="relative">
-                <Input
-                  id="changeConfirmPassword"
-                  type={showConfirmPassword ? "text" : "password"}
-                  value={confirmPassword}
-                  onChange={(e) => setConfirmPassword(e.target.value)}
-                  placeholder="Confirm new password"
-                  className="pr-10 h-10 text-xs rounded-lg"
-                  required
-                  disabled={passwordLoading}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowConfirmPassword(!showConfirmPassword)}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground p-1"
-                >
-                  {showConfirmPassword ? <EyeOff className="h-3.5 w-3.5" /> : <Eye className="h-3.5 w-3.5" />}
-                </button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-end gap-2.5 pt-3 border-t border-border">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setShowChangePasswordModal(false)}
-                disabled={passwordLoading}
-                className="text-xs font-bold"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                disabled={passwordLoading}
-                className="text-xs font-bold gap-1.5"
-              >
-                {passwordLoading && <Loader2 className="w-3.5 h-3.5 animate-spin" />}
-                Update Password
-              </Button>
-            </div>
-          </form>
-        </DialogContent>
-      </Dialog>
     </div>
   );
-};
-
-export default SecuritySettings;
+}

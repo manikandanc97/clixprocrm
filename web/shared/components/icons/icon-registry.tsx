@@ -538,30 +538,32 @@ export function AppIcon({
     );
 
     const onEnter = () => {
-      if (!disableHover && !isFormField) {
+      if (!disableHover) {
         playOneShotAnimation();
       }
     };
     const onLeave = () => {
-      if (!disableHover && !isFormField) {
+      if (!disableHover) {
         stopCurrentAnimation();
       }
     };
     const onFocusOrClick = () => playOneShotAnimation();
 
-    // 1. Form field interaction: animate ONLY on click / focus / mousedown on the input or wrapper
+    // 1. Form field interaction: animate on hover, focus, click on the input or wrapper
     if (formContainer) {
       const inputEl = formContainer.querySelector('input, textarea, select');
       if (inputEl) {
         inputEl.addEventListener("focus", onFocusOrClick);
         inputEl.addEventListener("click", onFocusOrClick);
       }
+      formContainer.addEventListener("mouseenter", onEnter);
+      formContainer.addEventListener("mouseleave", onLeave);
       formContainer.addEventListener("focusin", onFocusOrClick);
       formContainer.addEventListener("click", onFocusOrClick);
     }
 
     // 2. Buttons / Links / Navigation: animate on hover and click
-    if (parentInteractive && !isFormField) {
+    if (parentInteractive) {
       if (!disableHover) {
         parentInteractive.addEventListener("mouseenter", onEnter);
         parentInteractive.addEventListener("mouseleave", onLeave);
@@ -584,10 +586,12 @@ export function AppIcon({
           inputEl.removeEventListener("focus", onFocusOrClick);
           inputEl.removeEventListener("click", onFocusOrClick);
         }
+        formContainer.removeEventListener("mouseenter", onEnter);
+        formContainer.removeEventListener("mouseleave", onLeave);
         formContainer.removeEventListener("focusin", onFocusOrClick);
         formContainer.removeEventListener("click", onFocusOrClick);
       }
-      if (parentInteractive && !isFormField) {
+      if (parentInteractive) {
         if (!disableHover) {
           parentInteractive.removeEventListener("mouseenter", onEnter);
           parentInteractive.removeEventListener("mouseleave", onLeave);
@@ -608,12 +612,7 @@ export function AppIcon({
     className: `shrink-0 select-none ${className}`,
     onMouseEnter: () => {
       if (!disableHover) {
-        const el = containerRef.current;
-        const isFormField = Boolean(
-          el?.closest('[data-slot="form-item"], .form-item, [data-form-field], label') ||
-          el?.closest('.relative, .group')?.querySelector('input, textarea, select')
-        );
-        if (!isFormField) playOneShotAnimation();
+        playOneShotAnimation();
       }
     },
     onMouseLeave: () => {

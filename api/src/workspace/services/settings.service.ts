@@ -142,5 +142,118 @@ export class SettingsService {
       return this.getAiSettings(tenantId);
     });
   }
+
+  async getNotificationSettings(tenantId: string, userId: string) {
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { notificationPrefs: true },
+      });
+
+      const DEFAULT_NOTIFICATION_PREFS = {
+        emailAlerts: true,
+        inAppAlerts: true,
+        soundEnabled: true,
+        browserPush: false,
+        leadAssignment: true,
+        dealUpdates: true,
+        taskReminders: true,
+        aiBriefing: true,
+        invoiceAlerts: true,
+        meetingAlerts: true,
+        weeklyDigest: true,
+        securityAlerts: true,
+      };
+
+      const saved = (user?.notificationPrefs as Record<string, any>) || {};
+      const prefs = { ...DEFAULT_NOTIFICATION_PREFS, ...saved };
+
+      return {
+        ...prefs,
+        channels: [
+          { id: 'emailAlerts', name: 'Email Notifications', enabled: prefs.emailAlerts },
+          { id: 'inAppAlerts', name: 'In-App Banner Alerts', enabled: prefs.inAppAlerts },
+          { id: 'soundEnabled', name: 'Notification Sound Chime', enabled: prefs.soundEnabled },
+          { id: 'browserPush', name: 'Desktop Push Notifications', enabled: prefs.browserPush },
+        ],
+        categories: [
+          {
+            id: 'activity',
+            title: 'Activity & Event Alerts',
+            notifications: [
+              {
+                id: 'leadAssignment',
+                title: 'Lead Assignments & Imports',
+                description: 'Alert immediately when a new lead is assigned to you or imported.',
+                critical: false,
+                enabled: prefs.leadAssignment,
+              },
+              {
+                id: 'dealUpdates',
+                title: 'Deal Stage Movements & Wins',
+                description: 'Notify when monitored deals change stage or are marked Won/Lost.',
+                critical: false,
+                enabled: prefs.dealUpdates,
+              },
+              {
+                id: 'taskReminders',
+                title: 'Task Reminders & Overdue Alerts',
+                description: 'Reminders 15 minutes before tasks and overdue escalation notices.',
+                critical: false,
+                enabled: prefs.taskReminders,
+              },
+              {
+                id: 'invoiceAlerts',
+                title: 'Quotations & Invoicing Updates',
+                description: 'Alerts on quotation approvals and invoice payment settlements.',
+                critical: false,
+                enabled: prefs.invoiceAlerts,
+              },
+              {
+                id: 'meetingAlerts',
+                title: 'Meeting & Calendar Reminders',
+                description: 'Notifications for upcoming team syncs and client demo reminders.',
+                critical: false,
+                enabled: prefs.meetingAlerts,
+              },
+              {
+                id: 'aiBriefing',
+                title: 'AI Daily Briefing & Insights',
+                description: 'Receive daily AI summaries of top priorities and actionable deals.',
+                critical: false,
+                enabled: prefs.aiBriefing,
+              },
+              {
+                id: 'securityAlerts',
+                title: 'Security & Login Alerts',
+                description: 'Instant notifications for new logins, password changes, and MFA events.',
+                critical: true,
+                enabled: prefs.securityAlerts,
+              },
+            ],
+          },
+        ],
+      };
+    });
+  }
+
+  async updateNotificationSettings(tenantId: string, userId: string, data: any) {
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const user = await tx.user.findUnique({
+        where: { id: userId },
+        select: { notificationPrefs: true },
+      });
+
+      const current = (user?.notificationPrefs as Record<string, any>) || {};
+      const updatedPrefs = { ...current, ...data };
+
+      await tx.user.update({
+        where: { id: userId },
+        data: { notificationPrefs: updatedPrefs },
+      });
+
+      return this.getNotificationSettings(tenantId, userId);
+    });
+  }
 }
 
