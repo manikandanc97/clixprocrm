@@ -1,4 +1,4 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/services/notifications.service';
 import { StorageService } from '../../common/services/storage.service';
@@ -58,6 +58,15 @@ export function mapEnumToPriority(priority: SupportTicketPriority): 'Low' | 'Med
     case SupportTicketPriority.LOW: return 'Low';
     default: return 'Medium';
   }
+}
+
+export function extractRoleString(roleInput: any): string {
+  if (!roleInput) return '';
+  if (typeof roleInput === 'string') return roleInput;
+  if (typeof roleInput === 'object') {
+    return roleInput.name || roleInput.role || roleInput.title || '';
+  }
+  return String(roleInput);
 }
 
 export function formatTicketOutput(ticket: any, includeInternal = false): SupportTicketRecord {
@@ -577,6 +586,237 @@ export class SupportService {
         }
 
         return formatTicketOutput(updated);
+      },
+    );
+  }
+
+  async updateTicket(
+    ticketId: string,
+    userId: string,
+    updateData: {
+      subject?: string;
+      description?: string;
+      category?: string;
+      priority?: 'Low' | 'Medium' | 'High' | 'Critical';
+      status?: 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED';
+    },
+    tenantId?: string,
+    userRole?: any,
+    isSuperAdmin = false,
+  ): Promise<SupportTicketRecord> {
+    if (!this.prisma) {
+      throw new BadRequestException('Database service required');
+    }
+
+    const contextTenantId = tenantId || (isSuperAdmin ? undefined : undefined);
+
+    return this.prisma.withTenantContext(
+      { tenantId: contextTenantId, userId, isSuperAdmin },
+      async (tx) => {
+        const ticketWhere: any = {
+          OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+        };
+        if (tenantId && !isSuperAdmin) {
+          ticketWhere.tenantId = tenantId;
+        }
+
+        const ticket = await tx.supportTicket.findFirst({
+          where: ticketWhere,
+          include: {
+            messages: {
+              orderBy: { createdAt: 'asc' },
+              take: 1,
+            },
+          },
+        });
+
+        if (!ticket) {
+          throw new NotFoundException('Support ticket not found');
+        }
+
+        const isOwner = ticket.createdById === userId;
+        const normalizedRole = extractRoleString(userRole).toUpperCase();
+        const isAdmin =
+          isSuperAdmin ||
+          normalizedRole === 'ADMIN' ||
+          normalizedRole === 'SUPERADMIN' ||
+          normalizedRole === 'SUPER_ADMIN' ||
+          normalizedRole === 'OWNER' ||
+          normalizedRole === 'ORG_OWNER';
+
+        if (!isOwner && !isAdmin) {
+          throw new ForbiddenException('You are only authorized to edit tickets that you submitted');
+        }
+
+        if (ticket.status === SupportTicketStatus.CLOSED && !isAdmin) {
+          throw new BadRequestException('Closed tickets cannot be edited. Please post a reply or open a new ticket.');
+        }
+
+        const updatePayload: any = {
+          updatedAt: new Date(),
+        };
+
+        if (updateData.subject && updateData.subject.trim()) {
+          updatePayload.subject = updateData.subject.trim();
+        }
+        if (updateData.category && updateData.category.trim()) {
+          updatePayload.category = updateData.category.trim();
+        }
+        if (updateData.priority) {
+          updatePayload.priority = mapPriorityToEnum(updateData.priority);
+        }
+        if (updateData.status) {
+          updatePayload.status = updateData.status as SupportTicketStatus;
+          if (updateData.status === 'RESOLVED' && !ticket.resolvedAt) {
+            updatePayload.resolvedAt = new Date();
+          }
+          if (updateData.status === 'CLOSED' && !ticket.closedAt) {
+            updatePayload.closedAt = new Date();
+          }
+        }
+        if (updateData.description && updateData.description.trim()) {
+          updatePayload.description = updateData.description.trim();
+
+          // Keep initial description message in sync
+          if (ticket.messages && ticket.messages.length > 0) {
+            await tx.supportTicketMessage.update({
+              where: { id: ticket.messages[0].id },
+              data: { message: updateData.description.trim() },
+            });
+          }
+        }
+
+        const updated = await tx.supportTicket.update({
+          where: { id: ticket.id },
+          data: updatePayload,
+          include: {
+            createdBy: { select: { id: true, name: true, email: true, avatar: true } },
+            assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+            attachments: true,
+            messages: {
+              where: { isInternal: false },
+              orderBy: { createdAt: 'asc' },
+              include: {
+                sender: { select: { id: true, name: true, email: true, avatar: true } },
+              },
+            },
+          },
+        });
+
+        // Audit log
+        try {
+          await this.prisma?.createSealedAuditLog({
+            tenantId: ticket.tenantId,
+            userId,
+            action: 'SUPPORT_TICKET_UPDATED',
+            module: 'SupportDesk',
+            details: {
+              ticketId: ticket.id,
+              ticketNumber: ticket.ticketNumber,
+              updatedFields: Object.keys(updatePayload),
+            },
+          });
+        } catch (auditErr: any) {
+          this.logger.warn(`Failed to create audit log for updated ticket: ${auditErr?.message || auditErr}`);
+        }
+
+        return formatTicketOutput(updated);
+      },
+    );
+  }
+
+  async deleteTicket(
+    ticketId: string,
+    userId: string,
+    tenantId?: string,
+    userRole?: any,
+    isSuperAdmin = false,
+  ): Promise<{ success: boolean; id: string; ticketNumber: string }> {
+    if (!this.prisma) {
+      throw new BadRequestException('Database service required');
+    }
+
+    const contextTenantId = tenantId || (isSuperAdmin ? undefined : undefined);
+
+    return this.prisma.withTenantContext(
+      { tenantId: contextTenantId, userId, isSuperAdmin },
+      async (tx) => {
+        const ticketWhere: any = {
+          OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+        };
+        if (tenantId && !isSuperAdmin) {
+          ticketWhere.tenantId = tenantId;
+        }
+
+        const ticket = await tx.supportTicket.findFirst({
+          where: ticketWhere,
+          include: {
+            attachments: true,
+          },
+        });
+
+        if (!ticket) {
+          throw new NotFoundException('Support ticket not found');
+        }
+
+        const isOwner = ticket.createdById === userId;
+        const normalizedRole = extractRoleString(userRole).toUpperCase();
+        const isAdmin =
+          isSuperAdmin ||
+          normalizedRole === 'ADMIN' ||
+          normalizedRole === 'SUPERADMIN' ||
+          normalizedRole === 'SUPER_ADMIN' ||
+          normalizedRole === 'OWNER' ||
+          normalizedRole === 'ORG_OWNER';
+
+        if (!isOwner && !isAdmin) {
+          throw new ForbiddenException('You are only authorized to delete tickets that you submitted');
+        }
+
+        // Clean up storage attachments if storage service is active
+        if (this.storageService && ticket.attachments && ticket.attachments.length > 0) {
+          for (const att of ticket.attachments) {
+            if (att.storagePath) {
+              await this.storageService.deleteAttachment(att.storagePath).catch(() => {});
+            }
+          }
+        }
+
+        // 1. Explicitly delete child messages & attachments first to prevent RLS cascade conflicts
+        await tx.supportTicketMessage.deleteMany({
+          where: { ticketId: ticket.id },
+        });
+        await tx.supportTicketAttachment.deleteMany({
+          where: { ticketId: ticket.id },
+        });
+
+        // 2. Delete ticket record
+        await tx.supportTicket.delete({
+          where: { id: ticket.id },
+        });
+
+        // 3. Sealed audit log
+        try {
+          await this.prisma?.createSealedAuditLog({
+            tenantId: ticket.tenantId,
+            userId,
+            action: 'SUPPORT_TICKET_DELETED',
+            module: 'SupportDesk',
+            details: {
+              ticketId: ticket.id,
+              ticketNumber: ticket.ticketNumber,
+              subject: ticket.subject,
+            },
+          });
+        } catch (auditErr: any) {
+          this.logger.warn(`Failed to create audit log for deleted ticket: ${auditErr?.message || auditErr}`);
+        }
+
+        return {
+          success: true,
+          id: ticket.id,
+          ticketNumber: ticket.ticketNumber,
+        };
       },
     );
   }

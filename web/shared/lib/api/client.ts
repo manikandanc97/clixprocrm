@@ -57,6 +57,18 @@ client.interceptors.request.use(
       if (session?.access_token) {
         config.headers['Authorization'] = `Bearer ${session.access_token}`;
       }
+
+      // Allow browser and Axios to set correct multipart/form-data header with boundary
+      if (config.data instanceof FormData) {
+        if (config.headers && typeof (config.headers as any).delete === 'function') {
+          (config.headers as any).delete('Content-Type');
+          (config.headers as any).delete('content-type');
+        }
+        if (config.headers) {
+          delete (config.headers as any)['Content-Type'];
+          delete (config.headers as any)['content-type'];
+        }
+      }
     }
     return config;
   },

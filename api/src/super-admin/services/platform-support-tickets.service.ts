@@ -384,4 +384,137 @@ export class PlatformSupportTicketsService {
       };
     });
   }
+
+  async updateTicketDetails(
+    ticketId: string,
+    adminUserId: string,
+    data: {
+      subject?: string;
+      description?: string;
+      category?: string;
+      priority?: SupportTicketPriority;
+      status?: SupportTicketStatus;
+    },
+  ) {
+    return this.prisma.withTenantContext({ isSuperAdmin: true }, async (tx) => {
+      const ticket = await tx.supportTicket.findFirst({
+        where: {
+          OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+        },
+        include: {
+          messages: {
+            orderBy: { createdAt: 'asc' },
+            take: 1,
+          },
+        },
+      });
+
+      if (!ticket) {
+        throw new NotFoundException('Support ticket not found');
+      }
+
+      const updatePayload: any = {
+        updatedAt: new Date(),
+      };
+
+      if (data.subject && data.subject.trim()) {
+        updatePayload.subject = data.subject.trim();
+      }
+      if (data.category && data.category.trim()) {
+        updatePayload.category = data.category.trim();
+      }
+      if (data.priority) {
+        updatePayload.priority = data.priority;
+      }
+      if (data.status) {
+        updatePayload.status = data.status;
+        if (data.status === SupportTicketStatus.RESOLVED && !ticket.resolvedAt) {
+          updatePayload.resolvedAt = new Date();
+        }
+        if (data.status === SupportTicketStatus.CLOSED && !ticket.closedAt) {
+          updatePayload.closedAt = new Date();
+        }
+      }
+      if (data.description && data.description.trim()) {
+        updatePayload.description = data.description.trim();
+
+        if (ticket.messages && ticket.messages.length > 0) {
+          await tx.supportTicketMessage.update({
+            where: { id: ticket.messages[0].id },
+            data: { message: data.description.trim() },
+          });
+        }
+      }
+
+      await tx.supportTicket.update({
+        where: { id: ticket.id },
+        data: updatePayload,
+      });
+
+      // Audit Log
+      await this.prisma
+        .createSealedAuditLog({
+          tenantId: ticket.tenantId,
+          userId: adminUserId,
+          action: 'PLATFORM_SUPPORT_TICKET_UPDATED',
+          module: 'SupportDesk',
+          details: {
+            ticketId: ticket.id,
+            ticketNumber: ticket.ticketNumber,
+            updatedFields: Object.keys(updatePayload),
+          },
+        })
+        .catch(() => {});
+
+      return this.getTicketDetails(ticket.id);
+    });
+  }
+
+  async deleteTicket(ticketId: string, adminUserId: string) {
+    return this.prisma.withTenantContext({ isSuperAdmin: true }, async (tx) => {
+      const ticket = await tx.supportTicket.findFirst({
+        where: {
+          OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+        },
+      });
+
+      if (!ticket) {
+        throw new NotFoundException('Support ticket not found');
+      }
+
+      // Explicitly delete child messages & attachments first
+      await tx.supportTicketMessage.deleteMany({
+        where: { ticketId: ticket.id },
+      });
+      await tx.supportTicketAttachment.deleteMany({
+        where: { ticketId: ticket.id },
+      });
+
+      // Delete ticket record
+      await tx.supportTicket.delete({
+        where: { id: ticket.id },
+      });
+
+      // Audit log
+      await this.prisma
+        .createSealedAuditLog({
+          tenantId: ticket.tenantId,
+          userId: adminUserId,
+          action: 'PLATFORM_SUPPORT_TICKET_DELETED',
+          module: 'SupportDesk',
+          details: {
+            ticketId: ticket.id,
+            ticketNumber: ticket.ticketNumber,
+            subject: ticket.subject,
+          },
+        })
+        .catch(() => {});
+
+      return {
+        success: true,
+        id: ticket.id,
+        ticketNumber: ticket.ticketNumber,
+      };
+    });
+  }
 }

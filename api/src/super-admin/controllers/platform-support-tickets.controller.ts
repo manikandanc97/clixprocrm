@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Query,
   Body,
@@ -16,7 +17,7 @@ import {
   PlatformSupportTicketsService,
   TicketListQueryDto,
 } from '../services/platform-support-tickets.service';
-import { SupportTicketStatus } from '@prisma/client';
+import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
 
 @Controller('super-admin/support')
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)
@@ -113,6 +114,44 @@ export class PlatformSupportTicketsController {
     return {
       success: true,
       data: ticket,
+    };
+  }
+
+  @Patch('tickets/:id')
+  async updateTicket(
+    @Param('id') id: string,
+    @Body()
+    body: {
+      subject?: string;
+      description?: string;
+      category?: string;
+      priority?: SupportTicketPriority;
+      status?: SupportTicketStatus;
+    },
+    @Req() req: any,
+  ) {
+    const adminUserId = req.user.id;
+    const ticket = await this.supportTicketsService.updateTicketDetails(
+      id,
+      adminUserId,
+      body,
+    );
+    return {
+      success: true,
+      data: ticket,
+    };
+  }
+
+  @Delete('tickets/:id')
+  async deleteTicket(@Param('id') id: string, @Req() req: any) {
+    const adminUserId = req.user.id;
+    const result = await this.supportTicketsService.deleteTicket(
+      id,
+      adminUserId,
+    );
+    return {
+      success: true,
+      data: result,
     };
   }
 }

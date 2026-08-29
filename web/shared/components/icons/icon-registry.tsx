@@ -71,6 +71,7 @@ import {
   Star,
   Pin,
   Info,
+  Clock,
   ClockAlert,
   TriangleAlert,
   HandCoins,
@@ -80,6 +81,11 @@ import {
   House,
   Boxes,
   MessageCircle,
+  MessageSquare,
+  Paperclip,
+  Play,
+  Video,
+  Image,
   X,
   Menu,
 } from "@animateicons/react/lucide";
@@ -152,6 +158,7 @@ export type IconName =
   | "view"
   | "eyeOff"
   | "check"
+  | "circleCheck"
   | "save"
   | "externalLink"
   | "phone"
@@ -168,6 +175,12 @@ export type IconName =
   | "close"
   | "menu"
   | "message"
+  | "messageSquare"
+  | "clock"
+  | "paperclip"
+  | "video"
+  | "image"
+  | "play"
   | "default";
 
 export interface AppIconProps {
@@ -179,6 +192,7 @@ export interface AppIconProps {
   active?: boolean;
   isHovered?: boolean;
   disableHover?: boolean;
+  animateOnMount?: boolean;
   triggerAnimation?: number | string;
   duration?: number;
   onClick?: (e: React.MouseEvent) => void;
@@ -269,6 +283,22 @@ const CANONICAL_ICONS: Record<string, IconName> = {
   close: "close",
   menu: "menu",
   message: "message",
+  messagesquare: "messageSquare",
+  clock: "clock",
+  time: "clock",
+  sla: "clock",
+  paperclip: "paperclip",
+  attachment: "paperclip",
+  attachments: "paperclip",
+  circlecheck: "circleCheck",
+  checkcircle: "circleCheck",
+  checkcircle2: "circleCheck",
+  video: "video",
+  image: "image",
+  photo: "image",
+  play: "play",
+  shieldcheck: "security",
+  shield: "security",
 };
 
 export function resolveIconName(name?: string, href?: string, IconComponent?: any): IconName {
@@ -321,8 +351,15 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (iconDisp.includes("bell")) return "notifications";
   if (iconDisp.includes("eyeoff")) return "eyeOff";
   if (iconDisp.includes("eye")) return "eye";
+  if (iconDisp.includes("circlecheck") || iconDisp.includes("checkcircle")) return "circleCheck";
   if (iconDisp.includes("check")) return "check";
   if (iconDisp.includes("externallink") || iconDisp.includes("link")) return "externalLink";
+  if (iconDisp.includes("clock") || iconDisp.includes("timer")) return "clock";
+  if (iconDisp.includes("paperclip") || iconDisp.includes("attachment")) return "paperclip";
+  if (iconDisp.includes("messagesquare")) return "messageSquare";
+  if (iconDisp.includes("video") || iconDisp.includes("film")) return "video";
+  if (iconDisp.includes("image") || iconDisp.includes("photo")) return "image";
+  if (iconDisp.includes("play")) return "play";
   if (iconDisp.includes("calendar")) return "calendar";
   if (iconDisp.includes("file") || iconDisp.includes("filetext")) return "quotations";
   if (iconDisp.includes("building") || iconDisp.includes("company")) return "companies";
@@ -428,7 +465,14 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (text.includes("star") || text.includes("rating")) return "star";
   if (text.includes("info")) return "info";
   if (text.includes("globe") || text.includes("website") || text.includes("domain")) return "globe";
+  if (text.includes("messagesquare") || text.includes("thread") || text.includes("conversation") || text.includes("reply") || text.includes("replies")) return "messageSquare";
   if (text.includes("message") || text.includes("chat") || text.includes("comment")) return "message";
+  if (text.includes("clock") || text.includes("time") || text.includes("sla") || text.includes("hour")) return "clock";
+  if (text.includes("paperclip") || text.includes("attachment")) return "paperclip";
+  if (text.includes("circlecheck") || text.includes("checkcircle") || text.includes("staff")) return "circleCheck";
+  if (text.includes("video") || text.includes("film")) return "video";
+  if (text.includes("image") || text.includes("photo") || text.includes("picture") || text.includes("screenshot")) return "image";
+  if (text.includes("play")) return "play";
   if (text.includes("close") || text.includes("cancel") || text.includes("dismiss")) return "close";
   if (text.includes("menu")) return "menu";
 
@@ -456,6 +500,7 @@ export function AppIcon({
   active = false,
   isHovered = false,
   disableHover = false,
+  animateOnMount = false,
   triggerAnimation,
   duration = 0.55,
   onClick,
@@ -509,6 +554,16 @@ export function AppIcon({
     }
   }, [triggerAnimation, playOneShotAnimation]);
 
+  // Animate on mount if requested (e.g. when opening a popup/modal)
+  useEffect(() => {
+    if (animateOnMount) {
+      const mountTimer = setTimeout(() => {
+        playOneShotAnimation();
+      }, 150);
+      return () => clearTimeout(mountTimer);
+    }
+  }, [animateOnMount, playOneShotAnimation]);
+
   // Handle prop-driven hover state cleanly: strictly ONCE per hover cycle
   useEffect(() => {
     if (disableHover || isFormFieldRef.current) return;
@@ -538,9 +593,9 @@ export function AppIcon({
     const el = containerRef.current;
     if (!el) return;
 
-    // Check if the icon is inside an interactive element (button, link, menu item, row, tab, etc.)
+    // Check if the icon is inside an interactive element (button, link, menu item, row, tab, cursor-pointer, etc.)
     const parentInteractive = el.closest(
-      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"], tr, [data-interactive]'
+      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"], tr, [data-interactive], .cursor-pointer, [data-animate-target]'
     );
 
     const handleCustomTrigger = () => {
@@ -665,7 +720,34 @@ export function AppIcon({
       };
     }
 
+    // CASE 3: Standalone icon or icon inside non-interactive badge/text.
+    // Hovering the icon directly triggers the animation.
+    const onDirectEnter = () => {
+      if (!disableHover) {
+        if (!hasAnimatedForCurrentHoverRef.current) {
+          hasAnimatedForCurrentHoverRef.current = true;
+          playOneShotAnimation();
+        }
+      }
+    };
+
+    const onDirectLeave = () => {
+      if (!disableHover) {
+        hasAnimatedForCurrentHoverRef.current = false;
+        stopCurrentAnimation();
+      }
+    };
+
+    if (!disableHover) {
+      el.addEventListener("mouseenter", onDirectEnter);
+      el.addEventListener("mouseleave", onDirectLeave);
+    }
+
     return () => {
+      if (!disableHover) {
+        el.removeEventListener("mouseenter", onDirectEnter);
+        el.removeEventListener("mouseleave", onDirectLeave);
+      }
       el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
       el.removeEventListener("stop-icon-animation", handleCustomStop);
     };
@@ -784,6 +866,8 @@ export function AppIcon({
       case "check":
       case "save":
         return <Check {...props} />;
+      case "circleCheck":
+        return <CircleCheck {...props} />;
       case "externalLink":
         return <ExternalLink {...props} />;
       case "lock":
@@ -810,6 +894,18 @@ export function AppIcon({
         return <Menu {...props} />;
       case "message":
         return <MessageCircle {...props} />;
+      case "messageSquare":
+        return <MessageSquare {...props} />;
+      case "clock":
+        return <Clock {...props} />;
+      case "paperclip":
+        return <Paperclip {...props} />;
+      case "video":
+        return <Video {...props} />;
+      case "image":
+        return <Image {...props} />;
+      case "play":
+        return <Play {...props} />;
 
       // Animated Lucide Icons with smooth micro-interaction
       case "companies":
@@ -895,13 +991,13 @@ export function AppIcon({
   };
 
   return (
-    <div
+    <span
       ref={containerRef}
       data-animate-icon="true"
       onClick={onClick}
       className="inline-flex shrink-0 items-center justify-center"
     >
-      <motion.div
+      <motion.span
         animate={
           !reducedMotion && isAnimating
             ? { scale: [1, 1.08, 0.98, 1] }
@@ -911,7 +1007,7 @@ export function AppIcon({
         className="inline-flex shrink-0 items-center justify-center pointer-events-none"
       >
         {renderIcon()}
-      </motion.div>
-    </div>
+      </motion.span>
+    </span>
   );
 }

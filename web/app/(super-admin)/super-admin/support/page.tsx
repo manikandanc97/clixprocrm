@@ -24,6 +24,9 @@ import {
   Eye,
   UserCheck,
   Filter,
+  Trash2,
+  Edit3,
+  Loader2,
 } from "lucide-react";
 import {
   fetchPlatformSupportTickets,
@@ -32,12 +35,15 @@ import {
   replyPlatformSupportTicket,
   updatePlatformSupportTicketStatus,
   assignPlatformSupportTicket,
+  updatePlatformSupportTicket,
+  deletePlatformSupportTicket,
   PlatformSupportTicket,
   SupportTicketStats,
 } from "@/shared/lib/api/super-admin.api";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { Label } from "@/shared/ui/label";
 import { Badge } from "@/shared/ui/badge";
 import { Card, CardContent } from "@/shared/ui/card";
 import {
@@ -140,6 +146,19 @@ export default function SuperAdminSupportPage() {
   const [replyText, setReplyText] = useState("");
   const [isInternalNote, setIsInternalNote] = useState(false);
   const [sendingReply, setSendingReply] = useState(false);
+
+  // Edit Ticket Modal state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editSubject, setEditSubject] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editPriority, setEditPriority] = useState("MEDIUM");
+  const [editDescription, setEditDescription] = useState("");
+  const [savingEdit, setSavingEdit] = useState(false);
+
+  // Delete Ticket Confirmation state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [ticketToDelete, setTicketToDelete] = useState<PlatformSupportTicket | null>(null);
+  const [deletingTicket, setDeletingTicket] = useState(false);
 
   // UI helpers
   const [copiedId, setCopiedId] = useState<string | null>(null);
@@ -254,6 +273,81 @@ export default function SuperAdminSupportPage() {
     } catch (err: any) {
       console.error("Failed to assign ticket:", err);
       toast.error("Failed to update ticket assignment.");
+    }
+  };
+
+  const handleOpenEdit = (ticket: PlatformSupportTicket, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setEditSubject(ticket.subject);
+    setEditCategory(ticket.category || "General");
+    setEditPriority(ticket.priority || "MEDIUM");
+    setEditDescription(ticket.description || "");
+    setIsEditDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    if (!ticketDetails) return;
+    if (!editSubject.trim()) {
+      toast.error("Subject is required");
+      return;
+    }
+    try {
+      setSavingEdit(true);
+      const updated = await updatePlatformSupportTicket(ticketDetails.id, {
+        subject: editSubject.trim(),
+        category: editCategory,
+        priority: editPriority,
+        description: editDescription.trim(),
+      });
+      setTicketDetails(updated);
+      setTickets((prev) =>
+        prev.map((t) => (t.id === updated.id ? updated : t))
+      );
+      setIsEditDialogOpen(false);
+      toast.success("Ticket details updated successfully!");
+      loadData();
+    } catch (err: any) {
+      console.error("Failed to update ticket:", err);
+      toast.error(
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.message ||
+        "Failed to update ticket."
+      );
+    } finally {
+      setSavingEdit(false);
+    }
+  };
+
+  const handleOpenDelete = (ticket: PlatformSupportTicket, e?: React.MouseEvent) => {
+    if (e) e.stopPropagation();
+    setTicketToDelete(ticket);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleDeleteTicket = async () => {
+    const target = ticketToDelete || ticketDetails;
+    if (!target) return;
+    try {
+      setDeletingTicket(true);
+      await deletePlatformSupportTicket(target.id);
+      setTickets((prev) => prev.filter((t) => t.id !== target.id));
+      if (selectedTicketId === target.id) {
+        setSelectedTicketId(null);
+        setTicketDetails(null);
+      }
+      setIsDeleteDialogOpen(false);
+      setTicketToDelete(null);
+      toast.success(`Ticket #${target.ticketNumber} deleted permanently.`);
+      loadData();
+    } catch (err: any) {
+      console.error("Failed to delete ticket:", err);
+      toast.error(
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.message ||
+        "Failed to delete ticket."
+      );
+    } finally {
+      setDeletingTicket(false);
     }
   };
 
@@ -567,18 +661,29 @@ export default function SuperAdminSupportPage() {
 
                         {/* Action */}
                         <td className="py-3 px-4 text-right whitespace-nowrap">
-                          <Button
-                            variant="ghost"
-                            size="sm"
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleOpenTicket(t);
-                            }}
-                            className="h-8 px-2.5 text-xs font-semibold gap-1 text-primary hover:text-primary hover:bg-primary/10"
-                          >
-                            <Eye className="w-3.5 h-3.5" />
-                            <span>View</span>
-                          </Button>
+                          <div className="flex items-center justify-end gap-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenTicket(t);
+                              }}
+                              className="h-8 px-2.5 text-xs font-semibold gap-1 text-primary hover:text-primary hover:bg-primary/10"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                              <span>View</span>
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={(e) => handleOpenDelete(t, e)}
+                              className="h-8 px-2 text-xs font-semibold text-muted-foreground hover:text-destructive hover:bg-destructive/10"
+                              title="Delete Ticket"
+                            >
+                              <Trash2 className="w-3.5 h-3.5" />
+                            </Button>
+                          </div>
                         </td>
                       </tr>
                     );
@@ -697,6 +802,28 @@ export default function SuperAdminSupportPage() {
                         )}
                       </SelectContent>
                     </Select>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenEdit(ticketDetails)}
+                      className="h-8 px-2.5 text-xs font-semibold gap-1 hover:border-primary/50 hover:bg-primary/5 hover:text-primary cursor-pointer"
+                      title="Edit Ticket Details"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-primary" />
+                      <span className="hidden sm:inline">Edit</span>
+                    </Button>
+
+                    <Button
+                      variant="outline"
+                      size="sm"
+                      onClick={() => handleOpenDelete(ticketDetails)}
+                      className="h-8 px-2.5 text-xs font-semibold gap-1 text-destructive hover:bg-destructive/10 hover:border-destructive/40 cursor-pointer"
+                      title="Delete Ticket"
+                    >
+                      <Trash2 className="w-3.5 h-3.5 text-destructive" />
+                      <span className="hidden sm:inline">Delete</span>
+                    </Button>
                   </div>
                 </div>
 
@@ -934,6 +1061,157 @@ export default function SuperAdminSupportPage() {
               </div>
             </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Super Admin Edit Ticket Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-lg p-6 rounded-2xl">
+          <DialogHeader className="pb-3 border-b border-border">
+            <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <Edit3 className="w-4 h-4 text-primary" />
+              Edit Ticket #{ticketDetails?.ticketNumber}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Modify ticket subject, category, priority, or problem description.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-foreground">Subject *</Label>
+              <Input
+                value={editSubject}
+                onChange={(e) => setEditSubject(e.target.value)}
+                placeholder="Brief summary of the issue..."
+                className="text-xs h-9"
+              />
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-foreground">Category</Label>
+                <Input
+                  value={editCategory}
+                  onChange={(e) => setEditCategory(e.target.value)}
+                  placeholder="e.g. Bug Report, Billing"
+                  className="text-xs h-9"
+                />
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-foreground">Priority</Label>
+                <Select value={editPriority} onValueChange={setEditPriority}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="Select Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="LOW">Low</SelectItem>
+                    <SelectItem value="MEDIUM">Medium</SelectItem>
+                    <SelectItem value="HIGH">High</SelectItem>
+                    <SelectItem value="CRITICAL">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-foreground">Description</Label>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={5}
+                placeholder="Problem description..."
+                className="text-xs resize-y"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditDialogOpen(false)}
+              disabled={savingEdit}
+              className="text-xs h-8 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSaveEdit}
+              disabled={savingEdit || !editSubject.trim()}
+              className="text-xs h-8 gap-1.5 cursor-pointer font-semibold"
+            >
+              {savingEdit ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <Check className="w-3.5 h-3.5" /> Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Super Admin Delete Ticket Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="max-w-md p-6 rounded-2xl">
+          <DialogHeader className="pb-3">
+            <DialogTitle className="text-base font-bold text-destructive flex items-center gap-2">
+              <Trash2 className="w-4 h-4 text-destructive" />
+              Delete Ticket #{(ticketToDelete || ticketDetails)?.ticketNumber}?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground pt-1.5 leading-relaxed">
+              Are you sure you want to permanently delete this support ticket? All messages, internal
+              notes, and uploaded attachments will be permanently removed. This action cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-3 bg-destructive/5 rounded-xl border border-destructive/20 text-xs text-foreground/80 space-y-1 my-1">
+            <p className="font-semibold text-foreground truncate">
+              {(ticketToDelete || ticketDetails)?.subject}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              Submitted by {(ticketToDelete || ticketDetails)?.createdBy?.name || "Customer"} ({(ticketToDelete || ticketDetails)?.tenant?.name})
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={deletingTicket}
+              className="text-xs h-8 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteTicket}
+              disabled={deletingTicket}
+              className="text-xs h-8 gap-1.5 font-semibold cursor-pointer"
+            >
+              {deletingTicket ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Deleting...
+                </>
+              ) : (
+                <>
+                  <Trash2 className="w-3.5 h-3.5" /> Delete Permanently
+                </>
+              )}
+            </Button>
+          </div>
         </DialogContent>
       </Dialog>
     </CRMPageContainer>

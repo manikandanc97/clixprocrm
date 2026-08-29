@@ -62,17 +62,25 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
             findMany: jest.fn().mockResolvedValue([sampleTicket]),
             findFirst: jest.fn().mockImplementation((query) => {
               if (
-                query.where.tenantId === 'tenant-alpha' &&
-                query.where.createdById === 'user-charlie'
+                (!query.where.tenantId || query.where.tenantId === 'tenant-alpha') &&
+                (!query.where.createdById || query.where.createdById === 'user-charlie')
               ) {
                 return Promise.resolve(sampleTicket);
               }
               return Promise.resolve(null);
             }),
-            update: jest.fn().mockResolvedValue({ ...sampleTicket, status: 'IN_PROGRESS' }),
+            update: jest.fn().mockImplementation((args) =>
+              Promise.resolve({ ...sampleTicket, ...args.data, status: args.data.status || 'IN_PROGRESS' }),
+            ),
+            delete: jest.fn().mockResolvedValue(sampleTicket),
           },
           supportTicketMessage: {
             create: jest.fn().mockResolvedValue({ id: 'msg-new' }),
+            update: jest.fn().mockResolvedValue({ id: 'msg-1' }),
+            deleteMany: jest.fn().mockResolvedValue({ count: 2 }),
+          },
+          supportTicketAttachment: {
+            deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
           },
           user: {
             findMany: jest.fn().mockResolvedValue([{ id: 'sa-1' }, { id: 'sa-2' }]),
@@ -173,5 +181,79 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
 
     expect(updated).not.toBeNull();
     expect(mockNotifications.createNotification).toHaveBeenCalled();
+  });
+
+  it('5. Successfully updates a ticket when userRole is passed as an object ({ name: "ADMIN" })', async () => {
+    const roleAsObject = {
+      name: 'ADMIN',
+      permissions: [{ module: 'ALL', hasAccess: true }],
+      isActive: true,
+    };
+
+    const updated = await service.updateTicket(
+      'CP-SUP-2026-123456',
+      'user-charlie',
+      {
+        subject: 'Updated ticket subject',
+        category: 'Technical Issue',
+        priority: 'Critical',
+        description: 'New detailed description',
+      },
+      'tenant-alpha',
+      roleAsObject,
+    );
+
+    expect(updated).not.toBeNull();
+    expect(mockPrisma.createSealedAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SUPPORT_TICKET_UPDATED',
+      }),
+    );
+  });
+
+  it('6. Successfully deletes a ticket and pre-deletes child messages and attachments', async () => {
+    const roleAsObject = {
+      name: 'ADMIN',
+      permissions: [{ module: 'ALL', hasAccess: true }],
+      isActive: true,
+    };
+
+    const deleted = await service.deleteTicket(
+      'CP-SUP-2026-123456',
+      'user-charlie',
+      'tenant-alpha',
+      roleAsObject,
+    );
+
+    expect(deleted.success).toBe(true);
+    expect(deleted.ticketNumber).toBe('CP-SUP-2026-123456');
+    expect(mockPrisma.createSealedAuditLog).toHaveBeenCalledWith(
+      expect.objectContaining({
+        action: 'SUPPORT_TICKET_DELETED',
+      }),
+    );
+  });
+
+  it('7. Prevents non-owner and non-admin from deleting or editing ticket', async () => {
+    const strangerRole = { name: 'MEMBER' };
+
+    await expect(
+      service.deleteTicket(
+        'CP-SUP-2026-123456',
+        'stranger-user',
+        'tenant-alpha',
+        strangerRole,
+      ),
+    ).rejects.toThrow();
+
+    await expect(
+      service.updateTicket(
+        'CP-SUP-2026-123456',
+        'stranger-user',
+        { subject: 'Hacked subject' },
+        'tenant-alpha',
+        strangerRole,
+      ),
+    ).rejects.toThrow();
   });
 });

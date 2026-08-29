@@ -1,6 +1,6 @@
-import React, { useRef } from "react";
+import React, { useRef, useState } from "react";
 import { Button } from "@/shared/ui/button";
-import { Download, UploadCloud, File, FileText, Image as ImageIcon, Video, Trash2, Loader2 } from "lucide-react";
+import { Download, UploadCloud, File, FileText, Image as ImageIcon, Video, Trash2, Loader2, Sparkles } from "lucide-react";
 import { format } from "date-fns";
 import { useLeadAttachments, useUploadLeadAttachment, useDeleteLeadAttachment } from "@/shared/hooks/use-crm";
 import { formatBytes } from "@/shared/lib/utils";
@@ -8,6 +8,8 @@ import { EmptyState } from "@/shared/components/EmptyState";
 import { useViewMode } from "@/shared/hooks/useViewMode";
 import { ViewToggle } from "@/shared/components/crm/ViewToggle";
 import { AttachmentsSkeleton } from "@/shared/components/skeletons";
+import { motion, AnimatePresence } from "framer-motion";
+import { toast } from "sonner";
 
 const getFileIcon = (fileType: string) => {
   if (fileType?.includes("image")) return <ImageIcon className="w-8 h-8 text-blue-500" />;
@@ -20,10 +22,68 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
   const { data: attachmentsResp, isLoading } = useLeadAttachments(leadId);
   const attachments = attachmentsResp?.data || [];
   const [viewMode, setViewMode] = useViewMode("documents", "grid");
+  const [isDragging, setIsDragging] = useState(false);
+  const dragCounterRef = useRef(0);
   
   const uploadAttachment = useUploadLeadAttachment();
   const deleteAttachment = useDeleteLeadAttachment();
   const fileInputRef = useRef<HTMLInputElement>(null);
+
+  const handleUploadFile = (file: File) => {
+    uploadAttachment.mutate(
+      {
+        leadId,
+        file,
+      },
+      {
+        onSettled: () => {
+          if (fileInputRef.current) {
+            fileInputRef.current.value = "";
+          }
+        },
+      }
+    );
+  };
+
+  const handleDragEnter = (e: React.DragEvent) => {
+    if (e.dataTransfer && Array.from(e.dataTransfer.types).includes("Files")) {
+      e.preventDefault();
+      e.stopPropagation();
+      dragCounterRef.current += 1;
+      setIsDragging(true);
+    }
+  };
+
+  const handleDragLeave = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current -= 1;
+    if (dragCounterRef.current <= 0) {
+      dragCounterRef.current = 0;
+      setIsDragging(false);
+    }
+  };
+
+  const handleDragOver = (e: React.DragEvent) => {
+    if (e.dataTransfer && Array.from(e.dataTransfer.types).includes("Files")) {
+      e.preventDefault();
+      e.stopPropagation();
+      e.dataTransfer.dropEffect = "copy";
+    }
+  };
+
+  const handleDrop = (e: React.DragEvent) => {
+    e.preventDefault();
+    e.stopPropagation();
+    dragCounterRef.current = 0;
+    setIsDragging(false);
+
+    if (e.dataTransfer?.files && e.dataTransfer.files.length > 0) {
+      const fileList = Array.from(e.dataTransfer.files);
+      fileList.forEach((file) => handleUploadFile(file));
+      toast.success(`Uploading ${fileList.length} file${fileList.length > 1 ? "s" : ""}...`);
+    }
+  };
 
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -51,7 +111,36 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
   };
 
   return (
-    <div className="space-y-6">
+    <div
+      className="space-y-6 relative min-h-[280px]"
+      onDragEnter={handleDragEnter}
+      onDragLeave={handleDragLeave}
+      onDragOver={handleDragOver}
+      onDrop={handleDrop}
+    >
+      {/* Animated Drop Overlay */}
+      <AnimatePresence>
+        {isDragging && (
+          <motion.div
+            initial={{ opacity: 0, scale: 0.98 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.98 }}
+            transition={{ duration: 0.15 }}
+            className="absolute inset-0 z-30 bg-background/90 dark:bg-black/90 backdrop-blur-sm border-2 border-dashed border-primary rounded-2xl p-6 flex flex-col items-center justify-center text-center pointer-events-none shadow-xl shadow-primary/10"
+          >
+            <div className="w-16 h-16 rounded-2xl bg-primary/20 text-primary border border-primary/40 flex items-center justify-center mb-3 shadow-md">
+              <UploadCloud className="w-8 h-8 animate-bounce" />
+            </div>
+            <h4 className="text-base font-extrabold text-foreground mb-1 flex items-center gap-1.5">
+              <Sparkles className="w-4 h-4 text-primary" /> Drop files to upload to this lead
+            </h4>
+            <p className="text-xs text-muted-foreground max-w-xs">
+              Release anywhere in this area to upload proposals, screenshots, videos, or documents
+            </p>
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       <div className="flex justify-between items-center gap-4">
         <h3 className="text-sm font-bold text-foreground">Files & Documents</h3>
         <div className="flex items-center gap-3">

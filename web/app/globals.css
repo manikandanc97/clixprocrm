@@ -170,12 +170,12 @@
   --shadow-glow: 0 0 20px oklch(0.58 0.165 157 / 0.12);
   --shadow-soft:
     0 2px 12px -3px oklch(0 0 0 / 0.06);
-  /* Scrollbar Theme Tokens — Light Mode (Theme Primary Lite) */
-  --scrollbar-thumb: color-mix(in srgb, var(--primary) 32%, var(--border));
-  --scrollbar-thumb-hover: color-mix(in srgb, var(--primary) 68%, transparent);
+  /* Scrollbar Theme Tokens — Light Mode (Subtle, Modern SaaS Neutral) */
+  --scrollbar-thumb: color-mix(in srgb, var(--foreground) 16%, transparent);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--foreground) 32%, transparent);
   --scrollbar-thumb-active: var(--primary);
   --scrollbar-track: transparent;
-  --scrollbar-track-hover: color-mix(in srgb, var(--primary) 5%, transparent);
+  --scrollbar-track-hover: color-mix(in srgb, var(--foreground) 4%, transparent);
 }
 
 /* ============================================================
@@ -208,12 +208,12 @@
   --input: oklch(0.24 0.018 265);
   --ring: oklch(0.68 0.16 157);
 
-  /* Scrollbar Theme Tokens — Dark Mode (Theme Primary Lite) */
-  --scrollbar-thumb: color-mix(in srgb, var(--primary) 35%, var(--border));
-  --scrollbar-thumb-hover: color-mix(in srgb, var(--primary) 70%, transparent);
+  /* Scrollbar Theme Tokens — Dark Mode (Subtle, Modern SaaS Neutral) */
+  --scrollbar-thumb: color-mix(in srgb, var(--foreground) 18%, transparent);
+  --scrollbar-thumb-hover: color-mix(in srgb, var(--foreground) 36%, transparent);
   --scrollbar-thumb-active: var(--primary);
   --scrollbar-track: transparent;
-  --scrollbar-track-hover: color-mix(in srgb, var(--primary) 6%, transparent);
+  --scrollbar-track-hover: color-mix(in srgb, var(--foreground) 4%, transparent);
 
   /* CRM Specific Tokens Dark */
   --crm-radius-card: 12px;

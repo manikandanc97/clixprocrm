@@ -1455,6 +1455,33 @@ export const assignPlatformSupportTicket = async (
   return response.data.data;
 };
 
+export const updatePlatformSupportTicket = async (
+  ticketId: string,
+  data: {
+    subject?: string;
+    description?: string;
+    category?: string;
+    priority?: string;
+    status?: string;
+  }
+): Promise<PlatformSupportTicket> => {
+  const response = await client.patch<{ success: boolean; data: PlatformSupportTicket }>(
+    `/super-admin/support/tickets/${ticketId}`,
+    data
+  );
+  return response.data.data;
+};
+
+export const deletePlatformSupportTicket = async (
+  ticketId: string
+): Promise<{ success: boolean; id: string; ticketNumber: string }> => {
+  const response = await client.delete<{
+    success: boolean;
+    data: { success: boolean; id: string; ticketNumber: string };
+  }>(`/super-admin/support/tickets/${ticketId}`);
+  return response.data.data;
+};
+
 
 
 

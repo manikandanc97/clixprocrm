@@ -1,38 +1,35 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
-  Search,
-  Filter,
-  RefreshCw,
-  Ticket,
-  Clock,
-  CheckCircle2,
-  AlertCircle,
-  MessageSquare,
-  Paperclip,
-  ArrowRight,
-  Send,
   Loader2,
-  Calendar,
-  Laptop,
-  User,
-  Plus,
-  ExternalLink,
-  ChevronRight,
-  Check,
-  Copy,
 } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } from "@/shared/ui/dialog";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/shared/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
+import { Label } from "@/shared/ui/label";
 import { toast } from "sonner";
 import { Skeleton } from "@/shared/ui/skeleton";
 import client from "@/shared/lib/api/client";
+import { formatBytes, cn } from "@/shared/lib/utils";
+import { useAuth } from "@/features/auth/components/auth-provider";
 import ReactMarkdown from "react-markdown";
 
 export interface TicketItem {
@@ -47,7 +44,13 @@ export interface TicketItem {
   status: "OPEN" | "IN_PROGRESS" | "WAITING_FOR_USER" | "RESOLVED" | "CLOSED";
   description: string;
   diagnostics?: any;
-  attachments?: { filename: string; size: number; url?: string }[];
+  attachments?: {
+    id?: string;
+    filename: string;
+    size: number;
+    url?: string;
+    contentType?: string;
+  }[];
   estimatedResponseTime?: string;
   createdAt: string;
   updatedAt: string;
@@ -61,7 +64,7 @@ export interface TicketItem {
   }>;
 }
 
-const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
+const STATUS_CONFIG = {
   OPEN: {
     label: "Open",
     color: "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400",
@@ -70,10 +73,10 @@ const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string 
   IN_PROGRESS: {
     label: "In Progress",
     color: "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400",
-    dot: "bg-amber-500 animate-pulse",
+    dot: "bg-amber-500",
   },
   WAITING_FOR_USER: {
-    label: "Waiting for You",
+    label: "Waiting for Reply",
     color: "bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400",
     dot: "bg-purple-500",
   },
@@ -108,11 +111,95 @@ const PRIORITY_CONFIG = {
   },
 };
 
+const CATEGORIES = [
+  "Bug Report",
+  "Feature Request",
+  "Billing & Subscription",
+  "Technical Issue",
+  "Account / Access",
+  "General Inquiry",
+];
+
+const isImageFile = (filename: string, contentType?: string) => {
+  if (contentType?.startsWith("image/")) return true;
+  const ext = filename.toLowerCase().split(".").pop() || "";
+  return ["png", "jpg", "jpeg", "webp", "gif", "svg", "bmp"].includes(ext);
+};
+
+const isVideoFile = (filename: string, contentType?: string) => {
+  if (contentType?.startsWith("video/")) return true;
+  const ext = filename.toLowerCase().split(".").pop() || "";
+  return ["mp4", "webm", "mov", "avi", "mkv", "m4v"].includes(ext);
+};
+
+const getInitials = (name?: string) => {
+  if (!name) return "U";
+  const parts = name.trim().split(" ");
+  if (parts.length >= 2 && parts[0] && parts[1]) {
+    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
+  }
+  return name.slice(0, 2).toUpperCase();
+};
+
+function UserAvatar({
+  name,
+  isStaff = false,
+  size = "md",
+  className = "",
+}: {
+  name?: string;
+  isStaff?: boolean;
+  size?: "xs" | "sm" | "md" | "lg";
+  className?: string;
+}) {
+  const initials = getInitials(name);
+  const sizeClasses = {
+    xs: "w-5 h-5 text-[9px]",
+    sm: "w-7 h-7 text-[11px]",
+    md: "w-8 h-8 text-xs",
+    lg: "w-10 h-10 text-sm",
+  }[size];
+
+  if (isStaff) {
+    return (
+      <div
+        className={cn(
+          sizeClasses,
+          "rounded-full bg-linear-to-br from-blue-500/20 to-indigo-500/25 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center ring-1 ring-blue-500/30 shadow-2xs shrink-0 select-none",
+          className
+        )}
+        title={name ? `${name} (Support Staff)` : "Support Staff"}
+      >
+        <AppIcon
+          name="security"
+          size={size === "xs" ? 11 : size === "sm" ? 13 : 15}
+          className="text-blue-600 dark:text-blue-400"
+        />
+      </div>
+    );
+  }
+
+  return (
+    <div
+      className={cn(
+        sizeClasses,
+        "rounded-full bg-linear-to-br from-emerald-500/20 via-teal-500/15 to-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold flex items-center justify-center ring-1 ring-emerald-500/30 shadow-2xs shrink-0 select-none",
+        className
+      )}
+      title={name || "User"}
+    >
+      {initials}
+    </div>
+  );
+}
+
 interface TicketHistoryListProps {
   onNewTicketClick?: () => void;
 }
 
 export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) {
+  const { user } = useAuth();
+
   const [tickets, setTickets] = useState<TicketItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [searchTerm, setSearchTerm] = useState("");
@@ -122,6 +209,29 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   const [replyText, setReplyText] = useState("");
   const [isReplying, setIsReplying] = useState(false);
   const [copiedId, setCopiedId] = useState<string | null>(null);
+
+
+  // Edit ticket state
+  const [isEditDialogOpen, setIsEditDialogOpen] = useState(false);
+  const [editSubject, setEditSubject] = useState("");
+  const [editCategory, setEditCategory] = useState("");
+  const [editPriority, setEditPriority] = useState<"Low" | "Medium" | "High" | "Critical">("Medium");
+  const [editDescription, setEditDescription] = useState("");
+  const [isSavingEdit, setIsSavingEdit] = useState(false);
+
+  // Delete ticket state
+  const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
+  const [isDeleting, setIsDeleting] = useState(false);
+
+  // Attachment media preview lightbox state
+  const [previewMedia, setPreviewMedia] = useState<{
+    filename: string;
+    url: string;
+    size?: number;
+    contentType?: string;
+    isImage: boolean;
+    isVideo: boolean;
+  } | null>(null);
 
   const fetchTickets = useCallback(async () => {
     try {
@@ -140,6 +250,34 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   useEffect(() => {
     fetchTickets();
   }, [fetchTickets]);
+
+  // Target ticket for Edit / Delete operations (supports both list view and modal view)
+  const [targetTicket, setTargetTicket] = useState<TicketItem | null>(null);
+
+  // Safely extract user role string and determine privileges
+  const userRoleStr =
+    typeof user?.role === "string"
+      ? user.role
+      : (user?.role as any)?.name || (user as any)?.roleName || "";
+  const normalizedUserRole = userRoleStr.toUpperCase();
+  const isAdminOrOwner =
+    normalizedUserRole === "ADMIN" ||
+    normalizedUserRole === "SUPERADMIN" ||
+    normalizedUserRole === "SUPER_ADMIN" ||
+    normalizedUserRole === "OWNER" ||
+    normalizedUserRole === "ORG_OWNER" ||
+    Boolean((user as any)?.isSuperAdmin);
+
+  const canManageTicket = (ticket: TicketItem | null): boolean => {
+    if (!ticket) return false;
+    if (isAdminOrOwner) return true;
+    if (user?.id && (ticket.userId === user.id || ticket.userId === (user as any)?.sub)) return true;
+    if (user?.email && ticket.userEmail?.toLowerCase() === user.email?.toLowerCase()) return true;
+    return false;
+  };
+
+  // Determine if current logged in user created the selected ticket (or is Admin)
+  const isCreator = canManageTicket(selectedTicket);
 
   const handleSendReply = async () => {
     if (!selectedTicket || !replyText.trim()) return;
@@ -160,9 +298,99 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       toast.success("Reply added to ticket thread.");
     } catch (error: any) {
       console.error("Reply failed:", error);
-      toast.error(error?.response?.data?.error?.message || "Failed to send reply.");
+      toast.error(error?.response?.data?.error?.message || error?.response?.data?.message || "Failed to send reply.");
     } finally {
       setIsReplying(false);
+    }
+  };
+
+  const handleOpenEdit = (ticket: TicketItem) => {
+    setTargetTicket(ticket);
+    setEditSubject(ticket.subject);
+    setEditCategory(ticket.category || "General Inquiry");
+    setEditPriority(ticket.priority || "Medium");
+    setEditDescription(ticket.description || "");
+    setIsEditDialogOpen(true);
+  };
+
+  const handleOpenDelete = (ticket: TicketItem) => {
+    setTargetTicket(ticket);
+    setIsDeleteDialogOpen(true);
+  };
+
+  const handleSaveEdit = async () => {
+    const activeTarget = targetTicket || selectedTicket;
+    if (!activeTarget) return;
+    if (!editSubject.trim()) {
+      toast.error("Subject is required");
+      return;
+    }
+    if (!editDescription.trim()) {
+      toast.error("Description cannot be empty");
+      return;
+    }
+
+    try {
+      setIsSavingEdit(true);
+      const res = await client.patch(`/support/tickets/${activeTarget.ticketId || activeTarget.id}`, {
+        subject: editSubject.trim(),
+        category: editCategory,
+        priority: editPriority,
+        description: editDescription.trim(),
+      });
+
+      const updatedTicket = res.data?.data;
+      if (updatedTicket) {
+        if (selectedTicket && (selectedTicket.id === updatedTicket.id || selectedTicket.ticketId === updatedTicket.ticketId)) {
+          setSelectedTicket(updatedTicket);
+        }
+        setTickets((prev) =>
+          prev.map((t) =>
+            t.id === updatedTicket.id || t.ticketId === updatedTicket.ticketId ? updatedTicket : t
+          )
+        );
+      }
+      setIsEditDialogOpen(false);
+      setTargetTicket(null);
+      toast.success("Ticket updated successfully!");
+    } catch (err: any) {
+      console.error("Failed to update ticket:", err);
+      toast.error(
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.message ||
+        "Failed to update ticket details."
+      );
+    } finally {
+      setIsSavingEdit(false);
+    }
+  };
+
+  const handleDeleteTicket = async () => {
+    const activeTarget = targetTicket || selectedTicket;
+    if (!activeTarget) return;
+
+    try {
+      setIsDeleting(true);
+      await client.delete(`/support/tickets/${activeTarget.ticketId || activeTarget.id}`);
+      setTickets((prev) =>
+        prev.filter((t) => t.id !== activeTarget.id && t.ticketId !== activeTarget.ticketId)
+      );
+      if (selectedTicket && (selectedTicket.id === activeTarget.id || selectedTicket.ticketId === activeTarget.ticketId)) {
+        setSelectedTicket(null);
+      }
+      setIsDeleteDialogOpen(false);
+      const deletedNumber = activeTarget.ticketId;
+      setTargetTicket(null);
+      toast.success(`Ticket #${deletedNumber} deleted successfully.`);
+    } catch (err: any) {
+      console.error("Failed to delete ticket:", err);
+      toast.error(
+        err?.response?.data?.error?.message ||
+        err?.response?.data?.message ||
+        "Failed to delete ticket."
+      );
+    } finally {
+      setIsDeleting(false);
     }
   };
 
@@ -178,26 +406,24 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
     try {
       const date = new Date(isoString);
       const now = new Date();
-      const diffMs = now.getTime() - date.getTime();
-      const diffMins = Math.floor(diffMs / 60000);
-      const diffHours = Math.floor(diffMins / 60);
-      const diffDays = Math.floor(diffHours / 24);
+      const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
 
-      if (diffMins < 1) return "Just now";
-      if (diffMins < 60) return `${diffMins}m ago`;
-      if (diffHours < 24) return `${diffHours}h ago`;
-      if (diffDays === 1) return "Yesterday";
-      if (diffDays < 30) return `${diffDays}d ago`;
-      return date.toLocaleDateString("en-US", { month: "short", day: "numeric", year: "numeric" });
+      if (diffInHours < 1) return "Just now";
+      if (diffInHours < 24) return `${diffInHours}h ago`;
+      const diffInDays = Math.floor(diffInHours / 24);
+      if (diffInDays < 7) return `${diffInDays}d ago`;
+      return date.toLocaleDateString();
     } catch {
       return "Recently";
     }
   };
 
+  // Filtered ticket results
   const filteredTickets = tickets.filter((t) => {
     const matchesSearch =
-      t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.ticketId.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.subject.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      t.description.toLowerCase().includes(searchTerm.toLowerCase()) ||
       t.category.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesStatus = statusFilter === "ALL" || t.status === statusFilter;
@@ -208,186 +434,220 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
 
   return (
     <div className="space-y-4">
-      {/* Search & Filter Bar */}
-      <Card className="border-border shadow-card rounded-2xl overflow-hidden">
-        <CardContent className="p-4">
-          <div className="flex flex-col md:flex-row items-center justify-between gap-3">
-            <div className="relative w-full md:max-w-md">
-              <Search className="w-4 h-4 absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground" />
-              <Input
-                placeholder="Search by ticket ID, subject, or category..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-9 h-9 text-xs"
-              />
-            </div>
-
-            <div className="flex items-center gap-2 w-full md:w-auto">
-              <Select value={statusFilter} onValueChange={setStatusFilter}>
-                <SelectTrigger className="h-9 text-xs w-[130px]">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL" className="text-xs">All Statuses</SelectItem>
-                  <SelectItem value="OPEN" className="text-xs">Open</SelectItem>
-                  <SelectItem value="IN_PROGRESS" className="text-xs">In Progress</SelectItem>
-                  <SelectItem value="RESOLVED" className="text-xs">Resolved</SelectItem>
-                  <SelectItem value="CLOSED" className="text-xs">Closed</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-                <SelectTrigger className="h-9 text-xs w-[130px]">
-                  <SelectValue placeholder="Priority" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ALL" className="text-xs">All Priorities</SelectItem>
-                  <SelectItem value="Critical" className="text-xs">Critical</SelectItem>
-                  <SelectItem value="High" className="text-xs">High</SelectItem>
-                  <SelectItem value="Medium" className="text-xs">Medium</SelectItem>
-                  <SelectItem value="Low" className="text-xs">Low</SelectItem>
-                </SelectContent>
-              </Select>
-
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={fetchTickets}
-                disabled={loading}
-                className="h-9 px-3 text-xs"
-                title="Refresh tickets list"
-              >
-                <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin text-primary" : ""}`} />
-              </Button>
-            </div>
+      {/* Filter and Action Header */}
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border shadow-2xs">
+        <div className="flex items-center gap-2 flex-1 min-w-[200px]">
+          <div className="relative flex-1">
+            <AppIcon name="search" size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <Input
+              placeholder="Search by ticket ID, subject, keyword..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              className="pl-9 h-9 text-xs"
+            />
           </div>
-        </CardContent>
-      </Card>
+        </div>
 
-      {/* Tickets List */}
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Status filter */}
+          <Select value={statusFilter} onValueChange={setStatusFilter}>
+            <SelectTrigger className="h-9 text-xs w-[130px]">
+              <SelectValue placeholder="All Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Status</SelectItem>
+              <SelectItem value="OPEN">Open</SelectItem>
+              <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+              <SelectItem value="WAITING_FOR_USER">Waiting for Reply</SelectItem>
+              <SelectItem value="RESOLVED">Resolved</SelectItem>
+              <SelectItem value="CLOSED">Closed</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Priority filter */}
+          <Select value={priorityFilter} onValueChange={setPriorityFilter}>
+            <SelectTrigger className="h-9 text-xs w-[120px]">
+              <SelectValue placeholder="All Priorities" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Priorities</SelectItem>
+              <SelectItem value="Critical">Critical</SelectItem>
+              <SelectItem value="High">High</SelectItem>
+              <SelectItem value="Medium">Medium</SelectItem>
+              <SelectItem value="Low">Low</SelectItem>
+            </SelectContent>
+          </Select>
+
+          {/* Refresh button */}
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={fetchTickets}
+            disabled={loading}
+            className="h-9 px-2.5 cursor-pointer"
+            title="Refresh list"
+          >
+            <AppIcon name="refresh" size={14} className={loading ? "animate-spin" : ""} />
+          </Button>
+
+          {/* Create new ticket button */}
+          {onNewTicketClick && (
+            <Button size="sm" onClick={onNewTicketClick} className="h-9 text-xs gap-1.5 px-3 cursor-pointer">
+              <AppIcon name="plus" size={14} />
+              <span>New Ticket</span>
+            </Button>
+          )}
+        </div>
+      </div>
+
+      {/* Ticket List View */}
       {loading ? (
-        <div className="space-y-2.5">
-          {Array.from({ length: 4 }).map((_, i) => (
-            <Card
-              key={i}
-              className="border-border/80 bg-card rounded-2xl shadow-card overflow-hidden"
-            >
-              <CardContent className="p-4 sm:p-5">
-                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
-                  <div className="space-y-2 flex-1 min-w-0">
-                    <div className="flex flex-wrap items-center gap-2">
-                      <Skeleton className="h-4 w-20 font-mono" />
-                      <Skeleton className="h-4.5 w-16 rounded-full" />
-                      <Skeleton className="h-4.5 w-16 rounded-full" />
-                      <Skeleton className="h-4.5 w-20 rounded" />
-                    </div>
-                    <Skeleton className="h-4 w-3/5" />
-                    <Skeleton className="h-3.5 w-4/5" />
-                  </div>
-                  <div className="flex items-center sm:flex-col items-end justify-between sm:justify-center gap-2 sm:gap-1.5 text-right shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-                    <Skeleton className="h-3 w-20" />
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-10 rounded" />
-                      <Skeleton className="h-4 w-10 rounded" />
-                      <Skeleton className="w-4 h-4 rounded hidden sm:block" />
-                    </div>
-                  </div>
-                </div>
-              </CardContent>
-            </Card>
+        <div className="space-y-3">
+          {[1, 2, 3].map((i) => (
+            <div key={i} className="p-4 rounded-xl border bg-card space-y-3">
+              <div className="flex justify-between">
+                <Skeleton className="h-4 w-32" />
+                <Skeleton className="h-4 w-20" />
+              </div>
+              <Skeleton className="h-5 w-3/4" />
+              <Skeleton className="h-3 w-1/2" />
+            </div>
           ))}
         </div>
       ) : filteredTickets.length === 0 ? (
-        <Card className="border-dashed shadow-card rounded-2xl overflow-hidden">
-          <CardContent className="py-16 flex flex-col items-center justify-center text-center gap-3">
-            <div className="w-12 h-12 rounded-full bg-primary/10 text-primary flex items-center justify-center">
-              <Ticket className="w-6 h-6" />
-            </div>
-            <div>
-              <h4 className="text-sm font-bold text-foreground">No Support Tickets Found</h4>
-              <p className="text-xs text-muted-foreground mt-0.5 max-w-sm">
-                {searchTerm || statusFilter !== "ALL" || priorityFilter !== "ALL"
-                  ? "Try clearing your search or status filters to view all records."
-                  : "You haven't submitted any support tickets yet."}
-              </p>
-            </div>
-            {onNewTicketClick && (
-              <Button size="sm" onClick={onNewTicketClick} className="text-xs font-semibold h-8 mt-2 gap-1.5">
-                <Plus className="w-3.5 h-3.5" /> Create New Ticket
-              </Button>
-            )}
-          </CardContent>
-        </Card>
+        <div className="text-center py-12 px-4 rounded-2xl border-2 border-dashed border-border bg-card/50">
+          <AppIcon name="supportTickets" size={44} className="text-muted-foreground/40 mx-auto mb-3" />
+          <h4 className="font-bold text-base text-foreground mb-1">No Tickets Found</h4>
+          <p className="text-xs text-muted-foreground max-w-sm mx-auto mb-4">
+            {searchTerm || statusFilter !== "ALL" || priorityFilter !== "ALL"
+              ? "No tickets matched your current search filters. Try resetting the filters."
+              : "You haven't submitted any support requests yet. If you need assistance, our support engineers are here to help."}
+          </p>
+          {onNewTicketClick && (
+            <Button size="sm" onClick={onNewTicketClick} className="text-xs gap-1.5 cursor-pointer">
+              <AppIcon name="plus" size={14} /> Submit a Ticket
+            </Button>
+          )}
+        </div>
       ) : (
         <div className="space-y-2.5">
           {filteredTickets.map((ticket) => {
-            const statusMeta = STATUS_CONFIG[ticket.status] || STATUS_CONFIG.OPEN;
-            const priorityMeta = PRIORITY_CONFIG[ticket.priority] || PRIORITY_CONFIG.Medium;
+            const statusStyle = STATUS_CONFIG[ticket.status] || STATUS_CONFIG.OPEN;
+            const priorityStyle = PRIORITY_CONFIG[ticket.priority] || PRIORITY_CONFIG.Medium;
             const hasReplies = ticket.replies && ticket.replies.length > 0;
 
             return (
               <Card
-                key={ticket.ticketId}
+                key={ticket.id || ticket.ticketId}
                 onClick={() => setSelectedTicket(ticket)}
-                className="border-border hover:border-primary/50 hover:shadow-md transition-all cursor-pointer bg-card group rounded-2xl shadow-card overflow-hidden"
+                className="hover:border-primary/50 hover:shadow-sm cursor-pointer transition-all duration-200 group bg-card"
               >
-                <CardContent className="p-4 sm:p-5">
+                <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
                     <div className="space-y-1.5 flex-1 min-w-0">
-                      <div className="flex flex-wrap items-center gap-2">
-                        <span className="font-mono text-xs font-bold text-primary group-hover:underline">
-                          {ticket.ticketId}
-                        </span>
-                        <button
-                          type="button"
+                      <div className="flex flex-wrap items-center gap-2 text-xs">
+                        <UserAvatar name={ticket.userName} size="xs" />
+                        {/* Ticket Number Badge with Copy */}
+                        <div
+                          role="button"
+                          tabIndex={0}
                           onClick={(e) => copyId(ticket.ticketId, e)}
-                          className="text-muted-foreground hover:text-foreground transition-colors p-0.5"
-                          title="Copy ID"
+                          className="font-mono text-[11px] font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded flex items-center gap-1 transition-colors cursor-pointer"
+                          title="Click to copy ID"
                         >
+                          <span>{ticket.ticketId}</span>
                           {copiedId === ticket.ticketId ? (
-                            <Check className="w-3 h-3 text-emerald-500" />
+                            <AppIcon name="check" size={12} className="text-emerald-500" />
                           ) : (
-                            <Copy className="w-3 h-3" />
+                            <AppIcon name="copy" size={11} className="opacity-60 group-hover:opacity-100" />
                           )}
-                        </button>
-                        <Badge variant="outline" className={`text-[10px] font-bold ${statusMeta.color}`}>
-                          <span className={`w-1.5 h-1.5 rounded-full mr-1.5 ${statusMeta.dot}`} />
-                          {statusMeta.label}
-                        </Badge>
-                        <Badge variant="outline" className={`text-[10px] font-bold ${priorityMeta.color}`}>
-                          {priorityMeta.label}
-                        </Badge>
-                        <span className="text-[10px] text-muted-foreground font-semibold px-2 py-0.5 rounded bg-muted/60 border border-border/50">
-                          {ticket.category}
+                        </div>
+
+                        {/* Status badge */}
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border flex items-center gap-1.5 ${statusStyle.color}`}
+                        >
+                          <span className={`w-1.5 h-1.5 rounded-full ${statusStyle.dot}`} />
+                          {statusStyle.label}
+                        </span>
+
+                        {/* Priority badge */}
+                        <span
+                          className={`text-[10px] font-semibold px-2 py-0.5 rounded-full border ${priorityStyle.color}`}
+                        >
+                          {priorityStyle.label}
+                        </span>
+
+                        {/* Category */}
+                        <span className="text-[11px] text-muted-foreground font-medium hidden md:inline">
+                          • {ticket.category}
                         </span>
                       </div>
 
-                      <h4 className="text-xs sm:text-sm font-bold text-foreground group-hover:text-primary transition-colors truncate">
+                      {/* Ticket Title */}
+                      <h4 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors truncate">
                         {ticket.subject}
                       </h4>
 
+                      {/* Snippet */}
                       <p className="text-xs text-muted-foreground line-clamp-1">
                         {ticket.description}
                       </p>
                     </div>
 
-                    <div className="flex items-center sm:flex-col items-end justify-between sm:justify-center gap-2 sm:gap-1 text-right shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
-                      <span className="text-[11px] text-muted-foreground font-medium flex items-center gap-1">
-                        <Clock className="w-3 h-3" /> {formatRelativeTime(ticket.createdAt)}
+                    {/* Metadata column */}
+                    <div className="flex sm:flex-col items-center sm:items-end justify-between gap-1 text-[11px] text-muted-foreground shrink-0 border-t sm:border-t-0 pt-2 sm:pt-0">
+                      <span className="flex items-center gap-1">
+                        <AppIcon name="clock" size={12} />
+                        {formatRelativeTime(ticket.createdAt)}
                       </span>
 
                       <div className="flex items-center gap-2">
                         {ticket.attachments && ticket.attachments.length > 0 && (
                           <span className="text-[10px] font-semibold text-muted-foreground bg-muted px-1.5 py-0.5 rounded flex items-center gap-1">
-                            <Paperclip className="w-3 h-3 text-primary" /> {ticket.attachments.length}
+                            <AppIcon name="paperclip" size={12} className="text-primary" /> {ticket.attachments.length}
                           </span>
                         )}
                         {hasReplies && (
                           <span className="text-[10px] font-semibold text-primary bg-primary/10 px-1.5 py-0.5 rounded flex items-center gap-1">
-                            <MessageSquare className="w-3 h-3" /> {ticket.replies?.length}
+                            <AppIcon name="messageSquare" size={12} /> {ticket.replies?.length}
                           </span>
                         )}
-                        <ChevronRight className="w-4 h-4 text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all hidden sm:block" />
+
+                        {/* Quick action buttons for authorized users */}
+                        {canManageTicket(ticket) && (
+                          <div
+                            className="flex items-center gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                            onClick={(e) => e.stopPropagation()}
+                          >
+                            {ticket.status !== "CLOSED" && (
+                              <button
+                                type="button"
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  handleOpenEdit(ticket);
+                                }}
+                                className="p-1 hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-md transition-colors cursor-pointer"
+                                title="Edit ticket"
+                              >
+                                <AppIcon name="edit" size={13} />
+                              </button>
+                            )}
+                            <button
+                              type="button"
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                handleOpenDelete(ticket);
+                              }}
+                              className="p-1 hover:bg-destructive/10 text-muted-foreground hover:text-destructive rounded-md transition-colors cursor-pointer"
+                              title="Delete ticket"
+                            >
+                              <AppIcon name="trash" size={13} />
+                            </button>
+                          </div>
+                        )}
+
+                        <AppIcon name="chevronRight" size={14} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all hidden sm:block" />
                       </div>
                     </div>
                   </div>
@@ -400,121 +660,409 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
 
       {/* Ticket Details & Discussion Dialog */}
       <Dialog open={!!selectedTicket} onOpenChange={(open) => !open && setSelectedTicket(null)}>
-        <DialogContent className="max-w-2xl max-h-[85vh] overflow-y-auto p-0 gap-0">
+        <DialogContent
+          showCloseButton={false}
+          className="max-w-3xl w-full h-[90vh] max-h-[820px] p-0 gap-0 overflow-hidden flex flex-col rounded-2xl border border-border shadow-2xl bg-card"
+        >
           {selectedTicket && (
-            <div>
-              <DialogHeader className="p-5 pb-4 border-b border-border sticky top-0 bg-background z-10">
-                <div className="flex flex-wrap items-center justify-between gap-2 pr-6">
-                  <div className="flex items-center gap-2">
-                    <span className="font-mono text-xs font-bold text-primary bg-primary/10 px-2 py-1 rounded">
-                      {selectedTicket.ticketId}
+            <>
+              {/* Radix Accessibility Requirements */}
+              <DialogDescription className="sr-only">
+                Ticket details, original report, diagnostic data, attachments, and conversation thread.
+              </DialogDescription>
+
+              {/* Sticky Top Header */}
+              <div className="shrink-0 bg-card/95 backdrop-blur-md border-b border-border/80 p-5 sm:px-6 sm:py-4.5 space-y-3 relative z-10">
+                <div className="flex items-center justify-between gap-3">
+                  {/* Left: Badges & Tags */}
+                  <div className="flex flex-wrap items-center gap-2">
+                    {/* Ticket Reference Code with Copy button */}
+                    <div
+                      role="button"
+                      tabIndex={0}
+                      onClick={(e) => copyId(selectedTicket.ticketId, e)}
+                      className="font-mono text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors border border-primary/20 group"
+                      title="Click to copy ticket reference"
+                    >
+                      <span>#{selectedTicket.ticketId}</span>
+                      {copiedId === selectedTicket.ticketId ? (
+                        <AppIcon name="check" size={13} className="text-emerald-500" />
+                      ) : (
+                        <AppIcon name="copy" size={13} className="text-primary/70 group-hover:text-primary" />
+                      )}
+                    </div>
+
+                    {/* Status Pill */}
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold px-2.5 py-1 rounded-lg border flex items-center gap-1.5",
+                        STATUS_CONFIG[selectedTicket.status]?.color || STATUS_CONFIG.OPEN.color
+                      )}
+                    >
+                      <span
+                        className={cn(
+                          "w-1.5 h-1.5 rounded-full animate-pulse",
+                          STATUS_CONFIG[selectedTicket.status]?.dot || "bg-blue-500"
+                        )}
+                      />
+                      {STATUS_CONFIG[selectedTicket.status]?.label || selectedTicket.status}
                     </span>
-                    <Badge variant="outline" className={`text-[10px] font-bold ${STATUS_CONFIG[selectedTicket.status]?.color}`}>
-                      {STATUS_CONFIG[selectedTicket.status]?.label}
-                    </Badge>
-                    <Badge variant="outline" className={`text-[10px] font-bold ${PRIORITY_CONFIG[selectedTicket.priority]?.color}`}>
-                      {PRIORITY_CONFIG[selectedTicket.priority]?.label}
-                    </Badge>
+
+                    {/* Priority Pill */}
+                    <span
+                      className={cn(
+                        "text-[11px] font-semibold px-2.5 py-1 rounded-lg border flex items-center gap-1",
+                        PRIORITY_CONFIG[selectedTicket.priority]?.color || PRIORITY_CONFIG.Medium.color
+                      )}
+                    >
+                      {selectedTicket.priority === "Critical" && <AppIcon name="alert" size={13} className="text-rose-500" />}
+                      {selectedTicket.priority} Priority
+                    </span>
+
+                    {/* Category */}
+                    <span className="text-[11px] font-medium text-muted-foreground bg-muted/60 px-2 py-0.5 rounded-md border border-border/40 hidden md:inline-flex items-center gap-1.5">
+                      <AppIcon name="tag" size={12} className="text-muted-foreground" />
+                      {selectedTicket.category}
+                    </span>
                   </div>
-                  <span className="text-[11px] text-muted-foreground font-medium">
-                    Created {new Date(selectedTicket.createdAt).toLocaleString()}
+
+                  {/* Right: Actions (Edit, Delete, Close) */}
+                  <div className="flex items-center gap-1.5 shrink-0">
+                    {isCreator && (
+                      <>
+                        {selectedTicket.status !== "CLOSED" && (
+                          <Button
+                            size="sm"
+                            variant="outline"
+                            className="h-8 text-xs px-2.5 sm:px-3 gap-1.5 hover:border-primary/50 hover:bg-primary/5 hover:text-primary cursor-pointer rounded-lg font-medium transition-colors group"
+                            onClick={() => handleOpenEdit(selectedTicket)}
+                            title="Edit ticket subject & details"
+                          >
+                            <AppIcon name="edit" size={14} className="text-primary" />
+                            <span className="hidden sm:inline">Edit</span>
+                          </Button>
+                        )}
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          className="h-8 text-xs px-2.5 sm:px-3 gap-1.5 text-destructive hover:bg-destructive/10 hover:border-destructive/40 cursor-pointer rounded-lg font-medium transition-colors group"
+                          onClick={() => handleOpenDelete(selectedTicket)}
+                          title="Delete this ticket"
+                        >
+                          <AppIcon name="trash" size={14} className="text-destructive" />
+                          <span className="hidden sm:inline">Delete</span>
+                        </Button>
+                      </>
+                    )}
+
+                    {/* Custom Dedicated Close Button */}
+                    <Button
+                      size="sm"
+                      variant="ghost"
+                      onClick={() => setSelectedTicket(null)}
+                      className="h-8 w-8 p-0 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors group"
+                      title="Close dialog"
+                    >
+                      <AppIcon name="close" size={16} className="text-muted-foreground group-hover:text-foreground" />
+                      <span className="sr-only">Close</span>
+                    </Button>
+                  </div>
+                </div>
+
+                {/* Subject Title */}
+                <div>
+                  <DialogTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight leading-snug text-left">
+                    {selectedTicket.subject}
+                  </DialogTitle>
+                </div>
+
+                {/* Subtitle / Metadata Row */}
+                <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-[11px] text-muted-foreground">
+                  <span className="flex items-center gap-1.5">
+                    <AppIcon name="clock" size={13} className="text-primary/70" />
+                    SLA Target:{" "}
+                    <strong className="text-foreground font-semibold">
+                      {selectedTicket.estimatedResponseTime || "Within 24 Hours"}
+                    </strong>
+                  </span>
+                  <span className="text-border">•</span>
+                  <span>
+                    Created {new Date(selectedTicket.createdAt).toLocaleDateString(undefined, {
+                      month: "short",
+                      day: "numeric",
+                      year: "numeric",
+                    })}{" "}
+                    at{" "}
+                    {new Date(selectedTicket.createdAt).toLocaleTimeString([], {
+                      hour: "2-digit",
+                      minute: "2-digit",
+                    })}
+                  </span>
+                  <span className="text-border hidden sm:inline">•</span>
+                  <span className="hidden sm:inline text-primary/80 font-medium">
+                    {formatRelativeTime(selectedTicket.createdAt)}
                   </span>
                 </div>
-                <DialogTitle className="text-base font-bold text-foreground text-left mt-2">
-                  {selectedTicket.subject}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground text-left">
-                  Category: <strong className="text-foreground">{selectedTicket.category}</strong> • SLA Target: <strong className="text-foreground">{selectedTicket.estimatedResponseTime || "< 12 Hours"}</strong>
-                </DialogDescription>
-              </DialogHeader>
+              </div>
 
-              <div className="p-5 space-y-6">
-                {/* Initial Description */}
-                <div className="space-y-2">
-                  <div className="flex items-center gap-2 text-xs font-bold text-foreground">
-                    <div className="w-6 h-6 rounded-full bg-primary/10 text-primary flex items-center justify-center text-[10px]">
-                      <User className="w-3 h-3" />
+              {/* Scrollable Modal Body */}
+              <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar">
+                {/* Unified Conversation Timeline */}
+                <div className="p-5 sm:p-6 space-y-4">
+
+                  {/* ── Original Submission (first card in the thread) ── */}
+                  <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs">
+                    {/* Card header */}
+                    <div className="px-4 py-3 bg-muted/30 border-b border-border/60 flex items-center justify-between gap-2">
+                      <div className="flex items-center gap-2.5">
+                        <UserAvatar name={selectedTicket.userName} size="sm" />
+                        <div className="flex items-center gap-1.5">
+                          <span className="text-xs font-bold text-foreground">{selectedTicket.userName || "Requester"}</span>
+                          <span className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/20">Author</span>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-3">
+                        <span className="text-[10px] text-muted-foreground flex items-center gap-1">
+                          <AppIcon name="clock" size={12} className="opacity-60" />
+                          {new Date(selectedTicket.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                        </span>
+                        <span className="text-[9px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md border border-border/40">Initial Report</span>
+                      </div>
                     </div>
-                    <span>{selectedTicket.userName || "Requester"}</span>
-                    <span className="text-[10px] text-muted-foreground font-normal">• Initial Submission</span>
+
+                    {/* Description */}
+                    <div className="px-4 py-4 text-sm text-foreground/90 leading-relaxed prose dark:prose-invert max-w-none">
+                      <ReactMarkdown>{selectedTicket.description}</ReactMarkdown>
+                    </div>
+
+                    {/* Attachments — inline below description */}
+                    {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
+                      <div className="px-4 pb-4 border-t border-border/40 pt-3 space-y-2">
+                        <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+                          <AppIcon name="paperclip" size={13} className="text-muted-foreground" />
+                          Attachments ({selectedTicket.attachments.length})
+                        </div>
+                        <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
+                          {selectedTicket.attachments.map((att, idx) => {
+                            const isImg = isImageFile(att.filename, att.contentType);
+                            const isVid = isVideoFile(att.filename, att.contentType);
+                            const hasUrl = Boolean(att.url);
+                            return (
+                              <div
+                                key={idx}
+                                onClick={() => {
+                                  if (hasUrl) {
+                                    if (isImg || isVid) {
+                                      setPreviewMedia({ filename: att.filename, url: att.url!, size: att.size, contentType: att.contentType, isImage: isImg, isVideo: isVid });
+                                    } else {
+                                      window.open(att.url, "_blank", "noopener,noreferrer");
+                                    }
+                                  }
+                                }}
+                                className={cn(
+                                  "flex items-center gap-3 p-2.5 rounded-lg border bg-muted/30 hover:border-primary/50 hover:bg-primary/5 transition-all group select-none",
+                                  hasUrl ? "cursor-pointer" : "opacity-80"
+                                )}
+                              >
+                                {/* Thumbnail */}
+                                <div className="shrink-0 w-10 h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden border border-border/60">
+                                  {hasUrl && isImg ? (
+                                    // eslint-disable-next-line @next/next/no-img-element
+                                    <img src={att.url} alt={att.filename} className="w-full h-full object-cover" />
+                                  ) : hasUrl && isVid ? (
+                                    <div className="relative w-full h-full flex items-center justify-center bg-black/80">
+                                      <AppIcon name="play" size={16} className="text-white fill-white" />
+                                    </div>
+                                  ) : (
+                                    <AppIcon name="file" size={18} className="text-muted-foreground" />
+                                  )}
+                                </div>
+                                {/* Info */}
+                                <div className="flex-1 min-w-0">
+                                  <p className="text-xs font-semibold text-foreground truncate group-hover:text-primary transition-colors" title={att.filename}>
+                                    {att.filename}
+                                  </p>
+                                  <div className="flex items-center gap-1.5 mt-0.5">
+                                    <span className="text-[10px] text-muted-foreground">{att.size ? formatBytes(att.size) : "—"}</span>
+                                    {isImg && <span className="text-[9px] px-1 py-0 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold uppercase">IMG</span>}
+                                    {isVid && <span className="text-[9px] px-1 py-0 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold uppercase">VID</span>}
+                                  </div>
+                                </div>
+                                {/* Actions */}
+                                {hasUrl && (
+                                  <div className="flex items-center gap-0.5 shrink-0">
+                                    <button
+                                      type="button"
+                                      onClick={(e) => {
+                                        e.stopPropagation();
+                                        if (isImg || isVid) {
+                                          setPreviewMedia({ filename: att.filename, url: att.url!, size: att.size, contentType: att.contentType, isImage: isImg, isVideo: isVid });
+                                        } else {
+                                          window.open(att.url, "_blank");
+                                        }
+                                      }}
+                                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
+                                      title="Preview"
+                                    >
+                                      <AppIcon name="eye" size={14} className="text-muted-foreground group-hover:text-foreground" />
+                                    </button>
+                                    <a
+                                      href={att.url}
+                                      download={att.filename}
+                                      target="_blank"
+                                      rel="noreferrer"
+                                      onClick={(e) => e.stopPropagation()}
+                                      className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
+                                      title="Download"
+                                    >
+                                      <AppIcon name="download" size={14} className="text-muted-foreground group-hover:text-foreground" />
+                                    </a>
+                                  </div>
+                                )}
+                              </div>
+                            );
+                          })}
+                        </div>
+                      </div>
+                    )}
                   </div>
 
-                  <div className="p-4 rounded-xl bg-muted/30 border border-border/70 text-xs text-foreground leading-relaxed prose dark:prose-invert max-w-none">
-                    <ReactMarkdown>{selectedTicket.description}</ReactMarkdown>
-                  </div>
-                </div>
+                  {/* ── Replies / Conversation Thread ── */}
+                  {(() => {
+                    // Deduplicate: filter replies that are identical to the original description
+                    const uniqueReplies = (selectedTicket.replies || []).filter(
+                      (r) => r.message?.trim() !== selectedTicket.description?.trim()
+                    );
 
-                {/* Attachments list */}
-                {selectedTicket.attachments && selectedTicket.attachments.length > 0 && (
-                  <div className="space-y-2">
-                    <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                      <Paperclip className="w-3.5 h-3.5 text-primary" /> Attachments ({selectedTicket.attachments.length})
-                    </p>
-                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                      {selectedTicket.attachments.map((att, idx) => (
-                        <div key={idx} className="flex items-center justify-between p-2.5 rounded-lg border bg-card text-xs">
-                          <span className="font-medium text-foreground truncate max-w-[200px]">{att.filename}</span>
-                          <span className="text-[10px] text-muted-foreground font-mono">
-                            {att.size ? `${(att.size / 1024).toFixed(1)} KB` : "Attached"}
+                    if (uniqueReplies.length === 0) {
+                      return (
+                        <div className="text-center py-10 px-4 rounded-xl border border-dashed border-border/60 bg-muted/10">
+                          <div className="flex justify-center mb-2.5">
+                            <AppIcon name="messageSquare" size={28} className="text-muted-foreground/30" />
+                          </div>
+                          <p className="text-sm font-semibold text-foreground">No replies yet</p>
+                          <p className="text-xs text-muted-foreground mt-1">Use the reply box below to send an update on this ticket.</p>
+                        </div>
+                      );
+                    }
+
+                    return (
+                      <div className="space-y-3">
+                        {/* Thread label */}
+                        <div className="flex items-center gap-2 pb-1">
+                          <AppIcon name="messageSquare" size={14} className="text-primary" />
+                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
+                            Conversation & Activity
+                          </span>
+                          <span className="text-[9px] font-bold bg-muted text-muted-foreground px-1.5 py-0.5 rounded-full">
+                            {uniqueReplies.length}
                           </span>
                         </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
 
-                {/* Conversation Thread / Replies */}
-                {selectedTicket.replies && selectedTicket.replies.length > 0 && (
-                  <div className="space-y-3 pt-3 border-t border-border/60">
-                    <h5 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
-                      Ticket Updates & Responses
-                    </h5>
-                    <div className="space-y-3">
-                      {selectedTicket.replies.map((reply) => (
-                        <div
-                          key={reply.id}
-                          className={`p-3.5 rounded-xl border text-xs space-y-1.5 ${
-                            reply.isStaff
-                              ? "bg-primary/5 border-primary/20 mr-4"
-                              : "bg-muted/40 border-border ml-4"
-                          }`}
-                        >
-                          <div className="flex items-center justify-between">
-                            <span className="font-bold text-foreground flex items-center gap-1.5">
-                              {reply.author}
-                              {reply.isStaff && (
-                                <Badge className="text-[9px] bg-primary text-primary-foreground py-0 px-1.5 h-4">
-                                  Support Staff
-                                </Badge>
+                        {uniqueReplies.map((reply) => {
+                          const isStaffReply = reply.isStaff;
+                          return (
+                            <div
+                              key={reply.id}
+                              className={cn(
+                                "rounded-xl border bg-card overflow-hidden shadow-2xs",
+                                isStaffReply
+                                  ? "border-primary/25 ring-1 ring-primary/8"
+                                  : "border-border/70"
                               )}
-                            </span>
-                            <span className="text-[10px] text-muted-foreground">
-                              {new Date(reply.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
-                            </span>
-                          </div>
-                          <p className="text-foreground leading-relaxed whitespace-pre-wrap">{reply.message}</p>
-                        </div>
-                      ))}
-                    </div>
-                  </div>
-                )}
+                            >
+                              {/* Card Header: Avatar INSIDE box, next to name */}
+                              <div className={cn(
+                                "px-4 py-2.5 border-b flex items-center justify-between gap-2",
+                                isStaffReply ? "bg-primary/5 border-primary/15" : "bg-muted/25 border-border/50"
+                              )}>
+                                <div className="flex items-center gap-2.5">
+                                  <UserAvatar name={reply.author} isStaff={isStaffReply} size="sm" />
+                                  <div className="flex items-center gap-1.5">
+                                    <span className="font-bold text-xs text-foreground">{reply.author}</span>
+                                    {isStaffReply ? (
+                                      <span className="text-[9px] font-bold bg-primary text-primary-foreground py-0.5 px-2 rounded-full flex items-center gap-1">
+                                        <AppIcon name="circleCheck" size={11} className="text-primary-foreground" /> Support Staff
+                                      </span>
+                                    ) : (
+                                      <span className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
+                                        {reply.authorRole || "Client"}
+                                      </span>
+                                    )}
+                                  </div>
+                                </div>
+                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium shrink-0">
+                                  <AppIcon name="clock" size={12} className="opacity-50" />
+                                  {new Date(reply.createdAt).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
+                                </span>
+                              </div>
+                              {/* Message body */}
+                              <div className="px-4 py-3.5 text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
+                                {reply.message}
+                              </div>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    );
+                  })()}
 
-                {/* Add Reply Composer */}
-                <div className="space-y-2.5 pt-3 border-t border-border">
-                  <label className="text-xs font-bold text-foreground">Post a Reply or Additional Details</label>
+
+                </div>
+              </div>
+
+              {/* Docked Sticky Reply Composer at Bottom */}
+              <div className="shrink-0 bg-card/95 border-t border-border/80 p-4 sm:p-5 backdrop-blur-md space-y-3">
+                <div className="flex items-center justify-between text-xs">
+                  <div className="flex items-center gap-2 text-foreground font-semibold">
+                    <UserAvatar
+                      name={user?.name || user?.email}
+                      isStaff={user?.role === "ADMIN" || user?.role === "SUPERADMIN" || (user as any)?.isSuperAdmin}
+                      size="xs"
+                    />
+                    <span>
+                      Replying as{" "}
+                      <strong className="text-primary font-bold">
+                        {user?.name || user?.email?.split("@")[0] || "Workspace Member"}
+                      </strong>
+                    </span>
+                    <span className="text-[9px] font-semibold bg-muted text-muted-foreground px-1.5 py-0.5 rounded-md border border-border/60">
+                      {user?.role || "Member"}
+                    </span>
+                  </div>
+                  <span className="text-[10px] text-muted-foreground hidden sm:inline">
+                    Tip: Press <kbd className="px-1.5 py-0.5 bg-muted rounded border text-[9px] font-mono">Ctrl+Enter</kbd> to quickly send
+                  </span>
+                </div>
+
+                <div className="relative">
                   <Textarea
-                    placeholder="Add follow-up notes, answers to support queries, or new details..."
+                    placeholder="Write a follow-up, answer questions, or provide updates..."
                     value={replyText}
                     onChange={(e) => setReplyText(e.target.value)}
+                    onKeyDown={(e) => {
+                      if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+                        e.preventDefault();
+                        if (!isReplying && replyText.trim()) {
+                          handleSendReply();
+                        }
+                      }
+                    }}
                     rows={3}
-                    className="text-xs resize-none"
+                    className="text-xs resize-none rounded-xl bg-background border-border focus-visible:ring-primary/20 pr-4"
                   />
-                  <div className="flex justify-end">
+                </div>
+
+                <div className="flex items-center justify-between">
+                  <span className="text-[10px] text-muted-foreground sm:hidden">
+                    Press Ctrl+Enter to send
+                  </span>
+                  <div className="ml-auto">
                     <Button
                       size="sm"
                       onClick={handleSendReply}
                       disabled={isReplying || !replyText.trim()}
-                      className="text-xs font-semibold h-8 gap-1.5 px-3.5"
+                      className="text-xs font-semibold h-8.5 gap-1.5 px-4 cursor-pointer rounded-lg shadow-sm group"
                     >
                       {isReplying ? (
                         <>
@@ -522,15 +1070,239 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                         </>
                       ) : (
                         <>
-                          <Send className="w-3.5 h-3.5" /> Send Reply
+                          <AppIcon name="send" size={14} className="text-primary-foreground" /> Send Reply
                         </>
                       )}
                     </Button>
                   </div>
                 </div>
               </div>
-            </div>
+            </>
           )}
+        </DialogContent>
+      </Dialog>
+
+      {/* Edit Ticket Dialog */}
+      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+        <DialogContent className="max-w-lg p-6 rounded-2xl">
+          <DialogHeader className="pb-3 border-b border-border">
+            <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
+              <AppIcon name="edit" size={16} className="text-primary" />
+              Edit Ticket #{(targetTicket || selectedTicket)?.ticketId}
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground">
+              Update the subject, category, priority, or problem description for this ticket.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-2">
+            {/* Subject */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-foreground">Subject *</Label>
+              <Input
+                value={editSubject}
+                onChange={(e) => setEditSubject(e.target.value)}
+                placeholder="Brief summary of the issue..."
+                className="text-xs h-9"
+              />
+            </div>
+
+            {/* Category & Priority Grid */}
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-foreground">Category</Label>
+                <Select value={editCategory} onValueChange={setEditCategory}>
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="Select Category" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CATEGORIES.map((cat) => (
+                      <SelectItem key={cat} value={cat}>
+                        {cat}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+
+              <div className="space-y-1.5">
+                <Label className="text-xs font-bold text-foreground">Priority</Label>
+                <Select
+                  value={editPriority}
+                  onValueChange={(val: any) => setEditPriority(val)}
+                >
+                  <SelectTrigger className="h-9 text-xs">
+                    <SelectValue placeholder="Select Priority" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="Low">Low</SelectItem>
+                    <SelectItem value="Medium">Medium</SelectItem>
+                    <SelectItem value="High">High</SelectItem>
+                    <SelectItem value="Critical">Critical</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+
+            {/* Description */}
+            <div className="space-y-1.5">
+              <Label className="text-xs font-bold text-foreground">Description *</Label>
+              <Textarea
+                value={editDescription}
+                onChange={(e) => setEditDescription(e.target.value)}
+                rows={5}
+                placeholder="Detailed description of the issue..."
+                className="text-xs resize-y"
+              />
+            </div>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsEditDialogOpen(false)}
+              disabled={isSavingEdit}
+              className="text-xs h-8 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              size="sm"
+              onClick={handleSaveEdit}
+              disabled={isSavingEdit || !editSubject.trim() || !editDescription.trim()}
+              className="text-xs h-8 gap-1.5 cursor-pointer font-semibold group"
+            >
+              {isSavingEdit ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Saving...
+                </>
+              ) : (
+                <>
+                  <AppIcon name="circleCheck" size={14} className="text-primary-foreground" /> Save Changes
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Ticket Confirmation Dialog */}
+      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+        <DialogContent className="max-w-md p-6 rounded-2xl">
+          <DialogHeader className="pb-3">
+            <DialogTitle className="text-base font-bold text-destructive flex items-center gap-2">
+              <AppIcon name="alert" size={18} className="text-destructive" />
+              Delete Ticket #{(targetTicket || selectedTicket)?.ticketId}?
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground pt-1.5 leading-relaxed">
+              Are you sure you want to permanently delete this support ticket? All associated
+              conversation messages and uploaded attachments will be permanently removed. This action
+              cannot be undone.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="p-3 bg-destructive/5 rounded-xl border border-destructive/20 text-xs text-foreground/80 space-y-1 my-1">
+            <p className="font-semibold text-foreground truncate">
+              {(targetTicket || selectedTicket)?.subject}
+            </p>
+            <p className="text-[11px] text-muted-foreground">
+              Submitted on {(targetTicket || selectedTicket) ? new Date((targetTicket || selectedTicket)!.createdAt).toLocaleDateString() : ""}
+            </p>
+          </div>
+
+          <div className="flex items-center justify-end gap-2 pt-3 border-t border-border mt-2">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setIsDeleteDialogOpen(false)}
+              disabled={isDeleting}
+              className="text-xs h-8 cursor-pointer"
+            >
+              Cancel
+            </Button>
+            <Button
+              type="button"
+              variant="destructive"
+              size="sm"
+              onClick={handleDeleteTicket}
+              disabled={isDeleting}
+              className="text-xs h-8 gap-1.5 font-semibold cursor-pointer group"
+            >
+              {isDeleting ? (
+                <>
+                  <Loader2 className="w-3.5 h-3.5 animate-spin" /> Deleting...
+                </>
+              ) : (
+                <>
+                  <AppIcon name="trash" size={14} className="text-destructive-foreground" /> Delete Permanently
+                </>
+              )}
+            </Button>
+          </div>
+        </DialogContent>
+      </Dialog>
+
+      {/* Media Preview Lightbox Modal (Images & Videos) */}
+      <Dialog open={!!previewMedia} onOpenChange={(open) => !open && setPreviewMedia(null)}>
+        <DialogContent className="sm:max-w-3xl p-0 overflow-hidden bg-card/95 border-border rounded-2xl shadow-2xl backdrop-blur-xl">
+          <DialogHeader className="p-4 border-b border-border/60 flex flex-row items-center justify-between space-y-0">
+            <DialogTitle className="text-sm font-bold truncate pr-6 text-foreground flex items-center gap-2">
+              {previewMedia?.isVideo ? (
+                <AppIcon name="video" size={16} className="text-indigo-500" />
+              ) : (
+                <AppIcon name="image" size={16} className="text-emerald-500" />
+              )}
+              <span className="truncate">{previewMedia?.filename}</span>
+            </DialogTitle>
+          </DialogHeader>
+
+          {/* Media Player / Image Viewer Container */}
+          <div className="p-4 flex items-center justify-center bg-black/5 dark:bg-black/60 min-h-[300px] max-h-[72vh] overflow-hidden select-none">
+            {previewMedia?.isVideo ? (
+              <video
+                src={previewMedia.url}
+                controls
+                autoPlay
+                className="max-h-[68vh] w-auto max-w-full rounded-xl shadow-2xl"
+              />
+            ) : previewMedia?.isImage ? (
+              // eslint-disable-next-line @next/next/no-img-element
+              <img
+                src={previewMedia.url}
+                alt={previewMedia.filename}
+                className="max-h-[68vh] w-auto max-w-full object-contain rounded-xl shadow-2xl"
+              />
+            ) : (
+              <div className="text-center py-10">
+                <AppIcon name="file" size={44} className="text-muted-foreground/40 mx-auto mb-2" />
+                <p className="text-xs text-muted-foreground">Preview not available for this file type.</p>
+              </div>
+            )}
+          </div>
+
+          {/* Lightbox Footer with Download and Metadata */}
+          <div className="p-3.5 bg-muted/40 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground px-5">
+            <span className="font-mono font-medium">
+              {previewMedia?.size ? formatBytes(previewMedia.size) : ""}
+            </span>
+            <div className="flex items-center gap-2">
+              {previewMedia?.url && (
+                <a
+                  href={previewMedia.url}
+                  download={previewMedia.filename}
+                  target="_blank"
+                  rel="noreferrer"
+                  className="text-xs text-primary font-semibold hover:underline flex items-center gap-1.5 group cursor-pointer"
+                >
+                  <AppIcon name="download" size={14} className="text-primary" /> Download File
+                </a>
+              )}
+            </div>
+          </div>
         </DialogContent>
       </Dialog>
     </div>

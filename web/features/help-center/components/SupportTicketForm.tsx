@@ -183,7 +183,13 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
       }
     } catch (error: any) {
       console.error("Support ticket submission failed:", error);
-      toast.error(error?.response?.data?.error?.message || "Failed to submit ticket. Please check your inputs.");
+      const errorMsg =
+        error?.response?.data?.error?.message ||
+        error?.response?.data?.error ||
+        error?.response?.data?.message ||
+        error?.message ||
+        "Failed to submit ticket. Please check your inputs.";
+      toast.error(typeof errorMsg === "string" ? errorMsg : JSON.stringify(errorMsg));
     } finally {
       setIsSubmitting(false);
     }
@@ -203,7 +209,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
       <Card className="w-full max-w-2xl mx-auto border border-emerald-500/20 bg-card shadow-sm rounded-2xl overflow-hidden animate-in fade-in-50 zoom-in-95 duration-300">
         <div className="p-8 text-center space-y-6">
           <div className="w-16 h-16 bg-emerald-500/10 text-emerald-500 rounded-full flex items-center justify-center mx-auto ring-8 ring-emerald-500/5">
-            <CheckCircle2 className="w-8 h-8" />
+            <AppIcon name="circleCheck" size={32} animateOnMount className="text-emerald-500" />
           </div>
 
           <div className="space-y-1.5">
@@ -221,10 +227,14 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                 <button
                   type="button"
                   onClick={copyTicketId}
-                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors"
+                  className="p-1 rounded hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer group"
                   title="Copy Ticket ID"
                 >
-                  {copied ? <Check className="w-3.5 h-3.5 text-emerald-500" /> : <Copy className="w-3.5 h-3.5" />}
+                  {copied ? (
+                    <AppIcon name="check" size={14} className="text-emerald-500" />
+                  ) : (
+                    <AppIcon name="copy" size={14} className="opacity-70 group-hover:opacity-100" />
+                  )}
                 </button>
               </div>
             </div>
@@ -248,9 +258,9 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                 variant="outline"
                 size="sm"
                 onClick={onSwitchToHistory}
-                className="w-full sm:w-auto text-xs font-semibold h-9 gap-1.5"
+                className="w-full sm:w-auto text-xs font-semibold h-9 gap-1.5 cursor-pointer group"
               >
-                <Eye className="w-3.5 h-3.5 text-primary" /> View in My Tickets
+                <AppIcon name="eye" size={14} className="text-primary" /> View in My Tickets
               </Button>
             )}
             <Button
@@ -260,9 +270,9 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                 reset();
                 setFiles([]);
               }}
-              className="w-full sm:w-auto text-xs font-semibold h-9 gap-1.5"
+              className="w-full sm:w-auto text-xs font-semibold h-9 gap-1.5 cursor-pointer group"
             >
-              <Plus className="w-3.5 h-3.5" /> Submit Another Ticket
+              <AppIcon name="plus" size={14} /> Submit Another Ticket
             </Button>
           </div>
         </div>
