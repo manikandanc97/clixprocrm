@@ -81,7 +81,7 @@ const RecentActivities = () => {
         </Button>
       </CardHeader>
 
-      <CardContent className="flex-1 overflow-y-auto max-h-[500px] scrollbar-thin scrollbar-thumb-border scrollbar-track-transparent">
+      <CardContent className="flex-1 overflow-y-auto max-h-[500px] custom-scrollbar">
         <div className="space-y-5 relative py-2">
 
 

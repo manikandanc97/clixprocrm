@@ -7,12 +7,16 @@ import { SuperAdminHeader } from "./components/super-admin-header";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { SuperAdminMfaModal } from "@/features/auth/components/SuperAdminMfaModal";
 import { createClient } from "@/lib/supabase/client";
+import { useRealtimeNotifications } from "@/shared/hooks/use-realtime-notifications";
 
 export default function SuperAdminLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
+  // Active Supabase Realtime subscription for live notifications across the Super Admin platform
+  useRealtimeNotifications();
+
   const [showMfaModal, setShowMfaModal] = useState(false);
 
   useEffect(() => {

@@ -16,6 +16,7 @@ import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CRMCard } from "@/shared/components/crm";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
+import { Skeleton } from "@/shared/ui/skeleton";
 import {
   Dialog,
   DialogContent,
@@ -152,9 +153,31 @@ export default function SessionsSettings() {
         </div>
 
         {sessionsLoading ? (
-          <div className="py-12 flex items-center justify-center text-xs text-muted-foreground font-medium">
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            Loading active sessions...
+          <div className="mt-4 space-y-3">
+            {Array.from({ length: 4 }).map((_, i) => (
+              <div
+                key={i}
+                className="p-4 rounded-xl border border-border/60 bg-muted/20 flex flex-col sm:flex-row sm:items-center justify-between gap-3"
+              >
+                <div className="flex items-start gap-3 flex-1">
+                  <Skeleton className="w-9 h-9 rounded-lg shrink-0 mt-0.5" />
+                  <div className="space-y-1.5 flex-1">
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-44" />
+                      {i === 0 && <Skeleton className="h-4.5 w-20 rounded-full" />}
+                    </div>
+                    <div className="flex items-center gap-3">
+                      <Skeleton className="h-3 w-20" />
+                      <Skeleton className="h-3 w-28" />
+                      <Skeleton className="h-3 w-24" />
+                    </div>
+                  </div>
+                </div>
+                <div className="flex justify-end shrink-0">
+                  <Skeleton className="h-7 w-20 rounded-lg" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : sessionsError ? (
           <div className="p-4 mt-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-xs font-medium">

@@ -31,6 +31,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogDescription } f
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { Textarea } from "@/shared/ui/textarea";
 import { toast } from "sonner";
+import { Skeleton } from "@/shared/ui/skeleton";
 import client from "@/shared/lib/api/client";
 import ReactMarkdown from "react-markdown";
 
@@ -43,10 +44,10 @@ export interface TicketItem {
   subject: string;
   category: string;
   priority: "Low" | "Medium" | "High" | "Critical";
-  status: "OPEN" | "IN_PROGRESS" | "RESOLVED" | "CLOSED";
+  status: "OPEN" | "IN_PROGRESS" | "WAITING_FOR_USER" | "RESOLVED" | "CLOSED";
   description: string;
   diagnostics?: any;
-  attachments?: { filename: string; size: number }[];
+  attachments?: { filename: string; size: number; url?: string }[];
   estimatedResponseTime?: string;
   createdAt: string;
   updatedAt: string;
@@ -60,7 +61,7 @@ export interface TicketItem {
   }>;
 }
 
-const STATUS_CONFIG = {
+const STATUS_CONFIG: Record<string, { label: string; color: string; dot: string }> = {
   OPEN: {
     label: "Open",
     color: "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400",
@@ -70,6 +71,11 @@ const STATUS_CONFIG = {
     label: "In Progress",
     color: "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400",
     dot: "bg-amber-500 animate-pulse",
+  },
+  WAITING_FOR_USER: {
+    label: "Waiting for You",
+    color: "bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400",
+    dot: "bg-purple-500",
   },
   RESOLVED: {
     label: "Resolved",
@@ -260,12 +266,37 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
 
       {/* Tickets List */}
       {loading ? (
-        <Card className="border-border shadow-card rounded-2xl overflow-hidden">
-          <CardContent className="py-16 flex flex-col items-center justify-center gap-3 text-muted-foreground">
-            <Loader2 className="w-7 h-7 animate-spin text-primary" />
-            <p className="text-xs font-medium">Loading support tickets...</p>
-          </CardContent>
-        </Card>
+        <div className="space-y-2.5">
+          {Array.from({ length: 4 }).map((_, i) => (
+            <Card
+              key={i}
+              className="border-border/80 bg-card rounded-2xl shadow-card overflow-hidden"
+            >
+              <CardContent className="p-4 sm:p-5">
+                <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
+                  <div className="space-y-2 flex-1 min-w-0">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <Skeleton className="h-4 w-20 font-mono" />
+                      <Skeleton className="h-4.5 w-16 rounded-full" />
+                      <Skeleton className="h-4.5 w-16 rounded-full" />
+                      <Skeleton className="h-4.5 w-20 rounded" />
+                    </div>
+                    <Skeleton className="h-4 w-3/5" />
+                    <Skeleton className="h-3.5 w-4/5" />
+                  </div>
+                  <div className="flex items-center sm:flex-col items-end justify-between sm:justify-center gap-2 sm:gap-1.5 text-right shrink-0 pt-2 sm:pt-0 border-t sm:border-t-0 border-border/50">
+                    <Skeleton className="h-3 w-20" />
+                    <div className="flex items-center gap-2">
+                      <Skeleton className="h-4 w-10 rounded" />
+                      <Skeleton className="h-4 w-10 rounded" />
+                      <Skeleton className="w-4 h-4 rounded hidden sm:block" />
+                    </div>
+                  </div>
+                </div>
+              </CardContent>
+            </Card>
+          ))}
+        </div>
       ) : filteredTickets.length === 0 ? (
         <Card className="border-dashed shadow-card rounded-2xl overflow-hidden">
           <CardContent className="py-16 flex flex-col items-center justify-center text-center gap-3">

@@ -1,6 +1,6 @@
 import React, { useRef } from "react";
 import { Button } from "@/shared/ui/button";
-import { Download, UploadCloud, File, FileText, Image as ImageIcon, Trash2, Loader2 } from "lucide-react";
+import { Download, UploadCloud, File, FileText, Image as ImageIcon, Video, Trash2, Loader2 } from "lucide-react";
 import { format } from "date-fns";
 import { useLeadAttachments, useUploadLeadAttachment, useDeleteLeadAttachment } from "@/shared/hooks/use-crm";
 import { formatBytes } from "@/shared/lib/utils";
@@ -11,6 +11,7 @@ import { AttachmentsSkeleton } from "@/shared/components/skeletons";
 
 const getFileIcon = (fileType: string) => {
   if (fileType?.includes("image")) return <ImageIcon className="w-8 h-8 text-blue-500" />;
+  if (fileType?.includes("video")) return <Video className="w-8 h-8 text-indigo-500" />;
   if (fileType?.includes("pdf")) return <FileText className="w-8 h-8 text-rose-500" />;
   return <File className="w-8 h-8 text-muted-foreground" />;
 };

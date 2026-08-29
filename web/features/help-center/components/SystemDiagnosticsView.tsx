@@ -205,7 +205,7 @@ export function SystemDiagnosticsView() {
   return (
     <div className="space-y-6">
       {/* Top Banner with Real-time Ping */}
-      <Card className="border-border bg-linear-to-r from-primary/5 via-card to-card shadow-xs">
+      <Card className="border-border bg-gradient-to-r from-primary/5 via-card to-card shadow-card rounded-2xl overflow-hidden">
         <CardContent className="p-6 md:p-7 space-y-4">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
             <div>
@@ -281,7 +281,7 @@ export function SystemDiagnosticsView() {
       {/* Specifications & Diagnostic Self-Test 2-Column */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
         {/* Environment Specs Grid */}
-        <Card className="border-border shadow-xs">
+        <Card className="border-border shadow-card rounded-2xl overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border/50">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
@@ -337,7 +337,7 @@ export function SystemDiagnosticsView() {
         </Card>
 
         {/* Diagnostic Self-Test Suite */}
-        <Card className="border-border shadow-xs">
+        <Card className="border-border shadow-card rounded-2xl overflow-hidden">
           <CardContent className="p-6 space-y-4">
             <div className="flex items-center justify-between pb-3 border-b border-border/50">
               <h3 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">

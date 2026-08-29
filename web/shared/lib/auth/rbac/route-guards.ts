@@ -34,6 +34,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/role-management",
     "/settings",
     "/help",
+    "/support",
   ],
   [CRM_ROLES.ADMIN]: [
     "/dashboard",
@@ -55,6 +56,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/role-management",
     "/settings",
     "/help",
+    "/support",
   ],
   [CRM_ROLES.MANAGER]: [
     "/dashboard",
@@ -73,6 +75,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/team-performance",
     "/settings",
     "/help",
+    "/support",
   ],
   [CRM_ROLES.SALES]: [
     "/dashboard",
@@ -88,6 +91,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/invoices",
     "/settings",
     "/help",
+    "/support",
   ],
   [CRM_ROLES.SUPPORT]: [
     "/dashboard",
@@ -100,6 +104,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/calendar",
     "/settings",
     "/help",
+    "/support",
   ],
   [CRM_ROLES.EMPLOYEE]: [
     "/dashboard",
@@ -108,6 +113,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/calendar",
     "/settings",
     "/help",
+    "/support",
   ],
 };
 

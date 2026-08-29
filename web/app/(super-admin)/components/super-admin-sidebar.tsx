@@ -21,6 +21,7 @@ import {
   Receipt,
   Bot,
   Brain,
+  Ticket,
 } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -63,6 +64,11 @@ const superAdminNavGroups: NavGroup[] = [
         title: "Platform Modules",
         href: "/super-admin/modules",
         icon: Layers,
+      },
+      {
+        title: "Support Inbox",
+        href: "/super-admin/support",
+        icon: Ticket,
       },
     ],
   },

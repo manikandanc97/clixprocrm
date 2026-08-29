@@ -28,20 +28,16 @@ import {
   Check,
   Eye,
   Send,
-  Bold,
-  Italic,
-  List,
-  Code,
-  Heading,
+  TriangleAlert,
+  ClockAlert,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import ReactMarkdown from "react-markdown";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";
 import client from "@/shared/lib/api/client";
 
-const MAX_FILE_SIZE = 20 * 1024 * 1024; // 20MB
+const MAX_FILE_SIZE = 50 * 1024 * 1024; // 50MB
 const MAX_FILES = 10;
 
 const ticketSchema = z.object({
@@ -107,12 +103,13 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
     register,
     handleSubmit,
     control,
-    formState: { errors },
+    formState: { errors, isValid },
     reset,
     watch,
     setValue,
   } = useForm<TicketFormValues>({
     resolver: zodResolver(ticketSchema),
+    mode: "onChange",
     defaultValues: {
       subject: "",
       category: "",
@@ -121,9 +118,16 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
     },
   });
 
-  const descriptionValue = watch("description");
   const priorityValue = watch("priority") || "Medium";
   const subjectValue = watch("subject") || "";
+  const categoryValue = watch("category") || "";
+  const descriptionValue = watch("description") || "";
+
+  // Submit is enabled only when all mandatory fields have valid content
+  const isMandatoryFilled =
+    subjectValue.trim().length >= 5 &&
+    categoryValue.trim().length > 0 &&
+    descriptionValue.trim().length >= 20;
 
   const getDiagnostics = () => {
     return {
@@ -143,25 +147,6 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
       environment: process.env.NODE_ENV || "production",
       timestamp: new Date().toISOString(),
     };
-  };
-
-  const insertMarkdown = (prefix: string, suffix: string = "") => {
-    const textarea = document.getElementById("ticket-description") as HTMLTextAreaElement | null;
-    if (!textarea) return;
-
-    const start = textarea.selectionStart || 0;
-    const end = textarea.selectionEnd || 0;
-    const text = descriptionValue || "";
-    const selected = text.substring(start, end);
-    const replacement = prefix + (selected || "text") + suffix;
-
-    const newText = text.substring(0, start) + replacement + text.substring(end);
-    setValue("description", newText, { shouldValidate: true });
-    
-    setTimeout(() => {
-      textarea.focus();
-      textarea.setSelectionRange(start + prefix.length, start + replacement.length - suffix.length);
-    }, 50);
   };
 
   const onSubmit = async (data: TicketFormValues) => {
@@ -187,8 +172,8 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
       const result = response.data?.data || response.data;
 
       setSuccessData({
-        id: result.ticketId || `CRM-2026-${Math.floor(Math.random() * 900000 + 100000)}`,
-        time: result.estimatedResponseTime || PRIORITY_METRICS[data.priority]?.sla || "Within 12 hours",
+        id: result.ticketId || result.id,
+        time: result.estimatedResponseTime || "Within 24 hours",
         subject: data.subject,
       });
 
@@ -286,16 +271,17 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
   }
 
   const selectedPriorityInfo = PRIORITY_METRICS[priorityValue as keyof typeof PRIORITY_METRICS] || PRIORITY_METRICS.Medium;
+  const selectedCategoryObj = CATEGORIES.find((c) => c.value === categoryValue);
 
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
       {/* Form Area */}
-      <div className="lg:col-span-2 space-y-6">
+      <div className="lg:col-span-2">
         <Card className="border-border shadow-card rounded-2xl overflow-hidden">
           <CardContent className="p-6 md:p-7">
             <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
               {/* Subject */}
-              <div className="space-y-1.5">
+              <div className="space-y-1.5 group">
                 <div className="flex items-center justify-between">
                   <Label htmlFor="ticket-subject" className="text-xs font-bold text-foreground">
                     Subject / Issue Summary <span className="text-destructive">*</span>
@@ -304,12 +290,23 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                     {subjectValue.length}/120
                   </span>
                 </div>
-                <Input
-                  id="ticket-subject"
-                  placeholder="e.g., Quotation PDF export formatting error on mobile view..."
-                  {...register("subject")}
-                  className={`h-9 text-xs ${errors.subject ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                />
+                <div className="relative flex items-center w-full">
+                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
+                    <AppIcon
+                      name="tasks"
+                      icon={FileText}
+                      size={15}
+                      disableHover={true}
+                      className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
+                    />
+                  </div>
+                  <Input
+                    id="ticket-subject"
+                    placeholder="Briefly describe the issue or request..."
+                    {...register("subject")}
+                    className={`h-9 text-xs pl-9 ${errors.subject ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                  />
+                </div>
                 {errors.subject && (
                   <p className="text-[11px] text-destructive font-medium">{errors.subject.message}</p>
                 )}
@@ -318,7 +315,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
               {/* Category & Priority 2-Column */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 {/* Category */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 group">
                   <Label className="text-xs font-bold text-foreground">
                     Issue Category <span className="text-destructive">*</span>
                   </Label>
@@ -326,24 +323,35 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                     control={control}
                     name="category"
                     render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className={`h-9 text-xs ${errors.category ? "border-destructive" : ""}`}>
-                          <SelectValue placeholder="Select relevant module..." />
-                        </SelectTrigger>
-                        <SelectContent>
-                          {CATEGORIES.map((cat) => {
-                            const IconComponent = cat.icon;
-                            return (
-                              <SelectItem key={cat.value} value={cat.value} className="text-xs">
-                                <div className="flex items-center gap-2">
-                                  <IconComponent className={`w-3.5 h-3.5 ${cat.color}`} />
-                                  <span>{cat.label}</span>
-                                </div>
-                              </SelectItem>
-                            );
-                          })}
-                        </SelectContent>
-                      </Select>
+                      <div className="relative flex items-center w-full">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center pointer-events-none z-10">
+                          <AppIcon
+                            name={selectedCategoryObj ? "tag" : "modules"}
+                            icon={selectedCategoryObj?.icon || Layers}
+                            size={15}
+                            disableHover={true}
+                            className={`transition-colors ${selectedCategoryObj ? selectedCategoryObj.color : "text-muted-foreground/70 group-focus-within:text-primary"}`}
+                          />
+                        </div>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className={`h-9 text-xs pl-9 ${errors.category ? "border-destructive" : ""}`}>
+                            <SelectValue placeholder="Select issue category..." />
+                          </SelectTrigger>
+                          <SelectContent>
+                            {CATEGORIES.map((cat) => {
+                              const IconComponent = cat.icon;
+                              return (
+                                <SelectItem key={cat.value} value={cat.value} className="text-xs">
+                                  <div className="flex items-center gap-2">
+                                    <IconComponent className={`w-3.5 h-3.5 ${cat.color}`} />
+                                    <span>{cat.label}</span>
+                                  </div>
+                                </SelectItem>
+                              );
+                            })}
+                          </SelectContent>
+                        </Select>
+                      </div>
                     )}
                   />
                   {errors.category && (
@@ -352,7 +360,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                 </div>
 
                 {/* Priority */}
-                <div className="space-y-1.5">
+                <div className="space-y-1.5 group">
                   <div className="flex items-center justify-between">
                     <Label className="text-xs font-bold text-foreground">Urgency Level</Label>
                     <span className="text-[10px] font-semibold text-primary">{selectedPriorityInfo.sla}</span>
@@ -361,121 +369,76 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                     control={control}
                     name="priority"
                     render={({ field }) => (
-                      <Select onValueChange={field.onChange} value={field.value}>
-                        <SelectTrigger className="h-9 text-xs">
-                          <SelectValue />
-                        </SelectTrigger>
-                        <SelectContent>
-                          <SelectItem value="Low" className="text-xs">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-emerald-500" />
-                              <span>Low — General inquiry / minor note</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="Medium" className="text-xs">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-blue-500" />
-                              <span>Medium — Standard priority issue</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="High" className="text-xs">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-amber-500" />
-                              <span>High — Core workflow impaired</span>
-                            </div>
-                          </SelectItem>
-                          <SelectItem value="Critical" className="text-xs">
-                            <div className="flex items-center gap-2">
-                              <span className="w-2 h-2 rounded-full bg-rose-500" />
-                              <span>Critical — Outage or data blocker</span>
-                            </div>
-                          </SelectItem>
-                        </SelectContent>
-                      </Select>
+                      <div className="relative flex items-center w-full">
+                        <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
+                          <AppIcon
+                            name="alert"
+                            icon={ClockAlert}
+                            size={15}
+                            disableHover={true}
+                            className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
+                          />
+                        </div>
+                        <Select onValueChange={field.onChange} value={field.value}>
+                          <SelectTrigger className="h-9 text-xs pl-9">
+                            <SelectValue />
+                          </SelectTrigger>
+                          <SelectContent>
+                            <SelectItem value="Low" className="text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-emerald-500" />
+                                <span>Low — General inquiry / minor note</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="Medium" className="text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-blue-500" />
+                                <span>Medium — Standard priority issue</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="High" className="text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-amber-500" />
+                                <span>High — Core workflow impaired</span>
+                              </div>
+                            </SelectItem>
+                            <SelectItem value="Critical" className="text-xs">
+                              <div className="flex items-center gap-2">
+                                <span className="w-2 h-2 rounded-full bg-rose-500" />
+                                <span>Critical — Outage or data blocker</span>
+                              </div>
+                            </SelectItem>
+                          </SelectContent>
+                        </Select>
+                      </div>
                     )}
                   />
                 </div>
               </div>
 
-              {/* Description with Markdown Tabs */}
-              <div className="space-y-1.5">
+              {/* Description */}
+              <div className="space-y-1.5 group">
                 <div className="flex items-center justify-between">
-                  <Label className="text-xs font-bold text-foreground">
+                  <Label htmlFor="ticket-description" className="text-xs font-bold text-foreground flex items-center gap-1.5">
                     Detailed Description <span className="text-destructive">*</span>
                   </Label>
-                  <span className="text-[10px] text-muted-foreground">Markdown formatting supported</span>
+                  <AppIcon
+                    name="quotations"
+                    icon={FileText}
+                    size={15}
+                    disableHover={true}
+                    className="text-muted-foreground/60 group-focus-within:text-primary transition-colors"
+                  />
                 </div>
-
-                <Tabs defaultValue="write" className="w-full">
-                  <div className="flex items-center justify-between gap-2 border-b pb-2 mb-2">
-                    <TabsList className="h-8 p-0.5 bg-muted/60">
-                      <TabsTrigger value="write" className="text-xs px-3 h-7">Write</TabsTrigger>
-                      <TabsTrigger value="preview" className="text-xs px-3 h-7">Live Preview</TabsTrigger>
-                    </TabsList>
-
-                    {/* Toolbar helpers */}
-                    <div className="flex items-center gap-1 text-muted-foreground">
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("**", "**")}
-                        className="p-1 rounded hover:bg-muted hover:text-foreground text-[11px]"
-                        title="Bold"
-                      >
-                        <Bold className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("*", "*")}
-                        className="p-1 rounded hover:bg-muted hover:text-foreground text-[11px]"
-                        title="Italic"
-                      >
-                        <Italic className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("### ")}
-                        className="p-1 rounded hover:bg-muted hover:text-foreground text-[11px]"
-                        title="Heading"
-                      >
-                        <Heading className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("- ")}
-                        className="p-1 rounded hover:bg-muted hover:text-foreground text-[11px]"
-                        title="Bullet List"
-                      >
-                        <List className="w-3.5 h-3.5" />
-                      </button>
-                      <button
-                        type="button"
-                        onClick={() => insertMarkdown("`", "`")}
-                        className="p-1 rounded hover:bg-muted hover:text-foreground text-[11px]"
-                        title="Inline Code"
-                      >
-                        <Code className="w-3.5 h-3.5" />
-                      </button>
-                    </div>
-                  </div>
-
-                  <TabsContent value="write" className="mt-0">
-                    <Textarea
-                      id="ticket-description"
-                      placeholder="Please describe what happened, steps to reproduce, or relevant deal/quotation reference IDs..."
-                      rows={6}
-                      className={`text-xs resize-y ${errors.description ? "border-destructive focus-visible:ring-destructive" : ""}`}
-                      {...register("description")}
-                    />
-                  </TabsContent>
-
-                  <TabsContent value="preview" className="mt-0 min-h-[140px] max-h-[260px] p-3.5 border rounded-lg text-xs bg-muted/20 overflow-y-auto prose dark:prose-invert max-w-none">
-                    {descriptionValue ? (
-                      <ReactMarkdown>{descriptionValue}</ReactMarkdown>
-                    ) : (
-                      <span className="text-muted-foreground italic text-xs">Nothing to preview yet. Start typing in the Write tab...</span>
-                    )}
-                  </TabsContent>
-                </Tabs>
+                <div className="relative">
+                  <Textarea
+                    id="ticket-description"
+                    placeholder="Describe what happened, steps to reproduce, and any relevant reference IDs..."
+                    rows={6}
+                    className={`text-xs resize-y ${errors.description ? "border-destructive focus-visible:ring-destructive" : ""}`}
+                    {...register("description")}
+                  />
+                </div>
                 {errors.description && (
                   <p className="text-[11px] text-destructive font-medium">{errors.description.message}</p>
                 )}
@@ -483,7 +446,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
 
               {/* Attachments Uploader */}
               <div className="space-y-2 pt-1">
-                <Label className="text-xs font-bold text-foreground">Screenshots & Attachments</Label>
+                <Label className="text-xs font-bold text-foreground">Screenshots, Videos & Attachments</Label>
                 <FileUploader
                   files={files}
                   setFiles={setFiles}
@@ -503,15 +466,16 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                     setFiles([]);
                   }}
                   disabled={isSubmitting}
-                  className="text-xs font-semibold h-9 px-3.5"
+                  className="text-xs font-semibold h-9 px-3.5 gap-1.5"
                 >
-                  Clear Form
+                  <AppIcon name="refresh" size={13} className="text-muted-foreground" />
+                  <span>Clear Form</span>
                 </Button>
                 <Button
                   type="submit"
-                  disabled={isSubmitting}
+                  disabled={isSubmitting || !isMandatoryFilled}
                   size="sm"
-                  className="text-xs font-semibold h-9 px-4 gap-1.5 min-w-[130px]"
+                  className="text-xs font-semibold h-9 px-4 gap-1.5 min-w-[130px] transition-all duration-200"
                 >
                   {isSubmitting ? (
                     <>
@@ -519,7 +483,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
                     </>
                   ) : (
                     <>
-                      <Send className="w-3.5 h-3.5" /> Submit Ticket
+                      <AppIcon name="send" icon={Send} size={14} /> Submit Ticket
                     </>
                   )}
                 </Button>
@@ -530,7 +494,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
       </div>
 
       {/* Right Column: Support SLA & Real-time Details */}
-      <div className="space-y-5">
+      <div className="space-y-5 lg:sticky lg:top-4">
         <Card className="border-border shadow-card rounded-2xl overflow-hidden">
           <CardContent className="p-5 space-y-4">
             <div className="pb-3 border-b border-border/50">

@@ -2,6 +2,7 @@ import { Module } from '@nestjs/common';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SystemModule } from '../system/system.module';
 import { AiModule } from '../ai/ai.module';
+import { NotificationsModule } from '../notifications/notifications.module';
 import { PlatformDashboardController } from './controllers/platform-dashboard.controller';
 import { PlatformDashboardService } from './services/platform-dashboard.service';
 import { PlatformOrganizationsController } from './controllers/platform-organizations.controller';
@@ -26,13 +27,15 @@ import { PlatformPlansController } from './controllers/platform-plans.controller
 import { PlatformPlansService } from './services/platform-plans.service';
 import { PlatformBillingController } from './controllers/platform-billing.controller';
 import { PlatformBillingService } from './services/platform-billing.service';
+import { PlatformSupportTicketsController } from './controllers/platform-support-tickets.controller';
+import { PlatformSupportTicketsService } from './services/platform-support-tickets.service';
 import { EmergencySecurityService } from './services/emergency-security.service';
 import { SecurityIncidentsService } from './services/security-incidents.service';
 import { SecurityOperationsService } from './services/security-operations.service';
 import { SecurityGovernanceService } from './services/security-governance.service';
 
 @Module({
-  imports: [PrismaModule, SystemModule, AiModule],
+  imports: [PrismaModule, SystemModule, AiModule, NotificationsModule],
   controllers: [
     PlatformDashboardController,
     PlatformOrganizationsController,
@@ -48,6 +51,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformAiController,
     PlatformPlansController,
     PlatformBillingController,
+    PlatformSupportTicketsController,
   ],
   providers: [
     PlatformDashboardService,
@@ -60,6 +64,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformAiService,
     PlatformPlansService,
     PlatformBillingService,
+    PlatformSupportTicketsService,
     EmergencySecurityService,
     SecurityIncidentsService,
     SecurityOperationsService,
@@ -76,6 +81,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     PlatformAiService,
     PlatformPlansService,
     PlatformBillingService,
+    PlatformSupportTicketsService,
     EmergencySecurityService,
     SecurityIncidentsService,
     SecurityOperationsService,

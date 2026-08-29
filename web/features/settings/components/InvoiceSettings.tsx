@@ -19,6 +19,7 @@ import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
 import { useInvoiceSettings, useUpdateInvoiceSettings } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
+import { InvoiceSettingsSkeleton } from "./SettingsSkeletons";
 import { toast } from "sonner";
 
 export function InvoiceSettings() {
@@ -92,12 +93,7 @@ export function InvoiceSettings() {
   };
 
   if (isLoading) {
-    return (
-      <div className="p-6 space-y-4 animate-pulse">
-        <div className="h-6 bg-muted rounded w-48" />
-        <div className="h-40 bg-muted/60 rounded-xl" />
-      </div>
-    );
+    return <InvoiceSettingsSkeleton />;
   }
 
   return (

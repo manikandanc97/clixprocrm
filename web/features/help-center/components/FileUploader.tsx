@@ -13,6 +13,7 @@ import {
   Archive,
   Code2,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { cn } from "@/shared/lib/utils";
 import { Progress } from "@/shared/ui/progress";
 import { toast } from "sonner";
@@ -35,7 +36,7 @@ export function FileUploader({
   files,
   setFiles,
   maxFiles = 10,
-  maxSizeMB = 20,
+  maxSizeMB = 50,
 }: FileUploaderProps) {
   const [isDragActive, setIsDragActive] = useState(false);
 
@@ -64,7 +65,10 @@ export function FileUploader({
 
       const mappedFiles: FileWithPreview[] = validFiles.map((file) =>
         Object.assign(file, {
-          preview: file.type.startsWith("image/") ? URL.createObjectURL(file) : undefined,
+          preview:
+            file.type.startsWith("image/") || file.type.startsWith("video/")
+              ? URL.createObjectURL(file)
+              : undefined,
           id: `file_${Date.now()}_${Math.random().toString(36).substring(7)}`,
           progress: 100,
           status: "success" as const,
@@ -145,7 +149,8 @@ export function FileUploader({
 
   const getFileIcon = (type: string, name: string) => {
     if (type.startsWith("image/")) return <ImageIcon className="w-5 h-5 text-emerald-500" />;
-    if (type.startsWith("video/")) return <Video className="w-5 h-5 text-indigo-500" />;
+    if (type.startsWith("video/") || name.endsWith(".mp4") || name.endsWith(".webm") || name.endsWith(".mov") || name.endsWith(".avi") || name.endsWith(".mkv"))
+      return <Video className="w-5 h-5 text-indigo-500" />;
     if (type === "application/pdf") return <FileText className="w-5 h-5 text-rose-500" />;
     if (name.endsWith(".zip") || name.endsWith(".tar") || name.endsWith(".gz"))
       return <Archive className="w-5 h-5 text-amber-500" />;
@@ -165,8 +170,11 @@ export function FileUploader({
   return (
     <div className="space-y-3">
       <div
+        role="button"
+        tabIndex={0}
+        data-interactive="true"
         className={cn(
-          "relative border-2 border-dashed rounded-xl p-6 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer group bg-card hover:bg-muted/40",
+          "relative border-2 border-dashed rounded-xl p-6 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer group bg-card hover:bg-muted/40 outline-none focus-visible:ring-2 focus-visible:ring-primary/40",
           isDragActive
             ? "border-primary bg-primary/5 ring-2 ring-primary/20"
             : "border-border hover:border-primary/50"
@@ -176,6 +184,12 @@ export function FileUploader({
         onDragOver={onDragOver}
         onDrop={onDrop}
         onClick={() => document.getElementById("support-file-upload")?.click()}
+        onKeyDown={(e) => {
+          if (e.key === "Enter" || e.key === " ") {
+            e.preventDefault();
+            document.getElementById("support-file-upload")?.click();
+          }
+        }}
       >
         <input
           id="support-file-upload"
@@ -183,10 +197,10 @@ export function FileUploader({
           multiple
           className="hidden"
           onChange={onFileInputChange}
-          accept="image/*,video/*,.pdf,.txt,.log,.json,.csv,.zip,.xlsx,.xls,.doc,.docx"
+          accept="image/*,video/*,.mp4,.webm,.mov,.avi,.mkv,.m4v,.pdf,.txt,.log,.json,.csv,.zip,.xlsx,.xls,.doc,.docx"
         />
-        <div className="p-3 bg-primary/10 rounded-full mb-2.5 text-primary group-hover:scale-110 transition-transform">
-          <UploadCloud className="w-6 h-6" />
+        <div className="p-3 bg-primary/10 rounded-full mb-2.5 text-primary flex items-center justify-center">
+          <AppIcon name="upload" icon={UploadCloud} size={24} className="text-primary" />
         </div>
         <h4 className="font-semibold text-xs text-foreground mb-0.5">
           Drag & drop files, or <span className="text-primary underline">browse</span>
@@ -196,6 +210,7 @@ export function FileUploader({
         </p>
         <div className="flex flex-wrap gap-1.5 justify-center text-[10px] font-semibold text-muted-foreground">
           <span className="bg-muted px-2 py-0.5 rounded border border-border/60">Images (PNG, JPG, WebP)</span>
+          <span className="bg-muted px-2 py-0.5 rounded border border-border/60">Videos (MP4, WebM, MOV)</span>
           <span className="bg-muted px-2 py-0.5 rounded border border-border/60">PDF & Docs</span>
           <span className="bg-muted px-2 py-0.5 rounded border border-border/60">Logs & JSON</span>
           <span className="bg-muted px-2 py-0.5 rounded border border-border/60">Max {maxSizeMB}MB / {maxFiles} files</span>
@@ -222,10 +237,19 @@ export function FileUploader({
                 key={file.id}
                 className="flex items-center p-2.5 border rounded-lg bg-card/80 hover:bg-card shadow-xs gap-3 group relative transition-colors"
               >
-                <div className="shrink-0 w-9 h-9 rounded-md bg-muted/60 flex items-center justify-center overflow-hidden border border-border/50">
+                <div className="shrink-0 w-9 h-9 rounded-md bg-muted/60 flex items-center justify-center overflow-hidden border border-border/50 relative">
                   {file.preview ? (
-                    // eslint-disable-next-line @next/next/no-img-element
-                    <img src={file.preview} alt="preview" className="w-full h-full object-cover" />
+                    file.type.startsWith("video/") ? (
+                      <div className="relative w-full h-full flex items-center justify-center bg-black/10">
+                        <video src={file.preview} className="w-full h-full object-cover" muted />
+                        <div className="absolute inset-0 bg-black/25 flex items-center justify-center">
+                          <Video className="w-3.5 h-3.5 text-white drop-shadow" />
+                        </div>
+                      </div>
+                    ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
+                      <img src={file.preview} alt="preview" className="w-full h-full object-cover" />
+                    )
                   ) : (
                     getFileIcon(file.type, file.name)
                   )}

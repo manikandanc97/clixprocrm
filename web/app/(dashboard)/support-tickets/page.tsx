@@ -1,27 +1,14 @@
 "use client";
 
-import { Ticket } from "lucide-react";
-import RoleModulePlaceholder from "@/shared/components/role/RoleModulePlaceholder";
+import { useEffect } from "react";
+import { useRouter } from "next/navigation";
 
-export default function SupportTicketsPage() {
-  return (
-    <RoleModulePlaceholder
-      title="Support Tickets"
-      subtitle="Track, prioritize, and resolve customer support requests."
-      badge="Support Desk"
-      icon={Ticket}
-    />
-  );
+export default function SupportTicketsRedirectPage() {
+  const router = useRouter();
+
+  useEffect(() => {
+    router.replace("/support");
+  }, [router]);
+
+  return null;
 }
-
-
-
-
-
-
-
-
-
-
-
-

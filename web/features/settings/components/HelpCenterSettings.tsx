@@ -31,35 +31,35 @@ const ARTICLES: DocArticle[] = [
     title: "Quickstart: Setting Up Your Sales Pipeline & Stages",
     category: "Getting Started",
     readTime: "4 min read",
-    url: "/help",
+    url: "/support",
   },
   {
     id: "2",
     title: "Managing Role-Based Access and Workspace Permissions",
     category: "Administration",
     readTime: "6 min read",
-    url: "/help",
+    url: "/support",
   },
   {
     id: "3",
     title: "How to Generate Quotations and PDF Proformas",
     category: "Deals & Sales",
     readTime: "3 min read",
-    url: "/help",
+    url: "/support",
   },
   {
     id: "4",
     title: "Setting Up Two-Factor Authentication (2FA TOTP)",
     category: "Security",
     readTime: "2 min read",
-    url: "/help",
+    url: "/support",
   },
   {
     id: "5",
     title: "Automating Lead Distribution with Round-Robin Routing",
     category: "Automation",
     readTime: "5 min read",
-    url: "/help",
+    url: "/support",
   },
 ];
 
@@ -97,7 +97,7 @@ export default function HelpCenterSettings() {
             asChild
             className="text-xs font-semibold gap-1.5 h-9"
           >
-            <Link href="/help">
+            <Link href="/support">
               <ExternalLink className="w-3.5 h-3.5" />
               Full Help Portal
             </Link>

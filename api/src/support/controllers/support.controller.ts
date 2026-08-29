@@ -14,6 +14,7 @@ import {
 } from '@nestjs/common';
 import { SupportService } from '../services/support.service';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
+import { TenantGuard } from '../../auth/tenant.guard';
 import {
   checkRateLimit,
   incrementRateLimit,
@@ -38,13 +39,17 @@ const ALLOWED_EXTENSIONS = new Set([
   '.doc',
   '.docx',
   '.mp4',
+  '.webm',
+  '.mov',
+  '.avi',
+  '.m4v',
 ]);
 
-const MAX_INDIVIDUAL_FILE_SIZE = 20 * 1024 * 1024; // 20MB
-const MAX_TOTAL_ATTACHMENTS_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_INDIVIDUAL_FILE_SIZE = 50 * 1024 * 1024; // 50MB
+const MAX_TOTAL_ATTACHMENTS_SIZE = 100 * 1024 * 1024; // 100MB
 const MAX_ATTACHMENTS_COUNT = 10;
 
-const SUPPORT_RATE_LIMIT = { maxRequests: 20, windowMs: 10 * 60 * 1000 }; // 20 requests per 10 mins
+const SUPPORT_RATE_LIMIT = { maxRequests: 30, windowMs: 10 * 60 * 1000 }; // 30 requests per 10 mins
 
 @Controller('support')
 export class SupportController {
@@ -67,25 +72,26 @@ export class SupportController {
     };
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(SupabaseAuthGuard, TenantGuard)
   @Get('tickets')
   async getTickets(@Req() req: any) {
-    const userId = req.user?.id || req.user?.sub || 'anonymous';
-    const email = req.user?.email;
-    const tickets = await this.supportService.getUserTickets(userId, email);
+    const userId = req.user.id;
+    const tenantId = req.tenantId;
+    const tickets = await this.supportService.getUserTickets(userId, tenantId);
     return {
       success: true,
       data: tickets,
     };
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(SupabaseAuthGuard, TenantGuard)
   @Get('tickets/:id')
   async getTicketById(@Param('id') id: string, @Req() req: any) {
-    const userId = req.user?.id || req.user?.sub || 'anonymous';
-    const ticket = await this.supportService.getTicketById(id, userId);
+    const userId = req.user.id;
+    const tenantId = req.tenantId;
+    const ticket = await this.supportService.getTicketById(id, userId, tenantId);
     if (!ticket) {
-      throw new NotFoundException('Support ticket not found');
+      throw new NotFoundException('Support ticket not found or access denied');
     }
     return {
       success: true,
@@ -93,7 +99,7 @@ export class SupportController {
     };
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(SupabaseAuthGuard, TenantGuard)
   @Post('tickets/:id/reply')
   async replyTicket(
     @Param('id') id: string,
@@ -103,16 +109,19 @@ export class SupportController {
     if (!body?.message || !body.message.trim()) {
       throw new BadRequestException('Message cannot be empty');
     }
-    const userId = req.user?.id || req.user?.sub || 'anonymous';
-    const userName = req.user?.name || req.user?.email || 'Customer';
+    const userId = req.user.id;
+    const userName = req.user?.name || req.user?.user_metadata?.name || req.user?.email || 'Customer';
+    const tenantId = req.tenantId;
+
     const updatedTicket = await this.supportService.addReplyToTicket(
       id,
       userId,
       userName,
       body.message,
+      tenantId,
     );
     if (!updatedTicket) {
-      throw new NotFoundException('Support ticket not found');
+      throw new NotFoundException('Support ticket not found or access denied');
     }
     return {
       success: true,
@@ -120,10 +129,13 @@ export class SupportController {
     };
   }
 
-  @UseGuards(SupabaseAuthGuard)
+  @UseGuards(SupabaseAuthGuard, TenantGuard)
   @Post('ticket')
   async createTicket(@Req() req: any, @Res() res: any) {
-    const userId = req.user?.id || req.user?.sub || 'anonymous';
+    const userId = req.user.id;
+    const tenantId = req.tenantId;
+    const userEmail = req.user.email;
+    const userName = req.user.name || req.user.user_metadata?.name || userEmail || 'Workspace Member';
     const ip = getClientIp(req);
     const identifier = `support_${userId}_${ip}`;
 
@@ -156,7 +168,7 @@ export class SupportController {
       let priority: 'Low' | 'Medium' | 'High' | 'Critical' = 'Medium';
       let description = '';
       let diagnosticsStr = '';
-      const attachments: { filename: string; content: Buffer }[] = [];
+      const attachments: { filename: string; content: Buffer; contentType?: string }[] = [];
       let totalSize = 0;
 
       const parts = fastifyReq.parts();
@@ -178,14 +190,14 @@ export class SupportController {
           const buffer = await part.toBuffer();
           if (buffer.length > MAX_INDIVIDUAL_FILE_SIZE) {
             throw new BadRequestException(
-              `File '${part.filename}' exceeds the 20MB size limit`,
+              `File '${part.filename}' exceeds the 50MB size limit`,
             );
           }
 
           totalSize += buffer.length;
           if (totalSize > MAX_TOTAL_ATTACHMENTS_SIZE) {
             throw new BadRequestException(
-              'Total attachments size exceeds the 50MB limit',
+              'Total attachments size exceeds the 100MB limit',
             );
           }
 
@@ -193,7 +205,11 @@ export class SupportController {
             .basename(part.filename || 'attachment')
             .replace(/[^a-zA-Z0-9._-]/g, '_');
 
-          attachments.push({ filename: sanitizedFilename, content: buffer });
+          attachments.push({
+            filename: sanitizedFilename,
+            content: buffer,
+            contentType: part.mimetype || 'application/octet-stream',
+          });
         } else {
           if (part.fieldname === 'subject') subject = String(part.value || '').trim();
           if (part.fieldname === 'category') category = String(part.value || '').trim();
@@ -216,9 +232,10 @@ export class SupportController {
         }
       }
 
-      // Attach authenticated user identity to diagnostics
-      diagnostics.email = req.user?.email || diagnostics.email;
+      diagnostics.email = userEmail;
       diagnostics.userId = userId;
+      diagnostics.tenantId = tenantId;
+      diagnostics.currentUserName = userName;
 
       await incrementRateLimit(identifier, SUPPORT_RATE_LIMIT);
 
@@ -229,6 +246,7 @@ export class SupportController {
         description,
         diagnostics,
         attachments,
+        { userId, tenantId, userEmail, userName },
       );
 
       return res.status(200).send({

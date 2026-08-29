@@ -30,20 +30,23 @@ function HelpFooterItem({
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href="/help"
+              href="/support"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               onClick={() => setClickKey((c: number) => c + 1)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 outline-none ${
+              className={`relative flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 outline-none ${
                 isHelpActive
                   ? "text-sidebar-primary bg-sidebar-primary/15 dark:bg-sidebar-primary/20 shadow-sm border border-sidebar-primary/20 font-semibold"
                   : "text-sidebar-foreground/60 hover:text-primary hover:bg-primary/10"
               }`}
             >
+              {isHelpActive && (
+                <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-sidebar-primary shadow-sm shadow-sidebar-primary/50 z-10" />
+              )}
               <NavAnimatedIcon
                 icon={LifeBuoy}
                 name="Support"
-                href="/help"
+                href="/support"
                 isActive={isHelpActive}
                 isHovered={isHovered}
                 triggerAnimation={clickKey}
@@ -67,20 +70,23 @@ function HelpFooterItem({
 
   return (
     <Link
-      href="/help"
+      href="/support"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => setClickKey((c: number) => c + 1)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
+      className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
         isHelpActive
           ? "text-sidebar-primary bg-sidebar-primary/10 dark:bg-sidebar-primary/20 font-semibold shadow-sm border border-sidebar-primary/15"
           : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10"
       }`}
     >
+      {isHelpActive && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3.5px] h-5 rounded-r-full bg-sidebar-primary shadow-sm shadow-sidebar-primary/50 z-10" />
+      )}
       <NavAnimatedIcon
         icon={LifeBuoy}
         name="Support"
-        href="/help"
+        href="/support"
         isActive={isHelpActive}
         isHovered={isHovered}
         triggerAnimation={clickKey}
@@ -112,12 +118,15 @@ function UpgradeFooterItem({
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               onClick={() => setClickKey((c: number) => c + 1)}
-              className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 outline-none ${
+              className={`relative flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-all duration-200 outline-none ${
                 isUpgradeActive
                   ? "text-primary bg-primary/15 dark:bg-primary/25 shadow-sm border border-primary/25 font-semibold"
                   : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10"
               }`}
             >
+              {isUpgradeActive && (
+                <span className="absolute -left-1 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full bg-primary shadow-sm shadow-primary/50 z-10" />
+              )}
               <NavAnimatedIcon
                 icon={Sparkles}
                 name="Upgrade"
@@ -149,12 +158,15 @@ function UpgradeFooterItem({
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => setClickKey((c: number) => c + 1)}
-      className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
+      className={`relative w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-all duration-200 text-[13.5px] font-medium outline-none ${
         isUpgradeActive
           ? "text-primary bg-primary/10 dark:bg-primary/20 font-semibold shadow-sm border border-primary/20"
           : "text-sidebar-foreground/80 hover:text-primary hover:bg-primary/10"
       }`}
     >
+      {isUpgradeActive && (
+        <span className="absolute left-0 top-1/2 -translate-y-1/2 w-[3.5px] h-5 rounded-r-full bg-primary shadow-sm shadow-primary/50 z-10" />
+      )}
       <NavAnimatedIcon
         icon={Sparkles}
         name="Upgrade"
@@ -186,7 +198,7 @@ export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
 
   const hasHelpAccess = access.permissions.includes("Help Center") || access.permissions.includes("Support") || user?.role?.toUpperCase() === "ADMIN" || true;
 
-  const isHelpActive = pathname === "/help";
+  const isHelpActive = pathname === "/support" || pathname.startsWith("/support") || pathname === "/help";
   const isUpgradeActive = (pathname === "/settings" && searchParams?.get("section") === "billing") || pathname === "/pricing";
 
   const logoElement = companyLogo ? (
@@ -248,7 +260,7 @@ export default function Sidebar() {
 
   const hasHelpAccess = access.permissions.includes("Help Center") || access.permissions.includes("Support") || user?.role?.toUpperCase() === "ADMIN" || true;
 
-  const isHelpActive = pathname === "/help";
+  const isHelpActive = pathname === "/support" || pathname.startsWith("/support") || pathname === "/help";
   const isUpgradeActive = (pathname === "/settings" && searchParams?.get("section") === "billing") || pathname === "/pricing";
 
   const logoElement = companyLogo ? (

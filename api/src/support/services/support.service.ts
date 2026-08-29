@@ -1,4 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException, BadRequestException, Optional } from '@nestjs/common';
+import { PrismaService } from '../../prisma/prisma.service';
+import { NotificationsService } from '../../notifications/services/notifications.service';
+import { StorageService } from '../../common/services/storage.service';
+import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
 
 export interface SupportTicketRecord {
@@ -11,10 +15,10 @@ export interface SupportTicketRecord {
   subject: string;
   category: string;
   priority: 'Low' | 'Medium' | 'High' | 'Critical';
-  status: 'OPEN' | 'IN_PROGRESS' | 'RESOLVED' | 'CLOSED';
+  status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED';
   description: string;
   diagnostics: any;
-  attachments: { filename: string; size: number; contentType?: string }[];
+  attachments: { filename: string; size: number; contentType?: string; url?: string }[];
   estimatedResponseTime: string;
   createdAt: string;
   updatedAt: string;
@@ -25,10 +29,11 @@ export interface SupportTicketRecord {
     message: string;
     createdAt: string;
     isStaff: boolean;
+    isInternal?: boolean;
   }>;
 }
 
-function escapeHtml(str: any): string {
+export function escapeHtml(str: any): string {
   if (str === null || str === undefined) return '';
   return String(str)
     .replace(/&/g, '&amp;')
@@ -38,13 +43,74 @@ function escapeHtml(str: any): string {
     .replace(/'/g, '&#039;');
 }
 
+export function mapPriorityToEnum(priority: string): SupportTicketPriority {
+  const norm = String(priority || '').toUpperCase();
+  if (norm === 'CRITICAL') return SupportTicketPriority.CRITICAL;
+  if (norm === 'HIGH') return SupportTicketPriority.HIGH;
+  if (norm === 'LOW') return SupportTicketPriority.LOW;
+  return SupportTicketPriority.MEDIUM;
+}
+
+export function mapEnumToPriority(priority: SupportTicketPriority): 'Low' | 'Medium' | 'High' | 'Critical' {
+  switch (priority) {
+    case SupportTicketPriority.CRITICAL: return 'Critical';
+    case SupportTicketPriority.HIGH: return 'High';
+    case SupportTicketPriority.LOW: return 'Low';
+    default: return 'Medium';
+  }
+}
+
+export function formatTicketOutput(ticket: any, includeInternal = false): SupportTicketRecord {
+  const replies = (ticket.messages || [])
+    .filter((m: any) => includeInternal || !m.isInternal)
+    .map((m: any) => ({
+      id: m.id,
+      author: m.sender?.name || m.sender?.email || (m.isStaff ? 'ClixPro Support Staff' : 'Customer'),
+      authorRole: m.isStaff ? 'Support Engineer' : 'Client',
+      message: m.message,
+      createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+      isStaff: m.isStaff,
+      isInternal: m.isInternal || false,
+    }));
+
+  const attachments = (ticket.attachments || []).map((a: any) => ({
+    filename: a.fileName,
+    size: a.fileSize,
+    contentType: a.fileType,
+    url: a.fileUrl,
+  }));
+
+  return {
+    id: ticket.id,
+    ticketId: ticket.ticketNumber,
+    userId: ticket.createdById || ticket.createdBy?.id || 'anonymous',
+    userEmail: ticket.createdBy?.email || 'support@clixprocrm.com',
+    userName: ticket.createdBy?.name || 'Workspace Member',
+    tenantId: ticket.tenantId,
+    subject: ticket.subject,
+    category: ticket.category,
+    priority: mapEnumToPriority(ticket.priority),
+    status: ticket.status as any,
+    description: ticket.description,
+    diagnostics: ticket.diagnostics,
+    attachments,
+    estimatedResponseTime: ticket.estimatedResponseTime || 'Within 24 Hours',
+    createdAt: ticket.createdAt instanceof Date ? ticket.createdAt.toISOString() : ticket.createdAt,
+    updatedAt: ticket.updatedAt instanceof Date ? ticket.updatedAt.toISOString() : ticket.updatedAt,
+    replies,
+  };
+}
+
 @Injectable()
 export class SupportService {
   private readonly logger = new Logger(SupportService.name);
   private transporter: nodemailer.Transporter;
-  private ticketsStore: Map<string, SupportTicketRecord> = new Map();
 
-  constructor() {
+  constructor(
+    @Optional() private readonly prisma?: PrismaService,
+    @Optional() private readonly notificationsService?: NotificationsService,
+    @Optional() private readonly storageService?: StorageService,
+  ) {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
       port: Number(process.env.SMTP_PORT) || 587,
@@ -54,59 +120,20 @@ export class SupportService {
         pass: process.env.SMTP_PASS,
       },
     });
-
-    // Seed a helpful welcoming sample ticket for demonstration / onboarding
-    this.seedInitialTickets();
-  }
-
-  private seedInitialTickets() {
-    const welcomeTicket: SupportTicketRecord = {
-      id: 'welcome-ticket-1',
-      ticketId: `CRM-${new Date().getFullYear()}-001001`,
-      userId: 'system',
-      userEmail: 'support@clixprocrm.com',
-      userName: 'ClixPro Support Team',
-      subject: 'Welcome to ClixPro CRM Enterprise Support Desk',
-      category: 'General Inquiry',
-      priority: 'Low',
-      status: 'RESOLVED',
-      description: 'Welcome to your workspace! Our support engineers are available 24/7 to help you configure sales pipelines, user permissions, quotations, and API integrations.',
-      diagnostics: {
-        appVersion: '1.2.0',
-        environment: process.env.NODE_ENV || 'development',
-        systemStatus: 'Optimal',
-      },
-      attachments: [],
-      estimatedResponseTime: 'Resolved',
-      createdAt: new Date(Date.now() - 3600 * 24 * 1000).toISOString(),
-      updatedAt: new Date(Date.now() - 3600 * 24 * 1000).toISOString(),
-      replies: [
-        {
-          id: 'rep-welcome-1',
-          author: 'ClixPro Support Engineer',
-          authorRole: 'Support Staff',
-          message: 'Feel free to raise tickets anytime or browse our full Documentation hub for instant walkthroughs.',
-          createdAt: new Date(Date.now() - 3600 * 23 * 1000).toISOString(),
-          isStaff: true,
-        },
-      ],
-    };
-    this.ticketsStore.set(welcomeTicket.ticketId, welcomeTicket);
   }
 
   async sendSupportTicket(
     subject: string,
     category: string,
-    priority: 'Low' | 'Medium' | 'High' | 'Critical',
+    priority: 'Low' | 'Medium' | 'High' | 'Critical' | string,
     description: string,
     diagnostics: any,
-    attachments: { filename: string; content: Buffer }[],
+    attachments: { filename: string; content: Buffer; contentType?: string }[],
+    authenticatedContext?: { userId: string; tenantId: string; userEmail?: string; userName?: string },
   ) {
     const year = new Date().getFullYear();
-    const randomNum = Math.floor(Math.random() * 999999)
-      .toString()
-      .padStart(6, '0');
-    const ticketId = `CRM-${year}-${randomNum}`;
+    const randomNum = Math.floor(100000 + Math.random() * 900000).toString();
+    const ticketId = `CP-SUP-${year}-${randomNum}`;
 
     let estimatedResponseTime = 'Within 24 hours';
     if (priority === 'Critical') estimatedResponseTime = '< 1 Hour (Priority Escalation)';
@@ -114,41 +141,198 @@ export class SupportService {
     else if (priority === 'Medium') estimatedResponseTime = '< 12 Hours';
     else estimatedResponseTime = 'Within 24 Hours';
 
-    // Store in internal tickets store
-    const ticketRecord: SupportTicketRecord = {
-      id: `ticket_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      ticketId,
-      userId: diagnostics?.userId || 'anonymous',
-      userEmail: diagnostics?.email || 'support@clixprocrm.com',
-      userName: diagnostics?.currentUserName || 'Workspace Member',
-      tenantId: diagnostics?.tenantId,
-      subject,
-      category: category || 'General',
-      priority: priority || 'Medium',
-      status: 'OPEN',
-      description,
-      diagnostics,
-      attachments: attachments.map((a) => ({
-        filename: a.filename,
-        size: a.content.length,
-      })),
-      estimatedResponseTime,
-      createdAt: new Date().toISOString(),
-      updatedAt: new Date().toISOString(),
-      replies: [],
-    };
+    const userId = authenticatedContext?.userId || diagnostics?.userId || 'system';
+    const userEmail = authenticatedContext?.userEmail || diagnostics?.email || 'support@clixprocrm.com';
+    const userName = authenticatedContext?.userName || diagnostics?.currentUserName || 'Workspace Member';
+    const tenantId = authenticatedContext?.tenantId || diagnostics?.tenantId;
 
-    this.ticketsStore.set(ticketId, ticketRecord);
+    const mappedPriority = mapPriorityToEnum(priority);
+    let createdRecord: SupportTicketRecord;
 
+    if (this.prisma && tenantId && userId && userId !== 'system') {
+      // 1. Upload attachments to Supabase Storage if storageService is available
+      const uploadedAttachments: Array<{
+        fileName: string;
+        fileUrl: string;
+        fileSize: number;
+        fileType: string;
+        storagePath?: string;
+      }> = [];
+
+      if (this.storageService && attachments.length > 0) {
+        for (const att of attachments) {
+          try {
+            const uploaded = await this.storageService.uploadAttachment(
+              tenantId,
+              'support-tickets',
+              att.content,
+              att.filename,
+              att.contentType || 'application/octet-stream',
+            );
+            uploadedAttachments.push({
+              fileName: uploaded.fileName,
+              fileUrl: uploaded.storageUrl,
+              fileSize: uploaded.fileSize,
+              fileType: uploaded.fileType,
+              storagePath: uploaded.storagePath,
+            });
+          } catch (uploadErr: any) {
+            this.logger.warn(`Storage upload warning for ${att.filename}: ${uploadErr?.message || uploadErr}`);
+            uploadedAttachments.push({
+              fileName: att.filename,
+              fileUrl: '',
+              fileSize: att.content.length,
+              fileType: att.contentType || 'application/octet-stream',
+            });
+          }
+        }
+      } else {
+        for (const att of attachments) {
+          uploadedAttachments.push({
+            fileName: att.filename,
+            fileUrl: '',
+            fileSize: att.content.length,
+            fileType: att.contentType || 'application/octet-stream',
+          });
+        }
+      }
+
+      // 2. Transact SupportTicket, initial Message, and Attachments in DB with tenant isolation
+      const dbTicket = await this.prisma.withTenantContext(
+        { tenantId, userId },
+        async (tx) => {
+          return tx.supportTicket.create({
+            data: {
+              ticketNumber: ticketId,
+              tenantId,
+              createdById: userId,
+              subject,
+              category: category || 'General',
+              priority: mappedPriority,
+              status: SupportTicketStatus.OPEN,
+              description,
+              diagnostics: diagnostics || {},
+              estimatedResponseTime,
+              messages: {
+                create: {
+                  senderId: userId,
+                  message: description,
+                  isStaff: false,
+                  isInternal: false,
+                },
+              },
+              attachments: {
+                create: uploadedAttachments.map((a) => ({
+                  fileName: a.fileName,
+                  fileUrl: a.fileUrl || '',
+                  fileSize: a.fileSize,
+                  fileType: a.fileType,
+                  storagePath: a.storagePath,
+                })),
+              },
+            },
+            include: {
+              createdBy: { select: { id: true, name: true, email: true, avatar: true } },
+              attachments: true,
+              messages: {
+                include: {
+                  sender: { select: { id: true, name: true, email: true, avatar: true } },
+                },
+              },
+            },
+          });
+        },
+      );
+
+      createdRecord = formatTicketOutput(dbTicket);
+
+      // 3. Create Cryptographically Sealed Audit Log
+      try {
+        await this.prisma.createSealedAuditLog({
+          tenantId,
+          userId,
+          action: 'SUPPORT_TICKET_CREATED',
+          module: 'SupportDesk',
+          details: {
+            ticketId: dbTicket.id,
+            ticketNumber: ticketId,
+            subject,
+            category,
+            priority,
+            attachmentsCount: attachments.length,
+          },
+        });
+      } catch (auditErr: any) {
+        this.logger.warn(`Failed to create sealed audit log for ticket ${ticketId}: ${auditErr?.message || auditErr}`);
+      }
+
+      // 4. Notify all active Super Admins via existing Notification model & Supabase Realtime
+      if (this.notificationsService) {
+        try {
+          const superAdmins = await this.prisma.user.findMany({
+            where: { isSuperAdmin: true, status: 'ACTIVE' },
+            select: { id: true },
+          });
+
+          for (const admin of superAdmins) {
+            await this.notificationsService.createNotification(
+              tenantId,
+              admin.id,
+              `New Support Ticket #${ticketId}`,
+              `${userName} (${category}): ${subject.slice(0, 100)}`,
+              'support',
+            );
+          }
+        } catch (notifErr: any) {
+          this.logger.warn(`Failed to dispatch Super Admin notification for ticket ${ticketId}: ${notifErr?.message || notifErr}`);
+        }
+      }
+    } else {
+      // Fallback for tests or disconnected environments
+      createdRecord = {
+        id: `ticket_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+        ticketId,
+        userId,
+        userEmail,
+        userName,
+        tenantId,
+        subject,
+        category: category || 'General',
+        priority: mapEnumToPriority(mappedPriority),
+        status: 'OPEN',
+        description,
+        diagnostics,
+        attachments: attachments.map((a) => ({
+          filename: a.filename,
+          size: a.content.length,
+          contentType: a.contentType,
+        })),
+        estimatedResponseTime,
+        createdAt: new Date().toISOString(),
+        updatedAt: new Date().toISOString(),
+        replies: [
+          {
+            id: `rep_${Date.now()}`,
+            author: userName,
+            authorRole: 'Client',
+            message: description,
+            createdAt: new Date().toISOString(),
+            isStaff: false,
+          },
+        ],
+      };
+    }
+
+    // 5. Send SMTP notification email (sanitizes all user input against HTML injection)
     const safeSubject = escapeHtml(subject);
     const safeCategory = escapeHtml(category);
     const safePriority = escapeHtml(priority);
     const safeDescription = escapeHtml(description);
 
     const safeDiagnostics = {
-      currentUserName: escapeHtml(diagnostics?.currentUserName || 'N/A'),
-      email: escapeHtml(diagnostics?.email || 'N/A'),
-      userId: escapeHtml(diagnostics?.userId || 'N/A'),
+      currentUserName: escapeHtml(diagnostics?.currentUserName || userName || 'N/A'),
+      email: escapeHtml(diagnostics?.email || userEmail || 'N/A'),
+      userId: escapeHtml(diagnostics?.userId || userId || 'N/A'),
       role: escapeHtml(diagnostics?.role || 'N/A'),
       currentUrl: escapeHtml(diagnostics?.currentUrl || 'N/A'),
       browser: escapeHtml(diagnostics?.browser || 'N/A'),
@@ -210,8 +394,7 @@ export class SupportService {
       </div>
     `;
 
-    const supportRecipient =
-      process.env.SUPPORT_EMAIL || 'support@clixprocrm.com';
+    const supportRecipient = process.env.SUPPORT_EMAIL || 'support@clixprocrm.com';
 
     if (process.env.SMTP_HOST && process.env.SMTP_USER) {
       try {
@@ -231,31 +414,74 @@ export class SupportService {
       this.logger.warn('SMTP configuration not found, skipping email dispatch.');
     }
 
-    return { ticketId, estimatedResponseTime, ticket: ticketRecord };
+    return { ticketId, estimatedResponseTime, ticket: createdRecord };
   }
 
-  async getUserTickets(userId: string, userEmail?: string): Promise<SupportTicketRecord[]> {
-    const list: SupportTicketRecord[] = [];
-    for (const ticket of this.ticketsStore.values()) {
-      if (
-        ticket.userId === userId ||
-        ticket.userId === 'system' ||
-        (userEmail && ticket.userEmail === userEmail) ||
-        userId === 'admin'
-      ) {
-        list.push(ticket);
-      }
+  async getUserTickets(userId: string, tenantId?: string): Promise<SupportTicketRecord[]> {
+    if (this.prisma && tenantId) {
+      const tickets = await this.prisma.withTenantContext(
+        { tenantId, userId },
+        async (tx) => {
+          return tx.supportTicket.findMany({
+            where: {
+              tenantId,
+              createdById: userId,
+            },
+            include: {
+              createdBy: { select: { id: true, name: true, email: true, avatar: true } },
+              assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+              attachments: true,
+              messages: {
+                where: { isInternal: false }, // Internal notes strictly hidden from regular user
+                orderBy: { createdAt: 'asc' },
+                include: {
+                  sender: { select: { id: true, name: true, email: true, avatar: true } },
+                },
+              },
+            },
+            orderBy: { createdAt: 'desc' },
+          });
+        },
+      );
+      return tickets.map((t) => formatTicketOutput(t));
     }
-    // Sort descending by createdAt
-    return list.sort(
-      (a, b) => new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime(),
-    );
+    return [];
   }
 
-  async getTicketById(ticketId: string, userId: string): Promise<SupportTicketRecord | null> {
-    const ticket = this.ticketsStore.get(ticketId);
-    if (!ticket) return null;
-    return ticket;
+  async getTicketById(
+    ticketId: string,
+    userId: string,
+    tenantId?: string,
+  ): Promise<SupportTicketRecord | null> {
+    if (this.prisma && tenantId) {
+      const ticket = await this.prisma.withTenantContext(
+        { tenantId, userId },
+        async (tx) => {
+          return tx.supportTicket.findFirst({
+            where: {
+              tenantId,
+              createdById: userId,
+              OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+            },
+            include: {
+              createdBy: { select: { id: true, name: true, email: true, avatar: true } },
+              assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+              attachments: true,
+              messages: {
+                where: { isInternal: false }, // Internal notes strictly hidden
+                orderBy: { createdAt: 'asc' },
+                include: {
+                  sender: { select: { id: true, name: true, email: true, avatar: true } },
+                },
+              },
+            },
+          });
+        },
+      );
+      if (!ticket) return null;
+      return formatTicketOutput(ticket);
+    }
+    return null;
   }
 
   async addReplyToTicket(
@@ -263,26 +489,96 @@ export class SupportService {
     userId: string,
     userName: string,
     message: string,
+    tenantId?: string,
   ): Promise<SupportTicketRecord | null> {
-    const ticket = this.ticketsStore.get(ticketId);
-    if (!ticket) return null;
-
-    const reply = {
-      id: `rep_${Date.now()}_${Math.random().toString(36).substring(7)}`,
-      author: userName || 'Customer',
-      authorRole: 'Client',
-      message: message.trim(),
-      createdAt: new Date().toISOString(),
-      isStaff: false,
-    };
-
-    ticket.replies.push(reply);
-    ticket.updatedAt = new Date().toISOString();
-    if (ticket.status === 'RESOLVED' || ticket.status === 'CLOSED') {
-      ticket.status = 'IN_PROGRESS';
+    if (!this.prisma || !tenantId) {
+      throw new BadRequestException('Database tenant context required to add reply');
     }
 
-    return ticket;
+    return this.prisma.withTenantContext(
+      { tenantId, userId },
+      async (tx) => {
+        const ticket = await tx.supportTicket.findFirst({
+          where: {
+            tenantId,
+            createdById: userId,
+            OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+          },
+        });
+
+        if (!ticket) {
+          throw new NotFoundException('Support ticket not found or access denied');
+        }
+
+        // Add message
+        await tx.supportTicketMessage.create({
+          data: {
+            ticketId: ticket.id,
+            senderId: userId,
+            message: message.trim(),
+            isStaff: false,
+            isInternal: false,
+          },
+        });
+
+        // If status was WAITING_FOR_USER or RESOLVED, move back to IN_PROGRESS
+        const newStatus =
+          ticket.status === SupportTicketStatus.WAITING_FOR_USER ||
+          ticket.status === SupportTicketStatus.RESOLVED
+            ? SupportTicketStatus.IN_PROGRESS
+            : ticket.status;
+
+        const updated = await tx.supportTicket.update({
+          where: { id: ticket.id },
+          data: {
+            status: newStatus,
+            updatedAt: new Date(),
+          },
+          include: {
+            createdBy: { select: { id: true, name: true, email: true, avatar: true } },
+            assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+            attachments: true,
+            messages: {
+              where: { isInternal: false },
+              orderBy: { createdAt: 'asc' },
+              include: {
+                sender: { select: { id: true, name: true, email: true, avatar: true } },
+              },
+            },
+          },
+        });
+
+        // Notify assigned agent or Super Admins
+        if (this.notificationsService) {
+          const recipientId = ticket.assignedToId;
+          if (recipientId) {
+            await this.notificationsService.createNotification(
+              tenantId,
+              recipientId,
+              `New Reply on #${ticket.ticketNumber}`,
+              `${userName}: ${message.slice(0, 100)}`,
+              'support',
+            ).catch(() => {});
+          } else {
+            const superAdmins = await tx.user.findMany({
+              where: { isSuperAdmin: true, status: 'ACTIVE' },
+              select: { id: true },
+            });
+            for (const sa of superAdmins) {
+              await this.notificationsService.createNotification(
+                tenantId,
+                sa.id,
+                `New Reply on #${ticket.ticketNumber}`,
+                `${userName}: ${message.slice(0, 100)}`,
+                'support',
+              ).catch(() => {});
+            }
+          }
+        }
+
+        return formatTicketOutput(updated);
+      },
+    );
   }
 
   getSystemStatus() {

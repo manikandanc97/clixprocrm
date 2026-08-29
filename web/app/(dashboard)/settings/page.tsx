@@ -64,7 +64,7 @@ const SettingsPage = () => {
     } else if (resolved === "revenue_targets_redirect") {
       router.replace("/reports?customize=targets");
     } else if (resolved === "help_redirect") {
-      router.replace("/help");
+      router.replace("/support");
     }
   }, [rawSectionParam, router]);
 
@@ -169,7 +169,7 @@ const SettingsPage = () => {
   }, [activeSection]);
 
   return (
-    <CRMPageContainer className="flex-1 min-h-0 h-full flex flex-col pb-20 md:pb-3 lg:pb-3.5 lg:overflow-hidden">
+    <CRMPageContainer className="flex-1 min-h-0 h-full flex flex-col pb-20 md:pb-3 lg:pb-3 lg:overflow-hidden">
       {/* Dynamic Page Header */}
       <div className="shrink-0 pt-0.5 pb-1">
         <SettingsHeader activeSection={activeSection} />

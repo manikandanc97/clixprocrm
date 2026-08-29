@@ -67,6 +67,7 @@ model Tenant {
   teams           Team[]
   teamMembers     TeamMember[]
   recordShares    RecordShare[]
+  supportTickets  SupportTicket[]
 }
 
 model User {
@@ -108,6 +109,9 @@ model User {
   teamMemberships    TeamMember[]
   sharedRecords      RecordShare[]    @relation("RecordShareRecipient")
   createdShares      RecordShare[]    @relation("RecordShareCreator")
+  createdSupportTickets  SupportTicket[]        @relation("TicketCreatedBy")
+  assignedSupportTickets SupportTicket[]        @relation("TicketAssignedTo")
+  supportTicketMessages  SupportTicketMessage[] @relation("TicketMessageSender")
 }
 
 model TenantUser {
@@ -1443,3 +1447,89 @@ model PlatformBillingConfig {
   updatedAt        DateTime @updatedAt
   updatedBy        String?
 }
+
+// ----------------------------------------------------
+// Enterprise Support Desk Models
+// ----------------------------------------------------
+
+enum SupportTicketPriority {
+  LOW
+  MEDIUM
+  HIGH
+  CRITICAL
+}
+
+enum SupportTicketStatus {
+  OPEN
+  IN_PROGRESS
+  WAITING_FOR_USER
+  RESOLVED
+  CLOSED
+}
+
+model SupportTicket {
+  id                    String                @id @default(uuid())
+  ticketNumber          String                @unique // CP-SUP-2026-XXXXXX
+  tenantId              String
+  createdById           String
+  assignedToId          String?
+  subject               String
+  category              String                @default("General")
+  priority              SupportTicketPriority @default(MEDIUM)
+  status                SupportTicketStatus   @default(OPEN)
+  description           String
+  diagnostics           Json?
+  estimatedResponseTime String?
+  resolvedAt            DateTime?
+  closedAt              DateTime?
+  createdAt             DateTime              @default(now())
+  updatedAt             DateTime              @updatedAt
+
+  tenant                Tenant                @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  createdBy             User                  @relation("TicketCreatedBy", fields: [createdById], references: [id], onDelete: Cascade)
+  assignedTo            User?                 @relation("TicketAssignedTo", fields: [assignedToId], references: [id])
+  messages              SupportTicketMessage[]
+  attachments           SupportTicketAttachment[]
+
+  @@index([tenantId])
+  @@index([createdById])
+  @@index([assignedToId])
+  @@index([status])
+  @@index([priority])
+  @@index([createdAt])
+  @@index([tenantId, status])
+  @@index([tenantId, createdById])
+}
+
+model SupportTicketMessage {
+  id         String        @id @default(uuid())
+  ticketId   String
+  senderId   String
+  message    String
+  isStaff    Boolean       @default(false)
+  isInternal Boolean       @default(false) // Internal staff note; never visible to regular user
+  createdAt  DateTime      @default(now())
+
+  ticket     SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+  sender     User          @relation("TicketMessageSender", fields: [senderId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+  @@index([senderId])
+  @@index([createdAt])
+}
+
+model SupportTicketAttachment {
+  id          String        @id @default(uuid())
+  ticketId    String
+  fileName    String
+  fileUrl     String
+  fileSize    Int
+  fileType    String
+  storagePath String?
+  createdAt   DateTime      @default(now())
+
+  ticket      SupportTicket @relation(fields: [ticketId], references: [id], onDelete: Cascade)
+
+  @@index([ticketId])
+}
+

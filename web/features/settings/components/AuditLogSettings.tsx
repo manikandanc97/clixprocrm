@@ -13,8 +13,8 @@ import {
   Laptop,
   CheckCircle2,
   AlertTriangle,
-  Loader2,
 } from "lucide-react";
+import { Skeleton } from "@/shared/ui/skeleton";
 import { useQuery } from "@tanstack/react-query";
 import { CRMCard } from "@/shared/components/crm";
 import { Button } from "@/shared/ui/button";
@@ -176,9 +176,34 @@ export default function AuditLogSettings() {
 
         {/* Audit Log Table */}
         {isLoading ? (
-          <div className="py-12 flex items-center justify-center text-xs text-muted-foreground font-medium">
-            <Loader2 className="w-4 h-4 animate-spin mr-2" />
-            Loading audit events...
+          <div className="mt-3 border rounded-xl overflow-hidden divide-y divide-border/50">
+            <div className="grid grid-cols-12 bg-card border-b border-border/60 px-4 py-2.5 h-10 sm:h-11 items-center">
+              <Skeleton className="col-span-4 h-3.5 w-28" />
+              <Skeleton className="col-span-3 h-3.5 w-24" />
+              <Skeleton className="col-span-2 h-3.5 w-20" />
+              <Skeleton className="col-span-3 h-3.5 w-20 ml-auto" />
+            </div>
+
+            {Array.from({ length: 6 }).map((_, i) => (
+              <div
+                key={i}
+                className="grid grid-cols-12 items-center px-4 py-3 gap-3"
+              >
+                <div className="col-span-4 flex items-center gap-2.5">
+                  <Skeleton className="w-6 h-6 rounded-md shrink-0" />
+                  <Skeleton className="h-3.5 w-32" />
+                </div>
+                <div className="col-span-3">
+                  <Skeleton className="h-3.5 w-36" />
+                </div>
+                <div className="col-span-2">
+                  <Skeleton className="h-3.5 w-24 font-mono" />
+                </div>
+                <div className="col-span-3 flex justify-end">
+                  <Skeleton className="h-3.5 w-28" />
+                </div>
+              </div>
+            ))}
           </div>
         ) : isError ? (
           <div className="p-4 mt-4 bg-destructive/10 border border-destructive/20 rounded-lg text-destructive text-xs font-medium">

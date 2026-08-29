@@ -36,6 +36,7 @@ import {
 import { useSubscription } from "@/shared/hooks/use-subscription";
 import { PlanBadge } from "@/shared/components/PlanBadge";
 import { useAuth } from "@/features/auth/components/auth-provider";
+import { SubscriptionSettingsSkeleton } from "./SettingsSkeletons";
 import { toast } from "sonner";
 
 export default function SubscriptionSettings() {
@@ -69,22 +70,7 @@ export default function SubscriptionSettings() {
     : "Active (Perpetual)";
 
   if (isLoading) {
-    return (
-      <div className="space-y-6 max-w-5xl">
-        {/* Skeleton Top Card */}
-        <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-xs animate-pulse space-y-4">
-          <div className="h-4 bg-muted rounded w-32" />
-          <div className="h-8 bg-muted rounded w-64" />
-          <div className="h-4 bg-muted rounded w-96" />
-          <div className="grid grid-cols-1 sm:grid-cols-4 gap-4 pt-4">
-            <div className="h-16 bg-muted/60 rounded-xl" />
-            <div className="h-16 bg-muted/60 rounded-xl" />
-            <div className="h-16 bg-muted/60 rounded-xl" />
-            <div className="h-16 bg-muted/60 rounded-xl" />
-          </div>
-        </div>
-      </div>
-    );
+    return <SubscriptionSettingsSkeleton />;
   }
 
   if (isError) {

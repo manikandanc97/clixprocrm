@@ -311,7 +311,7 @@ export function DocumentationHub() {
       )}
 
       {/* Keyboard Shortcuts Cheat Sheet Card */}
-      <Card className="border-border shadow-xs">
+      <Card className="border-border shadow-card rounded-2xl overflow-hidden">
         <CardContent className="p-5 space-y-3">
           <div className="flex items-center justify-between pb-2 border-b border-border/50">
             <h3 className="text-xs font-bold text-foreground flex items-center gap-1.5">

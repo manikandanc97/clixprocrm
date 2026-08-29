@@ -55,6 +55,12 @@ export const ALLOWED_EXTENSIONS = new Set([
   '.pptx',
   '.zip',
   '.json',
+  '.mp4',
+  '.webm',
+  '.mov',
+  '.avi',
+  '.mkv',
+  '.m4v',
 ]);
 
 export const ALLOWED_MIME_TYPES = new Set([
@@ -75,6 +81,12 @@ export const ALLOWED_MIME_TYPES = new Set([
   'application/vnd.openxmlformats-officedocument.presentationml.presentation',
   'application/zip',
   'application/x-zip-compressed',
+  'video/mp4',
+  'video/webm',
+  'video/quicktime',
+  'video/x-msvideo',
+  'video/x-matroska',
+  'video/x-m4v',
 ]);
 
 /**
