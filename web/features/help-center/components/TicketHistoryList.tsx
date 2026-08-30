@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useCallback } from "react";
+import { useRouter } from "next/navigation";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   Loader2,
@@ -198,6 +199,7 @@ interface TicketHistoryListProps {
 }
 
 export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) {
+  const router = useRouter();
   const { user } = useAuth();
 
   const [tickets, setTickets] = useState<TicketItem[]>([]);
@@ -247,12 +249,40 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
     }
   }, []);
 
+  const handleSelectTicket = async (ticket: TicketItem) => {
+    setSelectedTicket(ticket);
+    try {
+      const res = await client.get(`/support/tickets/${ticket.ticketId || ticket.id}`);
+      if (res.data?.data) {
+        setSelectedTicket(res.data.data);
+        setTickets((prev) =>
+          prev.map((t) => (t.ticketId === res.data.data.ticketId ? res.data.data : t))
+        );
+      }
+    } catch (err) {
+      // Keep cached ticket state
+    }
+  };
+
   useEffect(() => {
     fetchTickets();
   }, [fetchTickets]);
 
   // Target ticket for Edit / Delete operations (supports both list view and modal view)
   const [targetTicket, setTargetTicket] = useState<TicketItem | null>(null);
+
+  // Active ticket being edited (either from targetTicket or fallback to selectedTicket)
+  const activeEditTicket = targetTicket || selectedTicket;
+
+  // Track if any modifications have been made to the edit form
+  const isEditDirty = Boolean(
+    activeEditTicket && (
+      editSubject.trim() !== (activeEditTicket.subject || "").trim() ||
+      editCategory !== (activeEditTicket.category || "General Inquiry") ||
+      editPriority !== (activeEditTicket.priority || "Medium") ||
+      editDescription.trim() !== (activeEditTicket.description || "").trim()
+    )
+  );
 
   // Safely extract user role string and determine privileges
   const userRoleStr =
@@ -305,6 +335,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   };
 
   const handleOpenEdit = (ticket: TicketItem) => {
+    setSelectedTicket(null); // Close view modal so 2 popups never stack
     setTargetTicket(ticket);
     setEditSubject(ticket.subject);
     setEditCategory(ticket.category || "General Inquiry");
@@ -314,6 +345,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   };
 
   const handleOpenDelete = (ticket: TicketItem) => {
+    setSelectedTicket(null); // Close view modal so 2 popups never stack
     setTargetTicket(ticket);
     setIsDeleteDialogOpen(true);
   };
@@ -341,9 +373,6 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
 
       const updatedTicket = res.data?.data;
       if (updatedTicket) {
-        if (selectedTicket && (selectedTicket.id === updatedTicket.id || selectedTicket.ticketId === updatedTicket.ticketId)) {
-          setSelectedTicket(updatedTicket);
-        }
         setTickets((prev) =>
           prev.map((t) =>
             t.id === updatedTicket.id || t.ticketId === updatedTicket.ticketId ? updatedTicket : t
@@ -375,9 +404,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       setTickets((prev) =>
         prev.filter((t) => t.id !== activeTarget.id && t.ticketId !== activeTarget.ticketId)
       );
-      if (selectedTicket && (selectedTicket.id === activeTarget.id || selectedTicket.ticketId === activeTarget.ticketId)) {
-        setSelectedTicket(null);
-      }
+      setSelectedTicket(null);
       setIsDeleteDialogOpen(false);
       const deletedNumber = activeTarget.ticketId;
       setTargetTicket(null);
@@ -435,23 +462,35 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   return (
     <div className="space-y-4">
       {/* Filter and Action Header */}
-      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3 bg-card p-3 rounded-xl border border-border shadow-2xs">
+      <div className="flex flex-col sm:flex-row items-stretch sm:items-center justify-between gap-3">
         <div className="flex items-center gap-2 flex-1 min-w-[200px]">
           <div className="relative flex-1">
-            <AppIcon name="search" size={15} className="absolute left-3 top-1/2 -translate-y-1/2 text-muted-foreground pointer-events-none" />
+            <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground pointer-events-none">
+              <AppIcon name="search" size={15} />
+            </div>
             <Input
               placeholder="Search by ticket ID, subject, keyword..."
               value={searchTerm}
               onChange={(e) => setSearchTerm(e.target.value)}
-              className="pl-9 h-9 text-xs"
+              className="pl-9 pr-9 h-9 text-xs bg-background shadow-xs border-border"
             />
+            {searchTerm && (
+              <button
+                type="button"
+                onClick={() => setSearchTerm("")}
+                className="absolute right-2.5 top-1/2 -translate-y-1/2 p-0.5 text-muted-foreground hover:text-foreground rounded-sm transition-colors cursor-pointer"
+                title="Clear search"
+              >
+                <AppIcon name="close" size={13} />
+              </button>
+            )}
           </div>
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
           {/* Status filter */}
           <Select value={statusFilter} onValueChange={setStatusFilter}>
-            <SelectTrigger className="h-9 text-xs w-[130px]">
+            <SelectTrigger className="h-9 text-xs w-[130px] bg-background shadow-xs">
               <SelectValue placeholder="All Status" />
             </SelectTrigger>
             <SelectContent>
@@ -466,7 +505,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
 
           {/* Priority filter */}
           <Select value={priorityFilter} onValueChange={setPriorityFilter}>
-            <SelectTrigger className="h-9 text-xs w-[120px]">
+            <SelectTrigger className="h-9 text-xs w-[135px] bg-background shadow-xs">
               <SelectValue placeholder="All Priorities" />
             </SelectTrigger>
             <SelectContent>
@@ -484,7 +523,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
             size="sm"
             onClick={fetchTickets}
             disabled={loading}
-            className="h-9 px-2.5 cursor-pointer"
+            className="h-9 px-2.5 bg-background shadow-xs cursor-pointer"
             title="Refresh list"
           >
             <AppIcon name="refresh" size={14} className={loading ? "animate-spin" : ""} />
@@ -492,7 +531,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
 
           {/* Create new ticket button */}
           {onNewTicketClick && (
-            <Button size="sm" onClick={onNewTicketClick} className="h-9 text-xs gap-1.5 px-3 cursor-pointer">
+            <Button size="sm" onClick={onNewTicketClick} className="h-9 text-xs gap-1.5 px-3.5 font-semibold cursor-pointer shadow-xs">
               <AppIcon name="plus" size={14} />
               <span>New Ticket</span>
             </Button>
@@ -539,8 +578,8 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
             return (
               <Card
                 key={ticket.id || ticket.ticketId}
-                onClick={() => setSelectedTicket(ticket)}
-                className="hover:border-primary/50 hover:shadow-sm cursor-pointer transition-all duration-200 group bg-card"
+                onClick={() => handleSelectTicket(ticket)}
+                className="hover:border-primary/50 hover:shadow-sm cursor-pointer transition-all duration-200 bg-card group"
               >
                 <CardContent className="p-4">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
@@ -559,7 +598,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                           {copiedId === ticket.ticketId ? (
                             <AppIcon name="check" size={12} className="text-emerald-500" />
                           ) : (
-                            <AppIcon name="copy" size={11} className="opacity-60 group-hover:opacity-100" />
+                            <AppIcon name="copy" size={11} className="opacity-70 hover:opacity-100" />
                           )}
                         </div>
 
@@ -614,10 +653,10 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                           </span>
                         )}
 
-                        {/* Quick action buttons for authorized users */}
+                        {/* Action buttons always normally visible for authorized users */}
                         {canManageTicket(ticket) && (
                           <div
-                            className="flex items-center gap-1 opacity-90 sm:opacity-0 group-hover:opacity-100 transition-opacity ml-1"
+                            className="flex items-center gap-1 text-muted-foreground ml-1"
                             onClick={(e) => e.stopPropagation()}
                           >
                             {ticket.status !== "CLOSED" && (
@@ -647,7 +686,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                           </div>
                         )}
 
-                        <AppIcon name="chevronRight" size={14} className="text-muted-foreground group-hover:text-primary group-hover:translate-x-0.5 transition-all hidden sm:block" />
+                        <AppIcon name="chevronRight" size={14} className="text-muted-foreground hidden sm:block" />
                       </div>
                     </div>
                   </div>
@@ -681,14 +720,14 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                       role="button"
                       tabIndex={0}
                       onClick={(e) => copyId(selectedTicket.ticketId, e)}
-                      className="font-mono text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg flex items-center gap-1.5 cursor-pointer transition-colors border border-primary/20 group"
+                      className="font-mono text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg inline-flex items-center gap-1.5 cursor-pointer transition-colors border border-primary/20 group whitespace-nowrap shrink-0 select-none"
                       title="Click to copy ticket reference"
                     >
-                      <span>#{selectedTicket.ticketId}</span>
+                      <span className="whitespace-nowrap font-mono">#{selectedTicket.ticketId}</span>
                       {copiedId === selectedTicket.ticketId ? (
-                        <AppIcon name="check" size={13} className="text-emerald-500" />
+                        <AppIcon name="check" size={13} className="text-emerald-500 shrink-0" />
                       ) : (
-                        <AppIcon name="copy" size={13} className="text-primary/70 group-hover:text-primary" />
+                        <AppIcon name="copy" size={13} className="text-primary/70 group-hover:text-primary shrink-0" />
                       )}
                     </div>
 
@@ -1083,12 +1122,20 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       </Dialog>
 
       {/* Edit Ticket Dialog */}
-      <Dialog open={isEditDialogOpen} onOpenChange={setIsEditDialogOpen}>
+      <Dialog
+        open={isEditDialogOpen}
+        onOpenChange={(open) => {
+          setIsEditDialogOpen(open);
+          if (!open) {
+            setTargetTicket(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-lg p-6 rounded-2xl">
           <DialogHeader className="pb-3 border-b border-border">
             <DialogTitle className="text-base font-bold text-foreground flex items-center gap-2">
               <AppIcon name="edit" size={16} className="text-primary" />
-              Edit Ticket #{(targetTicket || selectedTicket)?.ticketId}
+              Edit Ticket #{activeEditTicket?.ticketId}
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground">
               Update the subject, category, priority, or problem description for this ticket.
@@ -1158,21 +1205,25 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
           </div>
 
           <div className="flex items-center justify-end gap-2 pt-3 border-t border-border">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsEditDialogOpen(false)}
-              disabled={isSavingEdit}
-              className="text-xs h-8 cursor-pointer"
-            >
-              Cancel
-            </Button>
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  setIsEditDialogOpen(false);
+                  setTargetTicket(null);
+                }}
+                disabled={isSavingEdit}
+                className="text-xs h-8 cursor-pointer"
+              >
+                <AppIcon name="close" size={14} className="mr-1.5" />
+                Cancel
+              </Button>
             <Button
               type="button"
               size="sm"
               onClick={handleSaveEdit}
-              disabled={isSavingEdit || !editSubject.trim() || !editDescription.trim()}
+              disabled={isSavingEdit || !isEditDirty || !editSubject.trim() || !editDescription.trim()}
               className="text-xs h-8 gap-1.5 cursor-pointer font-semibold group"
             >
               {isSavingEdit ? (
@@ -1190,7 +1241,15 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       </Dialog>
 
       {/* Delete Ticket Confirmation Dialog */}
-      <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>
+      <Dialog
+        open={isDeleteDialogOpen}
+        onOpenChange={(open) => {
+          setIsDeleteDialogOpen(open);
+          if (!open) {
+            setTargetTicket(null);
+          }
+        }}
+      >
         <DialogContent className="max-w-md p-6 rounded-2xl">
           <DialogHeader className="pb-3">
             <DialogTitle className="text-base font-bold text-destructive flex items-center gap-2">
@@ -1218,10 +1277,14 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
               type="button"
               variant="outline"
               size="sm"
-              onClick={() => setIsDeleteDialogOpen(false)}
+              onClick={() => {
+                setIsDeleteDialogOpen(false);
+                setTargetTicket(null);
+              }}
               disabled={isDeleting}
               className="text-xs h-8 cursor-pointer"
             >
+              <AppIcon name="close" size={14} className="mr-1.5" />
               Cancel
             </Button>
             <Button
@@ -1258,6 +1321,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
               )}
               <span className="truncate">{previewMedia?.filename}</span>
             </DialogTitle>
+            <DialogDescription className="sr-only">Attached media preview lightbox</DialogDescription>
           </DialogHeader>
 
           {/* Media Player / Image Viewer Container */}

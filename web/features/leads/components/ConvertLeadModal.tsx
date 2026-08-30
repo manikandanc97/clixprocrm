@@ -8,6 +8,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import client from "@/shared/lib/api/client";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ArrowRight } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export function ConvertLeadModal({ 
   isOpen, 
@@ -210,7 +211,10 @@ export function ConvertLeadModal({
         )}
         
         <div className="flex justify-end gap-3 pt-4">
-          <Button type="button" variant="outline" onClick={onClose} disabled={loading}>Cancel</Button>
+          <Button type="button" variant="outline" onClick={onClose} disabled={loading} className="cursor-pointer">
+            <AppIcon name="close" size={14} className="mr-1.5" />
+            Cancel
+          </Button>
           <Button type="submit" disabled={loading} className="min-w-[140px]">
             {loading ? "Converting..." : "Convert Lead"}
           </Button>

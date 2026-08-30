@@ -281,6 +281,8 @@ const CANONICAL_ICONS: Record<string, IconName> = {
   info: "info",
   alert: "alert",
   close: "close",
+  cancel: "close",
+  dismiss: "close",
   menu: "menu",
   message: "message",
   messagesquare: "messageSquare",
@@ -593,9 +595,9 @@ export function AppIcon({
     const el = containerRef.current;
     if (!el) return;
 
-    // Check if the icon is inside an interactive element (button, link, menu item, row, tab, cursor-pointer, etc.)
+    // Check if the icon is inside a direct interactive control (button, link, menu item, tab, etc.)
     const parentInteractive = el.closest(
-      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"], tr, [data-interactive], .cursor-pointer, [data-animate-target]'
+      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"], [data-animate-target]'
     );
 
     const handleCustomTrigger = () => {

@@ -28,6 +28,7 @@ import {
   DialogContent,
   DialogHeader,
   DialogTitle,
+  DialogDescription,
 } from "@/shared/ui/dialog";
 
 export interface FileWithPreview extends File {
@@ -590,6 +591,7 @@ export function FileUploader({
               )}
               <span className="truncate">{previewFile?.name}</span>
             </DialogTitle>
+            <DialogDescription className="sr-only">Media file preview lightbox</DialogDescription>
           </DialogHeader>
 
           <div className="p-4 flex items-center justify-center bg-black/5 dark:bg-black/40 min-h-[250px] max-h-[70vh] overflow-hidden">

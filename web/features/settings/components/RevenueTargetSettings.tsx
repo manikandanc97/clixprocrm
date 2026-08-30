@@ -9,6 +9,7 @@ import { Input } from "@/shared/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { toast } from "sonner";
 import { Target, Plus, MoreVertical, Copy, Check, Trash2, Pencil, Calendar, Info } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import client from "@/shared/lib/api/client";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { useDirtyState } from "@/shared/hooks/use-dirty-form";
@@ -513,7 +514,10 @@ export default function RevenueTargetSettings() {
           
           <DialogFooter className="m-0 p-6 bg-background border-t shrink-0">
             <div className="flex gap-3 w-full justify-end">
-              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)}>Cancel</Button>
+              <Button type="button" variant="outline" onClick={() => handleOpenChange(false)} className="cursor-pointer">
+                <AppIcon name="close" size={14} className="mr-1.5" />
+                Cancel
+              </Button>
               <Button type="submit" form="target-form" disabled={!isDirty || createTarget.isPending || updateTarget.isPending} className="px-8">
                 {createTarget.isPending || updateTarget.isPending ? "Saving..." : "Save Changes"}
               </Button>

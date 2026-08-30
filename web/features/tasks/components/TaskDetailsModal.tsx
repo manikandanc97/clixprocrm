@@ -28,6 +28,7 @@ import {
   ShieldAlert,
 } from "lucide-react";
 import { useState } from "react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { ScrollArea } from "@/shared/ui/scroll-area";
 import { Progress } from "@/shared/ui/progress";
@@ -603,7 +604,10 @@ const TaskDetailsModal = ({
                 className="mb-4 min-h-[80px] resize-none text-sm"
               />
               <div className="flex justify-end gap-2">
-                <Button variant="ghost" size="sm" onClick={() => setShowCompletionDialog(false)}>Cancel</Button>
+                <Button variant="ghost" size="sm" onClick={() => setShowCompletionDialog(false)} className="cursor-pointer">
+                  <AppIcon name="close" size={14} className="mr-1.5" />
+                  Cancel
+                </Button>
                 <Button size="sm" disabled={isCompleting} onClick={() => {
                   setIsCompleting(true);
                   completeTask({ id: task.id, note: completionNote }, {
