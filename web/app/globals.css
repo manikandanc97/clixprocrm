@@ -126,8 +126,8 @@
   --crm-section-gap: 1.25rem;
   --crm-page-gap: 1.5rem;
   --crm-card-radius: var(--crm-radius-card);
-  --crm-card-shadow: none;
-  --crm-card-hover-shadow: none;
+  --crm-card-shadow: 0 1px 3px 0 oklch(0 0 0 / 0.04), 0 1px 2px -1px oklch(0 0 0 / 0.03);
+  --crm-card-hover-shadow: 0 4px 12px -2px oklch(0 0 0 / 0.06), 0 2px 4px -2px oklch(0 0 0 / 0.03);
   /* CRM Global 4-Side Viewport Inset & Layout Tokens (0.75rem = 12px) */
   --crm-shell-inset: 0.75rem;
   --crm-shell-bottom-space: 0.75rem;
@@ -161,17 +161,18 @@
   --info-foreground: oklch(0.98 0.005 220);
 
   /* Shadow tokens — Refined for Premium SaaS */
-  --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.05);
-  --shadow-sm: 0 1px 2px oklch(0 0 0 / 0.06);
+  --shadow-xs: 0 1px 2px oklch(0 0 0 / 0.04);
+  --shadow-sm: 0 1px 3px oklch(0 0 0 / 0.05), 0 1px 2px -1px oklch(0 0 0 / 0.04);
   --shadow-md:
-    0 4px 6px -1px oklch(0 0 0 / 0.1), 0 2px 4px -2px oklch(0 0 0 / 0.06);
+    0 4px 6px -1px oklch(0 0 0 / 0.08), 0 2px 4px -2px oklch(0 0 0 / 0.05);
   --shadow-lg:
-    0 10px 15px -3px oklch(0 0 0 / 0.1), 0 4px 6px -4px oklch(0 0 0 / 0.05);
+    0 10px 15px -3px oklch(0 0 0 / 0.08), 0 4px 6px -4px oklch(0 0 0 / 0.04);
   --shadow-xl:
-    0 20px 25px -5px oklch(0 0 0 / 0.1), 0 8px 10px -6px oklch(0 0 0 / 0.05);
+    0 20px 25px -5px oklch(0 0 0 / 0.08), 0 8px 10px -6px oklch(0 0 0 / 0.04);
   --shadow-premium:
     0 0 0 1px oklch(0.91 0.008 255), 0 10px 30px -10px oklch(0 0 0 / 0.08);
-  --shadow-card: none;
+  --shadow-card: 0 1px 3px 0 oklch(0 0 0 / 0.04), 0 1px 2px -1px oklch(0 0 0 / 0.03);
+  --shadow-card-hover: 0 4px 12px -2px oklch(0 0 0 / 0.06), 0 2px 4px -2px oklch(0 0 0 / 0.03);
   --shadow-sidebar: 1px 0 0 oklch(0.93 0.005 255);
   --shadow-glow: 0 0 20px oklch(0.58 0.165 157 / 0.12);
   --shadow-soft:
@@ -227,8 +228,8 @@
   --crm-radius-modal: 14px;
   --crm-radius-pill: 9999px;
   --crm-card-radius: var(--crm-radius-card);
-  --crm-card-shadow: none;
-  --crm-card-hover-shadow: none;
+  --crm-card-shadow: 0 1px 3px 0 oklch(0 0 0 / 0.35), 0 1px 2px -1px oklch(0 0 0 / 0.25);
+  --crm-card-hover-shadow: 0 4px 16px -2px oklch(0 0 0 / 0.50), 0 2px 6px -2px oklch(0 0 0 / 0.35);
   --crm-border-subtle: oklch(0.24 0.018 265 / 0.5);
 
   --sidebar: oklch(0.1 0.018 265);
@@ -255,7 +256,8 @@
   --shadow-premium:
     0 0 0 1px oklch(0.24 0.018 265), 0 10px 30px -10px oklch(0 0 0 / 0.4),
     0 4px 10px -5px oklch(0 0 0 / 0.2);
-  --shadow-card: none;
+  --shadow-card: 0 1px 3px 0 oklch(0 0 0 / 0.35), 0 1px 2px -1px oklch(0 0 0 / 0.25);
+  --shadow-card-hover: 0 4px 16px -2px oklch(0 0 0 / 0.50), 0 2px 6px -2px oklch(0 0 0 / 0.35);
 }
 
 /* Accent Color Overrides */
@@ -568,7 +570,7 @@
    ============================================================ */
 @layer utilities {
   .crm-card {
-    @apply rounded-xl border border-border bg-card text-card-foreground shadow-none;
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-card transition-all duration-200;
   }
 
   .crm-control {
@@ -596,7 +598,7 @@
   }
 
   .crm-toolbar {
-    @apply flex flex-col items-stretch justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-none sm:flex-row sm:items-center;
+    @apply flex flex-col items-stretch justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center;
   }
 
   .crm-segment {
@@ -607,13 +609,17 @@
     @apply flex flex-col items-center justify-center rounded-2xl border border-dashed border-border/80 bg-card/60 px-6 py-10 text-center shadow-xs;
   }
 
+  .crm-table-workspace {
+    @apply flex flex-col gap-3.5 sm:gap-4 w-full;
+  }
+
   .crm-table-wrap,
   .crm-table-container {
-    @apply overflow-hidden rounded-xl border border-border bg-card shadow-none flex flex-col w-full flex-1 min-h-0;
+    @apply overflow-hidden rounded-xl border border-border bg-card shadow-card w-full;
   }
 
   .crm-table-no-pagination {
-    @apply w-full flex-1 min-h-0;
+    @apply w-full;
   }
 
   .crm-table-th {
@@ -639,6 +645,9 @@
   /* Premium shadows */
   .shadow-card {
     box-shadow: var(--shadow-card);
+  }
+  .shadow-card-hover {
+    box-shadow: var(--shadow-card-hover);
   }
   .shadow-sidebar {
     box-shadow: var(--shadow-sidebar);

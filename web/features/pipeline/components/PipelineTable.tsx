@@ -99,9 +99,8 @@ export const PipelineTable: React.FC<PipelineTableProps> = ({ items, onSelectDea
   };
 
   return (
-    <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4">
-      <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden flex-1">
-        <CRMDataTable hasPagination={sortedItems.length > rowsPerPage} containerClassName="border-0 shadow-none rounded-none flex-auto h-full overflow-auto" className="w-full">
+    <div className="flex flex-col w-full relative gap-3.5 sm:gap-4">
+      <CRMDataTable hasPagination={sortedItems.length > rowsPerPage} className="w-full">
           <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
             <CRMTableRow className="h-10 sm:h-11">
               <CRMTableHeaderCell className="bg-card">
@@ -238,9 +237,8 @@ export const PipelineTable: React.FC<PipelineTableProps> = ({ items, onSelectDea
             })}
           </CRMTableBody>
         </CRMDataTable>
-      </div>
 
-      <CRMPagination
+        <CRMPagination
         currentPage={currentPage}
         totalPages={totalPages || 1}
         totalItems={items.length}

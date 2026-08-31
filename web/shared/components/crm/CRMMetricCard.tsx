@@ -245,8 +245,8 @@ export const CRMMetricCard = ({
         "rounded-xl",
         // ── Breathing layout ──
         "p-4 sm:p-5 flex flex-col justify-between h-full",
-        // ── Clean border surface ──
-        "shadow-none",
+        // ── Clean border surface with enterprise subtle drop shadow ──
+        "shadow-card hover:shadow-card-hover",
         // ── Premium subtle hover ──
         "transition-all duration-200 ease-out",
         t.hoverBorder,

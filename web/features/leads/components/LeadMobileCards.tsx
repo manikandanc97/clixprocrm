@@ -56,7 +56,7 @@ export function LeadMobileCards({
   return (
     <div className="grid grid-cols-1 gap-4 md:hidden flex-auto overflow-y-auto pr-1">
       {leads.map((lead) => (
-        <div key={lead.id} className="bg-card rounded-xl border border-border shadow-sm p-4 space-y-4">
+        <div key={lead.id} className="bg-card rounded-xl border border-border shadow-card hover:shadow-card-hover transition-all duration-200 p-4 space-y-4">
           <div className="flex items-start justify-between">
             <div className="flex items-center gap-3">
               <Checkbox

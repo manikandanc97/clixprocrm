@@ -327,11 +327,13 @@ export default function SuperAdminAuditLogsPage() {
       </div>
 
       {/* 3. Filter Controls & Table Workspace */}
-      <CRMToolbar
-        searchQuery={search}
-        setSearchQuery={setSearch}
-        placeholder="Filter audit logs by actor, action, details..."
-      >
+      <div className="crm-table-workspace">
+        <CRMToolbar
+          searchQuery={search}
+          setSearchQuery={setSearch}
+          placeholder="Filter audit logs by actor, action, details..."
+          sticky={false}
+        >
           <div className="flex items-center gap-2">
             <select
               value={moduleFilter}
@@ -350,7 +352,7 @@ export default function SuperAdminAuditLogsPage() {
 
         {/* 4. Standard CRM Data Table */}
         <div className={cn("crm-table-wrap", (loading || sortedLogs.length <= rowsPerPage) && "crm-table-no-pagination")}>
-          <div className="overflow-auto flex-1 min-h-0">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                 <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
@@ -473,6 +475,7 @@ export default function SuperAdminAuditLogsPage() {
             itemName="Logs"
           />
         )}
+      </div>
 
       {/* 5. Details Modal */}
       {selectedLog && (

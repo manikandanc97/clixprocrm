@@ -74,10 +74,10 @@ const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
       ref={setNodeRef}
       style={style}
       className={cn(
-        "group relative flex flex-col gap-2 rounded-xl border bg-card p-3 text-card-foreground shadow-sm transition-all duration-200 cursor-pointer",
+        "group relative flex flex-col gap-2 rounded-xl border bg-card p-3 text-card-foreground shadow-card transition-all duration-200 cursor-pointer",
         isDragging && "opacity-50 ring-2 ring-primary ring-offset-2 scale-95",
         isOverlay && "opacity-100 ring-2 ring-primary scale-105 shadow-xl rotate-2 cursor-grabbing",
-        !isDragging && !isOverlay && "hover:shadow-md hover:border-primary/50"
+        !isDragging && !isOverlay && "hover:shadow-card-hover hover:border-primary/50"
       )}
       {...attributes}
       {...listeners}

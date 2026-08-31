@@ -195,9 +195,9 @@ export function SuperAdminModulesSkeleton() {
       </div>
 
       {/* Table */}
-      <div className="flex-1 flex flex-col min-h-0">
-        <div className="w-full overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm flex flex-col flex-1 min-h-0">
-          <div className="overflow-auto flex-1 min-h-0">
+      <div className="w-full">
+        <div className="w-full overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                 <tr className="h-10 sm:h-11">

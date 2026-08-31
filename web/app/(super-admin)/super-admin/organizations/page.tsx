@@ -316,11 +316,13 @@ export default function SuperAdminOrganizationsPage() {
       </div>
 
       {/* 3. Standard CRM Toolbar & Table Workspace */}
-      <CRMToolbar
-        searchQuery={search}
-        setSearchQuery={setSearch}
-        placeholder="Search by workspace name or slug..."
-      >
+      <div className="crm-table-workspace">
+        <CRMToolbar
+          searchQuery={search}
+          setSearchQuery={setSearch}
+          placeholder="Search by workspace name or slug..."
+          sticky={false}
+        >
           <div className="flex items-center gap-2">
             {/* Plan Selector */}
             <select
@@ -339,7 +341,7 @@ export default function SuperAdminOrganizationsPage() {
 
         {/* 4. Standard CRM Data Table */}
         <div className={cn("crm-table-wrap", (loading || filteredOrganizations.length <= rowsPerPage) && "crm-table-no-pagination")}>
-          <div className="overflow-auto flex-1 min-h-0">
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                 <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
@@ -513,6 +515,7 @@ export default function SuperAdminOrganizationsPage() {
             itemName="Organizations"
           />
         )}
+      </div>
 
       {/* 5. Create Organization Modal */}
       {createModalOpen && (

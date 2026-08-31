@@ -263,17 +263,15 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
   );
 
   return (
-    <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4">
-      <div className="flex flex-col min-h-0 flex-1">
-        <DataTable
-          data={paginatedContacts}
-          columns={columns}
-          rowClassName="h-16 hover:bg-muted/30 transition-colors"
-          emptyTitle="No contacts found"
-          emptyDescription="No contacts match the current search or filters."
-          hasPagination={sortedContacts.length > rowsPerPage}
-        />
-      </div>
+    <div className="flex flex-col w-full relative gap-3.5 sm:gap-4">
+      <DataTable
+        data={paginatedContacts}
+        columns={columns}
+        rowClassName="h-16 hover:bg-muted/30 transition-colors"
+        emptyTitle="No contacts found"
+        emptyDescription="No contacts match the current search or filters."
+        hasPagination={sortedContacts.length > rowsPerPage}
+      />
 
       <CRMPagination
         currentPage={currentPage}

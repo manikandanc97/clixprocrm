@@ -440,7 +440,7 @@ export default function SuperAdminDashboardPage() {
             </Link>
           </div>
 
-          <div className="overflow-auto rounded-xl border border-border/60">
+          <div className="overflow-x-auto w-full rounded-xl border border-border/60">
             <table className="w-full text-left text-xs sm:text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                 <tr className="text-[11px] font-semibold text-muted-foreground uppercase tracking-[0.05em] leading-tight">

@@ -100,7 +100,7 @@ export const TaskKanbanCard = ({ task, onClick, isOverlay, onScheduleMeeting, on
       {...listeners}
       onClick={() => onClick(task)}
       className={cn(
-        "bg-card p-4 rounded-xl border border-border/50 shadow-[var(--crm-card-shadow)] hover:shadow-[var(--crm-card-hover-shadow)] hover:border-primary/20 transition-all cursor-grab active:cursor-grabbing group relative",
+        "bg-card p-4 rounded-xl border border-border/50 shadow-card hover:shadow-card-hover hover:border-primary/20 transition-all cursor-grab active:cursor-grabbing group relative",
         isOverlay && "shadow-elevated border-primary/50 rotate-1 scale-[1.02]"
       )}
     >

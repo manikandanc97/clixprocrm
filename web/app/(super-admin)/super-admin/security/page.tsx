@@ -20,6 +20,7 @@ import {
   KeyRound,
   FileCheck,
 } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 import {
   fetchSecurityCenterStatus,
   fetchSecurityIncidents,
@@ -281,11 +282,13 @@ export default function SecurityCenterPage() {
       </div>
 
       {/* 3. Incidents Filter & Workspace Area */}
-      <CRMToolbar
-        searchQuery={search}
-        setSearchQuery={setSearch}
-        placeholder="Filter incidents by title, ID, or IP address..."
-      >
+      <div className="crm-table-workspace">
+        <CRMToolbar
+          searchQuery={search}
+          setSearchQuery={setSearch}
+          placeholder="Filter incidents by title, ID, or IP address..."
+          sticky={false}
+        >
           <select
             value={severityFilter}
             onChange={(e) => setSeverityFilter(e.target.value)}
@@ -300,8 +303,8 @@ export default function SecurityCenterPage() {
         </CRMToolbar>
 
         {/* 4. Incidents Table */}
-        <div className="crm-table-wrap">
-          <div className="overflow-auto flex-1 min-h-0">
+        <div className={cn("crm-table-wrap", filteredIncidents.length <= rowsPerPage && "crm-table-no-pagination")}>
+          <div className="overflow-x-auto w-full">
             <table className="w-full text-left text-xs">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
                 <tr>
@@ -373,20 +376,19 @@ export default function SecurityCenterPage() {
               </tbody>
             </table>
           </div>
-
-          {filteredIncidents.length > rowsPerPage && (
-            <div className="p-3 border-t border-border/60">
-              <CRMPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={filteredIncidents.length}
-                rowsPerPage={rowsPerPage}
-                onPageChange={setCurrentPage}
-                onRowsPerPageChange={setRowsPerPage}
-              />
-            </div>
-          )}
         </div>
+
+        {filteredIncidents.length > rowsPerPage && (
+          <CRMPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={filteredIncidents.length}
+            rowsPerPage={rowsPerPage}
+            onPageChange={setCurrentPage}
+            onRowsPerPageChange={setRowsPerPage}
+          />
+        )}
+      </div>
 
       {/* Incident Details & Resolution Modal */}
       {selectedIncident && (

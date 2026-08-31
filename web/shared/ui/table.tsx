@@ -10,7 +10,7 @@ function Table({ className, wrapperClassName, ...props }: React.ComponentProps<"
       data-slot="table-container"
       className={cn("crm-table-wrap", wrapperClassName)}
     >
-      <div className="overflow-auto flex-1 min-h-0">
+      <div className="overflow-x-auto w-full">
         <table
           data-slot="table"
           className={cn("w-full text-sm caption-bottom border-collapse", className)}

@@ -330,259 +330,266 @@ export default function SuperAdminUsersPage() {
       </div>
 
       {/* 3. Standard CRM Toolbar & Table Workspace */}
-      <CRMToolbar
-        searchQuery={search}
-        setSearchQuery={setSearch}
-        placeholder="Search users by name or email address..."
-      >
-          <div className="flex items-center gap-2 flex-wrap">
-          {/* Super Admin Only Toggle */}
-          <button
-            onClick={() => setSuperAdminOnly(!superAdminOnly)}
-            className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
-              superAdminOnly
-                ? "bg-emerald-600 text-white font-bold"
-                : "bg-card text-muted-foreground hover:text-foreground border border-border"
-            }`}
-          >
-            <Crown className="h-3.5 w-3.5" />
-            <span>Super Admins</span>
-          </button>
+      <div className="crm-table-workspace">
+        <CRMToolbar
+          searchQuery={search}
+          setSearchQuery={setSearch}
+          placeholder="Search by name, email, or role..."
+          sticky={false}
+        >
+          <div className="flex flex-wrap items-center gap-2">
+            {/* Super Admin filter chip */}
+            <button
+              onClick={() => setSuperAdminOnly(!superAdminOnly)}
+              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
+                superAdminOnly
+                  ? "bg-emerald-600 text-white font-bold"
+                  : "bg-card text-muted-foreground hover:text-foreground border border-border"
+              }`}
+            >
+              <Crown className="h-3.5 w-3.5" />
+              <span>Super Admins</span>
+            </button>
 
-          {/* Status Tabs */}
-          <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60 shadow-sm">
-            {(["ALL", "ACTIVE", "INACTIVE", "SUSPENDED"] as const).map((st) => (
-              <button
-                key={st}
-                onClick={() => setStatusFilter(st)}
-                className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                  statusFilter === st
-                    ? "bg-card text-foreground shadow-sm font-bold"
-                    : "text-muted-foreground hover:text-foreground"
-                }`}
-              >
-                {st === "ALL" ? "All" : st.charAt(0) + st.slice(1).toLowerCase()}
-              </button>
-            ))}
+            {/* Status Tabs */}
+            <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60 shadow-sm">
+              {(["ALL", "ACTIVE", "INACTIVE", "SUSPENDED"] as const).map((st) => (
+                <button
+                  key={st}
+                  onClick={() => setStatusFilter(st)}
+                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
+                    statusFilter === st
+                      ? "bg-card text-foreground shadow-sm font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {st === "ALL" ? "All" : st.charAt(0) + st.slice(1).toLowerCase()}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
-      </CRMToolbar>
+        </CRMToolbar>
 
-      {/* 4. Standard CRM Data Table */}
-      <div className={cn("crm-table-wrap", (loading || sortedUsers.length <= rowsPerPage) && "crm-table-no-pagination")}>
-        <div className="overflow-auto flex-1 min-h-0">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-              <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                  <DataTableColumnHeader
-                    title="User"
-                    sortable
-                    sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
-                    onSort={(dir) => handleSort("name", dir)}
-                  />
-                </th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                  <DataTableColumnHeader
-                    title="Platform Role"
-                    sortable
-                    sortDirection={sortConfig.key === "role" ? sortConfig.direction : null}
-                    onSort={(dir) => handleSort("role", dir)}
-                  />
-                </th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card">Organizations &amp; Role</th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                  <DataTableColumnHeader
-                    title="Status"
-                    sortable
-                    sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
-                    onSort={(dir) => handleSort("status", dir)}
-                  />
-                </th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                  <DataTableColumnHeader
-                    title="Created Date"
-                    sortable
-                    sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
-                    onSort={(dir) => handleSort("createdAt", dir)}
-                  />
-                </th>
-                <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/50">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse h-16">
-                    <td className="px-6 py-4">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 bg-muted rounded-xl" />
-                        <div className="space-y-1.5">
-                          <div className="h-3.5 w-32 bg-muted rounded" />
-                          <div className="h-2.5 w-24 bg-muted/60 rounded" />
+        {/* 4. Standard CRM Data Table */}
+        <div className={cn("crm-table-wrap", (loading || sortedUsers.length <= rowsPerPage) && "crm-table-no-pagination")}>
+          <div className="overflow-x-auto w-full">
+            <table className="w-full text-left text-sm border-collapse">
+              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="User"
+                      sortable
+                      sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("name", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Platform Role"
+                      sortable
+                      sortDirection={sortConfig.key === "role" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("role", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card">Organizations &amp; Role</th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Status"
+                      sortable
+                      sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("status", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                    <DataTableColumnHeader
+                      title="Created Date"
+                      sortable
+                      sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("createdAt", dir)}
+                    />
+                  </th>
+                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/50">
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse h-16">
+                      <td className="px-6 py-4">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 bg-muted rounded-xl" />
+                          <div className="space-y-1.5">
+                            <div className="h-3.5 w-32 bg-muted rounded" />
+                            <div className="h-2.5 w-24 bg-muted/60 rounded" />
+                          </div>
                         </div>
-                      </div>
-                    </td>
-                    <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded-full" /></td>
-                    <td className="px-6 py-4"><div className="h-3.5 w-28 bg-muted rounded" /></td>
-                    <td className="px-6 py-4"><div className="h-4 w-16 bg-muted rounded-full" /></td>
-                    <td className="px-6 py-4"><div className="h-3.5 w-20 bg-muted rounded" /></td>
-                    <td className="px-6 py-4 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
-                  </tr>
-                ))
-              ) : paginatedUsers.length > 0 ? (
-                paginatedUsers.map((u) => (
-                  <tr
-                    key={u.id}
-                    className="group h-16 hover:bg-muted/[0.03] transition-colors"
-                  >
-                    {/* User Avatar & Info */}
-                    <td className="px-6 py-4 font-medium">
-                      <div className="flex items-center gap-3">
-                        <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
-                          {u.name?.charAt(0).toUpperCase() || u.email.charAt(0).toUpperCase()}
-                        </div>
-                        <div className="min-w-0">
-                          <p
-                            onClick={() => setSelectedUser(u)}
-                            className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate max-w-[200px]"
-                            title={u.name || u.email}
-                          >
-                            {u.name || "No name registered"}
-                          </p>
-                          <p className="text-xs text-muted-foreground truncate max-w-[200px]">{u.email}</p>
-                        </div>
-                      </div>
-                    </td>
-
-                    {/* Platform Role */}
-                    <td className="px-6 py-4 whitespace-nowrap">
-                      {u.isSuperAdmin ? (
-                        <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold shadow-sm whitespace-nowrap">
-                          <Crown className="h-3.5 w-3.5 shrink-0" />
-                          SUPER ADMIN
-                        </span>
-                      ) : (
-                        <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
-                          Standard User
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Organizations */}
-                    <td className="px-6 py-4">
-                      {u.organizations && u.organizations.length > 0 ? (
-                        <div className="flex flex-wrap gap-1.5">
-                          {u.organizations.map((org: any) => (
-                            <div
-                              key={org.tenantId}
-                              className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-muted/60 border border-border text-xs"
-                            >
-                              <Building2 className="h-3 w-3 text-muted-foreground" />
-                              <span className="font-semibold text-foreground">{org.name}</span>
-                              <CRMRoleBadge role={org.role} size="xs" />
-                            </div>
-                          ))}
-                        </div>
-                      ) : (
-                        <span className="text-xs text-muted-foreground italic">
-                          Platform Only (No Tenant)
-                        </span>
-                      )}
-                    </td>
-
-                    {/* Status */}
-                    <td className="px-6 py-4">
-                      <StatusBadge
-                        status={u.status === "ACTIVE" ? "Active" : u.status === "SUSPENDED" ? "Suspended" : "Inactive"}
-                        variant={u.status === "ACTIVE" ? "emerald" : u.status === "SUSPENDED" ? "rose" : "neutral"}
-                      />
-                    </td>
-
-                    {/* Created Date */}
-                    <td className="px-6 py-4 text-xs text-muted-foreground font-medium">
-                      {new Date(u.createdAt).toLocaleDateString()}
-                    </td>
-
-                    {/* Actions */}
-                    <td className="px-6 py-4 text-right">
-                      <div className="flex items-center justify-end">
-                        <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
-                              size="icon"
-                              className="h-8 w-8 rounded-lg hover:bg-muted"
-                            >
-                              <MoreHorizontal className="h-4 w-4" />
-                            </Button>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent
-                            align="end"
-                            className="rounded-xl w-56 shadow-lg border-border"
-                          >
-                            <DropdownMenuLabel className="text-xs">
-                              Manage Account
-                            </DropdownMenuLabel>
-                            <DropdownMenuItem
+                      </td>
+                      <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded-full" /></td>
+                      <td className="px-6 py-4"><div className="h-3.5 w-28 bg-muted rounded" /></td>
+                      <td className="px-6 py-4"><div className="h-4 w-16 bg-muted rounded-full" /></td>
+                      <td className="px-6 py-4"><div className="h-3.5 w-20 bg-muted rounded" /></td>
+                      <td className="px-6 py-4 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
+                    </tr>
+                  ))
+                ) : paginatedUsers.length > 0 ? (
+                  paginatedUsers.map((u) => (
+                    <tr
+                      key={u.id}
+                      className="group h-16 hover:bg-muted/[0.03] transition-colors"
+                    >
+                      {/* User Avatar & Info */}
+                      <td className="px-6 py-4 font-medium">
+                        <div className="flex items-center gap-3">
+                          <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
+                            {u.name?.charAt(0).toUpperCase() || u.email.charAt(0).toUpperCase()}
+                          </div>
+                          <div className="min-w-0">
+                            <p
                               onClick={() => setSelectedUser(u)}
-                              className="text-xs gap-2 cursor-pointer font-medium"
+                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate max-w-[200px]"
+                              title={u.name || u.email}
                             >
-                              <AppIcon name="quotations" size={14} className="text-primary" />
-                              <span>View User Profile</span>
-                            </DropdownMenuItem>
+                              {u.name || "No name registered"}
+                            </p>
+                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">{u.email}</p>
+                          </div>
+                        </div>
+                      </td>
 
-                            {!u.isSuperAdmin && (
-                              <>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  onClick={() => setTransferTargetUser(u)}
-                                  className="text-xs gap-2 cursor-pointer font-medium text-amber-600 focus:text-amber-600 focus:bg-amber-500/10 hover:text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 dark:focus:text-amber-400 dark:focus:bg-amber-500/20 not-data-[variant=destructive]:focus:**:!text-amber-600 not-data-[variant=destructive]:hover:**:!text-amber-600"
-                                >
-                                  <AppIcon name="security" size={14} className="text-amber-500" />
-                                  <span>Transfer Super Admin</span>
-                                </DropdownMenuItem>
-                              </>
-                            )}
+                      {/* Platform Role */}
+                      <td className="px-6 py-4 whitespace-nowrap">
+                        {u.isSuperAdmin ? (
+                          <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold shadow-sm whitespace-nowrap">
+                            <Crown className="h-3.5 w-3.5 shrink-0" />
+                            SUPER ADMIN
+                          </span>
+                        ) : (
+                          <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                            Standard User
+                          </span>
+                        )}
+                      </td>
 
-                            {!u.isSuperAdmin && (
-                              <>
-                                <DropdownMenuSeparator />
-                                {u.status === "ACTIVE" ? (
+                      {/* Organizations */}
+                      <td className="px-6 py-4">
+                        {u.organizations && u.organizations.length > 0 ? (
+                          <div className="flex flex-wrap gap-1.5">
+                            {u.organizations.map((org: any) => (
+                              <div
+                                key={org.tenantId}
+                                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-muted/60 border border-border text-xs"
+                              >
+                                <Building2 className="h-3 w-3 text-muted-foreground" />
+                                <span className="font-semibold text-foreground">{org.name}</span>
+                                <CRMRoleBadge role={org.role} size="xs" />
+                              </div>
+                            ))}
+                          </div>
+                        ) : (
+                          <span className="text-xs text-muted-foreground italic">
+                            Platform Only (No Tenant)
+                          </span>
+                        )}
+                      </td>
+
+                      {/* Status */}
+                      <td className="px-6 py-4">
+                        <StatusBadge
+                          status={u.status === "ACTIVE" ? "Active" : u.status === "SUSPENDED" ? "Suspended" : "Inactive"}
+                          variant={u.status === "ACTIVE" ? "emerald" : u.status === "SUSPENDED" ? "rose" : "neutral"}
+                        />
+                      </td>
+
+                      {/* Created Date */}
+                      <td className="px-6 py-4 text-xs text-muted-foreground font-medium">
+                        {new Date(u.createdAt).toLocaleDateString()}
+                      </td>
+
+                      {/* Actions */}
+                      <td className="px-6 py-4 text-right">
+                        <div className="flex items-center justify-end">
+                          <DropdownMenu>
+                            <DropdownMenuTrigger asChild>
+                              <Button
+                                variant="ghost"
+                                size="icon"
+                                className="h-8 w-8 rounded-lg hover:bg-muted"
+                              >
+                                <MoreHorizontal className="h-4 w-4" />
+                              </Button>
+                            </DropdownMenuTrigger>
+                            <DropdownMenuContent
+                              align="end"
+                              className="rounded-xl w-56 shadow-lg border-border"
+                            >
+                              <DropdownMenuLabel className="text-xs">
+                                Manage Account
+                              </DropdownMenuLabel>
+                              <DropdownMenuItem
+                                onClick={() => setSelectedUser(u)}
+                                className="text-xs gap-2 cursor-pointer font-medium"
+                              >
+                                <AppIcon name="quotations" size={14} className="text-primary" />
+                                <span>View User Profile</span>
+                              </DropdownMenuItem>
+
+                              {!u.isSuperAdmin && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => setTransferTargetUser(u)}
+                                    className="text-xs gap-2 cursor-pointer font-medium text-amber-600 focus:text-amber-600 focus:bg-amber-500/10 hover:text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 dark:focus:text-amber-400 dark:focus:bg-amber-500/20 not-data-[variant=destructive]:focus:**:!text-amber-600 not-data-[variant=destructive]:hover:**:!text-amber-600"
+                                  >
+                                    <AppIcon name="security" size={14} className="text-amber-500" />
+                                    <span>Transfer Super Admin</span>
+                                  </DropdownMenuItem>
+                                </>
+                              )}
+
+                              {!u.isSuperAdmin && (
+                                <>
+                                  <DropdownMenuSeparator />
+                                  {u.status === "ACTIVE" ? (
+                                    <DropdownMenuItem
+                                      variant="destructive"
+                                      onClick={() => handleToggleStatus(u)}
+                                      className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
+                                    >
+                                      <AppIcon name="security" size={14} className="text-rose-500 dark:text-rose-400" />
+                                      <span>Suspend Account</span>
+                                    </DropdownMenuItem>
+                                  ) : (
+                                    <DropdownMenuItem
+                                      onClick={() => handleToggleStatus(u)}
+                                      className="text-xs gap-2 cursor-pointer font-medium text-emerald-600 focus:text-emerald-600 focus:bg-emerald-500/10 hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400 dark:focus:text-emerald-400 dark:focus:bg-emerald-500/20"
+                                    >
+                                      <AppIcon name="checkCircle" size={14} className="text-emerald-500" />
+                                      <span>Re-activate Account</span>
+                                    </DropdownMenuItem>
+                                  )}
+                                </>
+                              )}
+
+                              {!u.isSuperAdmin && (
+                                <>
+                                  <DropdownMenuSeparator />
                                   <DropdownMenuItem
                                     variant="destructive"
-                                    onClick={() => handleToggleStatus(u)}
+                                    onClick={() => setDeleteTargetUser(u)}
                                     className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
                                   >
-                                    <AppIcon name="close" size={14} className="text-rose-500 dark:text-rose-400" />
-                                    <span>Suspend User</span>
+                                    <AppIcon name="trash" size={14} className="text-rose-500 dark:text-rose-400" />
+                                    <span>Delete User</span>
                                   </DropdownMenuItem>
-                                ) : (
-                                  <DropdownMenuItem
-                                    onClick={() => handleToggleStatus(u)}
-                                    className="text-xs gap-2 cursor-pointer font-medium text-emerald-600 focus:text-emerald-600 focus:bg-emerald-500/10 hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400 dark:focus:text-emerald-400 dark:focus:bg-emerald-500/20"
-                                  >
-                                    <AppIcon name="security" size={14} className="text-emerald-500 dark:text-emerald-400" />
-                                    <span>Activate User</span>
-                                  </DropdownMenuItem>
-                                )}
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  variant="destructive"
-                                  onClick={() => setDeleteTargetUser(u)}
-                                  className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
-                                >
-                                  <AppIcon name="trash" size={14} className="text-rose-500 dark:text-rose-400" />
-                                  <span>Delete User</span>
-                                </DropdownMenuItem>
-                              </>
-                            )}
-                          </DropdownMenuContent>
-                        </DropdownMenu>
-                      </div>
-                    </td>
-                  </tr>
-                ))
+                                </>
+                              )}
+                            </DropdownMenuContent>
+                          </DropdownMenu>
+                        </div>
+                      </td>
+                    </tr>
+                  ))
                 ) : (
                   <tr>
                     <td colSpan={6} className="p-4 border-0">
@@ -612,6 +619,7 @@ export default function SuperAdminUsersPage() {
             itemName="Platform Users"
           />
         )}
+      </div>
 
       {/* 6. User Details Modal */}
       {selectedUser && (
