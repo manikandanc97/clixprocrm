@@ -8,10 +8,10 @@ export const crmRadius = {
 
 export const crmSurface = {
   card:
-    "rounded-xl border border-[var(--crm-border-subtle)] bg-card text-card-foreground shadow-[var(--crm-card-shadow)]",
+    "rounded-xl border border-border bg-card text-card-foreground shadow-none",
   interactive:
-    "transition-all duration-300 hover:border-primary/20 hover:shadow-md",
-  mutedPanel: "rounded-lg border border-border bg-muted/40",
+    "transition-all duration-200 hover:border-primary/30",
+  mutedPanel: "rounded-xl border border-border bg-muted/40",
 } as const;
 
 export const crmControl = {

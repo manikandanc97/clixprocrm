@@ -55,7 +55,7 @@ export default function SuperAdminLayout({
   return (
     <SuperAdminRoute>
       <TooltipProvider>
-        <div className="flex h-screen w-full overflow-hidden bg-background text-foreground relative">
+        <div className="flex h-screen h-dvh w-full overflow-hidden bg-background text-foreground relative">
           {/* Subtle Surface Background */}
           <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#050505] -z-10" />
           <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
@@ -67,7 +67,7 @@ export default function SuperAdminLayout({
           <div className="flex flex-1 flex-col overflow-hidden min-w-0 h-full w-full">
             <SuperAdminHeader />
             <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col kanban-board-scroll">
-              <div className="w-full flex-1 min-h-0 flex flex-col h-full">{children}</div>
+              <div className="w-full flex-1 min-h-0 flex flex-col pb-20 md:pb-0">{children}</div>
             </main>
           </div>
 

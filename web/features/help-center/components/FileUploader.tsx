@@ -362,9 +362,11 @@ export function FileUploader({
 
       {/* Local Dropzone Box */}
       <div
-        role="button"
+        role="region"
+        aria-label="Upload files dropzone"
         tabIndex={0}
         data-interactive="true"
+        data-no-icon-delegate="true"
         className={cn(
           "relative border-2 border-dashed rounded-2xl p-6 transition-all duration-200 flex flex-col items-center justify-center text-center cursor-pointer group outline-none focus-visible:ring-2 focus-visible:ring-primary/40 overflow-hidden",
           isDragActive
@@ -400,15 +402,17 @@ export function FileUploader({
           )}
         />
 
+        {/* Upload Icon - Animates only when hovering over icon directly */}
         <div
+          data-animate-target="true"
           className={cn(
-            "p-3.5 rounded-2xl mb-3 flex items-center justify-center transition-all duration-200 relative",
+            "p-3.5 rounded-2xl mb-3 flex items-center justify-center transition-colors duration-200 relative cursor-pointer",
             isDragActive
-              ? "bg-primary text-primary-foreground scale-110 shadow-lg shadow-primary/30"
-              : "bg-primary/10 text-primary group-hover:bg-primary/20 group-hover:scale-105"
+              ? "bg-primary text-primary-foreground shadow-lg shadow-primary/30"
+              : "bg-primary/10 text-primary hover:bg-primary/20"
           )}
         >
-          <AppIcon name="upload" size={24} />
+          <AppIcon name="upload" size={24} standalone />
           {isDragActive && (
             <span className="absolute -top-1 -right-1 flex h-3 w-3">
               <span className="animate-ping absolute inline-flex h-full w-full rounded-full bg-primary opacity-75" />
@@ -420,7 +424,7 @@ export function FileUploader({
         <h4 className="font-bold text-xs text-foreground mb-1">
           {isDragActive ? (
             <span className="text-primary font-extrabold flex items-center gap-1.5 justify-center">
-              <AppIcon name="ai" size={14} /> Release mouse to attach files right here
+              <AppIcon name="ai" size={14} standalone /> Release mouse to attach files right here
             </span>
           ) : (
             <>
@@ -441,17 +445,20 @@ export function FileUploader({
           anywhere to paste screenshots or screen clips
         </p>
 
-        <div className="flex flex-wrap gap-1.5 justify-center text-[10px] font-semibold text-muted-foreground pointer-events-none">
-          <span className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60 flex items-center gap-1">
-            <AppIcon name="image" size={12} className="text-emerald-500" /> Images
+        {/* Category Pills - Animates icons only on hover without scaling */}
+        <div className="flex flex-wrap gap-1.5 justify-center text-[10px] font-semibold text-muted-foreground">
+          <span data-animate-target="true" className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60 flex items-center gap-1 transition-colors duration-150 hover:bg-muted hover:border-emerald-500/40 hover:text-foreground cursor-pointer">
+            <AppIcon name="image" size={12} standalone className="text-emerald-500" /> Images
           </span>
-          <span className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60 flex items-center gap-1">
-            <AppIcon name="video" size={12} className="text-indigo-500" /> Videos
+          <span data-animate-target="true" className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60 flex items-center gap-1 transition-colors duration-150 hover:bg-muted hover:border-indigo-500/40 hover:text-foreground cursor-pointer">
+            <AppIcon name="video" size={12} standalone className="text-indigo-500" /> Videos
           </span>
-          <span className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60 flex items-center gap-1">
-            <AppIcon name="file" size={12} className="text-rose-500" /> PDF & Docs
+          <span data-animate-target="true" className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60 flex items-center gap-1 transition-colors duration-150 hover:bg-muted hover:border-rose-500/40 hover:text-foreground cursor-pointer">
+            <AppIcon name="file" size={12} standalone className="text-rose-500" /> PDF & Docs
           </span>
-          <span className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60">Logs & JSON</span>
+          <span className="bg-muted/80 px-2 py-0.5 rounded-lg border border-border/60 flex items-center gap-1 transition-colors duration-150 hover:bg-muted hover:border-sky-500/40 hover:text-foreground cursor-pointer">
+            Logs & JSON
+          </span>
           <span className="bg-primary/10 text-primary px-2 py-0.5 rounded-lg border border-primary/20 font-bold">
             Max {maxSizeMB}MB / {maxFiles} files
           </span>

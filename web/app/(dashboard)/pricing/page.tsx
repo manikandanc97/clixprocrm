@@ -183,7 +183,7 @@ export default function PricingPage() {
 
   return (
     <CRMPageContainer>
-      <div className="space-y-10 max-w-6xl mx-auto pb-16">
+      <div className="space-y-10 max-w-6xl mx-auto pb-3.5">
         {/* Top Breadcrumb & Header */}
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pt-2">
           <div className="space-y-1">

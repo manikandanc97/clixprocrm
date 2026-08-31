@@ -169,16 +169,16 @@ const SettingsPage = () => {
   }, [activeSection]);
 
   return (
-    <CRMPageContainer className="flex-1 min-h-0 h-full flex flex-col pb-20 md:pb-3 lg:pb-3 lg:overflow-hidden">
+    <CRMPageContainer className="flex-1 h-full min-h-0 flex flex-col gap-4 lg:gap-5">
       {/* Dynamic Page Header */}
       <div className="shrink-0 pt-0.5 pb-1">
         <SettingsHeader activeSection={activeSection} />
       </div>
 
       {/* Body - Independent scrolling on desktop */}
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-4 lg:gap-5.5 lg:overflow-hidden">
-        {/* Secondary Sidebar Navigation (200px) */}
-        <div className="w-full lg:w-[200px] shrink-0 lg:h-full lg:overflow-y-auto pr-1 custom-scrollbar">
+      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-5 lg:gap-7 lg:overflow-hidden">
+        {/* Secondary Sidebar Navigation (215px) */}
+        <div className="w-full lg:w-[215px] shrink-0 lg:h-full lg:overflow-y-auto pr-1.5 sidebar-scroll">
           <SettingsSidebar
             activeSection={activeSection}
             onSectionChange={handleSectionChange}
@@ -188,7 +188,7 @@ const SettingsPage = () => {
         {/* Content Column */}
         <div
           ref={contentRef}
-          className="flex-1 min-w-0 lg:h-full lg:overflow-y-auto pr-1.5 pb-2 custom-scrollbar"
+          className="flex-1 min-w-0 w-full lg:h-full lg:overflow-y-auto pr-1.5 sidebar-scroll"
         >
           <AnimatePresence mode="wait" initial={false}>
             <motion.div
@@ -197,6 +197,7 @@ const SettingsPage = () => {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, y: -5 }}
               transition={{ duration: 0.12, ease: "easeOut" }}
+              className="min-h-full flex flex-col"
             >
               {renderSection()}
             </motion.div>

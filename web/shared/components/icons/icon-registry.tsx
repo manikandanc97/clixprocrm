@@ -193,6 +193,7 @@ export interface AppIconProps {
   isHovered?: boolean;
   disableHover?: boolean;
   animateOnMount?: boolean;
+  standalone?: boolean;
   triggerAnimation?: number | string;
   duration?: number;
   onClick?: (e: React.MouseEvent) => void;
@@ -503,6 +504,7 @@ export function AppIcon({
   isHovered = false,
   disableHover = false,
   animateOnMount = false,
+  standalone = false,
   triggerAnimation,
   duration = 0.55,
   onClick,
@@ -596,9 +598,15 @@ export function AppIcon({
     if (!el) return;
 
     // Check if the icon is inside a direct interactive control (button, link, menu item, tab, etc.)
-    const parentInteractive = el.closest(
-      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"], [data-animate-target]'
-    );
+    const noDelegateParent = el.closest('[data-no-icon-delegate="true"]');
+    const localTarget = el.closest('[data-animate-target="true"]');
+    const parentInteractive =
+      standalone || noDelegateParent
+        ? localTarget
+        : (localTarget ||
+           el.closest(
+            'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"]'
+          ));
 
     const handleCustomTrigger = () => {
       if (!hasAnimatedForCurrentHoverRef.current) {
@@ -663,11 +671,13 @@ export function AppIcon({
     // CASE 2: Icon is an adornment for an input field (NOT inside a button).
     // Find the immediate sibling or enclosing control wrapper with an input/textarea/select.
     const findAssociatedInput = (): HTMLElement | null => {
+      if (standalone || noDelegateParent) return null;
+
       // 1. Direct relative wrapper for this input
       const relativeParent = el.closest('.relative, [data-slot="control"], .form-control');
       if (relativeParent) {
         const input = relativeParent.querySelector<HTMLElement>(
-          'input, textarea, select, [role="combobox"], [role="textbox"]'
+          'input:not([type="hidden"]):not([type="file"]), textarea, select, [role="combobox"], [role="textbox"]'
         );
         if (input) return input;
       }
@@ -675,7 +685,7 @@ export function AppIcon({
       // 2. Direct parent if it contains an input
       if (el.parentElement) {
         const input = el.parentElement.querySelector<HTMLElement>(
-          'input, textarea, select, [role="combobox"], [role="textbox"]'
+          'input:not([type="hidden"]):not([type="file"]), textarea, select, [role="combobox"], [role="textbox"]'
         );
         if (input) return input;
       }
@@ -684,7 +694,7 @@ export function AppIcon({
       const groupParent = el.closest('.group, [data-slot="form-item"], .space-y-1\\.5, .space-y-2');
       if (groupParent) {
         const input = groupParent.querySelector<HTMLElement>(
-          'input, textarea, select, [role="combobox"], [role="textbox"], [data-slot="select-trigger"]'
+          'input:not([type="hidden"]):not([type="file"]), textarea, select, [role="combobox"], [role="textbox"], [data-slot="select-trigger"]'
         );
         if (input) return input;
       }
@@ -997,19 +1007,11 @@ export function AppIcon({
       ref={containerRef}
       data-animate-icon="true"
       onClick={onClick}
-      className="inline-flex shrink-0 items-center justify-center"
+      className="inline-flex shrink-0 items-center justify-center select-none pointer-events-auto"
     >
-      <motion.span
-        animate={
-          !reducedMotion && isAnimating
-            ? { scale: [1, 1.08, 0.98, 1] }
-            : { scale: 1 }
-        }
-        transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
-        className="inline-flex shrink-0 items-center justify-center pointer-events-none"
-      >
+      <span className="inline-flex shrink-0 items-center justify-center pointer-events-none">
         {renderIcon()}
-      </motion.span>
+      </span>
     </span>
   );
 }

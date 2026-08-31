@@ -92,7 +92,7 @@ export default function SubscriptionSettings() {
   }
 
   return (
-    <div className="space-y-8 max-w-5xl">
+    <div className="space-y-8 max-w-5xl min-h-full flex flex-col">
       {/* 1. CURRENT PLAN HERO SUMMARY CARD */}
       <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-xs relative overflow-hidden">
         <div className="absolute top-0 right-0 w-80 h-80 bg-primary/5 rounded-full blur-3xl -mr-20 -mt-20 pointer-events-none" />

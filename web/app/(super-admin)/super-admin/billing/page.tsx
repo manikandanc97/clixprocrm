@@ -50,6 +50,7 @@ import {
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
+import { CRMPageContainer } from "@/shared/components/crm";
 
 export default function SuperAdminBillingPage() {
   const { formatCurrency } = useCurrency();
@@ -187,7 +188,8 @@ export default function SuperAdminBillingPage() {
   };
 
   return (
-    <div className="p-8 max-w-7xl mx-auto space-y-8 font-sans">
+    <CRMPageContainer>
+      <div className="space-y-8 font-sans">
       {/* Header */}
       <div className="flex justify-between items-start flex-wrap gap-4">
         <div>
@@ -782,6 +784,7 @@ export default function SuperAdminBillingPage() {
           </motion.div>
         </div>
       )}
-    </div>
+      </div>
+    </CRMPageContainer>
   );
 }

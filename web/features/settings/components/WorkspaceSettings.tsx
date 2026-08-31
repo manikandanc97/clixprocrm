@@ -308,7 +308,7 @@ const WorkspaceSettings = () => {
       : PRESET_BRAND_SWATCHES;
 
   return (
-    <div className="space-y-3.5">
+    <div className="space-y-3.5 min-h-full flex flex-col">
       {/* Hidden File Input */}
       <input
         ref={fileInputRef}

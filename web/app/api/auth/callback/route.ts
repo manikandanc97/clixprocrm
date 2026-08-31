@@ -66,6 +66,11 @@ export async function GET(request: Request) {
         font-size: 22px;
         font-weight: bold;
       }
+      .success-icon {
+        color: #10b981;
+        font-size: 22px;
+        font-weight: bold;
+      }
       @keyframes spin {
         0% { transform: rotate(0deg); }
         100% { transform: rotate(360deg); }
@@ -105,7 +110,7 @@ export async function GET(request: Request) {
         ${
           !isSuccess
             ? '<span class="error-icon">✕</span>'
-            : '<div class="spinner"></div>'
+            : '<div id="icon-spinner" class="spinner"></div><span id="icon-check" class="success-icon" style="display: none;">✓</span>'
         }
       </div>
       <h2>${!isSuccess ? 'Authentication Failed' : 'Authentication Successful'}</h2>
@@ -115,19 +120,22 @@ export async function GET(request: Request) {
           : 'Completing sign in...'
       }</p>
       <button id="close-btn" class="close-btn" style="display: ${!isSuccess ? 'inline-block' : 'none'};" onclick="window.close()">Close Window</button>
-      <a id="dashboard-link" class="close-btn" style="display: none;" href="/dashboard">Go to Dashboard</a>
     </div>
     <script>
       (function() {
         var isSuccess = ${isSuccess ? 'true' : 'false'};
-        var isPopupUrlParam = ${isPopupParam ? 'true' : 'false'};
         var messageType = isSuccess ? 'CLIXPROCRM_GOOGLE_AUTH_SUCCESS' : 'CLIXPROCRM_GOOGLE_AUTH_ERROR';
-        var isPopup = isPopupUrlParam || (window.name === 'clixprocrm_google_auth') || (window.opener && window.opener !== window) || (window.innerWidth < 650 && window.innerHeight < 800);
+        var errorMsg = '${escapedErrorMessage}';
+        var targetOrigin = window.location.origin;
 
         // 1. PostMessage to opener if available
         try {
           if (window.opener && window.opener !== window) {
-            window.opener.postMessage({ type: messageType }, window.location.origin);
+            window.opener.postMessage({
+              type: messageType,
+              error: isSuccess ? undefined : errorMsg,
+              target: '/dashboard'
+            }, targetOrigin);
           }
         } catch (e) {}
 
@@ -135,7 +143,11 @@ export async function GET(request: Request) {
         try {
           if (typeof BroadcastChannel !== 'undefined') {
             var channel = new BroadcastChannel('clixprocrm_google_auth_channel');
-            channel.postMessage({ type: messageType });
+            channel.postMessage({
+              type: messageType,
+              error: isSuccess ? undefined : errorMsg,
+              target: '/dashboard'
+            });
             channel.close();
           }
         } catch (e) {}
@@ -144,38 +156,41 @@ export async function GET(request: Request) {
         try {
           localStorage.setItem('clixprocrm_google_auth_event', JSON.stringify({
             type: messageType,
+            error: isSuccess ? undefined : errorMsg,
+            target: '/dashboard',
             timestamp: Date.now()
           }));
         } catch (e) {}
 
-        if (isPopup) {
-          // In popup mode, attempt to close popup and never navigate popup to dashboard
-          setTimeout(function() {
-            try {
-              window.close();
-            } catch (e) {}
+        // In OAuth popup mode, immediately attempt to close this popup window.
+        // Never navigate the callback route to /dashboard. Application routing belongs to the parent window.
+        try {
+          window.close();
+        } catch (e) {}
 
-            setTimeout(function() {
-              var statusEl = document.getElementById('status-text');
-              var btnEl = document.getElementById('close-btn');
-              if (statusEl) {
-                statusEl.innerText = isSuccess ? 'You are now signed in. You may close this window.' : 'You can close this window and try again.';
-              }
-              if (btnEl) {
-                btnEl.style.display = 'inline-block';
-              }
-            }, 300);
-          }, 200);
-        } else {
-          // Direct navigation fallback (non-popup mode only)
-          setTimeout(function() {
-            if (isSuccess) {
-              window.location.replace('/dashboard');
-            } else {
-              window.location.replace('/login?error=' + encodeURIComponent('${escapedErrorMessage}'));
-            }
-          }, 300);
-        }
+        // If window.close() is blocked or not executed immediately, update UI and provide manual close button
+        setTimeout(function() {
+          try {
+            window.close();
+          } catch (e) {}
+
+          var statusEl = document.getElementById('status-text');
+          var btnEl = document.getElementById('close-btn');
+          var spinnerEl = document.getElementById('icon-spinner');
+          var checkEl = document.getElementById('icon-check');
+
+          if (spinnerEl) spinnerEl.style.display = 'none';
+          if (checkEl) checkEl.style.display = 'inline';
+
+          if (statusEl) {
+            statusEl.innerText = isSuccess
+              ? 'Authentication complete. You can close this window and return to ClixProCRM.'
+              : errorMsg;
+          }
+          if (btnEl) {
+            btnEl.style.display = 'inline-block';
+          }
+        }, 350);
       })();
     </script>
   </body>

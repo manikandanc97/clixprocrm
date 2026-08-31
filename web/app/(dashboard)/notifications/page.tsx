@@ -150,7 +150,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <CRMPageContainer className="flex flex-col h-full space-y-4">
+    <CRMPageContainer className="flex flex-col space-y-4">
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div>

@@ -229,8 +229,8 @@ export default function AIWorkspacePage() {
   };
 
   return (
-    <CRMPageContainer className="flex-1 h-full min-h-0 pb-20 md:pb-3 lg:pb-3 gap-0">
-      <div className="flex w-full flex-1 min-h-0 overflow-hidden bg-card text-card-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl">
+    <CRMPageContainer className="flex-1 h-full min-h-0 gap-0 pb-3.5">
+      <div className="flex w-full flex-1 min-h-0 overflow-hidden bg-card text-card-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl">
         {/* 1. Main Chat Workspace (Center) */}
         <main className="flex-1 flex flex-col h-full min-w-0 bg-background/50 relative">
           {/* Header */}

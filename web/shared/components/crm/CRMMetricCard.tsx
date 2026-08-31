@@ -245,12 +245,10 @@ export const CRMMetricCard = ({
         "rounded-xl",
         // ── Breathing layout ──
         "p-4 sm:p-5 flex flex-col justify-between h-full",
-        // ── Soft ambient card shadow ──
-        "shadow-[0_1px_3px_0_rgb(0_0_0/0.06),0_1px_2px_-1px_rgb(0_0_0/0.04)]",
-        // ── Premium hover: lift + deep shadow + border glow ──
-        "transition-all duration-300 ease-out",
-        "hover:-translate-y-1",
-        "hover:shadow-[0_6px_20px_-6px_rgb(0_0_0/0.1),0_3px_8px_-3px_rgb(0_0_0/0.05)]",
+        // ── Clean border surface ──
+        "shadow-none",
+        // ── Premium subtle hover ──
+        "transition-all duration-200 ease-out",
         t.hoverBorder,
         "hover:border-t-border/70 hover:border-r-border/70 hover:border-b-border/70",
         className

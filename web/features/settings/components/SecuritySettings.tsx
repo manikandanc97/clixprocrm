@@ -327,7 +327,7 @@ export default function SecuritySettings() {
   const securityAlertsEnabled = notificationData?.securityAlerts ?? true;
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 min-h-full flex flex-col">
       {/* Section Header */}
       <div className="pb-1">
         <h3 className="text-base font-bold tracking-tight text-foreground">Security & Privacy</h3>

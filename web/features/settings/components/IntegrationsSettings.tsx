@@ -97,9 +97,9 @@ export default function IntegrationsSettings() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="min-h-full flex-1 flex flex-col">
       {/* Integrations Hub */}
-      <CRMCard>
+      <CRMCard className="min-h-full flex-1 flex flex-col">
         <div className="pb-4 border-b border-border/50">
           <h3 className="text-base font-bold text-foreground flex items-center gap-2">
             <Boxes className="w-4 h-4 text-primary" />

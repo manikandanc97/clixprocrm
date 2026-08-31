@@ -71,7 +71,7 @@ export default function RegisterPage() {
     const popup = openGoogleAuthPopup();
 
     if (!popup) {
-      toast.error("Popup was blocked. Please allow popups for this site and try again.");
+      toast.error("Google sign-in popup was blocked. Please allow popups for ClixProCRM and try again.");
       return;
     }
 
@@ -101,19 +101,19 @@ export default function RegisterPage() {
               user.role?.toUpperCase() === "SUPER ADMIN" ||
               (user as any)?.isSuperAdmin === true;
             if (isSuperAdmin) {
-              router.push("/super-admin");
+              router.replace("/super-admin");
             } else {
-              router.push("/dashboard");
+              router.replace("/dashboard");
             }
           } else {
-            router.push("/login");
+            router.replace("/login");
             setGoogleLoading(false);
           }
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         } catch (err: any) {
           if (err?.message === "NEEDS_ONBOARDING") {
             setGoogleLoadingText("Opening onboarding...");
-            router.push("/onboarding");
+            router.replace("/onboarding");
           } else {
             setGoogleLoading(false);
             throw err;

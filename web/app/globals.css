@@ -126,8 +126,14 @@
   --crm-section-gap: 1.25rem;
   --crm-page-gap: 1.5rem;
   --crm-card-radius: var(--crm-radius-card);
-  --crm-card-shadow: 0 0 0 1px oklch(0.91 0.008 255 / 0.72), 0 1px 2px oklch(0 0 0 / 0.035);
-  --crm-card-hover-shadow: 0 0 0 1px oklch(0.88 0.01 255 / 0.8), 0 4px 12px -8px oklch(0 0 0 / 0.15);
+  --crm-card-shadow: none;
+  --crm-card-hover-shadow: none;
+  /* CRM Global 4-Side Viewport Inset & Layout Tokens (0.75rem = 12px) */
+  --crm-shell-inset: 0.75rem;
+  --crm-shell-bottom-space: 0.75rem;
+  --crm-layout-gap: 0.75rem;
+  --crm-layout-bottom-space: 0.75rem;
+
   --crm-border-subtle: oklch(0.91 0.008 255 / 0.5);
 
   /* Sidebar — Clean Light */
@@ -165,14 +171,14 @@
     0 20px 25px -5px oklch(0 0 0 / 0.1), 0 8px 10px -6px oklch(0 0 0 / 0.05);
   --shadow-premium:
     0 0 0 1px oklch(0.91 0.008 255), 0 10px 30px -10px oklch(0 0 0 / 0.08);
-  --shadow-card: var(--crm-card-shadow);
+  --shadow-card: none;
   --shadow-sidebar: 1px 0 0 oklch(0.93 0.005 255);
   --shadow-glow: 0 0 20px oklch(0.58 0.165 157 / 0.12);
   --shadow-soft:
     0 2px 12px -3px oklch(0 0 0 / 0.06);
-  /* Scrollbar Theme Tokens — Light Mode (Subtle, Modern SaaS Neutral) */
-  --scrollbar-thumb: color-mix(in srgb, var(--foreground) 16%, transparent);
-  --scrollbar-thumb-hover: color-mix(in srgb, var(--foreground) 32%, transparent);
+  /* Scrollbar Theme Tokens — Light Mode (Theme Primary Color) */
+  --scrollbar-thumb: color-mix(in srgb, var(--primary) 65%, transparent);
+  --scrollbar-thumb-hover: var(--primary);
   --scrollbar-thumb-active: var(--primary);
   --scrollbar-track: transparent;
   --scrollbar-track-hover: color-mix(in srgb, var(--foreground) 4%, transparent);
@@ -208,9 +214,9 @@
   --input: oklch(0.24 0.018 265);
   --ring: oklch(0.68 0.16 157);
 
-  /* Scrollbar Theme Tokens — Dark Mode (Subtle, Modern SaaS Neutral) */
-  --scrollbar-thumb: color-mix(in srgb, var(--foreground) 18%, transparent);
-  --scrollbar-thumb-hover: color-mix(in srgb, var(--foreground) 36%, transparent);
+  /* Scrollbar Theme Tokens — Dark Mode (Theme Primary Color) */
+  --scrollbar-thumb: color-mix(in srgb, var(--primary) 70%, transparent);
+  --scrollbar-thumb-hover: var(--primary);
   --scrollbar-thumb-active: var(--primary);
   --scrollbar-track: transparent;
   --scrollbar-track-hover: color-mix(in srgb, var(--foreground) 4%, transparent);
@@ -221,8 +227,8 @@
   --crm-radius-modal: 14px;
   --crm-radius-pill: 9999px;
   --crm-card-radius: var(--crm-radius-card);
-  --crm-card-shadow: 0 0 0 1px oklch(0.24 0.018 265 / 0.82), 0 1px 2px oklch(0 0 0 / 0.28);
-  --crm-card-hover-shadow: 0 0 0 1px oklch(0.28 0.02 265 / 0.9), 0 4px 12px -8px oklch(0 0 0 / 0.4);
+  --crm-card-shadow: none;
+  --crm-card-hover-shadow: none;
   --crm-border-subtle: oklch(0.24 0.018 265 / 0.5);
 
   --sidebar: oklch(0.1 0.018 265);
@@ -249,7 +255,7 @@
   --shadow-premium:
     0 0 0 1px oklch(0.24 0.018 265), 0 10px 30px -10px oklch(0 0 0 / 0.4),
     0 4px 10px -5px oklch(0 0 0 / 0.2);
-  --shadow-card: 0 0 0 1px oklch(0.24 0.018 265), 0 2px 8px oklch(0 0 0 / 0.25);
+  --shadow-card: none;
 }
 
 /* Accent Color Overrides */
@@ -562,7 +568,7 @@
    ============================================================ */
 @layer utilities {
   .crm-card {
-    @apply rounded-lg border border-border bg-card text-card-foreground shadow-card;
+    @apply rounded-xl border border-border bg-card text-card-foreground shadow-none;
   }
 
   .crm-control {
@@ -590,7 +596,7 @@
   }
 
   .crm-toolbar {
-    @apply flex flex-col items-stretch justify-between gap-3 rounded-lg border border-border bg-card p-3 shadow-card sm:flex-row sm:items-center;
+    @apply flex flex-col items-stretch justify-between gap-3 rounded-xl border border-border bg-card p-3 shadow-none sm:flex-row sm:items-center;
   }
 
   .crm-segment {
@@ -603,11 +609,11 @@
 
   .crm-table-wrap,
   .crm-table-container {
-    @apply overflow-hidden rounded-2xl border border-border bg-card shadow-card flex flex-col w-full flex-1 min-h-0 h-full;
+    @apply overflow-hidden rounded-xl border border-border bg-card shadow-none flex flex-col w-full flex-1 min-h-0;
   }
 
   .crm-table-no-pagination {
-    @apply w-full flex-1 min-h-0 h-full;
+    @apply w-full flex-1 min-h-0;
   }
 
   .crm-table-th {
@@ -619,7 +625,7 @@
   }
 
   .crm-muted-panel {
-    @apply rounded-lg border border-border bg-muted/40 p-4;
+    @apply rounded-xl border border-border bg-muted/40 p-4;
   }
 
   /* Font families */
@@ -944,16 +950,6 @@
     display: none;
     width: 0;
     height: 0;
-  }
-
-  .sidebar-scroll-emerald {
-    scrollbar-color: color-mix(in srgb, #10b981 45%, var(--border)) transparent;
-  }
-  .sidebar-scroll-emerald::-webkit-scrollbar-thumb {
-    background-color: color-mix(in srgb, #10b981 45%, var(--border));
-  }
-  .sidebar-scroll-emerald::-webkit-scrollbar-thumb:hover {
-    background-color: #10b981;
   }
 
   /* Kanban & Horizontal Scroll Styling */

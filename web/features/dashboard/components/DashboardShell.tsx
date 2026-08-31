@@ -23,7 +23,7 @@ export default function DashboardShell({
   }, []);
 
   return (
-    <div className="flex h-screen bg-background overflow-hidden">
+    <div className="flex h-screen h-dvh bg-background overflow-hidden relative">
       {/* Subtle Background Surface */}
       <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#050505] -z-10" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
@@ -35,20 +35,19 @@ export default function DashboardShell({
       <motion.div
         initial={false}
         animate={{
-          paddingLeft: mounted && isDesktop ? (isCollapsed ? "92px" : "276px") : "0px",
+          paddingLeft: mounted && isDesktop ? (isCollapsed ? "86px" : "270px") : "0px",
         }}
         transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
         className="flex flex-col flex-1 min-w-0 h-full w-full"
       >
-        {/* Topbar is sticky because only <main> below scrolls */}
         <div className="shrink-0">
           <Topbar />
         </div>
 
-        {/* Scrollable page content — only this region scrolls */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden scrollbar-hide min-h-0 flex flex-col">
+        {/* Scrollable page content */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col">
           <motion.div
-            className="w-full flex-1 flex flex-col min-h-0"
+            className="w-full flex-1 flex flex-col min-h-0 pb-20 md:pb-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.4, ease: "easeOut" }}

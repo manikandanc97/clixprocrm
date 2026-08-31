@@ -116,8 +116,8 @@ export default function AuditLogSettings() {
   };
 
   return (
-    <div className="space-y-6">
-      <CRMCard>
+    <div className="min-h-full flex-1 flex flex-col">
+      <CRMCard className="min-h-full flex-1 flex flex-col">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-5 border-b border-border/50">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary">

@@ -324,7 +324,7 @@ export function BaseSidebarContent({
         </div>
 
         <TooltipProvider delayDuration={0}>
-          <div className={`flex-1 overflow-y-auto sidebar-scroll ${isEmerald ? "sidebar-scroll-emerald" : ""} px-3 pb-4`}>
+          <div className="flex-1 overflow-y-auto sidebar-scroll px-3 pb-4">
             {groups.map((group, groupIdx) => (
               <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-4" : ""}>
                 {group.label && (
@@ -367,7 +367,7 @@ export function BaseSidebarContent({
       <motion.div
         initial={false}
         animate={{ opacity: 1 }}
-        className="relative shrink-0 h-[58px] flex items-center bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden"
+        className="relative shrink-0 h-[58px] flex items-center bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl overflow-hidden"
       >
         {collapsedState ? (
           <TooltipProvider delayDuration={0}>
@@ -445,10 +445,10 @@ export function BaseSidebarContent({
       {/* ── CARD 2: Navigation Menu ── */}
       <motion.div
         initial={false}
-        className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden flex flex-col"
+        className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl overflow-hidden flex flex-col"
       >
         <TooltipProvider delayDuration={0}>
-          <div className={`flex-1 overflow-y-auto sidebar-scroll ${isEmerald ? "sidebar-scroll-emerald" : ""} pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`}>
+          <div className={`flex-1 overflow-y-auto sidebar-scroll pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`}>
             {groups.map((group, groupIdx) => (
               <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-3.5" : ""}>
                 <AnimatePresence mode="wait">
@@ -511,7 +511,7 @@ export function BaseSidebarContent({
       {(footer || collapsedFooter) && (
         <motion.div
           initial={false}
-          className={`shrink-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl overflow-hidden ${
+          className={`shrink-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl overflow-hidden ${
             collapsedState ? "p-1.5" : "p-2"
           }`}
         >
@@ -530,7 +530,7 @@ export function BaseSidebar(props: BaseSidebarProps) {
       initial={false}
       animate={{ width: isCollapsed ? 72 : 256 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className={`hidden md:flex flex-col fixed top-3 left-3 h-[calc(100vh-24px)] z-40 overflow-visible gap-2.5 select-none ${props.className || ""}`}
+      className={`hidden md:flex flex-col fixed top-3.5 left-3.5 h-[calc(100dvh-28px)] z-40 overflow-visible gap-2.5 select-none ${props.className || ""}`}
     >
       <BaseSidebarContent {...props} />
     </motion.div>

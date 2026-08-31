@@ -37,9 +37,9 @@ export function SuperAdminHeader() {
   const initials = getInitials(user?.name);
 
   return (
-    <header className="sticky top-0 z-40 w-full px-3 sm:px-6 lg:px-10 pt-3 pb-3 sm:pb-3.5 shrink-0">
+    <header className="w-full px-4 sm:px-6 pt-3.5 pb-2.5 sm:pb-3 shrink-0">
       {/* ── Single Floating Card Container ── */}
-      <div className="flex items-center justify-between gap-3 sm:gap-4 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xl shadow-black/5 dark:shadow-2xl dark:shadow-black/40 rounded-2xl px-3.5 sm:px-5 backdrop-blur-md h-[58px]">
+      <div className="flex items-center justify-between gap-3 sm:gap-4 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl px-3.5 sm:px-5 backdrop-blur-md h-[58px]">
         {/* Left: Global Search */}
         <div className="flex flex-1 items-center gap-2.5 max-w-full md:max-w-[460px]">
           <GlobalSearch />

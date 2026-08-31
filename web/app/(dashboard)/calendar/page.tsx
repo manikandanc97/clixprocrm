@@ -96,7 +96,7 @@ export default function CalendarPage() {
   }
 
   return (
-    <CRMPageContainer className="min-h-full bg-background/50">
+    <CRMPageContainer>
       {/* ── HEADER ── */}
         <CalendarHeader
           currentDate={currentDate}
