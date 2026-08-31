@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
 import { Menu } from "lucide-react";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -30,6 +30,20 @@ export default function Topbar() {
   const initials = getInitials(user?.name);
   const pathname = usePathname();
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
+  const headerRef = useRef<HTMLElement>(null);
+
+  // Measure actual header height → expose as --sa-header-h for crm-table-workspace-sticky
+  useEffect(() => {
+    if (!headerRef.current) return;
+    const update = () => {
+      const h = headerRef.current?.offsetHeight ?? 0;
+      document.documentElement.style.setProperty("--sa-header-h", `${h}px`);
+    };
+    update();
+    const ro = new ResizeObserver(update);
+    ro.observe(headerRef.current);
+    return () => ro.disconnect();
+  }, []);
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect
@@ -37,7 +51,7 @@ export default function Topbar() {
   }, [pathname]);
 
   return (
-    <header className="w-full px-4 sm:px-6 pt-3.5 pb-2.5 sm:pb-3 shrink-0">
+    <header ref={headerRef} className="w-full px-4 sm:px-6 pt-3.5 pb-2.5 sm:pb-3 shrink-0">
       {/* ── Single Floating Card Container ── */}
       <div className="flex items-center justify-between gap-3 sm:gap-4 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl px-3.5 sm:px-5 backdrop-blur-md h-[58px]">
         {/* Left: Mobile Nav Drawer & Search */}

@@ -253,7 +253,7 @@ export default function SuperAdminOrganizationsPage() {
   );
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Standard CRM Page Header */}
       <CRMPageHeader
         title="Organizations"
@@ -315,8 +315,11 @@ export default function SuperAdminOrganizationsPage() {
         </CRMMetricsGrid>
       </div>
 
-      {/* 3. Standard CRM Toolbar & Table Workspace */}
-      <div className="crm-table-workspace">
+      {/* 3. Two-Stage Scroll Workspace: Search + Table
+           Stage 1 — outer page scrolls KPI cards away;
+           this div sticks at top-0 and fills remaining viewport.
+           Stage 2 — inner overflow-auto div scrolls table rows. */}
+      <div className="crm-table-workspace-sticky">
         <CRMToolbar
           searchQuery={search}
           setSearchQuery={setSearch}
@@ -341,7 +344,8 @@ export default function SuperAdminOrganizationsPage() {
 
         {/* 4. Standard CRM Data Table */}
         <div className={cn("crm-table-wrap", (loading || filteredOrganizations.length <= rowsPerPage) && "crm-table-no-pagination")}>
-          <div className="overflow-x-auto w-full">
+          {/* Inner scroll container — vertical scroll owner for table rows */}
+          <div className="overflow-auto flex-1 min-h-0">
             <table className="w-full text-left text-sm border-collapse">
               <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                 <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">

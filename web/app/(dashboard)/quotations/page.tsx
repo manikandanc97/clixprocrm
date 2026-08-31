@@ -130,7 +130,7 @@ const QuotationsPage = () => {
   }
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader 
         title="Quotations"
         subtitle="Generate and manage sales quotes with real-time tracking and AI-driven conversion probability."
@@ -206,7 +206,8 @@ const QuotationsPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
+          {/* Two-Stage Scroll Workspace */}
+          <div className="crm-table-workspace-sticky">
             <CRMToolbar 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}

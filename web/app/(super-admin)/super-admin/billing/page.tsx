@@ -188,7 +188,7 @@ export default function SuperAdminBillingPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <div className="space-y-8 font-sans">
       {/* Header */}
       <div className="flex justify-between items-start flex-wrap gap-4">
@@ -371,7 +371,7 @@ export default function SuperAdminBillingPage() {
 
       {/* TAB 2: Subscriptions Table */}
       {activeTab === "subscriptions" && (
-        <div className="space-y-4">
+        <div className="crm-table-workspace-sticky">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="relative w-72">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
@@ -397,8 +397,9 @@ export default function SuperAdminBillingPage() {
             </div>
           </div>
 
-          <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
-            <table className="w-full text-xs">
+          <div className="crm-table-wrap">
+            <div className="overflow-auto flex-1 min-h-0">
+              <table className="w-full text-xs">
               <thead className="sticky top-0 z-20 bg-muted/10 border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
                 <tr>
                   <th className="h-10 sm:h-11 py-2.5 px-4 text-left bg-card whitespace-nowrap">Organization</th>
@@ -451,13 +452,14 @@ export default function SuperAdminBillingPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}
 
       {/* TAB 3: Platform Invoices Table */}
       {activeTab === "invoices" && (
-        <div className="space-y-4">
+        <div className="crm-table-workspace-sticky">
           <div className="flex items-center justify-between gap-4 flex-wrap">
             <div className="relative w-72">
               <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
@@ -483,8 +485,9 @@ export default function SuperAdminBillingPage() {
             </div>
           </div>
 
-          <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden">
-            <table className="w-full text-xs">
+          <div className="crm-table-wrap">
+            <div className="overflow-auto flex-1 min-h-0">
+              <table className="w-full text-xs">
               <thead className="sticky top-0 z-20 bg-muted/10 border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
                 <tr>
                   <th className="h-10 sm:h-11 py-2.5 px-4 text-left bg-card whitespace-nowrap">Platform Invoice #</th>
@@ -553,6 +556,7 @@ export default function SuperAdminBillingPage() {
                 )}
               </tbody>
             </table>
+            </div>
           </div>
         </div>
       )}

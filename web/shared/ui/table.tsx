@@ -10,7 +10,8 @@ function Table({ className, wrapperClassName, ...props }: React.ComponentProps<"
       data-slot="table-container"
       className={cn("crm-table-wrap", wrapperClassName)}
     >
-      <div className="overflow-x-auto w-full">
+      {/* Inner scroll owner: handles both horizontal table scroll and vertical row scroll */}
+      <div className="overflow-auto flex-1 min-h-0">
         <table
           data-slot="table"
           className={cn("w-full text-sm caption-bottom border-collapse", className)}

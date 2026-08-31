@@ -210,7 +210,7 @@ export default function InvoicesPage() {
   }
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader
         title="Invoices"
         subtitle="Manage customer invoices, track payments, and calculate GST tax breakdowns."
@@ -288,8 +288,8 @@ export default function InvoicesPage() {
             </CRMMetricsGrid>
           </div>
 
-          {/* Toolbar & Filters */}
-          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
+          {/* Two-Stage Scroll Workspace */}
+          <div className="crm-table-workspace-sticky">
             <CRMToolbar
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
@@ -328,10 +328,10 @@ export default function InvoicesPage() {
                     exit={{ opacity: 0 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden flex flex-col flex-1">
-                      <div className="overflow-x-auto flex-1">
+                    <div className="crm-table-wrap">
+                      <div className="overflow-auto flex-1 min-h-0">
                         <table className="w-full text-xs">
-                          <thead className="bg-muted/50 border-b border-border/80 text-muted-foreground font-semibold">
+                          <thead className="sticky top-0 z-20 bg-card border-b border-border/80 text-muted-foreground font-semibold">
                             <tr>
                               <th className="py-3 px-4 text-left">
                                 <DataTableColumnHeader

@@ -613,13 +613,30 @@
     @apply flex flex-col gap-3.5 sm:gap-4 w-full;
   }
 
+  /* Two-stage scroll: workspace becomes sticky when it reaches the navbar */
+  .crm-table-workspace-sticky {
+    position: sticky;
+    top: 0;
+    /* Fills exactly the remaining viewport below the header — computed dynamically */
+    height: calc(100dvh - var(--sa-header-h, 84px));
+    display: flex;
+    flex-direction: column;
+    gap: 0.875rem; /* matches gap-3.5 */
+    width: 100%;
+    z-index: 10;
+    /* Matches the page background so scrolled-away KPI cards don't bleed through */
+    background-color: var(--background);
+    /* Preserve the existing bottom breathing space that CRMPageContainer provided */
+    padding-bottom: 0.875rem;
+  }
+
   .crm-table-wrap,
   .crm-table-container {
-    @apply overflow-hidden rounded-xl border border-border bg-card shadow-card w-full;
+    @apply overflow-hidden rounded-xl border border-border bg-card shadow-card flex flex-col w-full flex-1 min-h-0;
   }
 
   .crm-table-no-pagination {
-    @apply w-full;
+    @apply w-full flex-1 min-h-0;
   }
 
   .crm-table-th {

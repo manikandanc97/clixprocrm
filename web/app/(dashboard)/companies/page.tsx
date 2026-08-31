@@ -116,7 +116,7 @@ const CompaniesPage = () => {
   const totalCustomers = safeCompanies.reduce((acc: number, c: any) => acc + (c._count?.customers || 0), 0);
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader 
         title="Companies"
         subtitle="Manage B2B accounts, track pipeline value, and view customer health at the company level."
@@ -183,7 +183,8 @@ const CompaniesPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
+          {/* Two-Stage Scroll Workspace */}
+          <div className="crm-table-workspace-sticky">
             <CRMToolbar 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}

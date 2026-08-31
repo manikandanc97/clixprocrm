@@ -9,7 +9,7 @@ import { RoleList } from "./_components/RoleList";
 
 export default function RoleManagementPage() {
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader
         title="Role Management"
         subtitle="Manage roles and control access permissions across your organization."

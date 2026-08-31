@@ -165,7 +165,7 @@ export default function EmployeesPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader
         title="Employee Directory"
         subtitle="Manage your workforce, monitor performance, and track department growth."
@@ -202,7 +202,7 @@ export default function EmployeesPage() {
         </CRMMetricsGrid>
       </div>
 
-      <div className="grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8 flex-1 min-h-0">
+      <div className="crm-table-workspace-sticky !grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
         {/* Main Table Area */}
         <div className="lg:col-span-3 flex flex-col gap-3.5 sm:gap-4 min-h-0 flex-1">
           <CRMToolbar 

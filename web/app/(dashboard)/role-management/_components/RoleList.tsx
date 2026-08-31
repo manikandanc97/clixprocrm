@@ -382,62 +382,65 @@ export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => 
         </CRMMetricsGrid>
       </div>
 
-      {/* ── Standard CRMToolbar with Search & Action ── */}
-      <CRMToolbar
-        searchQuery={searchQuery}
-        setSearchQuery={setSearchQuery}
-        placeholder="Search roles by name or description..."
-      >
-        {canManageRoles && (
-          <Button
-            onClick={handleOpenCreate}
-            size="sm"
-            className="h-9 gap-1.5 text-xs font-semibold"
-          >
-            <Plus className="h-4 w-4" />
-            Create Role
-          </Button>
-        )}
-      </CRMToolbar>
+      {/* ── Two-Stage Scroll Workspace ── */}
+      <div className="crm-table-workspace-sticky">
+        {/* ── Standard CRMToolbar with Search & Action ── */}
+        <CRMToolbar
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          placeholder="Search roles by name or description..."
+        >
+          {canManageRoles && (
+            <Button
+              onClick={handleOpenCreate}
+              size="sm"
+              className="h-9 gap-1.5 text-xs font-semibold"
+            >
+              <Plus className="h-4 w-4" />
+              Create Role
+            </Button>
+          )}
+        </CRMToolbar>
 
-      {/* ── Standard DataTable ── */}
-      <div className="flex-1 min-h-0 flex flex-col">
-        <DataTable hasPagination={filteredRoles.length > rowsPerPage}>
-          <CRMTableHeader>
-            <CRMTableRow>
-              <CRMTableHeaderCell className="w-[32%]">Role Name</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[18%]">Assigned Users</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[45%]">Permission Modules</CRMTableHeaderCell>
-              <CRMTableHeaderCell className="w-[5%] text-right">Actions</CRMTableHeaderCell>
-            </CRMTableRow>
-          </CRMTableHeader>
-          <CRMTableBody>
-            <RoleTableRows
-              roles={paginatedRoles}
-              canManageRoles={canManageRoles}
-              currentUserRole={currentUserRole}
-              getRoleColor={getRoleColor}
-              onViewRole={handleOpenView}
-              onEditRole={handleOpenEdit}
-              onDeleteRole={handleOpenDelete}
-            />
-          </CRMTableBody>
-        </DataTable>
+        {/* ── Standard DataTable ── */}
+        <div className="flex-1 min-h-0 flex flex-col">
+          <DataTable hasPagination={filteredRoles.length > rowsPerPage}>
+            <CRMTableHeader>
+              <CRMTableRow>
+                <CRMTableHeaderCell className="w-[32%]">Role Name</CRMTableHeaderCell>
+                <CRMTableHeaderCell className="w-[18%]">Assigned Users</CRMTableHeaderCell>
+                <CRMTableHeaderCell className="w-[45%]">Permission Modules</CRMTableHeaderCell>
+                <CRMTableHeaderCell className="w-[5%] text-right">Actions</CRMTableHeaderCell>
+              </CRMTableRow>
+            </CRMTableHeader>
+            <CRMTableBody>
+              <RoleTableRows
+                roles={paginatedRoles}
+                canManageRoles={canManageRoles}
+                currentUserRole={currentUserRole}
+                getRoleColor={getRoleColor}
+                onViewRole={handleOpenView}
+                onEditRole={handleOpenEdit}
+                onDeleteRole={handleOpenDelete}
+              />
+            </CRMTableBody>
+          </DataTable>
+        </div>
+
+        <CRMPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredRoles.length}
+          rowsPerPage={rowsPerPage}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={(size) => {
+            setRowsPerPage(size);
+            setCurrentPage(1);
+          }}
+          itemName="Roles"
+          pageSizeOptions={[10, 25, 50, 100]}
+        />
       </div>
-
-      <CRMPagination
-        currentPage={currentPage}
-        totalPages={totalPages}
-        totalItems={filteredRoles.length}
-        rowsPerPage={rowsPerPage}
-        onPageChange={setCurrentPage}
-        onRowsPerPageChange={(size) => {
-          setRowsPerPage(size);
-          setCurrentPage(1);
-        }}
-        itemName="Roles"
-        pageSizeOptions={[10, 25, 50, 100]}
-      />
 
       {/* ── Create / Edit Role Modal ── */}
       <RoleEditorModal

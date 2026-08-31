@@ -177,7 +177,7 @@ const DealsPage = () => {
   }
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader 
         title="Deals & Pipeline"
         subtitle="Track sales opportunities, manage stages, and forecast revenue."
@@ -247,7 +247,7 @@ const DealsPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
+          <div className="crm-table-workspace-sticky">
             <CRMToolbar 
                 searchQuery={searchQuery}
                 setSearchQuery={setSearchQuery}

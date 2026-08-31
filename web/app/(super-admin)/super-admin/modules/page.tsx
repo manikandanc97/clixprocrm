@@ -728,7 +728,7 @@ export default function SuperAdminModulesPage() {
   }, [iconSearchQuery]);
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Header with Title and Actions */}
       <CRMPageHeader
         title="Platform Modules & Navigation"
@@ -969,7 +969,7 @@ export default function SuperAdminModulesPage() {
           </div>
         </div>
       ) : (
-        <div className="crm-table-workspace">
+        <div className="crm-table-workspace-sticky">
           {/* 3. Filter Toolbar */}
           <CRMToolbar
             placeholder="Search modules by name, key, route, group..."
@@ -1026,7 +1026,7 @@ export default function SuperAdminModulesPage() {
                 />
               </div>
             ) : (
-              <div className="overflow-x-auto w-full">
+              <div className="overflow-auto flex-1 min-h-0">
                 <table className="w-full text-left text-sm border-collapse">
                   <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
                     <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">

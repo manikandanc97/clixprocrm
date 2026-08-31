@@ -154,7 +154,7 @@ const ContactsPage = () => {
     );
   }
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader
         title="Contacts"
         subtitle="Manage leads and customers in one unified view with AI-powered insights."
@@ -264,7 +264,8 @@ const ContactsPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex flex-col gap-3.5 sm:gap-4 w-full">
+          {/* Two-Stage Scroll Workspace: sticks at top after KPI cards scroll away */}
+          <div className="crm-table-workspace-sticky">
             <CRMToolbar
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
