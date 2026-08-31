@@ -50,6 +50,9 @@ import {
   CRMTableRow,
   CRMTableCell,
   CRMTableHeaderCell,
+  CRMSortIndicator,
+  TruncatedText,
+  formatTicketCode,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { cn } from "@/shared/lib/utils";
@@ -112,13 +115,30 @@ export default function SuperAdminSupportPage() {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
 
-  // Filters & Pagination
+  // Filters, Sorting & Pagination
   const [search, setSearch] = useState("");
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [priorityFilter, setPriorityFilter] = useState("ALL");
   const [page, setPage] = useState(1);
   const [totalPages, setTotalPages] = useState(1);
   const [totalCount, setTotalCount] = useState(0);
+  const [sortConfig, setSortConfig] = useState<{
+    key: "ticketNumber" | "subject" | "createdBy" | "priority" | "status" | "assignedTo" | "createdAt";
+    direction: "asc" | "desc";
+  } | null>(null);
+
+  const handleSort = (
+    key: "ticketNumber" | "subject" | "createdBy" | "priority" | "status" | "assignedTo" | "createdAt"
+  ) => {
+    setSortConfig((prev) => {
+      if (prev?.key === key) {
+        if (prev.direction === "asc") return { key, direction: "desc" };
+        return null;
+      }
+      return { key, direction: "asc" };
+    });
+    setPage(1);
+  };
 
   // Delete state
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
@@ -149,6 +169,8 @@ export default function SuperAdminSupportPage() {
           search: search.trim() || undefined,
           page,
           limit: 15,
+          sortBy: sortConfig?.key,
+          sortOrder: sortConfig?.direction,
         }),
         fetchPlatformSupportStats(),
       ]);
@@ -164,7 +186,7 @@ export default function SuperAdminSupportPage() {
       setLoading(false);
       setRefreshing(false);
     }
-  }, [statusFilter, priorityFilter, search, page]);
+  }, [statusFilter, priorityFilter, search, page, sortConfig]);
 
   useEffect(() => {
     loadData();
@@ -354,16 +376,78 @@ export default function SuperAdminSupportPage() {
       {/* 4. Standard CRM Data Table */}
       <CRMDataTable hasPagination={totalPages > 1}>
         <CRMTableHeader>
-          <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-            <CRMTableHeaderCell>Ticket Ref</CRMTableHeaderCell>
-            <CRMTableHeaderCell>Subject & Details</CRMTableHeaderCell>
-            <CRMTableHeaderCell>Workspace</CRMTableHeaderCell>
-            <CRMTableHeaderCell>Raised By</CRMTableHeaderCell>
-            <CRMTableHeaderCell>Priority</CRMTableHeaderCell>
-            <CRMTableHeaderCell>Status</CRMTableHeaderCell>
-            <CRMTableHeaderCell>Assigned To</CRMTableHeaderCell>
-            <CRMTableHeaderCell>Created</CRMTableHeaderCell>
-            <CRMTableHeaderCell className="text-right">Actions</CRMTableHeaderCell>
+          <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground whitespace-nowrap">
+            <CRMTableHeaderCell 
+              className="cursor-pointer group select-none whitespace-nowrap"
+              onClick={() => handleSort("ticketNumber")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span>T-No</span>
+                <CRMSortIndicator active={sortConfig?.key === "ticketNumber"} direction={sortConfig?.direction} />
+              </div>
+            </CRMTableHeaderCell>
+
+            <CRMTableHeaderCell 
+              className="cursor-pointer group select-none"
+              onClick={() => handleSort("subject")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span>Subject</span>
+                <CRMSortIndicator active={sortConfig?.key === "subject"} direction={sortConfig?.direction} />
+              </div>
+            </CRMTableHeaderCell>
+
+            <CRMTableHeaderCell 
+              className="cursor-pointer group select-none whitespace-nowrap"
+              onClick={() => handleSort("createdBy")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span>Raised By</span>
+                <CRMSortIndicator active={sortConfig?.key === "createdBy"} direction={sortConfig?.direction} />
+              </div>
+            </CRMTableHeaderCell>
+
+            <CRMTableHeaderCell 
+              className="cursor-pointer group select-none whitespace-nowrap"
+              onClick={() => handleSort("priority")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span>Priority</span>
+                <CRMSortIndicator active={sortConfig?.key === "priority"} direction={sortConfig?.direction} />
+              </div>
+            </CRMTableHeaderCell>
+
+            <CRMTableHeaderCell 
+              className="cursor-pointer group select-none whitespace-nowrap"
+              onClick={() => handleSort("status")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span>Status</span>
+                <CRMSortIndicator active={sortConfig?.key === "status"} direction={sortConfig?.direction} />
+              </div>
+            </CRMTableHeaderCell>
+
+            <CRMTableHeaderCell 
+              className="cursor-pointer group select-none whitespace-nowrap"
+              onClick={() => handleSort("assignedTo")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span>Assigned To</span>
+                <CRMSortIndicator active={sortConfig?.key === "assignedTo"} direction={sortConfig?.direction} />
+              </div>
+            </CRMTableHeaderCell>
+
+            <CRMTableHeaderCell 
+              className="cursor-pointer group select-none whitespace-nowrap"
+              onClick={() => handleSort("createdAt")}
+            >
+              <div className="flex items-center gap-1.5">
+                <span>Created</span>
+                <CRMSortIndicator active={sortConfig?.key === "createdAt"} direction={sortConfig?.direction} />
+              </div>
+            </CRMTableHeaderCell>
+
+            <CRMTableHeaderCell className="text-right whitespace-nowrap">Actions</CRMTableHeaderCell>
           </tr>
         </CRMTableHeader>
 
@@ -372,15 +456,11 @@ export default function SuperAdminSupportPage() {
             Array.from({ length: 5 }).map((_, i) => (
               <tr key={i} className="animate-pulse h-16">
                 <td className="px-6 py-4">
-                  <div className="h-4 w-20 bg-muted rounded" />
+                  <div className="h-4 w-12 bg-muted rounded" />
                 </td>
                 <td className="px-6 py-4">
-                  <div className="space-y-1.5">
-                    <div className="h-3.5 w-48 bg-muted rounded" />
-                    <div className="h-2.5 w-32 bg-muted/60 rounded" />
-                  </div>
+                  <div className="h-3.5 w-48 bg-muted rounded" />
                 </td>
-                <td className="px-6 py-4"><div className="h-3.5 w-28 bg-muted rounded" /></td>
                 <td className="px-6 py-4">
                   <div className="space-y-1.5">
                     <div className="h-3.5 w-24 bg-muted rounded" />
@@ -396,7 +476,7 @@ export default function SuperAdminSupportPage() {
             ))
           ) : tickets.length === 0 ? (
             <tr>
-              <td colSpan={9} className="py-16 text-center">
+              <td colSpan={8} className="py-16 text-center">
                 <EmptyState
                   icon={Ticket}
                   title="No Support Tickets Found"
@@ -408,6 +488,7 @@ export default function SuperAdminSupportPage() {
             tickets.map((t) => {
               const statusInfo = STATUS_CONFIG[t.status] || STATUS_CONFIG.OPEN;
               const priorityInfo = PRIORITY_CONFIG[t.priority] || PRIORITY_CONFIG.MEDIUM;
+              const ticketDisplayCode = formatTicketCode(t);
 
               return (
                 <CRMTableRow
@@ -417,14 +498,14 @@ export default function SuperAdminSupportPage() {
                   {/* Reference */}
                   <CRMTableCell className="font-mono font-bold text-primary whitespace-nowrap">
                     <div className="flex items-center gap-1.5">
-                      <span>#{t.ticketNumber}</span>
+                      <span>{ticketDisplayCode}</span>
                       <button
                         type="button"
-                        onClick={(e) => copyId(t.ticketNumber, e)}
+                        onClick={(e) => copyId(t.ticketNumber || ticketDisplayCode, e)}
                         className="p-1 rounded opacity-0 group-hover:opacity-100 hover:bg-muted transition-opacity text-muted-foreground hover:text-foreground cursor-pointer"
-                        title="Copy Reference"
+                        title={`Copy Reference (${t.ticketNumber || ticketDisplayCode})`}
                       >
-                        {copiedId === t.ticketNumber ? (
+                        {copiedId === (t.ticketNumber || ticketDisplayCode) ? (
                           <AppIcon name="check" size={13} className="text-emerald-500" />
                         ) : (
                           <AppIcon name="copy" size={13} />
@@ -434,26 +515,28 @@ export default function SuperAdminSupportPage() {
                   </CRMTableCell>
 
                   {/* Subject */}
-                  <CRMTableCell className="max-w-[280px]">
-                    <div className="font-semibold text-sm text-foreground truncate">{t.subject}</div>
-                    <div className="text-[11px] text-muted-foreground truncate mt-0.5">{t.description}</div>
-                  </CRMTableCell>
-
-                  {/* Workspace */}
-                  <CRMTableCell className="whitespace-nowrap">
-                    <div className="flex items-center gap-1.5">
-                      <AppIcon name="companies" size={13} className="text-muted-foreground shrink-0" />
-                      <span className="font-medium text-sm text-foreground">{t.tenant?.name || "Workspace"}</span>
-                      <span className="text-[10px] uppercase font-bold px-1.5 py-0.5 rounded bg-muted text-muted-foreground border border-border">
-                        {t.tenant?.plan || "free"}
-                      </span>
-                    </div>
+                  <CRMTableCell className="max-w-[320px] min-w-[200px]">
+                    <TruncatedText
+                      text={t.subject}
+                      lines={1}
+                      className="font-semibold text-sm text-foreground hover:text-primary transition-colors cursor-pointer"
+                    />
                   </CRMTableCell>
 
                   {/* Customer */}
                   <CRMTableCell className="whitespace-nowrap">
-                    <div className="font-medium text-sm text-foreground">{t.createdBy?.name || "Customer"}</div>
-                    <div className="text-[10px] text-muted-foreground font-mono mt-0.5">{t.createdBy?.email}</div>
+                    <div className="min-w-0 max-w-[190px]">
+                      <TruncatedText
+                        text={t.createdBy?.name || "Customer"}
+                        lines={1}
+                        className="font-medium text-sm text-foreground"
+                      />
+                      <TruncatedText
+                        text={t.createdBy?.email}
+                        lines={1}
+                        className="text-[10px] text-muted-foreground font-mono mt-0.5"
+                      />
+                    </div>
                   </CRMTableCell>
 
                   {/* Priority */}
@@ -479,9 +562,13 @@ export default function SuperAdminSupportPage() {
                   {/* Assignee */}
                   <CRMTableCell className="whitespace-nowrap">
                     {t.assignedTo ? (
-                      <div className="flex items-center gap-1.5 text-sm text-foreground font-medium">
-                        <AppIcon name="userCheck" size={13} className="text-primary" />
-                        <span>{t.assignedTo.name || t.assignedTo.email}</span>
+                      <div className="flex items-center gap-1.5 text-sm text-foreground font-medium min-w-0 max-w-[180px]">
+                        <AppIcon name="userCheck" size={13} className="text-primary shrink-0" />
+                        <TruncatedText
+                          text={t.assignedTo.name || t.assignedTo.email}
+                          lines={1}
+                          className="font-medium text-sm text-foreground"
+                        />
                       </div>
                     ) : (
                       <span className="text-[10px] text-muted-foreground italic">Unassigned</span>

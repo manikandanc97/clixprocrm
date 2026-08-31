@@ -47,6 +47,7 @@ import {
   CRMToolbar,
   CRMPagination,
   CRMRoleBadge,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
@@ -444,15 +445,18 @@ export default function SuperAdminUsersPage() {
                           <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
                             {u.name?.charAt(0).toUpperCase() || u.email.charAt(0).toUpperCase()}
                           </div>
-                          <div className="min-w-0">
-                            <p
+                          <div className="min-w-0 max-w-[200px]">
+                            <TruncatedText
+                              text={u.name || "No name registered"}
+                              lines={1}
                               onClick={() => setSelectedUser(u)}
-                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate max-w-[200px]"
-                              title={u.name || u.email}
-                            >
-                              {u.name || "No name registered"}
-                            </p>
-                            <p className="text-xs text-muted-foreground truncate max-w-[200px]">{u.email}</p>
+                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer"
+                            />
+                            <TruncatedText
+                              text={u.email}
+                              lines={1}
+                              className="text-xs text-muted-foreground"
+                            />
                           </div>
                         </div>
                       </td>
@@ -474,14 +478,14 @@ export default function SuperAdminUsersPage() {
                       {/* Organizations */}
                       <td className="px-6 py-4">
                         {u.organizations && u.organizations.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5">
+                          <div className="flex flex-wrap gap-1.5 max-w-[300px]">
                             {u.organizations.map((org: any) => (
                               <div
                                 key={org.tenantId}
-                                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-muted/60 border border-border text-xs"
+                                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-muted/60 border border-border text-xs max-w-[200px]"
                               >
-                                <Building2 className="h-3 w-3 text-muted-foreground" />
-                                <span className="font-semibold text-foreground">{org.name}</span>
+                                <Building2 className="h-3 w-3 text-muted-foreground shrink-0" />
+                                <TruncatedText text={org.name} lines={1} className="font-semibold text-foreground" />
                                 <CRMRoleBadge role={org.role} size="xs" />
                               </div>
                             ))}

@@ -55,6 +55,7 @@ import {
   CRMTableHeaderCell,
   CRMSortIndicator,
   CRMPagination,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
@@ -210,13 +211,13 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
 
                 <CRMTableCell>
                   <div className="flex items-center gap-3">
-                    <Avatar className="w-9 h-9 rounded-lg border border-border bg-muted flex items-center justify-center font-bold text-xs">
+                    <Avatar className="w-9 h-9 rounded-lg border border-border bg-muted flex items-center justify-center font-bold text-xs shrink-0">
                       <AvatarFallback>
                         {quote.client.split(' ').map((n: string) => n[0]).join('')}
                       </AvatarFallback>
                     </Avatar>
-                    <div>
-                      <p className="font-semibold text-foreground text-sm tracking-tight">{quote.client}</p>
+                    <div className="min-w-0 max-w-[200px]">
+                      <TruncatedText text={quote.client} lines={1} className="font-semibold text-foreground text-sm tracking-tight" />
                       <div className="flex items-center gap-1.5 mt-0.5">
                         <span className="text-muted-foreground text-[10px] font-bold uppercase tracking-wider">{"System"}</span>
                         <span className="hidden sm:inline w-1 h-1 rounded-full bg-border" />
@@ -226,8 +227,8 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
                   </div>
                 </CRMTableCell>
 
-                <CRMTableCell className="hidden md:table-cell">
-                  <span className="font-semibold text-foreground text-sm">{quote.leadName || quote.client}</span>
+                <CRMTableCell className="hidden md:table-cell max-w-[180px]">
+                  <TruncatedText text={quote.leadName || quote.client} lines={1} className="font-semibold text-foreground text-sm" />
                 </CRMTableCell>
 
                 <CRMTableCell className="hidden md:table-cell">

@@ -28,7 +28,7 @@ import { CustomerType } from "@/shared/types/customer";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { CRMPagination } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText } from "@/shared/components/crm";
 import { useCustomers } from "../hooks/useCustomers";
 import { useBulkDeleteCustomers } from "@/shared/hooks/use-crm";
 import { motion, AnimatePresence } from "framer-motion";
@@ -86,14 +86,18 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
             <AvatarImage src={""} />
             <AvatarFallback className="font-bold text-[10px]">{customer.name.substring(0, 2).toUpperCase()}</AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span
+          <div className="flex flex-col min-w-0 max-w-[200px]">
+            <TruncatedText
+              text={customer.name}
+              lines={1}
               onClick={() => onEdit?.(customer)}
               className="text-sm font-bold text-foreground leading-none mb-1 hover:text-primary cursor-pointer transition-colors"
-            >
-              {customer.name}
-            </span>
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{customer.company}</span>
+            />
+            <TruncatedText
+              text={customer.company}
+              lines={1}
+              className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider"
+            />
           </div>
         </div>
       ),

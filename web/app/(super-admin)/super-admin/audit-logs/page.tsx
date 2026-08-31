@@ -35,6 +35,7 @@ import {
   CRMMetricCard,
   CRMToolbar,
   CRMPagination,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
@@ -417,19 +418,19 @@ export default function SuperAdminAuditLogsPage() {
                       key={log.id}
                       className="group h-16 hover:bg-muted/[0.03] transition-colors"
                     >
-                      <td className="px-6 py-4 font-mono text-xs font-bold text-foreground">
-                        {log.action}
+                      <td className="px-6 py-4 font-mono text-xs font-bold text-foreground max-w-[180px]">
+                        <TruncatedText text={log.action} lines={1} />
                       </td>
-                      <td className="px-6 py-4 text-xs font-semibold text-muted-foreground">
+                      <td className="px-6 py-4 text-xs font-semibold text-muted-foreground whitespace-nowrap">
                         <span className="px-2 py-0.5 rounded-full bg-muted border border-border">
                           {log.module}
                         </span>
                       </td>
-                      <td className="px-6 py-4 text-xs font-semibold text-foreground">
-                        {log.organizationName}
+                      <td className="px-6 py-4 text-xs font-semibold text-foreground max-w-[200px]">
+                        <TruncatedText text={log.organizationName} lines={1} />
                       </td>
-                      <td className="px-6 py-4 text-xs text-muted-foreground">
-                        {log.actor}
+                      <td className="px-6 py-4 text-xs text-muted-foreground max-w-[180px]">
+                        <TruncatedText text={log.actor} lines={1} />
                       </td>
                       <td className="px-6 py-4 text-xs text-muted-foreground">
                         {new Date(log.createdAt).toLocaleString()}

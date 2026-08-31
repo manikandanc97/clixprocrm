@@ -43,7 +43,7 @@ import { LeadType, LeadStatus } from "@/shared/types/lead";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { CRMPagination } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText } from "@/shared/components/crm";
 import { cn } from "@/shared/lib/utils";
 import { useLeads } from "../hooks/useLeads";
 import { Badge } from "@/shared/ui/badge";
@@ -268,16 +268,25 @@ const LeadsTable = ({
               {lead.name.split(' ').map(n => n[0]).join('').substring(0,2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <p className="font-bold text-foreground text-sm leading-none group-hover:text-primary transition-colors">{lead.name}</p>
-              <span className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md font-medium">
-                {lead.company}
-              </span>
+          <div className="space-y-1 min-w-0 max-w-[240px]">
+            <div className="flex items-center gap-2 min-w-0">
+              <TruncatedText
+                text={lead.name}
+                lines={1}
+                className="font-bold text-foreground text-sm leading-none group-hover:text-primary transition-colors"
+              />
+              {lead.company && (
+                <TruncatedText
+                  text={lead.company}
+                  lines={1}
+                  className="text-[11px] text-muted-foreground bg-muted px-1.5 py-0.5 rounded-md font-medium shrink-0 max-w-[120px]"
+                />
+              )}
             </div>
-            <div className="flex items-center gap-3 text-xs text-muted-foreground">
-              <span className="flex items-center gap-1">
-                <Mail className="w-3 h-3" /> {lead.email}
+            <div className="flex items-center gap-3 text-xs text-muted-foreground min-w-0">
+              <span className="flex items-center gap-1 min-w-0">
+                <Mail className="w-3 h-3 shrink-0" />
+                <TruncatedText text={lead.email} lines={1} className="text-xs text-muted-foreground" />
               </span>
             </div>
           </div>
@@ -425,9 +434,10 @@ const LeadsTable = ({
                   <span className="text-[10px] text-muted-foreground font-semibold flex items-center gap-1">
                     📝 {lead.notes.length} Note{lead.notes.length !== 1 && 's'}
                   </span>
-                  <span className="text-xs text-muted-foreground truncate max-w-[160px] leading-tight">
-                    <span className="font-medium">Last Note:</span> {lead.notes[0].message}
-                  </span>
+                  <div className="text-xs text-muted-foreground max-w-[160px] leading-tight">
+                    <span className="font-medium">Last Note:</span>{" "}
+                    <TruncatedText text={lead.notes[0].message} lines={1} className="inline text-xs text-muted-foreground" />
+                  </div>
                   <span className="text-[9px] text-muted-foreground mt-0.5 font-medium">
                     {formatDistanceToNow(new Date(lead.notes[0].createdAt), { addSuffix: true })}
                   </span>
@@ -435,9 +445,11 @@ const LeadsTable = ({
               ) : (
                 <>
                   <span className="text-[10px] text-muted-foreground font-semibold">Last Activity</span>
-                  <span className="text-xs text-muted-foreground truncate max-w-[160px]">
-                    {lead.lastActivity || formattedDate || "No notes"}
-                  </span>
+                  <TruncatedText
+                    text={lead.lastActivity || formattedDate || "No notes"}
+                    lines={1}
+                    className="text-xs text-muted-foreground max-w-[160px]"
+                  />
                 </>
               )}
             </div>

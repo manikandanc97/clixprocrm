@@ -25,7 +25,7 @@ import {
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { CRMPagination } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText } from "@/shared/components/crm";
 import { useDealsLocal } from "../hooks/useDealsLocal";
 import { formatCurrency, formatDate } from "@/lib/crm-formatters";
 import { useCRMStore } from "@/shared/store/useCRMStore";
@@ -90,14 +90,18 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
               {deal.name ? deal.name.substring(0, 2).toUpperCase() : "DL"}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span
+          <div className="flex flex-col min-w-0 max-w-[200px]">
+            <TruncatedText
+              text={deal.name}
+              lines={1}
               onClick={() => onEdit?.(deal)}
               className="text-sm font-bold text-foreground leading-none mb-1 hover:text-primary cursor-pointer transition-colors"
-            >
-              {deal.name}
-            </span>
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{deal.company?.name || "No Company"}</span>
+            />
+            <TruncatedText
+              text={deal.company?.name || "No Company"}
+              lines={1}
+              className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider"
+            />
           </div>
         </div>
       ),

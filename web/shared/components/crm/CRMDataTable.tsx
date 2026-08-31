@@ -18,7 +18,7 @@ export const crmTableStyles = {
   row: "group h-16 border-b border-border/40 align-middle",
   rowInteractive: "cursor-pointer transition-colors duration-150 hover:bg-muted/[0.03]",
   cell: "h-16 px-4 sm:px-6 py-3 align-middle text-sm",
-  headerCell: "h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground bg-card",
+  headerCell: "h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground bg-card whitespace-nowrap",
 } as const;
 
 export const CRMDataTable = ({

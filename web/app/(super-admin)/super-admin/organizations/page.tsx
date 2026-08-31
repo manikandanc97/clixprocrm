@@ -49,6 +49,7 @@ import {
   CRMToolbar,
   CRMPagination,
   CRMRoleBadge,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PlanBadge } from "@/shared/components/PlanBadge";
@@ -405,17 +406,18 @@ export default function SuperAdminOrganizationsPage() {
                           <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
                             {org.name.charAt(0).toUpperCase()}
                           </div>
-                          <div className="min-w-0">
-                            <p
+                          <div className="min-w-0 max-w-[240px]">
+                            <TruncatedText
+                              text={org.name}
+                              lines={1}
                               onClick={() => handleOpenDetails(org.id)}
-                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate max-w-[240px]"
-                              title={org.name}
-                            >
-                              {org.name}
-                            </p>
-                            <p className="text-[11px] text-muted-foreground font-mono truncate">
-                              /{org.slug}
-                            </p>
+                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer"
+                            />
+                            <TruncatedText
+                              text={`/${org.slug}`}
+                              lines={1}
+                              className="text-[11px] text-muted-foreground font-mono"
+                            />
                           </div>
                         </div>
                       </td>

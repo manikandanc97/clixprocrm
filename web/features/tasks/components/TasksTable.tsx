@@ -37,6 +37,7 @@ import {
   CRMTableHeaderCell,
   CRMTableRow,
   CRMPagination,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { cn } from "@/shared/lib/utils";
@@ -246,19 +247,21 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                   />
                 </CRMTableCell>
 
-                <CRMTableCell className="min-w-[280px] px-4">
+                <CRMTableCell className="min-w-[240px] max-w-[340px] px-4">
                   <button
                     type="button"
                     className="flex w-full flex-col gap-1 text-left"
                     onClick={() => onTaskClick(task)}
                   >
-                    <div className="flex items-center gap-2">
-                      <p className={cn(
-                        "line-clamp-1 text-[13px] font-semibold leading-tight tracking-tight text-foreground transition-colors",
-                        task.status === "COMPLETED" && "text-muted-foreground line-through"
-                      )}>
-                        {task.title}
-                      </p>
+                    <div className="flex items-center gap-2 min-w-0 w-full">
+                      <TruncatedText
+                        text={task.title}
+                        lines={1}
+                        className={cn(
+                          "text-[13px] font-semibold leading-tight tracking-tight text-foreground transition-colors",
+                          task.status === "COMPLETED" && "text-muted-foreground line-through"
+                        )}
+                      />
                     </div>
                   </button>
                 </CRMTableCell>
@@ -294,11 +297,13 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
 
                 <CRMTableCell className="px-4">
                   {(task.relatedLead || task.relatedCustomer) ? (
-                    <Badge variant="outline" className="gap-1.5 border-border/70 bg-background/60 text-[10px] text-muted-foreground px-2 py-1 transition-colors hover:bg-muted/50 cursor-pointer">
-                      <Link2 className="w-3 h-3" />
-                      <span className="font-semibold text-foreground truncate max-w-[80px]">
-                        {task.relatedLead ? task.relatedLead.name : task.relatedCustomer?.name}
-                      </span>
+                    <Badge variant="outline" className="gap-1.5 border-border/70 bg-background/60 text-[10px] text-muted-foreground px-2 py-1 transition-colors hover:bg-muted/50 cursor-pointer max-w-[140px]">
+                      <Link2 className="w-3 h-3 shrink-0" />
+                      <TruncatedText
+                        text={task.relatedLead ? task.relatedLead.name : task.relatedCustomer?.name}
+                        lines={1}
+                        className="font-semibold text-foreground"
+                      />
                     </Badge>
                   ) : (
                     <span className="text-muted-foreground/40 text-xs">-</span>
@@ -306,15 +311,17 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                 </CRMTableCell>
 
                 <CRMTableCell className="px-4">
-                  <div className="flex items-center gap-2">
-                    <Avatar className="h-6 w-6 border border-border/60">
+                  <div className="flex items-center gap-2 min-w-0 max-w-[140px]">
+                    <Avatar className="h-6 w-6 border border-border/60 shrink-0">
                       <AvatarFallback className="bg-primary/10 text-[9px] font-bold text-primary uppercase">
                         {task.assignedTo?.name ? task.assignedTo.name.charAt(0) : "U"}
                       </AvatarFallback>
                     </Avatar>
-                    <span className="text-[11px] font-semibold text-foreground">
-                      {task.assignedTo?.name || "Unassigned"}
-                    </span>
+                    <TruncatedText
+                      text={task.assignedTo?.name || "Unassigned"}
+                      lines={1}
+                      className="text-[11px] font-semibold text-foreground"
+                    />
                   </div>
                 </CRMTableCell>
                 

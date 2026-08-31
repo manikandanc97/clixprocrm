@@ -24,6 +24,8 @@ export * from "./ContextualSettingsComponents";
 // Semantic aliases — backward compatible
 export { CRMMetricCard as MetricCard } from "./CRMMetricCard";
 export { CRMDataTable as DataTable } from "./CRMDataTable";
+export * from "../TruncatedText";
+export * from "../../lib/ticket-utils";
 
 
 

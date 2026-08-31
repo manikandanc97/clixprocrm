@@ -6,6 +6,7 @@ import Link from "next/link";
 import client from "@/shared/lib/api/client";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { CRMPageContainer } from "@/shared/components/crm";
+import { formatTicketCode } from "@/shared/lib/ticket-utils";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -443,9 +444,12 @@ export default function CustomerTicketDetailPage() {
             tabIndex={0}
             onClick={(e) => copyId(ticketRefCode, e)}
             className="font-mono text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg inline-flex items-center gap-1.5 cursor-pointer transition-colors border border-primary/20 group whitespace-nowrap shrink-0 select-none"
-            title="Click to copy ticket reference"
+            title={`Click to copy ticket reference (${ticketRefCode})`}
           >
-            <span className="whitespace-nowrap font-mono">#{ticketRefCode}</span>
+            <span className="whitespace-nowrap font-mono">{formatTicketCode(ticket)}</span>
+            {ticketRefCode !== formatTicketCode(ticket) && (
+              <span className="opacity-60 text-[10px] hidden sm:inline">({ticketRefCode})</span>
+            )}
             {copiedId === ticketRefCode ? (
               <AppIcon name="check" size={13} className="text-emerald-500 shrink-0" />
             ) : (

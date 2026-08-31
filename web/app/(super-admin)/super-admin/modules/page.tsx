@@ -52,6 +52,7 @@ import {
   CRMMetricCard,
   CRMToolbar,
   CRMPagination,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { Button } from "@/shared/ui/button";
@@ -930,13 +931,13 @@ export default function SuperAdminModulesPage() {
                           </div>
                         </div>
                       </td>
-                      <td className="px-4 py-4">
+                      <td className="px-4 py-4 max-w-md">
                         <div>
                           <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/60">
                             <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
                             {menu.group}
                           </span>
-                          <p className="text-xs text-muted-foreground mt-1 max-w-md">{menu.description}</p>
+                          <TruncatedText text={menu.description} lines={2} className="text-xs text-muted-foreground mt-1" />
                         </div>
                       </td>
                       <td className="px-4 py-4 text-center">

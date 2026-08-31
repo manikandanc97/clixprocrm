@@ -25,7 +25,7 @@ import {
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge } from "@/shared/components/StatusBadge";
-import { CRMPagination } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText } from "@/shared/components/crm";
 import { useState } from "react";
 import { formatCurrency } from "@/lib/crm-formatters";
 import { useCurrency } from "@/shared/hooks/use-currency";
@@ -99,19 +99,21 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
               {contact.name.substring(0, 2).toUpperCase()}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span
+          <div className="flex flex-col min-w-0 max-w-[200px]">
+            <TruncatedText
+              text={contact.name}
+              lines={1}
               onClick={() => {
                 if (contact.type === "Lead") onEditLead?.(contact.raw);
                 else onEditCustomer?.(contact.raw);
               }}
               className="text-sm font-bold text-foreground leading-none mb-1 group-hover:text-primary transition-colors cursor-pointer"
-            >
-              {contact.name}
-            </span>
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">
-              {contact.company}
-            </span>
+            />
+            <TruncatedText
+              text={contact.company}
+              lines={1}
+              className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider"
+            />
           </div>
         </div>
       ),
@@ -160,12 +162,14 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
       header: "Contact Info",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (contact: any) => (
-        <div className="flex flex-col gap-1 text-xs text-muted-foreground">
-          <span className="flex items-center gap-1.5 font-medium text-foreground">
-            <Mail className="w-3 h-3" /> {contact.email || "—"}
+        <div className="flex flex-col gap-1 text-xs text-muted-foreground min-w-0 max-w-[180px]">
+          <span className="flex items-center gap-1.5 font-medium text-foreground min-w-0">
+            <Mail className="w-3 h-3 shrink-0" />
+            <TruncatedText text={contact.email || "—"} lines={1} className="font-medium text-foreground" />
           </span>
-          <span className="flex items-center gap-1.5 font-medium text-foreground">
-            <Phone className="w-3 h-3" /> {contact.phone || "—"}
+          <span className="flex items-center gap-1.5 font-medium text-foreground min-w-0">
+            <Phone className="w-3 h-3 shrink-0" />
+            <TruncatedText text={contact.phone || "—"} lines={1} className="font-medium text-foreground" />
           </span>
         </div>
       ),

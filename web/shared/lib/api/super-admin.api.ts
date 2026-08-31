@@ -1398,6 +1398,8 @@ export const fetchPlatformSupportTickets = async (params: {
   search?: string;
   page?: number;
   limit?: number;
+  sortBy?: string;
+  sortOrder?: "asc" | "desc";
 }) => {
   const response = await client.get<{
     success: boolean;

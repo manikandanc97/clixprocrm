@@ -19,6 +19,7 @@ import {
 import {
   CRMTableRow,
   CRMTableCell,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { normalizeToModuleTitle } from "@/shared/lib/auth/rbac";
@@ -85,17 +86,17 @@ export function RoleTableRows({
           <CRMTableRow key={role.id} className="cursor-default">
             {/* Role Name */}
             <CRMTableCell>
-              <div className="flex items-center gap-3">
+              <div className="flex items-center gap-3 min-w-0 max-w-[220px]">
                 <div
                   className="w-3 h-3 rounded-full flex-shrink-0 shadow-xs ring-2 ring-background"
                   style={{ backgroundColor: getRoleColor(role) }}
                 />
-                <div
+                <TruncatedText
+                  text={role.name}
+                  lines={1}
                   onClick={() => onViewRole(role)}
                   className="font-bold text-sm tracking-tight text-foreground hover:text-primary cursor-pointer transition-colors"
-                >
-                  {role.name}
-                </div>
+                />
               </div>
             </CRMTableCell>
 

@@ -27,7 +27,7 @@ import {
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { CRMPagination } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText } from "@/shared/components/crm";
 import { useCompanies } from "../hooks/useCompanies";
 
 interface CompaniesTableProps {
@@ -88,14 +88,18 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
               {company.name ? company.name.substring(0, 2).toUpperCase() : "CO"}
             </AvatarFallback>
           </Avatar>
-          <div className="flex flex-col">
-            <span
+          <div className="flex flex-col min-w-0 max-w-[200px]">
+            <TruncatedText
+              text={company.name}
+              lines={1}
               onClick={() => onEdit?.(company)}
               className="text-sm font-bold text-foreground leading-none mb-1 hover:text-primary cursor-pointer transition-colors"
-            >
-              {company.name}
-            </span>
-            <span className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider">{company.industry || "No Industry"}</span>
+            />
+            <TruncatedText
+              text={company.industry || "No Industry"}
+              lines={1}
+              className="text-[10px] font-medium text-muted-foreground uppercase tracking-wider"
+            />
           </div>
         </div>
       ),

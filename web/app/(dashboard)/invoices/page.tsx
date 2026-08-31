@@ -34,6 +34,7 @@ import {
   CRMToolbar,
   CRMPageContainer,
   CRMMetricsGrid,
+  TruncatedText,
 } from "@/shared/components/crm";
 import {
   DropdownMenu,
@@ -414,12 +415,18 @@ export default function InvoicesPage() {
                                 <td className="py-3 px-4 font-mono font-bold text-foreground">
                                   {inv.invoiceNumber}
                                 </td>
-                                <td className="py-3 px-4">
-                                  <div className="font-semibold text-foreground">
-                                    {inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned"}
-                                  </div>
+                                <td className="py-3 px-4 max-w-[220px]">
+                                  <TruncatedText
+                                    text={inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned"}
+                                    lines={1}
+                                    className="font-semibold text-foreground"
+                                  />
                                   {inv.customer?.name && inv.company?.name && (
-                                    <div className="text-[11px] text-muted-foreground">{inv.customer.name}</div>
+                                    <TruncatedText
+                                      text={inv.customer.name}
+                                      lines={1}
+                                      className="text-[11px] text-muted-foreground"
+                                    />
                                   )}
                                 </td>
                                 <td className="py-3 px-3 text-muted-foreground">

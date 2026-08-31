@@ -50,7 +50,7 @@ import {
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { toast } from "sonner";
 import { motion, AnimatePresence } from "framer-motion";
-import { CRMPageContainer } from "@/shared/components/crm";
+import { CRMPageContainer, TruncatedText } from "@/shared/components/crm";
 
 export default function SuperAdminBillingPage() {
   const { formatCurrency } = useCurrency();
@@ -421,12 +421,14 @@ export default function SuperAdminBillingPage() {
                 ) : (
                   subscriptions.map((sub) => (
                     <tr key={sub.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="py-3 px-4 font-bold text-foreground flex items-center gap-2">
-                        <Building2 className="w-4 h-4 text-primary" />
-                        {sub.tenantName}
+                      <td className="py-3 px-4 font-bold text-foreground max-w-[200px]">
+                        <div className="flex items-center gap-2 min-w-0">
+                          <Building2 className="w-4 h-4 text-primary shrink-0" />
+                          <TruncatedText text={sub.tenantName} lines={1} className="font-bold text-foreground" />
+                        </div>
                       </td>
-                      <td className="py-3 px-3 capitalize font-semibold text-foreground">
-                        {sub.planName || sub.planId}
+                      <td className="py-3 px-3 capitalize font-semibold text-foreground max-w-[150px]">
+                        <TruncatedText text={sub.planName || sub.planId} lines={1} />
                       </td>
                       <td className="py-3 px-3 text-center capitalize text-muted-foreground">
                         {sub.billingCycle}
@@ -513,11 +515,11 @@ export default function SuperAdminBillingPage() {
                       <td className="py-3 px-4 font-mono font-bold text-foreground">
                         {inv.invoiceNumber}
                       </td>
-                      <td className="py-3 px-3 font-semibold text-foreground">
-                        {inv.tenantName}
+                      <td className="py-3 px-3 font-semibold text-foreground max-w-[200px]">
+                        <TruncatedText text={inv.tenantName} lines={1} className="font-semibold text-foreground" />
                       </td>
-                      <td className="py-3 px-3 text-muted-foreground capitalize">
-                        {inv.planName} ({inv.seats} seats)
+                      <td className="py-3 px-3 text-muted-foreground capitalize max-w-[160px]">
+                        <TruncatedText text={`${inv.planName} (${inv.seats} seats)`} lines={1} />
                       </td>
                       <td className="py-3 px-3 text-muted-foreground">
                         {new Date(inv.invoiceDate).toLocaleDateString("en-IN", {

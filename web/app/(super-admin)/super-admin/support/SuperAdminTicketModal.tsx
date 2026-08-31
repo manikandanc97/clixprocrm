@@ -11,6 +11,7 @@ import {
   PlatformSupportTicket,
 } from "@/shared/lib/api/super-admin.api";
 import { useAuth } from "@/features/auth/components/auth-provider";
+import { formatTicketCode } from "@/shared/lib/ticket-utils";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -441,9 +442,12 @@ export function SuperAdminTicketModal({
                       tabIndex={0}
                       onClick={(e) => copyId(ticket.ticketNumber, e)}
                       className="font-mono text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg inline-flex items-center gap-1.5 cursor-pointer transition-colors border border-primary/20 whitespace-nowrap shrink-0 select-none"
-                      title="Click to copy ticket reference"
+                      title={`Click to copy ticket reference (${ticket.ticketNumber})`}
                     >
-                      <span className="whitespace-nowrap font-mono">#{ticket.ticketNumber}</span>
+                      <span className="whitespace-nowrap font-mono">{formatTicketCode(ticket)}</span>
+                      {ticket.ticketNumber !== formatTicketCode(ticket) && (
+                        <span className="opacity-60 text-[10px] hidden sm:inline">({ticket.ticketNumber})</span>
+                      )}
                       {copiedId === ticket.ticketNumber ? (
                         <AppIcon name="check" size={13} className="text-emerald-500 shrink-0" />
                       ) : (

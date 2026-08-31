@@ -32,6 +32,8 @@ import client from "@/shared/lib/api/client";
 import { formatBytes, cn } from "@/shared/lib/utils";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import ReactMarkdown from "react-markdown";
+import { TruncatedText } from "@/shared/components/TruncatedText";
+import { formatTicketCode } from "@/shared/lib/ticket-utils";
 
 export interface TicketItem {
   id: string;
@@ -592,9 +594,9 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                           tabIndex={0}
                           onClick={(e) => copyId(ticket.ticketId, e)}
                           className="font-mono text-[11px] font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2 py-0.5 rounded flex items-center gap-1 transition-colors cursor-pointer"
-                          title="Click to copy ID"
+                          title={`Click to copy ID (${ticket.ticketId})`}
                         >
-                          <span>{ticket.ticketId}</span>
+                          <span>{formatTicketCode(ticket)}</span>
                           {copiedId === ticket.ticketId ? (
                             <AppIcon name="check" size={12} className="text-emerald-500" />
                           ) : (
@@ -623,15 +625,12 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                         </span>
                       </div>
 
-                      {/* Ticket Title */}
-                      <h4 className="font-bold text-sm text-foreground group-hover:text-primary transition-colors truncate">
-                        {ticket.subject}
-                      </h4>
-
-                      {/* Snippet */}
-                      <p className="text-xs text-muted-foreground line-clamp-1">
-                        {ticket.description}
-                      </p>
+                      {/* Ticket Title (Subject Only) */}
+                      <TruncatedText
+                        text={ticket.subject}
+                        lines={1}
+                        className="font-bold text-sm text-foreground group-hover:text-primary transition-colors"
+                      />
                     </div>
 
                     {/* Metadata column */}

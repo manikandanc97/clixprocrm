@@ -33,6 +33,7 @@ import {
   ActivityTimeline,
   CRMPageSection,
   CRMPagination,
+  TruncatedText,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
@@ -265,19 +266,23 @@ export default function EmployeesPage() {
                       paginatedEmployees.map((emp) => (
                         <CRMTableRow key={emp.id} className="cursor-default">
                           <CRMTableCell>
-                            <div className="flex items-center gap-3">
-                              <Avatar className="h-10 w-10 border-2 border-background shadow-sm">
+                            <div className="flex items-center gap-3 min-w-0 max-w-[220px]">
+                              <Avatar className="h-10 w-10 border-2 border-background shadow-sm shrink-0">
                                 <AvatarImage src={""} alt={emp.name} />
                                 <AvatarFallback>{emp.name.charAt(0)}</AvatarFallback>
                               </Avatar>
-                              <div>
-                                <div
+                              <div className="min-w-0">
+                                <TruncatedText
+                                  text={emp.name}
+                                  lines={1}
                                   onClick={() => { setSelectedEmployee(emp); setIsViewModalOpen(true); }}
                                   className="font-bold text-sm tracking-tight text-foreground hover:text-primary cursor-pointer transition-colors"
-                                >
-                                  {emp.name}
-                                </div>
-                                <div className="text-[10px] text-muted-foreground font-medium">{emp.email}</div>
+                                />
+                                <TruncatedText
+                                  text={emp.email}
+                                  lines={1}
+                                  className="text-[10px] text-muted-foreground font-medium"
+                                />
                               </div>
                             </div>
                           </CRMTableCell>
