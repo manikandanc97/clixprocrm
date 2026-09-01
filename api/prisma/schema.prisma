@@ -1053,22 +1053,23 @@ model InvoiceCounter {
 }
 
 model PlatformModule {
-  id          String           @id @default(uuid())
-  key         String           @unique
-  label       String
-  icon        String           @default("Layers")
-  route       String
-  group       String           @default("Core")
-  parentId    String?
-  sortOrder   Int              @default(0)
-  isEnabled   Boolean          @default(true)
-  isVisible   Boolean          @default(true)
-  isSystem    Boolean          @default(false)
-  permission  String?
-  badge       String?
-  description String?
-  createdAt   DateTime         @default(now())
-  updatedAt   DateTime         @updatedAt
+  id               String           @id @default(uuid())
+  key              String           @unique
+  label            String
+  icon             String           @default("Layers")
+  route            String
+  group            String           @default("Core")
+  navigationScope  String           @default("TENANT_CRM")
+  parentId         String?
+  sortOrder        Int              @default(0)
+  isEnabled        Boolean          @default(true)
+  isVisible        Boolean          @default(true)
+  isSystem         Boolean          @default(false)
+  permission       String?
+  badge            String?
+  description      String?
+  createdAt        DateTime         @default(now())
+  updatedAt        DateTime         @updatedAt
 
   parent      PlatformModule?  @relation("ModuleHierarchy", fields: [parentId], references: [id], onDelete: SetNull)
   children    PlatformModule[] @relation("ModuleHierarchy")
@@ -1076,6 +1077,7 @@ model PlatformModule {
   @@index([isEnabled, sortOrder])
   @@index([group, sortOrder])
   @@index([parentId])
+  @@index([navigationScope, sortOrder])
 }
 
 model MfaRecoveryCode {

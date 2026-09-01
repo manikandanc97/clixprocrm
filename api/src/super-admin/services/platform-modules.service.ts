@@ -6,12 +6,20 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 
-export interface CreatePlatformModuleDto {
+export const NAVIGATION_SCOPE = {
+  TENANT_CRM: 'TENANT_CRM',
+  SUPER_ADMIN: 'SUPER_ADMIN',
+} as const;
+
+export type NavigationScope = (typeof NAVIGATION_SCOPE)[keyof typeof NAVIGATION_SCOPE];
+
+export class CreatePlatformModuleDto {
   key?: string;
-  label: string;
+  label!: string;
   icon?: string;
-  route: string;
+  route!: string;
   group?: string;
+  navigationScope?: NavigationScope;
   parentId?: string | null;
   sortOrder?: number;
   isEnabled?: boolean;
@@ -22,12 +30,13 @@ export interface CreatePlatformModuleDto {
   description?: string | null;
 }
 
-export interface UpdatePlatformModuleDto {
+export class UpdatePlatformModuleDto {
   key?: string;
   label?: string;
   icon?: string;
   route?: string;
   group?: string;
+  navigationScope?: NavigationScope;
   parentId?: string | null;
   sortOrder?: number;
   isEnabled?: boolean;
@@ -38,7 +47,11 @@ export interface UpdatePlatformModuleDto {
   description?: string | null;
 }
 
-const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
+// ============================================================
+// TENANT CRM NAVIGATION — default platform modules for workspace CRM
+// navigationScope: TENANT_CRM (default)
+// ============================================================
+const DEFAULT_TENANT_CRM_MODULES: CreatePlatformModuleDto[] = [
   {
     key: 'dashboard',
     label: 'Dashboard',
@@ -144,7 +157,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'UserSquare2',
     route: '/employees',
     group: 'Administration',
-    sortOrder: 9,
+    sortOrder: 10,
     isSystem: false,
     permission: 'Employees',
     description: 'Team member directory and onboarding',
@@ -155,7 +168,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'ShieldCheck',
     route: '/role-management',
     group: 'Administration',
-    sortOrder: 10,
+    sortOrder: 11,
     isSystem: false,
     permission: 'Role Management',
     description: 'Custom roles, granular access, and permissions',
@@ -166,7 +179,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'Settings',
     route: '/settings',
     group: 'Administration',
-    sortOrder: 11,
+    sortOrder: 12,
     isSystem: true,
     permission: 'Settings',
     description: 'Workspace profile, currencies, branding, and defaults',
@@ -177,7 +190,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'Ticket',
     route: '/support-tickets',
     group: 'Core',
-    sortOrder: 12,
+    sortOrder: 13,
     isSystem: false,
     permission: 'Support Tickets',
     description: 'Customer support issues and resolution tracking',
@@ -188,7 +201,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'BriefcaseBusiness',
     route: '/team-performance',
     group: 'Insights',
-    sortOrder: 13,
+    sortOrder: 14,
     isSystem: false,
     permission: 'Team Performance',
     description: 'Managerial performance summaries and KPIs',
@@ -199,7 +212,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'CalendarDays',
     route: '/attendance',
     group: 'HRM & Operations',
-    sortOrder: 14,
+    sortOrder: 15,
     isSystem: false,
     permission: 'Attendance',
     description: 'Employee attendance and shift monitoring',
@@ -210,7 +223,7 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'BarChart3',
     route: '/performance',
     group: 'HRM & Operations',
-    sortOrder: 15,
+    sortOrder: 16,
     isSystem: false,
     permission: 'Performance',
     description: 'Individual goal appraisal and performance reviews',
@@ -221,38 +234,200 @@ const DEFAULT_PLATFORM_MODULES: CreatePlatformModuleDto[] = [
     icon: 'LifeBuoy',
     route: '/help',
     group: 'Support',
-    sortOrder: 16,
+    sortOrder: 17,
     isSystem: false,
     permission: 'Help Center',
     description: 'Documentation and platform support guides',
   },
 ];
 
+// ============================================================
+// SUPER ADMIN NAVIGATION — platform administration menus
+// navigationScope: SUPER_ADMIN
+// Keys prefixed with sa_ to avoid collision with CRM keys
+// ============================================================
+const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
+  {
+    key: 'sa_overview',
+    label: 'Overview',
+    icon: 'LayoutDashboard',
+    route: '/super-admin',
+    group: 'Overview',
+    sortOrder: 1,
+    isSystem: true,
+    description: 'Multi-tenant health metrics, live platform activity stream, and tenant summary',
+  },
+  {
+    key: 'sa_copilot',
+    label: 'ClixPro AI',
+    icon: 'Sparkles',
+    route: '/super-admin/copilot',
+    group: 'Platform',
+    sortOrder: 2,
+    isSystem: true,
+    description: 'Intelligent platform operations copilot and interactive root administrative assistant',
+  },
+  {
+    key: 'sa_organizations',
+    label: 'Organizations',
+    icon: 'Building2',
+    route: '/super-admin/organizations',
+    group: 'Platform',
+    sortOrder: 3,
+    isSystem: true,
+    description: 'Manage multi-tenant workspaces, subscription plans, tenant quotas, and lifecycle',
+  },
+  {
+    key: 'sa_users',
+    label: 'Platform Users',
+    icon: 'UserCog',
+    route: '/super-admin/users',
+    group: 'Platform',
+    sortOrder: 4,
+    isSystem: true,
+    description: 'Global user directory, administrative privilege control, and cross-org access',
+  },
+  {
+    key: 'sa_modules',
+    label: 'Platform Modules',
+    icon: 'Layers',
+    route: '/super-admin/modules',
+    group: 'Platform',
+    sortOrder: 5,
+    isSystem: true,
+    description: 'Configure global modules, menu hierarchy, icon customization, and navigation visibility',
+  },
+  {
+    key: 'sa_support',
+    label: 'Support Inbox',
+    icon: 'Ticket',
+    route: '/super-admin/support',
+    group: 'Platform',
+    sortOrder: 6,
+    isSystem: true,
+    description: 'Central platform support ticketing desk, tenant inquiries, SLA tracking, and resolution inbox',
+  },
+  {
+    key: 'sa_plans',
+    label: 'Plans & Packages',
+    icon: 'CreditCard',
+    route: '/super-admin/plans',
+    group: 'Commerce',
+    sortOrder: 7,
+    isSystem: true,
+    description: 'Multi-tenant subscription tiers, pricing models, feature packaging, and MRR metrics',
+  },
+  {
+    key: 'sa_billing',
+    label: 'Billing & Revenue',
+    icon: 'Receipt',
+    route: '/super-admin/billing',
+    group: 'Commerce',
+    sortOrder: 8,
+    isSystem: true,
+    description: 'Platform-wide invoice collections, payment processing, transaction logs, and MRR cashflow',
+  },
+  {
+    key: 'sa_ai',
+    label: 'AI Models & Tiers',
+    icon: 'Brain',
+    route: '/super-admin/ai',
+    group: 'AI Platform',
+    sortOrder: 9,
+    isSystem: true,
+    description: 'Multi-tenant LLM provider routing, token quotas, tier allocations, and prompt controls',
+  },
+  {
+    key: 'sa_analytics',
+    label: 'Analytics',
+    icon: 'BarChart3',
+    route: '/super-admin/analytics',
+    group: 'Insights',
+    sortOrder: 10,
+    isSystem: false,
+    description: 'Cross-tenant SaaS metrics, MRR projections, growth velocity, and system telemetry',
+  },
+  {
+    key: 'sa_security',
+    label: 'Security Center',
+    icon: 'ShieldCheck',
+    route: '/super-admin/security',
+    group: 'Security & Operations',
+    sortOrder: 11,
+    isSystem: true,
+    description: 'Root IAM policy enforcement, multi-factor authentication requirements, and IP firewall filters',
+  },
+  {
+    key: 'sa_secops',
+    label: 'SecOps Telemetry',
+    icon: 'Activity',
+    route: '/super-admin/security/operations',
+    group: 'Security & Operations',
+    sortOrder: 12,
+    isSystem: true,
+    description: 'Live node health telemetry, cluster metrics, threat detection signals, and real-time alerts',
+  },
+  {
+    key: 'sa_audit_logs',
+    label: 'Audit Logs',
+    icon: 'FileClock',
+    route: '/super-admin/audit-logs',
+    group: 'Security & Operations',
+    sortOrder: 13,
+    isSystem: true,
+    description: 'Immutable cross-tenant audit trail, security events, and administrative mutations',
+  },
+  {
+    key: 'sa_settings',
+    label: 'Platform Settings',
+    icon: 'Settings',
+    route: '/super-admin/settings',
+    group: 'Configuration',
+    sortOrder: 14,
+    isSystem: true,
+    description: 'Global application configuration, environment settings, and multi-tenant feature toggles',
+  },
+];
+
 @Injectable()
 export class PlatformModulesService {
-  private isSeeded = false;
+  private isTenantCrmSeeded = false;
+  private isSuperAdminSeeded = false;
 
   constructor(private readonly prisma: PrismaService) {}
 
+  // ============================================================
+  // SEEDING
+  // ============================================================
+
   async seedDefaultModulesIfEmpty(): Promise<number> {
-    if (this.isSeeded) {
-      return DEFAULT_PLATFORM_MODULES.length;
+    if (this.isTenantCrmSeeded) {
+      return DEFAULT_TENANT_CRM_MODULES.length;
     }
 
     try {
-      const existingCount = await this.prisma.platformModule.count();
-      if (existingCount >= DEFAULT_PLATFORM_MODULES.length) {
-        this.isSeeded = true;
+      // Backfill any records created before the navigationScope column existed
+      await this.prisma.platformModule.updateMany({
+        where: { navigationScope: '' as any },
+        data: { navigationScope: 'TENANT_CRM' },
+      }).catch(() => {/* ignore if column doesn't exist yet during migration */});
+
+      const existingCount = await this.prisma.platformModule.count({
+        where: { navigationScope: 'TENANT_CRM' },
+      });
+
+      if (existingCount >= DEFAULT_TENANT_CRM_MODULES.length) {
+        this.isTenantCrmSeeded = true;
         return existingCount;
       }
 
-      // Check which default modules are missing and insert only those
       const existingModules = await this.prisma.platformModule.findMany({
+        where: { navigationScope: 'TENANT_CRM' },
         select: { key: true },
       });
       const existingKeys = new Set(existingModules.map((m) => m.key));
 
-      const missing = DEFAULT_PLATFORM_MODULES.filter((m) => !existingKeys.has(m.key!));
+      const missing = DEFAULT_TENANT_CRM_MODULES.filter((m) => !existingKeys.has(m.key!));
       if (missing.length > 0) {
         await this.prisma.platformModule.createMany({
           data: missing.map((mod) => ({
@@ -261,34 +436,94 @@ export class PlatformModulesService {
             icon: mod.icon || 'Layers',
             route: mod.route,
             group: mod.group || 'Core',
+            navigationScope: 'TENANT_CRM',
             sortOrder: mod.sortOrder ?? 0,
             isEnabled: mod.isEnabled ?? true,
             isVisible: mod.isVisible ?? true,
             isSystem: mod.isSystem ?? false,
             permission: mod.permission || null,
-            badge: mod.badge || null,
+            badge: null,
             description: mod.description || null,
           })),
           skipDuplicates: true,
         });
       }
 
-      this.isSeeded = true;
-      return DEFAULT_PLATFORM_MODULES.length;
+      this.isTenantCrmSeeded = true;
+      return DEFAULT_TENANT_CRM_MODULES.length;
     } catch {
-      return DEFAULT_PLATFORM_MODULES.length;
+      return DEFAULT_TENANT_CRM_MODULES.length;
     }
   }
+
+  async seedSuperAdminMenusIfEmpty(): Promise<number> {
+    if (this.isSuperAdminSeeded) {
+      return DEFAULT_SUPER_ADMIN_NAV_MENUS.length;
+    }
+
+    try {
+      const existingCount = await this.prisma.platformModule.count({
+        where: { navigationScope: 'SUPER_ADMIN' },
+      });
+
+      if (existingCount >= DEFAULT_SUPER_ADMIN_NAV_MENUS.length) {
+        this.isSuperAdminSeeded = true;
+        return existingCount;
+      }
+
+      const existingModules = await this.prisma.platformModule.findMany({
+        where: { navigationScope: 'SUPER_ADMIN' },
+        select: { key: true },
+      });
+      const existingKeys = new Set(existingModules.map((m) => m.key));
+
+      const missing = DEFAULT_SUPER_ADMIN_NAV_MENUS.filter((m) => !existingKeys.has(m.key));
+      if (missing.length > 0) {
+        await this.prisma.platformModule.createMany({
+          data: missing.map((mod) => ({
+            key: mod.key,
+            label: mod.label,
+            icon: mod.icon || 'Layers',
+            route: mod.route,
+            group: mod.group || 'Platform',
+            navigationScope: 'SUPER_ADMIN',
+            sortOrder: mod.sortOrder ?? 0,
+            isEnabled: true,
+            isVisible: true,
+            isSystem: mod.isSystem ?? false,
+            permission: null,
+            badge: null,
+            description: mod.description || null,
+          })),
+          skipDuplicates: true,
+        });
+      }
+
+      this.isSuperAdminSeeded = true;
+      return DEFAULT_SUPER_ADMIN_NAV_MENUS.length;
+    } catch {
+      return DEFAULT_SUPER_ADMIN_NAV_MENUS.length;
+    }
+  }
+
+  // ============================================================
+  // LIST MODULES (scoped)
+  // ============================================================
 
   async listModules(filters?: {
     search?: string;
     group?: string;
+    navigationScope?: string;
     isEnabled?: boolean;
     isVisible?: boolean;
   }) {
+    // Seed both scopes on first access
     await this.seedDefaultModulesIfEmpty();
+    await this.seedSuperAdminMenusIfEmpty();
 
-    const where: any = {};
+    const scope = filters?.navigationScope || 'TENANT_CRM';
+    const where: any = { navigationScope: scope };
+
     if (filters?.group && filters.group !== 'ALL') {
       where.group = filters.group;
     }
@@ -309,6 +544,8 @@ export class PlatformModulesService {
       ];
     }
 
+    const scopeWhere = { navigationScope: scope };
+
     const [modules, totalCount, enabledCount, disabledCount, systemCount] = await Promise.all([
       this.prisma.platformModule.findMany({
         where,
@@ -319,10 +556,10 @@ export class PlatformModulesService {
           },
         },
       }),
-      this.prisma.platformModule.count(),
-      this.prisma.platformModule.count({ where: { isEnabled: true } }),
-      this.prisma.platformModule.count({ where: { isEnabled: false } }),
-      this.prisma.platformModule.count({ where: { isSystem: true } }),
+      this.prisma.platformModule.count({ where: scopeWhere }),
+      this.prisma.platformModule.count({ where: { ...scopeWhere, isEnabled: true } }),
+      this.prisma.platformModule.count({ where: { ...scopeWhere, isEnabled: false } }),
+      this.prisma.platformModule.count({ where: { ...scopeWhere, isSystem: true } }),
     ]);
 
     return {
@@ -335,6 +572,10 @@ export class PlatformModulesService {
       },
     };
   }
+
+  // ============================================================
+  // GET BY ID
+  // ============================================================
 
   async getModuleById(id: string) {
     const module = await this.prisma.platformModule.findUnique({
@@ -349,6 +590,10 @@ export class PlatformModulesService {
     }
     return module;
   }
+
+  // ============================================================
+  // CREATE
+  // ============================================================
 
   async createModule(dto: CreatePlatformModuleDto, adminUserId: string) {
     // 1. Sanitize key
@@ -376,10 +621,12 @@ export class PlatformModulesService {
       throw new BadRequestException(`Route '${dto.route}' is already used by module '${existingRoute.label}'`);
     }
 
-    // 3. Determine max sort order if not provided
+    // 3. Determine max sort order within same scope
+    const scope = dto.navigationScope || 'TENANT_CRM';
     let sortOrder = dto.sortOrder;
     if (sortOrder === undefined || sortOrder === null) {
       const maxSort = await this.prisma.platformModule.aggregate({
+        where: { navigationScope: scope },
         _max: { sortOrder: true },
       });
       sortOrder = (maxSort._max.sortOrder || 0) + 1;
@@ -393,6 +640,7 @@ export class PlatformModulesService {
         icon: dto.icon || 'Layers',
         route: dto.route.trim(),
         group: dto.group?.trim() || 'Core',
+        navigationScope: scope,
         parentId: dto.parentId || null,
         sortOrder,
         isEnabled: dto.isEnabled ?? true,
@@ -410,12 +658,16 @@ export class PlatformModulesService {
         userId: adminUserId,
         action: 'PLATFORM_MODULE_CREATED',
         module: 'SuperAdmin',
-        details: { moduleId: created.id, key: created.key, label: created.label },
+        details: { moduleId: created.id, key: created.key, label: created.label, scope },
       },
     });
 
     return created;
   }
+
+  // ============================================================
+  // UPDATE
+  // ============================================================
 
   async updateModule(id: string, dto: UpdatePlatformModuleDto, adminUserId: string) {
     const existing = await this.getModuleById(id);
@@ -449,14 +701,12 @@ export class PlatformModulesService {
       }
     }
 
-    // Validate parent hierarchy (cannot set self as parent)
+    // Validate parent hierarchy
     if (dto.parentId) {
       if (dto.parentId === id) {
         throw new BadRequestException('A module cannot be its own parent');
       }
-      const parentExists = await this.prisma.platformModule.findUnique({
-        where: { id: dto.parentId },
-      });
+      const parentExists = await this.prisma.platformModule.findUnique({ where: { id: dto.parentId } });
       if (!parentExists) {
         throw new BadRequestException('Specified parent module does not exist');
       }
@@ -485,12 +735,16 @@ export class PlatformModulesService {
         userId: adminUserId,
         action: 'PLATFORM_MODULE_UPDATED',
         module: 'SuperAdmin',
-        details: { moduleId: id, changes: dto as any },
+        details: { moduleId: id, scope: existing.navigationScope, changes: dto as any },
       },
     });
 
     return updated;
   }
+
+  // ============================================================
+  // TOGGLE STATUS
+  // ============================================================
 
   async toggleModuleStatus(
     id: string,
@@ -512,12 +766,21 @@ export class PlatformModulesService {
         userId: adminUserId,
         action: 'PLATFORM_MODULE_STATUS_TOGGLED',
         module: 'SuperAdmin',
-        details: { moduleId: id, isEnabled: updated.isEnabled, isVisible: updated.isVisible },
+        details: {
+          moduleId: id,
+          scope: existing.navigationScope,
+          isEnabled: updated.isEnabled,
+          isVisible: updated.isVisible,
+        },
       },
     });
 
     return updated;
   }
+
+  // ============================================================
+  // REORDER
+  // ============================================================
 
   async reorderModules(
     items: Array<{ id: string; sortOrder: number }>,
@@ -548,36 +811,34 @@ export class PlatformModulesService {
     return { success: true, message: 'Platform modules reordered successfully' };
   }
 
+  // ============================================================
+  // DELETE
+  // ============================================================
+
   async deleteModule(id: string, adminUserId: string) {
     const existing = await this.getModuleById(id);
 
-    // 1. Core safety check: System modules cannot be deleted
     if (existing.isSystem) {
       throw new ForbiddenException(
         `'${existing.label}' is a core system module and cannot be deleted. You can disable or hide it instead.`,
       );
     }
 
-    // 2. Child dependency check
-    const childCount = await this.prisma.platformModule.count({
-      where: { parentId: id },
-    });
+    const childCount = await this.prisma.platformModule.count({ where: { parentId: id } });
     if (childCount > 0) {
       throw new BadRequestException(
         `Cannot delete module because it has ${childCount} child sub-module(s). Reassign or delete child items first.`,
       );
     }
 
-    // 3. Delete module
     await this.prisma.platformModule.delete({ where: { id } });
 
-    // 4. Audit Log
     await this.prisma.auditLog.create({
       data: {
         userId: adminUserId,
         action: 'PLATFORM_MODULE_DELETED',
         module: 'SuperAdmin',
-        details: { moduleId: id, key: existing.key, label: existing.label },
+        details: { moduleId: id, key: existing.key, label: existing.label, scope: existing.navigationScope },
       },
     });
 
@@ -587,6 +848,11 @@ export class PlatformModulesService {
     };
   }
 
+  // ============================================================
+  // TENANT CRM NAVIGATION
+  // Returns only TENANT_CRM scope, enabled & visible, role-filtered
+  // ============================================================
+
   async getNavigationMenu(userContext?: {
     isSuperAdmin?: boolean;
     role?: string;
@@ -594,16 +860,16 @@ export class PlatformModulesService {
   }) {
     await this.seedDefaultModulesIfEmpty();
 
-    // Only query enabled & visible modules for navigation
+    // CRITICAL: only TENANT_CRM scope — never return Super Admin nav items to the CRM sidebar
     const modules = await this.prisma.platformModule.findMany({
       where: {
+        navigationScope: 'TENANT_CRM',
         isEnabled: true,
         isVisible: true,
       },
       orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
     });
 
-    // If Super Admin or Admin, return all enabled platform modules
     const isSuperAdmin = userContext?.isSuperAdmin === true;
     const roleUpper = (userContext?.role || '').toUpperCase();
     const isAdmin = roleUpper === 'ADMIN' || roleUpper === 'SUPER_ADMIN';
@@ -612,19 +878,14 @@ export class PlatformModulesService {
       return modules;
     }
 
-    // Role-filtered navigation for other roles (Manager, Sales, Support, Employee)
     const userPermissions = userContext?.permissions || [];
     const normalizedPerms = userPermissions.map((p) => p.trim().toLowerCase());
 
-    const filtered = modules.filter((mod) => {
-      // If module doesn't specify a permission, it's public to all authenticated tenant users
+    return modules.filter((mod) => {
       if (!mod.permission) return true;
-
       const permLower = mod.permission.toLowerCase();
       const keyLower = mod.key.toLowerCase();
       const labelLower = mod.label.toLowerCase();
-
-      // Check if user has permission
       return (
         normalizedPerms.includes(permLower) ||
         normalizedPerms.includes(keyLower) ||
@@ -632,7 +893,24 @@ export class PlatformModulesService {
         normalizedPerms.some((p) => p.startsWith(keyLower) || p.startsWith(permLower))
       );
     });
+  }
 
-    return filtered;
+  // ============================================================
+  // SUPER ADMIN NAVIGATION
+  // Returns only SUPER_ADMIN scope, enabled & visible
+  // Used exclusively by the Super Admin platform sidebar
+  // ============================================================
+
+  async getSuperAdminNavigationMenu() {
+    await this.seedSuperAdminMenusIfEmpty();
+
+    return this.prisma.platformModule.findMany({
+      where: {
+        navigationScope: 'SUPER_ADMIN',
+        isEnabled: true,
+        isVisible: true,
+      },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    });
   }
 }

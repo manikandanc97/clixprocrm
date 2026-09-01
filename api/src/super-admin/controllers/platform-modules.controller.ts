@@ -15,48 +15,21 @@ import {
 } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
-import { PlatformModulesService } from '../services/platform-modules.service';
-
-export class CreatePlatformModuleDto {
-  key?: string;
-  label!: string;
-  icon?: string;
-  route!: string;
-  group?: string;
-  parentId?: string | null;
-  sortOrder?: number;
-  isEnabled?: boolean;
-  isVisible?: boolean;
-  isSystem?: boolean;
-  permission?: string | null;
-  badge?: string | null;
-  description?: string | null;
-}
-
-export class UpdatePlatformModuleDto {
-  key?: string;
-  label?: string;
-  icon?: string;
-  route?: string;
-  group?: string;
-  parentId?: string | null;
-  sortOrder?: number;
-  isEnabled?: boolean;
-  isVisible?: boolean;
-  isSystem?: boolean;
-  permission?: string | null;
-  badge?: string | null;
-  description?: string | null;
-}
-
+import {
+  PlatformModulesService,
+  CreatePlatformModuleDto,
+  UpdatePlatformModuleDto,
+  NavigationScope,
+} from '../services/platform-modules.service';
 
 @Controller(['super-admin/modules', 'super_admin/modules'])
 export class PlatformModulesController {
   constructor(private readonly modulesService: PlatformModulesService) {}
 
   /**
-   * Dynamic navigation menu endpoint for authenticated tenant users and Super Admins.
-   * Only requires SupabaseAuthGuard so tenant users can query enabled modules for their role.
+   * Dynamic TENANT CRM navigation menu endpoint.
+   * Returns only TENANT_CRM scope items — safe for authenticated tenant users.
+   * Used by: usePlatformNavigation() hook → tenant workspace sidebar.
    */
   @Get('navigation')
   @UseGuards(SupabaseAuthGuard)
@@ -74,6 +47,22 @@ export class PlatformModulesController {
   }
 
   /**
+   * Dynamic SUPER ADMIN navigation menu endpoint.
+   * Returns only SUPER_ADMIN scope items — for the platform admin sidebar.
+   * Requires SuperAdminGuard since this exposes admin nav structure.
+   * Used by: useSuperAdminNavigation() hook → super admin sidebar.
+   */
+  @Get('super-admin-navigation')
+  @UseGuards(SupabaseAuthGuard, SuperAdminGuard)
+  async getSuperAdminNavigation() {
+    const modules = await this.modulesService.getSuperAdminNavigationMenu();
+    return {
+      success: true,
+      data: modules,
+    };
+  }
+
+  /**
    * Super Admin full module management endpoints.
    * Strictly guarded by SuperAdminGuard.
    */
@@ -82,12 +71,14 @@ export class PlatformModulesController {
   async listModules(
     @Query('search') search?: string,
     @Query('group') group?: string,
+    @Query('navigationScope') navigationScope?: string,
     @Query('isEnabled') isEnabled?: string,
     @Query('isVisible') isVisible?: string,
   ) {
     const data = await this.modulesService.listModules({
       search,
       group,
+      navigationScope: navigationScope || 'TENANT_CRM',
       isEnabled: isEnabled !== undefined ? isEnabled === 'true' : undefined,
       isVisible: isVisible !== undefined ? isVisible === 'true' : undefined,
     });

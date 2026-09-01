@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   Receipt,
   TrendingUp,
@@ -23,18 +23,28 @@ import {
   Users,
   Download,
   Save,
+  RefreshCw,
+  Eye,
+  FileText,
+  Percent,
+  Check,
+  AlertTriangle,
+  Loader2,
+  DollarSign,
+  Briefcase,
+  Zap,
+  Info,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
 import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 import {
   fetchPlatformBillingOverview,
   fetchPlatformSubscriptions,
@@ -43,53 +53,106 @@ import {
   processPlatformRefund,
   fetchPlatformBillingSettings,
   updatePlatformBillingSettings,
+  fetchPlatformOrganizations,
   PlatformBillingOverviewData,
   PlatformSubscriptionItem,
   PlatformInvoiceItemData,
+  PlatformOrganization,
 } from "@/shared/lib/api/super-admin.api";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
-import { CRMPageContainer, TruncatedText } from "@/shared/components/crm";
+import { motion } from "framer-motion";
+import {
+  CRMPageContainer,
+  CRMPageHeader,
+  CRMMetricsGrid,
+  CRMMetricCard,
+  CRMToolbar,
+  CRMPagination,
+  TruncatedText,
+  EmptyState,
+} from "@/shared/components/crm";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { PlanBadge } from "@/shared/components/PlanBadge";
+import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
+import { cn } from "@/shared/lib/utils";
+import {
+  ResponsiveContainer,
+  AreaChart,
+  Area,
+  XAxis,
+  YAxis,
+  Tooltip as RechartsTooltip,
+  CartesianGrid,
+} from "recharts";
 
 export default function SuperAdminBillingPage() {
   const { formatCurrency } = useCurrency();
 
   const [activeTab, setActiveTab] = useState<"overview" | "subscriptions" | "invoices" | "settings">("overview");
   const [loading, setLoading] = useState(true);
+  const [isClient, setIsClient] = useState(false);
 
   // Data States
   const [overview, setOverview] = useState<PlatformBillingOverviewData | null>(null);
   const [subscriptions, setSubscriptions] = useState<PlatformSubscriptionItem[]>([]);
   const [invoices, setInvoices] = useState<PlatformInvoiceItemData[]>([]);
+  const [organizations, setOrganizations] = useState<PlatformOrganization[]>([]);
   const [configForm, setConfigForm] = useState<any>({});
+  const [savingConfig, setSavingConfig] = useState(false);
 
-  // Filters & Search
+  // Subscriptions Table Filter & Sort
   const [subSearch, setSubSearch] = useState("");
   const [subStatusFilter, setSubStatusFilter] = useState("all");
+  const [subPlanFilter, setSubPlanFilter] = useState("all");
+  const [subPage, setSubPage] = useState(1);
+  const [subRowsPerPage, setSubRowsPerPage] = useState(10);
+  const [subSortConfig, setSubSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+
+  // Invoices Table Filter & Sort
   const [invSearch, setInvSearch] = useState("");
   const [invStatusFilter, setInvStatusFilter] = useState("all");
+  const [invPage, setInvPage] = useState(1);
+  const [invRowsPerPage, setInvRowsPerPage] = useState(10);
+  const [invSortConfig, setInvSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
 
   // Modals
+  const [isCreateSubModalOpen, setIsCreateSubModalOpen] = useState(false);
+  const [selectedTenantId, setSelectedTenantId] = useState("");
+  const [selectedPlanId, setSelectedPlanId] = useState("growth");
+  const [selectedBillingCycle, setSelectedBillingCycle] = useState<"monthly" | "annual">("monthly");
+  const [selectedSeats, setSelectedSeats] = useState<number>(5);
+  const [isSubmittingSub, setIsSubmittingSub] = useState(false);
+
   const [isRefundModalOpen, setIsRefundModalOpen] = useState(false);
   const [refundTargetInvoice, setRefundTargetInvoice] = useState<PlatformInvoiceItemData | null>(null);
   const [refundAmount, setRefundAmount] = useState<number>(0);
   const [refundReason, setRefundReason] = useState("");
   const [isProcessingRefund, setIsProcessingRefund] = useState(false);
 
+  const [viewInvoiceModalOpen, setViewInvoiceModalOpen] = useState(false);
+  const [selectedInvoice, setSelectedInvoice] = useState<PlatformInvoiceItemData | null>(null);
+
+  useEffect(() => {
+    setIsClient(true);
+  }, []);
+
   const loadData = async () => {
     try {
       setLoading(true);
-      const [ovData, subData, invData, cfgData] = await Promise.all([
-        fetchPlatformBillingOverview(),
-        fetchPlatformSubscriptions({ search: subSearch || undefined, status: subStatusFilter !== "all" ? subStatusFilter : undefined }),
-        fetchPlatformInvoices({ search: invSearch || undefined, status: invStatusFilter !== "all" ? invStatusFilter : undefined }),
-        fetchPlatformBillingSettings(),
+      const [ovData, subData, invData, cfgData, orgsData] = await Promise.all([
+        fetchPlatformBillingOverview().catch(() => null),
+        fetchPlatformSubscriptions({ limit: 1000 }).catch(() => ({ subscriptions: [], pagination: { total: 0 } })),
+        fetchPlatformInvoices({ limit: 1000 }).catch(() => ({ invoices: [], pagination: { total: 0 } })),
+        fetchPlatformBillingSettings().catch(() => ({})),
+        fetchPlatformOrganizations({ limit: 1000 }).catch(() => ({ organizations: [] })),
       ]);
-      setOverview(ovData);
-      setSubscriptions(subData.subscriptions || []);
-      setInvoices(invData.invoices || []);
+
+      if (ovData) setOverview(ovData);
+      setSubscriptions(subData?.subscriptions || []);
+      setInvoices(invData?.invoices || []);
       setConfigForm(cfgData || {});
+      setOrganizations(orgsData?.organizations || []);
     } catch (err: any) {
       toast.error(err.message || "Failed to load platform billing data");
     } finally {
@@ -99,8 +162,45 @@ export default function SuperAdminBillingPage() {
 
   useEffect(() => {
     loadData();
-  }, [subSearch, subStatusFilter, invSearch, invStatusFilter]);
 
+    const handleAal2Verified = () => {
+      loadData();
+    };
+    window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
+    return () => {
+      window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
+    };
+  }, []);
+
+  // Handle Subscription Create / Update Submit
+  const handleCreateSubscriptionSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!selectedTenantId) {
+      toast.error("Please select a workspace / organization.");
+      return;
+    }
+
+    try {
+      setIsSubmittingSub(true);
+      await createOrUpdatePlatformSubscription({
+        tenantId: selectedTenantId,
+        planId: selectedPlanId,
+        billingCycle: selectedBillingCycle,
+        seats: Number(selectedSeats) || 1,
+        status: "ACTIVE",
+      });
+      toast.success("Subscription configured successfully!");
+      setIsCreateSubModalOpen(false);
+      setSelectedTenantId("");
+      loadData();
+    } catch (err: any) {
+      toast.error(err?.response?.data?.message || err?.message || "Failed to configure subscription");
+    } finally {
+      setIsSubmittingSub(false);
+    }
+  };
+
+  // Handle Refund Submit
   const handleRefundSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!refundTargetInvoice) return;
@@ -120,7 +220,7 @@ export default function SuperAdminBillingPage() {
         amount: Number(refundAmount),
         reason: refundReason.trim() || "Customer requested refund",
       });
-      toast.success("Refund processed successfully");
+      toast.success("Refund processed successfully!");
       setIsRefundModalOpen(false);
       setRefundTargetInvoice(null);
       setRefundReason("");
@@ -132,47 +232,194 @@ export default function SuperAdminBillingPage() {
     }
   };
 
+  // Handle Save Billing Settings
   const handleSaveConfig = async (e: React.FormEvent) => {
     e.preventDefault();
     try {
+      setSavingConfig(true);
       await updatePlatformBillingSettings(configForm);
-      toast.success("Platform billing configuration updated");
+      toast.success("Platform billing configuration updated successfully!");
     } catch (err: any) {
       toast.error(err?.response?.data?.message || err?.message || "Failed to update configuration");
+    } finally {
+      setSavingConfig(false);
     }
   };
 
+  // Export CSV Helper
+  const exportCSV = () => {
+    try {
+      if (activeTab === "invoices") {
+        const rows = [
+          ["Invoice Number", "Organization", "Plan", "Seats", "Date", "Subtotal", "Tax", "Total Amount", "Paid Amount", "Status"],
+          ...invoices.map((i) => [
+            i.invoiceNumber,
+            i.tenantName,
+            i.planName,
+            i.seats,
+            new Date(i.invoiceDate).toLocaleDateString(),
+            i.subtotal,
+            i.taxAmount,
+            i.totalAmount,
+            i.paidAmount,
+            i.status,
+          ]),
+        ];
+        const csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `platform_invoices_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Platform invoices exported to CSV.");
+      } else {
+        const rows = [
+          ["Organization", "Plan", "Billing Cycle", "Seats", "Recurring Amount", "Next Renewal", "Status"],
+          ...subscriptions.map((s) => [
+            s.tenantName,
+            s.planName || s.planId,
+            s.billingCycle,
+            s.seats,
+            s.recurringAmount,
+            new Date(s.currentPeriodEnd).toLocaleDateString(),
+            s.status,
+          ]),
+        ];
+        const csvContent = "data:text/csv;charset=utf-8," + rows.map((e) => e.join(",")).join("\n");
+        const encodedUri = encodeURI(csvContent);
+        const link = document.createElement("a");
+        link.setAttribute("href", encodedUri);
+        link.setAttribute("download", `platform_subscriptions_${new Date().toISOString().slice(0, 10)}.csv`);
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+        toast.success("Platform subscriptions exported to CSV.");
+      }
+    } catch {
+      toast.error("Failed to export CSV.");
+    }
+  };
+
+  // Helper Badge for Subscriptions
   const getSubStatusBadge = (st: string) => {
     switch (st?.toUpperCase()) {
       case "ACTIVE":
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><CheckCircle2 className="w-3 h-3" /> ACTIVE</span>;
+        return <StatusBadge status="ACTIVE" variant="emerald" />;
       case "TRIALING":
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20"><Clock className="w-3 h-3" /> TRIALING</span>;
+        return <StatusBadge status="TRIALING" variant="blue" />;
       case "PAST_DUE":
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20"><AlertCircle className="w-3 h-3" /> PAST DUE</span>;
+        return <StatusBadge status="PAST DUE" variant="rose" />;
       case "CANCELED":
       case "CANCELLED":
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/15 text-slate-500 border border-slate-500/20">CANCELED</span>;
+        return <StatusBadge status="CANCELED" variant="neutral" />;
       default:
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-muted text-muted-foreground">{st}</span>;
+        return <StatusBadge status={st || "UNKNOWN"} variant="neutral" />;
     }
   };
 
+  // Helper Badge for Invoices
   const getInvStatusBadge = (st: string, paySt: string) => {
     if (st === "REFUNDED" || paySt === "REFUNDED") {
-      return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-purple-500/15 text-purple-600 dark:text-purple-400 border border-purple-500/20"><RotateCcw className="w-3 h-3" /> REFUNDED</span>;
+      return <StatusBadge status="REFUNDED" variant="purple" />;
     }
     switch (paySt?.toUpperCase()) {
       case "PAID":
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20"><CheckCircle2 className="w-3 h-3" /> PAID</span>;
+        return <StatusBadge status="PAID" variant="emerald" />;
       case "PARTIALLY_REFUNDED":
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">PARTIAL REFUND</span>;
+        return <StatusBadge status="PARTIAL REFUND" variant="amber" />;
       case "PENDING":
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20"><Clock className="w-3 h-3" /> PENDING</span>;
+        return <StatusBadge status="PENDING" variant="amber" />;
+      case "FAILED":
+      case "OVERDUE":
+        return <StatusBadge status={paySt || "OVERDUE"} variant="rose" />;
       default:
-        return <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/15 text-slate-500 border border-slate-500/20">{paySt || st}</span>;
+        return <StatusBadge status={paySt || st || "UNPAID"} variant="neutral" />;
     }
   };
+
+  // Filtered & Sorted Subscriptions
+  const filteredSubscriptions = useMemo(() => {
+    let list = [...subscriptions];
+    if (subSearch.trim()) {
+      const q = subSearch.toLowerCase().trim();
+      list = list.filter(
+        (s) =>
+          s.tenantName?.toLowerCase().includes(q) ||
+          s.planName?.toLowerCase().includes(q) ||
+          s.planId?.toLowerCase().includes(q)
+      );
+    }
+    if (subStatusFilter !== "all") {
+      list = list.filter((s) => s.status?.toLowerCase() === subStatusFilter.toLowerCase());
+    }
+    if (subPlanFilter !== "all") {
+      list = list.filter((s) => s.planId?.toLowerCase() === subPlanFilter.toLowerCase());
+    }
+
+    if (subSortConfig) {
+      list.sort((a, b) => {
+        let valA = (a as any)[subSortConfig.key];
+        let valB = (b as any)[subSortConfig.key];
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+        if (valA < valB) return subSortConfig.direction === "asc" ? -1 : 1;
+        if (valA > valB) return subSortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return list;
+  }, [subscriptions, subSearch, subStatusFilter, subPlanFilter, subSortConfig]);
+
+  const totalSubPages = Math.max(1, Math.ceil(filteredSubscriptions.length / subRowsPerPage));
+  const paginatedSubscriptions = useMemo(() => {
+    return filteredSubscriptions.slice((subPage - 1) * subRowsPerPage, subPage * subRowsPerPage);
+  }, [filteredSubscriptions, subPage, subRowsPerPage]);
+
+  // Filtered & Sorted Invoices
+  const filteredInvoices = useMemo(() => {
+    let list = [...invoices];
+    if (invSearch.trim()) {
+      const q = invSearch.toLowerCase().trim();
+      list = list.filter(
+        (i) =>
+          i.invoiceNumber?.toLowerCase().includes(q) ||
+          i.tenantName?.toLowerCase().includes(q) ||
+          i.planName?.toLowerCase().includes(q)
+      );
+    }
+    if (invStatusFilter !== "all") {
+      if (invStatusFilter === "refunded") {
+        list = list.filter((i) => i.status === "REFUNDED" || i.paymentStatus === "REFUNDED");
+      } else if (invStatusFilter === "paid") {
+        list = list.filter((i) => i.paymentStatus === "PAID" && i.status !== "REFUNDED");
+      } else if (invStatusFilter === "pending") {
+        list = list.filter((i) => i.paymentStatus === "PENDING" || i.status === "PENDING");
+      }
+    }
+
+    if (invSortConfig) {
+      list.sort((a, b) => {
+        let valA = (a as any)[invSortConfig.key];
+        let valB = (b as any)[invSortConfig.key];
+        if (typeof valA === "string") valA = valA.toLowerCase();
+        if (typeof valB === "string") valB = valB.toLowerCase();
+        if (valA < valB) return invSortConfig.direction === "asc" ? -1 : 1;
+        if (valA > valB) return invSortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      });
+    }
+    return list;
+  }, [invoices, invSearch, invStatusFilter, invSortConfig]);
+
+  const totalInvPages = Math.max(1, Math.ceil(filteredInvoices.length / invRowsPerPage));
+  const paginatedInvoices = useMemo(() => {
+    return filteredInvoices.slice((invPage - 1) * invRowsPerPage, invPage * invRowsPerPage);
+  }, [filteredInvoices, invPage, invRowsPerPage]);
+
+  const totalWorkspacesCount = organizations.length || overview?.kpis?.totalOrganizations || 0;
+  const activeSubsCount = overview?.kpis?.activeSubscriptions || subscriptions.length || totalWorkspacesCount;
 
   const kpis = overview?.kpis || {
     mrr: 0,
@@ -182,544 +429,977 @@ export default function SuperAdminBillingPage() {
     pendingRevenue: 0,
     overdueRevenue: 0,
     totalRefunds: 0,
-    activeSubscriptions: 0,
-    totalSubscriptions: 0,
-    totalOrganizations: 0,
+    activeSubscriptions: activeSubsCount,
+    totalSubscriptions: subscriptions.length || totalWorkspacesCount,
+    totalOrganizations: totalWorkspacesCount,
   };
+
+  // Canonical plans array for distribution
+  const planDistribution = useMemo(() => {
+    if (overview?.planDistribution && overview.planDistribution.length > 0) {
+      return overview.planDistribution;
+    }
+    return [
+      { name: "Free", count: totalWorkspacesCount || 0, revenue: 0, percentage: 100 },
+      { name: "Growth", count: 0, revenue: 0, percentage: 0 },
+      { name: "Business", count: 0, revenue: 0, percentage: 0 },
+    ];
+  }, [overview, totalWorkspacesCount]);
+
+  // Safe trend series for Recharts
+  const trendData = useMemo(() => {
+    if (overview?.monthlyTrend && overview.monthlyTrend.length > 0) {
+      return overview.monthlyTrend.map((m) => ({
+        month: m.month,
+        revenue: m.revenue,
+        projected: m.revenue > 0 ? m.revenue : (kpis.mrr || 0),
+        invoices: m.invoicesCount,
+      }));
+    }
+    const months = ["Apr", "May", "Jun", "Jul", "Aug", "Sep"];
+    return months.map((m) => ({
+      month: m,
+      revenue: 0,
+      projected: 0,
+      invoices: 0,
+    }));
+  }, [overview, kpis.mrr]);
 
   return (
     <CRMPageContainer twoStageScroll>
-      <div className="space-y-8 font-sans">
-      {/* Header */}
-      <div className="flex justify-between items-start flex-wrap gap-4">
-        <div>
-          <div className="inline-flex items-center gap-2 px-3 py-1 rounded-full text-xs font-bold bg-primary/10 text-primary border border-primary/20 mb-2">
-            <Shield className="w-3.5 h-3.5" /> ClixPro Platform Revenue & SaaS Billing
-          </div>
-          <h1 className="text-2xl font-black text-foreground tracking-tight">
-            Platform Billing Control Center
-          </h1>
-          <p className="text-xs text-muted-foreground mt-1">
-            Real-time SaaS recurring revenue metrics, organization subscriptions, platform invoices, and gateway payouts.
-          </p>
-        </div>
+      {/* 1. Standard CRM Page Header */}
+      <CRMPageHeader
+        title="Billing & Revenue"
+        subtitle="Manage recurring subscriptions, platform SaaS invoices, gateway payouts, and legal configuration."
+        icon={CreditCard}
+        badge="Platform SaaS Billing"
+        actions={[
+          {
+            label: "Export CSV",
+            icon: Download,
+            onClick: exportCSV,
+            variant: "outline",
+          },
+          {
+            label: "Refresh",
+            icon: RefreshCw,
+            onClick: loadData,
+            variant: "outline",
+          },
+          {
+            label: "Configure Subscription",
+            icon: Plus,
+            onClick: () => setIsCreateSubModalOpen(true),
+            variant: "default",
+          },
+        ]}
+      />
 
-        {/* Global Navigation Tabs */}
+      {/* 2. Global Metric Cards */}
+      <div className="shrink-0">
+        <CRMMetricsGrid cols={4}>
+          <CRMMetricCard
+            title="Monthly Recurring (MRR)"
+            value={formatCurrency(kpis.mrr)}
+            change={kpis.arr > 0 ? `ARR: ${formatCurrency(kpis.arr)}` : "ARR: ₹0"}
+            trend={kpis.mrr > 0 ? "up" : "neutral"}
+            icon={TrendingUp}
+            color="indigo"
+            loading={loading}
+          />
+          <CRMMetricCard
+            title="Total SaaS Revenue"
+            value={formatCurrency(kpis.totalRevenue)}
+            change={`Collected: ${formatCurrency(kpis.paidRevenue)}`}
+            trend={kpis.totalRevenue > 0 ? "up" : "neutral"}
+            icon={IndianRupee}
+            color="emerald"
+            loading={loading}
+          />
+          <CRMMetricCard
+            title="Active Subscriptions"
+            value={activeSubsCount}
+            change={`across ${totalWorkspacesCount} workspaces`}
+            trend="neutral"
+            icon={Users}
+            color="blue"
+            loading={loading}
+          />
+          <CRMMetricCard
+            title="Refunds & Disputes"
+            value={formatCurrency(kpis.totalRefunds)}
+            change="0 active disputes (0.0%)"
+            trend="neutral"
+            icon={RotateCcw}
+            color="purple"
+            loading={loading}
+          />
+        </CRMMetricsGrid>
+      </div>
+
+      {/* 3. Global Navigation Tabs */}
+      <div className="flex items-center justify-between gap-4 flex-wrap border-b border-border/70 pb-3">
         <div className="flex items-center gap-1 bg-muted/40 p-1 rounded-xl border border-border/80 text-xs font-semibold">
           {[
             { id: "overview", label: "Revenue Overview", icon: TrendingUp },
-            { id: "subscriptions", label: "Subscriptions", icon: CreditCard },
-            { id: "invoices", label: "Platform Invoices", icon: Receipt },
+            { id: "subscriptions", label: "Subscriptions", icon: CreditCard, count: subscriptions.length || totalWorkspacesCount },
+            { id: "invoices", label: "Platform Invoices", icon: Receipt, count: invoices.length },
             { id: "settings", label: "Billing Config", icon: Settings },
           ].map((tab) => {
             const Icon = tab.icon;
+            const isCurrent = activeTab === tab.id;
             return (
               <button
                 key={tab.id}
                 onClick={() => setActiveTab(tab.id as any)}
-                className={`flex items-center gap-1.5 px-3 py-1.5 rounded-lg transition-all ${
-                  activeTab === tab.id
-                    ? "bg-card text-foreground shadow-xs font-bold"
+                className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
+                  isCurrent
+                    ? "bg-card text-foreground shadow-xs font-bold border border-border/50"
                     : "text-muted-foreground hover:text-foreground"
                 }`}
               >
                 <Icon className="w-3.5 h-3.5" />
-                {tab.label}
+                <span>{tab.label}</span>
+                {tab.count !== undefined && (
+                  <span
+                    className={`text-[10px] px-1.5 py-0.2 rounded-full font-mono ${
+                      isCurrent
+                        ? "bg-primary/10 text-primary font-bold"
+                        : "bg-muted text-muted-foreground"
+                    }`}
+                  >
+                    {tab.count}
+                  </span>
+                )}
               </button>
             );
           })}
         </div>
-      </div>
 
-      {/* KPI Cards */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
-        <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Monthly Recurring Revenue (MRR)
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-indigo-500/10 flex items-center justify-center text-indigo-600 dark:text-indigo-400">
-              <TrendingUp className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-foreground font-mono">
-              {formatCurrency(kpis.mrr)}
-            </span>
-            <div className="text-[11px] text-muted-foreground mt-1 flex items-center gap-1">
-              <span className="text-indigo-600 dark:text-indigo-400 font-bold">ARR: {formatCurrency(kpis.arr)}</span>
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Total SaaS Revenue
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-              <IndianRupee className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-foreground font-mono">
-              {formatCurrency(kpis.totalRevenue)}
-            </span>
-            <div className="text-[11px] text-emerald-600 dark:text-emerald-400 mt-1 font-bold">
-              Collected: {formatCurrency(kpis.paidRevenue)}
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Active SaaS Subscriptions
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-blue-500/10 flex items-center justify-center text-blue-600 dark:text-blue-400">
-              <Users className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-foreground font-mono">
-              {kpis.activeSubscriptions}
-            </span>
-            <div className="text-[11px] text-muted-foreground mt-1">
-              across {kpis.totalOrganizations} tenant organizations
-            </div>
-          </div>
-        </div>
-
-        <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs relative overflow-hidden">
-          <div className="flex justify-between items-start">
-            <span className="text-xs font-bold text-muted-foreground uppercase tracking-wider">
-              Refunds & Disputes
-            </span>
-            <div className="w-8 h-8 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400">
-              <RotateCcw className="w-4 h-4" />
-            </div>
-          </div>
-          <div className="mt-3">
-            <span className="text-2xl font-black text-foreground font-mono">
-              {formatCurrency(kpis.totalRefunds)}
-            </span>
-            <div className="text-[11px] text-muted-foreground mt-1">
-              Refund rate: &lt; 0.5%
-            </div>
-          </div>
+        <div className="flex items-center gap-2">
+          {activeTab === "subscriptions" && (
+            <Button
+              size="sm"
+              variant="default"
+              onClick={() => setIsCreateSubModalOpen(true)}
+              className="h-8 px-3 text-xs font-semibold gap-1.5"
+            >
+              <Plus className="w-3.5 h-3.5" /> New Subscription
+            </Button>
+          )}
         </div>
       </div>
 
-      {/* TAB CONTENT */}
+      {/* TAB 1: REVENUE OVERVIEW */}
       {activeTab === "overview" && (
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
-          {/* Revenue Trend */}
-          <div className="lg:col-span-2 bg-card border border-border/80 rounded-2xl p-6 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-primary" /> Monthly Platform Revenue Trend (Last 6 Months)
-            </h3>
+        <div className="space-y-6">
+          {/* Zero Data Onboarding Banner if total revenue is 0 */}
+          {kpis.totalRevenue === 0 && (
+            <div className="bg-gradient-to-r from-primary/10 via-primary/5 to-transparent border border-primary/20 rounded-2xl p-4.5 flex items-center justify-between gap-4 flex-wrap">
+              <div className="flex items-center gap-3">
+                <div className="w-9 h-9 rounded-xl bg-primary/20 flex items-center justify-center text-primary shrink-0">
+                  <Sparkles className="w-5 h-5" />
+                </div>
+                <div>
+                  <h4 className="text-xs sm:text-sm font-bold text-foreground">
+                    Ready to scale platform billing across {totalWorkspacesCount} workspaces
+                  </h4>
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Currently all registered organizations are on the Free starter tier. Assign workspaces to Growth or Business tiers to generate recurring revenue.
+                  </p>
+                </div>
+              </div>
+              <Button
+                size="sm"
+                onClick={() => setIsCreateSubModalOpen(true)}
+                className="h-8 px-3.5 text-xs font-semibold gap-1.5"
+              >
+                <Plus className="w-3.5 h-3.5" /> Configure Paid Plan
+              </Button>
+            </div>
+          )}
 
-            <div className="grid grid-cols-6 gap-3 pt-4 items-end h-44">
-              {overview?.monthlyTrend?.map((mt) => {
-                const maxRev = Math.max(...(overview?.monthlyTrend?.map((m) => m.revenue) || [1]), 1000);
-                const heightPercent = Math.max(12, Math.round((mt.revenue / maxRev) * 100));
-                return (
-                  <div key={mt.month} className="flex flex-col items-center gap-2 h-full justify-end">
-                    <span className="text-[10px] font-mono text-muted-foreground font-bold">
-                      {formatCurrency(mt.revenue)}
-                    </span>
-                    <div
-                      style={{ height: `${heightPercent}%` }}
-                      className="w-full bg-primary/20 hover:bg-primary/40 rounded-xl transition-all relative group border border-primary/30"
-                    />
-                    <span className="text-xs font-bold text-foreground">{mt.month}</span>
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            {/* Revenue Trend Visualizer */}
+            <div className="lg:col-span-2 bg-card border border-border/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4">
+              <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 pb-3">
+                <div>
+                  <div className="flex items-center gap-2">
+                    <div className="p-1.5 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border border-indigo-500/20">
+                      <TrendingUp className="w-4 h-4" />
+                    </div>
+                    <h3 className="text-sm sm:text-base font-bold text-foreground">
+                      Monthly Platform Revenue Trend
+                    </h3>
                   </div>
-                );
-              })}
+                  <p className="text-xs text-muted-foreground mt-0.5">
+                    Historical SaaS recurring revenue and run-rate trajectory (6 Months)
+                  </p>
+                </div>
+                <div className="flex items-center gap-2">
+                  <span className="text-[11px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 px-2.5 py-1 rounded-full border border-indigo-500/20">
+                    MRR Trajectory
+                  </span>
+                </div>
+              </div>
+
+              {/* Quick Metrics Bar */}
+              <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 pt-1">
+                <div className="rounded-xl bg-muted/40 border border-border/40 p-2.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Current MRR</span>
+                  <p className="text-sm sm:text-base font-bold font-mono text-foreground mt-0.5">
+                    {formatCurrency(kpis.mrr)}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-muted/40 border border-border/40 p-2.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Projected ARR</span>
+                  <p className="text-sm sm:text-base font-bold font-mono text-indigo-600 dark:text-indigo-400 mt-0.5">
+                    {formatCurrency(kpis.arr)}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-muted/40 border border-border/40 p-2.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Invoices Issued</span>
+                  <p className="text-sm sm:text-base font-bold font-mono text-foreground mt-0.5">
+                    {invoices.length}
+                  </p>
+                </div>
+                <div className="rounded-xl bg-muted/40 border border-border/40 p-2.5">
+                  <span className="text-[10px] font-semibold text-muted-foreground uppercase">Settlement Rate</span>
+                  <p className="text-sm sm:text-base font-bold text-emerald-600 dark:text-emerald-400 mt-0.5">
+                    100%
+                  </p>
+                </div>
+              </div>
+
+              {/* Chart Component */}
+              <div className="h-56 w-full pt-2">
+                {isClient ? (
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="billingRevGrad" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
+                      <XAxis
+                        dataKey="month"
+                        stroke="var(--muted-foreground)"
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
+                      />
+                      <YAxis
+                        stroke="var(--muted-foreground)"
+                        fontSize={10}
+                        tickLine={false}
+                        axisLine={false}
+                        tickFormatter={(val) => `₹${val}`}
+                      />
+                      <RechartsTooltip
+                        contentStyle={{
+                          backgroundColor: "var(--card)",
+                          borderColor: "var(--border)",
+                          borderRadius: "12px",
+                          fontSize: "11px",
+                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                        }}
+                        formatter={(val: any) => [formatCurrency(Number(val)), "Revenue"]}
+                        labelStyle={{ fontWeight: "bold", color: "var(--foreground)" }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="revenue"
+                        stroke="#6366f1"
+                        strokeWidth={2.5}
+                        fillOpacity={1}
+                        fill="url(#billingRevGrad)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
+                ) : (
+                  <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
+                    Loading trend analytics...
+                  </div>
+                )}
+              </div>
+            </div>
+
+            {/* Subscriptions by Plan */}
+            <div className="bg-card border border-border/80 rounded-2xl p-5 sm:p-6 shadow-xs flex flex-col justify-between space-y-4">
+              <div>
+                <div className="flex justify-between items-center border-b border-border/40 pb-3">
+                  <div>
+                    <h3 className="text-sm sm:text-base font-bold text-foreground flex items-center gap-2">
+                      <Sparkles className="w-4 h-4 text-primary" /> Subscriptions by Plan
+                    </h3>
+                    <p className="text-xs text-muted-foreground mt-0.5">
+                      Tenant distribution across subscription tiers
+                    </p>
+                  </div>
+                  <span className="text-[11px] font-bold text-muted-foreground">
+                    {totalWorkspacesCount} Workspaces
+                  </span>
+                </div>
+
+                <div className="space-y-3.5 pt-4">
+                  {planDistribution.map((p) => {
+                    const pct = p.percentage || 0;
+                    return (
+                      <div
+                        key={p.name}
+                        className="p-3 rounded-xl bg-muted/20 border border-border/60 hover:bg-muted/30 transition-all space-y-2"
+                      >
+                        <div className="flex items-center justify-between">
+                          <div className="flex items-center gap-2">
+                            <PlanBadge plan={p.name} size="sm" />
+                            <span className="text-xs font-bold text-foreground capitalize">{p.name} Tier</span>
+                          </div>
+                          <span className="text-xs font-mono font-bold text-foreground">
+                            {p.count} {p.count === 1 ? "org" : "orgs"}
+                          </span>
+                        </div>
+
+                        {/* Progress bar */}
+                        <div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden">
+                          <div
+                            style={{ width: `${Math.max(4, pct)}%` }}
+                            className={`h-full rounded-full transition-all ${
+                              p.name.toLowerCase() === "free"
+                                ? "bg-slate-400 dark:bg-slate-600"
+                                : p.name.toLowerCase() === "growth" || p.name.toLowerCase() === "pro"
+                                ? "bg-emerald-500"
+                                : "bg-indigo-500"
+                            }`}
+                          />
+                        </div>
+
+                        <div className="flex justify-between items-center text-[10px] text-muted-foreground">
+                          <span>{pct}% of total workspaces</span>
+                          <span className="font-mono font-semibold text-foreground">
+                            {formatCurrency(p.revenue)}/mo
+                          </span>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+
+              <div className="pt-3 border-t border-border/60 flex items-center justify-between text-xs">
+                <span className="text-muted-foreground font-semibold">Total Projected ARR</span>
+                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
+                  {formatCurrency(kpis.arr)}
+                </span>
+              </div>
             </div>
           </div>
 
-          {/* Plan Distribution */}
-          <div className="bg-card border border-border/80 rounded-2xl p-6 shadow-xs space-y-4">
-            <h3 className="text-sm font-bold text-foreground flex items-center gap-2">
-              <Sparkles className="w-4 h-4 text-primary" /> Subscriptions by Plan
-            </h3>
+          {/* SaaS Health & Cash Flow Breakdown */}
+          <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+            <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+                <CheckCircle2 className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground font-semibold">Collected Revenue</span>
+                <div className="text-lg font-black text-foreground font-mono mt-0.5">
+                  {formatCurrency(kpis.paidRevenue)}
+                </div>
+                <span className="text-[11px] text-emerald-600 dark:text-emerald-400 font-semibold">Settled successfully</span>
+              </div>
+            </div>
 
-            <div className="space-y-3 pt-2">
-              {overview?.planDistribution?.length === 0 ? (
-                <p className="text-xs text-muted-foreground">No active subscription breakdown available.</p>
-              ) : (
-                overview?.planDistribution?.map((p) => (
-                  <div
-                    key={p.name}
-                    className="p-3 rounded-xl bg-muted/20 border border-border/60 flex items-center justify-between"
-                  >
-                    <div>
-                      <span className="text-xs font-bold text-foreground capitalize block">{p.name}</span>
-                      <span className="text-[11px] text-muted-foreground">{p.count} active subscribers</span>
-                    </div>
-                    <span className="text-xs font-mono font-bold text-foreground">
-                      {formatCurrency(p.revenue)}/mo
-                    </span>
-                  </div>
-                ))
-              )}
+            <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+                <Clock className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground font-semibold">Pending Invoices</span>
+                <div className="text-lg font-black text-foreground font-mono mt-0.5">
+                  {formatCurrency(kpis.pendingRevenue)}
+                </div>
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Awaiting payment</span>
+              </div>
+            </div>
+
+            <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs flex items-center gap-4">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+                <Shield className="w-5 h-5" />
+              </div>
+              <div>
+                <span className="text-xs text-muted-foreground font-semibold">Gateway Status</span>
+                <div className="text-lg font-black text-foreground uppercase mt-0.5">
+                  {configForm.paymentGateway || "Razorpay / Stripe"}
+                </div>
+                <span className="text-[11px] text-muted-foreground">GST: {configForm.gstin || "29AAAAA0000A1Z5"}</span>
+              </div>
             </div>
           </div>
         </div>
       )}
 
-      {/* TAB 2: Subscriptions Table */}
+      {/* TAB 2: SUBSCRIPTIONS TABLE */}
       {activeTab === "subscriptions" && (
         <div className="crm-table-workspace-sticky">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="relative w-72">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
-              <Input
-                placeholder="Search organizations..."
-                value={subSearch}
-                onChange={(e) => setSubSearch(e.target.value)}
-                className="pl-9 h-9 text-xs"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              {["all", "active", "trialing", "past_due", "canceled"].map((st) => (
-                <Button
-                  key={st}
-                  variant={subStatusFilter === st ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setSubStatusFilter(st)}
-                  className="h-8 px-3 text-xs font-semibold capitalize"
-                >
-                  {st.replace(/_/g, " ")}
-                </Button>
-              ))}
-            </div>
-          </div>
+          <CRMToolbar
+            searchQuery={subSearch}
+            setSearchQuery={setSubSearch}
+            placeholder="Search by organization or plan..."
+            sticky={false}
+          >
+            <div className="flex items-center gap-2 flex-wrap">
+              {/* Status Filter */}
+              <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded-lg border border-border">
+                {["all", "active", "trialing", "past_due", "canceled"].map((st) => (
+                  <button
+                    key={st}
+                    onClick={() => {
+                      setSubStatusFilter(st);
+                      setSubPage(1);
+                    }}
+                    className={`h-7 px-2.5 rounded-md text-xs font-semibold capitalize transition-all ${
+                      subStatusFilter === st
+                        ? "bg-card text-foreground shadow-xs font-bold"
+                        : "text-muted-foreground hover:text-foreground"
+                    }`}
+                  >
+                    {st.replace(/_/g, " ")}
+                  </button>
+                ))}
+              </div>
 
-          <div className="crm-table-wrap">
+              {/* Plan Filter */}
+              <select
+                value={subPlanFilter}
+                onChange={(e) => {
+                  setSubPlanFilter(e.target.value);
+                  setSubPage(1);
+                }}
+                className="h-8 px-2.5 rounded-lg bg-card border border-border text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
+              >
+                <option value="all">All Plans</option>
+                <option value="free">Free</option>
+                <option value="growth">Growth / Pro</option>
+                <option value="business">Business / Enterprise</option>
+              </select>
+            </div>
+          </CRMToolbar>
+
+          <div className={cn("crm-table-wrap", (loading || filteredSubscriptions.length <= subRowsPerPage) && "crm-table-no-pagination")}>
             <div className="overflow-auto flex-1 min-h-0">
-              <table className="w-full text-xs">
-              <thead className="sticky top-0 z-20 bg-muted/10 border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                <tr>
-                  <th className="h-10 sm:h-11 py-2.5 px-4 text-left bg-card whitespace-nowrap">Organization</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Plan</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Billing Cycle</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Seats</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Recurring Amount</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Next Renewal</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Status</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="animate-pulse h-12">
-                      <td className="py-3 px-4"><div className="h-4 w-32 bg-muted rounded" /></td>
-                      <td className="py-3 px-3"><div className="h-4 w-20 bg-muted rounded" /></td>
-                      <td className="py-3 px-3 text-center"><div className="h-4 w-16 bg-muted rounded mx-auto" /></td>
-                      <td className="py-3 px-3 text-center"><div className="h-4 w-8 bg-muted rounded mx-auto" /></td>
-                      <td className="py-3 px-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
-                      <td className="py-3 px-3"><div className="h-4 w-24 bg-muted rounded" /></td>
-                      <td className="py-3 px-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
-                    </tr>
-                  ))
-                ) : subscriptions.length === 0 ? (
-                  <tr>
-                    <td colSpan={7} className="py-8 text-center text-muted-foreground">
-                      No platform subscriptions found.
-                    </td>
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                  <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+                      <DataTableColumnHeader
+                        title="Organization"
+                        sortable
+                        sortDirection={subSortConfig?.key === "tenantName" ? subSortConfig.direction : null}
+                        onSort={(d) => setSubSortConfig(d ? { key: "tenantName", direction: d } : null)}
+                      />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Plan Tier" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Billing Cycle" align="center" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Seats" align="right" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap cursor-pointer select-none">
+                      <DataTableColumnHeader
+                        title="Recurring Amount"
+                        align="right"
+                        sortable
+                        sortDirection={subSortConfig?.key === "recurringAmount" ? subSortConfig.direction : null}
+                        onSort={(d) => setSubSortConfig(d ? { key: "recurringAmount", direction: d } : null)}
+                      />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Next Renewal" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Status" align="center" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Actions" align="right" />
+                    </th>
                   </tr>
-                ) : (
-                  subscriptions.map((sub) => (
-                    <tr key={sub.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="py-3 px-4 font-bold text-foreground max-w-[200px]">
-                        <div className="flex items-center gap-2 min-w-0">
-                          <Building2 className="w-4 h-4 text-primary shrink-0" />
-                          <TruncatedText text={sub.tenantName} lines={1} className="font-bold text-foreground" />
-                        </div>
-                      </td>
-                      <td className="py-3 px-3 capitalize font-semibold text-foreground max-w-[150px]">
-                        <TruncatedText text={sub.planName || sub.planId} lines={1} />
-                      </td>
-                      <td className="py-3 px-3 text-center capitalize text-muted-foreground">
-                        {sub.billingCycle}
-                      </td>
-                      <td className="py-3 px-3 text-center font-mono font-medium">
-                        {sub.seats}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold text-foreground">
-                        {formatCurrency(sub.recurringAmount, sub.currency)}
-                      </td>
-                      <td className="py-3 px-3 text-muted-foreground">
-                        {new Date(sub.currentPeriodEnd).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {getSubStatusBadge(sub.status)}
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="animate-pulse h-14">
+                        <td className="px-6 py-3"><div className="h-4 w-36 bg-muted rounded" /></td>
+                        <td className="px-6 py-3"><div className="h-5 w-20 bg-muted rounded-full" /></td>
+                        <td className="px-6 py-3 text-center"><div className="h-4 w-16 bg-muted rounded mx-auto" /></td>
+                        <td className="px-6 py-3 text-right"><div className="h-4 w-8 bg-muted rounded ml-auto" /></td>
+                        <td className="px-6 py-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
+                        <td className="px-6 py-3"><div className="h-4 w-24 bg-muted rounded" /></td>
+                        <td className="px-6 py-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
+                        <td className="px-6 py-3 text-right"><div className="h-7 w-14 bg-muted rounded ml-auto" /></td>
+                      </tr>
+                    ))
+                  ) : paginatedSubscriptions.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-12">
+                        <EmptyState
+                          title="No platform subscriptions found"
+                          description="No tenant organizations match your search or filter criteria."
+                          icon={CreditCard}
+                          action={{
+                            label: "Create Subscription",
+                            onClick: () => setIsCreateSubModalOpen(true),
+                          }}
+                        />
                       </td>
                     </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
-            </div>
-          </div>
-        </div>
-      )}
-
-      {/* TAB 3: Platform Invoices Table */}
-      {activeTab === "invoices" && (
-        <div className="crm-table-workspace-sticky">
-          <div className="flex items-center justify-between gap-4 flex-wrap">
-            <div className="relative w-72">
-              <Search className="w-4 h-4 absolute left-3 top-2.5 text-muted-foreground" />
-              <Input
-                placeholder="Search by invoice # or tenant..."
-                value={invSearch}
-                onChange={(e) => setInvSearch(e.target.value)}
-                className="pl-9 h-9 text-xs"
-              />
-            </div>
-            <div className="flex items-center gap-2">
-              {["all", "paid", "refunded"].map((st) => (
-                <Button
-                  key={st}
-                  variant={invStatusFilter === st ? "secondary" : "ghost"}
-                  size="sm"
-                  onClick={() => setInvStatusFilter(st)}
-                  className="h-8 px-3 text-xs font-semibold capitalize"
-                >
-                  {st}
-                </Button>
-              ))}
-            </div>
-          </div>
-
-          <div className="crm-table-wrap">
-            <div className="overflow-auto flex-1 min-h-0">
-              <table className="w-full text-xs">
-              <thead className="sticky top-0 z-20 bg-muted/10 border-b border-border/60 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                <tr>
-                  <th className="h-10 sm:h-11 py-2.5 px-4 text-left bg-card whitespace-nowrap">Platform Invoice #</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Organization (Tenant)</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Plan &amp; Seats</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-left bg-card whitespace-nowrap">Date</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Tax (GST)</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-right bg-card whitespace-nowrap">Total Amount</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Status</th>
-                  <th className="h-10 sm:h-11 py-2.5 px-3 sm:px-4 text-center bg-card whitespace-nowrap">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="animate-pulse h-12">
-                      <td className="py-3 px-4"><div className="h-4 w-24 bg-muted rounded font-mono" /></td>
-                      <td className="py-3 px-3"><div className="h-4 w-32 bg-muted rounded" /></td>
-                      <td className="py-3 px-3"><div className="h-4 w-28 bg-muted rounded" /></td>
-                      <td className="py-3 px-3"><div className="h-4 w-20 bg-muted rounded" /></td>
-                      <td className="py-3 px-3 text-right"><div className="h-4 w-16 bg-muted rounded ml-auto" /></td>
-                      <td className="py-3 px-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
-                      <td className="py-3 px-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
-                      <td className="py-3 px-3 text-center"><div className="h-6 w-14 bg-muted rounded mx-auto" /></td>
-                    </tr>
-                  ))
-                ) : invoices.length === 0 ? (
-                  <tr>
-                    <td colSpan={8} className="py-8 text-center text-muted-foreground">
-                      No platform SaaS invoices found.
-                    </td>
-                  </tr>
-                ) : (
-                  invoices.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-foreground">
-                        {inv.invoiceNumber}
-                      </td>
-                      <td className="py-3 px-3 font-semibold text-foreground max-w-[200px]">
-                        <TruncatedText text={inv.tenantName} lines={1} className="font-semibold text-foreground" />
-                      </td>
-                      <td className="py-3 px-3 text-muted-foreground capitalize max-w-[160px]">
-                        <TruncatedText text={`${inv.planName} (${inv.seats} seats)`} lines={1} />
-                      </td>
-                      <td className="py-3 px-3 text-muted-foreground">
-                        {new Date(inv.invoiceDate).toLocaleDateString("en-IN", {
-                          day: "2-digit",
-                          month: "short",
-                          year: "numeric",
-                        })}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono text-muted-foreground">
-                        {formatCurrency(inv.taxAmount, inv.currency)}
-                      </td>
-                      <td className="py-3 px-3 text-right font-mono font-bold text-foreground">
-                        {formatCurrency(inv.totalAmount, inv.currency)}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {getInvStatusBadge(inv.status, inv.paymentStatus)}
-                      </td>
-                      <td className="py-3 px-3 text-center">
-                        {inv.paymentStatus === "PAID" && (
+                  ) : (
+                    paginatedSubscriptions.map((sub) => (
+                      <tr key={sub.id} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-6 py-3.5 font-bold text-foreground">
+                          <div className="flex items-center gap-2.5 min-w-0">
+                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold text-xs">
+                              {sub.tenantName?.charAt(0)?.toUpperCase() || "O"}
+                            </div>
+                            <div className="min-w-0">
+                              <TruncatedText text={sub.tenantName} lines={1} className="font-bold text-foreground text-xs" />
+                              <span className="text-[10px] text-muted-foreground font-mono block">
+                                ID: {sub.tenantId?.slice(0, 8)}...
+                              </span>
+                            </div>
+                          </div>
+                        </td>
+                        <td className="px-6 py-3.5">
+                          <PlanBadge plan={sub.planName || sub.planId} size="sm" />
+                        </td>
+                        <td className="px-6 py-3.5 text-center capitalize text-xs text-muted-foreground font-medium">
+                          <span className="px-2 py-0.5 rounded-md bg-muted/40 border border-border/60">
+                            {sub.billingCycle}
+                          </span>
+                        </td>
+                        <td className="px-6 py-3.5 text-right font-mono font-medium text-xs">
+                          {sub.seats}
+                        </td>
+                        <td className="px-6 py-3.5 text-right font-mono font-bold text-foreground text-xs">
+                          {formatCurrency(sub.recurringAmount, sub.currency)}
+                        </td>
+                        <td className="px-6 py-3.5 text-xs text-muted-foreground">
+                          {new Date(sub.currentPeriodEnd).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td className="px-6 py-3.5 text-center">
+                          {getSubStatusBadge(sub.status)}
+                        </td>
+                        <td className="px-6 py-3.5 text-right">
                           <Button
                             variant="outline"
                             size="sm"
                             onClick={() => {
-                              setRefundTargetInvoice(inv);
-                              setRefundAmount(inv.paidAmount);
-                              setIsRefundModalOpen(true);
+                              setSelectedTenantId(sub.tenantId);
+                              setSelectedPlanId(sub.planId || "growth");
+                              setSelectedBillingCycle((sub.billingCycle as any) || "monthly");
+                              setSelectedSeats(sub.seats || 5);
+                              setIsCreateSubModalOpen(true);
                             }}
-                            className="h-7 px-2.5 text-[11px] text-purple-600 hover:text-purple-700 hover:bg-purple-500/10 font-semibold gap-1"
+                            className="h-7 px-2.5 text-[11px] font-semibold"
                           >
-                            <RotateCcw className="w-3 h-3" /> Refund
+                            Edit
                           </Button>
-                        )}
-                      </td>
-                    </tr>
-                  ))
-                )}
-              </tbody>
-            </table>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
             </div>
+
+            {/* Pagination */}
+            {filteredSubscriptions.length > subRowsPerPage && (
+              <CRMPagination
+                currentPage={subPage}
+                totalPages={totalSubPages}
+                totalItems={filteredSubscriptions.length}
+                rowsPerPage={subRowsPerPage}
+                onPageChange={setSubPage}
+                onRowsPerPageChange={(rows: number) => {
+                  setSubRowsPerPage(rows);
+                  setSubPage(1);
+                }}
+              />
+            )}
           </div>
         </div>
       )}
 
-      {/* TAB 4: Billing Configuration */}
-      {activeTab === "settings" && (
-        <form onSubmit={handleSaveConfig} className="bg-card border border-border/80 rounded-2xl p-6 shadow-xs space-y-6">
-          <div className="flex justify-between items-center pb-4 border-b border-border/80">
-            <div>
-              <h3 className="text-base font-bold text-foreground">
-                ClixPro Platform SaaS Legal & Invoicing Configuration
-              </h3>
-              <p className="text-xs text-muted-foreground">
-                Company legal details used when generating SaaS invoices for organizations purchasing ClixPro plans.
-              </p>
+      {/* TAB 3: PLATFORM INVOICES TABLE */}
+      {activeTab === "invoices" && (
+        <div className="crm-table-workspace-sticky">
+          <CRMToolbar
+            searchQuery={invSearch}
+            setSearchQuery={setInvSearch}
+            placeholder="Search by invoice # or organization..."
+            sticky={false}
+          >
+            <div className="flex items-center gap-1 bg-muted/40 p-0.5 rounded-lg border border-border">
+              {["all", "paid", "pending", "refunded"].map((st) => (
+                <button
+                  key={st}
+                  onClick={() => {
+                    setInvStatusFilter(st);
+                    setInvPage(1);
+                  }}
+                  className={`h-7 px-2.5 rounded-md text-xs font-semibold capitalize transition-all ${
+                    invStatusFilter === st
+                      ? "bg-card text-foreground shadow-xs font-bold"
+                      : "text-muted-foreground hover:text-foreground"
+                  }`}
+                >
+                  {st}
+                </button>
+              ))}
             </div>
-            <Button type="submit" size="sm" className="gap-1.5 text-xs font-semibold">
-              <Save className="w-3.5 h-3.5" /> Save Configuration
-            </Button>
+          </CRMToolbar>
+
+          <div className={cn("crm-table-wrap", (loading || filteredInvoices.length <= invRowsPerPage) && "crm-table-no-pagination")}>
+            <div className="overflow-auto flex-1 min-h-0">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                  <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+                      <DataTableColumnHeader
+                        title="Platform Invoice #"
+                        sortable
+                        sortDirection={invSortConfig?.key === "invoiceNumber" ? invSortConfig.direction : null}
+                        onSort={(d) => setInvSortConfig(d ? { key: "invoiceNumber", direction: d } : null)}
+                      />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Organization (Tenant)" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Plan & Seats" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+                      <DataTableColumnHeader
+                        title="Date"
+                        sortable
+                        sortDirection={invSortConfig?.key === "invoiceDate" ? invSortConfig.direction : null}
+                        onSort={(d) => setInvSortConfig(d ? { key: "invoiceDate", direction: d } : null)}
+                      />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Tax (GST)" align="right" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap cursor-pointer select-none">
+                      <DataTableColumnHeader
+                        title="Total Amount"
+                        align="right"
+                        sortable
+                        sortDirection={invSortConfig?.key === "totalAmount" ? invSortConfig.direction : null}
+                        onSort={(d) => setInvSortConfig(d ? { key: "totalAmount", direction: d } : null)}
+                      />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Status" align="center" />
+                    </th>
+                    <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                      <DataTableColumnHeader title="Actions" align="right" />
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {loading ? (
+                    Array.from({ length: 5 }).map((_, i) => (
+                      <tr key={i} className="animate-pulse h-14">
+                        <td className="px-6 py-3"><div className="h-4 w-28 bg-muted rounded font-mono" /></td>
+                        <td className="px-6 py-3"><div className="h-4 w-36 bg-muted rounded" /></td>
+                        <td className="px-6 py-3"><div className="h-4 w-24 bg-muted rounded" /></td>
+                        <td className="px-6 py-3"><div className="h-4 w-20 bg-muted rounded" /></td>
+                        <td className="px-6 py-3 text-right"><div className="h-4 w-16 bg-muted rounded ml-auto" /></td>
+                        <td className="px-6 py-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
+                        <td className="px-6 py-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
+                        <td className="px-6 py-3 text-right"><div className="h-7 w-20 bg-muted rounded ml-auto" /></td>
+                      </tr>
+                    ))
+                  ) : paginatedInvoices.length === 0 ? (
+                    <tr>
+                      <td colSpan={8} className="py-12">
+                        <EmptyState
+                          title="No platform SaaS invoices found"
+                          description="No platform invoices match your search or filter criteria."
+                          icon={Receipt}
+                        />
+                      </td>
+                    </tr>
+                  ) : (
+                    paginatedInvoices.map((inv) => (
+                      <tr key={inv.id} className="hover:bg-muted/20 transition-colors">
+                        <td className="px-6 py-3.5 font-mono font-bold text-foreground text-xs">
+                          {inv.invoiceNumber}
+                        </td>
+                        <td className="px-6 py-3.5 font-semibold text-foreground text-xs max-w-[200px]">
+                          <div className="flex items-center gap-2 min-w-0">
+                            <Building2 className="w-4 h-4 text-primary shrink-0" />
+                            <TruncatedText text={inv.tenantName} lines={1} className="font-semibold text-foreground" />
+                          </div>
+                        </td>
+                        <td className="px-6 py-3.5 text-muted-foreground capitalize text-xs max-w-[160px]">
+                          <TruncatedText text={`${inv.planName} (${inv.seats} seats)`} lines={1} />
+                        </td>
+                        <td className="px-6 py-3.5 text-xs text-muted-foreground">
+                          {new Date(inv.invoiceDate).toLocaleDateString("en-IN", {
+                            day: "2-digit",
+                            month: "short",
+                            year: "numeric",
+                          })}
+                        </td>
+                        <td className="px-6 py-3.5 text-right font-mono text-muted-foreground text-xs">
+                          {formatCurrency(inv.taxAmount, inv.currency)}
+                        </td>
+                        <td className="px-6 py-3.5 text-right font-mono font-bold text-foreground text-xs">
+                          {formatCurrency(inv.totalAmount, inv.currency)}
+                        </td>
+                        <td className="px-6 py-3.5 text-center">
+                          {getInvStatusBadge(inv.status, inv.paymentStatus)}
+                        </td>
+                        <td className="px-6 py-3.5 text-right">
+                          <div className="flex items-center justify-end gap-1.5">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => {
+                                setSelectedInvoice(inv);
+                                setViewInvoiceModalOpen(true);
+                              }}
+                              className="h-7 px-2 text-[11px] text-muted-foreground hover:text-foreground"
+                              title="View Invoice"
+                            >
+                              <Eye className="w-3.5 h-3.5" />
+                            </Button>
+                            {inv.paymentStatus === "PAID" && (
+                              <Button
+                                variant="outline"
+                                size="sm"
+                                onClick={() => {
+                                  setRefundTargetInvoice(inv);
+                                  setRefundAmount(inv.paidAmount);
+                                  setIsRefundModalOpen(true);
+                                }}
+                                className="h-7 px-2.5 text-[11px] text-purple-600 hover:text-purple-700 hover:bg-purple-500/10 font-semibold gap-1"
+                              >
+                                <RotateCcw className="w-3 h-3" /> Refund
+                              </Button>
+                            )}
+                          </div>
+                        </td>
+                      </tr>
+                    ))
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Pagination */}
+            {filteredInvoices.length > invRowsPerPage && (
+              <CRMPagination
+                currentPage={invPage}
+                totalPages={totalInvPages}
+                totalItems={filteredInvoices.length}
+                rowsPerPage={invRowsPerPage}
+                onPageChange={setInvPage}
+                onRowsPerPageChange={(rows: number) => {
+                  setInvRowsPerPage(rows);
+                  setInvPage(1);
+                }}
+              />
+            )}
           </div>
+        </div>
+      )}
 
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
+      {/* TAB 4: BILLING CONFIGURATION */}
+      {activeTab === "settings" && (
+        <form onSubmit={handleSaveConfig} className="space-y-6">
+          <div className="bg-card border border-border/80 rounded-2xl p-6 shadow-xs space-y-6">
+            <div className="flex justify-between items-center pb-4 border-b border-border/80 flex-wrap gap-4">
               <div>
-                <Label className="text-xs font-semibold text-foreground mb-1">Company Legal Entity</Label>
-                <Input
-                  value={configForm.companyLegalName || ""}
-                  onChange={(e) => setConfigForm({ ...configForm, companyLegalName: e.target.value })}
-                  placeholder="ClixPro Technologies Pvt. Ltd."
-                  className="h-8 text-xs font-semibold"
-                />
+                <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                  <Shield className="w-4 h-4 text-primary" /> ClixPro Platform Legal & Invoicing Configuration
+                </h3>
+                <p className="text-xs text-muted-foreground mt-0.5">
+                  Platform legal and banking details printed on invoices generated when customer organizations subscribe.
+                </p>
               </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">Platform GSTIN</Label>
-                  <Input
-                    value={configForm.gstin || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, gstin: e.target.value.toUpperCase() })}
-                    placeholder="29AAAAA0000A1Z5"
-                    className="h-8 text-xs font-mono"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">Platform PAN</Label>
-                  <Input
-                    value={configForm.pan || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, pan: e.target.value.toUpperCase() })}
-                    placeholder="AAAAA0000A"
-                    className="h-8 text-xs font-mono"
-                  />
-                </div>
-              </div>
-
-              <div className="grid grid-cols-2 gap-3">
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">Platform Invoice Prefix</Label>
-                  <Input
-                    value={configForm.invoicePrefix || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, invoicePrefix: e.target.value.toUpperCase() })}
-                    placeholder="CP-INV"
-                    className="h-8 text-xs font-mono font-bold"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">Platform GST Rate (%)</Label>
-                  <Input
-                    type="number"
-                    value={configForm.taxRate || 18}
-                    onChange={(e) => setConfigForm({ ...configForm, taxRate: Number(e.target.value) })}
-                    placeholder="18"
-                    className="h-8 text-xs font-mono font-bold"
-                  />
-                </div>
-              </div>
+              <Button type="submit" size="sm" disabled={savingConfig} className="gap-1.5 text-xs font-semibold">
+                {savingConfig ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Save className="w-3.5 h-3.5" />}
+                Save Configuration
+              </Button>
             </div>
 
-            <div className="space-y-4">
-              <div>
-                <Label className="text-xs font-semibold text-foreground mb-1">Billing Street Address</Label>
-                <Input
-                  value={configForm.billingAddress || ""}
-                  onChange={(e) => setConfigForm({ ...configForm, billingAddress: e.target.value })}
-                  placeholder="Level 4, Cyber City"
-                  className="h-8 text-xs"
-                />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              {/* Left Column: Legal Identity & Invoicing */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Briefcase className="w-3.5 h-3.5 text-primary" /> Legal Entity & Tax
+                </h4>
+
+                <div>
+                  <Label className="text-xs font-semibold text-foreground mb-1">Company Legal Entity Name</Label>
+                  <Input
+                    value={configForm.companyLegalName || ""}
+                    onChange={(e) => setConfigForm({ ...configForm, companyLegalName: e.target.value })}
+                    placeholder="ClixPro Technologies Pvt. Ltd."
+                    className="h-8 text-xs font-semibold"
+                  />
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Platform GSTIN</Label>
+                    <Input
+                      value={configForm.gstin || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, gstin: e.target.value.toUpperCase() })}
+                      placeholder="29AAAAA0000A1Z5"
+                      className="h-8 text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Platform PAN</Label>
+                    <Input
+                      value={configForm.pan || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, pan: e.target.value.toUpperCase() })}
+                      placeholder="AAAAA0000A"
+                      className="h-8 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Invoice Prefix</Label>
+                    <Input
+                      value={configForm.invoicePrefix || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, invoicePrefix: e.target.value.toUpperCase() })}
+                      placeholder="CP-INV"
+                      className="h-8 text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">GST Rate (%)</Label>
+                    <Input
+                      type="number"
+                      value={configForm.taxRate || 18}
+                      onChange={(e) => setConfigForm({ ...configForm, taxRate: Number(e.target.value) })}
+                      placeholder="18"
+                      className="h-8 text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Due Terms (Days)</Label>
+                    <Input
+                      type="number"
+                      value={configForm.paymentTermsDays || 15}
+                      onChange={(e) => setConfigForm({ ...configForm, paymentTermsDays: Number(e.target.value) })}
+                      placeholder="15"
+                      className="h-8 text-xs font-mono"
+                    />
+                  </div>
+                </div>
               </div>
 
-              <div className="grid grid-cols-3 gap-2">
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">City</Label>
-                  <Input
-                    value={configForm.city || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, city: e.target.value })}
-                    placeholder="Bengaluru"
-                    className="h-8 text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">State</Label>
-                  <Input
-                    value={configForm.state || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, state: e.target.value })}
-                    placeholder="Karnataka"
-                    className="h-8 text-xs"
-                  />
-                </div>
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">Postal Code</Label>
-                  <Input
-                    value={configForm.postalCode || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, postalCode: e.target.value })}
-                    placeholder="560100"
-                    className="h-8 text-xs font-mono"
-                  />
-                </div>
-              </div>
+              {/* Right Column: Address & Banking */}
+              <div className="space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+                  <Building2 className="w-3.5 h-3.5 text-primary" /> Registered Address & Settlement
+                </h4>
 
-              <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">Bank Name</Label>
+                  <Label className="text-xs font-semibold text-foreground mb-1">Registered Address</Label>
                   <Input
-                    value={configForm.bankName || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, bankName: e.target.value })}
-                    placeholder="ICICI Bank"
+                    value={configForm.billingAddress || ""}
+                    onChange={(e) => setConfigForm({ ...configForm, billingAddress: e.target.value })}
+                    placeholder="Level 4, Cyber City, Phase II"
                     className="h-8 text-xs"
                   />
                 </div>
-                <div>
-                  <Label className="text-xs font-semibold text-foreground mb-1">Account Number</Label>
-                  <Input
-                    value={configForm.accountNumber || ""}
-                    onChange={(e) => setConfigForm({ ...configForm, accountNumber: e.target.value })}
-                    placeholder="000105001234"
-                    className="h-8 text-xs font-mono"
-                  />
+
+                <div className="grid grid-cols-3 gap-2">
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">City</Label>
+                    <Input
+                      value={configForm.city || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, city: e.target.value })}
+                      placeholder="Bengaluru"
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">State</Label>
+                    <Input
+                      value={configForm.state || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, state: e.target.value })}
+                      placeholder="Karnataka"
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Postal Code</Label>
+                    <Input
+                      value={configForm.postalCode || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, postalCode: e.target.value })}
+                      placeholder="560100"
+                      className="h-8 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Bank Name</Label>
+                    <Input
+                      value={configForm.bankName || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, bankName: e.target.value })}
+                      placeholder="HDFC Bank"
+                      className="h-8 text-xs"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Account Number</Label>
+                    <Input
+                      value={configForm.accountNumber || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, accountNumber: e.target.value })}
+                      placeholder="50200012345678"
+                      className="h-8 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+
+                <div className="grid grid-cols-2 gap-3">
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">IFSC Code</Label>
+                    <Input
+                      value={configForm.ifscCode || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, ifscCode: e.target.value.toUpperCase() })}
+                      placeholder="HDFC0001234"
+                      className="h-8 text-xs font-mono"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">UPI ID</Label>
+                    <Input
+                      value={configForm.upiId || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, upiId: e.target.value })}
+                      placeholder="clixpro@hdfcbank"
+                      className="h-8 text-xs"
+                    />
+                  </div>
                 </div>
               </div>
             </div>
@@ -727,7 +1407,117 @@ export default function SuperAdminBillingPage() {
         </form>
       )}
 
-      {/* Platform Refund Modal */}
+      {/* CREATE / CONFIGURE SUBSCRIPTION MODAL */}
+      {isCreateSubModalOpen && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            className="bg-card border border-border/80 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4"
+          >
+            <div className="flex justify-between items-center">
+              <h3 className="text-base font-bold text-foreground flex items-center gap-2">
+                <CreditCard className="w-5 h-5 text-primary" /> Configure Subscription
+              </h3>
+              <button
+                onClick={() => setIsCreateSubModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <form onSubmit={handleCreateSubscriptionSubmit} className="space-y-4">
+              <div>
+                <Label className="text-xs font-semibold text-foreground mb-1">Organization (Workspace) *</Label>
+                <select
+                  required
+                  value={selectedTenantId}
+                  onChange={(e) => setSelectedTenantId(e.target.value)}
+                  className="w-full h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                >
+                  <option value="">Select an organization...</option>
+                  {organizations.map((org) => (
+                    <option key={org.id} value={org.id}>
+                      {org.name} ({org.plan?.toUpperCase()} - {org.slug})
+                    </option>
+                  ))}
+                </select>
+              </div>
+
+              <div className="grid grid-cols-2 gap-3">
+                <div>
+                  <Label className="text-xs font-semibold text-foreground mb-1">Plan Tier</Label>
+                  <select
+                    value={selectedPlanId}
+                    onChange={(e) => setSelectedPlanId(e.target.value)}
+                    className="w-full h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="free">Free Tier</option>
+                    <option value="growth">Growth ⭐ (₹499/mo)</option>
+                    <option value="business">Business (₹999/mo)</option>
+                  </select>
+                </div>
+
+                <div>
+                  <Label className="text-xs font-semibold text-foreground mb-1">Billing Cycle</Label>
+                  <select
+                    value={selectedBillingCycle}
+                    onChange={(e) => setSelectedBillingCycle(e.target.value as any)}
+                    className="w-full h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+                  >
+                    <option value="monthly">Monthly</option>
+                    <option value="annual">Annual (Discounted)</option>
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <Label className="text-xs font-semibold text-foreground mb-1">Licensed Seats</Label>
+                <Input
+                  type="number"
+                  min="1"
+                  max="1000"
+                  required
+                  value={selectedSeats}
+                  onChange={(e) => setSelectedSeats(Number(e.target.value))}
+                  className="h-9 text-xs font-mono font-bold"
+                />
+              </div>
+
+              <div className="p-3 rounded-xl bg-muted/20 border border-border/60 text-xs text-muted-foreground">
+                <p>
+                  Setting this will immediately update the organization&apos;s active quota, access tier, and generate a platform invoice.
+                </p>
+              </div>
+
+              <div className="flex justify-end gap-2 pt-2 border-t border-border/80">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => setIsCreateSubModalOpen(false)}
+                  className="text-xs"
+                >
+                  Cancel
+                </Button>
+                <Button
+                  type="submit"
+                  size="sm"
+                  disabled={isSubmittingSub}
+                  className="text-xs font-semibold"
+                >
+                  {isSubmittingSub ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
+                  Save Subscription
+                </Button>
+              </div>
+            </form>
+          </motion.div>
+        </div>
+      )}
+
+      {/* PLATFORM REFUND MODAL */}
       {isRefundModalOpen && refundTargetInvoice && (
         <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
           <motion.div
@@ -749,7 +1539,7 @@ export default function SuperAdminBillingPage() {
             </div>
 
             <form onSubmit={handleRefundSubmit} className="space-y-4">
-              <div className="p-3 rounded-xl bg-muted/20 border border-border/60 text-xs space-y-1">
+              <div className="p-3 rounded-xl bg-muted/20 border border-border/60 text-xs space-y-1.5">
                 <div className="flex justify-between">
                   <span className="text-muted-foreground">Invoice #:</span>
                   <span className="font-mono font-bold text-foreground">{refundTargetInvoice.invoiceNumber}</span>
@@ -808,6 +1598,7 @@ export default function SuperAdminBillingPage() {
                   disabled={isProcessingRefund}
                   className="text-xs font-semibold bg-purple-600 hover:bg-purple-700 text-white"
                 >
+                  {isProcessingRefund ? <Loader2 className="w-3.5 h-3.5 animate-spin mr-1" /> : null}
                   Confirm Refund
                 </Button>
               </div>
@@ -815,7 +1606,111 @@ export default function SuperAdminBillingPage() {
           </motion.div>
         </div>
       )}
-      </div>
+
+      {/* VIEW INVOICE PREVIEW MODAL */}
+      {viewInvoiceModalOpen && selectedInvoice && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
+          <motion.div
+            initial={{ opacity: 0, scale: 0.96 }}
+            animate={{ opacity: 1, scale: 1 }}
+            exit={{ opacity: 0, scale: 0.96 }}
+            className="bg-card border border-border/80 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+          >
+            <div className="flex justify-between items-center border-b border-border/60 pb-3">
+              <div className="flex items-center gap-2">
+                <FileText className="w-5 h-5 text-primary" />
+                <div>
+                  <h3 className="text-base font-bold text-foreground font-mono">
+                    {selectedInvoice.invoiceNumber}
+                  </h3>
+                  <p className="text-[11px] text-muted-foreground">Platform SaaS Tax Invoice</p>
+                </div>
+              </div>
+              <button
+                onClick={() => setViewInvoiceModalOpen(false)}
+                className="text-muted-foreground hover:text-foreground"
+              >
+                ✕
+              </button>
+            </div>
+
+            <div className="space-y-4 text-xs">
+              <div className="grid grid-cols-2 gap-4 p-4 rounded-xl bg-muted/20 border border-border/60">
+                <div>
+                  <span className="text-[11px] text-muted-foreground uppercase font-bold block">Billed To</span>
+                  <span className="font-bold text-foreground block text-sm mt-0.5">{selectedInvoice.tenantName}</span>
+                  <span className="text-muted-foreground block text-[11px]">Tenant ID: {selectedInvoice.tenantId}</span>
+                </div>
+                <div className="text-right">
+                  <span className="text-[11px] text-muted-foreground uppercase font-bold block">Status</span>
+                  <div className="mt-1">{getInvStatusBadge(selectedInvoice.status, selectedInvoice.paymentStatus)}</div>
+                  <span className="text-[11px] text-muted-foreground block mt-1">
+                    Date: {new Date(selectedInvoice.invoiceDate).toLocaleDateString()}
+                  </span>
+                </div>
+              </div>
+
+              <div className="border border-border/60 rounded-xl overflow-hidden">
+                <table className="w-full text-xs">
+                  <thead className="bg-muted/40 border-b border-border/60 text-muted-foreground font-semibold">
+                    <tr>
+                      <th className="py-2 px-3 text-left">Description</th>
+                      <th className="py-2 px-3 text-center">Seats</th>
+                      <th className="py-2 px-3 text-right">Amount</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/40">
+                    <tr>
+                      <td className="py-3 px-3">
+                        <span className="font-semibold text-foreground block capitalize">{selectedInvoice.planName} Plan</span>
+                        <span className="text-[10px] text-muted-foreground capitalize">{selectedInvoice.billingCycle} billing</span>
+                      </td>
+                      <td className="py-3 px-3 text-center font-mono">{selectedInvoice.seats}</td>
+                      <td className="py-3 px-3 text-right font-mono font-bold text-foreground">
+                        {formatCurrency(selectedInvoice.subtotal, selectedInvoice.currency)}
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
+
+              <div className="space-y-1.5 pt-2 border-t border-border/60">
+                <div className="flex justify-between text-muted-foreground">
+                  <span>Subtotal</span>
+                  <span className="font-mono">{formatCurrency(selectedInvoice.subtotal, selectedInvoice.currency)}</span>
+                </div>
+                <div className="flex justify-between text-muted-foreground">
+                  <span>GST ({selectedInvoice.taxRate || 18}%)</span>
+                  <span className="font-mono">{formatCurrency(selectedInvoice.taxAmount, selectedInvoice.currency)}</span>
+                </div>
+                <div className="flex justify-between text-sm font-bold text-foreground pt-2 border-t border-border/60">
+                  <span>Total Amount</span>
+                  <span className="font-mono text-primary">
+                    {formatCurrency(selectedInvoice.totalAmount, selectedInvoice.currency)}
+                  </span>
+                </div>
+                <div className="flex justify-between text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                  <span>Amount Paid</span>
+                  <span className="font-mono">
+                    {formatCurrency(selectedInvoice.paidAmount, selectedInvoice.currency)}
+                  </span>
+                </div>
+              </div>
+            </div>
+
+            <div className="flex justify-end pt-3 border-t border-border/60">
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => setViewInvoiceModalOpen(false)}
+                className="text-xs"
+              >
+                Close
+              </Button>
+            </div>
+          </motion.div>
+        </div>
+      )}
     </CRMPageContainer>
   );
 }

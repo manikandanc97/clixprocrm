@@ -84,10 +84,107 @@ export class PlatformBillingService {
     return `CP-REF-${year}-${String(seq).padStart(6, '0')}`;
   }
 
+  private async syncMissingTenantSubscriptions() {
+    try {
+      const tenantsWithoutSub = await this.prisma.tenant.findMany({
+        where: {
+          platformSubscriptions: {
+            none: {},
+          },
+        },
+        take: 100,
+      });
+
+      if (!tenantsWithoutSub || tenantsWithoutSub.length === 0) return;
+
+      const config = await this.getBillingConfig();
+      const currency = config.currency || 'INR';
+      const taxRate = toNumber(config.taxRate || 18.0);
+
+      for (const tenant of tenantsWithoutSub) {
+        try {
+          const normPlan = normalizePlanId(tenant.plan || 'free');
+          const planDef = getPlanDefinition(normPlan);
+          const billingCycle = (tenant.billingCycle as 'monthly' | 'annual') || 'monthly';
+          const seats = normPlan === 'enterprise' ? 10 : normPlan === 'pro' ? 5 : normPlan === 'starter' ? 3 : 1;
+          const unitPrice = billingCycle === 'annual' ? planDef.annualPriceNum : planDef.priceNum;
+          const subtotal = roundTo2(unitPrice * seats);
+          const taxAmount = roundTo2(subtotal * (taxRate / 100));
+          const totalAmount = roundTo2(subtotal + taxAmount);
+
+          const now = new Date();
+          const periodEnd = tenant.currentPeriodEnd || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+
+          const sub = await this.prisma.platformSubscription.create({
+            data: {
+              tenantId: tenant.id,
+              planId: normPlan,
+              billingCycle,
+              seats,
+              status: tenant.subscriptionStatus || 'ACTIVE',
+              unitPrice,
+              recurringAmount: subtotal,
+              currency,
+              currentPeriodStart: tenant.createdAt || now,
+              currentPeriodEnd: periodEnd,
+            },
+          });
+
+          if (subtotal > 0) {
+            const prefix = config.invoicePrefix || 'CP-INV';
+            const year = new Date().getFullYear();
+            const count = await this.prisma.platformInvoice.count();
+            const invoiceNumber = `${prefix}-${year}-${String(count + 1).padStart(6, '0')}`;
+
+            await this.prisma.platformInvoice.create({
+              data: {
+                tenantId: tenant.id,
+                subscriptionId: sub.id,
+                invoiceNumber,
+                planName: planDef.name,
+                billingCycle,
+                seats,
+                invoiceDate: now,
+                dueDate: new Date(now.getTime() + 15 * 24 * 60 * 60 * 1000),
+                currency,
+                subtotal,
+                discountAmount: 0,
+                taxRate,
+                taxAmount,
+                totalAmount,
+                paidAmount: totalAmount,
+                status: 'PAID',
+                paymentStatus: 'PAID',
+                paidAt: now,
+                items: {
+                  create: [
+                    {
+                      description: `${planDef.name} Plan Subscription (${seats} seats)`,
+                      quantity: seats,
+                      unitPrice,
+                      taxAmount,
+                      totalAmount,
+                    },
+                  ],
+                },
+              },
+            });
+          }
+        } catch (subErr) {
+          this.logger.warn(`Failed to auto-sync subscription for tenant ${tenant.id}: ${subErr}`);
+        }
+      }
+    } catch (err) {
+      this.logger.warn(`Error in syncMissingTenantSubscriptions: ${err}`);
+    }
+  }
+
   /**
    * Super Admin Platform Billing KPI Overview & Analytics.
    */
   async getOverview() {
+    await this.syncMissingTenantSubscriptions();
+
     const [
       subscriptions,
       invoices,
@@ -126,21 +223,33 @@ export class PlatformBillingService {
 
     // 1. Calculate MRR & ARR from active subscriptions
     let monthlyMRR = 0;
-    const planDistMap: Record<string, { count: number; name: string; revenue: number }> = {};
+    const planDistMap: Record<string, { count: number; name: string; revenue: number; percentage: number }> = {
+      free: { count: 0, name: 'Free', revenue: 0, percentage: 0 },
+      growth: { count: 0, name: 'Growth', revenue: 0, percentage: 0 },
+      business: { count: 0, name: 'Business', revenue: 0, percentage: 0 },
+    };
+
+    const activeSubs = subscriptions.filter((s) => s.status === 'ACTIVE' || s.status === 'TRIALING');
 
     for (const sub of subscriptions) {
+      const recAmt = toNumber(sub.recurringAmount);
+      const mVal = sub.billingCycle === 'annual' ? recAmt / 12 : recAmt;
       if (sub.status === 'ACTIVE' || sub.status === 'TRIALING') {
-        const recAmt = toNumber(sub.recurringAmount);
-        const mVal = sub.billingCycle === 'annual' ? recAmt / 12 : recAmt;
         monthlyMRR += mVal;
-
-        const pId = sub.planId.toLowerCase();
-        if (!planDistMap[pId]) {
-          planDistMap[pId] = { count: 0, name: sub.planId, revenue: 0 };
-        }
-        planDistMap[pId].count += 1;
-        planDistMap[pId].revenue += recAmt;
       }
+
+      const pId = normalizePlanId(sub.planId);
+      if (!planDistMap[pId]) {
+        const pDef = getPlanDefinition(pId);
+        planDistMap[pId] = { count: 0, name: pDef.name, revenue: 0, percentage: 0 };
+      }
+      planDistMap[pId].count += 1;
+      planDistMap[pId].revenue += recAmt;
+    }
+
+    const totalSubCount = subscriptions.length || 1;
+    for (const key of Object.keys(planDistMap)) {
+      planDistMap[key].percentage = Math.round((planDistMap[key].count / totalSubCount) * 100);
     }
 
     const projectedARR = monthlyMRR * 12;
@@ -174,7 +283,7 @@ export class PlatformBillingService {
     const totalRefunds = refunds.reduce((s, r) => s + toNumber(r.amount), 0);
 
     // 3. Last 6 Months Revenue Trend
-    const monthlyTrend: Array<{ month: string; revenue: number; invoicesCount: number }> = [];
+    const monthlyTrend: Array<{ month: string; revenue: number; projected: number; invoicesCount: number }> = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
@@ -191,6 +300,7 @@ export class PlatformBillingService {
       monthlyTrend.push({
         month: mLabel,
         revenue: roundTo2(mRev),
+        projected: roundTo2(monthlyMRR),
         invoicesCount: mInvoices.length,
       });
     }
@@ -211,7 +321,7 @@ export class PlatformBillingService {
         overdueRevenueFormatted: formatCurrency(roundTo2(overdueRevenue), currency),
         totalRefunds: roundTo2(totalRefunds),
         totalRefundsFormatted: formatCurrency(roundTo2(totalRefunds), currency),
-        activeSubscriptions: subscriptions.filter((s) => s.status === 'ACTIVE').length,
+        activeSubscriptions: activeSubs.length || subscriptions.length,
         totalSubscriptions: subscriptions.length,
         totalOrganizations: tenantsCount,
       },
@@ -229,6 +339,7 @@ export class PlatformBillingService {
     limit = 20,
     options?: { search?: string; planId?: string; status?: string },
   ) {
+    await this.syncMissingTenantSubscriptions();
     page = Math.max(1, page);
     limit = Math.max(1, Math.min(limit, 1000));
     const skip = (page - 1) * limit;

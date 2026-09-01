@@ -16,23 +16,20 @@ import {
   UpdatePlatformBillingConfigDto,
 } from '../services/platform-billing.service';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
+import { SuperAdminGuard } from '../../auth/super-admin.guard';
 
-@Controller('super-admin/billing')
-@UseGuards(SupabaseAuthGuard, RolesGuard)
+@Controller(['super-admin/billing', 'super_admin/billing'])
+@UseGuards(SupabaseAuthGuard, SuperAdminGuard)
 export class PlatformBillingController {
   constructor(private readonly billingService: PlatformBillingService) {}
 
   @Get('overview')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async getOverview() {
     const data = await this.billingService.getOverview();
     return { success: true, data };
   }
 
   @Get('subscriptions')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async getSubscriptions(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -47,20 +44,19 @@ export class PlatformBillingController {
   }
 
   @Post('subscriptions')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async createSubscription(
     @Req() req: any,
     @Body() body: CreatePlatformSubscriptionDto,
   ) {
+    const actorId = req.user?.id || req.user?.sub || 'SUPER_ADMIN';
     const result = await this.billingService.createOrUpdateSubscription(
-      req.user.sub,
+      actorId,
       body,
     );
     return { success: true, data: result };
   }
 
   @Get('invoices')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async getInvoices(
     @Query('page') page?: string,
     @Query('limit') limit?: string,
@@ -81,44 +77,43 @@ export class PlatformBillingController {
   }
 
   @Get('invoices/:id')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async getInvoiceById(@Param('id') id: string) {
     const invoice = await this.billingService.getPlatformInvoiceById(id);
     return { success: true, data: invoice };
   }
 
   @Post('invoices/:id/refund')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async processRefund(
     @Req() req: any,
     @Param('id') id: string,
     @Body() body: ProcessPlatformRefundDto,
   ) {
+    const actorId = req.user?.id || req.user?.sub || 'SUPER_ADMIN';
     const refund = await this.billingService.processPlatformRefund(
       id,
-      req.user.sub,
+      actorId,
       body,
     );
     return { success: true, data: refund };
   }
 
   @Get('settings')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async getSettings() {
     const config = await this.billingService.getBillingConfig();
     return { success: true, data: config };
   }
 
   @Put('settings')
-  @Roles('SUPER_ADMIN', 'SUPERADMIN')
   async updateSettings(
     @Req() req: any,
     @Body() body: UpdatePlatformBillingConfigDto,
   ) {
+    const actorId = req.user?.id || req.user?.sub || 'SUPER_ADMIN';
     const config = await this.billingService.updateBillingConfig(
-      req.user.sub,
+      actorId,
       body,
     );
     return { success: true, data: config };
   }
 }
+

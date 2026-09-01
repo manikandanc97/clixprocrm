@@ -19,7 +19,7 @@ import {
   CRMPageContainer, 
   CRMPageHeader, 
   CRMMetricsGrid, 
-  MetricCard, 
+  CRMMetricCard, 
   CRMCard,
   DataTable,
   CRMTableHeader,
@@ -28,13 +28,13 @@ import {
   CRMTableCell,
   CRMTableHeaderCell,
   CRMToolbar,
-  CRMStatusBadge,
   CRMRoleBadge,
   ActivityTimeline,
   CRMPageSection,
   CRMPagination,
   TruncatedText,
 } from "@/shared/components/crm";
+import { StatusBadge } from "@/shared/components/StatusBadge";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { Button } from "@/shared/ui/button";
@@ -62,9 +62,6 @@ import { FormModal } from "@/shared/components/form-modal";
 import { EmployeesSkeleton } from "@/features/employees/components/EmployeesSkeleton";
 import { EmployeeForm } from "@/features/forms/EmployeeForm";
 import { useSearchParams } from "next/navigation";
-
-import { useViewMode } from "@/shared/hooks/useViewMode";
-import { EmployeesGrid } from "@/features/employees/components/EmployeesGrid";
 import { AnimatePresence, motion } from "framer-motion";
 
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -88,7 +85,6 @@ const getSafeStr = (val: unknown) => (typeof val === 'string' ? val : typeof val
 export default function EmployeesPage() {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useViewMode("employees", "list");
   const { data: hrmData, isLoading: loading, isPending } = useEmployees();
   
   const employees = hrmData?.employees || [];
@@ -163,7 +159,7 @@ export default function EmployeesPage() {
   const isInitialLoading = !hrmData && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
 
   if (isInitialLoading && employees.length === 0) {
-    return <EmployeesSkeleton viewMode={viewMode} />;
+    return <EmployeesSkeleton />;
   }
 
   const handleAddEmployee = () => {
@@ -205,261 +201,246 @@ export default function EmployeesPage() {
           {/* Stats Grid */}
           <div className="shrink-0">
             <CRMMetricsGrid cols={4}>
-          {employeeStats.map((stat, i) => {
-            const defaultColors = ["indigo", "emerald", "orange", "violet"] as const;
-            const icon = STAT_ICONS[stat.title] || Users;
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            const color = (stat as any).color || STAT_COLORS[stat.title] || defaultColors[i % defaultColors.length];
-            return (
-              <MetricCard
-                key={i}
-                {...stat}
-                icon={icon}
-                color={color}
-                delay={i * 0.1}
-              />
-            );
-          })}
-        </CRMMetricsGrid>
-      </div>
+              {employeeStats.map((stat, i) => {
+                const defaultColors = ["indigo", "emerald", "orange", "violet"] as const;
+                const icon = STAT_ICONS[stat.title] || Users;
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                const color = (stat as any).color || STAT_COLORS[stat.title] || defaultColors[i % defaultColors.length];
+                return (
+                  <CRMMetricCard
+                    key={stat.title || i}
+                    title={stat.title}
+                    value={stat.value}
+                    change={stat.change}
+                    trend={stat.positive ? "up" : "down"}
+                    icon={icon}
+                    color={color}
+                    delay={i * 0.1}
+                  />
+                );
+              })}
+            </CRMMetricsGrid>
+          </div>
 
-      <div className="crm-table-workspace-sticky !grid grid-cols-1 lg:grid-cols-4 gap-6 lg:gap-8">
-        {/* Main Table Area */}
-        <div className="lg:col-span-3 flex flex-col gap-3.5 sm:gap-4 min-h-0 flex-1">
-          <CRMToolbar 
-            searchQuery={searchQuery}
-            setSearchQuery={setSearchQuery}
-            viewMode={viewMode}
-            setViewMode={setViewMode}
-            placeholder="Search employees by name or department..."
-            sticky={false}
-          />
+          {/* Two-Stage Sticky Table Workspace */}
+          <div className="crm-table-workspace-sticky">
+            <CRMToolbar 
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              placeholder="Search employees by name or department..."
+              sticky={false}
+            />
 
-          <AnimatePresence mode="wait">
-            <motion.div
-              key={viewMode}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
-              exit={{ opacity: 0 }}
-              className="flex-1 flex flex-col min-h-0 gap-3.5 sm:gap-4"
-            >
-              {viewMode === "list" || viewMode === "table" ? (
-                <DataTable hasPagination={sortedEmployees.length > rowsPerPage}>
-                  <CRMTableHeader>
-                    <CRMTableRow>
-                      <CRMTableHeaderCell>
-                        <DataTableColumnHeader
-                          title="Employee"
-                          sortable
-                          sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("name", dir)}
-                        />
-                      </CRMTableHeaderCell>
-                      <CRMTableHeaderCell>
-                        <DataTableColumnHeader
-                          title="Role"
-                          sortable
-                          sortDirection={sortConfig.key === "role" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("role", dir)}
-                        />
-                      </CRMTableHeaderCell>
-                      <CRMTableHeaderCell>
-                        <DataTableColumnHeader
-                          title="Status"
-                          sortable
-                          sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("status", dir)}
-                        />
-                      </CRMTableHeaderCell>
-                      <CRMTableHeaderCell>
-                        <DataTableColumnHeader
-                          title="Joined Date"
-                          sortable
-                          sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("createdAt", dir)}
-                        />
-                      </CRMTableHeaderCell>
-                      <CRMTableHeaderCell className="text-right">Actions</CRMTableHeaderCell>
-                    </CRMTableRow>
-                  </CRMTableHeader>
-                  <CRMTableBody>
-                    {filteredEmployees.length > 0 ? (
-                      paginatedEmployees.map((emp) => (
-                        <CRMTableRow key={emp.id} className="cursor-default">
-                          <CRMTableCell>
-                            <div className="flex items-center gap-3 min-w-0 max-w-[220px]">
-                              <Avatar className="h-10 w-10 border-2 border-background shadow-sm shrink-0">
-                                <AvatarImage src={""} alt={emp.name} />
-                                <AvatarFallback>{emp.name.charAt(0)}</AvatarFallback>
-                              </Avatar>
-                              <div className="min-w-0">
-                                <TruncatedText
-                                  text={emp.name}
-                                  lines={1}
-                                  onClick={() => { setSelectedEmployee(emp); setIsViewModalOpen(true); }}
-                                  className="font-bold text-sm tracking-tight text-foreground hover:text-primary cursor-pointer transition-colors"
-                                />
-                                <TruncatedText
-                                  text={emp.email}
-                                  lines={1}
-                                  className="text-[10px] text-muted-foreground font-medium"
-                                />
-                              </div>
-                            </div>
-                          </CRMTableCell>
-                          <CRMTableCell>
-                            <CRMRoleBadge role={emp.role} />
-                          </CRMTableCell>
-                          <CRMTableCell>
-                            <CRMStatusBadge tone={emp.status === 'ACTIVE' ? 'success' : 'warning'}>
-                              {emp.status}
-                            </CRMStatusBadge>
-                          </CRMTableCell>
-                          <CRMTableCell>
-                            <span className="text-sm text-muted-foreground">
-                              {new Date(emp.createdAt).toLocaleDateString()}
-                            </span>
-                          </CRMTableCell>
-                          <CRMTableCell className="text-right">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button variant="ghost" size="icon" className="h-8 w-8">
-                                  <MoreVertical className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent align="end" className="w-48 rounded-xl p-1.5 shadow-elevated border-border bg-popover/95 backdrop-blur-xl">
-                                <DropdownMenuItem onClick={() => { setSelectedEmployee(emp); setIsViewModalOpen(true); }} className="cursor-pointer py-2.5 rounded-xl group">
-                                  <User className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                  <span className="font-semibold text-sm">View Details</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem onClick={() => { setSelectedEmployee(emp); setIsEditModalOpen(true); }} className="cursor-pointer py-2.5 rounded-xl group">
-                                  <Edit2 className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                  <span className="font-semibold text-sm">Edit Employee</span>
-                                </DropdownMenuItem>
-                                
-                                <DropdownMenuSeparator />
-                                
-                                <DropdownMenuItem 
-                                  onClick={() => {
-                                    const newStatus = emp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-                                    toggleStatusMutation.mutate(
-                                      { id: emp.id, status: newStatus },
-                                      { onSuccess: () => toast.success(`Employee ${newStatus.toLowerCase()}d`) }
-                                    );
-                                  }}
-                                  className="cursor-pointer py-2.5 rounded-xl group"
-                                >
-                                  <Power className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                  <span className="font-semibold text-sm">{emp.status === "ACTIVE" ? "Deactivate" : "Activate"}</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem 
-                                  variant="destructive"
-                                  onClick={() => { setSelectedEmployee(emp); setIsDeleteModalOpen(true); }}
-                                  className="cursor-pointer py-2.5 rounded-xl group"
-                                >
-                                  <Trash2 className="mr-3 h-4 w-4 transition-colors" />
-                                  <span className="font-bold text-sm transition-colors">Delete Employee</span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </CRMTableCell>
+            <div className="flex-1 min-h-0 flex flex-col">
+              <AnimatePresence mode="wait">
+                <motion.div
+                  key="employees-table"
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  exit={{ opacity: 0 }}
+                  className="flex-1 flex flex-col min-h-0"
+                >
+                  <div className="crm-table-wrap">
+                    <DataTable hasPagination={sortedEmployees.length > rowsPerPage}>
+                      <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
+                        <CRMTableRow className="h-10 sm:h-11">
+                          <CRMTableHeaderCell>
+                            <DataTableColumnHeader
+                              title="Employee"
+                              sortable
+                              sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
+                              onSort={(dir) => handleSort("name", dir)}
+                            />
+                          </CRMTableHeaderCell>
+                          <CRMTableHeaderCell>
+                            <DataTableColumnHeader
+                              title="Role"
+                              sortable
+                              sortDirection={sortConfig.key === "role" ? sortConfig.direction : null}
+                              onSort={(dir) => handleSort("role", dir)}
+                            />
+                          </CRMTableHeaderCell>
+                          <CRMTableHeaderCell>
+                            <DataTableColumnHeader
+                              title="Status"
+                              sortable
+                              sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
+                              onSort={(dir) => handleSort("status", dir)}
+                            />
+                          </CRMTableHeaderCell>
+                          <CRMTableHeaderCell>
+                            <DataTableColumnHeader
+                              title="Joined Date"
+                              sortable
+                              sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
+                              onSort={(dir) => handleSort("createdAt", dir)}
+                            />
+                          </CRMTableHeaderCell>
+                          <CRMTableHeaderCell className="text-right">Actions</CRMTableHeaderCell>
                         </CRMTableRow>
-                      ))
-                    ) : (
-                      <CRMTableRow className="hover:bg-transparent border-0">
-                        <CRMTableCell colSpan={5} className="p-4 border-0">
-                          <EmptyState
-                            icon={Users}
-                            title="No employees found"
-                            description="No employees match the current search or filters."
-                          />
-                        </CRMTableCell>
-                      </CRMTableRow>
-                    )}
-                  </CRMTableBody>
-                </DataTable>
-              ) : sortedEmployees.length > 0 ? (
-                <EmployeesGrid
-                  employees={paginatedEmployees}
-                  onViewDetails={(emp) => { setSelectedEmployee(emp); setIsViewModalOpen(true); }}
-                  onEdit={(emp) => { setSelectedEmployee(emp); setIsEditModalOpen(true); }}
-                  onDelete={(emp) => { setSelectedEmployee(emp); setIsDeleteModalOpen(true); }}
-                  onToggleStatus={(emp) => {
-                    const newStatus = emp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
-                    toggleStatusMutation.mutate(
-                      { id: emp.id, status: newStatus },
-                      { onSuccess: () => toast.success(`Employee ${newStatus.toLowerCase()}d`) }
-                    );
-                  }}
-                />
-              ) : (
-                <EmptyState
-                  icon={Users}
-                  title="No employees found"
-                  description="No employees match the current search or filters."
-                />
-              )}
-
-              <CRMPagination
-                currentPage={currentPage}
-                totalPages={totalPages}
-                totalItems={sortedEmployees.length}
-                rowsPerPage={rowsPerPage}
-                onPageChange={setCurrentPage}
-                onRowsPerPageChange={(size) => {
-                  setRowsPerPage(size);
-                  setCurrentPage(1);
-                }}
-                itemName="Employees"
-                pageSizeOptions={[10, 25, 50, 100]}
-              />
-            </motion.div>
-          </AnimatePresence>
-        </div>
-
-        {/* Sidebar */}
-        <div className="flex flex-col gap-3.5 sm:gap-4 min-h-0">
-          <CRMPageSection title="Recent Activity" className="flex-1 min-h-0 flex flex-col">
-            <CRMCard className="p-4 flex-1 min-h-0 flex flex-col justify-between overflow-hidden">
-              <div className="overflow-y-auto flex-1 sidebar-scroll pr-1">
-                <ActivityTimeline items={employeeActivities.slice(0, 4)} />
-              </div>
-              <Button variant="ghost" className="w-full mt-3 text-[10px] font-bold uppercase tracking-widest text-primary h-8 shrink-0">
-                View All Activity
-              </Button>
-            </CRMCard>
-          </CRMPageSection>
-
-          <CRMPageSection title="Performance Overview" className="shrink-0">
-            <CRMCard className="p-4 space-y-3">
-              <div className="flex items-center justify-between">
-                <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Top Dept</div>
-                <TrendingUp className="w-4 h-4 text-emerald-500" />
-              </div>
-              <div>
-                <h4 className="text-base font-bold tracking-tight">Sales Team</h4>
-                <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Average Performance: 96%</p>
-              </div>
-              <div className="pt-2 border-t border-border/50">
-                <div className="flex items-center gap-2.5">
-                  <div className="flex -space-x-2">
-                    {[1, 2, 3].map(i => (
-                      <Avatar key={i} className="h-6 w-6 border-2 border-background">
-                        <AvatarImage src={`https://i.pravatar.cc/150?u=${i}`} />
-                      </Avatar>
-                    ))}
+                      </CRMTableHeader>
+                      <CRMTableBody>
+                        {filteredEmployees.length > 0 ? (
+                          paginatedEmployees.map((emp) => (
+                            <CRMTableRow key={emp.id} className="h-16 hover:bg-muted/[0.03] transition-colors cursor-default">
+                              <CRMTableCell>
+                                <div className="flex items-center gap-3 min-w-0 max-w-[220px]">
+                                  <Avatar className="h-10 w-10 border-2 border-background shadow-sm shrink-0">
+                                    <AvatarImage src={""} alt={emp.name} />
+                                    <AvatarFallback>{emp.name.charAt(0)}</AvatarFallback>
+                                  </Avatar>
+                                  <div className="min-w-0">
+                                    <TruncatedText
+                                      text={emp.name}
+                                      lines={1}
+                                      onClick={() => { setSelectedEmployee(emp); setIsViewModalOpen(true); }}
+                                      className="font-bold text-sm tracking-tight text-foreground hover:text-primary cursor-pointer transition-colors"
+                                    />
+                                    <TruncatedText
+                                      text={emp.email}
+                                      lines={1}
+                                      className="text-[10px] text-muted-foreground font-medium"
+                                    />
+                                  </div>
+                                </div>
+                              </CRMTableCell>
+                              <CRMTableCell>
+                                <CRMRoleBadge role={emp.role} />
+                              </CRMTableCell>
+                              <CRMTableCell>
+                                <StatusBadge
+                                  status={emp.status}
+                                  variant={emp.status === "ACTIVE" ? "success" : "warning"}
+                                  showDot
+                                />
+                              </CRMTableCell>
+                              <CRMTableCell>
+                                <span className="text-sm text-muted-foreground">
+                                  {new Date(emp.createdAt).toLocaleDateString()}
+                                </span>
+                              </CRMTableCell>
+                              <CRMTableCell className="text-right">
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button variant="ghost" size="icon" className="h-8 w-8">
+                                      <MoreVertical className="h-4 w-4" />
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-48 rounded-xl p-1.5 shadow-elevated border-border bg-popover/95 backdrop-blur-xl">
+                                    <DropdownMenuItem onClick={() => { setSelectedEmployee(emp); setIsViewModalOpen(true); }} className="cursor-pointer py-2.5 rounded-xl group">
+                                      <User className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                      <span className="font-semibold text-sm">View Details</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem onClick={() => { setSelectedEmployee(emp); setIsEditModalOpen(true); }} className="cursor-pointer py-2.5 rounded-xl group">
+                                      <Edit2 className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                      <span className="font-semibold text-sm">Edit Employee</span>
+                                    </DropdownMenuItem>
+                                    
+                                    <DropdownMenuSeparator />
+                                    
+                                    <DropdownMenuItem 
+                                      onClick={() => {
+                                        const newStatus = emp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
+                                        toggleStatusMutation.mutate(
+                                          { id: emp.id, status: newStatus },
+                                          { onSuccess: () => toast.success(`Employee ${newStatus.toLowerCase()}d`) }
+                                        );
+                                      }}
+                                      className="cursor-pointer py-2.5 rounded-xl group"
+                                    >
+                                      <Power className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
+                                      <span className="font-semibold text-sm">{emp.status === "ACTIVE" ? "Deactivate" : "Activate"}</span>
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem 
+                                      variant="destructive"
+                                      onClick={() => { setSelectedEmployee(emp); setIsDeleteModalOpen(true); }}
+                                      className="cursor-pointer py-2.5 rounded-xl group"
+                                    >
+                                      <Trash2 className="mr-3 h-4 w-4 transition-colors" />
+                                      <span className="font-bold text-sm transition-colors">Delete Employee</span>
+                                    </DropdownMenuItem>
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </CRMTableCell>
+                            </CRMTableRow>
+                          ))
+                        ) : (
+                          <CRMTableRow className="hover:bg-transparent border-0">
+                            <CRMTableCell colSpan={5} className="p-4 border-0">
+                              <EmptyState
+                                icon={Users}
+                                title="No employees found"
+                                description="No employees match the current search or filters."
+                              />
+                            </CRMTableCell>
+                          </CRMTableRow>
+                        )}
+                      </CRMTableBody>
+                    </DataTable>
                   </div>
-                  <span className="text-[10px] font-bold text-muted-foreground">+5 more</span>
+
+                  <CRMPagination
+                    currentPage={currentPage}
+                    totalPages={totalPages}
+                    totalItems={sortedEmployees.length}
+                    rowsPerPage={rowsPerPage}
+                    onPageChange={setCurrentPage}
+                    onRowsPerPageChange={(size) => {
+                      setRowsPerPage(size);
+                      setCurrentPage(1);
+                    }}
+                    itemName="Employees"
+                    pageSizeOptions={[10, 25, 50, 100]}
+                  />
+                </motion.div>
+              </AnimatePresence>
+            </div>
+          </div>
+
+          {/* Operational Secondary Row: Activity & Performance */}
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 pb-6">
+            <CRMPageSection title="Recent Activity" className="flex-1 min-h-0 flex flex-col">
+              <CRMCard className="p-4 flex-1 min-h-[240px] flex flex-col justify-between overflow-hidden">
+                <div className="overflow-y-auto flex-1 sidebar-scroll pr-1">
+                  <ActivityTimeline items={employeeActivities.slice(0, 4)} />
                 </div>
-              </div>
-              <Button className="w-full h-8 bg-primary/10 hover:bg-primary/20 text-primary border-none text-xs font-bold">
-                Analytics Report
-              </Button>
-            </CRMCard>
-          </CRMPageSection>
-        </div>
-      </div>
-      </>
+                <Button variant="ghost" className="w-full mt-3 text-[10px] font-bold uppercase tracking-widest text-primary h-8 shrink-0">
+                  View All Activity
+                </Button>
+              </CRMCard>
+            </CRMPageSection>
+
+            <CRMPageSection title="Performance Overview" className="flex-1 min-h-0 flex flex-col">
+              <CRMCard className="p-4 space-y-3 flex-1 min-h-[240px] flex flex-col justify-between">
+                <div>
+                  <div className="flex items-center justify-between mb-2">
+                    <div className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">Top Dept</div>
+                    <TrendingUp className="w-4 h-4 text-emerald-500" />
+                  </div>
+                  <div>
+                    <h4 className="text-base font-bold tracking-tight">Sales Team</h4>
+                    <p className="text-[10px] text-muted-foreground font-medium uppercase tracking-wider">Average Performance: 96%</p>
+                  </div>
+                </div>
+                <div className="pt-2 border-t border-border/50">
+                  <div className="flex items-center gap-2.5">
+                    <div className="flex -space-x-2">
+                      {[1, 2, 3].map(i => (
+                        <Avatar key={i} className="h-6 w-6 border-2 border-background">
+                          <AvatarImage src={`https://i.pravatar.cc/150?u=${i}`} />
+                        </Avatar>
+                      ))}
+                    </div>
+                    <span className="text-[10px] font-bold text-muted-foreground">+5 more</span>
+                  </div>
+                </div>
+                <Button className="w-full h-8 bg-primary/10 hover:bg-primary/20 text-primary border-none text-xs font-bold">
+                  Analytics Report
+                </Button>
+              </CRMCard>
+            </CRMPageSection>
+          </div>
+        </>
       )}
 
       <FormModal
@@ -517,10 +498,12 @@ export default function EmployeesPage() {
               </div>
               <div>
                 <label className="text-xs font-bold text-muted-foreground uppercase">Status</label>
-                <div>
-                  <CRMStatusBadge tone={selectedEmployee.status === 'ACTIVE' ? 'success' : 'warning'}>
-                    {selectedEmployee.status}
-                  </CRMStatusBadge>
+                <div className="mt-1">
+                  <StatusBadge
+                    status={selectedEmployee.status}
+                    variant={selectedEmployee.status === "ACTIVE" ? "success" : "warning"}
+                    showDot
+                  />
                 </div>
               </div>
               <div>

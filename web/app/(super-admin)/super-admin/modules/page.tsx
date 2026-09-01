@@ -1,6 +1,8 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
+import { useQueryClient } from "@tanstack/react-query";
+import { SUPER_ADMIN_NAV_QUERY_KEY } from "@/shared/hooks/use-super-admin-navigation";
 import {
   Layers,
   Plus,
@@ -30,6 +32,9 @@ import {
   Info,
   MoreHorizontal,
   Loader2,
+  Copy,
+  ExternalLink,
+  Ticket,
 } from "lucide-react";
 import { useSearchParams, useRouter } from "next/navigation";
 import Link from "next/link";
@@ -85,164 +90,9 @@ import {
 import { EmptyState } from "@/shared/components/EmptyState";
 import { Skeleton } from "@/shared/ui/skeleton";
 
-const SUPER_ADMIN_NAV_MENUS = [
-  {
-    key: "overview",
-    label: "Overview",
-    icon: "LayoutDashboard",
-    route: "/super-admin",
-    group: "Overview",
-    sortOrder: 1,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Multi-tenant health metrics, live platform activity stream, and tenant summary",
-  },
-  {
-    key: "copilot",
-    label: "ClixPro AI",
-    icon: "Sparkles",
-    route: "/super-admin/copilot",
-    group: "Platform",
-    sortOrder: 2,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Intelligent platform operations copilot and interactive root administrative assistant",
-  },
-  {
-    key: "organizations",
-    label: "Organizations",
-    icon: "Building2",
-    route: "/super-admin/organizations",
-    group: "Platform",
-    sortOrder: 3,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Manage multi-tenant workspaces, subscription plans, tenant quotas, and lifecycle",
-  },
-  {
-    key: "users",
-    label: "Platform Users",
-    icon: "Users",
-    route: "/super-admin/users",
-    group: "Platform",
-    sortOrder: 4,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Global user directory, administrative privilege control, and cross-org access",
-  },
-  {
-    key: "modules",
-    label: "Platform Modules",
-    icon: "Layers",
-    route: "/super-admin/modules",
-    group: "Platform",
-    sortOrder: 5,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Configure global modules, menu hierarchy, icon customization, and navigation visibility",
-  },
-  {
-    key: "plans",
-    label: "Plans & Packages",
-    icon: "CreditCard",
-    route: "/super-admin/plans",
-    group: "Commerce",
-    sortOrder: 6,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Multi-tenant subscription tiers, pricing models, feature packaging, and MRR metrics",
-  },
-  {
-    key: "billing",
-    label: "Billing & Revenue",
-    icon: "Receipt",
-    route: "/super-admin/billing",
-    group: "Commerce",
-    sortOrder: 7,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Platform-wide invoice collections, payment processing, transaction logs, and MRR cashflow",
-  },
-  {
-    key: "ai",
-    label: "AI Models & Tiers",
-    icon: "Brain",
-    route: "/super-admin/ai",
-    group: "AI Platform",
-    sortOrder: 8,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Multi-tenant LLM provider routing, token quotas, tier allocations, and prompt controls",
-  },
-  {
-    key: "analytics",
-    label: "Analytics",
-    icon: "BarChart3",
-    route: "/super-admin/analytics",
-    group: "Insights",
-    sortOrder: 9,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Cross-tenant SaaS metrics, MRR projections, growth velocity, and system telemetry",
-  },
-  {
-    key: "security",
-    label: "Security Center",
-    icon: "ShieldCheck",
-    route: "/super-admin/security",
-    group: "Security & Operations",
-    sortOrder: 10,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Root IAM policy enforcement, multi-factor authentication requirements, and IP firewall filters",
-  },
-  {
-    key: "secops",
-    label: "SecOps Telemetry",
-    icon: "Activity",
-    route: "/super-admin/security/operations",
-    group: "Security & Operations",
-    sortOrder: 11,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Live node health telemetry, cluster metrics, threat detection signals, and real-time alerts",
-  },
-  {
-    key: "audit_logs",
-    label: "Audit Logs",
-    icon: "FileClock",
-    route: "/super-admin/audit-logs",
-    group: "Security & Operations",
-    sortOrder: 12,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Immutable cross-tenant audit trail, security events, and administrative mutations",
-  },
-  {
-    key: "settings",
-    label: "Platform Settings",
-    icon: "Settings",
-    route: "/super-admin/settings",
-    group: "Configuration",
-    sortOrder: 13,
-    isSystem: true,
-    isEnabled: true,
-    isVisible: true,
-    description: "Global application configuration, environment settings, and multi-tenant feature toggles",
-  },
-];
+/* SUPER_ADMIN_NAV_MENUS hardcoded array removed — now loaded from database via API.
+ * See: fetchPlatformModules({ navigationScope: 'SUPER_ADMIN' }) below.
+ */
 
 /* -------------------------------------------------------------------------- */
 /*  Inline table-only skeleton — used when page is mounted but data is loading */
@@ -340,28 +190,59 @@ function PlatformModulesTableSkeleton() {
 export default function SuperAdminModulesPage() {
   const searchParams = useSearchParams();
   const router = useRouter();
+  const queryClient = useQueryClient();
 
   const [activeScope, setActiveScope] = useState<"tenant" | "platform">("tenant");
+
+  // -------------------------------------------------------
+  // Tenant CRM modules state
+  // -------------------------------------------------------
   const [modules, setModules] = useState<PlatformModule[]>([]);
-  const [stats, setStats] = useState({
-    total: 0,
-    enabled: 0,
-    disabled: 0,
-    system: 0,
-  });
+  const [stats, setStats] = useState({ total: 0, enabled: 0, disabled: 0, system: 0 });
   const [loading, setLoading] = useState(true);
+
+  // -------------------------------------------------------
+  // Super Admin platform modules state (DB-driven, not hardcoded)
+  // -------------------------------------------------------
+  const [platformModules, setPlatformModules] = useState<PlatformModule[]>([]);
+  const [platformStats, setPlatformStats] = useState({ total: 0, enabled: 0, disabled: 0, system: 0 });
+  const [platformLoading, setPlatformLoading] = useState(true);
+
   const [search, setSearch] = useState("");
   const [groupFilter, setGroupFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ENABLED" | "DISABLED">("ALL");
 
-  // Pagination State
+  // Tenant CRM Pagination
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  // Platform (Super Admin) Pagination
+  const [platformPage, setPlatformPage] = useState(1);
+  const [platformRowsPerPage, setPlatformRowsPerPage] = useState(10);
 
   // Reset pagination on filter or search changes
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, groupFilter, statusFilter]);
+    setPlatformPage(1);
+  }, [search, groupFilter, statusFilter, activeScope]);
+
+  // Super Admin Navigation Menus State
+  const [selectedSuperAdminMenu, setSelectedSuperAdminMenu] = useState<PlatformModule | null>(null);
+  const [platformSortConfig, setPlatformSortConfig] = useState<{ key: string; direction: SortDirection }>({
+    key: "order",
+    direction: "asc",
+  });
+
+  const handlePlatformSort = (key: string, direction: SortDirection) => {
+    setPlatformSortConfig({ key, direction });
+  };
+
+  const handleCopyRoute = (route: string) => {
+    if (typeof navigator !== "undefined" && navigator.clipboard) {
+      navigator.clipboard.writeText(route);
+      toast.success(`Copied route "${route}" to clipboard.`);
+    }
+  };
 
   // Create / Edit Modal State
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -393,12 +274,22 @@ export default function SuperAdminModulesPage() {
   // Reorder State
   const [reordering, setReordering] = useState(false);
 
-  const loadModules = async () => {
+  // -------------------------------------------------------
+  // Invalidate both navigation caches after any mutation
+  // so the tenant CRM sidebar AND super admin sidebar get fresh data
+  // -------------------------------------------------------
+  const invalidateNavCaches = useCallback(() => {
+    queryClient.invalidateQueries({ queryKey: ["platform-navigation"] });
+    queryClient.invalidateQueries({ queryKey: SUPER_ADMIN_NAV_QUERY_KEY });
+  }, [queryClient]);
+
+  const loadModules = useCallback(async () => {
     try {
       setLoading(true);
       setLoadError(null);
       setAal2Required(false);
-      const res = await fetchPlatformModules();
+      // Tenant CRM scope
+      const res = await fetchPlatformModules({ navigationScope: "TENANT_CRM" });
       setModules(res.modules || []);
       setStats(res.stats || { total: 0, enabled: 0, disabled: 0, system: 0 });
     } catch (err: any) {
@@ -424,22 +315,38 @@ export default function SuperAdminModulesPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
+
+  const loadPlatformModules = useCallback(async () => {
+    try {
+      setPlatformLoading(true);
+      // Super Admin scope
+      const res = await fetchPlatformModules({ navigationScope: "SUPER_ADMIN" });
+      setPlatformModules(res.modules || []);
+      setPlatformStats(res.stats || { total: 0, enabled: 0, disabled: 0, system: 0 });
+    } catch {
+      // Silently fail — static fallback is shown in useSuperAdminNavigation hook
+    } finally {
+      setPlatformLoading(false);
+    }
+  }, []);
 
   useEffect(() => {
     loadModules();
+    loadPlatformModules();
 
     const handleAal2Verified = () => {
       setAal2Required(false);
       setLoadError(null);
       loadModules();
+      loadPlatformModules();
     };
 
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
-  }, []);
+  }, [loadModules, loadPlatformModules]);
 
   useEffect(() => {
     if (searchParams.get("add") === "true") {
@@ -447,7 +354,7 @@ export default function SuperAdminModulesPage() {
     }
   }, [searchParams]);
 
-  // Distinct groups available
+  // Distinct groups available for tenant modules
   const availableGroups = useMemo(() => {
     const set = new Set<string>(["Core", "Insights", "Administration", "HRM & Operations", "Support"]);
     modules.forEach((m) => {
@@ -456,7 +363,115 @@ export default function SuperAdminModulesPage() {
     return Array.from(set);
   }, [modules]);
 
-  // Filtered modules
+  // Distinct groups available for active scope
+  const currentAvailableGroups = useMemo(() => {
+    if (activeScope === "platform") {
+      const groups = Array.from(new Set(platformModules.map((m) => m.group)));
+      return groups.length > 0 ? groups : ["Overview", "Platform", "Commerce", "AI Platform", "Insights", "Security & Operations", "Configuration"];
+    }
+    return availableGroups;
+  }, [activeScope, availableGroups, platformModules]);
+
+  // Dynamic KPI Stats based on active scope — now uses live DB data for platform scope
+  const displayStats = useMemo(() => {
+    if (activeScope === "platform") {
+      const activeCount = platformModules.filter((m) => m.isEnabled && m.isVisible).length;
+      const groupsCount = new Set(platformModules.map((m) => m.group)).size;
+      return {
+        card1Title: "Total System Menus",
+        card1Value: platformStats.total,
+        card1Icon: Shield,
+        card1Color: "indigo" as const,
+        card1Text: "Root administration controls",
+
+        card2Title: "Active Routes",
+        card2Value: activeCount,
+        card2Icon: CheckCircle2,
+        card2Color: "emerald" as const,
+        card2Text: "Active in Super Admin sidebar",
+
+        card3Title: "Platform Domains",
+        card3Value: groupsCount,
+        card3Icon: FolderTree,
+        card3Color: "orange" as const,
+        card3Text: "System domain hierarchies",
+
+        card4Title: "Access Privilege",
+        card4Value: "Root IAM",
+        card4Icon: Lock,
+        card4Color: "violet" as const,
+        card4Text: "Super Admin & AAL2 protected",
+      };
+    }
+
+    return {
+      card1Title: "Total Modules",
+      card1Value: stats.total,
+      card1Icon: Boxes,
+      card1Color: "indigo" as const,
+      card1Text: "Registered platform features",
+
+      card2Title: "Active Modules",
+      card2Value: stats.enabled,
+      card2Icon: CheckCircle2,
+      card2Color: "emerald" as const,
+      card2Text: "Globally enabled for users",
+
+      card3Title: "Disabled Modules",
+      card3Value: stats.disabled,
+      card3Icon: XCircle,
+      card3Color: "orange" as const,
+      card3Text: "Hidden from navigation",
+
+      card4Title: "Core System",
+      card4Value: stats.system,
+      card4Icon: Shield,
+      card4Color: "violet" as const,
+      card4Text: "Protected foundations",
+    };
+  }, [activeScope, stats, platformStats, platformModules]);
+
+  // Filtered Super Admin platform menus — now from live DB data
+  const filteredPlatformMenus = useMemo(() => {
+    return platformModules.filter((m) => {
+      if (search.trim()) {
+        const q = search.toLowerCase();
+        const matchesLabel = m.label.toLowerCase().includes(q);
+        const matchesKey = m.key.toLowerCase().includes(q);
+        const matchesRoute = m.route.toLowerCase().includes(q);
+        const matchesGroup = m.group.toLowerCase().includes(q);
+        const matchesDesc = (m.description || "").toLowerCase().includes(q);
+        if (!matchesLabel && !matchesKey && !matchesRoute && !matchesGroup && !matchesDesc) {
+          return false;
+        }
+      }
+      if (groupFilter !== "ALL" && m.group !== groupFilter) return false;
+      if (statusFilter === "ENABLED" && !m.isEnabled) return false;
+      if (statusFilter === "DISABLED" && m.isEnabled) return false;
+      return true;
+    });
+  }, [platformModules, search, groupFilter, statusFilter]);
+
+  // Sorted Super Admin platform menus
+  const sortedPlatformMenus = useMemo(() => {
+    return [...filteredPlatformMenus].sort((a, b) => {
+      if (!platformSortConfig.direction) return 0;
+      const dir = platformSortConfig.direction === "asc" ? 1 : -1;
+      if (platformSortConfig.key === "order") return (a.sortOrder - b.sortOrder) * dir;
+      if (platformSortConfig.key === "label") return a.label.localeCompare(b.label) * dir;
+      if (platformSortConfig.key === "group") return a.group.localeCompare(b.group) * dir;
+      return 0;
+    });
+  }, [filteredPlatformMenus, platformSortConfig]);
+
+  // Platform tab pagination
+  const platformTotalPages = Math.max(1, Math.ceil(sortedPlatformMenus.length / platformRowsPerPage));
+  const paginatedPlatformMenus = useMemo(() => {
+    const start = (platformPage - 1) * platformRowsPerPage;
+    return sortedPlatformMenus.slice(start, start + platformRowsPerPage);
+  }, [sortedPlatformMenus, platformPage, platformRowsPerPage]);
+
+  // Filtered tenant modules
   const filteredModules = useMemo(() => {
     return modules.filter((m) => {
       // Search match
@@ -633,6 +648,8 @@ export default function SuperAdminModulesPage() {
       }
       setIsModalOpen(false);
       await loadModules();
+      await loadPlatformModules();
+      invalidateNavCaches();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to save module.");
     } finally {
@@ -656,12 +673,17 @@ export default function SuperAdminModulesPage() {
       toast.success(
         `${mod.label} ${field === "isEnabled" ? (nextVal ? "enabled globally" : "disabled globally") : nextVal ? "shown in navigation" : "hidden from navigation"}.`
       );
-      // Reload stats
-      const res = await fetchPlatformModules();
+      // Reload stats for the active scope + invalidate both nav caches
+      const res = await fetchPlatformModules({ navigationScope: "TENANT_CRM" });
       setStats(res.stats);
+      await loadPlatformModules();
+      invalidateNavCaches();
     } catch (err: any) {
-      // Revert on error
+      // Revert optimistic update on error
       setModules((prev) =>
+        prev.map((m) => (m.id === mod.id ? { ...m, [field]: mod[field] } : m))
+      );
+      setPlatformModules((prev) =>
         prev.map((m) => (m.id === mod.id ? { ...m, [field]: mod[field] } : m))
       );
       toast.error(err?.response?.data?.message || "Failed to update module status.");
@@ -697,9 +719,11 @@ export default function SuperAdminModulesPage() {
         newModules.map((m, idx) => ({ id: m.id, sortOrder: idx + 1 }))
       );
       toast.success("Module order updated.");
+      invalidateNavCaches();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to reorder modules.");
       await loadModules();
+      await loadPlatformModules();
     } finally {
       setReordering(false);
     }
@@ -714,6 +738,8 @@ export default function SuperAdminModulesPage() {
       toast.success(`Platform module '${moduleToDelete.label}' deleted.`);
       setModuleToDelete(null);
       await loadModules();
+      await loadPlatformModules();
+      invalidateNavCaches();
     } catch (err: any) {
       toast.error(err?.response?.data?.message || "Failed to delete module.");
     } finally {
@@ -812,32 +838,32 @@ export default function SuperAdminModulesPage() {
       {/* 2. KPI Metrics Grid */}
       <CRMMetricsGrid cols={4}>
         <CRMMetricCard
-          title="Total Modules"
-          value={stats.total}
-          icon={Boxes}
-          color="indigo"
-          comparisonText="Registered platform features"
+          title={displayStats.card1Title}
+          value={displayStats.card1Value}
+          icon={displayStats.card1Icon}
+          color={displayStats.card1Color}
+          comparisonText={displayStats.card1Text}
         />
         <CRMMetricCard
-          title="Active Modules"
-          value={stats.enabled}
-          icon={CheckCircle2}
-          color="emerald"
-          comparisonText="Globally enabled for users"
+          title={displayStats.card2Title}
+          value={displayStats.card2Value}
+          icon={displayStats.card2Icon}
+          color={displayStats.card2Color}
+          comparisonText={displayStats.card2Text}
         />
         <CRMMetricCard
-          title="Disabled Modules"
-          value={stats.disabled}
-          icon={XCircle}
-          color="orange"
-          comparisonText="Hidden from navigation"
+          title={displayStats.card3Title}
+          value={displayStats.card3Value}
+          icon={displayStats.card3Icon}
+          color={displayStats.card3Color}
+          comparisonText={displayStats.card3Text}
         />
         <CRMMetricCard
-          title="Core System"
-          value={stats.system}
-          icon={Shield}
-          color="violet"
-          comparisonText="Protected foundations"
+          title={displayStats.card4Title}
+          value={displayStats.card4Value}
+          icon={displayStats.card4Icon}
+          color={displayStats.card4Color}
+          comparisonText={displayStats.card4Text}
         />
       </CRMMetricsGrid>
 
@@ -845,7 +871,11 @@ export default function SuperAdminModulesPage() {
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 rounded-2xl bg-card border border-border shadow-xs">
         <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/50">
           <button
-            onClick={() => setActiveScope("tenant")}
+            onClick={() => {
+              setActiveScope("tenant");
+              setGroupFilter("ALL");
+              setSearch("");
+            }}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeScope === "tenant"
                 ? "bg-emerald-600 text-white shadow-md"
@@ -856,7 +886,11 @@ export default function SuperAdminModulesPage() {
             <span>Tenant CRM Navigation ({modules.length})</span>
           </button>
           <button
-            onClick={() => setActiveScope("platform")}
+            onClick={() => {
+              setActiveScope("platform");
+              setGroupFilter("ALL");
+              setSearch("");
+            }}
             className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
               activeScope === "platform"
                 ? "bg-emerald-600 text-white shadow-md"
@@ -864,7 +898,7 @@ export default function SuperAdminModulesPage() {
             }`}
           >
             <Shield className="w-3.5 h-3.5" />
-            <span>Super Admin Platform Menus ({SUPER_ADMIN_NAV_MENUS.length})</span>
+            <span>Super Admin Platform Menus ({platformModules.length})</span>
           </button>
         </div>
 
@@ -872,102 +906,253 @@ export default function SuperAdminModulesPage() {
           <span className="font-semibold">
             {activeScope === "tenant"
               ? "Configuring dynamic workspace navigation visible to CRM roles"
-              : "Root platform administration menus & system routes"}
+              : "Root platform administration hierarchy & system routes"}
           </span>
         </div>
       </div>
 
       {activeScope === "platform" ? (
-        /* Super Admin Platform Navigation Table */
-        <div className="rounded-2xl bg-card border border-border shadow-card overflow-hidden">
-          <div className="p-4 border-b border-border bg-muted/10 flex items-center justify-between">
-            <div className="flex items-center gap-2.5">
-              <Shield className="w-4 h-4 text-emerald-600" />
-              <div>
-                <h3 className="text-sm font-bold text-foreground">Platform Control Navigation Hierarchy</h3>
-                <p className="text-xs text-muted-foreground">These menus are rendered in the Super Admin left sidebar navigation.</p>
-              </div>
+        /* Super Admin Platform Navigation Workspace */
+        <div className="crm-table-workspace-sticky space-y-3">
+          {/* Platform Search & Group Filter Toolbar */}
+          <CRMToolbar
+            placeholder="Search Super Admin menus by name, route, key, description..."
+            searchQuery={search}
+            setSearchQuery={setSearch}
+            sticky={false}
+          >
+            <div className="flex items-center gap-2">
+              {/* Group Filter */}
+              <select
+                value={groupFilter}
+                onChange={(e) => setGroupFilter(e.target.value)}
+                className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
+              >
+                <option value="ALL">All Domain Groups</option>
+                {currentAvailableGroups.map((g) => (
+                  <option key={g} value={g}>
+                    Group: {g}
+                  </option>
+                ))}
+              </select>
             </div>
-            <span className="text-xs font-bold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
-              {SUPER_ADMIN_NAV_MENUS.length} System Controls Active
-            </span>
+          </CRMToolbar>
+
+          <div className="crm-table-wrap crm-table-no-pagination">
+            {platformLoading ? (
+              <PlatformModulesTableSkeleton />
+            ) : sortedPlatformMenus.length === 0 ? (
+              <div className="p-12">
+                <EmptyState
+                  icon={Shield}
+                  title="No Super Admin menus match your criteria"
+                  description="Try clearing your search query or group filter to view all platform navigation controls."
+                  action={{
+                    label: "Clear Filters",
+                    onClick: () => {
+                      setSearch("");
+                      setGroupFilter("ALL");
+                    },
+                  }}
+                />
+              </div>
+            ) : (
+              <div className="overflow-auto flex-1 min-h-0">
+                <table className="w-full text-left text-sm border-collapse">
+                  <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                    <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                      <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">
+                        <DataTableColumnHeader
+                          title="Order"
+                          align="center"
+                          sortable
+                          sortDirection={platformSortConfig.key === "order" ? platformSortConfig.direction : null}
+                          onSort={(dir) => handlePlatformSort("order", dir)}
+                        />
+                      </th>
+                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                        <DataTableColumnHeader
+                          title="Menu & Route"
+                          sortable
+                          sortDirection={platformSortConfig.key === "label" ? platformSortConfig.direction : null}
+                          onSort={(dir) => handlePlatformSort("label", dir)}
+                        />
+                      </th>
+                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                        <DataTableColumnHeader
+                          title="Group & Description"
+                          sortable
+                          sortDirection={platformSortConfig.key === "group" ? platformSortConfig.direction : null}
+                          onSort={(dir) => handlePlatformSort("group", dir)}
+                        />
+                      </th>
+                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Access Level</th>
+                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Status</th>
+                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Quick Navigation</th>
+                    </tr>
+                  </thead>
+                  <tbody className="divide-y divide-border/50">
+                    {paginatedPlatformMenus.map((menu) => {
+                      const Icon = getDynamicIcon(menu.icon);
+                      return (
+                        <tr key={menu.key} className="group h-16 hover:bg-muted/[0.03] transition-colors">
+                          {/* Order */}
+                          <td className="px-3 sm:px-4 py-4 text-center font-mono text-xs font-bold text-foreground">
+                            {menu.sortOrder}
+                          </td>
+
+                          {/* Menu & Route */}
+                          <td className="px-4 sm:px-6 py-4 font-medium">
+                            <div className="flex items-center gap-3">
+                              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
+                                <Icon className="w-4 h-4" />
+                              </div>
+                              <div className="min-w-0">
+                                <button
+                                  type="button"
+                                  onClick={() => setSelectedSuperAdminMenu(menu)}
+                                  className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors text-left truncate block cursor-pointer"
+                                >
+                                  {menu.label}
+                                </button>
+                                <div className="flex items-center gap-1.5 mt-0.5">
+                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted font-mono text-[11px] text-muted-foreground border border-border/50">
+                                    <LinkIcon className="w-2.5 h-2.5" />
+                                    {menu.route}
+                                  </span>
+                                  <button
+                                    type="button"
+                                    onClick={() => handleCopyRoute(menu.route)}
+                                    className="p-0.5 text-muted-foreground hover:text-foreground rounded transition-colors"
+                                    title="Copy route path"
+                                  >
+                                    <Copy className="w-3 h-3" />
+                                  </button>
+                                </div>
+                              </div>
+                            </div>
+                          </td>
+
+                          {/* Group & Description */}
+                          <td className="px-4 sm:px-6 py-4 max-w-md">
+                            <div>
+                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/60">
+                                <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
+                                {menu.group}
+                              </span>
+                              <TruncatedText text={menu.description} lines={2} className="text-xs text-muted-foreground mt-1" />
+                            </div>
+                          </td>
+
+                          {/* Access Level */}
+                          <td className="px-4 sm:px-6 py-4 text-center">
+                            <Badge
+                              variant="secondary"
+                              className="bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 font-semibold text-[10px] gap-1"
+                            >
+                              <Lock className="w-3 h-3" />
+                              Super Admin Only (AAL2)
+                            </Badge>
+                          </td>
+
+                          {/* Status */}
+                          <td className="px-4 sm:px-6 py-4 text-center">
+                            {menu.isEnabled && menu.isVisible ? (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
+                                <CheckCircle2 className="w-3.5 h-3.5" />
+                                Active
+                              </span>
+                            ) : !menu.isEnabled ? (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20">
+                                <XCircle className="w-3.5 h-3.5" />
+                                Disabled
+                              </span>
+                            ) : (
+                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
+                                <EyeOff className="w-3.5 h-3.5" />
+                                Hidden
+                              </span>
+                            )}
+                          </td>
+
+                          {/* Quick Navigation & Actions */}
+                          <td className="px-4 sm:px-6 py-4 text-right">
+                            <div className="flex items-center justify-end gap-2">
+                              <Button asChild variant="outline" size="sm" className="h-8 px-3 rounded-lg text-xs font-bold">
+                                <Link href={menu.route}>
+                                  Open Section
+                                </Link>
+                              </Button>
+
+                              <DropdownMenu>
+                                <DropdownMenuTrigger asChild>
+                                  <Button
+                                    variant="ghost"
+                                    size="icon"
+                                    className="h-8 w-8 rounded-lg hover:bg-muted"
+                                  >
+                                    <MoreHorizontal className="h-4 w-4" />
+                                  </Button>
+                                </DropdownMenuTrigger>
+                                <DropdownMenuContent align="end" className="rounded-xl w-52 shadow-lg border-border">
+                                  <DropdownMenuLabel className="text-xs font-bold">
+                                    Menu Controls
+                                  </DropdownMenuLabel>
+                                  <DropdownMenuItem asChild className="text-xs gap-2 cursor-pointer font-medium">
+                                    <Link href={menu.route}>
+                                      <LinkIcon className="h-3.5 w-3.5 text-emerald-600" />
+                                      <span>Open Section</span>
+                                    </Link>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => window.open(menu.route, "_blank")}
+                                    className="text-xs gap-2 cursor-pointer font-medium"
+                                  >
+                                    <ExternalLink className="h-3.5 w-3.5 text-primary" />
+                                    <span>Open in New Tab</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuItem
+                                    onClick={() => handleCopyRoute(menu.route)}
+                                    className="text-xs gap-2 cursor-pointer font-medium"
+                                  >
+                                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
+                                    <span>Copy Route Path</span>
+                                  </DropdownMenuItem>
+                                  <DropdownMenuSeparator />
+                                  <DropdownMenuItem
+                                    onClick={() => setSelectedSuperAdminMenu(menu)}
+                                    className="text-xs gap-2 cursor-pointer font-semibold text-foreground"
+                                  >
+                                    <Info className="h-3.5 w-3.5 text-indigo-500" />
+                                    <span>View Security & Metadata</span>
+                                  </DropdownMenuItem>
+                                </DropdownMenuContent>
+                              </DropdownMenu>
+                            </div>
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
           </div>
 
-          <div className="overflow-x-auto w-full">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                  <th className="h-10 sm:h-11 px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">Order</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Menu & Route</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">Group & Description</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Access Level</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Status</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Quick Navigation</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {SUPER_ADMIN_NAV_MENUS.map((menu) => {
-                  const Icon = getDynamicIcon(menu.icon);
-                  return (
-                    <tr key={menu.key} className="group h-16 hover:bg-muted/[0.03] transition-colors">
-                      <td className="px-4 py-4 text-center font-mono text-xs font-bold text-foreground">
-                        {menu.sortOrder}
-                      </td>
-                      <td className="px-4 py-4 font-medium">
-                        <div className="flex items-center gap-3">
-                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
-                            <Icon className="w-4 h-4" />
-                          </div>
-                          <div>
-                            <Link href={menu.route} className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors">
-                              {menu.label}
-                            </Link>
-                            <div className="flex items-center gap-1.5 mt-0.5">
-                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted font-mono text-[11px] text-muted-foreground border border-border/50">
-                                <LinkIcon className="w-2.5 h-2.5" />
-                                {menu.route}
-                              </span>
-                            </div>
-                          </div>
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 max-w-md">
-                        <div>
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/60">
-                            <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
-                            {menu.group}
-                          </span>
-                          <TruncatedText text={menu.description} lines={2} className="text-xs text-muted-foreground mt-1" />
-                        </div>
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <Badge
-                          variant="secondary"
-                          className="bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 font-semibold text-[10px] gap-1"
-                        >
-                          <Lock className="w-3 h-3" />
-                          Super Admin Only
-                        </Badge>
-                      </td>
-                      <td className="px-4 py-4 text-center">
-                        <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                          <CheckCircle2 className="w-3.5 h-3.5" />
-                          Active
-                        </span>
-                      </td>
-                      <td className="px-4 py-4 text-right">
-                        <Button asChild variant="outline" size="sm" className="h-8 px-3 rounded-lg text-xs font-bold">
-                          <Link href={menu.route}>
-                            Open Section
-                          </Link>
-                        </Button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
+          {/* Platform Tab Pagination */}
+          {!platformLoading && sortedPlatformMenus.length > 0 && (
+            <CRMPagination
+              currentPage={platformPage}
+              totalPages={platformTotalPages}
+              totalItems={sortedPlatformMenus.length}
+              rowsPerPage={platformRowsPerPage}
+              onPageChange={setPlatformPage}
+              onRowsPerPageChange={(rpp) => {
+                setPlatformRowsPerPage(rpp);
+                setPlatformPage(1);
+              }}
+            />
+          )}
         </div>
       ) : (
         <div className="crm-table-workspace-sticky">
@@ -1637,6 +1822,142 @@ export default function SuperAdminModulesPage() {
                 )}
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* 7. Super Admin Navigation Menu Details Modal */}
+      <Dialog
+        open={Boolean(selectedSuperAdminMenu)}
+        onOpenChange={(open) => {
+          if (!open) setSelectedSuperAdminMenu(null);
+        }}
+      >
+        <DialogContent className="sm:max-w-[540px] rounded-2xl border-border bg-card shadow-2xl p-6">
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
+                <DynamicIcon name={selectedSuperAdminMenu?.icon} className="w-5 h-5" />
+              </div>
+              <div>
+                <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
+                  <span>{selectedSuperAdminMenu?.label}</span>
+                  <Badge
+                    variant="secondary"
+                    className="bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 font-semibold text-[10px]"
+                  >
+                    System Control
+                  </Badge>
+                </DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground">
+                  Root Platform Administration Navigation Details & IAM Policy
+                </DialogDescription>
+              </div>
+            </div>
+          </DialogHeader>
+
+          <div className="py-4 space-y-4">
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Route Endpoint
+                </span>
+                <div className="flex items-center justify-between gap-2">
+                  <code className="text-xs font-mono font-bold text-foreground truncate">
+                    {selectedSuperAdminMenu?.route}
+                  </code>
+                  <button
+                    type="button"
+                    onClick={() => selectedSuperAdminMenu && handleCopyRoute(selectedSuperAdminMenu.route)}
+                    className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
+                    title="Copy route path"
+                  >
+                    <Copy className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+              </div>
+
+              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Menu Key & Order
+                </span>
+                <p className="text-xs font-mono font-bold text-foreground">
+                  {selectedSuperAdminMenu?.key} (#{selectedSuperAdminMenu?.sortOrder})
+                </p>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-3">
+              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Hierarchy Domain
+                </span>
+                <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
+                  <FolderTree className="w-3.5 h-3.5 text-muted-foreground" />
+                  {selectedSuperAdminMenu?.group}
+                </p>
+              </div>
+
+              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
+                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                  Security Level
+                </span>
+                <p className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
+                  <Lock className="w-3.5 h-3.5" />
+                  Super Admin Root IAM (AAL2)
+                </p>
+              </div>
+            </div>
+
+            <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5">
+              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
+                Functional Scope & Description
+              </span>
+              <p className="text-xs text-foreground/90 leading-relaxed">
+                {selectedSuperAdminMenu?.description}
+              </p>
+            </div>
+          </div>
+
+          <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
+            <Button
+              type="button"
+              variant="outline"
+              size="sm"
+              onClick={() => setSelectedSuperAdminMenu(null)}
+              className="h-9 rounded-xl text-xs font-medium"
+            >
+              Close
+            </Button>
+
+            <div className="flex items-center gap-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => {
+                  if (selectedSuperAdminMenu) {
+                    window.open(selectedSuperAdminMenu.route, "_blank");
+                  }
+                }}
+                className="h-9 px-3 rounded-xl text-xs font-medium gap-1.5"
+              >
+                <ExternalLink className="w-3.5 h-3.5 text-primary" />
+                <span>New Tab</span>
+              </Button>
+
+              {selectedSuperAdminMenu && (
+                <Button
+                  asChild
+                  size="sm"
+                  className="h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md transition-all"
+                >
+                  <Link href={selectedSuperAdminMenu.route}>
+                    Open Section
+                  </Link>
+                </Button>
+              )}
+            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>

@@ -9,10 +9,6 @@ import { TableSkeleton, QuoteFormSkeleton } from "@/shared/components/skeletons"
 const QuotationsTable = dynamic(() => import("@/features/quotations/components/QuotationsTable"), {
   loading: () => <TableSkeleton rows={8} cols={7} showPagination={true} />
 });
-const QuotationsGrid = dynamic(() => import("@/features/quotations/components/QuotationsGrid").then(mod => ({ default: mod.QuotationsGrid })), {
-  loading: () => <TableSkeleton rows={6} cols={4} showPagination={false} />
-});
-import { useViewMode } from "@/shared/hooks/useViewMode";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { PageErrorState } from "@/shared/components/page-states";
 import { QuotationsSkeleton } from "@/features/quotations/components/QuotationsSkeleton";
@@ -22,7 +18,7 @@ import { Button } from "@/shared/ui/button";
 import { 
   CRMPageHeader, 
   CRMMetricCard, 
-  CRMToolbar,
+  CRMToolbar, 
   CRMPageContainer,
   CRMMetricsGrid
 } from "@/shared/components/crm";
@@ -42,7 +38,6 @@ const QuotationsPage = () => {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [viewMode, setViewMode] = useViewMode("quotations", "list");
   const { formatCurrency } = useCurrency();
 
   const { quotations, setQuotations } = useCRMStore();
@@ -122,7 +117,7 @@ const QuotationsPage = () => {
   const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
 
   if (isInitialLoading && safeQuotations.length === 0) {
-    return <QuotationsSkeleton viewMode={viewMode} />;
+    return <QuotationsSkeleton />;
   }
 
   if (error && safeQuotations.length === 0) {
@@ -217,8 +212,6 @@ const QuotationsPage = () => {
             <CRMToolbar 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
               placeholder="Search quotes, clients..."
               sticky={false}
             >
@@ -241,17 +234,13 @@ const QuotationsPage = () => {
               <AnimatePresence mode="wait">
                 {filteredQuotations.length > 0 ? (
                   <motion.div
-                    key={viewMode}
+                    key="quotations-table"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    {viewMode === "list" || viewMode === "table" ? (
-                      <QuotationsTable quotations={filteredQuotations} />
-                    ) : (
-                      <QuotationsGrid quotations={filteredQuotations} />
-                    )}
+                    <QuotationsTable quotations={filteredQuotations} />
                   </motion.div>
                 ) : (
                   <EmptyState 

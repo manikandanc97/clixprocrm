@@ -1,7 +1,7 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { BarChart3, Download, Calendar, TrendingUp, Users, IndianRupee, Target, RefreshCcw, Settings, X } from "lucide-react";
+import { BarChart3, Download, Calendar, TrendingUp, Users, Target, RefreshCcw } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { PageErrorState } from "@/shared/components/page-states";
@@ -10,7 +10,6 @@ import { useReports } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { CRMPageHeader, CRMMetricCard, CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/shared/ui/sheet";
-import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
 import RevenueTargetSettings from "@/features/settings/components/RevenueTargetSettings";
 
@@ -238,15 +237,14 @@ const ReportsPage = () => {
             stat.title.toLowerCase().includes("deal") || stat.title.toLowerCase().includes("lead") ? Users :
             TrendingUp;
 
-          // Define an array of premium colors
-          const colors: ReturnType<typeof JSON.parse>[] = ["indigo", "violet", "emerald", "rose", "pink", "cyan", "amber", "blue"];
-          // We can use a deterministic color based on index or title. Let's map by title or index.
+          // Define an array of canonical metric card colors
+          const colors = ["indigo", "violet", "emerald", "pink", "cyan", "orange", "blue"] as const;
           let assignedColor = stat.color || colors[index % colors.length];
 
-          // Let's refine based on the title to have semantic colors
+          // Refine based on the title to have semantic colors
           const lowerTitle = stat.title.toLowerCase();
           if (lowerTitle.includes("won") || lowerTitle.includes("conversion")) assignedColor = "emerald";
-          else if (lowerTitle.includes("lost")) assignedColor = "pink"; // fallback to pink/rose
+          else if (lowerTitle.includes("lost")) assignedColor = "pink";
           else if (lowerTitle.includes("open")) assignedColor = "cyan";
           else if (lowerTitle.includes("total")) assignedColor = "indigo";
           else if (lowerTitle.includes("avg") || lowerTitle.includes("size")) assignedColor = "violet";

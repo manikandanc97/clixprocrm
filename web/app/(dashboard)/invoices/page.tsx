@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect } from "react";
 import {
   Receipt,
   Plus,
@@ -12,12 +12,6 @@ import {
   Eye,
   CreditCard,
   Printer,
-  Mail,
-  Trash2,
-  Send,
-  Building2,
-  Calendar,
-  FileSpreadsheet,
   Settings,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -34,13 +28,20 @@ import {
   CRMToolbar,
   CRMPageContainer,
   CRMMetricsGrid,
+  CRMDataTable,
+  CRMTableHeader,
+  CRMTableBody,
+  CRMTableRow,
+  CRMTableCell,
+  CRMTableHeaderCell,
+  CRMPagination,
   TruncatedText,
 } from "@/shared/components/crm";
+import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import { InvoicesSkeleton } from "@/features/invoices/components/InvoicesSkeleton";
@@ -114,11 +115,14 @@ export default function InvoicesPage() {
         const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
         return (dateA - dateB) * dir;
       }
-      if (sortConfig.key === "total") {
-        return ((a.total || 0) - (b.total || 0)) * dir;
+      if (sortConfig.key === "total" || sortConfig.key === "totalAmount") {
+        return ((a.totalAmount || a.total || 0) - (b.totalAmount || b.total || 0)) * dir;
       }
-      if (sortConfig.key === "balance") {
-        return ((a.balance || 0) - (b.balance || 0)) * dir;
+      if (sortConfig.key === "paidAmount") {
+        return ((a.paidAmount || 0) - (b.paidAmount || 0)) * dir;
+      }
+      if (sortConfig.key === "balance" || sortConfig.key === "balanceAmount") {
+        return ((a.balanceAmount || a.balance || 0) - (b.balanceAmount || b.balance || 0)) * dir;
       }
       if (sortConfig.key === "status") {
         return (a.status || "").localeCompare(b.status || "") * dir;
@@ -126,6 +130,15 @@ export default function InvoicesPage() {
       return 0;
     });
   }, [invoices, sortConfig]);
+
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
+
+  const totalPages = Math.ceil(sortedInvoices.length / rowsPerPage) || 1;
+  const paginatedInvoices = sortedInvoices.slice(
+    (currentPage - 1) * rowsPerPage,
+    currentPage * rowsPerPage
+  );
 
   const stats = useMemo(() => {
     return (
@@ -142,45 +155,40 @@ export default function InvoicesPage() {
     );
   }, [data?.stats, invoices]);
 
-  const getStatusBadge = (st: string) => {
+  const getInvoiceStatusVariant = (st?: string): StatusVariant => {
     switch (st?.toUpperCase()) {
       case "PAID":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
-            <CheckCircle2 className="w-3 h-3" /> PAID
-          </span>
-        );
+        return "success";
       case "PARTIALLY_PAID":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-amber-500/15 text-amber-600 dark:text-amber-400 border border-amber-500/20">
-            <Clock className="w-3 h-3" /> PARTIALLY PAID
-          </span>
-        );
+        return "warning";
       case "OVERDUE":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-rose-500/15 text-rose-600 dark:text-rose-400 border border-rose-500/20">
-            <AlertCircle className="w-3 h-3" /> OVERDUE
-          </span>
-        );
+        return "danger";
       case "SENT":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-blue-500/15 text-blue-600 dark:text-blue-400 border border-blue-500/20">
-            <Send className="w-3 h-3" /> SENT
-          </span>
-        );
+        return "info";
       case "CANCELLED":
       case "VOID":
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-slate-500/15 text-slate-500 border border-slate-500/20">
-            VOID
-          </span>
-        );
+      case "DRAFT":
       default:
-        return (
-          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 rounded-full text-[11px] font-bold bg-muted text-muted-foreground border border-border">
-            DRAFT
-          </span>
-        );
+        return "neutral";
+    }
+  };
+
+  const getInvoiceStatusLabel = (st?: string): string => {
+    switch (st?.toUpperCase()) {
+      case "PARTIALLY_PAID":
+        return "Partially Paid";
+      case "PAID":
+        return "Paid";
+      case "OVERDUE":
+        return "Overdue";
+      case "SENT":
+        return "Sent";
+      case "VOID":
+      case "CANCELLED":
+        return "Void";
+      case "DRAFT":
+      default:
+        return "Draft";
     }
   };
 
@@ -328,186 +336,205 @@ export default function InvoicesPage() {
             {/* Invoice Records Table */}
             <div className="flex-1 min-h-0 flex flex-col" data-testid="invoices-list">
               <AnimatePresence mode="wait">
-                {invoices.length > 0 ? (
+                {sortedInvoices.length > 0 ? (
                   <motion.div
                     key="invoices-table"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="flex-1 flex flex-col min-h-0"
+                    className="flex-1 flex flex-col min-h-0 gap-3.5 sm:gap-4"
                   >
-                    <div className="crm-table-wrap crm-table-no-pagination">
-                      <div className="overflow-auto flex-1 min-h-0">
-                        <table className="w-full text-xs">
-                          <thead className="sticky top-0 z-20 bg-card border-b border-border/80 text-muted-foreground font-semibold">
-                            <tr>
-                              <th className="py-3 px-4 text-left">
-                                <DataTableColumnHeader
-                                  title="Invoice #"
-                                  sortable
-                                  sortDirection={sortConfig.key === "invoiceNumber" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("invoiceNumber", dir)}
+                    <div className="crm-table-wrap">
+                      <CRMDataTable hasPagination={sortedInvoices.length > rowsPerPage} className="w-full">
+                        <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
+                          <CRMTableRow className="h-10 sm:h-11">
+                            <CRMTableHeaderCell>
+                              <DataTableColumnHeader
+                                title="Invoice #"
+                                sortable
+                                sortDirection={sortConfig.key === "invoiceNumber" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("invoiceNumber", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell>
+                              <DataTableColumnHeader
+                                title="Customer / Company"
+                                sortable
+                                sortDirection={sortConfig.key === "client" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("client", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell className="hidden md:table-cell">
+                              <DataTableColumnHeader
+                                title="Invoice Date"
+                                sortable
+                                sortDirection={sortConfig.key === "invoiceDate" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("invoiceDate", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell className="hidden md:table-cell">
+                              <DataTableColumnHeader
+                                title="Due Date"
+                                sortable
+                                sortDirection={sortConfig.key === "dueDate" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("dueDate", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell className="text-right">
+                              <DataTableColumnHeader
+                                title="Total Amount"
+                                align="right"
+                                sortable
+                                sortDirection={sortConfig.key === "totalAmount" || sortConfig.key === "total" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("totalAmount", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell className="text-right hidden sm:table-cell">
+                              <DataTableColumnHeader
+                                title="Paid"
+                                align="right"
+                                sortable
+                                sortDirection={sortConfig.key === "paidAmount" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("paidAmount", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell className="text-right hidden sm:table-cell">
+                              <DataTableColumnHeader
+                                title="Balance"
+                                align="right"
+                                sortable
+                                sortDirection={sortConfig.key === "balanceAmount" || sortConfig.key === "balance" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("balanceAmount", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell className="text-center">
+                              <DataTableColumnHeader
+                                title="Status"
+                                align="center"
+                                sortable
+                                sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
+                                onSort={(dir) => handleSort("status", dir)}
+                              />
+                            </CRMTableHeaderCell>
+                            <CRMTableHeaderCell className="text-center w-[60px]">
+                              <span className="sr-only">Actions</span>
+                            </CRMTableHeaderCell>
+                          </CRMTableRow>
+                        </CRMTableHeader>
+                        <CRMTableBody>
+                          {paginatedInvoices.map((inv: any) => (
+                            <CRMTableRow
+                              key={inv.id}
+                              onClick={() => handleOpenDetail(inv.id)}
+                              className="h-16 hover:bg-muted/[0.03] transition-colors cursor-pointer group"
+                            >
+                              <CRMTableCell className="font-mono font-bold text-foreground">
+                                {inv.invoiceNumber}
+                              </CRMTableCell>
+                              <CRMTableCell className="max-w-[220px]">
+                                <TruncatedText
+                                  text={inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned"}
+                                  lines={1}
+                                  className="font-semibold text-foreground"
                                 />
-                              </th>
-                              <th className="py-3 px-4 text-left">
-                                <DataTableColumnHeader
-                                  title="Customer / Company"
-                                  sortable
-                                  sortDirection={sortConfig.key === "client" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("client", dir)}
-                                />
-                              </th>
-                              <th className="py-3 px-3 text-left">
-                                <DataTableColumnHeader
-                                  title="Invoice Date"
-                                  sortable
-                                  sortDirection={sortConfig.key === "invoiceDate" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("invoiceDate", dir)}
-                                />
-                              </th>
-                              <th className="py-3 px-3 text-left">
-                                <DataTableColumnHeader
-                                  title="Due Date"
-                                  sortable
-                                  sortDirection={sortConfig.key === "dueDate" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("dueDate", dir)}
-                                />
-                              </th>
-                              <th className="py-3 px-3 text-right">
-                                <DataTableColumnHeader
-                                  title="Total Amount"
-                                  align="right"
-                                  sortable
-                                  sortDirection={sortConfig.key === "totalAmount" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("totalAmount", dir)}
-                                />
-                              </th>
-                              <th className="py-3 px-3 text-right">
-                                <DataTableColumnHeader
-                                  title="Paid"
-                                  align="right"
-                                  sortable
-                                  sortDirection={sortConfig.key === "paidAmount" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("paidAmount", dir)}
-                                />
-                              </th>
-                              <th className="py-3 px-3 text-right">
-                                <DataTableColumnHeader
-                                  title="Balance"
-                                  align="right"
-                                  sortable
-                                  sortDirection={sortConfig.key === "balanceAmount" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("balanceAmount", dir)}
-                                />
-                              </th>
-                              <th className="py-3 px-3 text-center">
-                                <DataTableColumnHeader
-                                  title="Status"
-                                  align="center"
-                                  sortable
-                                  sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
-                                  onSort={(dir) => handleSort("status", dir)}
-                                />
-                              </th>
-                              <th className="py-3 px-3 w-[60px]"></th>
-                            </tr>
-                          </thead>
-                          <tbody className="divide-y divide-border/60">
-                            {sortedInvoices.map((inv: any) => (
-                              <tr
-                                key={inv.id}
-                                onClick={() => handleOpenDetail(inv.id)}
-                                className="hover:bg-muted/30 transition-colors cursor-pointer group"
-                              >
-                                <td className="py-3 px-4 font-mono font-bold text-foreground">
-                                  {inv.invoiceNumber}
-                                </td>
-                                <td className="py-3 px-4 max-w-[220px]">
+                                {inv.customer?.name && inv.company?.name && (
                                   <TruncatedText
-                                    text={inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned"}
+                                    text={inv.customer.name}
                                     lines={1}
-                                    className="font-semibold text-foreground"
+                                    className="text-[11px] text-muted-foreground"
                                   />
-                                  {inv.customer?.name && inv.company?.name && (
-                                    <TruncatedText
-                                      text={inv.customer.name}
-                                      lines={1}
-                                      className="text-[11px] text-muted-foreground"
-                                    />
-                                  )}
-                                </td>
-                                <td className="py-3 px-3 text-muted-foreground">
-                                  {new Date(inv.invoiceDate).toLocaleDateString("en-IN", {
-                                    day: "2-digit",
-                                    month: "short",
-                                    year: "numeric",
-                                  })}
-                                </td>
-                                <td className="py-3 px-3 text-muted-foreground">
-                                  {inv.dueDate
-                                    ? new Date(inv.dueDate).toLocaleDateString("en-IN", {
+                                )}
+                              </CRMTableCell>
+                              <CRMTableCell className="text-muted-foreground hidden md:table-cell">
+                                {new Date(inv.invoiceDate).toLocaleDateString("en-IN", {
+                                  day: "2-digit",
+                                  month: "short",
+                                  year: "numeric",
+                                })}
+                              </CRMTableCell>
+                              <CRMTableCell className="text-muted-foreground hidden md:table-cell">
+                                {inv.dueDate
+                                  ? new Date(inv.dueDate).toLocaleDateString("en-IN", {
                                       day: "2-digit",
                                       month: "short",
                                       year: "numeric",
                                     })
-                                    : "On Receipt"}
-                                </td>
-                                <td className="py-3 px-3 text-right font-mono font-bold text-foreground">
-                                  {formatCurrency(inv.totalAmount, inv.currency)}
-                                </td>
-                                <td className="py-3 px-3 text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400">
-                                  {inv.paidAmount > 0 ? formatCurrency(inv.paidAmount, inv.currency) : "-"}
-                                </td>
-                                <td className="py-3 px-3 text-right font-mono font-bold text-foreground">
-                                  {formatCurrency(inv.balanceAmount, inv.currency)}
-                                </td>
-                                <td className="py-3 px-3 text-center">
-                                  {getStatusBadge(inv.status)}
-                                </td>
-                                <td
-                                  className="py-3 px-3 text-center"
-                                  onClick={(e) => e.stopPropagation()}
-                                >
-                                  <DropdownMenu>
-                                    <DropdownMenuTrigger asChild>
-                                      <Button
-                                        variant="ghost"
-                                        size="sm"
-                                        className="h-7 w-7 p-0 rounded-lg hover:bg-muted"
-                                      >
-                                        <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                                      </Button>
-                                    </DropdownMenuTrigger>
-                                    <DropdownMenuContent align="end" className="w-44 text-xs">
+                                  : "On Receipt"}
+                              </CRMTableCell>
+                              <CRMTableCell className="text-right font-mono font-bold text-foreground">
+                                {formatCurrency(inv.totalAmount, inv.currency)}
+                              </CRMTableCell>
+                              <CRMTableCell className="text-right font-mono font-semibold text-emerald-600 dark:text-emerald-400 hidden sm:table-cell">
+                                {inv.paidAmount > 0 ? formatCurrency(inv.paidAmount, inv.currency) : "-"}
+                              </CRMTableCell>
+                              <CRMTableCell className="text-right font-mono font-bold text-foreground hidden sm:table-cell">
+                                {formatCurrency(inv.balanceAmount, inv.currency)}
+                              </CRMTableCell>
+                              <CRMTableCell className="text-center">
+                                <StatusBadge
+                                  status={getInvoiceStatusLabel(inv.status)}
+                                  variant={getInvoiceStatusVariant(inv.status)}
+                                  showDot
+                                />
+                              </CRMTableCell>
+                              <CRMTableCell
+                                className="text-center"
+                                onClick={(e) => e.stopPropagation()}
+                              >
+                                <DropdownMenu>
+                                  <DropdownMenuTrigger asChild>
+                                    <Button
+                                      variant="ghost"
+                                      size="icon-sm"
+                                      className="h-8 w-8 p-0 rounded-lg hover:bg-muted"
+                                    >
+                                      <MoreVertical className="w-4 h-4 text-muted-foreground" />
+                                      <span className="sr-only">Actions</span>
+                                    </Button>
+                                  </DropdownMenuTrigger>
+                                  <DropdownMenuContent align="end" className="w-44 text-xs rounded-xl">
+                                    <DropdownMenuItem
+                                      onClick={() => handleOpenDetail(inv.id)}
+                                      className="gap-2 cursor-pointer"
+                                    >
+                                      <Eye className="w-3.5 h-3.5 text-primary" /> View Details
+                                    </DropdownMenuItem>
+                                    <DropdownMenuItem
+                                      onClick={() => handlePrintPdf(inv.id)}
+                                      className="gap-2 cursor-pointer"
+                                    >
+                                      <Printer className="w-3.5 h-3.5 text-muted-foreground" /> Print / PDF
+                                    </DropdownMenuItem>
+                                    {inv.balanceAmount > 0 && inv.status !== "CANCELLED" && (
                                       <DropdownMenuItem
-                                        onClick={() => handleOpenDetail(inv.id)}
-                                        className="gap-2 cursor-pointer"
+                                        onClick={() => handleOpenPayment(inv)}
+                                        className="gap-2 cursor-pointer text-emerald-600 font-semibold"
                                       >
-                                        <Eye className="w-3.5 h-3.5 text-primary" /> View Details
+                                        <CreditCard className="w-3.5 h-3.5" /> Record Payment
                                       </DropdownMenuItem>
-                                      <DropdownMenuItem
-                                        onClick={() => handlePrintPdf(inv.id)}
-                                        className="gap-2 cursor-pointer"
-                                      >
-                                        <Printer className="w-3.5 h-3.5 text-muted-foreground" /> Print / PDF
-                                      </DropdownMenuItem>
-                                      {inv.balanceAmount > 0 && inv.status !== "CANCELLED" && (
-                                        <DropdownMenuItem
-                                          onClick={() => handleOpenPayment(inv)}
-                                          className="gap-2 cursor-pointer text-emerald-600 font-semibold"
-                                        >
-                                          <CreditCard className="w-3.5 h-3.5" /> Record Payment
-                                        </DropdownMenuItem>
-                                      )}
-                                    </DropdownMenuContent>
-                                  </DropdownMenu>
-                                </td>
-                              </tr>
-                            ))}
-                          </tbody>
-                        </table>
-                      </div>
+                                    )}
+                                  </DropdownMenuContent>
+                                </DropdownMenu>
+                              </CRMTableCell>
+                            </CRMTableRow>
+                          ))}
+                        </CRMTableBody>
+                      </CRMDataTable>
                     </div>
+
+                    <CRMPagination
+                      currentPage={currentPage}
+                      totalPages={totalPages}
+                      totalItems={sortedInvoices.length}
+                      rowsPerPage={rowsPerPage}
+                      onPageChange={setCurrentPage}
+                      onRowsPerPageChange={(size) => {
+                        setRowsPerPage(size);
+                        setCurrentPage(1);
+                      }}
+                      itemName="Invoices"
+                      pageSizeOptions={[10, 25, 50, 100]}
+                    />
                   </motion.div>
                 ) : (
                   <EmptyState

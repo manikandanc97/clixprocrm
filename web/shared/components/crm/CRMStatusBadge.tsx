@@ -1,34 +1,43 @@
 "use client";
 
-import { Badge } from "@/shared/ui/badge";
-import { cn } from "@/shared/lib/utils";
+import React from "react";
+import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 
 type CRMStatusTone = "success" | "warning" | "danger" | "info" | "neutral" | "primary";
 
-const toneClasses: Record<CRMStatusTone, string> = {
-  success: "badge-success",
-  warning: "badge-warning",
-  danger: "badge-danger",
-  info: "badge-info",
-  neutral: "badge-neutral",
-  primary: "badge-primary",
+const toneToVariant: Record<CRMStatusTone, StatusVariant> = {
+  success: "success",
+  warning: "warning",
+  danger: "danger",
+  info: "info",
+  neutral: "neutral",
+  primary: "primary",
 };
 
 interface CRMStatusBadgeProps {
   children: React.ReactNode;
   tone?: CRMStatusTone;
   className?: string;
+  showDot?: boolean;
+  pulse?: boolean;
 }
 
 export const CRMStatusBadge = ({
   children,
   tone = "neutral",
   className,
+  showDot = false,
+  pulse = false,
 }: CRMStatusBadgeProps) => {
+  const statusText = typeof children === "string" ? children : String(children ?? "");
   return (
-    <Badge variant="outline" className={cn(toneClasses[tone], className)}>
-      {children}
-    </Badge>
+    <StatusBadge
+      status={statusText}
+      variant={toneToVariant[tone] || "neutral"}
+      className={className}
+      showDot={showDot}
+      pulse={pulse}
+    />
   );
 };
 

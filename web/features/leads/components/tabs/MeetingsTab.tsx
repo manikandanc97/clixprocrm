@@ -6,23 +6,18 @@ import { useLeadMeetings } from "@/shared/hooks/use-crm";
 import { FormModal } from "@/shared/components/form-modal";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { MeetingForm } from "@/features/forms/MeetingForm";
-
-import { useViewMode } from "@/shared/hooks/useViewMode";
-import { ViewToggle } from "@/shared/components/crm/ViewToggle";
 import { MeetingsSkeleton } from "@/shared/components/skeletons";
 
 export function MeetingsTab({ leadId }: { leadId: string }) {
   const { data: meetingsResp, isLoading } = useLeadMeetings(leadId);
   const meetings = meetingsResp?.data || [];
   const [isScheduling, setIsScheduling] = useState(false);
-  const [viewMode, setViewMode] = useViewMode("meetings", "list");
 
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center gap-4">
         <h3 className="text-sm font-bold text-foreground">Upcoming & Past Meetings</h3>
         <div className="flex items-center gap-3">
-          <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
           <Button onClick={() => setIsScheduling(true)} size="sm" className="gap-2">
             <Calendar className="w-4 h-4" /> Schedule Meeting
           </Button>
@@ -44,7 +39,7 @@ export function MeetingsTab({ leadId }: { leadId: string }) {
           }}
           size="sm"
         />
-      ) : viewMode === "list" || viewMode === "table" ? (
+      ) : (
         <div className="space-y-4 relative">
           <div className="absolute left-6 top-2 bottom-2 w-0.5 bg-border -z-10" />
 
@@ -84,50 +79,6 @@ export function MeetingsTab({ leadId }: { leadId: string }) {
                     <div className="text-sm text-foreground/80 mt-2 bg-muted/30 p-3 rounded-lg">
                       {meeting.description}
                     </div>
-                  )}
-                </div>
-              </div>
-            );
-          })}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {meetings.map((meeting: ReturnType<typeof JSON.parse>) => {
-            const isUpcoming = new Date(meeting.startTime) > new Date();
-            return (
-              <div key={meeting.id} className={`bg-card border rounded-xl p-4 shadow-sm flex flex-col justify-between ${isUpcoming ? 'border-primary/30' : 'border-border/60'}`}>
-                <div>
-                  <div className="flex items-center justify-between gap-2 mb-3">
-                    <div className="flex items-center gap-2">
-                      <span className="text-[10px] font-bold uppercase px-2 py-0.5 rounded-full bg-primary/10 text-primary">
-                        {format(new Date(meeting.startTime), "MMM dd")}
-                      </span>
-                    </div>
-                    <span className="text-xs font-medium text-muted-foreground flex items-center gap-1">
-                      <Clock className="w-3 h-3" />
-                      {format(new Date(meeting.startTime), "h:mm a")}
-                    </span>
-                  </div>
-
-                  <h4 className="text-sm font-bold text-foreground mb-2">{meeting.title}</h4>
-                  {meeting.description && (
-                    <p className="text-xs text-muted-foreground line-clamp-2 mb-3 bg-muted/30 p-2.5 rounded-lg">
-                      {meeting.description}
-                    </p>
-                  )}
-                </div>
-
-                <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground pt-3 border-t border-border/40">
-                  {meeting.isOnline ? (
-                    <span className="flex items-center gap-1 text-blue-600">
-                      <Video className="w-3.5 h-3.5" /> Online Meeting
-                    </span>
-                  ) : meeting.location ? (
-                    <span className="flex items-center gap-1 truncate">
-                      <MapPin className="w-3.5 h-3.5" /> {meeting.location}
-                    </span>
-                  ) : (
-                    <span>In-person</span>
                   )}
                 </div>
               </div>

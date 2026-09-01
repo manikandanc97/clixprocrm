@@ -31,7 +31,6 @@ const CustomerForm = dynamic(() => import("@/features/forms/CustomerForm").then(
 });
 
 import { ContactsTable } from "@/features/contacts/components/ContactsTable";
-import { useViewMode } from "@/shared/hooks/useViewMode";
 import { ContactsSkeleton } from "@/features/contacts/components/ContactsSkeleton";
 import { BulkImportModal } from "@/features/leads/components/BulkImportModal";
 
@@ -45,7 +44,6 @@ const ContactsPage = () => {
   const initialStatus = searchParams.get("status") || "all";
   const [statusFilter, setStatusFilter] = useState(initialStatus);
   const [searchQuery, setSearchQuery] = useState("");
-  const [viewMode, setViewMode] = useViewMode("contacts", "list");
 
   const { data: leadsData, isLoading: leadsLoading, isPending: leadsPending, error: leadsError, refetch: refetchLeads } = useLeads();
   const { data: customersData, isLoading: customersLoading, isPending: customersPending, error: customersError, refetch: refetchCustomers } = useCustomers();
@@ -145,7 +143,7 @@ const ContactsPage = () => {
     (leadsLoading || customersLoading || leadsPending || customersPending || !isHydrated || !isAuthenticated || isInitializing);
 
   if (isInitialLoading && combinedContacts.length === 0) {
-    return <ContactsSkeleton viewMode={viewMode} />;
+    return <ContactsSkeleton />;
   }
 
   if ((leadsError || customersError) && combinedContacts.length === 0) {
@@ -276,8 +274,6 @@ const ContactsPage = () => {
             <CRMToolbar
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
               placeholder="Search contacts by name, email, company, or phone..."
               sticky={false}
             >
@@ -305,7 +301,7 @@ const ContactsPage = () => {
               <AnimatePresence mode="wait">
                 {filteredContacts.length > 0 ? (
                   <motion.div
-                    key={viewMode}
+                    key="contacts-table"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}

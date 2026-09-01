@@ -14,11 +14,8 @@ import {
   Settings,
 } from "lucide-react";
 
-import { Grid } from "lucide-react";
-
 import dynamic from "next/dynamic";
 const TasksTable = dynamic(() => import("@/features/tasks/components/TasksTable"));
-const TasksGrid = dynamic(() => import("@/features/tasks/components/TasksGrid").then(mod => ({ default: mod.TasksGrid })));
 const KanbanView = dynamic(() => import("@/features/tasks/components/KanbanView").then(mod => ({ default: mod.KanbanView })));
 const CalendarView = dynamic(() => import("@/features/tasks/components/CalendarView").then(mod => ({ default: mod.CalendarView })));
 const TimelineView = dynamic(() => import("@/features/tasks/components/TimelineView").then(mod => ({ default: mod.TimelineView })));
@@ -51,7 +48,6 @@ import { useAuth } from "@/features/auth/components/auth-provider";
 
 const VIEW_MODES = [
   { id: "list", icon: List, label: "List" },
-  { id: "grid", icon: Grid, label: "Grid" },
   { id: "kanban", icon: Kanban, label: "Board" },
   { id: "calendar", icon: CalendarIcon, label: "Calendar" },
   { id: "timeline", icon: GanttChart, label: "Timeline" },
@@ -284,11 +280,8 @@ const TasksPage = () => {
                     transition={{ duration: 0.2 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    {(viewMode === "list" || viewMode === "table") && (
+                    {(viewMode === "list" || viewMode === "table" || viewMode === "grid" || viewMode === "cards") && (
                       <TasksTable tasks={filteredTasks} onTaskClick={setSelectedTask} onScheduleMeeting={handleScheduleMeeting} onEditTask={setTaskToEdit} />
-                    )}
-                    {(viewMode === "grid" || viewMode === "cards") && (
-                      <TasksGrid tasks={filteredTasks} onTaskClick={setSelectedTask} />
                     )}
                     {viewMode === "kanban" && (
                       <KanbanView tasks={filteredTasks} onTaskClick={setSelectedTask} onAddTask={() => setIsAddModalOpen(true)} onScheduleMeeting={handleScheduleMeeting} onEditTask={setTaskToEdit} />

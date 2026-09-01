@@ -759,6 +759,7 @@ export interface PlatformModule {
   icon: string;
   route: string;
   group: string;
+  navigationScope: string;
   parentId: string | null;
   sortOrder: number;
   isEnabled: boolean;
@@ -807,6 +808,7 @@ export interface UpdatePlatformModuleDto {
 export const fetchPlatformModules = async (params?: {
   search?: string;
   group?: string;
+  navigationScope?: string;
   isEnabled?: boolean;
   isVisible?: boolean;
 }): Promise<{
@@ -833,11 +835,28 @@ export const fetchPlatformModules = async (params?: {
   return response.data.data;
 };
 
+/**
+ * Fetches enabled & visible TENANT_CRM navigation items.
+ * Used by: usePlatformNavigation() → tenant workspace sidebar.
+ */
 export const fetchPlatformNavigation = async (): Promise<PlatformModule[]> => {
   const response = await client.get<{
     success: boolean;
     data: PlatformModule[];
   }>("/super-admin/modules/navigation");
+  return response.data.data;
+};
+
+/**
+ * Fetches enabled & visible SUPER_ADMIN navigation items.
+ * Used by: useSuperAdminNavigation() → super admin platform sidebar.
+ * Requires Super Admin session.
+ */
+export const fetchSuperAdminNavigation = async (): Promise<PlatformModule[]> => {
+  const response = await client.get<{
+    success: boolean;
+    data: PlatformModule[];
+  }>("/super-admin/modules/super-admin-navigation");
   return response.data.data;
 };
 
@@ -1271,8 +1290,8 @@ export interface PlatformBillingOverviewData {
     totalSubscriptions: number;
     totalOrganizations: number;
   };
-  planDistribution: Array<{ count: number; name: string; revenue: number }>;
-  monthlyTrend: Array<{ month: string; revenue: number; invoicesCount: number }>;
+  planDistribution: Array<{ count: number; name: string; revenue: number; percentage?: number }>;
+  monthlyTrend: Array<{ month: string; revenue: number; projected?: number; invoicesCount: number }>;
   config: any;
 }
 

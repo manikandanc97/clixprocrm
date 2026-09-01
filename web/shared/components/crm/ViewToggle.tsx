@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { List, Grid, LucideIcon } from "lucide-react";
+import { LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
 import { motion } from "framer-motion";
@@ -19,27 +19,22 @@ interface ViewToggleProps {
   className?: string;
 }
 
-const DEFAULT_OPTIONS: ViewOption[] = [
-  { id: "list", icon: List, label: "List" },
-  { id: "grid", icon: Grid, label: "Grid" },
-];
-
 export const ViewToggle: React.FC<ViewToggleProps> = ({
   viewMode,
   setViewMode,
-  options = DEFAULT_OPTIONS,
+  options,
   className,
 }) => {
-  const normalizedMode =
-    viewMode === "table" ? "list" : viewMode === "cards" ? "grid" : viewMode;
+  if (!options || options.length < 2) return null;
+
+  const normalizedMode = viewMode === "table" ? "list" : viewMode;
 
   return (
     <div className={cn("crm-segment flex items-center gap-0.5 p-1 bg-muted/50 rounded-xl border border-border/50", className)}>
       {options.map(({ id, icon: Icon, label }) => {
         const isActive =
           normalizedMode === id ||
-          (id === "list" && normalizedMode === "table") ||
-          (id === "grid" && normalizedMode === "cards");
+          (id === "list" && normalizedMode === "table");
 
         return (
           <Button

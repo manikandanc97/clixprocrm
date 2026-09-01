@@ -6,15 +6,11 @@ import { formatDistanceToNow } from "date-fns";
 import { useLeadNotes, useCreateLeadNote } from "@/shared/hooks/use-crm";
 import { Textarea } from "@/shared/ui/textarea";
 import { EmptyState } from "@/shared/components/EmptyState";
-
-import { useViewMode } from "@/shared/hooks/useViewMode";
-import { ViewToggle } from "@/shared/components/crm/ViewToggle";
 import { NotesSkeleton } from "@/shared/components/skeletons";
 
 export function NotesTab({ leadId }: { leadId: string }) {
   const { data: notesResp, isLoading } = useLeadNotes(leadId);
   const notes = notesResp?.data || [];
-  const [viewMode, setViewMode] = useViewMode("notes", "list");
   
   const createNote = useCreateLeadNote();
   const [newMessage, setNewMessage] = useState("");
@@ -36,7 +32,6 @@ export function NotesTab({ leadId }: { leadId: string }) {
     <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-sm font-bold text-foreground">Lead Notes & Conversation History</h3>
-        <ViewToggle viewMode={viewMode} setViewMode={setViewMode} />
       </div>
 
       <div className="bg-card border rounded-xl p-4 shadow-sm flex flex-col gap-3">
@@ -64,7 +59,7 @@ export function NotesTab({ leadId }: { leadId: string }) {
           description="Add internal notes to keep track of conversations and updates."
           size="sm"
         />
-      ) : viewMode === "list" || viewMode === "table" ? (
+      ) : (
         <div className="space-y-4 relative">
           <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-border -z-10" />
 
@@ -99,37 +94,6 @@ export function NotesTab({ leadId }: { leadId: string }) {
                 <div className="text-sm text-foreground/90 whitespace-pre-wrap leading-relaxed">
                   {note.message}
                 </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      ) : (
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-          {sortedNotes.map((note: ReturnType<typeof JSON.parse>) => (
-            <div key={note.id} className="bg-card border border-border/60 rounded-xl p-4 shadow-sm relative flex flex-col justify-between">
-              {note.isPinned && (
-                <div className="absolute top-3 right-3 bg-amber-100 border border-amber-200 text-amber-600 rounded-full p-1 shadow-sm">
-                  <Pin className="w-3 h-3 fill-current" />
-                </div>
-              )}
-              <div>
-                <div className="flex items-center gap-3 mb-3">
-                  <Avatar className="w-8 h-8 border border-border">
-                    <AvatarFallback className="bg-primary/10 text-primary text-[10px] font-bold">
-                      {note.user?.name ? note.user.name.substring(0, 2).toUpperCase() : "U"}
-                    </AvatarFallback>
-                  </Avatar>
-                  <div>
-                    <h4 className="text-xs font-bold text-foreground">{note.user?.name || "Unknown"}</h4>
-                    <span className="text-[10px] font-medium text-muted-foreground">
-                      {formatDistanceToNow(new Date(note.createdAt), { addSuffix: true })}
-                    </span>
-                  </div>
-                </div>
-
-                <p className="text-xs text-foreground/90 whitespace-pre-wrap leading-relaxed line-clamp-4 bg-muted/20 p-3 rounded-lg border border-border/40 mb-3">
-                  {note.message}
-                </p>
               </div>
             </div>
           ))}

@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Handshake, Plus, TrendingUp, Target, Banknote, List, Grid, GitBranch, Filter, ArrowUpDown, Settings } from "lucide-react";
+import { Handshake, Plus, TrendingUp, Target, Banknote, List, GitBranch, Filter, ArrowUpDown, Settings } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -17,9 +17,6 @@ import { TableSkeleton, KanbanSkeleton } from "@/shared/components/skeletons";
 
 const DealsTable = dynamic(() => import("@/features/deals/components/DealsTable").then(mod => ({ default: mod.DealsTable })), {
   loading: () => <TableSkeleton rows={8} cols={7} showPagination={true} />
-});
-const DealsGrid = dynamic(() => import("@/features/deals/components/DealsGrid").then(mod => ({ default: mod.DealsGrid })), {
-  loading: () => <TableSkeleton rows={6} cols={4} showPagination={false} />
 });
 const PipelineBoard = dynamic(() => import("@/features/pipeline/components/PipelineBoard"), {
   loading: () => <KanbanSkeleton />
@@ -273,8 +270,7 @@ const DealsPage = () => {
                   window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
                 }}
                 viewOptions={[
-                  { id: "list", icon: List, label: "List View" },
-                  { id: "grid", icon: Grid, label: "Grid View" },
+                  { id: "list", icon: List, label: "Table" },
                   { id: "pipeline", icon: GitBranch, label: "Pipeline" },
                 ]}
                 placeholder="Search deals by name or company..."
@@ -341,7 +337,7 @@ const DealsPage = () => {
                     exit={{ opacity: 0 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    {viewMode === "list" && (
+                    {viewMode !== "pipeline" ? (
                       <DealsTable 
                         deals={filteredDeals} 
                         onEdit={(deal) => {
@@ -353,18 +349,7 @@ const DealsPage = () => {
                           else deleteDeal.mutate(id);
                         }}
                       />
-                    )}
-                    {viewMode === "grid" && (
-                      <DealsGrid 
-                        deals={filteredDeals} 
-                        onEdit={(deal) => {
-                          setSelectedDeal(deal);
-                          setIsAddModalOpen(true);
-                        }}
-                        onDelete={(id) => deleteDeal.mutate(id)}
-                      />
-                    )}
-                    {viewMode === "pipeline" && (
+                    ) : (
                       <PipelineBoard 
                         items={filteredPipelineItems} 
                         onAddDeal={handleNewDeal} 

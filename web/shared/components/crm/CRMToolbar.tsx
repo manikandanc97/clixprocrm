@@ -95,7 +95,7 @@ export const CRMToolbar = ({
       <div className="flex w-full flex-wrap items-center gap-3 sm:w-auto sm:justify-end">
         {children}
         
-        {viewMode && setViewMode && (
+        {viewMode && setViewMode && viewOptions && viewOptions.length > 1 && (
           <ViewToggle
             viewMode={viewMode}
             setViewMode={setViewMode}

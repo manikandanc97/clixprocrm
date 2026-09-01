@@ -2,13 +2,12 @@
 
 import { useState, useEffect, useCallback } from "react";
 
-export type ViewMode = "list" | "grid" | "table" | "cards" | string;
+export type ViewMode = "list" | "table" | "pipeline" | "kanban" | "calendar" | "timeline" | string;
 
 export function normalizeViewMode(mode: string | null | undefined, defaultMode: string = "list"): string {
   if (!mode) return defaultMode;
   const lower = mode.toLowerCase();
-  if (lower === "table" || lower === "list") return "list";
-  if (lower === "cards" || lower === "grid") return "grid";
+  if (lower === "table" || lower === "list" || lower === "cards" || lower === "grid") return "list";
   return lower;
 }
 
@@ -51,7 +50,7 @@ export function useViewMode(moduleKey: string, defaultMode: string = "list") {
           localStorage.setItem(storageKey, normalized);
           // Also update legacy key if leads for backward compatibility
           if (moduleKey === "leads") {
-            localStorage.setItem("leadViewMode", normalized === "list" ? "table" : "cards");
+            localStorage.setItem("leadViewMode", "table");
           }
           // Notify other components/tabs
           window.dispatchEvent(

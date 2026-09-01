@@ -27,18 +27,12 @@ import { FormModal } from "@/shared/components/form-modal";
 import { CompanyForm } from "@/features/forms/CompanyForm";
 import { CompanyContextualSettings } from "@/features/companies/components/CompanyContextualSettings";
 
-const CompaniesGrid = dynamic(() => import("@/features/companies/components/CompaniesGrid").then(mod => ({ default: mod.CompaniesGrid })), {
-  loading: () => <TableSkeleton rows={6} cols={4} showPagination={false} />
-});
-import { useViewMode } from "@/shared/hooks/useViewMode";
-
 import { useAuth } from "@/features/auth/components/auth-provider";
 
 const CompaniesPage = () => {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
-  const [viewMode, setViewMode] = useViewMode("companies", "list");
 
   const { data, isLoading: loading, isPending, error, refetch } = useCompanies();
   const safeCompanies = useMemo(() => Array.isArray(data?.companies) ? data.companies : [], [data]);
@@ -103,7 +97,7 @@ const CompaniesPage = () => {
   const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
 
   if (isInitialLoading && safeCompanies.length === 0) {
-    return <CompaniesSkeleton viewMode={viewMode} />;
+    return <CompaniesSkeleton />;
   }
 
   if (error && safeCompanies.length === 0) {
@@ -194,8 +188,6 @@ const CompaniesPage = () => {
             <CRMToolbar 
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
-              viewMode={viewMode}
-              setViewMode={setViewMode}
               placeholder="Search companies by name or industry..."
               sticky={false}
             >
@@ -218,31 +210,20 @@ const CompaniesPage = () => {
               <AnimatePresence mode="wait">
                 {filteredCompanies.length > 0 ? (
                   <motion.div
-                    key={viewMode}
+                    key="companies-table"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    {viewMode === "list" || viewMode === "table" ? (
-                      <CompaniesTable 
-                        companies={filteredCompanies} 
-                        onEdit={(company) => {
-                          setSelectedCompany(company);
-                          setIsAddModalOpen(true);
-                        }}
-                        onDelete={handleDelete}
-                      />
-                    ) : (
-                      <CompaniesGrid 
-                        companies={filteredCompanies} 
-                        onEdit={(company) => {
-                          setSelectedCompany(company);
-                          setIsAddModalOpen(true);
-                        }}
-                        onDelete={handleDelete}
-                      />
-                    )}
+                    <CompaniesTable 
+                      companies={filteredCompanies} 
+                      onEdit={(company) => {
+                        setSelectedCompany(company);
+                        setIsAddModalOpen(true);
+                      }}
+                      onDelete={handleDelete}
+                    />
                   </motion.div>
                 ) : (
                   <EmptyState

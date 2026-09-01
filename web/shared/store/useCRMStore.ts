@@ -6,18 +6,10 @@ import { CustomerType } from '@/shared/types/customer';
 import { PipelineLeadType as DealType } from '@/shared/types/pipeline';
 import { QuotationType } from '@/shared/types/quotation';
 
-export type LeadViewMode = 'cards' | 'table';
+export type LeadViewMode = 'table';
 
 const getInitialLeadViewMode = (): LeadViewMode => {
-  if (typeof window === 'undefined') return 'cards';
-  try {
-    const saved = localStorage.getItem('leadViewMode');
-    if (saved === 'table' || saved === 'list') return 'table';
-    if (saved === 'cards' || saved === 'grid') return 'cards';
-  } catch {
-    // Ignore storage access errors
-  }
-  return 'cards';
+  return 'table';
 };
 
 interface CRMState {
@@ -58,7 +50,7 @@ interface CRMState {
   
   setSidebarCollapsed: (collapsed: boolean) => void;
   setActiveTimeframe: (timeframe: 'today' | 'week' | 'month' | 'year') => void;
-  setLeadViewMode: (mode: LeadViewMode | 'grid' | 'list') => void;
+  setLeadViewMode: (mode?: string) => void;
   
   setAccentColor: (color: string) => void;
   setFontFamily: (font: string) => void;
@@ -117,16 +109,15 @@ export const useCRMStore = create<CRMState>()(
 
       setSidebarCollapsed: (collapsed) => set({ sidebarCollapsed: collapsed }),
       setActiveTimeframe: (timeframe) => set({ activeTimeframe: timeframe }),
-      setLeadViewMode: (mode) => {
-        const normalizedMode: LeadViewMode = (mode === 'table' || mode === 'list') ? 'table' : 'cards';
+      setLeadViewMode: () => {
         if (typeof window !== 'undefined') {
           try {
-            localStorage.setItem('leadViewMode', normalizedMode);
+            localStorage.setItem('leadViewMode', 'table');
           } catch {
             // Ignore storage quota/permission errors
           }
         }
-        set({ leadViewMode: normalizedMode });
+        set({ leadViewMode: 'table' });
       },
       
       setAccentColor: (accentColor) => set({ accentColor }),
@@ -158,7 +149,7 @@ export const useCRMStore = create<CRMState>()(
         return {
           sidebarCollapsed: state?.sidebarCollapsed ?? false,
           activeTimeframe: state?.activeTimeframe ?? 'month',
-          leadViewMode: state?.leadViewMode ?? 'cards',
+          leadViewMode: 'table',
           accentColor: state?.accentColor ?? 'emerald',
           fontFamily: state?.fontFamily ?? 'sans',
           superAdminAccentColor: state?.superAdminAccentColor ?? 'emerald',
