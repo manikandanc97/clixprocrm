@@ -43,7 +43,7 @@ const SettingsPage = () => {
     if (!rawSectionParam) return;
     const resolved = resolveCanonicalSectionId(rawSectionParam);
     if (resolved === "pricing_redirect") {
-      router.replace("/pricing");
+      router.replace("/upgrade");
     } else if (resolved === "roles_redirect") {
       router.replace("/role-management");
     } else if (resolved === "members_redirect") {

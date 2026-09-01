@@ -139,6 +139,10 @@ function buildAccess(user: AuthUser | null): RoleAccess {
     allowedRoutes.push("/ai");
   }
 
+  if (!allowedRoutes.includes("/upgrade")) {
+    allowedRoutes.push("/upgrade");
+  }
+
   if (!allowedRoutes.includes("/pricing")) {
     allowedRoutes.push("/pricing");
   }

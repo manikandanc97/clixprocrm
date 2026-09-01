@@ -114,7 +114,7 @@ function UpgradeFooterItem({
         <Tooltip>
           <TooltipTrigger asChild>
             <Link
-              href="/pricing"
+              href="/upgrade"
               onMouseEnter={() => setIsHovered(true)}
               onMouseLeave={() => setIsHovered(false)}
               onClick={() => setClickKey((c: number) => c + 1)}
@@ -130,7 +130,7 @@ function UpgradeFooterItem({
               <NavAnimatedIcon
                 icon={Sparkles}
                 name="Upgrade"
-                href="/pricing"
+                href="/upgrade"
                 isActive={isUpgradeActive}
                 isHovered={isHovered}
                 triggerAnimation={clickKey}
@@ -154,7 +154,7 @@ function UpgradeFooterItem({
 
   return (
     <Link
-      href="/pricing"
+      href="/upgrade"
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => setClickKey((c: number) => c + 1)}
@@ -170,7 +170,7 @@ function UpgradeFooterItem({
       <NavAnimatedIcon
         icon={Sparkles}
         name="Upgrade"
-        href="/pricing"
+        href="/upgrade"
         isActive={isUpgradeActive}
         isHovered={isHovered}
         triggerAnimation={clickKey}
@@ -199,7 +199,7 @@ export function SidebarContent({ isMobile = false }: { isMobile?: boolean }) {
   const hasHelpAccess = access.permissions.includes("Help Center") || access.permissions.includes("Support") || user?.role?.toUpperCase() === "ADMIN" || true;
 
   const isHelpActive = pathname === "/support" || pathname.startsWith("/support") || pathname === "/help";
-  const isUpgradeActive = (pathname === "/settings" && searchParams?.get("section") === "billing") || pathname === "/pricing";
+  const isUpgradeActive = (pathname === "/settings" && searchParams?.get("section") === "subscription") || pathname === "/upgrade" || pathname === "/pricing";
 
   const logoElement = companyLogo ? (
     // eslint-disable-next-line @next/next/no-img-element
@@ -261,7 +261,7 @@ export default function Sidebar() {
   const hasHelpAccess = access.permissions.includes("Help Center") || access.permissions.includes("Support") || user?.role?.toUpperCase() === "ADMIN" || true;
 
   const isHelpActive = pathname === "/support" || pathname.startsWith("/support") || pathname === "/help";
-  const isUpgradeActive = (pathname === "/settings" && searchParams?.get("section") === "billing") || pathname === "/pricing";
+  const isUpgradeActive = (pathname === "/settings" && searchParams?.get("section") === "subscription") || pathname === "/upgrade" || pathname === "/pricing";
 
   const logoElement = companyLogo ? (
     // eslint-disable-next-line @next/next/no-img-element

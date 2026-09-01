@@ -53,7 +53,7 @@ export function PlanBadgePopover({
     if (isEnterprise) {
       router.push("/settings?section=subscription");
     } else if (isFree) {
-      router.push("/pricing");
+      router.push("/upgrade");
     } else {
       router.push("/settings?section=subscription");
     }
@@ -61,7 +61,7 @@ export function PlanBadgePopover({
 
   const handleViewPricing = () => {
     setOpen(false);
-    router.push("/pricing");
+    router.push("/upgrade");
   };
 
   return (

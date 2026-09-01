@@ -252,7 +252,7 @@ export function AIChatHeader({
               size="sm"
               onClick={() => {
                 setIsUpgradeModalOpen(false);
-                router.push('/pricing');
+                router.push('/upgrade');
               }}
               className="bg-primary text-primary-foreground text-xs font-medium gap-1.5 shadow-sm"
             >

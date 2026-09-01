@@ -160,7 +160,7 @@ export default function SubscriptionSettings() {
             {canManageBilling ? (
               <>
                 <Button
-                  onClick={() => router.push("/pricing")}
+                  onClick={() => router.push("/upgrade")}
                   className="bg-primary text-primary-foreground hover:brightness-110 shadow-xs gap-1.5 text-xs font-bold"
                 >
                   <Sparkles className="w-3.5 h-3.5" />
@@ -168,7 +168,7 @@ export default function SubscriptionSettings() {
                 </Button>
                 <Button
                   variant="outline"
-                  onClick={() => router.push("/pricing")}
+                  onClick={() => router.push("/upgrade")}
                   className="text-xs font-bold border-border gap-1.5"
                 >
                   <CreditCard className="w-3.5 h-3.5 text-muted-foreground" />
@@ -302,7 +302,7 @@ export default function SubscriptionSettings() {
 
           <Button
             size="sm"
-            onClick={() => router.push("/pricing?plan=growth")}
+            onClick={() => router.push("/upgrade?plan=growth")}
             className="bg-primary text-primary-foreground text-xs font-bold shrink-0 shadow-xs"
           >
             Upgrade to Growth ⭐
@@ -400,10 +400,10 @@ export default function SubscriptionSettings() {
         <Button
           variant="outline"
           size="sm"
-          onClick={() => router.push("/pricing")}
+          onClick={() => router.push("/upgrade")}
           className="text-xs font-bold gap-1 shrink-0 border-border"
         >
-          <span>View Pricing Page</span>
+          <span>View Plans & Upgrade</span>
           <ArrowRight className="w-3 h-3" />
         </Button>
       </div>

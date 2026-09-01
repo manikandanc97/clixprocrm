@@ -567,7 +567,7 @@ export function AIChatComposer({
               size="sm"
               onClick={() => {
                 setIsUpgradeModalOpen(false);
-                router.push('/pricing');
+                router.push('/upgrade');
               }}
               className="flex-1 sm:flex-none text-xs gap-1.5 bg-primary text-primary-foreground"
             >

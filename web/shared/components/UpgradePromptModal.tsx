@@ -38,7 +38,7 @@ export function UpgradePromptModal({
 
   const handleNavigateToPricing = () => {
     onClose();
-    router.push(`/pricing?plan=${plan.id}`);
+    router.push(`/upgrade?plan=${plan.id}`);
   };
 
   return (

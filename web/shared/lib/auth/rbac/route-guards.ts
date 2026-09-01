@@ -35,6 +35,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/upgrade",
     "/pricing",
   ],
   [CRM_ROLES.ADMIN]: [
@@ -58,6 +59,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/upgrade",
     "/pricing",
   ],
   [CRM_ROLES.MANAGER]: [
@@ -78,6 +80,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/upgrade",
     "/pricing",
   ],
   [CRM_ROLES.SALES]: [
@@ -95,6 +98,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/upgrade",
     "/pricing",
   ],
   [CRM_ROLES.SUPPORT]: [
@@ -109,6 +113,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/upgrade",
     "/pricing",
   ],
   [CRM_ROLES.EMPLOYEE]: [
@@ -119,6 +124,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/upgrade",
     "/pricing",
   ],
 };
@@ -132,6 +138,8 @@ export function isRouteAllowed(pathname: string, allowedRoutes: string[]): boole
   if (
     pathname === "/ai" ||
     pathname.startsWith("/ai/") ||
+    pathname === "/upgrade" ||
+    pathname.startsWith("/upgrade/") ||
     pathname === "/pricing" ||
     pathname.startsWith("/pricing/")
   ) {

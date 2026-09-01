@@ -219,7 +219,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                   <Building2 className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
                   <span className="font-semibold text-sm">Workspace Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/pricing")} className="cursor-pointer py-2 rounded-xl">
+                <DropdownMenuItem onClick={() => router.push("/upgrade")} className="cursor-pointer py-2 rounded-xl">
                   <CreditCard className="mr-3 h-4 w-4 text-primary transition-colors" />
                   <span className="font-semibold text-sm">Subscription & Billing</span>
                 </DropdownMenuItem>
