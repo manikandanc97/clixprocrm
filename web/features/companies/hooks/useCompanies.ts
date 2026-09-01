@@ -13,8 +13,17 @@ export function useCompanies(companies: any[]) {
   const sortedCompanies = useMemo(() => {
     if (!sortConfig) return companies;
     return [...companies].sort((a, b) => {
-      const aVal = a[sortConfig.key] ?? "";
-      const bVal = b[sortConfig.key] ?? "";
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+      if (sortConfig.key === "customers") {
+        aVal = a._count?.customers ?? 0;
+        bVal = b._count?.customers ?? 0;
+      } else if (sortConfig.key === "deals") {
+        aVal = a._count?.deals ?? 0;
+        bVal = b._count?.deals ?? 0;
+      }
+      aVal = aVal ?? "";
+      bVal = bVal ?? "";
       if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;

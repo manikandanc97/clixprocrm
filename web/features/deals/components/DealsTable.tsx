@@ -115,7 +115,7 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (deal: any) => {
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col items-end">
             <span className="text-sm font-bold text-foreground">{formatCurrency(deal.value, currency)}</span>
           </div>
         );

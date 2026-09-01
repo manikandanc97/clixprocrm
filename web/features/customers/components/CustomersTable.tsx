@@ -125,10 +125,10 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
           ? `₹${(revenueNum / 1000).toFixed(1)}K`
           : `₹${revenueNum.toLocaleString("en-IN")}`;
         return (
-          <div className="flex flex-col">
+          <div className="flex flex-col items-end">
             <span className="text-sm font-bold text-foreground">{revenueNum > 0 ? formatted : <span className="text-muted-foreground text-xs">—</span>}</span>
             {revenueNum > 0 && (
-              <div className="flex items-center gap-1 text-[9px] font-black text-emerald-600 uppercase">
+              <div className="flex items-center justify-end gap-1 text-[9px] font-black text-emerald-600 uppercase">
                 <TrendingUp className="size-3" /> Lifetime Value
               </div>
             )}

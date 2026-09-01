@@ -117,12 +117,15 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
     },
     {
       header: "Customers",
-      align: "right" as const,
+      align: "left" as const,
+      sortable: true,
+      sortDirection: sortConfig?.key === "customers" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("customers", dir),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => {
         const count = company._count?.customers || 0;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <span className="text-sm font-medium text-foreground">{count}</span>
           </div>
         );
@@ -130,12 +133,15 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
     },
     {
       header: "Deals",
-      align: "right" as const,
+      align: "left" as const,
+      sortable: true,
+      sortDirection: sortConfig?.key === "deals" ? (sortConfig.direction as "asc" | "desc") : null,
+      onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("deals", dir),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => {
         const count = company._count?.deals || 0;
         return (
-          <div className="flex items-center gap-2">
+          <div className="flex items-center">
             <span className="text-sm font-medium text-foreground">{count}</span>
           </div>
         );
