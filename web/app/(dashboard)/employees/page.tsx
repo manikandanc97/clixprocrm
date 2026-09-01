@@ -33,6 +33,7 @@ import {
   CRMPageSection,
   CRMPagination,
   TruncatedText,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { EmptyState } from "@/shared/components/EmptyState";
@@ -320,47 +321,48 @@ export default function EmployeesPage() {
                                 </span>
                               </CRMTableCell>
                               <CRMTableCell className="text-right">
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button variant="ghost" size="icon" className="h-8 w-8">
-                                      <MoreVertical className="h-4 w-4" />
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-48 rounded-xl p-1.5 shadow-elevated border-border bg-popover/95 backdrop-blur-xl">
-                                    <DropdownMenuItem onClick={() => { setSelectedEmployee(emp); setIsViewModalOpen(true); }} className="cursor-pointer py-2.5 rounded-xl group">
-                                      <User className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                      <span className="font-semibold text-sm">View Details</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem onClick={() => { setSelectedEmployee(emp); setIsEditModalOpen(true); }} className="cursor-pointer py-2.5 rounded-xl group">
-                                      <Edit2 className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                      <span className="font-semibold text-sm">Edit Employee</span>
-                                    </DropdownMenuItem>
-                                    
-                                    <DropdownMenuSeparator />
-                                    
-                                    <DropdownMenuItem 
-                                      onClick={() => {
+                                <CRMActionMenu
+                                  items={[
+                                    {
+                                      label: "View Details",
+                                      icon: User,
+                                      onClick: () => {
+                                        setSelectedEmployee(emp);
+                                        setIsViewModalOpen(true);
+                                      },
+                                    },
+                                    {
+                                      label: "Edit Employee",
+                                      icon: Edit2,
+                                      onClick: () => {
+                                        setSelectedEmployee(emp);
+                                        setIsEditModalOpen(true);
+                                      },
+                                    },
+                                    {
+                                      label: emp.status === "ACTIVE" ? "Deactivate" : "Activate",
+                                      icon: Power,
+                                      separatorBefore: true,
+                                      onClick: () => {
                                         const newStatus = emp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
                                         toggleStatusMutation.mutate(
                                           { id: emp.id, status: newStatus },
                                           { onSuccess: () => toast.success(`Employee ${newStatus.toLowerCase()}d`) }
                                         );
-                                      }}
-                                      className="cursor-pointer py-2.5 rounded-xl group"
-                                    >
-                                      <Power className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                                      <span className="font-semibold text-sm">{emp.status === "ACTIVE" ? "Deactivate" : "Activate"}</span>
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem 
-                                      variant="destructive"
-                                      onClick={() => { setSelectedEmployee(emp); setIsDeleteModalOpen(true); }}
-                                      className="cursor-pointer py-2.5 rounded-xl group"
-                                    >
-                                      <Trash2 className="mr-3 h-4 w-4 transition-colors" />
-                                      <span className="font-bold text-sm transition-colors">Delete Employee</span>
-                                    </DropdownMenuItem>
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                                      },
+                                    },
+                                    {
+                                      label: "Delete Employee",
+                                      icon: Trash2,
+                                      variant: "destructive" as const,
+                                      separatorBefore: true,
+                                      onClick: () => {
+                                        setSelectedEmployee(emp);
+                                        setIsDeleteModalOpen(true);
+                                      },
+                                    },
+                                  ]}
+                                />
                               </CRMTableCell>
                             </CRMTableRow>
                           ))

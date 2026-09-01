@@ -45,6 +45,7 @@ import {
   CRMMetricCard,
   CRMToolbar,
   CRMPagination,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { Button } from "@/shared/ui/button";
@@ -1129,70 +1130,32 @@ export default function SuperAdminModulesPage() {
 
                         {/* ACTIONS */}
                         <td className="px-4 sm:px-6 py-4 text-right">
-                          <div className="flex items-center justify-end">
-                            <DropdownMenu>
-                              <DropdownMenuTrigger asChild>
-                                <Button
-                                  variant="ghost"
-                                  size="icon"
-                                  className="h-8 w-8 rounded-lg hover:bg-muted cursor-pointer"
-                                >
-                                  <MoreHorizontal className="h-4 w-4" />
-                                </Button>
-                              </DropdownMenuTrigger>
-                              <DropdownMenuContent
-                                align="end"
-                                className="rounded-xl w-52 shadow-lg border-border"
-                              >
-                                <DropdownMenuLabel className="text-xs font-bold">
-                                  Menu Actions
-                                </DropdownMenuLabel>
-                                <DropdownMenuItem
-                                  onClick={() => handleOpenEdit(mod)}
-                                  className="text-xs gap-2 cursor-pointer font-medium"
-                                >
-                                  <Edit2 className="h-3.5 w-3.5 text-primary" />
-                                  <span>Edit Menu</span>
-                                </DropdownMenuItem>
-                                <DropdownMenuItem
-                                  variant={mod.isEnabled ? "destructive" : "default"}
-                                  onClick={() =>
-                                    handleToggleStatus(mod, !mod.isEnabled)
-                                  }
-                                  className="text-xs gap-2 cursor-pointer font-medium"
-                                >
-                                  {mod.isEnabled ? (
-                                    <>
-                                      <XCircle className="h-3.5 w-3.5" />
-                                      <span>Disable Menu</span>
-                                    </>
-                                  ) : (
-                                    <>
-                                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                                      <span>Enable Menu</span>
-                                    </>
-                                  )}
-                                </DropdownMenuItem>
-                                <DropdownMenuSeparator />
-                                <DropdownMenuItem
-                                  disabled={mod.isSystem}
-                                  variant={mod.isSystem ? "default" : "destructive"}
-                                  onClick={() => !mod.isSystem && setModuleToDelete(mod)}
-                                  className={cn(
-                                    "text-xs gap-2 font-medium",
-                                    mod.isSystem
-                                      ? "opacity-50 text-muted-foreground cursor-not-allowed hover:bg-transparent focus:bg-transparent"
-                                      : "cursor-pointer font-semibold"
-                                  )}
-                                >
-                                  <Trash2 className="h-3.5 w-3.5" />
-                                  <span>
-                                    {mod.isSystem ? "System Menu (Protected)" : "Delete Menu"}
-                                  </span>
-                                </DropdownMenuItem>
-                              </DropdownMenuContent>
-                            </DropdownMenu>
-                          </div>
+                          <CRMActionMenu
+                            triggerOrientation="horizontal"
+                            items={[
+                              {
+                                label: "Edit Menu",
+                                icon: Edit2,
+                                variant: "primary" as const,
+                                onClick: () => handleOpenEdit(mod),
+                              },
+                              {
+                                label: mod.isEnabled ? "Disable Menu" : "Enable Menu",
+                                icon: mod.isEnabled ? XCircle : CheckCircle2,
+                                variant: mod.isEnabled ? ("destructive" as const) : ("default" as const),
+                                className: !mod.isEnabled ? "text-emerald-600 dark:text-emerald-400 font-medium" : undefined,
+                                onClick: () => handleToggleStatus(mod, !mod.isEnabled),
+                              },
+                              {
+                                label: mod.isSystem ? "System Menu (Protected)" : "Delete Menu",
+                                icon: Trash2,
+                                variant: mod.isSystem ? ("default" as const) : ("destructive" as const),
+                                disabled: mod.isSystem,
+                                separatorBefore: true,
+                                onClick: () => !mod.isSystem && setModuleToDelete(mod),
+                              },
+                            ]}
+                          />
                         </td>
                       </tr>
                     );

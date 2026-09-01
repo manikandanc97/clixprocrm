@@ -38,6 +38,7 @@ import {
   CRMTableRow,
   CRMPagination,
   TruncatedText,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { cn } from "@/shared/lib/utils";
@@ -332,62 +333,55 @@ const TasksTable = ({ tasks, onTaskClick, onScheduleMeeting, onEditTask }: Tasks
                 </CRMTableCell>
 
                 <CRMTableCell className="px-5 text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
-                      <Button variant="ghost" size="icon-sm" className="text-muted-foreground/70 hover:text-foreground">
-                        <MoreHorizontal className="h-4 w-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48 rounded-xl border-border/70 p-1.5 shadow-premium">
-                      <DropdownMenuItem onClick={() => onTaskClick(task)} className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer">
-                        <AppIcon name="eye" size={15} /> <span>View</span>
-                      </DropdownMenuItem>
-                      {canEditTask(task) && (
-                        <>
-                          <DropdownMenuItem 
-                            onClick={() => onEditTask?.(task)}
-                            className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer"
-                          >
-                            <AppIcon name="edit" size={15} /> <span>Edit</span>
-                          </DropdownMenuItem>
-                          <DropdownMenuItem 
-                            onClick={(e) => {
-                              e.preventDefault();
-                              setUpdatingTaskId(task.id);
-                              updateTask(
-                                { id: task.id, data: { status: task.status === "COMPLETED" ? "PENDING" : "COMPLETED" } },
-                                { onSettled: () => setUpdatingTaskId(null) }
-                              );
-                            }} 
-                            className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer"
-                            disabled={updatingTaskId === task.id}
-                          >
-                            {updatingTaskId === task.id ? (
-                              <Loader2 className="h-4 w-4 animate-spin text-muted-foreground" />
-                            ) : (
-                              <AppIcon name="check" size={15} /> 
-                            )}
-                            <span>{task.status === "COMPLETED" ? "Reopen Task" : "Mark Complete"}</span>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                      <DropdownMenuItem onClick={() => onScheduleMeeting?.(task)} className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer">
-                        <AppIcon name="calendar" size={15} /> <span>Schedule Meeting</span>
-                      </DropdownMenuItem>
-                      {canDeleteTask && (
-                        <>
-                          <DropdownMenuSeparator />
-                          <DropdownMenuItem 
-                            variant="destructive" 
-                            className="gap-2 rounded-lg py-2 text-xs font-medium cursor-pointer text-destructive focus:text-destructive"
-                            onClick={() => setTaskToDelete(task)}
-                          >
-                            <AppIcon name="trash" size={15} className="text-destructive" /> <span>Delete</span>
-                          </DropdownMenuItem>
-                        </>
-                      )}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <CRMActionMenu
+                    triggerOrientation="horizontal"
+                    items={[
+                      {
+                        label: "View",
+                        icon: "eye",
+                        onClick: () => onTaskClick(task),
+                      },
+                      ...(canEditTask(task)
+                        ? [
+                            {
+                              label: "Edit",
+                              icon: "edit",
+                              onClick: () => onEditTask?.(task),
+                            },
+                            {
+                              label: task.status === "COMPLETED" ? "Reopen Task" : "Mark Complete",
+                              icon: "check",
+                              loading: updatingTaskId === task.id,
+                              disabled: updatingTaskId === task.id,
+                              onClick: (e: React.MouseEvent) => {
+                                e.preventDefault();
+                                setUpdatingTaskId(task.id);
+                                updateTask(
+                                  { id: task.id, data: { status: task.status === "COMPLETED" ? "PENDING" : "COMPLETED" } },
+                                  { onSettled: () => setUpdatingTaskId(null) }
+                                );
+                              },
+                            },
+                          ]
+                        : []),
+                      {
+                        label: "Schedule Meeting",
+                        icon: "calendar",
+                        onClick: () => onScheduleMeeting?.(task),
+                      },
+                      ...(canDeleteTask
+                        ? [
+                            {
+                              label: "Delete",
+                              icon: "trash",
+                              variant: "destructive" as const,
+                              separatorBefore: true,
+                              onClick: () => setTaskToDelete(task),
+                            },
+                          ]
+                        : []),
+                    ]}
+                  />
                 </CRMTableCell>
               </CRMTableRow>
             ))}

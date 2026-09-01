@@ -89,8 +89,12 @@ import {
   Image,
   X,
   Menu,
+  LogOut,
+  ArrowLeftRight,
+  Type,
+  Laptop,
 } from "@animateicons/react/lucide";
-import { Building2, Handshake, BriefcaseBusiness, Laptop, type LucideIcon } from "lucide-react";
+import { Building2, Handshake, BriefcaseBusiness, Palette, type LucideIcon } from "lucide-react";
 
 export type IconName =
   | "dashboard"
@@ -128,6 +132,10 @@ export type IconName =
   | "packages"
   | "notifications"
   | "mail"
+  | "logout"
+  | "arrowLeftRight"
+  | "type"
+  | "palette"
   | "search"
   | "filter"
   | "sliders"
@@ -306,6 +314,20 @@ const CANONICAL_ICONS: Record<string, IconName> = {
   play: "play",
   shieldcheck: "security",
   shield: "security",
+  logout: "logout",
+  signout: "logout",
+  arrowleftright: "arrowLeftRight",
+  switch: "arrowLeftRight",
+  swap: "arrowLeftRight",
+  type: "type",
+  typography: "type",
+  font: "type",
+  fonts: "type",
+  palette: "palette",
+  accent: "palette",
+  accentcolor: "palette",
+  color: "palette",
+  theme: "palette",
 };
 
 export function resolveIconName(name?: string, href?: string, IconComponent?: any): IconName {
@@ -329,6 +351,10 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   }
 
   // 2. Direct IconComponent name matches
+  if (iconDisp.includes("logout") || iconDisp.includes("signout")) return "logout";
+  if (iconDisp.includes("arrowleftright") || iconDisp.includes("switch") || iconDisp.includes("arrowrightleft")) return "arrowLeftRight";
+  if (iconDisp.includes("palette") || iconDisp.includes("paint") || iconDisp.includes("theme")) return "palette";
+  if (iconDisp.includes("type") || iconDisp.includes("font")) return "type";
   if (iconDisp.includes("trash")) return "trash";
   if (iconDisp.includes("pencil") || iconDisp.includes("edit") || iconDisp.includes("squarepen")) return "edit";
   if (iconDisp.includes("userplus")) return "userPlus";
@@ -446,7 +472,10 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (text.includes("attendance") || lastPathPart === "attendance") return "attendance";
   if (text.includes("calendar") || text.includes("meeting") || text.includes("schedule") || text.includes("event") || lastPathPart === "calendar") return "calendar";
 
-  // Navigation Utilities
+  if (text.includes("logout") || text.includes("sign out") || text.includes("signout") || text.includes("log out")) return "logout";
+  if (text.includes("switch") || text.includes("swap") || text.includes("arrowleftright") || text.includes("tenant crm")) return "arrowLeftRight";
+  if (text.includes("palette") || text.includes("accent") || text.includes("color theme")) return "palette";
+  if (text.includes("typography") || text.includes("font") || text.includes("typeface")) return "type";
   if (text.includes("notification") || text.includes("bell")) return "notifications";
   if (text.includes("alert") || text.includes("warning") || text.includes("priority")) return "alert";
   if (text.includes("mail") || text.includes("email") || text.includes("inbox")) return "mail";
@@ -604,7 +633,7 @@ export function AppIcon({
 
     // 1. Direct interactive control (button, link, menu item, tab, etc.)
     const directButton = el.closest(
-      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"]'
+      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [data-slot="button"], [data-slot="dropdown-menu-item"], [data-slot="dropdown-menu-sub-trigger"]'
     );
     // 2. Explicit custom animate target (e.g. card with data-animate-target="true")
     const localTarget = el.closest('[data-animate-target="true"]');
@@ -925,6 +954,12 @@ export function AppIcon({
         return <Video {...props} />;
       case "image":
         return <Image {...props} />;
+      case "logout":
+        return <LogOut {...props} />;
+      case "arrowLeftRight":
+        return <ArrowLeftRight {...props} />;
+      case "type":
+        return <Type {...props} />;
       case "play":
         return <Play {...props} />;
 
@@ -1007,6 +1042,22 @@ export function AppIcon({
             className="shrink-0 select-none flex items-center justify-center pointer-events-none"
           >
             <BriefcaseBusiness size={size} className={className} />
+          </motion.div>
+        );
+
+      case "palette":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && isAnimating
+                ? { rotate: [0, -18, 16, -6, 0], scale: [1, 1.15, 0.95, 1] }
+                : { rotate: 0, scale: 1 }
+            }
+            style={{ transformOrigin: "center center" }}
+            transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            <Palette size={size} className={className} />
           </motion.div>
         );
 

@@ -48,6 +48,7 @@ import {
   CRMPagination,
   CRMRoleBadge,
   TruncatedText,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
@@ -513,83 +514,46 @@ export default function SuperAdminUsersPage() {
                       {/* Actions */}
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-lg hover:bg-muted"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent
-                              align="end"
-                              className="rounded-xl w-56 shadow-lg border-border"
-                            >
-                              <DropdownMenuLabel className="text-xs">
-                                Manage Account
-                              </DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => setSelectedUser(u)}
-                                className="text-xs gap-2 cursor-pointer font-medium"
-                              >
-                                <AppIcon name="quotations" size={14} className="text-primary" />
-                                <span>View User Profile</span>
-                              </DropdownMenuItem>
-
-                              {!u.isSuperAdmin && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => setTransferTargetUser(u)}
-                                    className="text-xs gap-2 cursor-pointer font-medium text-amber-600 focus:text-amber-600 focus:bg-amber-500/10 hover:text-amber-600 hover:bg-amber-500/10 dark:text-amber-400 dark:focus:text-amber-400 dark:focus:bg-amber-500/20 not-data-[variant=destructive]:focus:**:!text-amber-600 not-data-[variant=destructive]:hover:**:!text-amber-600"
-                                  >
-                                    <AppIcon name="security" size={14} className="text-amber-500" />
-                                    <span>Transfer Super Admin</span>
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-
-                              {!u.isSuperAdmin && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  {u.status === "ACTIVE" ? (
-                                    <DropdownMenuItem
-                                      variant="destructive"
-                                      onClick={() => handleToggleStatus(u)}
-                                      className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
-                                    >
-                                      <AppIcon name="security" size={14} className="text-rose-500 dark:text-rose-400" />
-                                      <span>Suspend Account</span>
-                                    </DropdownMenuItem>
-                                  ) : (
-                                    <DropdownMenuItem
-                                      onClick={() => handleToggleStatus(u)}
-                                      className="text-xs gap-2 cursor-pointer font-medium text-emerald-600 focus:text-emerald-600 focus:bg-emerald-500/10 hover:text-emerald-600 hover:bg-emerald-500/10 dark:text-emerald-400 dark:focus:text-emerald-400 dark:focus:bg-emerald-500/20"
-                                    >
-                                      <AppIcon name="checkCircle" size={14} className="text-emerald-500" />
-                                      <span>Re-activate Account</span>
-                                    </DropdownMenuItem>
-                                  )}
-                                </>
-                              )}
-
-                              {!u.isSuperAdmin && (
-                                <>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    variant="destructive"
-                                    onClick={() => setDeleteTargetUser(u)}
-                                    className="text-xs gap-2 cursor-pointer font-medium text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 hover:text-rose-600 hover:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
-                                  >
-                                    <AppIcon name="trash" size={14} className="text-rose-500 dark:text-rose-400" />
-                                    <span>Delete User</span>
-                                  </DropdownMenuItem>
-                                </>
-                              )}
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <CRMActionMenu
+                            triggerOrientation="horizontal"
+                            width="w-56"
+                            items={[
+                              {
+                                label: "View User Profile",
+                                icon: "quotations",
+                                variant: "primary" as const,
+                                onClick: () => setSelectedUser(u),
+                              },
+                              ...(!u.isSuperAdmin
+                                ? [
+                                    {
+                                      label: "Transfer Super Admin",
+                                      icon: "security",
+                                      separatorBefore: true,
+                                      className: "text-amber-600 dark:text-amber-400 font-medium hover:bg-amber-500/10 hover:text-amber-600",
+                                      iconColor: "text-amber-500",
+                                      onClick: () => setTransferTargetUser(u),
+                                    },
+                                    {
+                                      label: u.status === "ACTIVE" ? "Suspend Account" : "Re-activate Account",
+                                      icon: u.status === "ACTIVE" ? "security" : "checkCircle",
+                                      variant: u.status === "ACTIVE" ? ("destructive" as const) : ("default" as const),
+                                      separatorBefore: true,
+                                      className: u.status !== "ACTIVE" ? "text-emerald-600 dark:text-emerald-400 font-medium hover:bg-emerald-500/10 hover:text-emerald-600" : undefined,
+                                      iconColor: u.status !== "ACTIVE" ? "text-emerald-500" : undefined,
+                                      onClick: () => handleToggleStatus(u),
+                                    },
+                                    {
+                                      label: "Delete User",
+                                      icon: "trash",
+                                      variant: "destructive" as const,
+                                      separatorBefore: true,
+                                      onClick: () => setDeleteTargetUser(u),
+                                    },
+                                  ]
+                                : []),
+                            ]}
+                          />
                         </div>
                       </td>
                     </tr>

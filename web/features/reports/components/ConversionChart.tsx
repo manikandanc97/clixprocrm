@@ -9,12 +9,11 @@ import {
   Tooltip, 
   Cell
 } from "recharts";
-import { MoreHorizontal, BarChart3 } from "lucide-react";
+import { BarChart3, Download, RefreshCw } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
-import { Button } from "@/shared/ui/button";
 import { ConversionChartPointType } from "@/shared/types/report";
 import { motion } from "framer-motion";
-
+import { CRMActionMenu } from "@/shared/components/crm";
 import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 
 const COLORS = ['#3b82f6', '#2dd4bf', '#fbbf24', '#f87171', '#a78bfa', '#f472b6', '#22d3ee'];
@@ -42,9 +41,19 @@ const ConversionChart = ({ data, loading }: ConversionChartProps) => {
             <CardDescription className="text-muted-foreground text-sm mt-1">Weekly conversion percentage</CardDescription>
           </div>
           
-          <Button variant="ghost" size="icon" className="rounded-xl transition-colors h-9 w-9">
-            <MoreHorizontal className="w-5 h-5 text-muted-foreground" />
-          </Button>
+          <CRMActionMenu
+            triggerOrientation="horizontal"
+            items={[
+              {
+                label: "Export Chart Data",
+                icon: Download,
+              },
+              {
+                label: "Refresh Data",
+                icon: RefreshCw,
+              },
+            ]}
+          />
         </CardHeader>
 
         <CardContent className="p-8 pt-0 min-w-0 flex-1 flex flex-col">

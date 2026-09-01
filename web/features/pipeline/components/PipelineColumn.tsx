@@ -9,6 +9,7 @@ import { useDroppable } from "@dnd-kit/core";
 import { cn } from "@/shared/lib/utils";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { PIPELINE_STAGE_LABELS } from "@/lib/crm-formatters";
+import { CRMActionMenu } from "@/shared/components/crm";
 
 interface Props {
   title: string;
@@ -64,9 +65,17 @@ const PipelineColumn = ({ title, items, onSelectDeal, onAddDeal }: Props) => {
             <button onClick={() => onAddDeal?.(title)} className={cn("p-1 text-muted-foreground rounded-md transition-colors", colors.hoverText, colors.hoverBg)} title="Add deal to this stage">
               <Plus className="w-4 h-4" />
             </button>
-            <button className="p-1 text-muted-foreground hover:text-foreground hover:bg-muted rounded-md transition-colors">
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
+            <CRMActionMenu
+              triggerOrientation="horizontal"
+              triggerClassName="h-7 w-7 p-0"
+              items={[
+                {
+                  label: "Add Deal to Stage",
+                  icon: Plus,
+                  onClick: () => onAddDeal?.(title),
+                },
+              ]}
+            />
           </div>
         </div>
         

@@ -20,6 +20,7 @@ import {
   CRMTableRow,
   CRMTableCell,
   TruncatedText,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { normalizeToModuleTitle } from "@/shared/lib/auth/rbac";
@@ -158,58 +159,43 @@ export function RoleTableRows({
 
             {/* Actions */}
             <CRMTableCell className="text-right">
-              <DropdownMenu>
-                <DropdownMenuTrigger asChild>
-                  <Button variant="ghost" size="icon" className="h-8 w-8">
-                    <MoreVertical className="h-4 w-4 text-muted-foreground" />
-                  </Button>
-                </DropdownMenuTrigger>
-                <DropdownMenuContent
-                  align="end"
-                  className="w-48 rounded-xl p-1.5 shadow-elevated border-border bg-popover/95 backdrop-blur-xl"
-                >
-                  <DropdownMenuItem
-                    onClick={() => onViewRole(role)}
-                    className="cursor-pointer py-2.5 rounded-xl group"
-                  >
-                    <User className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                    <span className="font-semibold text-sm">View Details</span>
-                  </DropdownMenuItem>
-
-                  {canEditThis && (
-                    <DropdownMenuItem
-                      onClick={() => onEditRole(role)}
-                      className="cursor-pointer py-2.5 rounded-xl group"
-                    >
-                      <Edit2 className="mr-3 h-4 w-4 text-muted-foreground group-hover:text-primary transition-colors" />
-                      <span className="font-semibold text-sm">
-                        Edit Permissions
-                      </span>
-                    </DropdownMenuItem>
-                  )}
-
-                  {canManageRoles && (
-                    <DropdownMenuItem
-                      variant="destructive"
-                      onClick={() => {
-                        if (role.isSystem) {
-                          toast.error(
-                            `System default role "${role.name}" cannot be deleted.`,
-                          );
-                          return;
-                        }
-                        onDeleteRole(role);
-                      }}
-                      className="cursor-pointer py-2.5 rounded-xl group"
-                    >
-                      <Trash2 className="mr-3 h-4 w-4 transition-colors" />
-                      <span className="font-bold text-sm transition-colors">
-                        Delete Role
-                      </span>
-                    </DropdownMenuItem>
-                  )}
-                </DropdownMenuContent>
-              </DropdownMenu>
+              <CRMActionMenu
+                items={[
+                  {
+                    label: "View Details",
+                    icon: User,
+                    onClick: () => onViewRole(role),
+                  },
+                  ...(canEditThis
+                    ? [
+                        {
+                          label: "Edit Permissions",
+                          icon: Edit2,
+                          onClick: () => onEditRole(role),
+                        },
+                      ]
+                    : []),
+                  ...(canManageRoles
+                    ? [
+                        {
+                          label: "Delete Role",
+                          icon: Trash2,
+                          variant: "destructive" as const,
+                          separatorBefore: true,
+                          onClick: () => {
+                            if (role.isSystem) {
+                              toast.error(
+                                `System default role "${role.name}" cannot be deleted.`,
+                              );
+                              return;
+                            }
+                            onDeleteRole(role);
+                          },
+                        },
+                      ]
+                    : []),
+                ]}
+              />
             </CRMTableCell>
           </CRMTableRow>
         );

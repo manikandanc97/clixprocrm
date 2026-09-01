@@ -17,13 +17,7 @@ import {
 } from 'lucide-react';
 import { ChatSession } from '../types';
 import { formatRelativeTime } from '../hooks/use-ai-workspace';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu';
+import { CRMActionMenu } from '@/shared/components/crm';
 import {
   Dialog,
   DialogContent,
@@ -158,39 +152,34 @@ export function AIConversationSidebar({
         </div>
 
         <div className="flex items-center gap-1 shrink-0">
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                onClick={(e) => e.stopPropagation()}
-                className="opacity-0 group-hover:opacity-100 p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-all"
-                title="Conversation options"
-              >
-                <MoreHorizontal className="w-3.5 h-3.5" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-40 text-xs">
-              <DropdownMenuItem onClick={(e) => startRename(session, e)}>
-                <Edit2 className="w-3.5 h-3.5 mr-2" />
-                Rename
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onTogglePinSession(session.id)}>
-                <Pin className="w-3.5 h-3.5 mr-2" />
-                {session.isPinned ? 'Unpin' : 'Pin to top'}
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => onToggleArchiveSession(session.id)}>
-                <Archive className="w-3.5 h-3.5 mr-2" />
-                {session.isArchived ? 'Unarchive' : 'Archive'}
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={() => setDeletingSessionId(session.id)}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-2" />
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CRMActionMenu
+            triggerOrientation="horizontal"
+            triggerClassName="opacity-0 group-hover:opacity-100 h-6 w-6 p-0 text-muted-foreground hover:text-foreground hover:bg-muted/80"
+            items={[
+              {
+                label: "Rename",
+                icon: Edit2,
+                onClick: (e: React.MouseEvent) => startRename(session, e),
+              },
+              {
+                label: session.isPinned ? "Unpin" : "Pin to top",
+                icon: Pin,
+                onClick: () => onTogglePinSession(session.id),
+              },
+              {
+                label: session.isArchived ? "Unarchive" : "Archive",
+                icon: Archive,
+                onClick: () => onToggleArchiveSession(session.id),
+              },
+              {
+                label: "Delete",
+                icon: Trash2,
+                variant: "destructive" as const,
+                separatorBefore: true,
+                onClick: () => setDeletingSessionId(session.id),
+              },
+            ]}
+          />
         </div>
       </div>
     );

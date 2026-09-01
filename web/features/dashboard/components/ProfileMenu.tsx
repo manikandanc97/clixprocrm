@@ -2,18 +2,7 @@
 
 import { useState } from "react";
 import { 
-  Settings, 
-  LogOut, 
-  Palette, 
   Check, 
-  Type,
-  User,
-  Bell,
-  Laptop,
-  Building2,
-  Shield,
-  ArrowLeftRight,
-  CreditCard
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -134,20 +123,20 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
           </button>
         </DropdownMenuTrigger>
 
-        <DropdownMenuContent className="w-68 rounded-xl p-2 shadow-elevated border-border bg-popover/95 backdrop-blur-xl" align="end" sideOffset={8}>
-          <DropdownMenuLabel className="px-3 py-3">
-            <div className="flex items-center gap-3">
+        <DropdownMenuContent className="w-68 rounded-2xl p-1.5 border border-border/75 dark:border-border/60 bg-popover bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_5.5%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_3.5%,transparent)_0%,transparent_45%)] dark:bg-card dark:bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_8%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_5.5%,transparent)_0%,transparent_45%)] shadow-[0_12px_32px_-6px_rgba(0,0,0,0.08),0_4px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_16px_36px_-6px_rgba(0,0,0,0.5),0_6px_16px_-2px_rgba(0,0,0,0.35)]" align="end" sideOffset={8}>
+          <DropdownMenuLabel className="px-2.5 py-2.5">
+            <div className="flex items-center gap-2.5">
               <div className="relative shrink-0">
                 {user?.avatar ? (
                   // eslint-disable-next-line @next/next/no-img-element
                   <img
                     src={user.avatar}
                     alt={displayName}
-                    className="rounded-xl w-10 h-10 object-cover shadow-sm border border-border"
+                    className="rounded-xl w-9 h-9 object-cover shadow-xs border border-border"
                   />
                 ) : (
                   <div 
-                    className="flex justify-center items-center rounded-xl w-10 h-10 font-bold text-xs text-primary-foreground shadow-sm border border-white/20"
+                    className="flex justify-center items-center rounded-xl w-9 h-9 font-bold text-xs text-primary-foreground shadow-xs border border-white/20"
                     style={{
                       background: "linear-gradient(135deg, var(--primary), color-mix(in srgb, var(--primary) 65%, black))"
                     }}
@@ -158,7 +147,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
               </div>
               <div className="flex flex-col space-y-1 min-w-0 flex-1">
                 <div className="flex items-center justify-between gap-1.5">
-                  <p className="text-sm font-bold leading-none truncate">{displayName}</p>
+                  <p className="text-[13px] font-semibold leading-none truncate">{displayName}</p>
                   <span className={`inline-flex items-center gap-1 text-[8.5px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border shrink-0 leading-none ${badgeStyle.badge}`}>
                     <RoleIcon className="w-2.5 h-2.5 shrink-0" />
                     {roleDisplay}
@@ -170,33 +159,33 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
               </div>
             </div>
           </DropdownMenuLabel>
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />
           
           {/* MY ACCOUNT */}
-          <div className="px-3 pt-1.5 pb-1">
+          <div className="px-2.5 pt-1.5 pb-0.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
               My Account
             </span>
           </div>
           <DropdownMenuGroup>
-            <DropdownMenuItem onClick={() => router.push("/settings?section=profile")} className="cursor-pointer py-2 rounded-xl">
-              <User className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
-              <span className="font-semibold text-sm">My Profile</span>
+            <DropdownMenuItem onClick={() => router.push("/settings?section=profile")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+              <AppIcon name="user" size={16} className="text-muted-foreground transition-colors" />
+              <span>My Profile</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/settings?section=notifications")} className="cursor-pointer py-2 rounded-xl">
-              <Bell className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
-              <span className="font-semibold text-sm">Notifications</span>
+            <DropdownMenuItem onClick={() => router.push("/settings?section=notifications")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+              <AppIcon name="notifications" size={16} className="text-muted-foreground transition-colors" />
+              <span>Notifications</span>
             </DropdownMenuItem>
-            <DropdownMenuItem onClick={() => router.push("/settings?section=sessions")} className="cursor-pointer py-2 rounded-xl">
-              <Laptop className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
-              <span className="font-semibold text-sm">Login & Sessions</span>
+            <DropdownMenuItem onClick={() => router.push("/settings?section=sessions")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+              <AppIcon name="sessions" size={16} className="text-muted-foreground transition-colors" />
+              <span>Login & Sessions</span>
             </DropdownMenuItem>
           </DropdownMenuGroup>
           
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />
 
           {/* WORKSPACE */}
-          <div className="px-3 pt-1.5 pb-1">
+          <div className="px-2.5 pt-1.5 pb-0.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
               Workspace
             </span>
@@ -204,39 +193,39 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
           <DropdownMenuGroup>
             {isSuperAdminPath ? (
               <>
-                <DropdownMenuItem onClick={() => router.push("/super-admin/settings")} className="cursor-pointer py-2 rounded-xl">
-                  <Settings className="mr-3 h-4 w-4 text-emerald-600 transition-colors" />
-                  <span className="font-semibold text-sm">Platform Settings</span>
+                <DropdownMenuItem onClick={() => router.push("/super-admin/settings")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+                  <AppIcon name="settings" size={16} className="text-emerald-600 transition-colors" />
+                  <span>Platform Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/dashboard")} className="cursor-pointer py-2 rounded-xl">
-                  <ArrowLeftRight className="mr-3 h-4 w-4 text-primary transition-colors" />
-                  <span className="font-semibold text-sm">Switch to Tenant CRM</span>
+                <DropdownMenuItem onClick={() => router.push("/dashboard")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+                  <AppIcon name="arrowLeftRight" size={16} className="text-primary transition-colors" />
+                  <span>Switch to Tenant CRM</span>
                 </DropdownMenuItem>
               </>
             ) : (
               <>
-                <DropdownMenuItem onClick={() => router.push("/settings?section=general")} className="cursor-pointer py-2 rounded-xl">
-                  <Building2 className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
-                  <span className="font-semibold text-sm">Workspace Settings</span>
+                <DropdownMenuItem onClick={() => router.push("/settings?section=general")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+                  <AppIcon name="companies" size={16} className="text-muted-foreground transition-colors" />
+                  <span>Workspace Settings</span>
                 </DropdownMenuItem>
-                <DropdownMenuItem onClick={() => router.push("/upgrade")} className="cursor-pointer py-2 rounded-xl">
-                  <CreditCard className="mr-3 h-4 w-4 text-primary transition-colors" />
-                  <span className="font-semibold text-sm">Subscription & Billing</span>
+                <DropdownMenuItem onClick={() => router.push("/upgrade")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+                  <AppIcon name="plans" size={16} className="text-primary transition-colors" />
+                  <span>Subscription & Billing</span>
                 </DropdownMenuItem>
                 {(user?.role?.toUpperCase() === "SUPER_ADMIN" || user?.role?.toUpperCase() === "SUPERADMIN") && (
-                  <DropdownMenuItem onClick={() => router.push("/super-admin")} className="cursor-pointer py-2 rounded-xl">
-                    <Shield className="mr-3 h-4 w-4 text-emerald-600 transition-colors" />
-                    <span className="font-semibold text-sm">Super Admin Portal</span>
+                  <DropdownMenuItem onClick={() => router.push("/super-admin")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+                    <AppIcon name="security" size={16} className="text-emerald-600 transition-colors" />
+                    <span>Super Admin Portal</span>
                   </DropdownMenuItem>
                 )}
               </>
             )}
           </DropdownMenuGroup>
           
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />
 
           {/* APPEARANCE */}
-          <div className="px-3 pt-1.5 pb-1">
+          <div className="px-2.5 pt-1.5 pb-0.5">
             <span className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground/70">
               Appearance
             </span>
@@ -244,12 +233,12 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
           <DropdownMenuGroup>
             {/* Accent Color Submenu */}
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="py-2 rounded-xl">
-                <Palette className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
-                <span className="font-semibold text-sm">Accent Color</span>
+              <DropdownMenuSubTrigger className="py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+                <AppIcon name="palette" size={16} className="text-muted-foreground transition-colors" />
+                <span>Accent Color</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
-                <DropdownMenuSubContent className="w-56 rounded-xl p-2 shadow-elevated border-border bg-popover/95 backdrop-blur-xl max-h-80 overflow-y-auto">
+                <DropdownMenuSubContent className="w-56 rounded-2xl p-1.5 border border-border/75 dark:border-border/60 bg-popover bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_5.5%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_3.5%,transparent)_0%,transparent_45%)] dark:bg-card dark:bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_8%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_5.5%,transparent)_0%,transparent_45%)] shadow-[0_12px_32px_-6px_rgba(0,0,0,0.08),0_4px_12px_-2px_rgba(0,0,0,0.04)] max-h-80 overflow-y-auto">
                   <div className="text-[10px] font-bold uppercase tracking-wider text-muted-foreground px-2 py-1 mb-1">
                     Color Presets
                   </div>
@@ -258,10 +247,10 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                       <DropdownMenuItem 
                         key={item.value} 
                         onClick={() => setAccentColor(item.value)}
-                        className="rounded-lg flex items-center justify-between px-2 py-1.5 cursor-pointer"
+                        className="rounded-lg flex items-center justify-between px-2 py-1.5 cursor-pointer text-xs"
                       >
                         <div className="flex items-center">
-                          <div className={`w-3 h-3 rounded-full ${item.color} mr-2 shadow-sm`} />
+                          <div className={`w-3 h-3 rounded-full ${item.color} mr-2 shadow-xs`} />
                           <span className="text-xs font-medium">{item.label}</span>
                         </div>
                         {accentColor === item.value && <Check className="h-3.5 w-3.5 text-primary shrink-0" />}
@@ -269,7 +258,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                     ))}
                   </div>
 
-                  <DropdownMenuSeparator className="my-2" />
+                  <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />
 
                   {/* Color Wheel Custom Picker */}
                   <div className="p-1">
@@ -278,7 +267,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                     </div>
                     <label className="flex items-center justify-between cursor-pointer rounded-lg p-2 hover:bg-primary/10 hover:text-primary border border-border/50 group transition-colors">
                       <div className="flex items-center gap-2.5">
-                        <div className="w-6 h-6 rounded-full border border-white/20 shadow-sm flex items-center justify-center bg-[conic-gradient(from_0deg,#ff0000,#ffff00,#00ff00,#00ffff,#0000ff,#ff00ff,#ff0000)]" />
+                        <div className="w-6 h-6 rounded-full border border-white/20 shadow-xs flex items-center justify-center bg-[conic-gradient(from_0deg,#ff0000,#ffff00,#00ff00,#00ffff,#0000ff,#ff00ff,#ff0000)]" />
                         <div className="flex flex-col">
                           <span className="text-xs font-semibold">Color Wheel</span>
                           <span className="text-[9px] text-muted-foreground font-mono">
@@ -300,12 +289,12 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
 
             {/* Typography Submenu (Google Fonts with Search) */}
             <DropdownMenuSub>
-              <DropdownMenuSubTrigger className="py-2 rounded-xl">
-                <Type className="mr-3 h-4 w-4 text-muted-foreground transition-colors" />
-                <span className="font-semibold text-sm">Typography</span>
+              <DropdownMenuSubTrigger className="py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
+                <AppIcon name="typography" size={16} className="text-muted-foreground transition-colors" />
+                <span>Typography</span>
               </DropdownMenuSubTrigger>
               <DropdownMenuPortal>
-                <DropdownMenuSubContent className="w-64 rounded-xl p-2 shadow-elevated border-border bg-popover/95 backdrop-blur-xl">
+                <DropdownMenuSubContent className="w-64 rounded-2xl p-1.5 border border-border/75 dark:border-border/60 bg-popover bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_5.5%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_3.5%,transparent)_0%,transparent_45%)] dark:bg-card dark:bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_8%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_5.5%,transparent)_0%,transparent_45%)] shadow-[0_12px_32px_-6px_rgba(0,0,0,0.08),0_4px_12px_-2px_rgba(0,0,0,0.04)]">
                   {/* Search Input Bar */}
                   <div className="p-1 mb-1.5 border-b border-border/50">
                     <div className="relative flex items-center group">
@@ -348,7 +337,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                         <DropdownMenuItem 
                           key={item.name} 
                           onClick={() => setFontFamily(item.name)}
-                          className="rounded-lg flex items-center justify-between py-2 px-2.5 cursor-pointer hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary"
+                          className="rounded-lg flex items-center justify-between py-2 px-2.5 cursor-pointer hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary text-xs"
                         >
                           <div className="flex flex-col">
                             <span className="text-xs font-semibold">{item.name}</span>
@@ -379,11 +368,11 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
             </DropdownMenuSub>
           </DropdownMenuGroup>
           
-          <DropdownMenuSeparator />
+          <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />
 
-          <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} variant="destructive" className="cursor-pointer py-2.5 rounded-xl group">
-            <LogOut className="mr-3 h-4 w-4 transition-colors" />
-            <span className="font-bold text-sm transition-colors">Sign out</span>
+          <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} variant="destructive" className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5 text-[#f95738] dark:text-[#ff6b4a] hover:bg-rose-500/10 hover:text-[#f95738] group">
+            <AppIcon name="logout" size={16} className="text-[#f95738] dark:text-[#ff6b4a] transition-colors" />
+            <span className="font-medium text-[13px] transition-colors">Sign out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>
       </DropdownMenu>

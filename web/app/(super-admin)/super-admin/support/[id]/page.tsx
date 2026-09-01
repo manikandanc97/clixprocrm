@@ -13,7 +13,7 @@ import {
   PlatformSupportTicket,
 } from "@/shared/lib/api/super-admin.api";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import { CRMPageContainer } from "@/shared/components/crm";
+import { CRMPageContainer, CRMActionMenu } from "@/shared/components/crm";
 import { formatTicketCode } from "@/shared/lib/ticket-utils";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
@@ -464,8 +464,8 @@ export default function SuperAdminTicketDetailPage() {
           </Button>
 
           {/* Non-destructive More menu */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
+          <CRMActionMenu
+            trigger={
               <Button
                 variant="outline"
                 size="sm"
@@ -474,17 +474,16 @@ export default function SuperAdminTicketDetailPage() {
                 <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
                 <span>More</span>
               </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48 rounded-xl shadow-lg">
-              <DropdownMenuItem
-                onClick={() => setIsDeleteDialogOpen(true)}
-                className="text-destructive focus:text-destructive focus:bg-destructive/10 cursor-pointer text-xs font-semibold gap-2 py-2"
-              >
-                <AppIcon name="trash" size={14} className="text-destructive" />
-                <span>Delete Ticket</span>
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+            }
+            items={[
+              {
+                label: "Delete Ticket",
+                icon: "trash",
+                variant: "destructive" as const,
+                onClick: () => setIsDeleteDialogOpen(true),
+              },
+            ]}
+          />
         </div>
       </div>
 

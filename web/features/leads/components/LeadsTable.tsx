@@ -43,7 +43,7 @@ import { LeadType, LeadStatus } from "@/shared/types/lead";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { CRMPagination, TruncatedText } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components/crm";
 import { cn } from "@/shared/lib/utils";
 import { useLeads } from "../hooks/useLeads";
 import { Badge } from "@/shared/ui/badge";
@@ -517,73 +517,106 @@ const LeadsTable = ({
         <div className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground text-right">Actions</div>
       ),
       headerClassName: "text-right",
-      cell: (lead: LeadType) => (
-        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted">
-                <MoreVertical className="w-4 h-4" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-56 shadow-lg border-border/50">
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setDetailsLeadId(lead.id); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="view" size={15} /> View Details</DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setEditingLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="edit" size={15} /> Edit Lead</DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => handleAction(e, "Email Draft", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><AppIcon name="mail" size={15} /> Send Email</DropdownMenuItem>
-              <DropdownMenuItem onClick={(e) => handleAction(e, "Call Initiated", lead.name, lead)} className="gap-2 text-xs cursor-pointer"><AppIcon name="phone" size={15} /> Log Call</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              
-              {lead.stage === LeadStatus.WON && (
-                <>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); if(lead.customerId) router.push(`/customers/${lead.customerId}`); else toast.error("Customer ID not found"); }} className="gap-2 text-xs text-blue-600 focus:text-blue-700 cursor-pointer">
-                    <AppIcon name="contacts" size={15} /> View Customer
-                  </DropdownMenuItem>
-                  {lead.isConverted && (
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConvertLead(lead); }} className="gap-2 text-xs text-emerald-600 focus:text-emerald-700 cursor-pointer">
-                      <AppIcon name="check" size={15} /> View Deal Conversion
-                    </DropdownMenuItem>
-                  )}
-                </>
-              )}
+      cell: (lead: LeadType) => {
+        const actionItems = [
+          {
+            label: "View Details",
+            icon: "view",
+            onClick: () => setDetailsLeadId(lead.id),
+          },
+          {
+            label: "Edit Lead",
+            icon: "edit",
+            onClick: () => setEditingLead(lead),
+          },
+          {
+            label: "Send Email",
+            icon: "mail",
+            onClick: (e: React.MouseEvent) => handleAction(e, "Email Draft", lead.name, lead),
+          },
+          {
+            label: "Log Call",
+            icon: "phone",
+            onClick: (e: React.MouseEvent) => handleAction(e, "Call Initiated", lead.name, lead),
+          },
+          ...(lead.stage === LeadStatus.WON
+            ? [
+                {
+                  label: "View Customer",
+                  icon: "contacts",
+                  separatorBefore: true,
+                  className: "text-blue-600 dark:text-blue-400 font-medium",
+                  onClick: () => {
+                    if (lead.customerId) router.push(`/customers/${lead.customerId}`);
+                    else toast.error("Customer ID not found");
+                  },
+                },
+                ...(lead.isConverted
+                  ? [
+                      {
+                        label: "View Deal Conversion",
+                        icon: "check",
+                        className: "text-emerald-600 dark:text-emerald-400 font-medium",
+                        onClick: () => setConvertLead(lead),
+                      },
+                    ]
+                  : []),
+              ]
+            : []),
+          ...(lead.stage !== LeadStatus.WON && lead.stage !== LeadStatus.LOST
+            ? [
+                {
+                  label: "Convert to Deal",
+                  icon: "deals",
+                  separatorBefore: true,
+                  className: "text-emerald-600 dark:text-emerald-400 font-semibold hover:bg-emerald-50 dark:hover:bg-emerald-950",
+                  onClick: () => setConvertLead(lead),
+                },
+              ]
+            : []),
+          ...(lead.stage === LeadStatus.LOST
+            ? [
+                {
+                  label: "Reopen Lead",
+                  icon: "refresh",
+                  onClick: () => setStageTransitionLead(lead),
+                },
+              ]
+            : lead.stage !== LeadStatus.WON
+            ? [
+                {
+                  label: "Move Stage",
+                  icon: "refresh",
+                  onClick: () => setStageTransitionLead(lead),
+                },
+              ]
+            : []),
+          ...(lead.stage !== LeadStatus.LOST
+            ? [
+                {
+                  label: "Create Task",
+                  icon: "tasks",
+                  separatorBefore: true,
+                  onClick: () => setTaskLead(lead),
+                },
+              ]
+            : []),
+          {
+            label: "Schedule Meeting",
+            icon: "calendar",
+            onClick: () => setMeetingLead(lead),
+          },
+          {
+            label: "Delete Lead",
+            icon: "trash",
+            variant: "destructive" as const,
+            separatorBefore: true,
+            onClick: () => setDeletingLead(lead),
+          },
+        ];
 
-              {lead.stage !== LeadStatus.WON && lead.stage !== LeadStatus.LOST && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setConvertLead(lead); }} className="gap-2 text-xs text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 dark:focus:bg-emerald-950 cursor-pointer font-medium">
-                  <AppIcon name="deals" size={15} /> Convert to Deal
-                </DropdownMenuItem>
-              )}
-
-              {lead.stage === LeadStatus.LOST ? (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setStageTransitionLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="refresh" size={15} /> Reopen Lead</DropdownMenuItem>
-              ) : lead.stage !== LeadStatus.WON ? (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setStageTransitionLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="refresh" size={15} /> Move Stage</DropdownMenuItem>
-              ) : null}
-
-              <DropdownMenuSeparator />
-
-              {lead.stage !== LeadStatus.LOST && (
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setTaskLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="tasks" size={15} /> Create Task</DropdownMenuItem>
-              )}
-              
-              <DropdownMenuItem onClick={(e) => { e.stopPropagation(); setMeetingLead(lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="calendar" size={15} /> Schedule Meeting</DropdownMenuItem>
-              
-              {lead.stage !== LeadStatus.LOST && (
-                <>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAction(e, "Email Draft", lead.name, lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="mail" size={15} /> Send Email</DropdownMenuItem>
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); handleAction(e, "Call Initiated", lead.name, lead); }} className="gap-2 text-xs cursor-pointer"><AppIcon name="phone" size={15} /> Call</DropdownMenuItem>
-                </>
-              )}
-
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                onClick={(e) => { e.stopPropagation(); setDeletingLead(lead); }}
-                variant="destructive"
-                className="gap-2 text-xs cursor-pointer text-destructive focus:text-destructive"
-              >
-                <AppIcon name="trash" size={15} className="text-destructive" /> Delete Lead
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      ),
+        return <CRMActionMenu items={actionItems} width="w-56" />;
+      },
       className: "text-right w-[110px]",
     },
   ];

@@ -11,13 +11,7 @@ import {
 } from "lucide-react";
 // import {  } from "@/shared/ui/avatar";
 import { Badge } from "@/shared/ui/badge";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "@/shared/ui/dropdown-menu";
+import { CRMActionMenu } from "@/shared/components/crm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 import { motion } from "framer-motion";
 import { useSortable } from "@dnd-kit/sortable";
@@ -106,25 +100,27 @@ const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
           {item.priority || "Low"}
         </Badge>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <button onPointerDown={(e) => e.stopPropagation()} className="text-muted-foreground hover:text-foreground transition-colors p-1 -mr-1">
-              <MoreHorizontal className="w-4 h-4" />
-            </button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48">
-             <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onSelect?.(); }}>
-               <MessageSquare className="w-3.5 h-3.5 mr-2" /> Edit / Quick Note
-             </DropdownMenuItem>
-             <DropdownMenuItem>
-               <UserPlus className="w-3.5 h-3.5 mr-2" /> Assign Owner
-             </DropdownMenuItem>
-             <DropdownMenuSeparator />
-             <DropdownMenuItem className="text-primary focus:text-primary">
-               <Zap className="w-3.5 h-3.5 mr-2" /> AI Summary
-             </DropdownMenuItem>
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <CRMActionMenu
+          triggerOrientation="horizontal"
+          triggerClassName="h-7 w-7 p-0 -mr-1"
+          items={[
+            {
+              label: "Edit / Quick Note",
+              icon: MessageSquare,
+              onClick: () => onSelect?.(),
+            },
+            {
+              label: "Assign Owner",
+              icon: UserPlus,
+            },
+            {
+              label: "AI Summary",
+              icon: Zap,
+              variant: "primary" as const,
+              separatorBefore: true,
+            },
+          ]}
+        />
       </div>
 
       {/* Title & Company */}

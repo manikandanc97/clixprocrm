@@ -17,17 +17,10 @@ import {
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "@/shared/ui/dropdown-menu";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { CRMPagination, TruncatedText } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components/crm";
 import { useCompanies } from "../hooks/useCompanies";
 
 interface CompaniesTableProps {
@@ -153,27 +146,22 @@ export const CompaniesTable = ({ companies, onEdit, onDelete }: CompaniesTablePr
       headerClassName: "text-right",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (company: any) => (
-        <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                <MoreVertical className="size-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => onEdit?.(company)}>
-                <AppIcon name="edit" size={14} className="mr-2" /> Edit Company
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="text-rose-600 focus:text-rose-600"
-                onClick={() => onDelete?.(company.id)}
-              >
-                <AppIcon name="trash" size={14} className="mr-2 text-rose-600" /> Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <CRMActionMenu
+          items={[
+            {
+              label: "Edit Company",
+              icon: "edit",
+              onClick: () => onEdit?.(company),
+            },
+            {
+              label: "Delete",
+              icon: "trash",
+              variant: "destructive" as const,
+              separatorBefore: true,
+              onClick: () => onDelete?.(company.id),
+            },
+          ]}
+        />
       ),
       className: "text-right",
     },

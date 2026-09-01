@@ -50,6 +50,7 @@ import {
   CRMPagination,
   CRMRoleBadge,
   TruncatedText,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PlanBadge } from "@/shared/components/PlanBadge";
@@ -456,38 +457,24 @@ export default function SuperAdminOrganizationsPage() {
                       {/* Actions Menu */}
                       <td className="px-6 py-4 text-right">
                         <div className="flex items-center justify-end">
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button
-                                variant="ghost"
-                                size="icon"
-                                className="h-8 w-8 rounded-lg hover:bg-muted"
-                              >
-                                <MoreHorizontal className="h-4 w-4" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="rounded-xl w-48 shadow-lg border-border">
-                              <DropdownMenuLabel className="text-xs">
-                                Workspace Actions
-                              </DropdownMenuLabel>
-                              <DropdownMenuItem
-                                onClick={() => handleOpenDetails(org.id)}
-                                className="text-xs gap-2 cursor-pointer font-medium"
-                              >
-                                <AppIcon name="quotations" size={14} className="text-primary" />
-                                <span>View Overview</span>
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem
-                                variant="destructive"
-                                onClick={() => setOrgToDelete(org)}
-                                className="text-xs gap-2 cursor-pointer font-semibold text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
-                              >
-                                <AppIcon name="trash" size={14} className="text-rose-600 dark:text-rose-400" />
-                                <span className="text-rose-600 dark:text-rose-400">Delete Workspace</span>
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <CRMActionMenu
+                            triggerOrientation="horizontal"
+                            items={[
+                              {
+                                label: "View Overview",
+                                icon: "quotations",
+                                variant: "primary" as const,
+                                onClick: () => handleOpenDetails(org.id),
+                              },
+                              {
+                                label: "Delete Workspace",
+                                icon: "trash",
+                                variant: "destructive" as const,
+                                separatorBefore: true,
+                                onClick: () => setOrgToDelete(org),
+                              },
+                            ]}
+                          />
                         </div>
                       </td>
                     </tr>

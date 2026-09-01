@@ -15,17 +15,10 @@ import {
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/shared/ui/dropdown-menu";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge } from "@/shared/components/StatusBadge";
-import { CRMPagination, TruncatedText } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components/crm";
 import { useState } from "react";
 import { formatCurrency } from "@/lib/crm-formatters";
 import { useCurrency } from "@/shared/hooks/use-currency";
@@ -216,44 +209,39 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
       headerClassName: "text-right",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (contact: any) => (
-        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                <MoreVertical className="w-4 h-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem
-                onClick={() => {
-                  if (contact.type === "Lead") onEditLead?.(contact.raw);
-                  else onEditCustomer?.(contact.raw);
-                }}
-              >
-                <AppIcon name="edit" size={14} className="mr-2" /> Edit {contact.type}
-              </DropdownMenuItem>
-              {contact.email && (
-                <DropdownMenuItem
-                  onClick={() => window.open(`mailto:${contact.email}`)}
-                >
-                  <AppIcon name="mail" size={14} className="mr-2" /> Send Email
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                className="text-rose-600 focus:text-rose-600"
-                onClick={() => {
-                  if (confirm(`Are you sure you want to delete this ${contact.type.toLowerCase()}?`)) {
-                    if (contact.type === "Lead") onDeleteLead?.(contact.raw.id);
-                    else onDeleteCustomer?.(contact.raw.id);
-                  }
-                }}
-              >
-                <AppIcon name="trash" size={14} className="mr-2 text-rose-600" /> Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <CRMActionMenu
+          items={[
+            {
+              label: `Edit ${contact.type}`,
+              icon: "edit",
+              onClick: () => {
+                if (contact.type === "Lead") onEditLead?.(contact.raw);
+                else onEditCustomer?.(contact.raw);
+              },
+            },
+            ...(contact.email
+              ? [
+                  {
+                    label: "Send Email",
+                    icon: "mail",
+                    onClick: () => window.open(`mailto:${contact.email}`),
+                  },
+                ]
+              : []),
+            {
+              label: "Delete",
+              icon: "trash",
+              variant: "destructive" as const,
+              separatorBefore: true,
+              onClick: () => {
+                if (confirm(`Are you sure you want to delete this ${contact.type.toLowerCase()}?`)) {
+                  if (contact.type === "Lead") onDeleteLead?.(contact.raw.id);
+                  else onDeleteCustomer?.(contact.raw.id);
+                }
+              },
+            },
+          ]}
+        />
       ),
       className: "text-right",
     },

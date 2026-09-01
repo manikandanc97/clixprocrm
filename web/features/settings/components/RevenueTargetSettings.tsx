@@ -15,7 +15,7 @@ import { useCurrency } from "@/shared/hooks/use-currency";
 import { useDirtyState } from "@/shared/hooks/use-dirty-form";
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog";
-import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator, DropdownMenuTrigger } from "@/shared/ui/dropdown-menu";
+import { CRMActionMenu } from "@/shared/components/crm";
 import { Badge } from "@/shared/ui/badge";
 import { Progress } from "@/shared/ui/progress";
 import { ScrollArea } from "@/shared/ui/scroll-area";
@@ -303,31 +303,35 @@ export default function RevenueTargetSettings() {
                       </div>
                     </div>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="icon" className="h-8 w-8 rounded-full border-muted-foreground/20 text-muted-foreground hover:text-foreground hover:bg-muted/50 transition-colors">
-                          <MoreVertical className="w-4 h-4" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => updateTarget.mutate({ id: activeTarget.id, isActive: false })}>
-                          <Check className="w-4 h-4 mr-2 text-muted-foreground" /> Set as Inactive
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => handleEdit(activeTarget)}>
-                          <Pencil className="w-4 h-4 mr-2" /> Edit Target
-                        </DropdownMenuItem>
-                        <DropdownMenuItem onClick={() => {
-                          handleEdit(activeTarget);
-                          setEditingId(null);
-                        }}>
-                          <Copy className="w-4 h-4 mr-2" /> Duplicate Target
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => setDeleteId(activeTarget.id)}>
-                          <Trash2 className="w-4 h-4 mr-2" /> Delete
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                    <CRMActionMenu
+                      items={[
+                        {
+                          label: "Set as Inactive",
+                          icon: Check,
+                          onClick: () => updateTarget.mutate({ id: activeTarget.id, isActive: false }),
+                        },
+                        {
+                          label: "Edit Target",
+                          icon: Pencil,
+                          onClick: () => handleEdit(activeTarget),
+                        },
+                        {
+                          label: "Duplicate Target",
+                          icon: Copy,
+                          onClick: () => {
+                            handleEdit(activeTarget);
+                            setEditingId(null);
+                          },
+                        },
+                        {
+                          label: "Delete",
+                          icon: Trash2,
+                          variant: "destructive" as const,
+                          separatorBefore: true,
+                          onClick: () => setDeleteId(activeTarget.id),
+                        },
+                      ]}
+                    />
                   </div>
                   
                   <div className="flex items-center gap-4 bg-background/50 border border-muted/50 py-3 px-5 rounded-xl shadow-inner mt-2">
@@ -365,31 +369,36 @@ export default function RevenueTargetSettings() {
                             </div>
                           </div>
                           
-                          <DropdownMenu>
-                            <DropdownMenuTrigger asChild>
-                              <Button variant="ghost" size="icon" className="h-7 w-7 -mr-2 rounded-full text-muted-foreground hover:text-foreground">
-                                <MoreVertical className="w-3.5 h-3.5" />
-                              </Button>
-                            </DropdownMenuTrigger>
-                            <DropdownMenuContent align="end" className="w-48">
-                              <DropdownMenuItem onClick={() => updateTarget.mutate({ id: target.id, isActive: true })}>
-                                <Check className="w-4 h-4 mr-2 text-emerald-500" /> Set as Active
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => handleEdit(target)}>
-                                <Pencil className="w-4 h-4 mr-2" /> Edit Target
-                              </DropdownMenuItem>
-                              <DropdownMenuItem onClick={() => {
-                                handleEdit(target);
-                                setEditingId(null);
-                              }}>
-                                <Copy className="w-4 h-4 mr-2" /> Duplicate Target
-                              </DropdownMenuItem>
-                              <DropdownMenuSeparator />
-                              <DropdownMenuItem className="text-destructive focus:text-destructive focus:bg-destructive/10" onClick={() => setDeleteId(target.id)}>
-                                <Trash2 className="w-4 h-4 mr-2" /> Delete
-                              </DropdownMenuItem>
-                            </DropdownMenuContent>
-                          </DropdownMenu>
+                          <CRMActionMenu
+                            items={[
+                              {
+                                label: "Set as Active",
+                                icon: Check,
+                                className: "text-emerald-600 dark:text-emerald-400 font-medium",
+                                onClick: () => updateTarget.mutate({ id: target.id, isActive: true }),
+                              },
+                              {
+                                label: "Edit Target",
+                                icon: Pencil,
+                                onClick: () => handleEdit(target),
+                              },
+                              {
+                                label: "Duplicate Target",
+                                icon: Copy,
+                                onClick: () => {
+                                  handleEdit(target);
+                                  setEditingId(null);
+                                },
+                              },
+                              {
+                                label: "Delete",
+                                icon: Trash2,
+                                variant: "destructive" as const,
+                                separatorBefore: true,
+                                onClick: () => setDeleteId(target.id),
+                              },
+                            ]}
+                          />
                         </div>
                         
                         <div className="mt-5 pt-4 border-t border-border/50 flex items-center justify-between">

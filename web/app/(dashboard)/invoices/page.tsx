@@ -36,6 +36,7 @@ import {
   CRMTableHeaderCell,
   CRMPagination,
   TruncatedText,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import {
@@ -477,44 +478,33 @@ export default function InvoicesPage() {
                                   showDot
                                 />
                               </CRMTableCell>
-                              <CRMTableCell
-                                className="text-center"
-                                onClick={(e) => e.stopPropagation()}
-                              >
-                                <DropdownMenu>
-                                  <DropdownMenuTrigger asChild>
-                                    <Button
-                                      variant="ghost"
-                                      size="icon-sm"
-                                      className="h-8 w-8 p-0 rounded-lg hover:bg-muted"
-                                    >
-                                      <MoreVertical className="w-4 h-4 text-muted-foreground" />
-                                      <span className="sr-only">Actions</span>
-                                    </Button>
-                                  </DropdownMenuTrigger>
-                                  <DropdownMenuContent align="end" className="w-44 text-xs rounded-xl">
-                                    <DropdownMenuItem
-                                      onClick={() => handleOpenDetail(inv.id)}
-                                      className="gap-2 cursor-pointer"
-                                    >
-                                      <Eye className="w-3.5 h-3.5 text-primary" /> View Details
-                                    </DropdownMenuItem>
-                                    <DropdownMenuItem
-                                      onClick={() => handlePrintPdf(inv.id)}
-                                      className="gap-2 cursor-pointer"
-                                    >
-                                      <Printer className="w-3.5 h-3.5 text-muted-foreground" /> Print / PDF
-                                    </DropdownMenuItem>
-                                    {inv.balanceAmount > 0 && inv.status !== "CANCELLED" && (
-                                      <DropdownMenuItem
-                                        onClick={() => handleOpenPayment(inv)}
-                                        className="gap-2 cursor-pointer text-emerald-600 font-semibold"
-                                      >
-                                        <CreditCard className="w-3.5 h-3.5" /> Record Payment
-                                      </DropdownMenuItem>
-                                    )}
-                                  </DropdownMenuContent>
-                                </DropdownMenu>
+                              <CRMTableCell className="text-center">
+                                <CRMActionMenu
+                                  items={[
+                                    {
+                                      label: "View Details",
+                                      icon: Eye,
+                                      variant: "primary" as const,
+                                      onClick: () => handleOpenDetail(inv.id),
+                                    },
+                                    {
+                                      label: "Print / PDF",
+                                      icon: Printer,
+                                      onClick: () => handlePrintPdf(inv.id),
+                                    },
+                                    ...(inv.balanceAmount > 0 && inv.status !== "CANCELLED"
+                                      ? [
+                                          {
+                                            label: "Record Payment",
+                                            icon: CreditCard,
+                                            className: "text-emerald-600 dark:text-emerald-400 font-semibold",
+                                            separatorBefore: true,
+                                            onClick: () => handleOpenPayment(inv),
+                                          },
+                                        ]
+                                      : []),
+                                  ]}
+                                />
                               </CRMTableCell>
                             </CRMTableRow>
                           ))}

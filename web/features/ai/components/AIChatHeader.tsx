@@ -17,6 +17,7 @@ import {
   Settings,
 } from 'lucide-react';
 import { ModelOption, CrmContextData } from '../types';
+import { CRMActionMenu } from '@/shared/components/crm';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -170,37 +171,33 @@ export function AIChatHeader({
           )}
 
           {/* More Actions Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <button
-                className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/80 transition-colors"
-                title="More actions"
-              >
-                <MoreVertical className="w-4 h-4" />
-              </button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-44 text-xs">
-              {onOpenSettings && (
-                <DropdownMenuItem onClick={onOpenSettings} className="gap-2 cursor-pointer">
-                  <Settings className="w-3.5 h-3.5 text-muted-foreground" />
-                  AI Settings
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem onClick={onCopyTranscript} disabled={!hasMessages}>
-                <Copy className="w-3.5 h-3.5 mr-2 text-muted-foreground" />
-                Copy Transcript
-              </DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem
-                onClick={onClearMessages}
-                disabled={!hasMessages}
-                className="text-destructive focus:text-destructive"
-              >
-                <Trash2 className="w-3.5 h-3.5 mr-2" />
-                Clear Messages
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <CRMActionMenu
+            items={[
+              ...(onOpenSettings
+                ? [
+                    {
+                      label: "AI Settings",
+                      icon: Settings,
+                      onClick: onOpenSettings,
+                    },
+                  ]
+                : []),
+              {
+                label: "Copy Transcript",
+                icon: Copy,
+                disabled: !hasMessages,
+                onClick: onCopyTranscript,
+              },
+              {
+                label: "Clear Messages",
+                icon: Trash2,
+                variant: "destructive" as const,
+                separatorBefore: true,
+                disabled: !hasMessages,
+                onClick: onClearMessages,
+              },
+            ]}
+          />
         </div>
       </header>
 

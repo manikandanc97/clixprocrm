@@ -17,18 +17,11 @@ import {
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuTrigger,
-  DropdownMenuSeparator
-} from "@/shared/ui/dropdown-menu";
 import { CustomerType } from "@/shared/types/customer";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { DataTable } from "@/shared/components/DataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { CRMPagination, TruncatedText } from "@/shared/components/crm";
+import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components/crm";
 import { useCustomers } from "../hooks/useCustomers";
 import { useBulkDeleteCustomers } from "@/shared/hooks/use-crm";
 import { motion, AnimatePresence } from "framer-motion";
@@ -157,33 +150,35 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
       align: "right" as const,
       headerClassName: "text-right",
       cell: (customer: CustomerType) => (
-        <div className="flex items-center justify-end" onClick={(e) => e.stopPropagation()}>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                <MoreVertical className="size-4 text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-48">
-              <DropdownMenuItem onClick={() => onEdit?.(customer)}>
-                <AppIcon name="edit" size={14} className="mr-2" /> Edit Customer
-              </DropdownMenuItem>
-              {customer.email && (
-                <DropdownMenuItem onClick={() => window.open(`mailto:${customer.email}`)}>
-                  <AppIcon name="mail" size={14} className="mr-2" /> Send Email
-                </DropdownMenuItem>
-              )}
-              <DropdownMenuItem><AppIcon name="externalLink" size={14} className="mr-2" /> Open Portal</DropdownMenuItem>
-              <DropdownMenuSeparator />
-              <DropdownMenuItem 
-                className="text-rose-600 focus:text-rose-600"
-                onClick={() => onDelete?.(customer.id)}
-              >
-                <AppIcon name="trash" size={14} className="mr-2 text-rose-600" /> Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
+        <CRMActionMenu
+          items={[
+            {
+              label: "Edit Customer",
+              icon: "edit",
+              onClick: () => onEdit?.(customer),
+            },
+            ...(customer.email
+              ? [
+                  {
+                    label: "Send Email",
+                    icon: "mail",
+                    onClick: () => window.open(`mailto:${customer.email}`),
+                  },
+                ]
+              : []),
+            {
+              label: "Open Portal",
+              icon: "externalLink",
+            },
+            {
+              label: "Delete",
+              icon: "trash",
+              variant: "destructive" as const,
+              separatorBefore: true,
+              onClick: () => onDelete?.(customer.id),
+            },
+          ]}
+        />
       ),
       className: "text-right",
     },

@@ -34,7 +34,7 @@ function DropdownMenuTrigger({
 function DropdownMenuContent({
   className,
   align = "start",
-  sideOffset = 4,
+  sideOffset = 6,
   ...props
 }: React.ComponentProps<typeof DropdownMenuPrimitive.Content>) {
   return (
@@ -44,7 +44,7 @@ function DropdownMenuContent({
         sideOffset={sideOffset}
         align={align}
         className={cn(
-          "data-[side=left]:slide-in-from-right-1.5 data-[side=top]:slide-in-from-bottom-1.5 z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-40 origin-[var(--radix-dropdown-menu-content-transform-origin)] overflow-x-hidden overflow-y-auto rounded-xl bg-popover p-1.5 text-popover-foreground shadow-elevated ring-1 ring-border data-[side=bottom]:slide-in-from-top-1.5 data-[side=right]:slide-in-from-left-1.5 data-[state=closed]:overflow-hidden data-closed:animate-out data-open:animate-in duration-150 data-open:fade-in-0 data-open:zoom-in-98 data-closed:fade-out-0 data-closed:zoom-out-98",
+          "data-[side=left]:slide-in-from-right-1 data-[side=top]:slide-in-from-bottom-1 z-50 max-h-[var(--radix-dropdown-menu-content-available-height)] min-w-44 origin-[var(--radix-dropdown-menu-content-transform-origin)] overflow-x-hidden overflow-y-auto rounded-2xl p-1.5 text-popover-foreground border border-border/75 dark:border-border/60 bg-popover bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_5.5%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_3.5%,transparent)_0%,transparent_45%)] dark:bg-card dark:bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_8%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_5.5%,transparent)_0%,transparent_45%)] shadow-[0_12px_32px_-6px_rgba(0,0,0,0.08),0_4px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_16px_36px_-6px_rgba(0,0,0,0.5),0_6px_16px_-2px_rgba(0,0,0,0.35)] data-[side=bottom]:slide-in-from-top-1 data-[side=right]:slide-in-from-left-1 data-[state=closed]:overflow-hidden data-closed:animate-out data-open:animate-in duration-140 data-open:fade-in-0 data-open:zoom-in-[0.98] data-closed:fade-out-0 data-closed:zoom-out-[0.98]",
           className
         )}
         {...props}
@@ -76,7 +76,7 @@ function DropdownMenuItem({
       data-inset={inset}
       data-variant={variant}
       className={cn(
-        "group/dropdown-menu-item relative flex cursor-pointer items-center gap-2 rounded-lg px-2.5 py-2 text-sm outline-hidden select-none transition-colors duration-150 focus:bg-primary/10 focus:text-primary hover:bg-primary/10 hover:text-primary not-data-[variant=destructive]:focus:**:text-primary not-data-[variant=destructive]:hover:**:text-primary data-inset:pl-7 data-[variant=destructive]:text-destructive data-[variant=destructive]:focus:bg-destructive/10 data-[variant=destructive]:focus:text-destructive data-[variant=destructive]:hover:bg-destructive/10 data-[variant=destructive]:hover:text-destructive dark:data-[variant=destructive]:focus:bg-destructive/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-destructive",
+        "group/dropdown-menu-item relative flex cursor-pointer items-center gap-2.5 rounded-xl px-2.5 py-1.5 text-[13px] font-medium leading-none outline-hidden select-none transition-colors duration-140 hover:bg-primary/[0.07] hover:text-foreground focus:bg-primary/[0.07] focus:text-foreground not-data-[variant=destructive]:focus:**:text-primary not-data-[variant=destructive]:hover:**:text-primary data-inset:pl-7 data-[variant=destructive]:text-[#f95738] dark:data-[variant=destructive]:text-[#ff6b4a] data-[variant=destructive]:focus:bg-rose-500/10 data-[variant=destructive]:focus:text-[#f95738] data-[variant=destructive]:hover:bg-rose-500/10 data-[variant=destructive]:hover:text-[#f95738] dark:data-[variant=destructive]:focus:bg-rose-500/20 data-disabled:pointer-events-none data-disabled:opacity-50 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 data-[variant=destructive]:*:[svg]:text-[#f95738] dark:data-[variant=destructive]:*:[svg]:text-[#ff6b4a]",
         className
       )}
       {...props}
@@ -186,7 +186,7 @@ function DropdownMenuSeparator({
   return (
     <DropdownMenuPrimitive.Separator
       data-slot="dropdown-menu-separator"
-      className={cn("-mx-1.5 my-1.5 bg-border/60 h-px", className)}
+      className={cn("-mx-1 my-1 border-t border-dashed border-border/80 h-0 bg-transparent", className)}
       {...props}
     />
   );

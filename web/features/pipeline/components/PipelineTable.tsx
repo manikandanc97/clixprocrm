@@ -31,6 +31,7 @@ import {
   CRMTableCell, 
   CRMTableHeaderCell,
   CRMPagination,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { useCurrency } from "@/shared/hooks/use-currency";
@@ -212,26 +213,27 @@ export const PipelineTable: React.FC<PipelineTableProps> = ({ items, onSelectDea
                     </div>
                   </CRMTableCell>
 
-                  <CRMTableCell className="text-right" onClick={(e) => e.stopPropagation()}>
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg">
-                          <MoreHorizontal className="w-4 h-4 text-muted-foreground" />
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuItem onClick={() => onSelectDeal?.(item)}>
-                          <MessageSquare className="w-3.5 h-3.5 mr-2" /> View Details
-                        </DropdownMenuItem>
-                        <DropdownMenuItem>
-                          <UserPlus className="w-3.5 h-3.5 mr-2" /> Assign Owner
-                        </DropdownMenuItem>
-                        <DropdownMenuSeparator />
-                        <DropdownMenuItem className="text-primary focus:text-primary">
-                          <Zap className="w-3.5 h-3.5 mr-2" /> AI Summary
-                        </DropdownMenuItem>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+                  <CRMTableCell className="text-right">
+                    <CRMActionMenu
+                      triggerOrientation="horizontal"
+                      items={[
+                        {
+                          label: "View Details",
+                          icon: MessageSquare,
+                          onClick: () => onSelectDeal?.(item),
+                        },
+                        {
+                          label: "Assign Owner",
+                          icon: UserPlus,
+                        },
+                        {
+                          label: "AI Summary",
+                          icon: Zap,
+                          variant: "primary" as const,
+                          separatorBefore: true,
+                        },
+                      ]}
+                    />
                   </CRMTableCell>
                 </CRMTableRow>
               );

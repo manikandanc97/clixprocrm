@@ -20,6 +20,7 @@ export * from "./CRMPagination";
 export * from "./CRMRoleBadge";
 export * from "./ContextualSettingsDrawer";
 export * from "./ContextualSettingsComponents";
+export * from "./CRMActionMenu";
 
 // Semantic aliases — backward compatible
 export { CRMMetricCard as MetricCard } from "./CRMMetricCard";

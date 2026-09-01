@@ -6,14 +6,8 @@ import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { Badge } from "@/shared/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-  DropdownMenuSeparator,
-} from "@/shared/ui/dropdown-menu";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
+import { CRMActionMenu } from "@/shared/components/crm";
 import { LeadType, LeadStatus } from "@/shared/types/lead";
 import { formatCurrency } from "@/shared/utils/formatters";
 import { cn } from "@/shared/lib/utils";
@@ -78,86 +72,104 @@ export function LeadMobileCards({
                 <p className="text-xs text-muted-foreground font-medium">{lead.company}</p>
               </div>
             </div>
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="ghost" size="icon" className="h-8 w-8">
-                  <MoreVertical className="w-4 h-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end">
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onEditLead(lead); }}>
-                  Edit Lead
-                </DropdownMenuItem>
-
-                {lead.stage === LeadStatus.WON && (
-                  <>
-                    <DropdownMenuItem
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        if (lead.customerId) router.push(`/customers/${lead.customerId}`);
-                        else toast.error("Customer ID not found");
-                      }}
-                    >
-                      View Customer
-                    </DropdownMenuItem>
-                    {lead.isConverted && (
-                      <DropdownMenuItem
-                        onClick={(e) => { e.stopPropagation(); onConvertLead(lead); }}
-                        className="text-emerald-600 focus:text-emerald-700 font-medium"
-                      >
-                        View Deal Conversion
-                      </DropdownMenuItem>
-                    )}
-                  </>
-                )}
-
-                {lead.stage === LeadStatus.LOST ? (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStageTransitionLead(lead); }}>
-                    Reopen Lead
-                  </DropdownMenuItem>
-                ) : lead.stage !== LeadStatus.WON ? (
-                  <>
-                    <DropdownMenuItem
-                      onClick={(e) => { e.stopPropagation(); onConvertLead(lead); }}
-                      className="text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50 dark:focus:bg-emerald-950 font-medium"
-                    >
-                      Convert to Deal
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onStageTransitionLead(lead); }}>
-                      Move Stage
-                    </DropdownMenuItem>
-                  </>
-                ) : null}
-
-                <DropdownMenuSeparator />
-
-                {lead.stage !== LeadStatus.LOST && (
-                  <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onCreateTask(lead); }}>
-                    Create Task
-                  </DropdownMenuItem>
-                )}
-
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onScheduleMeeting(lead); }}>
-                  Schedule Meeting
-                </DropdownMenuItem>
-
-                {lead.stage !== LeadStatus.LOST && (
-                  <>
-                    <DropdownMenuItem onClick={(e) => onAction(e, "Email Draft", lead.name, lead)}>
-                      Send Email
-                    </DropdownMenuItem>
-                    <DropdownMenuItem onClick={(e) => onAction(e, "Call Initiated", lead.name, lead)}>
-                      Call
-                    </DropdownMenuItem>
-                  </>
-                )}
-
-                <DropdownMenuSeparator />
-                <DropdownMenuItem onClick={(e) => { e.stopPropagation(); onDeleteLead(lead); }} variant="destructive">
-                  Delete Lead
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
+            <CRMActionMenu
+              width="w-56"
+              items={[
+                {
+                  label: "Edit Lead",
+                  icon: "edit",
+                  onClick: () => onEditLead(lead),
+                },
+                ...(lead.stage === LeadStatus.WON
+                  ? [
+                      {
+                        label: "View Customer",
+                        icon: "contacts",
+                        separatorBefore: true,
+                        className: "text-blue-600 dark:text-blue-400 font-medium",
+                        onClick: () => {
+                          if (lead.customerId) router.push(`/customers/${lead.customerId}`);
+                          else toast.error("Customer ID not found");
+                        },
+                      },
+                      ...(lead.isConverted
+                        ? [
+                            {
+                              label: "View Deal Conversion",
+                              icon: "check",
+                              className: "text-emerald-600 dark:text-emerald-400 font-medium",
+                              onClick: () => onConvertLead(lead),
+                            },
+                          ]
+                        : []),
+                    ]
+                  : []),
+                ...(lead.stage !== LeadStatus.WON && lead.stage !== LeadStatus.LOST
+                  ? [
+                      {
+                        label: "Convert to Deal",
+                        icon: "deals",
+                        separatorBefore: true,
+                        className: "text-emerald-600 dark:text-emerald-400 font-medium",
+                        onClick: () => onConvertLead(lead),
+                      },
+                    ]
+                  : []),
+                ...(lead.stage === LeadStatus.LOST
+                  ? [
+                      {
+                        label: "Reopen Lead",
+                        icon: "refresh",
+                        onClick: () => onStageTransitionLead(lead),
+                      },
+                    ]
+                  : lead.stage !== LeadStatus.WON
+                  ? [
+                      {
+                        label: "Move Stage",
+                        icon: "refresh",
+                        onClick: () => onStageTransitionLead(lead),
+                      },
+                    ]
+                  : []),
+                ...(lead.stage !== LeadStatus.LOST
+                  ? [
+                      {
+                        label: "Create Task",
+                        icon: "tasks",
+                        separatorBefore: true,
+                        onClick: () => onCreateTask(lead),
+                      },
+                    ]
+                  : []),
+                {
+                  label: "Schedule Meeting",
+                  icon: "calendar",
+                  onClick: () => onScheduleMeeting(lead),
+                },
+                ...(lead.stage !== LeadStatus.LOST
+                  ? [
+                      {
+                        label: "Send Email",
+                        icon: "mail",
+                        onClick: (e: React.MouseEvent) => onAction(e, "Email Draft", lead.name, lead),
+                      },
+                      {
+                        label: "Call",
+                        icon: "phone",
+                        onClick: (e: React.MouseEvent) => onAction(e, "Call Initiated", lead.name, lead),
+                      },
+                    ]
+                  : []),
+                {
+                  label: "Delete Lead",
+                  icon: "trash",
+                  variant: "destructive" as const,
+                  separatorBefore: true,
+                  onClick: () => onDeleteLead(lead),
+                },
+              ]}
+            />
           </div>
 
           <div className="grid grid-cols-2 gap-3 bg-muted/30 p-3 rounded-lg border border-border/50">

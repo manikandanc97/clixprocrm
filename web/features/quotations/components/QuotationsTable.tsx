@@ -56,6 +56,7 @@ import {
   CRMSortIndicator,
   CRMPagination,
   TruncatedText,
+  CRMActionMenu,
 } from "@/shared/components/crm";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
@@ -294,58 +295,78 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
                 </CRMTableCell>
 
                 <CRMTableCell className="text-right">
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                      <Button variant="ghost" size="icon" className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground">
-                        <MoreHorizontal className="w-4 h-4" />
-                      </Button>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end" className="w-48">
-                      <DropdownMenuItem onClick={() => setSelectedQuote(quote)}>
-                        <AppIcon name="view" size={14} className="mr-2" /> View Details
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem onClick={() => router.push(`?edit=${quote.id}`)}>
-                        <AppIcon name="edit" size={14} className="mr-2" /> Edit Quote
-                      </DropdownMenuItem>
-
-                      <DropdownMenuItem onClick={() => handleAction("Download", quote)}>
-                        <AppIcon name="download" size={14} className="mr-2" /> Download PDF
-                      </DropdownMenuItem>
-                      
-                      <DropdownMenuItem onClick={() => handleAction("Duplicate", quote)}>
-                        <AppIcon name="copy" size={14} className="mr-2" /> Duplicate
-                      </DropdownMenuItem>
-
-                      <DropdownMenuSeparator />
-
-                      {quote.status !== "SENT" && (
-                        <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "SENT" })}>
-                          <AppIcon name="send" size={14} className="mr-2" /> Mark as Sent
-                        </DropdownMenuItem>
-                      )}
-                      {quote.status !== "ACCEPTED" && (
-                        <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "ACCEPTED" })} className="text-emerald-600 focus:text-emerald-600 focus:bg-emerald-50">
-                          <AppIcon name="check" size={14} className="mr-2 text-emerald-600" /> Mark as Accepted
-                        </DropdownMenuItem>
-                      )}
-                      {quote.status !== "REJECTED" && (
-                        <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "REJECTED" })} className="text-rose-600 focus:text-rose-600 focus:bg-rose-50">
-                          <AppIcon name="close" size={14} className="mr-2 text-rose-600" /> Mark as Rejected
-                        </DropdownMenuItem>
-                      )}
-                      {quote.status !== "DRAFT" && (
-                        <DropdownMenuItem onClick={() => updateStatusMutation({ id: quote.id, status: "DRAFT" })}>
-                          <AppIcon name="quotations" size={14} className="mr-2" /> Mark as Draft
-                        </DropdownMenuItem>
-                      )}
-
-                      <DropdownMenuSeparator />
-                      <DropdownMenuItem onClick={(e) => handleDelete(e, quote)} variant="destructive">
-                        <AppIcon name="trash" size={14} className="mr-2 text-destructive" /> Delete
-                      </DropdownMenuItem>
-                    </DropdownMenuContent>
-                  </DropdownMenu>
+                  <CRMActionMenu
+                    triggerOrientation="horizontal"
+                    items={[
+                      {
+                        label: "View Details",
+                        icon: "view",
+                        onClick: () => setSelectedQuote(quote),
+                      },
+                      {
+                        label: "Edit Quote",
+                        icon: "edit",
+                        onClick: () => router.push(`?edit=${quote.id}`),
+                      },
+                      {
+                        label: "Download PDF",
+                        icon: "download",
+                        onClick: () => handleAction("Download", quote),
+                      },
+                      {
+                        label: "Duplicate",
+                        icon: "copy",
+                        onClick: () => handleAction("Duplicate", quote),
+                      },
+                      ...(quote.status !== "SENT"
+                        ? [
+                            {
+                              label: "Mark as Sent",
+                              icon: "send",
+                              separatorBefore: true,
+                              onClick: () => updateStatusMutation({ id: quote.id, status: "SENT" }),
+                            },
+                          ]
+                        : []),
+                      ...(quote.status !== "ACCEPTED"
+                        ? [
+                            {
+                              label: "Mark as Accepted",
+                              icon: "check",
+                              className: "text-emerald-600 dark:text-emerald-400 font-medium",
+                              separatorBefore: quote.status === "SENT",
+                              onClick: () => updateStatusMutation({ id: quote.id, status: "ACCEPTED" }),
+                            },
+                          ]
+                        : []),
+                      ...(quote.status !== "REJECTED"
+                        ? [
+                            {
+                              label: "Mark as Rejected",
+                              icon: "close",
+                              className: "text-rose-600 dark:text-rose-400 font-medium",
+                              onClick: () => updateStatusMutation({ id: quote.id, status: "REJECTED" }),
+                            },
+                          ]
+                        : []),
+                      ...(quote.status !== "DRAFT"
+                        ? [
+                            {
+                              label: "Mark as Draft",
+                              icon: "quotations",
+                              onClick: () => updateStatusMutation({ id: quote.id, status: "DRAFT" }),
+                            },
+                          ]
+                        : []),
+                      {
+                        label: "Delete",
+                        icon: "trash",
+                        variant: "destructive" as const,
+                        separatorBefore: true,
+                        onClick: (e: React.MouseEvent) => handleDelete(e, quote),
+                      },
+                    ]}
+                  />
                 </CRMTableCell>
               </CRMTableRow>
             ))}

@@ -154,9 +154,9 @@ export default function NotificationPanel() {
           )}
         </button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-84 sm:w-[400px] rounded-xl p-0 shadow-elevated border-border bg-popover/98 backdrop-blur-xl overflow-hidden" align="end" sideOffset={8}>
+      <DropdownMenuContent className="w-84 sm:w-[400px] rounded-2xl p-0 border border-border/75 dark:border-border/60 bg-popover shadow-[0_12px_32px_-6px_rgba(0,0,0,0.08),0_4px_12px_-2px_rgba(0,0,0,0.04)] dark:shadow-[0_16px_36px_-6px_rgba(0,0,0,0.5),0_6px_16px_-2px_rgba(0,0,0,0.35)] overflow-hidden" align="end" sideOffset={8}>
         {/* Header */}
-        <div className="flex items-center justify-between px-4 py-3.5 border-b border-border/50 bg-muted/40">
+        <div className="flex items-center justify-between px-4 py-3 border-b border-border/50 bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_5.5%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_3.5%,transparent)_0%,transparent_45%)]">
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-sm tracking-tight text-foreground">Notifications</h3>
             {unreadCount > 0 && (

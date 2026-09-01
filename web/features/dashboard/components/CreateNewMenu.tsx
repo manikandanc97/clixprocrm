@@ -47,22 +47,22 @@ export default function CreateNewMenu() {
           <span className="hidden sm:inline font-semibold">Create New</span>
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56 rounded-xl p-1.5 shadow-elevated border-border bg-popover/95 backdrop-blur-xl" align="end" sideOffset={8}>
-        <DropdownMenuLabel className="px-2.5 py-1.5 text-[10px] font-black text-muted-foreground uppercase tracking-[0.2em]">
+      <DropdownMenuContent className="w-56" align="end" sideOffset={8}>
+        <DropdownMenuLabel className="px-2.5 py-1.5 text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
           Quick Actions
         </DropdownMenuLabel>
-        <DropdownMenuSeparator className="my-1" />
+        <DropdownMenuSeparator />
         {actions.map((action) => (
           <DropdownMenuItem 
             key={action.label} 
             onClick={() => action.onClick ? action.onClick() : router.push(action.path!)}
-            className="cursor-pointer py-2 px-2.5 rounded-lg hover:bg-primary/10 hover:text-primary focus:bg-primary/10 focus:text-primary group flex items-center justify-between transition-all duration-150"
+            className="cursor-pointer py-1.5 px-2 rounded-xl group flex items-center justify-between transition-all duration-140"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-muted/80 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-muted/70 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
                 <AppIcon name={action.iconName} size={15} className={action.iconColor} />
               </div>
-              <span className="font-semibold text-xs sm:text-sm text-foreground group-hover:text-primary group-focus:text-primary transition-colors">
+              <span className="font-medium text-[13px] text-foreground group-hover:text-primary group-focus:text-primary transition-colors">
                 {action.label}
               </span>
             </div>

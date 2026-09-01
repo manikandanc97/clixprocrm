@@ -18,12 +18,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { useDeleteTask, useUpdateTask } from "@/shared/hooks/use-crm";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+import { CRMActionMenu } from "@/shared/components/crm";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -114,74 +109,55 @@ export const TaskKanbanCard = ({ task, onClick, isOverlay, onScheduleMeeting, on
           {task.priority}
         </Badge>
         
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              onClick={(e) => e.stopPropagation()}
-              className="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg"
-            >
-              <MoreHorizontal className="w-3.5 h-3.5 text-muted-foreground" />
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-48 rounded-xl p-2 shadow-premium">
-            <DropdownMenuItem
-              onClick={(e) => { e.stopPropagation(); onClick(task); }}
-              className="rounded-lg gap-2 font-semibold text-xs cursor-pointer"
-            >
-              <Eye className="w-3.5 h-3.5" /> View
-            </DropdownMenuItem>
-            {canEditTask && (
-              <>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onEditTask?.(task);
-                  }}
-                  className="rounded-lg gap-2 font-semibold text-xs cursor-pointer"
-                >
-                  <Pencil className="w-3.5 h-3.5" /> Edit
-                </DropdownMenuItem>
-                <DropdownMenuItem
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    setIsUpdating(true);
-                    updateTask(
-                      { id: task.id, data: { status: task.status === "COMPLETED" ? "PENDING" : "COMPLETED" } },
-                      { onSettled: () => setIsUpdating(false) }
-                    );
-                  }}
-                  className="rounded-lg gap-2 font-semibold text-xs cursor-pointer"
-                  disabled={isUpdating}
-                >
-                  {isUpdating ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <CheckCircle2 className="w-3.5 h-3.5" />}
-                  {task.status === "COMPLETED" ? "Reopen Task" : "Mark Complete"}
-                </DropdownMenuItem>
-              </>
-            )}
-            <DropdownMenuItem
-              onClick={(e) => {
-                e.stopPropagation();
-                onScheduleMeeting?.(task);
-              }}
-              className="rounded-lg gap-2 font-semibold text-xs cursor-pointer"
-            >
-              <Calendar className="w-3.5 h-3.5" /> Schedule Meeting
-            </DropdownMenuItem>
-            {canDeleteTask && (
-              <DropdownMenuItem 
-                onClick={(e) => {
-                  e.stopPropagation();
-                  setShowDeleteConfirm(true);
-                }}
-                className="rounded-lg gap-2 font-semibold text-xs cursor-pointer text-red-600 focus:bg-red-50 focus:text-red-700"
-              >
-                <Trash2 className="w-3.5 h-3.5" /> Delete
-              </DropdownMenuItem>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
+        <CRMActionMenu
+          triggerOrientation="horizontal"
+          triggerClassName="opacity-0 group-hover:opacity-100 h-7 w-7 rounded-lg"
+          items={[
+            {
+              label: "View",
+              icon: Eye,
+              onClick: () => onClick(task),
+            },
+            ...(canEditTask
+              ? [
+                  {
+                    label: "Edit",
+                    icon: Pencil,
+                    onClick: () => onEditTask?.(task),
+                  },
+                  {
+                    label: task.status === "COMPLETED" ? "Reopen Task" : "Mark Complete",
+                    icon: CheckCircle2,
+                    loading: isUpdating,
+                    disabled: isUpdating,
+                    onClick: () => {
+                      setIsUpdating(true);
+                      updateTask(
+                        { id: task.id, data: { status: task.status === "COMPLETED" ? "PENDING" : "COMPLETED" } },
+                        { onSettled: () => setIsUpdating(false) }
+                      );
+                    },
+                  },
+                ]
+              : []),
+            {
+              label: "Schedule Meeting",
+              icon: Calendar,
+              onClick: () => onScheduleMeeting?.(task),
+            },
+            ...(canDeleteTask
+              ? [
+                  {
+                    label: "Delete",
+                    icon: Trash2,
+                    variant: "destructive" as const,
+                    separatorBefore: true,
+                    onClick: () => setShowDeleteConfirm(true),
+                  },
+                ]
+              : []),
+          ]}
+        />
       </div>
 
       <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
