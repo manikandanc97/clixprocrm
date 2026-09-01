@@ -13,6 +13,7 @@ import Link from "next/link";
 import { PERMISSIONS } from "@/shared/lib/auth/rbac/permissions";
 import { useDashboardData } from "@/shared/hooks/use-dashboard";
 import { Skeleton } from "@/shared/ui/skeleton";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export default function WelcomeBanner() {
   const { user, access, hasPermission } = useAuth();
@@ -89,17 +90,18 @@ export default function WelcomeBanner() {
 
         <div className="flex flex-wrap gap-3 shrink-0">
           {hasPermission(PERMISSIONS.REPORTS_READ) && (
-            <Button asChild className="rounded-full px-6 h-10 bg-white text-slate-950 hover:bg-slate-200 font-bold transition-all shadow-md">
+            <Button asChild className="rounded-full px-6 h-10 bg-white text-slate-950 hover:bg-slate-200 font-bold transition-all shadow-md group">
               <Link href="/reports" className="flex items-center gap-2 text-sm">
-                View Reports
-                <ArrowUpRight className="w-4 h-4" />
+                <span>View Reports</span>
+                <AppIcon name="arrowUpRight" icon={ArrowUpRight} size={15} />
               </Link>
             </Button>
           )}
           {hasPermission(PERMISSIONS.LEADS_READ) && (
-            <Button asChild variant="outline" className="rounded-full px-6 h-10 border-white/10 bg-white/5 text-white hover:bg-white/10 font-bold transition-all text-sm">
-              <Link href="/leads">
-                Manage Leads
+            <Button asChild variant="outline" className="rounded-full px-6 h-10 border-white/10 bg-white/5 text-white hover:bg-white/10 font-bold transition-all text-sm group">
+              <Link href="/leads" className="flex items-center gap-2">
+                <span>Manage Leads</span>
+                <AppIcon name="arrowRight" size={15} />
               </Link>
             </Button>
           )}

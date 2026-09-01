@@ -1,76 +1,256 @@
 /**
- * ClixProCRM Enterprise Motion System Tokens
- * Standardized timing, easing curves, and physics configurations
- * inspired by Linear, Stripe, Notion, and Vercel.
+ * ClixProCRM Enterprise Motion System
+ * 
+ * Centralized motion tokens, easing functions, animation variants,
+ * and interaction transitions. Designed for enterprise SaaS:
+ * fast, predictable, restrained, and calm.
  */
 
-export const MOTION_DURATIONS = {
-  instant: 0.1, // 100ms - press/tap feedback, instant toggles
-  fast: 0.18,   // 180ms - hover micro-states
-  normal: 0.24, // 240ms - active indicator gliding, tab transitions
-  slow: 0.32,   // 320ms - collapsible menus, drawer slides
-  // Icon micro-interactions (500ms–580ms smooth, natural SaaS timings)
-  iconFast: 0.48,
-  iconNormal: 0.54,
-  iconComplex: 0.58,
+import { type Transition, type Variants } from "framer-motion";
+
+// ============================================================================
+// 1. MOTION TOKENS (Durations, Easings, Scales)
+// ============================================================================
+
+export const motionTokens = {
+  duration: {
+    micro: 0.1,      // 100ms: Press, instant feedback
+    fast: 0.15,      // 150ms: Dropdowns, tooltips, buttons
+    normal: 0.2,     // 200ms: Modals, tabs, popovers
+    panel: 0.25,     // 250ms: Drawers, side sheets
+    page: 0.2,       // 200ms: Route/page entrance
+  },
+  easing: {
+    // Smooth, decelerating cubic-bezier for natural UI transitions
+    easeOut: [0.16, 1, 0.3, 1] as const,
+    // Symmetric ease for enter/exit
+    easeInOut: [0.4, 0, 0.2, 1] as const,
+    // Snappy entrance
+    snappy: [0.2, 0, 0, 1] as const,
+  },
+  spring: {
+    // Restrained spring with NO bounce/overshoot for enterprise stability
+    subtle: {
+      type: "spring",
+      stiffness: 420,
+      damping: 32,
+      mass: 0.8,
+    } as Transition,
+    // Tab & indicator movement
+    indicator: {
+      type: "spring",
+      stiffness: 450,
+      damping: 36,
+      mass: 0.8,
+    } as Transition,
+  },
+  scale: {
+    buttonHover: 1.01,
+    buttonTap: 0.98,
+    iconHover: 1.05,
+    iconTap: 0.94,
+    cardHover: 1.002,
+    subtleHover: 1.005,
+    subtleTap: 0.985,
+  },
 } as const;
 
-export const MOTION_EASINGS = {
-  // Swift quintic ease-out for ultra-responsive navigation feedback
-  easeOut: [0.16, 1, 0.3, 1] as const,
-  // Natural cubic-bezier for smooth icon micro-movements (deliberate deceleration, no flash)
-  iconEase: [0.16, 1, 0.3, 1] as const,
-  // Standard smooth easeInOut for state transitions
-  easeInOut: [0.4, 0, 0.2, 1] as const,
-  // Physical spring for shared gliders (smooth, controlled, non-bouncy)
-  springGlider: {
-    type: "spring" as const,
-    stiffness: 420,
-    damping: 38,
-    mass: 0.8,
+// ============================================================================
+// 2. STANDARD TRANSITIONS
+// ============================================================================
+
+export const transitions = {
+  micro: {
+    duration: motionTokens.duration.micro,
+    ease: motionTokens.easing.easeOut,
   },
-  // Subtler spring for micro-interactions
-  springSubtle: {
-    type: "spring" as const,
-    stiffness: 450,
-    damping: 38,
-    mass: 0.7,
+  fast: {
+    duration: motionTokens.duration.fast,
+    ease: motionTokens.easing.easeOut,
   },
-} as const;
+  normal: {
+    duration: motionTokens.duration.normal,
+    ease: motionTokens.easing.easeOut,
+  },
+  panel: {
+    duration: motionTokens.duration.panel,
+    ease: motionTokens.easing.easeInOut,
+  },
+  page: {
+    duration: motionTokens.duration.page,
+    ease: motionTokens.easing.easeOut,
+  },
+};
+
+// ============================================================================
+// 3. REUSABLE ANIMATION VARIANTS
+// ============================================================================
 
 /**
- * Common variants for enterprise micro-interactions
+ * Dropdown & Select popovers: fast opacity + small 4px vertical shift
  */
-export const MOTION_VARIANTS = {
-  // Tactile click press
-  pressable: {
-    whileTap: { scale: 0.98, transition: { duration: MOTION_DURATIONS.instant } },
+export const dropdownVariants: Variants = {
+  initial: {
+    opacity: 0,
+    y: -4,
+    scale: 0.99,
   },
-  // Subtle content fade & lift
-  contentFadeIn: {
-    initial: { opacity: 0, y: 4 },
-    animate: { opacity: 1, y: 0 },
-    exit: { opacity: 0, y: -4 },
-    transition: { duration: MOTION_DURATIONS.normal, ease: MOTION_EASINGS.easeOut },
+  animate: {
+    opacity: 1,
+    y: 0,
+    scale: 1,
+    transition: transitions.fast,
   },
-  // Collapsible dropdown / nested group
-  collapse: {
-    initial: { opacity: 0, height: 0, overflow: "hidden" as const },
-    animate: {
-      opacity: 1,
-      height: "auto",
-      transition: {
-        height: { duration: MOTION_DURATIONS.slow, ease: MOTION_EASINGS.easeOut },
-        opacity: { duration: MOTION_DURATIONS.normal, ease: MOTION_EASINGS.easeOut },
-      },
+  exit: {
+    opacity: 0,
+    y: -4,
+    scale: 0.99,
+    transition: transitions.micro,
+  },
+};
+
+/**
+ * Dialogs & Modals: clean opacity + subtle scale (0.98 -> 1)
+ */
+export const modalVariants: Variants = {
+  initial: {
+    opacity: 0,
+    scale: 0.98,
+    y: 0,
+  },
+  animate: {
+    opacity: 1,
+    scale: 1,
+    y: 0,
+    transition: transitions.normal,
+  },
+  exit: {
+    opacity: 0,
+    scale: 0.98,
+    transition: transitions.fast,
+  },
+};
+
+/**
+ * Modal Backdrop Overlay
+ */
+export const backdropVariants: Variants = {
+  initial: { opacity: 0 },
+  animate: { opacity: 1, transition: transitions.fast },
+  exit: { opacity: 0, transition: transitions.fast },
+};
+
+/**
+ * Side Drawers (Right & Left)
+ */
+export const drawerRightVariants: Variants = {
+  initial: {
+    x: "100%",
+    opacity: 0.8,
+  },
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: transitions.panel,
+  },
+  exit: {
+    x: "100%",
+    opacity: 0.8,
+    transition: transitions.panel,
+  },
+};
+
+export const drawerLeftVariants: Variants = {
+  initial: {
+    x: "-100%",
+    opacity: 0.8,
+  },
+  animate: {
+    x: 0,
+    opacity: 1,
+    transition: transitions.panel,
+  },
+  exit: {
+    x: "-100%",
+    opacity: 0.8,
+    transition: transitions.panel,
+  },
+};
+
+/**
+ * Tab Content Transition: subtle fade + small vertical translate (y: 4px -> 0)
+ */
+export const tabContentVariants: Variants = {
+  initial: {
+    opacity: 0,
+    y: 4,
+  },
+  animate: {
+    opacity: 1,
+    y: 0,
+    transition: transitions.fast,
+  },
+  exit: {
+    opacity: 0,
+    y: -4,
+    transition: transitions.micro,
+  },
+};
+
+/**
+ * Form Validation / Action Failure Shake (restrained, 3px max)
+ */
+export const shakeErrorVariants: Variants = {
+  shake: {
+    x: [-3, 3, -2, 2, 0],
+    transition: {
+      duration: 0.25,
+      ease: "easeInOut",
     },
-    exit: {
-      opacity: 0,
-      height: 0,
-      transition: {
-        height: { duration: MOTION_DURATIONS.normal, ease: MOTION_EASINGS.easeOut },
-        opacity: { duration: MOTION_DURATIONS.fast, ease: MOTION_EASINGS.easeOut },
-      },
-    },
   },
-} as const;
+};
+
+/**
+ * Success Badge / Checkmark entrance
+ */
+export const successPopVariants: Variants = {
+  initial: {
+    scale: 0.9,
+    opacity: 0,
+  },
+  animate: {
+    scale: 1,
+    opacity: 1,
+    transition: transitions.fast,
+  },
+};
+
+/**
+ * Button Micro-Interactions
+ */
+export const buttonPressProps = {
+  whileHover: { scale: motionTokens.scale.buttonHover },
+  whileTap: { scale: motionTokens.scale.buttonTap },
+  transition: transitions.micro,
+};
+
+export const iconPressProps = {
+  whileHover: { scale: motionTokens.scale.iconHover },
+  whileTap: { scale: motionTokens.scale.iconTap },
+  transition: transitions.micro,
+};
+
+// Backwards compatibility aliases
+export const MOTION_EASINGS = {
+  easeOut: [0.16, 1, 0.3, 1] as const,
+  easeInOut: [0.4, 0, 0.2, 1] as const,
+  snappy: [0.2, 0, 0, 1] as const,
+  springGlider: {
+    type: "spring",
+    stiffness: 450,
+    damping: 36,
+    mass: 0.8,
+  } as Transition,
+};
+
+export const MOTION_DURATIONS = motionTokens.duration;

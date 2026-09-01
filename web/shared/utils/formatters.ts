@@ -69,22 +69,28 @@ export function formatPercentage(value: number | string | null | undefined, digi
   return `${safeValue.toFixed(digits)}%`;
 }
 
-// ─── Trends ───────────────────────────────────────────────────────────────────
-
 export function calculateTrend(currentValue: number, previousValue: number) {
-  if (!previousValue) {
-    if (!currentValue) {
-      return { change: "0.0%", positive: true };
+  const current = Number(currentValue) || 0;
+  const previous = Number(previousValue) || 0;
+
+  if (previous === 0) {
+    if (current === 0) {
+      return { change: "0.0%", positive: false, trend: "neutral" as const };
     }
-    return { change: "+100.0%", positive: true };
+    return { change: "+100.0%", positive: true, trend: "up" as const };
   }
 
-  const delta = ((currentValue - previousValue) / Math.abs(previousValue)) * 100;
+  const delta = ((current - previous) / Math.abs(previous)) * 100;
   const rounded = Number(delta.toFixed(1));
 
+  if (rounded === 0) {
+    return { change: "0.0%", positive: false, trend: "neutral" as const };
+  }
+
   return {
-    change: `${rounded >= 0 ? "+" : ""}${rounded.toFixed(1)}%`,
-    positive: rounded >= 0,
+    change: `${rounded > 0 ? "+" : ""}${rounded.toFixed(1)}%`,
+    positive: rounded > 0,
+    trend: rounded > 0 ? ("up" as const) : ("down" as const),
   };
 }
 

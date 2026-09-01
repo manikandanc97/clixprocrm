@@ -186,10 +186,7 @@ export function ImportUploadStep({
       {/* Feature / Highlight Cards with Consistent Animated Icons */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
         {/* Card 1: AI / Sparkles / Auto Mapping */}
-        <motion.div
-          data-animate-target="true"
-          whileHover={{ y: -2, scale: 1.01 }}
-          transition={{ type: "spring", stiffness: 350, damping: 20 }}
+        <div
           className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-emerald-500/[0.03] border border-border/70 hover:border-emerald-500/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
         >
           <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-emerald-500/20">
@@ -207,13 +204,10 @@ export function ImportUploadStep({
               Smart CRM field detection
             </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Card 2: Security / Instant Validation */}
-        <motion.div
-          data-animate-target="true"
-          whileHover={{ y: -2, scale: 1.01 }}
-          transition={{ type: "spring", stiffness: 350, damping: 20 }}
+        <div
           className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-blue-500/[0.03] border border-border/70 hover:border-blue-500/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
         >
           <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-blue-500/20">
@@ -231,13 +225,10 @@ export function ImportUploadStep({
               Email & required checks
             </p>
           </div>
-        </motion.div>
+        </div>
 
         {/* Card 3: Modules / Duplicate Protection */}
-        <motion.div
-          data-animate-target="true"
-          whileHover={{ y: -2, scale: 1.01 }}
-          transition={{ type: "spring", stiffness: 350, damping: 20 }}
+        <div
           className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-amber-500/[0.03] border border-border/70 hover:border-amber-500/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
         >
           <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-amber-500/20">
@@ -255,7 +246,7 @@ export function ImportUploadStep({
               Skip, update or append
             </p>
           </div>
-        </motion.div>
+        </div>
       </div>
     </motion.div>
   );

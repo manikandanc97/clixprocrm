@@ -563,6 +563,18 @@
     width: 0;
     height: 0;
   }
+
+  /* Accessibility: Respect user reduced-motion preference */
+  @media (prefers-reduced-motion: reduce) {
+    *,
+    *::before,
+    *::after {
+      animation-duration: 0.01ms !important;
+      animation-iteration-count: 1 !important;
+      transition-duration: 0.01ms !important;
+      scroll-behavior: auto !important;
+    }
+  }
 }
 
 /* ============================================================
@@ -617,8 +629,9 @@
   .crm-table-workspace-sticky {
     position: sticky;
     top: 0;
-    /* Fills exactly the remaining viewport below the header — computed dynamically */
-    height: calc(100dvh - var(--sa-header-h, 84px));
+    /* Bounded by remaining viewport below the header — computed dynamically */
+    max-height: calc(100dvh - var(--sa-header-h, 84px));
+    height: auto;
     display: flex;
     flex-direction: column;
     gap: 0.875rem; /* matches gap-3.5 */

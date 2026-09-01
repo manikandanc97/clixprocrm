@@ -13,6 +13,10 @@ export interface PipelineMetricType {
   title: string;
   value: string;
   valueAmount?: number;
+  change?: string;
+  positive?: boolean;
+  trend?: "up" | "down" | "neutral";
+  sparklineData?: { value: number }[];
 }
 
 export interface PipelineLeadType {

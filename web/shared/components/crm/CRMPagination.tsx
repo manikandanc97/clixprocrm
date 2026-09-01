@@ -43,8 +43,7 @@ export function CRMPagination({
   className,
   alwaysShow = false,
 }: CRMPaginationProps) {
-  if (totalItems === 0) return null;
-  if (!alwaysShow && totalItems <= rowsPerPage) return null;
+  if (totalItems === 0 || (!alwaysShow && totalItems <= rowsPerPage)) return null;
 
   const startItem = (currentPage - 1) * rowsPerPage + 1;
   const endItem = Math.min(currentPage * rowsPerPage, totalItems);

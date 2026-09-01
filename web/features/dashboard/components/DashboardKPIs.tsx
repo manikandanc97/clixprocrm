@@ -39,8 +39,10 @@ export default function DashboardKPIs() {
   const dashboardStats = dashboardData?.stats || [];
   const dashboardRevenue = dashboardStats.find(s => s.title === "Revenue");
   const dashboardLeads = dashboardStats.find(s => s.title === "Total Leads");
+  const dashboardActiveDeals = dashboardStats.find(s => s.title === "Active Deals" || s.title === "Total Deals");
+  const dashboardWinRate = dashboardStats.find(s => s.title === "Win Rate" || s.title === "Conversion Rate");
   
-  // Retrieve metrics returned by the pipeline API
+  // Retrieve metrics returned by the pipeline API as fallback
   const pipelineActiveDeals = pipelineData?.stats?.find(s => s.title === "Active Deals");
   const pipelineWinRate = pipelineData?.stats?.find(s => s.title === "Win Rate");
 
@@ -56,9 +58,10 @@ export default function DashboardKPIs() {
         if (hasError(dashboardQuery)) return "Error";
         return formatCurrency(dashboardRevenue?.valueAmount || 0);
       },
-      getChange: () => dashboardRevenue?.change || "+0.0%",
+      getChange: () => dashboardRevenue?.change || "0.0%",
       getTrend: () => {
-        if (!dashboardRevenue) return "neutral" as const;
+        if (dashboardRevenue?.trend) return dashboardRevenue.trend;
+        if (!dashboardRevenue || dashboardRevenue.change === "0.0%" || dashboardRevenue.change === "+0.0%") return "neutral" as const;
         return dashboardRevenue.positive ? ("up" as const) : ("down" as const);
       },
       icon: CurrencyIcon,
@@ -76,16 +79,17 @@ export default function DashboardKPIs() {
         if (hasError(dashboardQuery) && hasError(leadsQuery)) return "Error";
         return dashboardLeads?.value || leadsData?.summary?.total?.toLocaleString("en-US") || "0";
       },
-      getChange: () => dashboardLeads?.change || "+0.0%",
+      getChange: () => dashboardLeads?.change || "0.0%",
       getTrend: () => {
-        if (!dashboardLeads) return "neutral" as const;
+        if (dashboardLeads?.trend) return dashboardLeads.trend;
+        if (!dashboardLeads || dashboardLeads.change === "0.0%" || dashboardLeads.change === "+0.0%") return "neutral" as const;
         return dashboardLeads.positive ? ("up" as const) : ("down" as const);
       },
       icon: Users,
       color: "violet" as const,
       loading: dashboardQuery.isLoading || leadsQuery.isLoading,
       sparklineData: dashboardLeads?.sparklineData || [],
-      comparisonText: "vs last week",
+      comparisonText: "vs last month",
       href: "/leads",
       tooltip: "Total number of leads accumulated.",
     },
@@ -93,19 +97,21 @@ export default function DashboardKPIs() {
       id: "activeDeals",
       title: "Active Deals",
       getValue: () => {
-        if (hasError(pipelineQuery) && hasError(leadsQuery)) return "Error";
-        return pipelineActiveDeals?.value || "0 Deals";
+        if (hasError(dashboardQuery) && hasError(pipelineQuery)) return "Error";
+        return dashboardActiveDeals?.value || pipelineActiveDeals?.value || "0 Deals";
       },
-      getChange: () => (pipelineActiveDeals as ReturnType<typeof JSON.parse>)?.change || "+0.0%",
+      getChange: () => dashboardActiveDeals?.change || (pipelineActiveDeals as ReturnType<typeof JSON.parse>)?.change || "0.0%",
       getTrend: () => {
-        if (!pipelineActiveDeals) return "neutral" as const;
-        return (pipelineActiveDeals as ReturnType<typeof JSON.parse>).positive ? ("up" as const) : ("down" as const);
+        const dealStat = dashboardActiveDeals || pipelineActiveDeals;
+        if (dealStat?.trend) return dealStat.trend;
+        if (!dealStat || dealStat.change === "0.0%" || dealStat.change === "+0.0%") return "neutral" as const;
+        return (dealStat as ReturnType<typeof JSON.parse>).positive ? ("up" as const) : ("down" as const);
       },
       icon: Target,
       color: "orange" as const,
-      loading: pipelineQuery.isLoading || leadsQuery.isLoading,
-      sparklineData: (pipelineActiveDeals as ReturnType<typeof JSON.parse>)?.sparklineData || [],
-      comparisonText: "vs last week",
+      loading: dashboardQuery.isLoading || pipelineQuery.isLoading,
+      sparklineData: dashboardActiveDeals?.sparklineData || (pipelineActiveDeals as ReturnType<typeof JSON.parse>)?.sparklineData || [],
+      comparisonText: "vs last month",
       href: "/pipeline",
       tooltip: "Number of active deals currently in the pipeline.",
     },
@@ -113,24 +119,26 @@ export default function DashboardKPIs() {
       id: "winRate",
       title: "Conversion Rate",
       getValue: () => {
-        if (hasError(pipelineQuery) && hasError(leadsQuery)) return "Error";
-        return pipelineWinRate?.value || "0%";
+        if (hasError(dashboardQuery) && hasError(pipelineQuery)) return "Error";
+        return dashboardWinRate?.value || pipelineWinRate?.value || "0%";
       },
-      getChange: () => (pipelineWinRate as ReturnType<typeof JSON.parse>)?.change || "+0.0%",
+      getChange: () => dashboardWinRate?.change || (pipelineWinRate as ReturnType<typeof JSON.parse>)?.change || "0.0%",
       getTrend: () => {
-        if (!pipelineWinRate) return "neutral" as const;
-        return (pipelineWinRate as ReturnType<typeof JSON.parse>).positive ? ("up" as const) : ("down" as const);
+        const winStat = dashboardWinRate || pipelineWinRate;
+        if (winStat?.trend) return winStat.trend;
+        if (!winStat || winStat.change === "0.0%" || winStat.change === "+0.0%") return "neutral" as const;
+        return (winStat as ReturnType<typeof JSON.parse>).positive ? ("up" as const) : ("down" as const);
       },
       icon: TrendingUp,
       color: "pink" as const,
-      loading: pipelineQuery.isLoading || leadsQuery.isLoading,
-      sparklineData: (pipelineWinRate as ReturnType<typeof JSON.parse>)?.sparklineData || [],
-      comparisonText: "vs last week",
+      loading: dashboardQuery.isLoading || pipelineQuery.isLoading,
+      sparklineData: dashboardWinRate?.sparklineData || (pipelineWinRate as ReturnType<typeof JSON.parse>)?.sparklineData || [],
+      comparisonText: "vs last month",
       href: "/analytics",
       tooltip: "Percentage of leads successfully converted to closed deals.",
     },
   ], [
-    dashboardQuery, dashboardRevenue, dashboardLeads, 
+    dashboardQuery, dashboardRevenue, dashboardLeads, dashboardActiveDeals, dashboardWinRate,
     leadsQuery, leadsData, 
     pipelineQuery, pipelineActiveDeals, pipelineWinRate, 
     formatCurrency, currency

@@ -61,205 +61,141 @@ export class DashboardService {
     const currentYear = new Date().getFullYear();
     const startOfCurrentYear = new Date(currentYear, 0, 1);
 
-    const qTimings: Record<string, number> = {};
-
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const tQueriesStart = performance.now();
+    const qTimings: Record<string, number> = {};    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const [
-        statsRaw,
+        totalDeals,
+        currentPeriodDeals,
+        prevPeriodDeals,
+        activeDeals,
+        prevActiveDeals,
+        wonDealsTotal,
+        lostDealsTotal,
+        totalRevenueAgg,
+        currentPeriodRevenueAgg,
+        prevPeriodRevenueAgg,
+        totalLeads,
+        currentPeriodLeads,
+        prevPeriodLeads,
+        currentPeriodCustomers,
+        prevPeriodCustomers,
+        pendingTasksTotal,
+        currentPeriodPendingTasks,
+        prevPeriodPendingTasks,
         monthlySalesRaw,
         sparklineDealsRaw,
         sparklineRevenueRaw,
+        sparklineLeadsRaw,
         recentDeals,
         recentQuotations,
         recentCompletedTasks,
         revenueTargetData,
       ] = await Promise.all([
-        // 1. Consolidated Key Metric Counts & Sums in a Single DB Query
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.$queryRaw<
-            Array<{
-              total_deals: number;
-              current_period_deals: number;
-              prev_period_deals: number;
-              current_period_revenue: number;
-              prev_period_revenue: number;
-              current_period_customers: number;
-              prev_period_customers: number;
-              pending_tasks_total: number;
-              current_period_pending_tasks: number;
-              prev_period_pending_tasks: number;
-            }>
-          >`
-            SELECT
-              (SELECT COUNT(*)::int FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL) as total_deals,
-              (SELECT COUNT(*)::int FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "createdAt" >= ${currentStart} AND "createdAt" < ${nextStart}) as current_period_deals,
-              (SELECT COUNT(*)::int FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "createdAt" >= ${previousStart} AND "createdAt" < ${currentStart}) as prev_period_deals,
-              (SELECT COALESCE(SUM("value"), 0)::float FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "stage" = 'WON'::"DealStage" AND "updatedAt" >= ${currentStart} AND "updatedAt" < ${nextStart}) as current_period_revenue,
-              (SELECT COALESCE(SUM("value"), 0)::float FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "stage" = 'WON'::"DealStage" AND "updatedAt" >= ${previousStart} AND "updatedAt" < ${currentStart}) as prev_period_revenue,
-              (SELECT COUNT(*)::int FROM "Customer" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "createdAt" >= ${currentStart} AND "createdAt" < ${nextStart}) as current_period_customers,
-              (SELECT COUNT(*)::int FROM "Customer" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "createdAt" >= ${previousStart} AND "createdAt" < ${currentStart}) as prev_period_customers,
-              (SELECT COUNT(*)::int FROM "Task" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "status" != 'COMPLETED'::"TaskStatus") as pending_tasks_total,
-              (SELECT COUNT(*)::int FROM "Task" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "status" != 'COMPLETED'::"TaskStatus" AND "createdAt" >= ${currentStart} AND "createdAt" < ${nextStart}) as current_period_pending_tasks,
-              (SELECT COUNT(*)::int FROM "Task" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "status" != 'COMPLETED'::"TaskStatus" AND "createdAt" >= ${previousStart} AND "createdAt" < ${currentStart}) as prev_period_pending_tasks
-          `;
-          qTimings['Q1_statsRaw'] = performance.now() - t0;
-          return res;
-        })(),
+        tx.deal.count({ where: { tenantId, deletedAt: null } }),
+        tx.deal.count({ where: { tenantId, deletedAt: null, createdAt: { gte: currentStart, lt: nextStart } } }),
+        tx.deal.count({ where: { tenantId, deletedAt: null, createdAt: { gte: previousStart, lt: currentStart } } }),
+        tx.deal.count({ where: { tenantId, deletedAt: null, stage: { notIn: ['WON', 'LOST'] } } }),
+        tx.deal.count({ where: { tenantId, deletedAt: null, stage: { notIn: ['WON', 'LOST'] }, createdAt: { lt: currentStart } } }),
+        tx.deal.count({ where: { tenantId, deletedAt: null, stage: 'WON' } }),
+        tx.deal.count({ where: { tenantId, deletedAt: null, stage: 'LOST' } }),
+        tx.deal.aggregate({ where: { tenantId, deletedAt: null, stage: 'WON' }, _sum: { value: true } }),
+        tx.deal.aggregate({ where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: currentStart, lt: nextStart } }, _sum: { value: true } }),
+        tx.deal.aggregate({ where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: previousStart, lt: currentStart } }, _sum: { value: true } }),
+        tx.lead.count({ where: { tenantId, deletedAt: null } }),
+        tx.lead.count({ where: { tenantId, deletedAt: null, createdAt: { gte: currentStart, lt: nextStart } } }),
+        tx.lead.count({ where: { tenantId, deletedAt: null, createdAt: { gte: previousStart, lt: currentStart } } }),
+        tx.customer.count({ where: { tenantId, deletedAt: null, createdAt: { gte: currentStart, lt: nextStart } } }),
+        tx.customer.count({ where: { tenantId, deletedAt: null, createdAt: { gte: previousStart, lt: currentStart } } }),
+        tx.task.count({ where: { tenantId, deletedAt: null, status: { not: 'COMPLETED' } } }),
+        tx.task.count({ where: { tenantId, deletedAt: null, status: { not: 'COMPLETED' }, createdAt: { gte: currentStart, lt: nextStart } } }),
+        tx.task.count({ where: { tenantId, deletedAt: null, status: { not: 'COMPLETED' }, createdAt: { gte: previousStart, lt: currentStart } } }),
 
-        // 2. Aggregated Year-to-Date Won Deals Sales Chart by Month
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.$queryRaw<
-            Array<{
-              month_index: number;
-              total: number;
-            }>
-          >`
-            SELECT 
-              (EXTRACT(MONTH FROM "updatedAt")::int - 1) as month_index,
-              COALESCE(SUM("value"), 0)::float as total
-            FROM "Deal"
-            WHERE "tenantId" = ${tenantId} 
-              AND "deletedAt" IS NULL 
-              AND "stage" = 'WON'::"DealStage" 
-              AND "updatedAt" >= ${startOfCurrentYear}
-            GROUP BY (EXTRACT(MONTH FROM "updatedAt")::int - 1)
-          `;
-          qTimings['Q2_monthlySalesRaw'] = performance.now() - t0;
-          return res;
-        })(),
+        // Monthly Won Deals Sales Chart
+        tx.deal.findMany({
+          where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: startOfCurrentYear } },
+          select: { value: true, updatedAt: true },
+        }),
 
-        // 3. Sparkline Deal Counts (Last 7 Days)
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.$queryRaw<
-            Array<{
-              day_date: Date;
-              deal_count: number;
-            }>
-          >`
-            SELECT
-              DATE_TRUNC('day', "createdAt")::date as day_date,
-              COUNT(*)::int as deal_count
-            FROM "Deal"
-            WHERE "tenantId" = ${tenantId} 
-              AND "deletedAt" IS NULL 
-              AND "createdAt" >= ${sevenDaysAgo}
-            GROUP BY DATE_TRUNC('day', "createdAt")::date
-          `;
-          qTimings['Q3_sparklineDealsRaw'] = performance.now() - t0;
-          return res;
-        })(),
+        // 7-day deals for sparkline
+        tx.deal.findMany({
+          where: { tenantId, deletedAt: null, createdAt: { gte: sevenDaysAgo } },
+          select: { createdAt: true },
+        }),
 
-        // 4. Sparkline Won Revenue (Last 7 Days)
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.$queryRaw<
-            Array<{
-              day_date: Date;
-              revenue: number;
-            }>
-          >`
-            SELECT
-              DATE_TRUNC('day', "updatedAt")::date as day_date,
-              COALESCE(SUM("value"), 0)::float as revenue
-            FROM "Deal"
-            WHERE "tenantId" = ${tenantId} 
-              AND "deletedAt" IS NULL 
-              AND "stage" = 'WON'::"DealStage" 
-              AND "updatedAt" >= ${sevenDaysAgo}
-            GROUP BY DATE_TRUNC('day', "updatedAt")::date
-          `;
-          qTimings['Q4_sparklineRevenueRaw'] = performance.now() - t0;
-          return res;
-        })(),
+        // 7-day won revenue for sparkline
+        tx.deal.findMany({
+          where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: sevenDaysAgo } },
+          select: { value: true, updatedAt: true },
+        }),
 
-        // 5. Recent Deals (take 5)
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.deal.findMany({
-            where: { tenantId, deletedAt: null },
-            select: { id: true, name: true, createdAt: true },
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-          });
-          qTimings['Q5_recentDeals'] = performance.now() - t0;
-          return res;
-        })(),
+        // 7-day leads for sparkline
+        tx.lead.findMany({
+          where: { tenantId, deletedAt: null, createdAt: { gte: sevenDaysAgo } },
+          select: { createdAt: true },
+        }),
 
-        // 6. Recent Quotations (take 5)
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.quotation.findMany({
-            where: { tenantId, deletedAt: null },
-            select: { id: true, client: true, createdAt: true },
-            orderBy: { createdAt: 'desc' },
-            take: 5,
-          });
-          qTimings['Q6_recentQuotations'] = performance.now() - t0;
-          return res;
-        })(),
+        // Recent Deals (take 5)
+        tx.deal.findMany({
+          where: { tenantId, deletedAt: null },
+          select: { id: true, name: true, createdAt: true },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+        }),
 
-        // 7. Recent Completed Tasks (take 5)
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.task.findMany({
-            where: { tenantId, deletedAt: null, status: 'COMPLETED' },
-            select: { id: true, title: true, updatedAt: true },
-            orderBy: { updatedAt: 'desc' },
-            take: 5,
-          });
-          qTimings['Q7_recentCompletedTasks'] = performance.now() - t0;
-          return res;
-        })(),
+        // Recent Quotations (take 5)
+        tx.quotation.findMany({
+          where: { tenantId, deletedAt: null },
+          select: { id: true, client: true, createdAt: true },
+          orderBy: { createdAt: 'desc' },
+          take: 5,
+        }),
 
-        // 8. Active Revenue Target
-        (async () => {
-          const t0 = performance.now();
-          const res = await tx.revenueTarget.findFirst({
-            where: { tenantId, isActive: true },
-            orderBy: { createdAt: 'desc' },
-            select: { value: true },
-          });
-          qTimings['Q8_revenueTargetData'] = performance.now() - t0;
-          return res;
-        })(),
+        // Recent Completed Tasks (take 5)
+        tx.task.findMany({
+          where: { tenantId, deletedAt: null, status: 'COMPLETED' },
+          select: { id: true, title: true, updatedAt: true },
+          orderBy: { updatedAt: 'desc' },
+          take: 5,
+        }),
+
+        // Active Revenue Target
+        tx.revenueTarget.findFirst({
+          where: { tenantId, isActive: true },
+          orderBy: { createdAt: 'desc' },
+          select: { value: true },
+        }),
       ]);
-      const tQueriesEnd = performance.now();
 
-      const stats = statsRaw[0] || {
-        total_deals: 0,
-        current_period_deals: 0,
-        prev_period_deals: 0,
-        current_period_revenue: 0,
-        prev_period_revenue: 0,
-        current_period_customers: 0,
-        prev_period_customers: 0,
-        pending_tasks_total: 0,
-        current_period_pending_tasks: 0,
-        prev_period_pending_tasks: 0,
-      };
+      const totalRevenue = Number(totalRevenueAgg._sum.value || 0);
+      const currentRevenue = Number(currentPeriodRevenueAgg._sum.value || 0);
+      const previousRevenue = Number(prevPeriodRevenueAgg._sum.value || 0);
 
-      const currentRevenue = Number(stats.current_period_revenue || 0);
-      const previousRevenue = Number(stats.prev_period_revenue || 0);
+      const wonCount = wonDealsTotal;
+      const lostCount = lostDealsTotal;
+      const totalQualified = wonCount + lostCount;
+      const winRate = totalQualified > 0 ? (wonCount / totalQualified) * 100 : totalDeals > 0 ? (wonCount / totalDeals) * 100 : 0;
 
-      // Build 7-day sparklines efficiently from grouped data
+      // Build 7-day sparklines from findMany records
       const dealsDayMap = new Map<string, number>();
-      for (const r of sparklineDealsRaw) {
-        const dStr = new Date(r.day_date).toISOString().split('T')[0];
-        dealsDayMap.set(dStr, Number(r.deal_count || 0));
+      for (const d of sparklineDealsRaw) {
+        const dStr = new Date(d.createdAt).toISOString().split('T')[0];
+        dealsDayMap.set(dStr, (dealsDayMap.get(dStr) || 0) + 1);
       }
 
       const revenueDayMap = new Map<string, number>();
       for (const r of sparklineRevenueRaw) {
-        const dStr = new Date(r.day_date).toISOString().split('T')[0];
-        revenueDayMap.set(dStr, Number(r.revenue || 0));
+        const dStr = new Date(r.updatedAt).toISOString().split('T')[0];
+        revenueDayMap.set(dStr, (revenueDayMap.get(dStr) || 0) + Number(r.value || 0));
+      }
+
+      const leadsDayMap = new Map<string, number>();
+      for (const l of sparklineLeadsRaw) {
+        const dStr = new Date(l.createdAt).toISOString().split('T')[0];
+        leadsDayMap.set(dStr, (leadsDayMap.get(dStr) || 0) + 1);
       }
 
       const sparklineDeals: { value: number }[] = [];
       const sparklineRevenue: { value: number }[] = [];
+      const sparklineLeads: { value: number }[] = [];
       for (let i = 6; i >= 0; i--) {
         const d = new Date(todayStart);
         d.setDate(d.getDate() - i);
@@ -267,42 +203,72 @@ export class DashboardService {
 
         sparklineDeals.push({ value: dealsDayMap.get(dStr) || 0 });
         sparklineRevenue.push({ value: revenueDayMap.get(dStr) || 0 });
+        sparklineLeads.push({ value: leadsDayMap.get(dStr) || 0 });
       }
+
+      const revenueDisplayValue = totalRevenue > 0 ? totalRevenue : currentRevenue;
 
       const dashboardStats = [
         {
-          title: 'Total Deals',
-          value: Number(stats.total_deals || 0).toLocaleString('en-US'),
-          valueAmount: Number(stats.total_deals || 0),
-          sparklineData: sparklineDeals,
-          ...calculateTrend(
-            Number(stats.current_period_deals || 0),
-            Number(stats.prev_period_deals || 0),
-          ),
-        },
-        {
-          title: 'New Customers',
-          value: Number(stats.current_period_customers || 0).toLocaleString('en-US'),
-          valueAmount: Number(stats.current_period_customers || 0),
-          ...calculateTrend(
-            Number(stats.current_period_customers || 0),
-            Number(stats.prev_period_customers || 0),
-          ),
-        },
-        {
           title: 'Revenue',
-          value: formatCurrency(currentRevenue, currency),
-          valueAmount: currentRevenue,
+          value: formatCurrency(revenueDisplayValue, currency),
+          valueAmount: revenueDisplayValue,
           sparklineData: sparklineRevenue,
           ...calculateTrend(currentRevenue, previousRevenue),
         },
         {
-          title: 'Pending Tasks',
-          value: Number(stats.pending_tasks_total || 0).toLocaleString('en-US'),
-          valueAmount: Number(stats.pending_tasks_total || 0),
+          title: 'Total Leads',
+          value: Number(totalLeads || 0).toLocaleString('en-US'),
+          valueAmount: Number(totalLeads || 0),
+          sparklineData: sparklineLeads,
           ...calculateTrend(
-            Number(stats.current_period_pending_tasks || 0),
-            Number(stats.prev_period_pending_tasks || 0),
+            Number(currentPeriodLeads || 0),
+            Number(prevPeriodLeads || 0),
+          ),
+        },
+        {
+          title: 'Active Deals',
+          value: `${Number(activeDeals || 0)} Deals`,
+          valueAmount: Number(activeDeals || 0),
+          sparklineData: sparklineDeals,
+          ...calculateTrend(
+            Number(activeDeals || 0),
+            Number(prevActiveDeals || 0),
+          ),
+        },
+        {
+          title: 'Win Rate',
+          value: formatPercentage(winRate),
+          valueAmount: winRate,
+          sparklineData: sparklineDeals,
+          ...calculateTrend(winRate, 0),
+        },
+        {
+          title: 'Total Deals',
+          value: Number(totalDeals || 0).toLocaleString('en-US'),
+          valueAmount: Number(totalDeals || 0),
+          sparklineData: sparklineDeals,
+          ...calculateTrend(
+            Number(currentPeriodDeals || 0),
+            Number(prevPeriodDeals || 0),
+          ),
+        },
+        {
+          title: 'New Customers',
+          value: Number(currentPeriodCustomers || 0).toLocaleString('en-US'),
+          valueAmount: Number(currentPeriodCustomers || 0),
+          ...calculateTrend(
+            Number(currentPeriodCustomers || 0),
+            Number(prevPeriodCustomers || 0),
+          ),
+        },
+        {
+          title: 'Pending Tasks',
+          value: Number(pendingTasksTotal || 0).toLocaleString('en-US'),
+          valueAmount: Number(pendingTasksTotal || 0),
+          ...calculateTrend(
+            Number(currentPeriodPendingTasks || 0),
+            Number(prevPeriodPendingTasks || 0),
           ),
         },
       ];
@@ -346,9 +312,10 @@ export class DashboardService {
         'Dec',
       ];
       const salesChartData = months.map((month) => ({ name: month, total: 0 }));
-      for (const row of monthlySalesRaw) {
-        if (row.month_index >= 0 && row.month_index < 12) {
-          salesChartData[row.month_index].total = Number(row.total || 0);
+      for (const d of monthlySalesRaw) {
+        const mIndex = new Date(d.updatedAt).getMonth();
+        if (mIndex >= 0 && mIndex < 12) {
+          salesChartData[mIndex].total += Number(d.value || 0);
         }
       }
 

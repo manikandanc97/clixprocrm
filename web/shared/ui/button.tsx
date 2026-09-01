@@ -5,7 +5,7 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "group group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:transition-transform [&_svg]:duration-200 [&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[&_svg]:scale-110 group-hover:[&_svg]:-translate-y-[0.5px] active:[&_svg]:scale-95",
+  "group group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-semibold transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring/40 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 hover:scale-[1.01] active:scale-[0.98] [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4 [&_svg]:transition-transform [&_svg]:duration-150 [&_svg]:ease-[cubic-bezier(0.16,1,0.3,1)] group-hover:[&_svg]:scale-105 group-hover:[&_svg]:-translate-y-[0.5px] active:[&_svg]:scale-95",
   {
     variants: {
       variant: {

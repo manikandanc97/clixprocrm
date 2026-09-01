@@ -195,10 +195,10 @@ export function ContextualSettingsDrawer({
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={activeSection?.id || "empty"}
-                  initial={{ opacity: 0, y: 6 }}
+                  initial={{ opacity: 0, y: 4 }}
                   animate={{ opacity: 1, y: 0 }}
-                  exit={{ opacity: 0, y: -6 }}
-                  transition={{ duration: 0.14, ease: "easeOut" }}
+                  exit={{ opacity: 0, y: -4 }}
+                  transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
                   className="space-y-6 max-w-4xl"
                 >
                   {activeSection?.component}

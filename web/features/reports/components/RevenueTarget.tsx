@@ -32,7 +32,7 @@ const RevenueTarget = ({ data }: { data: RevenueTargetType | null }) => {
   const CurrencyBgIcon = CurrencyIcon;
 
   return (
-    <Card className="relative bg-primary text-primary-foreground rounded-xl border-transparent shadow-lg overflow-hidden flex flex-col transition-all duration-300 hover:shadow-xl hover:-translate-y-0.5 min-w-0">
+    <Card className="relative bg-primary text-primary-foreground rounded-xl border-transparent shadow-lg overflow-hidden flex flex-col transition-all duration-300 min-w-0">
       {/* Decorative Background SVG */}
       <CurrencyBgIcon className="absolute -right-8 -bottom-8 w-64 h-64 text-white/10 -rotate-12 pointer-events-none" />
       

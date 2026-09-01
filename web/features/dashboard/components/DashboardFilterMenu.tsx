@@ -3,6 +3,7 @@
 import React, { useState, useEffect } from "react";
 import { Filter } from "lucide-react";
 import { Button } from "@/shared/ui/button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,8 +47,8 @@ export default function DashboardFilterMenu() {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <Button variant="outline" size="sm" className="rounded-full h-9 px-3 sm:px-4 text-xs font-bold gap-2">
-          <Filter className="w-3.5 h-3.5" />
+        <Button variant="outline" size="sm" className="rounded-full h-9 px-3 sm:px-4 text-xs font-bold gap-2 group">
+          <AppIcon icon={Filter} name="filter" size={14} />
           <span className="hidden sm:inline">Filters</span>
         </Button>
       </DropdownMenuTrigger>

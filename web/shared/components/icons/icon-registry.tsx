@@ -45,6 +45,7 @@ import {
   Download,
   Upload,
   ArrowRight,
+  ArrowUpRight,
   ArrowLeft,
   ChevronRight,
   ChevronLeft,
@@ -141,6 +142,7 @@ export type IconName =
   | "upload"
   | "import"
   | "arrowRight"
+  | "arrowUpRight"
   | "next"
   | "arrowLeft"
   | "back"
@@ -251,6 +253,8 @@ const CANONICAL_ICONS: Record<string, IconName> = {
   upload: "upload",
   import: "import",
   arrowright: "arrowRight",
+  arrowupright: "arrowUpRight",
+  viewreports: "arrowUpRight",
   next: "next",
   arrowleft: "arrowLeft",
   back: "back",
@@ -371,6 +375,7 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   if (iconDisp.includes("chevronleft") || iconDisp.includes("chevronsleft")) return "chevronLeft";
   if (iconDisp.includes("chevrondown")) return "chevronDown";
   if (iconDisp.includes("chevronup")) return "chevronUp";
+  if (iconDisp.includes("arrowupright")) return "arrowUpRight";
   if (iconDisp.includes("arrowright")) return "arrowRight";
   if (iconDisp.includes("arrowleft")) return "arrowLeft";
   if (iconDisp.includes("lock")) return "lock";
@@ -924,6 +929,40 @@ export function AppIcon({
         return <Play {...props} />;
 
       // Animated Lucide Icons with smooth micro-interaction
+      case "arrowUpRight":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && isAnimating
+                ? { x: [0, 2, 0], y: [0, -2, 0], scale: [1, 1.15, 1] }
+                : { x: 0, y: 0, scale: 1 }
+            }
+            transition={{ duration: 0.45, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            <ArrowUpRight size={size} className={className} />
+          </motion.div>
+        );
+
+      case "filter":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && isAnimating
+                ? { rotate: [0, -12, 12, -4, 0], scale: [1, 1.1, 0.95, 1] }
+                : { rotate: 0, scale: 1 }
+            }
+            transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            {FallbackIcon === Filter ? (
+              <Filter size={size} className={className} />
+            ) : (
+              <SlidersHorizontal size={size} className={className} />
+            )}
+          </motion.div>
+        );
+
       case "companies":
         return (
           <motion.div

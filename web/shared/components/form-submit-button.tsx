@@ -4,6 +4,7 @@ import { Button, ButtonProps } from '@/shared/ui/button';
 import { Loader2 } from 'lucide-react';
 import { AppIcon } from '@/shared/components/icons/icon-registry';
 import { cn } from '@/shared/lib/utils';
+import { motion, AnimatePresence } from 'framer-motion';
 
 export interface FormSubmitButtonProps extends ButtonProps {
   isDirty: boolean;
@@ -30,49 +31,12 @@ export const FormSubmitButton = React.forwardRef<HTMLButtonElement, FormSubmitBu
     const context = useFormContext();
     const resolvedIcon = resolveSubmitIcon(iconName, children);
     
-    // Fallback if not used within a FormProvider (though it usually should be)
-    if (!context) {
-      const disabled = isPending || !isDirty;
-      return (
-        <Button
-          ref={ref}
-          type="submit"
-          disabled={disabled}
-          className={cn(
-            "min-w-32 transition-all", 
-            disabled ? "opacity-50 cursor-not-allowed" : "",
-            className
-          )}
-          {...props}
-        >
-          {isPending ? (
-            <>
-              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-              {loadingText}
-            </>
-          ) : (
-            <>
-              {!hideIcon && (
-                <AppIcon
-                  name={resolvedIcon}
-                  icon={icon}
-                  size={16}
-                  disableHover={true}
-                  className="mr-1.5"
-                />
-              )}
-              {children}
-            </>
-          )}
-        </Button>
-      );
-    }
-
-    // Subscribe to form validity
+    // Subscribe to form validity if context exists
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    const { isValid } = useFormState({ control: context.control });
+    const formState = context ? useFormState({ control: context.control }) : null;
+    const isValid = formState ? formState.isValid : true;
 
-    const disabled = isPending || !isDirty || !isValid;
+    const disabled = isPending || !isDirty || (context ? !isValid : false);
 
     return (
       <Button
@@ -80,31 +44,47 @@ export const FormSubmitButton = React.forwardRef<HTMLButtonElement, FormSubmitBu
         type="submit"
         disabled={disabled}
         className={cn(
-          "min-w-32 transition-all", 
+          "min-w-32 relative overflow-hidden transition-all duration-150", 
           disabled ? "opacity-50 cursor-not-allowed" : "",
           className
         )}
         {...props}
       >
-        {isPending ? (
-          <>
-            <Loader2 className="mr-2 h-4 w-4 animate-spin" />
-            {loadingText}
-          </>
-        ) : (
-          <>
-            {!hideIcon && (
-              <AppIcon
-                name={resolvedIcon}
-                icon={icon}
-                size={16}
-                disableHover={true}
-                className="mr-1.5"
-              />
-            )}
-            {children}
-          </>
-        )}
+        <AnimatePresence mode="wait" initial={false}>
+          {isPending ? (
+            <motion.span
+              key="pending"
+              initial={{ opacity: 0, y: 3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: -3 }}
+              transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="inline-flex items-center justify-center gap-1.5"
+            >
+              <Loader2 className="h-4 w-4 animate-spin shrink-0" />
+              <span>{loadingText}</span>
+            </motion.span>
+          ) : (
+            <motion.span
+              key="idle"
+              initial={{ opacity: 0, y: -3 }}
+              animate={{ opacity: 1, y: 0 }}
+              exit={{ opacity: 0, y: 3 }}
+              transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
+              className="inline-flex items-center justify-center gap-1.5"
+            >
+              {!hideIcon && (
+                <AppIcon
+                  name={resolvedIcon}
+                  icon={icon}
+                  size={16}
+                  disableHover={true}
+                  className="mr-0.5"
+                />
+              )}
+              <span>{children}</span>
+            </motion.span>
+          )}
+        </AnimatePresence>
       </Button>
     );
   }

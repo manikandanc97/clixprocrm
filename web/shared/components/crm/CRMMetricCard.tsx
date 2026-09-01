@@ -245,28 +245,34 @@ interface SparklineCurveProps {
 }
 
 const SparklineCurve = ({ data, trend = "neutral", strokeColor }: SparklineCurveProps) => {
-  // If custom numeric points exist, compute smooth cubic bezier path
-  if (data && data.length >= 2) {
+  const hasVariation =
+    data &&
+    data.length >= 2 &&
+    data.some((d, _, arr) => d.value !== arr[0].value);
+
+  // If custom numeric points exist with variation across time, compute smooth cubic bezier path
+  if (data && data.length >= 2 && hasVariation) {
     const values = data.map((d) => d.value);
     const min = Math.min(...values);
     const max = Math.max(...values);
-    const range = max - min === 0 ? 1 : max - min;
+    const range = max - min || 1;
     const width = 64;
     const height = 28;
-    const padding = 3;
+    const paddingX = 4;
+    const paddingY = 4;
 
     const points = values.map((v, i) => ({
-      x: padding + (i / (values.length - 1)) * (width - 2 * padding),
-      y: height - padding - ((v - min) / range) * (height - 2 * padding),
+      x: paddingX + (i / (values.length - 1)) * (width - 2 * paddingX),
+      y: height - paddingY - ((v - min) / range) * (height - 2 * paddingY),
     }));
 
     // Generate smooth bezier curve path
-    let d = `M ${points[0].x} ${points[0].y}`;
+    let d = `M ${points[0].x.toFixed(1)} ${points[0].y.toFixed(1)}`;
     for (let i = 0; i < points.length - 1; i++) {
       const p0 = points[i];
       const p1 = points[i + 1];
       const cpX = (p0.x + p1.x) / 2;
-      d += ` C ${cpX} ${p0.y}, ${cpX} ${p1.y}, ${p1.x} ${p1.y}`;
+      d += ` C ${cpX.toFixed(1)} ${p0.y.toFixed(1)}, ${cpX.toFixed(1)} ${p1.y.toFixed(1)}, ${p1.x.toFixed(1)} ${p1.y.toFixed(1)}`;
     }
 
     return (
@@ -283,17 +289,17 @@ const SparklineCurve = ({ data, trend = "neutral", strokeColor }: SparklineCurve
     );
   }
 
-  // Pre-configured natural organic sparkline waves matching reference image
+  // Pre-configured natural organic sparkline waves with lively peaks & valleys (ups and downs)
   let pathD = "";
   if (trend === "up") {
-    // Elegant rising wave (like Card 1 in Image 2)
-    pathD = "M 4 22 C 10 24, 18 16, 26 14 C 34 12, 40 4, 48 4 C 54 4, 58 12, 62 20";
+    // Dynamic rising wave with natural peaks & valleys
+    pathD = "M 4 20 C 12 24, 18 14, 26 18 C 34 22, 40 8, 48 12 C 54 16, 58 6, 62 4";
   } else if (trend === "down") {
-    // Sharp valley wave (like Card 2 in Image 2)
-    pathD = "M 4 10 C 12 10, 18 18, 24 16 C 30 14, 34 4, 40 6 C 46 8, 48 24, 54 22 C 58 20, 60 14, 62 16";
+    // Dynamic descending wave with natural peaks & valleys
+    pathD = "M 4 6 C 12 4, 18 16, 26 12 C 34 8, 40 22, 48 18 C 54 14, 58 24, 62 24";
   } else {
-    // Dynamic multi-wave (like Card 3 & 4 in Image 2)
-    pathD = "M 4 18 C 10 24, 16 12, 22 14 C 28 16, 32 8, 38 6 C 44 4, 48 22, 54 18 C 58 14, 60 8, 62 6";
+    // Dynamic undulating multi-wave with organic rhythm (ups & downs)
+    pathD = "M 4 16 C 12 8, 18 22, 26 12 C 34 18, 40 6, 48 20 C 54 10, 58 16, 62 12";
   }
 
   return (
@@ -364,6 +370,12 @@ export const CRMMetricCard = ({
     ? t.trendDownColor
     : t.trendNeutralColor;
 
+  const displayChange = change
+    ? !isUp && !isDown && change.startsWith("+")
+      ? change.slice(1)
+      : change
+    : undefined;
+
   return (
     <motion.div
       initial={{ opacity: 0, y: 12 }}
@@ -373,7 +385,7 @@ export const CRMMetricCard = ({
         // Base container: rounded-2xl + pastel gradient background
         "group relative overflow-hidden min-w-0 flex flex-col justify-between select-none",
         "rounded-2xl p-4 sm:p-5",
-        "border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5",
+        "border shadow-sm transition-all duration-300",
         t.cardBg,
         t.cardBorder,
         className
@@ -412,7 +424,7 @@ export const CRMMetricCard = ({
         {loading && !hideBottomSkeletons ? (
           <Skeleton className="h-5 w-14 rounded-full opacity-60" />
         ) : (
-          change && (
+          displayChange && (
             <div
               className={cn(
                 "flex items-center gap-0.5 text-xs sm:text-sm font-bold tracking-tight shrink-0",
@@ -422,7 +434,7 @@ export const CRMMetricCard = ({
               {isUp && <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />}
               {isDown && <ArrowDownRight className="w-3.5 h-3.5 stroke-[2.5]" />}
               {!isUp && !isDown && <Minus className="w-3 h-3 stroke-[2.5]" />}
-              <span>{change}</span>
+              <span>{displayChange}</span>
             </div>
           )
         )}

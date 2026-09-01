@@ -389,7 +389,7 @@ export default function SecurityCenterPage() {
           </div>
         </div>
 
-        {filteredIncidents.length > rowsPerPage && (
+        {!loading && filteredIncidents.length > 0 && (
           <CRMPagination
             currentPage={currentPage}
             totalPages={totalPages}
@@ -397,6 +397,7 @@ export default function SecurityCenterPage() {
             rowsPerPage={rowsPerPage}
             onPageChange={setCurrentPage}
             onRowsPerPageChange={setRowsPerPage}
+            itemName="Incidents"
           />
         )}
       </div>

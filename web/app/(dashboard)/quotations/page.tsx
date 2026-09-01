@@ -176,8 +176,8 @@ const QuotationsPage = () => {
               <CRMMetricCard 
                 title="Total Quotations"
                 value={data?.stats?.[0]?.value || safeQuotations.length}
-                change="0%"
-                trend="up"
+                change={`${safeQuotations.length} total`}
+                trend="neutral"
                 icon={FileText}
                 color="indigo"
                 delay={0.1}
@@ -185,7 +185,7 @@ const QuotationsPage = () => {
               <CRMMetricCard 
                 title="Total Quote Value"
                 value={data?.stats?.[1]?.valueAmount !== undefined ? formatCurrency(data.stats[1].valueAmount) : formatCurrency(safeQuotations.reduce((sum, q) => sum + (q.amountValue ?? 0), 0))}
-                change="0%"
+                change={`${safeQuotations.filter(q => q.status === "ACCEPTED").length} accepted`}
                 trend="up"
                 icon={TrendingUp}
                 color="emerald"
@@ -194,8 +194,8 @@ const QuotationsPage = () => {
               <CRMMetricCard 
                 title="Pending Quotes"
                 value={data?.stats?.[2]?.value || safeQuotations.filter(q => q.status === "SENT").length}
-                change="0%"
-                trend="neutral"
+                change={safeQuotations.filter(q => q.status === "SENT").length > 0 ? "Awaiting Action" : "All Clear"}
+                trend={safeQuotations.filter(q => q.status === "SENT").length > 0 ? "down" : "neutral"}
                 icon={Clock}
                 color="orange"
                 delay={0.3}
@@ -203,7 +203,7 @@ const QuotationsPage = () => {
               <CRMMetricCard 
                 title="Approved Quotes"
                 value={data?.stats?.[3]?.value || safeQuotations.filter(q => q.status === "ACCEPTED").length}
-                change="0%"
+                change={`${safeQuotations.length > 0 ? ((safeQuotations.filter(q => q.status === "ACCEPTED").length / safeQuotations.length) * 100).toFixed(0) : 0}% rate`}
                 trend="up"
                 icon={FileText}
                 color="emerald"

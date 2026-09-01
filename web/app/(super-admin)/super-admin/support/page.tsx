@@ -616,7 +616,7 @@ export default function SuperAdminSupportPage() {
       </CRMDataTable>
 
       {/* 5. Pagination */}
-      {!loading && totalPages > 1 && (
+      {!loading && totalCount > 0 && (
         <CRMPagination
           currentPage={page}
           totalPages={totalPages}
