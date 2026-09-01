@@ -779,6 +779,7 @@ export interface CreatePlatformModuleDto {
   icon?: string;
   route: string;
   group?: string;
+  navigationScope?: string;
   parentId?: string | null;
   sortOrder?: number;
   isEnabled?: boolean;
@@ -795,6 +796,7 @@ export interface UpdatePlatformModuleDto {
   icon?: string;
   route?: string;
   group?: string;
+  navigationScope?: string;
   parentId?: string | null;
   sortOrder?: number;
   isEnabled?: boolean;

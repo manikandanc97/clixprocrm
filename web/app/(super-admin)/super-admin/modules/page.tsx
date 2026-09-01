@@ -14,30 +14,18 @@ import {
   ArrowDown,
   CheckCircle2,
   XCircle,
-  Eye,
-  EyeOff,
   Shield,
   ShieldAlert,
-  Sliders,
-  Sparkles,
-  Link as LinkIcon,
   FolderTree,
   Boxes,
   Lock,
-  Globe,
-  Tag,
+  Link as LinkIcon,
   AlertTriangle,
-  Check,
-  ChevronRight,
-  Info,
   MoreHorizontal,
   Loader2,
-  Copy,
-  ExternalLink,
-  Ticket,
+  Users,
 } from "lucide-react";
-import { useSearchParams, useRouter } from "next/navigation";
-import Link from "next/link";
+import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import {
   fetchPlatformModules,
@@ -57,7 +45,6 @@ import {
   CRMMetricCard,
   CRMToolbar,
   CRMPagination,
-  TruncatedText,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { Button } from "@/shared/ui/button";
@@ -90,92 +77,63 @@ import {
 import { EmptyState } from "@/shared/components/EmptyState";
 import { Skeleton } from "@/shared/ui/skeleton";
 
-/* SUPER_ADMIN_NAV_MENUS hardcoded array removed — now loaded from database via API.
- * See: fetchPlatformModules({ navigationScope: 'SUPER_ADMIN' }) below.
- */
-
 /* -------------------------------------------------------------------------- */
-/*  Inline table-only skeleton — used when page is mounted but data is loading */
+/*  Table Loading Skeleton                                                    */
 /* -------------------------------------------------------------------------- */
-function PlatformModulesTableSkeleton() {
+function ModulesTableSkeleton() {
   return (
     <div className="overflow-x-auto w-full rounded-xl border border-border/60 bg-card shadow-sm">
       <table className="w-full text-left text-sm border-collapse">
         <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
           <tr className="h-10 sm:h-11">
-            <th className="px-3 sm:px-4 py-2.5 w-16">
+            <th className="px-3 sm:px-4 py-2.5 w-20 text-center">
               <Skeleton className="h-2.5 w-10 mx-auto" />
-            </th>
-            <th className="px-4 sm:px-6 py-2.5">
-              <Skeleton className="h-2.5 w-24" />
             </th>
             <th className="px-4 sm:px-6 py-2.5">
               <Skeleton className="h-2.5 w-28" />
             </th>
-            <th className="px-4 sm:px-6 py-2.5 text-center">
-              <Skeleton className="h-2.5 w-10 mx-auto" />
+            <th className="px-4 sm:px-6 py-2.5">
+              <Skeleton className="h-2.5 w-24" />
             </th>
             <th className="px-4 sm:px-6 py-2.5 text-center">
-              <Skeleton className="h-2.5 w-24 mx-auto" />
+              <Skeleton className="h-2.5 w-20 mx-auto" />
             </th>
             <th className="px-4 sm:px-6 py-2.5 text-center">
               <Skeleton className="h-2.5 w-20 mx-auto" />
             </th>
             <th className="px-4 sm:px-6 py-2.5 text-right">
-              <Skeleton className="h-2.5 w-14 ml-auto" />
+              <Skeleton className="h-2.5 w-12 ml-auto" />
             </th>
           </tr>
         </thead>
         <tbody className="divide-y divide-border/50">
-          {Array.from({ length: 8 }).map((_, i) => (
-            <tr key={i} className="h-16 border-b border-border/50">
-              {/* Order: up/number/down */}
-              <td className="px-3 py-4 w-16 text-center">
+          {Array.from({ length: 6 }).map((_, i) => (
+            <tr key={i} className="h-16">
+              <td className="px-3 py-4 text-center">
                 <div className="flex items-center justify-center gap-1">
-                  <Skeleton className="w-5 h-5 rounded-md" />
-                  <Skeleton className="w-4 h-3.5" />
-                  <Skeleton className="w-5 h-5 rounded-md" />
+                  <Skeleton className="w-6 h-6 rounded-md" />
+                  <Skeleton className="w-4 h-4" />
+                  <Skeleton className="w-6 h-6 rounded-md" />
                 </div>
               </td>
-              {/* Module & Route: icon + name + badge + route */}
               <td className="px-4 py-4">
                 <div className="flex items-center gap-3">
                   <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
                   <div className="space-y-1.5 min-w-0">
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-3.5 w-28" />
-                      <Skeleton className="h-4 w-12 rounded-full" />
-                    </div>
-                    <div className="flex items-center gap-2">
-                      <Skeleton className="h-4 w-32 rounded" />
-                      <Skeleton className="h-3 w-16" />
-                    </div>
+                    <Skeleton className="h-4 w-32" />
+                    <Skeleton className="h-3 w-20" />
                   </div>
                 </div>
               </td>
-              {/* Category & Access */}
               <td className="px-4 py-4">
-                <div className="flex flex-col gap-1 items-start">
-                  <Skeleton className="h-5 w-24 rounded-lg" />
-                  <Skeleton className="h-4 w-20 rounded" />
-                </div>
+                <Skeleton className="h-5 w-24 rounded-lg" />
               </td>
-              {/* Type */}
               <td className="px-4 py-4 text-center">
-                <Skeleton className="h-5 w-14 rounded-full mx-auto" />
+                <Skeleton className="h-5 w-24 rounded-full mx-auto" />
               </td>
-              {/* Global Status */}
               <td className="px-4 py-4 text-center">
-                <div className="flex items-center justify-center gap-2">
-                  <Skeleton className="h-5 w-9 rounded-full" />
-                  <Skeleton className="h-3.5 w-8" />
-                </div>
+                <Skeleton className="h-5 w-16 rounded-full mx-auto" />
               </td>
-              {/* Sidebar Nav */}
-              <td className="px-4 py-4 text-center">
-                <Skeleton className="h-6 w-20 rounded-lg mx-auto" />
-              </td>
-              {/* Actions */}
               <td className="px-4 py-4 text-right">
                 <Skeleton className="h-8 w-8 rounded-lg ml-auto" />
               </td>
@@ -189,62 +147,36 @@ function PlatformModulesTableSkeleton() {
 
 export default function SuperAdminModulesPage() {
   const searchParams = useSearchParams();
-  const router = useRouter();
   const queryClient = useQueryClient();
 
+  // Navigation Scope Tabs: "tenant" (Tenant CRM) vs "platform" (Super Admin)
   const [activeScope, setActiveScope] = useState<"tenant" | "platform">("tenant");
 
-  // -------------------------------------------------------
-  // Tenant CRM modules state
-  // -------------------------------------------------------
-  const [modules, setModules] = useState<PlatformModule[]>([]);
+  // Modules State & Stats
+  const [tenantModules, setTenantModules] = useState<PlatformModule[]>([]);
   const [stats, setStats] = useState({ total: 0, enabled: 0, disabled: 0, system: 0 });
-  const [loading, setLoading] = useState(true);
 
-  // -------------------------------------------------------
-  // Super Admin platform modules state (DB-driven, not hardcoded)
-  // -------------------------------------------------------
   const [platformModules, setPlatformModules] = useState<PlatformModule[]>([]);
   const [platformStats, setPlatformStats] = useState({ total: 0, enabled: 0, disabled: 0, system: 0 });
-  const [platformLoading, setPlatformLoading] = useState(true);
 
+  const [loading, setLoading] = useState(true);
+
+  // Search & Filter State
   const [search, setSearch] = useState("");
   const [groupFilter, setGroupFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState<"ALL" | "ENABLED" | "DISABLED">("ALL");
 
-  // Tenant CRM Pagination
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  // Platform (Super Admin) Pagination
-  const [platformPage, setPlatformPage] = useState(1);
-  const [platformRowsPerPage, setPlatformRowsPerPage] = useState(10);
-
-  // Reset pagination on filter or search changes
-  useEffect(() => {
-    setCurrentPage(1);
-    setPlatformPage(1);
-  }, [search, groupFilter, statusFilter, activeScope]);
-
-  // Super Admin Navigation Menus State
-  const [selectedSuperAdminMenu, setSelectedSuperAdminMenu] = useState<PlatformModule | null>(null);
-  const [platformSortConfig, setPlatformSortConfig] = useState<{ key: string; direction: SortDirection }>({
+  // Sorting
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
     key: "order",
     direction: "asc",
   });
 
-  const handlePlatformSort = (key: string, direction: SortDirection) => {
-    setPlatformSortConfig({ key, direction });
-  };
+  // Pagination
+  const [currentPage, setCurrentPage] = useState(1);
+  const [rowsPerPage, setRowsPerPage] = useState(10);
 
-  const handleCopyRoute = (route: string) => {
-    if (typeof navigator !== "undefined" && navigator.clipboard) {
-      navigator.clipboard.writeText(route);
-      toast.success(`Copied route "${route}" to clipboard.`);
-    }
-  };
-
-  // Create / Edit Modal State
+  // Modal State for Create / Edit
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [editingModule, setEditingModule] = useState<PlatformModule | null>(null);
   const [saving, setSaving] = useState(false);
@@ -256,42 +188,37 @@ export default function SuperAdminModulesPage() {
   const [formIcon, setFormIcon] = useState("Layers");
   const [formGroup, setFormGroup] = useState("Core");
   const [customGroup, setCustomGroup] = useState("");
+  const [formAccessPreset, setFormAccessPreset] = useState<"ALL" | "ADMIN_ONLY" | "MANAGER_ADMIN" | "CUSTOM">("ALL");
   const [formPermission, setFormPermission] = useState("");
   const [formBadge, setFormBadge] = useState("");
+  const [formOrder, setFormOrder] = useState<number>(1);
   const [formDescription, setFormDescription] = useState("");
   const [formIsEnabled, setFormIsEnabled] = useState(true);
-  const [formIsVisible, setFormIsVisible] = useState(true);
   const [iconSearchQuery, setIconSearchQuery] = useState("");
 
   // Delete Modal State
   const [moduleToDelete, setModuleToDelete] = useState<PlatformModule | null>(null);
   const [deleting, setDeleting] = useState(false);
 
-  // Error State & AAL2
+  // Error & AAL2
   const [loadError, setLoadError] = useState<string | null>(null);
   const [aal2Required, setAal2Required] = useState(false);
 
   // Reorder State
   const [reordering, setReordering] = useState(false);
 
-  // -------------------------------------------------------
-  // Invalidate both navigation caches after any mutation
-  // so the tenant CRM sidebar AND super admin sidebar get fresh data
-  // -------------------------------------------------------
+  // Invalidate both navigation caches after mutations
   const invalidateNavCaches = useCallback(() => {
     queryClient.invalidateQueries({ queryKey: ["platform-navigation"] });
     queryClient.invalidateQueries({ queryKey: SUPER_ADMIN_NAV_QUERY_KEY });
   }, [queryClient]);
 
-  const loadModules = useCallback(async () => {
+  // Load Tenant CRM Modules
+  const loadTenantModules = useCallback(async () => {
     try {
-      setLoading(true);
-      setLoadError(null);
-      setAal2Required(false);
-      // Tenant CRM scope
       const res = await fetchPlatformModules({ navigationScope: "TENANT_CRM" });
-      setModules(res.modules || []);
-      setStats(res.stats || { total: 0, enabled: 0, disabled: 0, system: 0 });
+      setTenantModules(res.modules || []);
+      if (res.stats) setStats(res.stats);
     } catch (err: any) {
       const errData = err?.response?.data;
       const isAal =
@@ -301,85 +228,59 @@ export default function SuperAdminModulesPage() {
 
       if (isAal) {
         setAal2Required(true);
-        const aalMsg = "MFA verification required: AAL2 session assurance required for Super Admin platform access.";
-        setLoadError(aalMsg);
-        toast.error(aalMsg);
-        if (typeof window !== "undefined") {
-          window.dispatchEvent(new CustomEvent("clixpro:aal2-required"));
-        }
+        setLoadError("MFA verification required (AAL2 Assurance).");
       } else {
-        const msg = errData?.message || err?.message || "Failed to load platform modules.";
-        setLoadError(msg);
-        toast.error(msg);
+        setLoadError(errData?.message || err?.message || "Failed to load Tenant CRM navigation.");
       }
+    }
+  }, []);
+
+  // Load Super Admin Platform Modules
+  const loadPlatformModules = useCallback(async () => {
+    try {
+      const res = await fetchPlatformModules({ navigationScope: "SUPER_ADMIN" });
+      setPlatformModules(res.modules || []);
+      if (res.stats) setPlatformStats(res.stats);
+    } catch (err: any) {
+      // Silently handle error
+    }
+  }, []);
+
+  // Load All Data
+  const loadAllModules = useCallback(async () => {
+    setLoading(true);
+    setLoadError(null);
+    setAal2Required(false);
+    try {
+      await Promise.all([loadTenantModules(), loadPlatformModules()]);
     } finally {
       setLoading(false);
     }
-  }, []);
-
-  const loadPlatformModules = useCallback(async () => {
-    try {
-      setPlatformLoading(true);
-      // Super Admin scope
-      const res = await fetchPlatformModules({ navigationScope: "SUPER_ADMIN" });
-      setPlatformModules(res.modules || []);
-      setPlatformStats(res.stats || { total: 0, enabled: 0, disabled: 0, system: 0 });
-    } catch {
-      // Silently fail — static fallback is shown in useSuperAdminNavigation hook
-    } finally {
-      setPlatformLoading(false);
-    }
-  }, []);
+  }, [loadTenantModules, loadPlatformModules]);
 
   useEffect(() => {
-    loadModules();
-    loadPlatformModules();
+    loadAllModules();
 
     const handleAal2Verified = () => {
       setAal2Required(false);
       setLoadError(null);
-      loadModules();
-      loadPlatformModules();
+      loadAllModules();
     };
 
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
-  }, [loadModules, loadPlatformModules]);
+  }, [loadAllModules]);
 
-  useEffect(() => {
-    if (searchParams.get("add") === "true") {
-      handleOpenCreate();
-    }
-  }, [searchParams]);
-
-  // Distinct groups available for tenant modules
-  const availableGroups = useMemo(() => {
-    const set = new Set<string>(["Core", "Insights", "Administration", "HRM & Operations", "Support"]);
-    modules.forEach((m) => {
-      if (m.group) set.add(m.group);
-    });
-    return Array.from(set);
-  }, [modules]);
-
-  // Distinct groups available for active scope
-  const currentAvailableGroups = useMemo(() => {
-    if (activeScope === "platform") {
-      const groups = Array.from(new Set(platformModules.map((m) => m.group)));
-      return groups.length > 0 ? groups : ["Overview", "Platform", "Commerce", "AI Platform", "Insights", "Security & Operations", "Configuration"];
-    }
-    return availableGroups;
-  }, [activeScope, availableGroups, platformModules]);
-
-  // Dynamic KPI Stats based on active scope — now uses live DB data for platform scope
+  // Dynamic KPI Stats based on active scope
   const displayStats = useMemo(() => {
     if (activeScope === "platform") {
-      const activeCount = platformModules.filter((m) => m.isEnabled && m.isVisible).length;
+      const activeCount = platformModules.filter((m) => m.isEnabled).length;
       const groupsCount = new Set(platformModules.map((m) => m.group)).size;
       return {
         card1Title: "Total System Menus",
-        card1Value: platformStats.total,
+        card1Value: platformStats.total || platformModules.length,
         card1Icon: Shield,
         card1Color: "indigo" as const,
         card1Text: "Root administration controls",
@@ -406,7 +307,7 @@ export default function SuperAdminModulesPage() {
 
     return {
       card1Title: "Total Modules",
-      card1Value: stats.total,
+      card1Value: stats.total || tenantModules.length,
       card1Icon: Boxes,
       card1Color: "indigo" as const,
       card1Text: "Registered platform features",
@@ -429,86 +330,62 @@ export default function SuperAdminModulesPage() {
       card4Color: "violet" as const,
       card4Text: "Protected foundations",
     };
-  }, [activeScope, stats, platformStats, platformModules]);
+  }, [activeScope, stats, platformStats, tenantModules, platformModules]);
 
-  // Filtered Super Admin platform menus — now from live DB data
-  const filteredPlatformMenus = useMemo(() => {
-    return platformModules.filter((m) => {
+  // Handle "+ Add" query param from deep link
+  useEffect(() => {
+    if (searchParams.get("add") === "true") {
+      handleOpenCreate();
+    }
+  }, [searchParams]);
+
+  // Reset pagination on filter, search, or tab change
+  useEffect(() => {
+    setCurrentPage(1);
+  }, [search, groupFilter, statusFilter, activeScope]);
+
+  // Current active raw list based on tab
+  const rawCurrentList = useMemo(() => {
+    return activeScope === "tenant" ? tenantModules : platformModules;
+  }, [activeScope, tenantModules, platformModules]);
+
+  // Available groups for active tab
+  const availableGroups = useMemo(() => {
+    const defaultGroups =
+      activeScope === "tenant"
+        ? ["Core", "CRM", "AI", "Insights", "Administration", "HRM & Operations", "Support"]
+        : ["Overview", "Platform", "Commerce", "AI Platform", "Insights", "Security & Operations", "Configuration"];
+
+    const set = new Set<string>(defaultGroups);
+    rawCurrentList.forEach((m) => {
+      if (m.group) set.add(m.group);
+    });
+    return Array.from(set);
+  }, [activeScope, rawCurrentList]);
+
+  // Filtered Modules
+  const filteredModules = useMemo(() => {
+    return rawCurrentList.filter((m) => {
       if (search.trim()) {
         const q = search.toLowerCase();
         const matchesLabel = m.label.toLowerCase().includes(q);
         const matchesKey = m.key.toLowerCase().includes(q);
         const matchesRoute = m.route.toLowerCase().includes(q);
         const matchesGroup = m.group.toLowerCase().includes(q);
-        const matchesDesc = (m.description || "").toLowerCase().includes(q);
-        if (!matchesLabel && !matchesKey && !matchesRoute && !matchesGroup && !matchesDesc) {
+        if (!matchesLabel && !matchesKey && !matchesRoute && !matchesGroup) {
           return false;
         }
       }
+
       if (groupFilter !== "ALL" && m.group !== groupFilter) return false;
       if (statusFilter === "ENABLED" && !m.isEnabled) return false;
       if (statusFilter === "DISABLED" && m.isEnabled) return false;
-      return true;
-    });
-  }, [platformModules, search, groupFilter, statusFilter]);
-
-  // Sorted Super Admin platform menus
-  const sortedPlatformMenus = useMemo(() => {
-    return [...filteredPlatformMenus].sort((a, b) => {
-      if (!platformSortConfig.direction) return 0;
-      const dir = platformSortConfig.direction === "asc" ? 1 : -1;
-      if (platformSortConfig.key === "order") return (a.sortOrder - b.sortOrder) * dir;
-      if (platformSortConfig.key === "label") return a.label.localeCompare(b.label) * dir;
-      if (platformSortConfig.key === "group") return a.group.localeCompare(b.group) * dir;
-      return 0;
-    });
-  }, [filteredPlatformMenus, platformSortConfig]);
-
-  // Platform tab pagination
-  const platformTotalPages = Math.max(1, Math.ceil(sortedPlatformMenus.length / platformRowsPerPage));
-  const paginatedPlatformMenus = useMemo(() => {
-    const start = (platformPage - 1) * platformRowsPerPage;
-    return sortedPlatformMenus.slice(start, start + platformRowsPerPage);
-  }, [sortedPlatformMenus, platformPage, platformRowsPerPage]);
-
-  // Filtered tenant modules
-  const filteredModules = useMemo(() => {
-    return modules.filter((m) => {
-      // Search match
-      if (search.trim()) {
-        const q = search.toLowerCase();
-        const matchesLabel = m.label.toLowerCase().includes(q);
-        const matchesKey = m.key.toLowerCase().includes(q);
-        const matchesRoute = m.route.toLowerCase().includes(q);
-        const matchesGroup = m.group.toLowerCase().includes(q);
-        const matchesDesc = (m.description || "").toLowerCase().includes(q);
-        if (!matchesLabel && !matchesKey && !matchesRoute && !matchesGroup && !matchesDesc) {
-          return false;
-        }
-      }
-
-      // Group match
-      if (groupFilter !== "ALL" && m.group !== groupFilter) {
-        return false;
-      }
-
-      // Status match
-      if (statusFilter === "ENABLED" && !m.isEnabled) return false;
-      if (statusFilter === "DISABLED" && m.isEnabled) return false;
 
       return true;
     });
-  }, [modules, search, groupFilter, statusFilter]);
+  }, [rawCurrentList, search, groupFilter, statusFilter]);
 
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
-    key: "",
-    direction: null,
-  });
-
-  const handleSort = (key: string, direction: SortDirection) => {
-    setSortConfig({ key, direction });
-  };
-
+  // Sorted Modules
   const sortedModules = useMemo(() => {
     return [...filteredModules].sort((a, b) => {
       if (!sortConfig.direction) return 0;
@@ -530,49 +407,76 @@ export default function SuperAdminModulesPage() {
     });
   }, [filteredModules, sortConfig]);
 
+  // Paginated Modules
   const totalPages = Math.max(1, Math.ceil(sortedModules.length / rowsPerPage));
   const paginatedModules = useMemo(() => {
     const start = (currentPage - 1) * rowsPerPage;
     return sortedModules.slice(start, start + rowsPerPage);
   }, [sortedModules, currentPage, rowsPerPage]);
 
-  // Open Create Modal
+  const handleSort = (key: string, direction: SortDirection) => {
+    setSortConfig({ key, direction });
+  };
+
+  // Helper: Open Create Modal
   const handleOpenCreate = () => {
     setEditingModule(null);
     setFormLabel("");
     setFormKey("");
     setFormRoute("");
     setFormIcon("Layers");
-    setFormGroup("Core");
+    setFormGroup(activeScope === "tenant" ? "Core" : "Platform");
     setCustomGroup("");
+    setFormAccessPreset("ALL");
     setFormPermission("");
     setFormBadge("");
+    setFormOrder((rawCurrentList.length || 0) + 1);
     setFormDescription("");
     setFormIsEnabled(true);
-    setFormIsVisible(true);
     setIconSearchQuery("");
     setIsModalOpen(true);
   };
 
-  // Open Edit Modal
+  // Helper: Open Edit Modal
   const handleOpenEdit = (mod: PlatformModule) => {
     setEditingModule(mod);
     setFormLabel(mod.label);
     setFormKey(mod.key);
     setFormRoute(mod.route);
     setFormIcon(mod.icon || "Layers");
-    if (["Core", "Insights", "Administration", "HRM & Operations", "Support"].includes(mod.group)) {
+
+    const defaultPresetGroups =
+      activeScope === "tenant"
+        ? ["Core", "CRM", "AI", "Insights", "Administration", "HRM & Operations", "Support"]
+        : ["Overview", "Platform", "Commerce", "AI Platform", "Insights", "Security & Operations", "Configuration"];
+
+    if (defaultPresetGroups.includes(mod.group)) {
       setFormGroup(mod.group);
       setCustomGroup("");
     } else {
       setFormGroup("CUSTOM");
       setCustomGroup(mod.group);
     }
-    setFormPermission(mod.permission || "");
+
+    // Access preset mapping
+    if (!mod.permission || mod.permission === "Dashboard" || mod.permission === "Help Center") {
+      setFormAccessPreset("ALL");
+      setFormPermission("");
+    } else if (mod.permission === "Settings" || mod.permission === "Role Management" || mod.permission === "Employees") {
+      setFormAccessPreset("ADMIN_ONLY");
+      setFormPermission(mod.permission);
+    } else if (mod.permission === "Reports & Analytics" || mod.permission === "Team Performance") {
+      setFormAccessPreset("MANAGER_ADMIN");
+      setFormPermission(mod.permission);
+    } else {
+      setFormAccessPreset("CUSTOM");
+      setFormPermission(mod.permission);
+    }
+
     setFormBadge(mod.badge || "");
+    setFormOrder(mod.sortOrder ?? 1);
     setFormDescription(mod.description || "");
     setFormIsEnabled(mod.isEnabled);
-    setFormIsVisible(mod.isVisible);
     setIconSearchQuery("");
     setIsModalOpen(true);
   };
@@ -586,12 +490,13 @@ export default function SuperAdminModulesPage() {
         .trim()
         .replace(/[^a-z0-9]+/g, "_")
         .replace(/^_+|_+$/g, "");
-      setFormKey(slug);
+      
+      const keyPrefix = activeScope === "platform" ? "sa_" : "";
+      setFormKey(`${keyPrefix}${slug}`);
+      
       if (!formRoute || formRoute.startsWith("/")) {
-        setFormRoute(`/${slug.replace(/_/g, "-")}`);
-      }
-      if (!formPermission) {
-        setFormPermission(val);
+        const routePrefix = activeScope === "platform" ? "/super-admin/" : "/";
+        setFormRoute(`${routePrefix}${slug.replace(/_/g, "-")}`);
       }
     }
   };
@@ -600,11 +505,11 @@ export default function SuperAdminModulesPage() {
   const handleSaveModule = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formLabel.trim()) {
-      toast.error("Module label is required.");
+      toast.error("Menu label is required.");
       return;
     }
     if (!formRoute.trim()) {
-      toast.error("Module route path is required.");
+      toast.error("Route path is required.");
       return;
     }
 
@@ -612,6 +517,21 @@ export default function SuperAdminModulesPage() {
       formGroup === "CUSTOM"
         ? customGroup.trim() || "Custom"
         : formGroup;
+
+    let effectivePermission: string | null = null;
+    if (activeScope === "tenant") {
+      if (formAccessPreset === "ALL") {
+        effectivePermission = null;
+      } else if (formAccessPreset === "ADMIN_ONLY") {
+        effectivePermission = "Settings";
+      } else if (formAccessPreset === "MANAGER_ADMIN") {
+        effectivePermission = "Reports & Analytics";
+      } else {
+        effectivePermission = formPermission.trim() || formLabel.trim();
+      }
+    }
+
+    const targetScope = activeScope === "tenant" ? "TENANT_CRM" : "SUPER_ADMIN";
 
     try {
       setSaving(true);
@@ -622,14 +542,15 @@ export default function SuperAdminModulesPage() {
           route: formRoute.trim(),
           icon: formIcon,
           group: effectiveGroup,
-          permission: formPermission.trim() || null,
+          sortOrder: Number(formOrder) || editingModule.sortOrder,
+          permission: effectivePermission,
           badge: formBadge.trim() || null,
           description: formDescription.trim() || null,
           isEnabled: formIsEnabled,
-          isVisible: formIsVisible,
+          isVisible: formIsEnabled,
         };
         const res = await updatePlatformModule(editingModule.id, updatePayload);
-        toast.success(`Platform module '${res.data.label}' updated successfully.`);
+        toast.success(`Menu '${res.data.label}' updated.`);
       } else {
         const createPayload: CreatePlatformModuleDto = {
           label: formLabel.trim(),
@@ -637,60 +558,61 @@ export default function SuperAdminModulesPage() {
           route: formRoute.trim(),
           icon: formIcon,
           group: effectiveGroup,
-          permission: formPermission.trim() || formLabel.trim(),
+          navigationScope: targetScope,
+          sortOrder: Number(formOrder) || (rawCurrentList.length + 1),
+          permission: effectivePermission,
           badge: formBadge.trim() || null,
           description: formDescription.trim() || null,
           isEnabled: formIsEnabled,
-          isVisible: formIsVisible,
+          isVisible: formIsEnabled,
         };
         const res = await createPlatformModule(createPayload);
-        toast.success(`Platform module '${res.data.label}' created successfully.`);
+        toast.success(`Menu '${res.data.label}' created.`);
       }
       setIsModalOpen(false);
-      await loadModules();
-      await loadPlatformModules();
+      await loadAllModules();
       invalidateNavCaches();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to save module.");
+      toast.error(err?.response?.data?.message || "Failed to save menu.");
     } finally {
       setSaving(false);
     }
   };
 
-  // Toggle isEnabled or isVisible
+  // Single Unified Status Toggle (Enables/Disables module & navigation visibility in one step)
   const handleToggleStatus = async (
     mod: PlatformModule,
-    field: "isEnabled" | "isVisible",
     nextVal: boolean
   ) => {
     // Optimistic UI update
-    setModules((prev) =>
-      prev.map((m) => (m.id === mod.id ? { ...m, [field]: nextVal } : m))
-    );
+    if (activeScope === "tenant") {
+      setTenantModules((prev) =>
+        prev.map((m) =>
+          m.id === mod.id ? { ...m, isEnabled: nextVal, isVisible: nextVal } : m
+        )
+      );
+    } else {
+      setPlatformModules((prev) =>
+        prev.map((m) =>
+          m.id === mod.id ? { ...m, isEnabled: nextVal, isVisible: nextVal } : m
+        )
+      );
+    }
 
     try {
-      await togglePlatformModuleStatus(mod.id, { [field]: nextVal });
+      await togglePlatformModuleStatus(mod.id, { isEnabled: nextVal, isVisible: nextVal });
       toast.success(
-        `${mod.label} ${field === "isEnabled" ? (nextVal ? "enabled globally" : "disabled globally") : nextVal ? "shown in navigation" : "hidden from navigation"}.`
+        `${mod.label} ${nextVal ? "activated" : "disabled"}.`
       );
-      // Reload stats for the active scope + invalidate both nav caches
-      const res = await fetchPlatformModules({ navigationScope: "TENANT_CRM" });
-      setStats(res.stats);
-      await loadPlatformModules();
+      await loadAllModules();
       invalidateNavCaches();
     } catch (err: any) {
-      // Revert optimistic update on error
-      setModules((prev) =>
-        prev.map((m) => (m.id === mod.id ? { ...m, [field]: mod[field] } : m))
-      );
-      setPlatformModules((prev) =>
-        prev.map((m) => (m.id === mod.id ? { ...m, [field]: mod[field] } : m))
-      );
-      toast.error(err?.response?.data?.message || "Failed to update module status.");
+      await loadAllModules();
+      toast.error(err?.response?.data?.message || "Failed to update status.");
     }
   };
 
-  // Reorder Item Up or Down
+  // Persistent Reordering (Works for BOTH Tenant CRM & Super Admin)
   const handleMoveOrder = async (index: number, direction: "up" | "down") => {
     const targetIndex = direction === "up" ? index - 1 : index + 1;
     if (targetIndex < 0 || targetIndex >= filteredModules.length) return;
@@ -698,32 +620,34 @@ export default function SuperAdminModulesPage() {
     const currentItem = filteredModules[index];
     const targetItem = filteredModules[targetIndex];
 
-    // Swap in state
-    const newModules = [...modules];
-    const itemAIndex = newModules.findIndex((m) => m.id === currentItem.id);
-    const itemBIndex = newModules.findIndex((m) => m.id === targetItem.id);
+    const currentList = activeScope === "tenant" ? [...tenantModules] : [...platformModules];
+    const itemAIndex = currentList.findIndex((m) => m.id === currentItem.id);
+    const itemBIndex = currentList.findIndex((m) => m.id === targetItem.id);
 
     if (itemAIndex === -1 || itemBIndex === -1) return;
 
-    const tempSort = newModules[itemAIndex].sortOrder;
-    newModules[itemAIndex].sortOrder = newModules[itemBIndex].sortOrder;
-    newModules[itemBIndex].sortOrder = tempSort;
+    const tempSort = currentList[itemAIndex].sortOrder;
+    currentList[itemAIndex].sortOrder = currentList[itemBIndex].sortOrder;
+    currentList[itemBIndex].sortOrder = tempSort;
 
-    // Sort by sortOrder
-    newModules.sort((a, b) => a.sortOrder - b.sortOrder);
-    setModules(newModules);
+    currentList.sort((a, b) => a.sortOrder - b.sortOrder);
+
+    if (activeScope === "tenant") {
+      setTenantModules(currentList);
+    } else {
+      setPlatformModules(currentList);
+    }
 
     try {
       setReordering(true);
       await reorderPlatformModules(
-        newModules.map((m, idx) => ({ id: m.id, sortOrder: idx + 1 }))
+        currentList.map((m, idx) => ({ id: m.id, sortOrder: idx + 1 }))
       );
-      toast.success("Module order updated.");
+      toast.success("Menu order updated.");
       invalidateNavCaches();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to reorder modules.");
-      await loadModules();
-      await loadPlatformModules();
+      toast.error(err?.response?.data?.message || "Failed to reorder menus.");
+      await loadAllModules();
     } finally {
       setReordering(false);
     }
@@ -735,41 +659,89 @@ export default function SuperAdminModulesPage() {
     try {
       setDeleting(true);
       await deletePlatformModule(moduleToDelete.id);
-      toast.success(`Platform module '${moduleToDelete.label}' deleted.`);
+      toast.success(`Menu '${moduleToDelete.label}' deleted.`);
       setModuleToDelete(null);
-      await loadModules();
-      await loadPlatformModules();
+      await loadAllModules();
       invalidateNavCaches();
     } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to delete module.");
+      toast.error(err?.response?.data?.message || "Failed to delete menu.");
     } finally {
       setDeleting(false);
     }
   };
 
-  // Filtered icon list for picker
+  // Filtered icons for picker
   const filteredIcons = useMemo(() => {
     if (!iconSearchQuery.trim()) return AVAILABLE_ICON_NAMES.slice(0, 32);
     const q = iconSearchQuery.toLowerCase();
     return AVAILABLE_ICON_NAMES.filter((name) => name.toLowerCase().includes(q));
   }, [iconSearchQuery]);
 
+  // Helper to format access badge
+  const renderAccessBadge = (mod: PlatformModule) => {
+    if (activeScope === "platform") {
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 font-semibold text-[10px] gap-1 mx-auto"
+        >
+          <Lock className="w-3 h-3" />
+          Super Admin
+        </Badge>
+      );
+    }
+
+    if (!mod.permission || mod.permission === "Dashboard" || mod.permission === "Help Center") {
+      return (
+        <Badge
+          variant="outline"
+          className="bg-emerald-50 dark:bg-emerald-950/30 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/40 font-semibold text-[10px] gap-1 mx-auto"
+        >
+          <Users className="w-3 h-3" />
+          All CRM Users
+        </Badge>
+      );
+    }
+
+    if (mod.permission === "Settings" || mod.permission === "Role Management" || mod.permission === "Employees") {
+      return (
+        <Badge
+          variant="secondary"
+          className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-semibold text-[10px] gap-1 mx-auto"
+        >
+          <Shield className="w-3 h-3 text-slate-500" />
+          Admin Only
+        </Badge>
+      );
+    }
+
+    return (
+      <Badge
+        variant="outline"
+        className="bg-muted text-foreground border-border/70 font-mono text-[10px] gap-1 max-w-[140px] truncate mx-auto"
+      >
+        <ShieldAlert className="w-3 h-3 text-amber-500 shrink-0" />
+        <span className="truncate">{mod.permission}</span>
+      </Badge>
+    );
+  };
+
   return (
     <CRMPageContainer twoStageScroll>
-      {/* 1. Header with Title and Actions */}
+      {/* 1. Page Header */}
       <CRMPageHeader
-        title="Platform Modules & Navigation"
-        subtitle="Manage global modules, menu hierarchy, icon customization, routing, and access visibility across ClixProCRM."
+        title="Platform Modules"
+        subtitle="Manage CRM and Super Admin navigation, access, and visibility."
         icon={Layers}
         actions={[
           {
             label: "Refresh",
             icon: RefreshCw,
-            onClick: loadModules,
+            onClick: loadAllModules,
             variant: "outline",
           },
           {
-            label: "Add Module",
+            label: "Add Menu",
             icon: Plus,
             onClick: handleOpenCreate,
             variant: "emerald",
@@ -777,7 +749,7 @@ export default function SuperAdminModulesPage() {
         ]}
       />
 
-      {/* AAL2 Security Elevation Alert Banner */}
+      {/* AAL2 Elevated MFA Banner */}
       {aal2Required && (
         <div className="rounded-2xl p-4 bg-amber-500/10 border border-amber-500/30 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -789,7 +761,7 @@ export default function SuperAdminModulesPage() {
                 MFA Verification Required (AAL2 Assurance)
               </h4>
               <p className="text-xs text-muted-foreground mt-0.5">
-                Elevated session authentication is required to manage platform navigation and CRM modules.
+                Elevated session authentication is required to manage platform navigation.
               </p>
             </div>
           </div>
@@ -807,7 +779,7 @@ export default function SuperAdminModulesPage() {
         </div>
       )}
 
-      {/* General Error Banner */}
+      {/* Error Banner */}
       {loadError && !aal2Required && (
         <div className="rounded-2xl p-4 bg-rose-500/10 border border-rose-500/30 flex items-center justify-between gap-4">
           <div className="flex items-center gap-3">
@@ -815,18 +787,14 @@ export default function SuperAdminModulesPage() {
               <AlertTriangle className="w-5 h-5" />
             </div>
             <div>
-              <h4 className="text-sm font-bold text-foreground">
-                Unable to Load Platform Modules
-              </h4>
-              <p className="text-xs text-muted-foreground mt-0.5">
-                {loadError}
-              </p>
+              <h4 className="text-sm font-bold text-foreground">Unable to Load Modules</h4>
+              <p className="text-xs text-muted-foreground mt-0.5">{loadError}</p>
             </div>
           </div>
           <Button
             size="sm"
             variant="outline"
-            onClick={loadModules}
+            onClick={loadAllModules}
             className="font-semibold text-xs shrink-0 cursor-pointer"
           >
             <RefreshCw className="w-3.5 h-3.5 mr-1.5" />
@@ -867,661 +835,425 @@ export default function SuperAdminModulesPage() {
         />
       </CRMMetricsGrid>
 
-      {/* 2.5 Navigation Scope Switcher */}
-      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 rounded-2xl bg-card border border-border shadow-xs">
+      {/* 3. Navigation Scope Tabs */}
+      <div className="flex items-center justify-between gap-3 p-1.5 rounded-2xl bg-card border border-border shadow-xs">
         <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/50">
           <button
             onClick={() => {
               setActiveScope("tenant");
               setGroupFilter("ALL");
+              setStatusFilter("ALL");
               setSearch("");
             }}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={cn(
+              "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer",
               activeScope === "tenant"
                 ? "bg-emerald-600 text-white shadow-md"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+            )}
           >
             <Boxes className="w-3.5 h-3.5" />
-            <span>Tenant CRM Navigation ({modules.length})</span>
+            <span>Tenant CRM Navigation ({tenantModules.length})</span>
           </button>
           <button
             onClick={() => {
               setActiveScope("platform");
               setGroupFilter("ALL");
+              setStatusFilter("ALL");
               setSearch("");
             }}
-            className={`px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer ${
+            className={cn(
+              "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer",
               activeScope === "platform"
                 ? "bg-emerald-600 text-white shadow-md"
                 : "text-muted-foreground hover:text-foreground"
-            }`}
+            )}
           >
             <Shield className="w-3.5 h-3.5" />
             <span>Super Admin Platform Menus ({platformModules.length})</span>
           </button>
         </div>
 
-        <div className="flex items-center gap-2 px-3 text-xs text-muted-foreground">
-          <span className="font-semibold">
+        <div className="hidden sm:flex items-center gap-2 px-3 text-xs text-muted-foreground">
+          <span className="font-medium">
             {activeScope === "tenant"
-              ? "Configuring dynamic workspace navigation visible to CRM roles"
-              : "Root platform administration hierarchy & system routes"}
+              ? "Tenant CRM workspace sidebar navigation"
+              : "Root platform administration menus"}
           </span>
         </div>
       </div>
 
-      {activeScope === "platform" ? (
-        /* Super Admin Platform Navigation Workspace */
-        <div className="crm-table-workspace-sticky space-y-3">
-          {/* Platform Search & Group Filter Toolbar */}
-          <CRMToolbar
-            placeholder="Search Super Admin menus by name, route, key, description..."
-            searchQuery={search}
-            setSearchQuery={setSearch}
-            sticky={false}
-          >
-            <div className="flex items-center gap-2">
-              {/* Group Filter */}
-              <select
-                value={groupFilter}
-                onChange={(e) => setGroupFilter(e.target.value)}
-                className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="ALL">All Domain Groups</option>
-                {currentAvailableGroups.map((g) => (
-                  <option key={g} value={g}>
-                    Group: {g}
-                  </option>
-                ))}
-              </select>
-            </div>
-          </CRMToolbar>
+      {/* 4. Toolbar & Data Table Workspace */}
+      <div className="crm-table-workspace-sticky space-y-3">
+        {/* Search & Filter Toolbar */}
+        <CRMToolbar
+          placeholder={
+            activeScope === "tenant"
+              ? "Search modules by name, route, group..."
+              : "Search Super Admin menus..."
+          }
+          searchQuery={search}
+          setSearchQuery={setSearch}
+          sticky={false}
+        >
+          <div className="flex items-center gap-2">
+            {/* Group Filter */}
+            <select
+              value={groupFilter}
+              onChange={(e) => setGroupFilter(e.target.value)}
+              className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+            >
+              <option value="ALL">All Groups</option>
+              {availableGroups.map((g) => (
+                <option key={g} value={g}>
+                  Group: {g}
+                </option>
+              ))}
+            </select>
 
-          <div className="crm-table-wrap crm-table-no-pagination">
-            {platformLoading ? (
-              <PlatformModulesTableSkeleton />
-            ) : sortedPlatformMenus.length === 0 ? (
-              <div className="p-12">
-                <EmptyState
-                  icon={Shield}
-                  title="No Super Admin menus match your criteria"
-                  description="Try clearing your search query or group filter to view all platform navigation controls."
-                  action={{
-                    label: "Clear Filters",
-                    onClick: () => {
-                      setSearch("");
-                      setGroupFilter("ALL");
-                    },
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="overflow-auto flex-1 min-h-0">
-                <table className="w-full text-left text-sm border-collapse">
-                  <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-                    <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                      <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">
-                        <DataTableColumnHeader
-                          title="Order"
-                          align="center"
-                          sortable
-                          sortDirection={platformSortConfig.key === "order" ? platformSortConfig.direction : null}
-                          onSort={(dir) => handlePlatformSort("order", dir)}
-                        />
-                      </th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                        <DataTableColumnHeader
-                          title="Menu & Route"
-                          sortable
-                          sortDirection={platformSortConfig.key === "label" ? platformSortConfig.direction : null}
-                          onSort={(dir) => handlePlatformSort("label", dir)}
-                        />
-                      </th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                        <DataTableColumnHeader
-                          title="Group & Description"
-                          sortable
-                          sortDirection={platformSortConfig.key === "group" ? platformSortConfig.direction : null}
-                          onSort={(dir) => handlePlatformSort("group", dir)}
-                        />
-                      </th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Access Level</th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Status</th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Quick Navigation</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/50">
-                    {paginatedPlatformMenus.map((menu) => {
-                      const Icon = getDynamicIcon(menu.icon);
-                      return (
-                        <tr key={menu.key} className="group h-16 hover:bg-muted/[0.03] transition-colors">
-                          {/* Order */}
-                          <td className="px-3 sm:px-4 py-4 text-center font-mono text-xs font-bold text-foreground">
-                            {menu.sortOrder}
-                          </td>
-
-                          {/* Menu & Route */}
-                          <td className="px-4 sm:px-6 py-4 font-medium">
-                            <div className="flex items-center gap-3">
-                              <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
-                                <Icon className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <button
-                                  type="button"
-                                  onClick={() => setSelectedSuperAdminMenu(menu)}
-                                  className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors text-left truncate block cursor-pointer"
-                                >
-                                  {menu.label}
-                                </button>
-                                <div className="flex items-center gap-1.5 mt-0.5">
-                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted font-mono text-[11px] text-muted-foreground border border-border/50">
-                                    <LinkIcon className="w-2.5 h-2.5" />
-                                    {menu.route}
-                                  </span>
-                                  <button
-                                    type="button"
-                                    onClick={() => handleCopyRoute(menu.route)}
-                                    className="p-0.5 text-muted-foreground hover:text-foreground rounded transition-colors"
-                                    title="Copy route path"
-                                  >
-                                    <Copy className="w-3 h-3" />
-                                  </button>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Group & Description */}
-                          <td className="px-4 sm:px-6 py-4 max-w-md">
-                            <div>
-                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/60">
-                                <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
-                                {menu.group}
-                              </span>
-                              <TruncatedText text={menu.description} lines={2} className="text-xs text-muted-foreground mt-1" />
-                            </div>
-                          </td>
-
-                          {/* Access Level */}
-                          <td className="px-4 sm:px-6 py-4 text-center">
-                            <Badge
-                              variant="secondary"
-                              className="bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 font-semibold text-[10px] gap-1"
-                            >
-                              <Lock className="w-3 h-3" />
-                              Super Admin Only (AAL2)
-                            </Badge>
-                          </td>
-
-                          {/* Status */}
-                          <td className="px-4 sm:px-6 py-4 text-center">
-                            {menu.isEnabled && menu.isVisible ? (
-                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 bg-emerald-500/10 px-2.5 py-1 rounded-full border border-emerald-500/20">
-                                <CheckCircle2 className="w-3.5 h-3.5" />
-                                Active
-                              </span>
-                            ) : !menu.isEnabled ? (
-                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-red-600 bg-red-500/10 px-2.5 py-1 rounded-full border border-red-500/20">
-                                <XCircle className="w-3.5 h-3.5" />
-                                Disabled
-                              </span>
-                            ) : (
-                              <span className="inline-flex items-center gap-1.5 text-xs font-bold text-amber-600 bg-amber-500/10 px-2.5 py-1 rounded-full border border-amber-500/20">
-                                <EyeOff className="w-3.5 h-3.5" />
-                                Hidden
-                              </span>
-                            )}
-                          </td>
-
-                          {/* Quick Navigation & Actions */}
-                          <td className="px-4 sm:px-6 py-4 text-right">
-                            <div className="flex items-center justify-end gap-2">
-                              <Button asChild variant="outline" size="sm" className="h-8 px-3 rounded-lg text-xs font-bold">
-                                <Link href={menu.route}>
-                                  Open Section
-                                </Link>
-                              </Button>
-
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 rounded-lg hover:bg-muted"
-                                  >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="rounded-xl w-52 shadow-lg border-border">
-                                  <DropdownMenuLabel className="text-xs font-bold">
-                                    Menu Controls
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuItem asChild className="text-xs gap-2 cursor-pointer font-medium">
-                                    <Link href={menu.route}>
-                                      <LinkIcon className="h-3.5 w-3.5 text-emerald-600" />
-                                      <span>Open Section</span>
-                                    </Link>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => window.open(menu.route, "_blank")}
-                                    className="text-xs gap-2 cursor-pointer font-medium"
-                                  >
-                                    <ExternalLink className="h-3.5 w-3.5 text-primary" />
-                                    <span>Open in New Tab</span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleCopyRoute(menu.route)}
-                                    className="text-xs gap-2 cursor-pointer font-medium"
-                                  >
-                                    <Copy className="h-3.5 w-3.5 text-muted-foreground" />
-                                    <span>Copy Route Path</span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    onClick={() => setSelectedSuperAdminMenu(menu)}
-                                    className="text-xs gap-2 cursor-pointer font-semibold text-foreground"
-                                  >
-                                    <Info className="h-3.5 w-3.5 text-indigo-500" />
-                                    <span>View Security & Metadata</span>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
-                            </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value as any)}
+              className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+            >
+              <option value="ALL">All Statuses</option>
+              <option value="ENABLED">Active Only</option>
+              <option value="DISABLED">Inactive Only</option>
+            </select>
           </div>
+        </CRMToolbar>
 
-          {/* Platform Tab Pagination */}
-          {!platformLoading && sortedPlatformMenus.length > 0 && (
-            <CRMPagination
-              currentPage={platformPage}
-              totalPages={platformTotalPages}
-              totalItems={sortedPlatformMenus.length}
-              rowsPerPage={platformRowsPerPage}
-              onPageChange={setPlatformPage}
-              onRowsPerPageChange={(rpp) => {
-                setPlatformRowsPerPage(rpp);
-                setPlatformPage(1);
-              }}
-            />
+        {/* 5. Unified Data Table */}
+        <div
+          className={cn(
+            "crm-table-wrap",
+            (loading || filteredModules.length <= rowsPerPage) && "crm-table-no-pagination"
           )}
-        </div>
-      ) : (
-        <div className="crm-table-workspace-sticky">
-          {/* 3. Filter Toolbar */}
-          <CRMToolbar
-            placeholder="Search modules by name, key, route, group..."
-            searchQuery={search}
-            setSearchQuery={setSearch}
-            sticky={false}
-          >
-            <div className="flex items-center gap-2">
-              {/* Group Filter */}
-              <select
-                value={groupFilter}
-                onChange={(e) => setGroupFilter(e.target.value)}
-                className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="ALL">All Groups</option>
-                {availableGroups.map((g) => (
-                  <option key={g} value={g}>
-                    Group: {g}
-                  </option>
-                ))}
-              </select>
-
-              {/* Status Filter */}
-              <select
-                value={statusFilter}
-                onChange={(e) => setStatusFilter(e.target.value as any)}
-                className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring"
-              >
-                <option value="ALL">All Statuses</option>
-                <option value="ENABLED">Enabled Only</option>
-                <option value="DISABLED">Disabled Only</option>
-              </select>
-            </div>
-          </CRMToolbar>
-
-          {/* 4. Modules Data Table */}
-          <div className={cn("crm-table-wrap", (loading || filteredModules.length <= rowsPerPage) && "crm-table-no-pagination")}>
-            {loading ? (
-              <PlatformModulesTableSkeleton />
-            ) : filteredModules.length === 0 ? (
-              <div className="p-12">
-                <EmptyState
-                  icon={Layers}
-                  title="No modules match your criteria"
-                  description={
+        >
+          {loading ? (
+            <ModulesTableSkeleton />
+          ) : filteredModules.length === 0 ? (
+            <div className="p-12">
+              <EmptyState
+                icon={activeScope === "tenant" ? Boxes : Shield}
+                title={
+                  search || groupFilter !== "ALL" || statusFilter !== "ALL"
+                    ? "No menus match your filters"
+                    : "No navigation menus registered"
+                }
+                description={
+                  search || groupFilter !== "ALL" || statusFilter !== "ALL"
+                    ? "Try clearing your search query or group filter to view all navigation menus."
+                    : "Click '+ Add Menu' to register your first navigation item."
+                }
+                action={{
+                  label:
                     search || groupFilter !== "ALL" || statusFilter !== "ALL"
-                      ? "Try clearing your search filters or add a new custom platform module."
-                      : "No platform modules have been registered yet."
-                  }
-                  action={{
-                    label: "Add Module",
-                    onClick: handleOpenCreate,
-                  }}
-                />
-              </div>
-            ) : (
-              <div className="overflow-auto flex-1 min-h-0">
-                <table className="w-full text-left text-sm border-collapse">
-                  <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-                    <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                      <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-16 text-center bg-card whitespace-nowrap">
-                        <DataTableColumnHeader
-                          title="Order"
-                          align="center"
-                          sortable
-                          sortDirection={sortConfig.key === "order" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("order", dir)}
-                        />
-                      </th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                        <DataTableColumnHeader
-                          title="Module & Route"
-                          sortable
-                          sortDirection={sortConfig.key === "label" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("label", dir)}
-                        />
-                      </th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                        <DataTableColumnHeader
-                          title="Category & Access"
-                          sortable
-                          sortDirection={sortConfig.key === "group" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("group", dir)}
-                        />
-                      </th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Type</th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
-                        <DataTableColumnHeader
-                          title="Global Status"
-                          align="center"
-                          sortable
-                          sortDirection={sortConfig.key === "isEnabled" ? sortConfig.direction : null}
-                          onSort={(dir) => handleSort("isEnabled", dir)}
-                        />
-                      </th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">Sidebar Nav</th>
-                      <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
-                    </tr>
-                  </thead>
-                  <tbody className="divide-y divide-border/50">
-                    {paginatedModules.map((mod, pageIndex) => {
-                      const Icon = getDynamicIcon(mod.icon);
-                      const globalIndex = (currentPage - 1) * rowsPerPage + pageIndex;
-                      const isFirst = globalIndex === 0;
-                      const isLast = globalIndex === sortedModules.length - 1;
+                      ? "Clear Filters"
+                      : "Add Menu",
+                  onClick:
+                    search || groupFilter !== "ALL" || statusFilter !== "ALL"
+                      ? () => {
+                          setSearch("");
+                          setGroupFilter("ALL");
+                          setStatusFilter("ALL");
+                        }
+                      : handleOpenCreate,
+                }}
+              />
+            </div>
+          ) : (
+            <div className="overflow-auto flex-1 min-h-0">
+              <table className="w-full text-left text-sm border-collapse">
+                <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
+                  <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
+                    <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-20 text-center bg-card whitespace-nowrap">
+                      <DataTableColumnHeader
+                        title="Order"
+                        align="center"
+                        sortable
+                        sortDirection={sortConfig.key === "order" ? sortConfig.direction : null}
+                        onSort={(dir) => handleSort("order", dir)}
+                      />
+                    </th>
+                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                      <DataTableColumnHeader
+                        title="Menu"
+                        sortable
+                        sortDirection={sortConfig.key === "label" ? sortConfig.direction : null}
+                        onSort={(dir) => handleSort("label", dir)}
+                      />
+                    </th>
+                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                      <DataTableColumnHeader
+                        title="Group"
+                        sortable
+                        sortDirection={sortConfig.key === "group" ? sortConfig.direction : null}
+                        onSort={(dir) => handleSort("group", dir)}
+                      />
+                    </th>
+                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                      Access
+                    </th>
+                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                      <DataTableColumnHeader
+                        title="Status"
+                        align="center"
+                        sortable
+                        sortDirection={sortConfig.key === "isEnabled" ? sortConfig.direction : null}
+                        onSort={(dir) => handleSort("isEnabled", dir)}
+                      />
+                    </th>
+                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                      Actions
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-border/50">
+                  {paginatedModules.map((mod, pageIndex) => {
+                    const Icon = getDynamicIcon(mod.icon);
+                    const globalIndex = (currentPage - 1) * rowsPerPage + pageIndex;
+                    const isFirst = globalIndex === 0;
+                    const isLast = globalIndex === sortedModules.length - 1;
 
-                      return (
-                        <tr
-                          key={mod.id}
-                          className="group h-16 hover:bg-muted/[0.03] transition-colors"
-                        >
-                          {/* Drag Handle & Order */}
-                          <td className="px-3 sm:px-4 py-4 text-center">
-                            <span className="font-mono text-xs font-semibold text-muted-foreground">
+                    return (
+                      <tr
+                        key={mod.id}
+                        className="group h-16 hover:bg-muted/[0.03] transition-colors"
+                      >
+                        {/* ORDER: Up/Down Buttons + Number */}
+                        <td className="px-3 sm:px-4 py-4 text-center">
+                          <div className="flex items-center justify-center gap-1">
+                            <button
+                              type="button"
+                              disabled={isFirst || reordering}
+                              onClick={() => handleMoveOrder(globalIndex, "up")}
+                              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
+                              title="Move Up"
+                            >
+                              <ArrowUp className="w-3.5 h-3.5" />
+                            </button>
+                            <span className="font-mono text-xs font-bold text-foreground w-5 text-center">
                               {mod.sortOrder}
                             </span>
-                          </td>
-
-                          {/* Label & Route */}
-                          <td className="px-4 sm:px-6 py-4">
-                            <div className="flex items-center gap-3">
-                              <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-                                <Icon className="w-4 h-4" />
-                              </div>
-                              <div className="min-w-0">
-                                <div className="flex items-center gap-2">
-                                  <span
-                                    onClick={() => handleOpenEdit(mod)}
-                                    className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate"
-                                  >
-                                    {mod.label}
-                                  </span>
-                                  {mod.badge && (
-                                    <Badge
-                                      variant="outline"
-                                      className="text-[10px] px-1.5 py-0 font-semibold bg-primary/10 text-primary border-primary/20 shrink-0"
-                                    >
-                                      {mod.badge}
-                                    </Badge>
-                                  )}
-                                </div>
-                                <div className="flex items-center gap-2 mt-1 flex-wrap">
-                                  <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted font-mono text-[11px] text-muted-foreground border border-border/50">
-                                    <LinkIcon className="w-2.5 h-2.5" />
-                                    {mod.route}
-                                  </span>
-                                  <span className="font-mono text-[11px] text-muted-foreground">
-                                    key: {mod.key}
-                                  </span>
-                                </div>
-                              </div>
-                            </div>
-                          </td>
-
-                          {/* Category & Permission */}
-                          <td className="px-4 py-4">
-                            <div className="flex flex-col gap-1 items-start">
-                              <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/60">
-                                <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
-                                {mod.group}
-                              </span>
-                              {mod.permission && (
-                                <span className="inline-flex items-center gap-1 text-[11px] font-mono text-muted-foreground">
-                                  <ShieldAlert className="w-3 h-3 text-amber-500" />
-                                  {mod.permission}
-                                </span>
-                              )}
-                            </div>
-                          </td>
-
-                          {/* Core vs Custom */}
-                          <td className="px-4 py-4 text-center">
-                            {mod.isSystem ? (
-                              <Badge
-                                variant="secondary"
-                                className="bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 border-slate-200 dark:border-slate-700 font-semibold text-[10px] gap-1"
-                              >
-                                <Lock className="w-3 h-3 text-slate-500" />
-                                Core
-                              </Badge>
-                            ) : (
-                              <Badge
-                                variant="outline"
-                                className="bg-emerald-50 dark:bg-emerald-950/40 text-emerald-700 dark:text-emerald-300 border-emerald-200 dark:border-emerald-800/50 font-semibold text-[10px] gap-1"
-                              >
-                                <Sparkles className="w-3 h-3 text-emerald-500" />
-                                Custom
-                              </Badge>
-                            )}
-                          </td>
-
-                          {/* Global Status Switch */}
-                          <td className="px-4 py-4 text-center">
-                            <div className="flex items-center justify-center gap-2">
-                              <Switch
-                                checked={mod.isEnabled}
-                                onCheckedChange={(checked) =>
-                                  handleToggleStatus(mod, "isEnabled", checked)
-                                }
-                                className="data-[state=checked]:bg-emerald-600 cursor-pointer"
-                              />
-                              <span
-                                className={`text-xs font-bold ${
-                                  mod.isEnabled
-                                    ? "text-emerald-600 dark:text-emerald-400"
-                                    : "text-muted-foreground"
-                                }`}
-                              >
-                                {mod.isEnabled ? "Active" : "Off"}
-                              </span>
-                            </div>
-                          </td>
-
-                          {/* Sidebar Visibility Toggle */}
-                          <td className="px-4 py-4 text-center">
                             <button
-                              onClick={() =>
-                                handleToggleStatus(mod, "isVisible", !mod.isVisible)
-                              }
-                              className={`inline-flex items-center gap-1.5 px-2.5 py-1 rounded-lg border text-xs font-semibold transition-all cursor-pointer ${
-                                mod.isVisible
-                                  ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 hover:bg-emerald-500/20"
-                                  : "bg-muted/50 text-muted-foreground border-border hover:bg-muted"
-                              }`}
-                              title={mod.isVisible ? "Visible in sidebar navigation" : "Hidden from sidebar navigation"}
+                              type="button"
+                              disabled={isLast || reordering}
+                              onClick={() => handleMoveOrder(globalIndex, "down")}
+                              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
+                              title="Move Down"
                             >
-                              {mod.isVisible ? (
-                                <>
-                                  <Eye className="w-3.5 h-3.5" />
-                                  <span>Visible</span>
-                                </>
-                              ) : (
-                                <>
-                                  <EyeOff className="w-3.5 h-3.5" />
-                                  <span>Hidden</span>
-                                </>
-                              )}
+                              <ArrowDown className="w-3.5 h-3.5" />
                             </button>
-                          </td>
+                          </div>
+                        </td>
 
-                          {/* Actions Menu */}
-                          <td className="px-4 py-4 text-right">
-                            <div className="flex items-center justify-end">
-                              <DropdownMenu>
-                                <DropdownMenuTrigger asChild>
-                                  <Button
-                                    variant="ghost"
-                                    size="icon"
-                                    className="h-8 w-8 rounded-lg hover:bg-muted"
-                                  >
-                                    <MoreHorizontal className="h-4 w-4" />
-                                  </Button>
-                                </DropdownMenuTrigger>
-                                <DropdownMenuContent align="end" className="rounded-xl w-52 shadow-lg border-border">
-                                  <DropdownMenuLabel className="text-xs font-bold">
-                                    Module Actions
-                                  </DropdownMenuLabel>
-                                  <DropdownMenuItem
-                                    onClick={() => handleOpenEdit(mod)}
-                                    className="text-xs gap-2 cursor-pointer font-medium"
-                                  >
-                                    <Edit2 className="h-3.5 w-3.5 text-primary" />
-                                    <span>Edit Module Details</span>
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleToggleStatus(mod, "isVisible", !mod.isVisible)}
-                                    className="text-xs gap-2 cursor-pointer font-medium"
-                                  >
-                                    {mod.isVisible ? (
-                                      <>
-                                        <EyeOff className="h-3.5 w-3.5 text-muted-foreground" />
-                                        <span>Hide from Navigation</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <Eye className="h-3.5 w-3.5 text-emerald-600" />
-                                        <span>Show in Navigation</span>
-                                      </>
-                                    )}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuItem
-                                    onClick={() => handleToggleStatus(mod, "isEnabled", !mod.isEnabled)}
-                                    className="text-xs gap-2 cursor-pointer font-medium"
-                                  >
-                                    {mod.isEnabled ? (
-                                      <>
-                                        <XCircle className="h-3.5 w-3.5 text-rose-500" />
-                                        <span>Disable Module Globally</span>
-                                      </>
-                                    ) : (
-                                      <>
-                                        <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
-                                        <span>Enable Module Globally</span>
-                                      </>
-                                    )}
-                                  </DropdownMenuItem>
-                                  <DropdownMenuSeparator />
-                                  <DropdownMenuItem
-                                    disabled={mod.isSystem}
-                                    onClick={() => setModuleToDelete(mod)}
-                                    className={`text-xs gap-2 cursor-pointer font-semibold ${
-                                      mod.isSystem
-                                        ? "opacity-40 cursor-not-allowed"
-                                        : "text-rose-600 focus:text-rose-600 focus:bg-rose-500/10 dark:text-rose-400 dark:focus:text-rose-400 dark:focus:bg-rose-500/20"
-                                    }`}
-                                  >
-                                    <Trash2 className="h-3.5 w-3.5 text-rose-600 dark:text-rose-400" />
-                                    <span>{mod.isSystem ? "Protected System Module" : "Delete Module"}</span>
-                                  </DropdownMenuItem>
-                                </DropdownMenuContent>
-                              </DropdownMenu>
+                        {/* MENU: Icon + Label + Subtitle Route */}
+                        <td className="px-4 sm:px-6 py-4">
+                          <div className="flex items-center gap-3">
+                            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
+                              <Icon className="w-4 h-4" />
                             </div>
-                          </td>
-                        </tr>
-                      );
-                    })}
-                  </tbody>
-                </table>
-              </div>
-            )}
-          </div>
+                            <div className="min-w-0">
+                              <div className="flex items-center gap-2">
+                                <button
+                                  type="button"
+                                  onClick={() => handleOpenEdit(mod)}
+                                  className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate text-left"
+                                >
+                                  {mod.label}
+                                </button>
+                                {mod.badge && (
+                                  <Badge
+                                    variant="outline"
+                                    className="text-[10px] px-1.5 py-0 font-semibold bg-primary/10 text-primary border-primary/20 shrink-0"
+                                  >
+                                    {mod.badge}
+                                  </Badge>
+                                )}
+                                {mod.isSystem && (
+                                  <span
+                                    title="Core system module (Protected)"
+                                    className="inline-flex items-center text-[10px] text-muted-foreground"
+                                  >
+                                    <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                                  </span>
+                                )}
+                              </div>
+                              <div className="flex items-center gap-1.5 mt-0.5">
+                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted/60 font-mono text-[11px] text-muted-foreground border border-border/50">
+                                  <LinkIcon className="w-2.5 h-2.5" />
+                                  {mod.route}
+                                </span>
+                              </div>
+                            </div>
+                          </div>
+                        </td>
 
-          {/* Pagination */}
-          {!loading && sortedModules.length > 0 && (
-            <CRMPagination
-              currentPage={currentPage}
-              totalPages={totalPages}
-              totalItems={sortedModules.length}
-              rowsPerPage={rowsPerPage}
-              onPageChange={setCurrentPage}
-              onRowsPerPageChange={setRowsPerPage}
-              itemName="Modules"
-            />
+                        {/* GROUP */}
+                        <td className="px-4 sm:px-6 py-4">
+                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/60">
+                            <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
+                            {mod.group}
+                          </span>
+                        </td>
+
+                        {/* ACCESS */}
+                        <td className="px-4 sm:px-6 py-4 text-center">
+                          {renderAccessBadge(mod)}
+                        </td>
+
+                        {/* STATUS (Single Unified Active / Inactive Toggle) */}
+                        <td className="px-4 sm:px-6 py-4 text-center">
+                          <div className="flex items-center justify-center gap-2">
+                            <Switch
+                              checked={mod.isEnabled}
+                              onCheckedChange={(checked) =>
+                                handleToggleStatus(mod, checked)
+                              }
+                              className="data-[state=checked]:bg-emerald-600 cursor-pointer"
+                            />
+                            <span
+                              className={cn(
+                                "text-xs font-bold w-14 text-left",
+                                mod.isEnabled
+                                  ? "text-emerald-600 dark:text-emerald-400"
+                                  : "text-muted-foreground"
+                              )}
+                            >
+                              {mod.isEnabled ? "Active" : "Inactive"}
+                            </span>
+                          </div>
+                        </td>
+
+                        {/* ACTIONS */}
+                        <td className="px-4 sm:px-6 py-4 text-right">
+                          <div className="flex items-center justify-end">
+                            <DropdownMenu>
+                              <DropdownMenuTrigger asChild>
+                                <Button
+                                  variant="ghost"
+                                  size="icon"
+                                  className="h-8 w-8 rounded-lg hover:bg-muted cursor-pointer"
+                                >
+                                  <MoreHorizontal className="h-4 w-4" />
+                                </Button>
+                              </DropdownMenuTrigger>
+                              <DropdownMenuContent
+                                align="end"
+                                className="rounded-xl w-52 shadow-lg border-border"
+                              >
+                                <DropdownMenuLabel className="text-xs font-bold">
+                                  Menu Actions
+                                </DropdownMenuLabel>
+                                <DropdownMenuItem
+                                  onClick={() => handleOpenEdit(mod)}
+                                  className="text-xs gap-2 cursor-pointer font-medium"
+                                >
+                                  <Edit2 className="h-3.5 w-3.5 text-primary" />
+                                  <span>Edit Menu</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  variant={mod.isEnabled ? "destructive" : "default"}
+                                  onClick={() =>
+                                    handleToggleStatus(mod, !mod.isEnabled)
+                                  }
+                                  className="text-xs gap-2 cursor-pointer font-medium"
+                                >
+                                  {mod.isEnabled ? (
+                                    <>
+                                      <XCircle className="h-3.5 w-3.5" />
+                                      <span>Disable Menu</span>
+                                    </>
+                                  ) : (
+                                    <>
+                                      <CheckCircle2 className="h-3.5 w-3.5 text-emerald-600" />
+                                      <span>Enable Menu</span>
+                                    </>
+                                  )}
+                                </DropdownMenuItem>
+                                <DropdownMenuSeparator />
+                                <DropdownMenuItem
+                                  disabled={mod.isSystem}
+                                  variant={mod.isSystem ? "default" : "destructive"}
+                                  onClick={() => !mod.isSystem && setModuleToDelete(mod)}
+                                  className={cn(
+                                    "text-xs gap-2 font-medium",
+                                    mod.isSystem
+                                      ? "opacity-50 text-muted-foreground cursor-not-allowed hover:bg-transparent focus:bg-transparent"
+                                      : "cursor-pointer font-semibold"
+                                  )}
+                                >
+                                  <Trash2 className="h-3.5 w-3.5" />
+                                  <span>
+                                    {mod.isSystem ? "System Menu (Protected)" : "Delete Menu"}
+                                  </span>
+                                </DropdownMenuItem>
+                              </DropdownMenuContent>
+                            </DropdownMenu>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           )}
         </div>
-      )}
 
-      {/* 5. Add / Edit Module Modal */}
+        {/* 6. Pagination */}
+        {!loading && sortedModules.length > 0 && (
+          <CRMPagination
+            currentPage={currentPage}
+            totalPages={totalPages}
+            totalItems={sortedModules.length}
+            rowsPerPage={rowsPerPage}
+            onPageChange={setCurrentPage}
+            onRowsPerPageChange={(rpp) => {
+              setRowsPerPage(rpp);
+              setCurrentPage(1);
+            }}
+            itemName="Menus"
+          />
+        )}
+      </div>
+
+      {/* 7. Add / Edit Modal */}
       <Dialog open={isModalOpen} onOpenChange={setIsModalOpen}>
-        <DialogContent className="sm:max-w-[620px] max-h-[90vh] overflow-y-auto rounded-2xl border-border bg-card shadow-2xl p-6">
+        <DialogContent className="sm:max-w-[580px] max-h-[90vh] overflow-y-auto rounded-2xl border-border bg-card shadow-2xl p-6">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
                 <DynamicIcon name={formIcon} className="w-5 h-5" />
               </div>
               <div>
-                <DialogTitle className="text-lg font-bold text-foreground">
-                  {editingModule ? "Edit Platform Module" : "Add New Platform Module"}
-                </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
-                  Configure the module label, route path, icon, category grouping, and access controls.
+                <div className="flex items-center gap-2">
+                  <DialogTitle className="text-lg font-bold text-foreground">
+                    {editingModule ? "Edit Navigation Menu" : "Add Navigation Menu"}
+                  </DialogTitle>
+                  <Badge variant="outline" className="text-[10px] font-mono">
+                    {activeScope === "tenant" ? "Tenant CRM" : "Super Admin"}
+                  </Badge>
+                </div>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                  Configure menu details, route path, icon, group, access level, and status.
                 </DialogDescription>
               </div>
             </div>
           </DialogHeader>
 
           <form onSubmit={handleSaveModule} className="space-y-4 pt-2">
-            {/* Label & Key */}
+            {/* BASIC: Display Name & Route */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="module-label" className="text-xs font-bold text-foreground">
-                  Display Label <span className="text-destructive">*</span>
+                <Label htmlFor="menu-label" className="text-xs font-bold text-foreground">
+                  Menu Name <span className="text-destructive">*</span>
                 </Label>
                 <Input
-                  id="module-label"
-                  placeholder="Enter display label"
+                  id="menu-label"
+                  placeholder="e.g. Contacts"
                   value={formLabel}
                   onChange={(e) => handleLabelChange(e.target.value)}
                   required
@@ -1530,52 +1262,37 @@ export default function SuperAdminModulesPage() {
               </div>
 
               <div className="space-y-1.5">
-                <Label htmlFor="module-key" className="text-xs font-bold text-foreground">
-                  Unique Key Identifier <span className="text-destructive">*</span>
-                </Label>
-                <Input
-                  id="module-key"
-                  placeholder="Enter unique key identifier"
-                  value={formKey}
-                  onChange={(e) => setFormKey(e.target.value)}
-                  disabled={editingModule?.isSystem}
-                  required
-                  className="h-9 rounded-xl text-xs font-mono"
-                />
-              </div>
-            </div>
-
-            {/* Route & Group */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <div className="space-y-1.5">
-                <Label htmlFor="module-route" className="text-xs font-bold text-foreground">
+                <Label htmlFor="menu-route" className="text-xs font-bold text-foreground">
                   Route Path <span className="text-destructive">*</span>
                 </Label>
                 <Input
-                  id="module-route"
-                  placeholder="Enter route path (/path)"
+                  id="menu-route"
+                  placeholder={activeScope === "platform" ? "/super-admin/section" : "/section"}
                   value={formRoute}
                   onChange={(e) => setFormRoute(e.target.value)}
                   required
                   className="h-9 rounded-xl text-xs font-mono"
                 />
               </div>
+            </div>
 
+            {/* ORGANIZATION: Group & Order */}
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="module-group" className="text-xs font-bold text-foreground">
+                <Label htmlFor="menu-group" className="text-xs font-bold text-foreground">
                   Navigation Group
                 </Label>
                 <select
-                  id="module-group"
+                  id="menu-group"
                   value={formGroup}
                   onChange={(e) => setFormGroup(e.target.value)}
-                  className="w-full h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring"
+                  className="w-full h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
                 >
-                  <option value="Core">Core</option>
-                  <option value="Insights">Insights</option>
-                  <option value="Administration">Administration</option>
-                  <option value="HRM & Operations">HRM & Operations</option>
-                  <option value="Support">Support</option>
+                  {availableGroups.map((grp) => (
+                    <option key={grp} value={grp}>
+                      {grp}
+                    </option>
+                  ))}
                   <option value="CUSTOM">Custom Group...</option>
                 </select>
                 {formGroup === "CUSTOM" && (
@@ -1588,13 +1305,61 @@ export default function SuperAdminModulesPage() {
                   />
                 )}
               </div>
+
+              <div className="space-y-1.5">
+                <Label htmlFor="menu-order" className="text-xs font-bold text-foreground">
+                  Order Index
+                </Label>
+                <Input
+                  id="menu-order"
+                  type="number"
+                  min="1"
+                  value={formOrder}
+                  onChange={(e) => setFormOrder(parseInt(e.target.value) || 1)}
+                  className="h-9 rounded-xl text-xs font-mono"
+                />
+              </div>
             </div>
 
-            {/* Icon Picker Section */}
+            {/* ACCESS CONTROL */}
+            {activeScope === "tenant" ? (
+              <div className="space-y-1.5">
+                <Label htmlFor="access-preset" className="text-xs font-bold text-foreground">
+                  Access Level
+                </Label>
+                <select
+                  id="access-preset"
+                  value={formAccessPreset}
+                  onChange={(e) => setFormAccessPreset(e.target.value as any)}
+                  className="w-full h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+                >
+                  <option value="ALL">All CRM Users (Standard Access)</option>
+                  <option value="ADMIN_ONLY">Admin Only</option>
+                  <option value="MANAGER_ADMIN">Manager & Admin</option>
+                  <option value="CUSTOM">Custom RBAC Permission...</option>
+                </select>
+                {formAccessPreset === "CUSTOM" && (
+                  <Input
+                    placeholder="Enter custom permission key (e.g. Invoices, Reports)"
+                    value={formPermission}
+                    onChange={(e) => setFormPermission(e.target.value)}
+                    className="h-8 mt-1.5 rounded-xl text-xs font-mono"
+                    autoFocus
+                  />
+                )}
+              </div>
+            ) : (
+              <div className="p-3 rounded-xl bg-purple-50 dark:bg-purple-950/20 border border-purple-200 dark:border-purple-800/40 text-xs text-purple-800 dark:text-purple-300 flex items-center gap-2">
+                <Lock className="w-4 h-4 shrink-0 text-purple-600 dark:text-purple-400" />
+                <span>Super Admin Root Access (AAL2 MFA assurance required)</span>
+              </div>
+            )}
+
+            {/* ICON PICKER */}
             <div className="space-y-1.5">
               <div className="flex items-center justify-between">
                 <Label className="text-xs font-bold text-foreground">
-                  Module Icon <span className="text-muted-foreground font-normal">({formIcon})</span>
+                  Icon <span className="text-muted-foreground font-normal">({formIcon})</span>
                 </Label>
                 <div className="relative w-36">
                   <Search className="w-3 h-3 absolute left-2.5 top-2.5 text-muted-foreground" />
@@ -1607,8 +1372,7 @@ export default function SuperAdminModulesPage() {
                 </div>
               </div>
 
-              {/* Icon Grid */}
-              <div className="grid grid-cols-8 gap-2 p-2.5 rounded-xl bg-muted/40 border border-border/60 max-h-36 overflow-y-auto">
+              <div className="grid grid-cols-8 gap-2 p-2.5 rounded-xl bg-muted/40 border border-border/60 max-h-32 overflow-y-auto">
                 {filteredIcons.map((iconName) => {
                   const IconComp = getDynamicIcon(iconName);
                   const isSelected = formIcon === iconName;
@@ -1617,11 +1381,12 @@ export default function SuperAdminModulesPage() {
                       key={iconName}
                       type="button"
                       onClick={() => setFormIcon(iconName)}
-                      className={`flex flex-col items-center justify-center p-2 rounded-lg transition-all cursor-pointer ${
+                      className={cn(
+                        "flex flex-col items-center justify-center p-2 rounded-lg transition-all cursor-pointer",
                         isSelected
                           ? "bg-emerald-600 text-white shadow-sm ring-2 ring-emerald-500/30"
                           : "hover:bg-muted text-muted-foreground hover:text-foreground"
-                      }`}
+                      )}
                       title={iconName}
                     >
                       <IconComp className="w-4 h-4" />
@@ -1631,72 +1396,48 @@ export default function SuperAdminModulesPage() {
               </div>
             </div>
 
-            {/* Permission & Badge */}
+            {/* SINGLE UNIFIED STATUS TOGGLE */}
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-muted/30 border border-border/60">
+              <div>
+                <p className="text-xs font-bold text-foreground">Menu Status</p>
+                <p className="text-[11px] text-muted-foreground mt-0.5">
+                  {formIsEnabled
+                    ? "Active — Enabled and visible in sidebar navigation"
+                    : "Inactive — Disabled and hidden from sidebar navigation"}
+                </p>
+              </div>
+              <Switch
+                checked={formIsEnabled}
+                onCheckedChange={setFormIsEnabled}
+                className="data-[state=checked]:bg-emerald-600 cursor-pointer"
+              />
+            </div>
+
+            {/* Optional Description / Badge */}
             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
               <div className="space-y-1.5">
-                <Label htmlFor="module-permission" className="text-xs font-bold text-foreground">
-                  RBAC Permission Key
+                <Label htmlFor="menu-badge" className="text-xs font-bold text-foreground">
+                  Badge Text <span className="text-muted-foreground font-normal">(Optional)</span>
                 </Label>
                 <Input
-                  id="module-permission"
-                  placeholder="Enter RBAC permission key"
-                  value={formPermission}
-                  onChange={(e) => setFormPermission(e.target.value)}
-                  className="h-9 rounded-xl text-xs font-mono"
-                />
-              </div>
-
-              <div className="space-y-1.5">
-                <Label htmlFor="module-badge" className="text-xs font-bold text-foreground">
-                  Badge Label <span className="text-muted-foreground font-normal">(Optional)</span>
-                </Label>
-                <Input
-                  id="module-badge"
-                  placeholder="Enter badge label (New, Beta, Pro, etc.)"
+                  id="menu-badge"
+                  placeholder="e.g. Beta, New, Pro"
                   value={formBadge}
                   onChange={(e) => setFormBadge(e.target.value)}
                   className="h-9 rounded-xl text-xs"
                 />
               </div>
-            </div>
 
-            {/* Description */}
-            <div className="space-y-1.5">
-              <Label htmlFor="module-description" className="text-xs font-bold text-foreground">
-                Description
-              </Label>
-              <Input
-                id="module-description"
-                placeholder="Brief explanation of the module purpose"
-                value={formDescription}
-                onChange={(e) => setFormDescription(e.target.value)}
-                className="h-9 rounded-xl text-xs"
-              />
-            </div>
-
-            {/* Toggles */}
-            <div className="grid grid-cols-2 gap-4 p-3 rounded-xl bg-muted/30 border border-border/60">
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-foreground">Globally Enabled</p>
-                  <p className="text-[11px] text-muted-foreground">Available to platform tenants</p>
-                </div>
-                <Switch
-                  checked={formIsEnabled}
-                  onCheckedChange={setFormIsEnabled}
-                  className="data-[state=checked]:bg-emerald-600"
-                />
-              </div>
-
-              <div className="flex items-center justify-between">
-                <div>
-                  <p className="text-xs font-bold text-foreground">Sidebar Visible</p>
-                  <p className="text-[11px] text-muted-foreground">Display in main navigation</p>
-                </div>
-                <Switch
-                  checked={formIsVisible}
-                  onCheckedChange={setFormIsVisible}
-                  className="data-[state=checked]:bg-emerald-600"
+              <div className="space-y-1.5">
+                <Label htmlFor="menu-description" className="text-xs font-bold text-foreground">
+                  Description <span className="text-muted-foreground font-normal">(Optional)</span>
+                </Label>
+                <Input
+                  id="menu-description"
+                  placeholder="Brief menu purpose"
+                  value={formDescription}
+                  onChange={(e) => setFormDescription(e.target.value)}
+                  className="h-9 rounded-xl text-xs"
                 />
               </div>
             </div>
@@ -1706,7 +1447,7 @@ export default function SuperAdminModulesPage() {
                 type="button"
                 variant="outline"
                 onClick={() => setIsModalOpen(false)}
-                className="h-9 rounded-xl text-xs font-medium"
+                className="h-9 rounded-xl text-xs font-medium cursor-pointer"
               >
                 Cancel
               </Button>
@@ -1721,9 +1462,9 @@ export default function SuperAdminModulesPage() {
                     Saving...
                   </>
                 ) : editingModule ? (
-                  "Update Module"
+                  "Update Menu"
                 ) : (
-                  "Create Module"
+                  "Create Menu"
                 )}
               </Button>
             </DialogFooter>
@@ -1731,22 +1472,23 @@ export default function SuperAdminModulesPage() {
         </DialogContent>
       </Dialog>
 
-      {/* 6. Safe Delete Confirmation Modal */}
+      {/* 8. Delete Confirmation Modal */}
       <Dialog
         open={Boolean(moduleToDelete)}
         onOpenChange={(open) => {
           if (!open) setModuleToDelete(null);
         }}
       >
-        <DialogContent className="sm:max-w-[460px] rounded-2xl border-border bg-card shadow-2xl p-6">
+        <DialogContent className="sm:max-w-[440px] rounded-2xl border-border bg-card shadow-2xl p-6">
           <DialogHeader>
             <div className="flex items-center gap-3">
               <div
-                className={`w-10 h-10 rounded-xl flex items-center justify-center shrink-0 ${
+                className={cn(
+                  "w-10 h-10 rounded-xl flex items-center justify-center shrink-0",
                   moduleToDelete?.isSystem
                     ? "bg-amber-500/10 text-amber-600"
                     : "bg-destructive/10 text-destructive"
-                }`}
+                )}
               >
                 {moduleToDelete?.isSystem ? (
                   <ShieldAlert className="w-5 h-5" />
@@ -1756,14 +1498,12 @@ export default function SuperAdminModulesPage() {
               </div>
               <div>
                 <DialogTitle className="text-base font-bold text-foreground">
-                  {moduleToDelete?.isSystem
-                    ? "Protected System Module"
-                    : "Delete Platform Module"}
+                  {moduleToDelete?.isSystem ? "Protected System Menu" : "Delete Navigation Menu"}
                 </DialogTitle>
                 <DialogDescription className="text-xs text-muted-foreground">
                   {moduleToDelete?.isSystem
-                    ? "This module is essential to core CRM operations."
-                    : "This action will permanently delete this module from platform navigation."}
+                    ? "System menus provide core CRM workflows and cannot be deleted."
+                    : `Are you sure you want to delete "${moduleToDelete?.label}"?`}
                 </DialogDescription>
               </div>
             </div>
@@ -1771,26 +1511,20 @@ export default function SuperAdminModulesPage() {
 
           <div className="py-3">
             {moduleToDelete?.isSystem ? (
-              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 space-y-2">
-                <p className="font-semibold flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5 shrink-0" />
+              <div className="p-3.5 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-800 dark:text-amber-300 space-y-1.5">
+                <p className="font-semibold">
                   Cannot delete core module &quot;{moduleToDelete?.label}&quot;
                 </p>
                 <p className="text-[11px] leading-relaxed opacity-90">
-                  System modules provide vital data models and workflows. Instead of deleting,
-                  you can switch off <strong>Global Status</strong> or <strong>In Sidebar</strong> to hide it from tenant users.
+                  Instead of deleting, you can switch <strong>Status</strong> to Inactive to disable it and remove it from sidebar navigation.
                 </p>
               </div>
             ) : (
-              <div className="p-3.5 rounded-xl bg-muted/60 border border-border/60 text-xs text-foreground space-y-2">
-                <p>
-                  Are you sure you want to delete module{" "}
-                  <strong>&quot;{moduleToDelete?.label}&quot;</strong> (<code>{moduleToDelete?.route}</code>)?
-                </p>
-                <p className="text-[11px] text-muted-foreground">
-                  Organization users will no longer see this module in their navigation.
-                </p>
-              </div>
+              <p className="text-xs text-muted-foreground leading-relaxed">
+                This will permanently remove <strong>&quot;{moduleToDelete?.label}&quot;</strong> (
+                <code>{moduleToDelete?.route}</code>) from navigation. This action cannot be
+                undone.
+              </p>
             )}
           </div>
 
@@ -1799,165 +1533,28 @@ export default function SuperAdminModulesPage() {
               variant="outline"
               size="sm"
               onClick={() => setModuleToDelete(null)}
-              className="h-9 rounded-xl text-xs font-medium"
+              className="text-xs font-medium cursor-pointer"
             >
-              {moduleToDelete?.isSystem ? "Understood" : "Cancel"}
+              Cancel
             </Button>
-
             {!moduleToDelete?.isSystem && (
               <Button
                 variant="destructive"
                 size="sm"
-                onClick={handleDeleteConfirm}
                 disabled={deleting}
-                className="h-9 px-4 rounded-xl text-xs font-semibold shadow-sm transition-all cursor-pointer"
+                onClick={handleDeleteConfirm}
+                className="text-xs font-semibold cursor-pointer"
               >
                 {deleting ? (
                   <>
-                    <Loader2 className="w-3.5 h-3.5 animate-spin mr-1.5" />
+                    <Loader2 className="w-3 h-3 animate-spin mr-1.5" />
                     Deleting...
                   </>
                 ) : (
-                  "Confirm Delete"
+                  "Delete Menu"
                 )}
               </Button>
             )}
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
-
-      {/* 7. Super Admin Navigation Menu Details Modal */}
-      <Dialog
-        open={Boolean(selectedSuperAdminMenu)}
-        onOpenChange={(open) => {
-          if (!open) setSelectedSuperAdminMenu(null);
-        }}
-      >
-        <DialogContent className="sm:max-w-[540px] rounded-2xl border-border bg-card shadow-2xl p-6">
-          <DialogHeader>
-            <div className="flex items-center gap-3">
-              <div className="w-11 h-11 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
-                <DynamicIcon name={selectedSuperAdminMenu?.icon} className="w-5 h-5" />
-              </div>
-              <div>
-                <DialogTitle className="text-lg font-bold text-foreground flex items-center gap-2">
-                  <span>{selectedSuperAdminMenu?.label}</span>
-                  <Badge
-                    variant="secondary"
-                    className="bg-purple-100 dark:bg-purple-950/40 text-purple-700 dark:text-purple-300 border-purple-200 dark:border-purple-800 font-semibold text-[10px]"
-                  >
-                    System Control
-                  </Badge>
-                </DialogTitle>
-                <DialogDescription className="text-xs text-muted-foreground">
-                  Root Platform Administration Navigation Details & IAM Policy
-                </DialogDescription>
-              </div>
-            </div>
-          </DialogHeader>
-
-          <div className="py-4 space-y-4">
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Route Endpoint
-                </span>
-                <div className="flex items-center justify-between gap-2">
-                  <code className="text-xs font-mono font-bold text-foreground truncate">
-                    {selectedSuperAdminMenu?.route}
-                  </code>
-                  <button
-                    type="button"
-                    onClick={() => selectedSuperAdminMenu && handleCopyRoute(selectedSuperAdminMenu.route)}
-                    className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted transition-colors shrink-0"
-                    title="Copy route path"
-                  >
-                    <Copy className="w-3.5 h-3.5" />
-                  </button>
-                </div>
-              </div>
-
-              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Menu Key & Order
-                </span>
-                <p className="text-xs font-mono font-bold text-foreground">
-                  {selectedSuperAdminMenu?.key} (#{selectedSuperAdminMenu?.sortOrder})
-                </p>
-              </div>
-            </div>
-
-            <div className="grid grid-cols-2 gap-3">
-              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Hierarchy Domain
-                </span>
-                <p className="text-xs font-bold text-foreground flex items-center gap-1.5">
-                  <FolderTree className="w-3.5 h-3.5 text-muted-foreground" />
-                  {selectedSuperAdminMenu?.group}
-                </p>
-              </div>
-
-              <div className="p-3 rounded-xl bg-muted/40 border border-border/60 space-y-1">
-                <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                  Security Level
-                </span>
-                <p className="text-xs font-bold text-purple-600 dark:text-purple-400 flex items-center gap-1.5">
-                  <Lock className="w-3.5 h-3.5" />
-                  Super Admin Root IAM (AAL2)
-                </p>
-              </div>
-            </div>
-
-            <div className="p-3.5 rounded-xl bg-muted/30 border border-border/60 space-y-1.5">
-              <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                Functional Scope & Description
-              </span>
-              <p className="text-xs text-foreground/90 leading-relaxed">
-                {selectedSuperAdminMenu?.description}
-              </p>
-            </div>
-          </div>
-
-          <DialogFooter className="flex items-center justify-between sm:justify-between w-full">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setSelectedSuperAdminMenu(null)}
-              className="h-9 rounded-xl text-xs font-medium"
-            >
-              Close
-            </Button>
-
-            <div className="flex items-center gap-2">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => {
-                  if (selectedSuperAdminMenu) {
-                    window.open(selectedSuperAdminMenu.route, "_blank");
-                  }
-                }}
-                className="h-9 px-3 rounded-xl text-xs font-medium gap-1.5"
-              >
-                <ExternalLink className="w-3.5 h-3.5 text-primary" />
-                <span>New Tab</span>
-              </Button>
-
-              {selectedSuperAdminMenu && (
-                <Button
-                  asChild
-                  size="sm"
-                  className="h-9 px-4 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-white text-xs font-semibold shadow-md transition-all"
-                >
-                  <Link href={selectedSuperAdminMenu.route}>
-                    Open Section
-                  </Link>
-                </Button>
-              )}
-            </div>
           </DialogFooter>
         </DialogContent>
       </Dialog>
