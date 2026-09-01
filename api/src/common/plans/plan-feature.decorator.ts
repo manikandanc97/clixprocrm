@@ -6,5 +6,14 @@ export const RequirePlanFeature = (feature: string) =>
 
 export const REQUIRE_PLAN_LIMIT_KEY = 'require_plan_limit';
 export const RequirePlanLimit = (
-  limitKey: 'maxUsers' | 'maxContacts' | 'maxLeads' | 'maxDeals' | 'maxAutomations',
+  limitKey:
+    | 'maxUsers'
+    | 'maxContacts'
+    | 'maxLeads'
+    | 'maxTasks'
+    | 'maxPipelines'
+    | 'maxCustomFields'
+    | 'maxDeals'
+    | 'maxAutomations',
 ) => SetMetadata(REQUIRE_PLAN_LIMIT_KEY, limitKey);
+

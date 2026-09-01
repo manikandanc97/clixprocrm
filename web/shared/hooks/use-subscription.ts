@@ -11,6 +11,7 @@ import {
   PlanDefinition,
   PlanLimits,
 } from "@/shared/lib/plans/plan-definitions";
+import { CRM_ROLES, normalizeRole } from "@/shared/lib/auth/rbac";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { toast } from "sonner";
 
@@ -18,10 +19,13 @@ export interface WorkspaceUsageStats {
   users: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
   contacts: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
   leads: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  deals: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  automations: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  storageGb: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  apiRequests: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  tasks?: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  pipelines?: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  customFields?: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  deals?: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  automations?: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  storageGb?: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  apiRequests?: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
 }
 
 export interface WorkspaceSubscriptionResponse {
@@ -91,10 +95,21 @@ export function useSubscription() {
     isOpen: false,
   });
 
-  const isSuperAdmin = user?.role === "SUPER_ADMIN" || (user as any)?.isSuperAdmin;
+  const roleKey = normalizeRole(user?.role || access?.roleName);
+  const isSuperAdmin =
+    roleKey === CRM_ROLES.SUPER_ADMIN ||
+    user?.role === "SUPER_ADMIN" ||
+    (user as any)?.isSuperAdmin === true;
   const userRole = (user?.role || access?.roleName || "").toUpperCase();
   // Billing management requires ADMIN or organization owner
-  const canManageBilling = isSuperAdmin || userRole === "ADMIN" || (user as any)?.isOrgOwner;
+  const canManageBilling =
+    isSuperAdmin ||
+    roleKey === CRM_ROLES.ADMIN ||
+    userRole === "ADMIN" ||
+    userRole === "ORG_ADMIN" ||
+    userRole === "OWNER" ||
+    (user as any)?.isOrgOwner === true ||
+    (user as any)?.isOrgAdmin === true;
 
   const query = useQuery<WorkspaceSubscriptionResponse>({
     queryKey: ["workspace", "subscription"],

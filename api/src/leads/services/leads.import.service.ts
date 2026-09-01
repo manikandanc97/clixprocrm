@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { LeadStage, LeadPriority } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import { SubscriptionEntitlementService } from '../../common/plans/subscription-entitlement.service';
 
 /**
  * @file leads/services/leads.import.service.ts
@@ -16,6 +17,7 @@ export class LeadsImportService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly enc: EncryptionService,
+    private readonly entitlementService: SubscriptionEntitlementService,
   ) {}
 
   async bulkImportLeads(
@@ -24,6 +26,11 @@ export class LeadsImportService {
     leadsData: any[],
     duplicateStrategy: 'skip' | 'update' | 'create',
   ) {
+    // Atomically validate that the workspace has sufficient lead capacity for this import
+    if (leadsData && leadsData.length > 0 && duplicateStrategy !== 'update') {
+      await this.entitlementService.assertWithinLimit(tenantId, 'maxLeads', leadsData.length);
+    }
+
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       let imported = 0;
       let skipped = 0;

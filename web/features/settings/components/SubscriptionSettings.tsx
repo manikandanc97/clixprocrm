@@ -260,24 +260,24 @@ export default function SubscriptionSettings() {
               </div>
             </div>
 
-            {/* Storage */}
+            {/* Tasks / Storage */}
             <div className="p-4 rounded-xl bg-muted/40 border border-border/70 space-y-2">
               <div className="flex items-center justify-between text-xs">
                 <span className="font-semibold text-foreground flex items-center gap-1.5">
-                  <HardDrive className="w-3.5 h-3.5 text-muted-foreground" />
-                  Storage
+                  <Check className="w-3.5 h-3.5 text-muted-foreground" />
+                  Tasks
                 </span>
                 <span className="font-bold text-foreground">
-                  {usage?.storageGb?.current ?? 0} GB /{" "}
-                  {currentPlan.limits.storageGb === -1
+                  {(usage?.tasks?.current ?? 0).toLocaleString()} /{" "}
+                  {currentPlan.limits.maxTasks === -1
                     ? "Unlimited"
-                    : `${currentPlan.limits.storageGb} GB`}
+                    : currentPlan.limits.maxTasks.toLocaleString()}
                 </span>
               </div>
               <div className="w-full bg-background rounded-full h-1.5 overflow-hidden border border-border/40">
                 <div
                   className="bg-emerald-500 h-full rounded-full transition-all"
-                  style={{ width: `${Math.min(100, usage?.storageGb?.percentage ?? 0)}%` }}
+                  style={{ width: `${Math.min(100, usage?.tasks?.percentage ?? 0)}%` }}
                 />
               </div>
             </div>
@@ -285,18 +285,18 @@ export default function SubscriptionSettings() {
         </div>
       </div>
 
-      {/* 3. QUICK UPGRADE PROMPT (IF ON FREE/STARTER) */}
+      {/* 3. QUICK UPGRADE PROMPT (IF ON FREE) */}
       {!isEnterprise && activePlanId !== "growth" && activePlanId !== "business" && (
         <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-primary" />
               <h4 className="text-sm font-bold text-foreground">
-                Unlock Advanced Workflows & AI with Growth
+                Unlock Advanced Workflows & Pipelines with Growth
               </h4>
             </div>
             <p className="text-xs text-muted-foreground">
-              Upgrade to the Growth plan (₹999/user/month) for customized pipeline stages, team permissions, AI lead scoring, and 50 GB storage.
+              Upgrade to the Growth plan (₹499/user/month) for sales pipeline customization, team permissions, email integration & tracking, and 10,000 contacts.
             </p>
           </div>
 
@@ -390,10 +390,10 @@ export default function SubscriptionSettings() {
       <div className="p-4 rounded-xl border border-border/80 bg-muted/20 flex items-center justify-between gap-4">
         <div>
           <h4 className="text-xs font-bold text-foreground">
-            Looking for full feature comparisons across all 5 tiers?
+            Looking for full feature comparisons across all 3 plans?
           </h4>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Compare Free, Starter, Growth, Business, and Enterprise side-by-side.
+            Compare Free, Growth, and Business side-by-side.
           </p>
         </div>
 

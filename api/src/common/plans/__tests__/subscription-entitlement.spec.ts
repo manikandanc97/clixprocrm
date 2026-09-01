@@ -48,11 +48,11 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
   });
 
   describe('1. Resolving Workspace Subscription & Canonical Plan', () => {
-    it('should return subscription details, limits, and live usage for a Starter workspace', async () => {
+    it('should return subscription details, limits, and live usage for a Free workspace', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
         name: 'Alpha Corp',
-        plan: 'starter',
+        plan: 'free',
         subscriptionStatus: 'ACTIVE',
         billingCycle: 'monthly',
         trialStart: null,
@@ -64,18 +64,19 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       prismaMock.tenantUser.count.mockResolvedValue(2);
       prismaMock.customer.count.mockResolvedValue(450);
       prismaMock.lead.count.mockResolvedValue(120);
+      prismaMock.task = { count: jest.fn().mockResolvedValue(30) };
       prismaMock.deal.count.mockResolvedValue(30);
 
       const res = await service.getWorkspaceSubscription('tenant-1');
 
-      expect(res.planId).toBe('starter');
-      expect(res.planName).toBe('Starter');
-      expect(res.plan.price).toBe('₹499');
+      expect(res.planId).toBe('free');
+      expect(res.planName).toBe('Free');
+      expect(res.plan.price).toBe('₹0');
       expect(res.usage.contacts.current).toBe(450);
-      expect(res.usage.contacts.limit).toBe(10000);
-      expect(res.usage.contacts.remaining).toBe(9550);
+      expect(res.usage.contacts.limit).toBe(500);
+      expect(res.usage.contacts.remaining).toBe(50);
       expect(res.usage.contacts.isLimitReached).toBe(false);
-      expect(res.entitledFeatures).toContain('email_integration');
+      expect(res.entitledFeatures).toContain('basic_dashboard');
       expect(res.entitledFeatures).not.toContain('advanced_rbac');
     });
 
@@ -90,14 +91,15 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       prismaMock.tenantUser.count.mockResolvedValue(5);
       prismaMock.customer.count.mockResolvedValue(1000);
       prismaMock.lead.count.mockResolvedValue(500);
+      prismaMock.task = { count: jest.fn().mockResolvedValue(100) };
       prismaMock.deal.count.mockResolvedValue(100);
 
       const res = await service.getWorkspaceSubscription('tenant-2');
 
       expect(res.planId).toBe('growth');
-      expect(res.plan.price).toBe('₹999');
+      expect(res.plan.price).toBe('₹499');
       expect(res.plan.recommended).toBe(true);
-      expect(res.plan.badge).toBe('Most Popular');
+      expect(res.plan.badge).toBe('MOST POPULAR');
       expect(res.entitledFeatures).toContain('advanced_automation');
       expect(res.entitledFeatures).toContain('ai_copilot');
     });
@@ -118,7 +120,7 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
     it('should throw ForbiddenException with PLAN_FEATURE_LOCKED if feature is not entitled', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
-        plan: 'starter',
+        plan: 'free',
         subscriptionStatus: 'ACTIVE',
       });
 
@@ -141,17 +143,17 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
 
       expect(quote.planId).toBe('growth');
       expect(quote.seats).toBe(5);
-      expect(quote.unitPricePerMonth).toBe(999);
-      expect(quote.subtotal).toBe(4995); // 999 * 5
-      expect(quote.taxAmount).toBe(899); // 18% of 4995 = 899.1 -> 899
-      expect(quote.totalAmount).toBe(5894);
+      expect(quote.unitPricePerMonth).toBe(499);
+      expect(quote.subtotal).toBe(2495); // 499 * 5
+      expect(quote.taxAmount).toBe(449); // 18% of 2495 = 449.1 -> 449
+      expect(quote.totalAmount).toBe(2944);
       expect(quote.isUpgrade).toBe(true);
     });
 
     it('should calculate annual discount quote for Growth plan', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
-        plan: 'starter',
+        plan: 'free',
         currency: 'INR',
       });
       prismaMock.tenantUser.count.mockResolvedValue(2);
@@ -160,7 +162,7 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
 
       expect(quote.planId).toBe('growth');
       expect(quote.seats).toBe(2);
-      expect(quote.subtotal).toBe(19980); // 9990 * 2
+      expect(quote.subtotal).toBe(9980); // 4990 * 2
       expect(quote.isUpgrade).toBe(true);
     });
   });
@@ -169,10 +171,10 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
     it('should pass if within limits', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
-        plan: 'starter', // maxContacts = 10000
+        plan: 'free', // maxContacts = 500
         subscriptionStatus: 'ACTIVE',
       });
-      prismaMock.customer.count.mockResolvedValue(5000);
+      prismaMock.customer.count.mockResolvedValue(400);
 
       await expect(
         service.assertWithinLimit('tenant-1', 'maxContacts', 1),
@@ -182,25 +184,25 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
     it('should throw ForbiddenException with PLAN_LIMIT_REACHED if limit exceeded', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
-        plan: 'starter', // maxContacts = 10000
+        plan: 'free', // maxContacts = 500
         subscriptionStatus: 'ACTIVE',
       });
-      prismaMock.customer.count.mockResolvedValue(10000);
+      prismaMock.customer.count.mockResolvedValue(500);
 
       await expect(
         service.assertWithinLimit('tenant-1', 'maxContacts', 1),
       ).rejects.toThrow(ForbiddenException);
     });
 
-    it('should allow unlimited records for Enterprise plan', async () => {
+    it('should allow unlimited records for Business plan', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
-        id: 'tenant-ent',
-        plan: 'enterprise', // maxContacts = -1 (unlimited)
+        id: 'tenant-biz',
+        plan: 'business', // maxContacts = -1 (unlimited)
         subscriptionStatus: 'ACTIVE',
       });
 
       await expect(
-        service.assertWithinLimit('tenant-ent', 'maxContacts', 50000),
+        service.assertWithinLimit('tenant-biz', 'maxContacts', 50000),
       ).resolves.not.toThrow();
     });
   });

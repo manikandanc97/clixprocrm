@@ -7,6 +7,7 @@ import { createClient } from '@supabase/supabase-js';
 import { invalidateTokenUserCache } from '../../auth/supabase.guard';
 import { invalidateUserTenantCache } from '../../auth/tenant.guard';
 import { invalidateGetMeCache } from '../../auth/auth.service';
+import { SubscriptionEntitlementService } from '../../common/plans/subscription-entitlement.service';
 
 export function hashInvitationToken(token: string): string {
   return createHash('sha256').update(token.trim()).digest('hex');
@@ -17,6 +18,7 @@ export class EmployeesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
+    private readonly entitlementService: SubscriptionEntitlementService,
   ) {}
 
   async getEmployees(tenantId: string, page = 1, limit = 10) {
@@ -94,6 +96,9 @@ export class EmployeesService {
     }
 
     const normalizedEmail = email.toLowerCase().trim();
+
+    // Enforce workspace active user limit
+    await this.entitlementService.assertWithinLimit(tenantId, 'maxUsers', 1);
 
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const existingTenantUser = await tx.tenantUser.findFirst({
@@ -350,6 +355,10 @@ export class EmployeesService {
     actorRole: string,
     status: string,
   ) {
+    if (status === 'ACTIVE') {
+      await this.entitlementService.assertWithinLimit(tenantId, 'maxUsers', 1);
+    }
+
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const existingUser = await tx.tenantUser.findFirst({
         where: { userId, tenantId },

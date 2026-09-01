@@ -72,6 +72,23 @@ export const SETTINGS_NAVIGATION: SettingsCategory[] = [
           return permissions.includes(PERMISSIONS.SETTINGS_MANAGE) || permissions.includes("settings.general");
         },
       },
+      {
+        id: "billing",
+        label: "Subscription & Billing",
+        icon: CreditCard,
+        description: "Manage subscription plans, active seat limits, usage stats, and invoices.",
+        aliases: ["subscription", "plan", "plans", "pricing", "upgrade"],
+        isAuthorized: ({ role, permissions, isSuperAdmin }) => {
+          if (isSuperAdmin) return true;
+          const r = normalizeRole(role);
+          if (r === CRM_ROLES.SUPER_ADMIN || r === CRM_ROLES.ADMIN) return true;
+          return (
+            permissions.includes(PERMISSIONS.SETTINGS_MANAGE) ||
+            permissions.includes("billing.manage") ||
+            permissions.includes("subscription.manage")
+          );
+        },
+      },
     ],
   },
   {

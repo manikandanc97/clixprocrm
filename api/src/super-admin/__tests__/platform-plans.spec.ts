@@ -63,11 +63,11 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
 
       await service.seedCanonicalPlansIfEmpty();
 
-      expect(prismaMock.plan.create).toHaveBeenCalledTimes(5);
+      expect(prismaMock.plan.create).toHaveBeenCalledTimes(3);
     });
 
     it('should NOT create or modify plans when database already has plans', async () => {
-      prismaMock.plan.count.mockResolvedValue(5);
+      prismaMock.plan.count.mockResolvedValue(3);
 
       await service.seedCanonicalPlansIfEmpty();
 

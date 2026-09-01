@@ -35,6 +35,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/pricing",
   ],
   [CRM_ROLES.ADMIN]: [
     "/dashboard",
@@ -57,6 +58,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/pricing",
   ],
   [CRM_ROLES.MANAGER]: [
     "/dashboard",
@@ -76,6 +78,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/pricing",
   ],
   [CRM_ROLES.SALES]: [
     "/dashboard",
@@ -92,6 +95,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/pricing",
   ],
   [CRM_ROLES.SUPPORT]: [
     "/dashboard",
@@ -105,6 +109,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/pricing",
   ],
   [CRM_ROLES.EMPLOYEE]: [
     "/dashboard",
@@ -114,6 +119,7 @@ export const roleRouteConfig: Record<RoleKey, string[]> = {
     "/settings",
     "/help",
     "/support",
+    "/pricing",
   ],
 };
 
@@ -123,7 +129,12 @@ export function isRouteAllowed(pathname: string, allowedRoutes: string[]): boole
   }
 
   // Universal modules accessible to all authenticated workspace users
-  if (pathname === "/ai" || pathname.startsWith("/ai/")) {
+  if (
+    pathname === "/ai" ||
+    pathname.startsWith("/ai/") ||
+    pathname === "/pricing" ||
+    pathname.startsWith("/pricing/")
+  ) {
     return true;
   }
 

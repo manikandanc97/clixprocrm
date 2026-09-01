@@ -17,6 +17,9 @@ export interface WorkspaceUsageStats {
   users: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
   contacts: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
   leads: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  tasks: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  pipelines: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  customFields: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
   deals: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
   automations: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
   storageGb: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
@@ -153,9 +156,12 @@ export class SubscriptionEntitlementService {
             maxUsers: parseLimit(dbPlan.maxUsers),
             maxContacts: parseLimit(dbPlan.maxContacts),
             maxLeads: parseLimit(dbPlan.maxLeads),
+            maxPipelines: parseLimit(dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1)),
+            maxTasks: parseLimit(dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1)),
+            maxCustomFields: parseLimit(dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1)),
             maxDeals: parseLimit(dbPlan.maxDeals ?? dbPlan.maxLeads),
-            maxAutomations: parseLimit(dbPlan.maxAutomations ?? 100),
-            storageGb: dbPlan.storageGb || 10,
+            maxAutomations: parseLimit(dbPlan.maxAutomations ?? (dbPlan.id === 'free' ? 1 : dbPlan.id === 'growth' ? 50 : -1)),
+            storageGb: dbPlan.storageGb || (dbPlan.id === 'free' ? 1 : dbPlan.id === 'growth' ? 50 : 200),
             maxApiRequests: parseLimit(dbPlan.maxApiRequests),
             dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
           },
@@ -183,6 +189,7 @@ export class SubscriptionEntitlementService {
       const dbPlans = await (this.prisma as any).plan.findMany({
         where: {
           status: 'ACTIVE',
+          id: { in: ['free', 'growth', 'business'] },
         },
         orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
       });
@@ -197,7 +204,7 @@ export class SubscriptionEntitlementService {
             priceNum: Number(dbPlan.priceNum || 0),
             annualPriceNum: Number(dbPlan.annualPriceNum || (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0)),
             currency: dbPlan.currency || 'INR',
-            billingInterval: 'month',
+            billingInterval: 'user/month',
             pricingMode: (dbPlan.pricingMode as any) || (dbPlan.priceNum === 0 && dbPlan.id !== 'free' ? 'CUSTOM' : 'FIXED'),
             target: dbPlan.description || '',
             description: dbPlan.description || '',
@@ -209,9 +216,12 @@ export class SubscriptionEntitlementService {
               maxUsers: parseLimit(dbPlan.maxUsers),
               maxContacts: parseLimit(dbPlan.maxContacts),
               maxLeads: parseLimit(dbPlan.maxLeads),
+              maxPipelines: parseLimit(dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1)),
+              maxTasks: parseLimit(dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1)),
+              maxCustomFields: parseLimit(dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1)),
               maxDeals: parseLimit(dbPlan.maxDeals ?? dbPlan.maxLeads),
-              maxAutomations: parseLimit(dbPlan.maxAutomations ?? 100),
-              storageGb: dbPlan.storageGb || 10,
+              maxAutomations: parseLimit(dbPlan.maxAutomations ?? (dbPlan.id === 'free' ? 1 : dbPlan.id === 'growth' ? 50 : -1)),
+              storageGb: dbPlan.storageGb || (dbPlan.id === 'free' ? 1 : dbPlan.id === 'growth' ? 50 : 200),
               maxApiRequests: parseLimit(dbPlan.maxApiRequests),
               dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
             },
@@ -262,7 +272,7 @@ export class SubscriptionEntitlementService {
     ]);
 
     // Query live resource counts in parallel for accurate usage reporting
-    const [userCount, contactCount, leadCount, dealCount, attachmentAgg] = await Promise.all([
+    const [userCount, contactCount, leadCount, taskCount, dealCount, attachmentAgg] = await Promise.all([
       this.prisma.tenantUser.count({
         where: { tenantId, status: 'ACTIVE' },
       }),
@@ -270,6 +280,9 @@ export class SubscriptionEntitlementService {
         where: { tenantId, deletedAt: null },
       }),
       this.prisma.lead.count({
+        where: { tenantId, deletedAt: null },
+      }),
+      this.prisma.task.count({
         where: { tenantId, deletedAt: null },
       }),
       this.prisma.deal.count({
@@ -282,7 +295,7 @@ export class SubscriptionEntitlementService {
     ]);
 
     const calculateLimit = (current: number, maxLimit: number) => {
-      if (maxLimit === -1) {
+      if (maxLimit === -1 || maxLimit === null || maxLimit === undefined) {
         return {
           current,
           limit: -1,
@@ -309,10 +322,13 @@ export class SubscriptionEntitlementService {
       users: calculateLimit(userCount, planDef.limits.maxUsers),
       contacts: calculateLimit(contactCount, planDef.limits.maxContacts),
       leads: calculateLimit(leadCount, planDef.limits.maxLeads),
-      deals: calculateLimit(dealCount, planDef.limits.maxDeals),
-      automations: calculateLimit(0, planDef.limits.maxAutomations),
-      storageGb: calculateLimit(storageGbUsed, planDef.limits.storageGb),
-      apiRequests: calculateLimit(0, planDef.limits.maxApiRequests),
+      tasks: calculateLimit(taskCount, planDef.limits.maxTasks),
+      pipelines: calculateLimit(1, planDef.limits.maxPipelines),
+      customFields: calculateLimit(0, planDef.limits.maxCustomFields),
+      deals: calculateLimit(dealCount, planDef.limits.maxDeals ?? -1),
+      automations: calculateLimit(0, planDef.limits.maxAutomations ?? -1),
+      storageGb: calculateLimit(storageGbUsed, planDef.limits.storageGb ?? -1),
+      apiRequests: calculateLimit(0, planDef.limits.maxApiRequests ?? -1),
     };
 
     // Calculate trial days remaining if in trial mode
@@ -386,7 +402,7 @@ export class SubscriptionEntitlementService {
     // Validate maximum limit for plan tier
     if (targetPlanDef.limits.maxUsers !== -1 && seats > targetPlanDef.limits.maxUsers) {
       throw new BadRequestException(
-        `The ${targetPlanDef.name} plan supports a maximum of ${targetPlanDef.limits.maxUsers} seats. For larger teams, please choose Business or Enterprise.`,
+        `The ${targetPlanDef.name} plan supports a maximum of ${targetPlanDef.limits.maxUsers} seats. For larger teams, please choose Business.`,
       );
     }
 
@@ -418,7 +434,6 @@ export class SubscriptionEntitlementService {
     const annualDiscountPercentage = billingCycle === 'annual' ? 17 : 0;
 
     if (billingCycle === 'annual') {
-      // 10 months rate for 12 months (e.g. 2 months free equivalent)
       const baseYearly = targetPlanDef.annualPriceNum > 0 ? targetPlanDef.annualPriceNum : unitPriceMonthly * 10;
       subtotal = baseYearly * seats;
       const fullMonthlyYearly = unitPriceMonthly * 12 * seats;
@@ -508,7 +523,15 @@ export class SubscriptionEntitlementService {
    */
   async assertWithinLimit(
     tenantId: string,
-    limitKey: 'maxUsers' | 'maxContacts' | 'maxLeads' | 'maxDeals' | 'maxAutomations',
+    limitKey:
+      | 'maxUsers'
+      | 'maxContacts'
+      | 'maxLeads'
+      | 'maxTasks'
+      | 'maxPipelines'
+      | 'maxCustomFields'
+      | 'maxDeals'
+      | 'maxAutomations',
     increment = 1,
   ): Promise<void> {
     const tenant = await this.prisma.tenant.findUnique({
@@ -520,7 +543,7 @@ export class SubscriptionEntitlementService {
     const planDef = await this.resolvePlanDefinition(tenant.plan);
     const maxLimit = planDef.limits[limitKey];
 
-    if (maxLimit === -1) return; // Unlimited for enterprise
+    if (maxLimit === -1 || maxLimit === null || maxLimit === undefined) return; // Unlimited
 
     let currentCount = 0;
     if (limitKey === 'maxUsers') {
@@ -529,11 +552,26 @@ export class SubscriptionEntitlementService {
       currentCount = await this.prisma.customer.count({ where: { tenantId, deletedAt: null } });
     } else if (limitKey === 'maxLeads') {
       currentCount = await this.prisma.lead.count({ where: { tenantId, deletedAt: null } });
+    } else if (limitKey === 'maxTasks') {
+      currentCount = await this.prisma.task.count({ where: { tenantId, deletedAt: null } });
     } else if (limitKey === 'maxDeals') {
       currentCount = await this.prisma.deal.count({ where: { tenantId, deletedAt: null } });
     }
 
     if (currentCount + increment > maxLimit) {
+      const entityLabelMap: Record<string, string> = {
+        maxUsers: 'user',
+        maxContacts: 'contact',
+        maxLeads: 'lead',
+        maxTasks: 'task',
+        maxPipelines: 'pipeline',
+        maxCustomFields: 'custom field',
+        maxDeals: 'deal',
+        maxAutomations: 'automation',
+      };
+      const entityLabel = entityLabelMap[limitKey] || 'record';
+      const nextPlanName = planDef.id === 'free' ? 'Growth' : 'Business';
+
       throw new ForbiddenException({
         statusCode: 403,
         error: 'PLAN_LIMIT_REACHED',
@@ -541,7 +579,8 @@ export class SubscriptionEntitlementService {
         currentCount,
         maxLimit,
         currentPlan: planDef.name,
-        message: `You have reached your ${limitKey.replace('max', '')} limit (${currentCount}/${maxLimit}) on the ${planDef.name} plan. Please upgrade your subscription to add more records.`,
+        requiredPlan: nextPlanName,
+        message: `${planDef.name} plan ${entityLabel} limit reached. ${currentCount} / ${maxLimit} ${entityLabel}s used. Upgrade to ${nextPlanName} to add more ${entityLabel}s.`,
       });
     }
   }

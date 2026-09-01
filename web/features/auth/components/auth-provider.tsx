@@ -139,6 +139,10 @@ function buildAccess(user: AuthUser | null): RoleAccess {
     allowedRoutes.push("/ai");
   }
 
+  if (!allowedRoutes.includes("/pricing")) {
+    allowedRoutes.push("/pricing");
+  }
+
   if (resolvedPermissions.includes("Help Center") || resolvedPermissions.includes("Support") || roleKey === CRM_ROLES.ADMIN || isSuperAdmin) {
     if (!allowedRoutes.includes("/help")) {
       allowedRoutes.push("/help");

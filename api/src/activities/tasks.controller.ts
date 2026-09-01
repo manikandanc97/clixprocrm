@@ -23,6 +23,8 @@ import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
 import { PermissionsGuard } from '../auth/permissions.guard';
 import { Permissions } from '../auth/permissions.decorator';
+import { PlanLimitGuard } from '../common/plans/plan-feature.guard';
+import { RequirePlanLimit } from '../common/plans/plan-feature.decorator';
 
 @Controller('crm/tasks')
 @UseGuards(SupabaseAuthGuard, TenantGuard, PermissionsGuard)
@@ -46,6 +48,8 @@ export class TasksController {
 
   @Post()
   @Permissions('Tasks')
+  @UseGuards(PlanLimitGuard)
+  @RequirePlanLimit('maxTasks')
   async createTask(@Req() req: any, @Body() body: CreateTaskDto) {
     const data = await this.tasksService.createTask(
       req.tenantId,

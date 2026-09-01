@@ -89,7 +89,10 @@ export default function PricingPage() {
   const activePlanId = normalizePlanId(subscription?.planId || "free");
   const currentActiveUsers = usage?.users?.current ?? 1;
 
-  const displayPlans = availablePlans && availablePlans.length > 0 ? availablePlans : Object.values(CANONICAL_PLANS);
+  const rawDisplayPlans = availablePlans && availablePlans.length > 0 ? availablePlans : Object.values(CANONICAL_PLANS);
+  const displayPlans = rawDisplayPlans
+    .filter((p) => ["free", "growth", "business"].includes(normalizePlanId(p.id)))
+    .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   // Pre-select plan if passed in query param
   useEffect(() => {
@@ -274,8 +277,8 @@ export default function PricingPage() {
           </div>
         </div>
 
-        {/* DYNAMIC PRICING CARDS IN BALANCED GRID */}
-        <div className="grid grid-cols-1 md:grid-cols-3 lg:grid-cols-5 gap-4 items-stretch">
+        {/* 3 DYNAMIC PRICING CARDS IN BALANCED GRID */}
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 items-stretch max-w-5xl mx-auto">
           {displayPlans.map((planItem) => {
             const isCurrent = planItem.id === activePlanId;
             const isGrowth = planItem.recommended || planItem.id === "growth";
@@ -287,15 +290,15 @@ export default function PricingPage() {
             return (
               <div
                 key={planItem.id}
-                className={`flex flex-col justify-between rounded-2xl p-5 transition-all relative ${
+                className={`flex flex-col justify-between rounded-2xl p-6 transition-all relative ${
                   isGrowth
-                    ? "bg-card border-2 border-primary ring-4 ring-primary/10 shadow-lg lg:-translate-y-1 z-10"
+                    ? "bg-card border-2 border-primary ring-4 ring-primary/10 shadow-lg md:-translate-y-1 z-10"
                     : "bg-card border border-border/80 hover:border-border shadow-xs"
                 }`}
               >
                 {/* Popular Badge */}
                 {isGrowth && (
-                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-bold uppercase tracking-wider shadow-sm flex items-center gap-1">
+                  <div className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-primary text-primary-foreground text-[10px] font-extrabold uppercase tracking-wider shadow-sm flex items-center gap-1">
                     <Sparkles className="w-3 h-3" />
                     <span>Most Popular</span>
                   </div>
@@ -303,24 +306,24 @@ export default function PricingPage() {
 
                 <div>
                   <div className="flex items-center justify-between mb-2">
-                    <h3 className="font-extrabold text-foreground text-base">
+                    <h3 className="font-extrabold text-foreground text-lg">
                       {planItem.name}
                     </h3>
                     <PlanBadge plan={planItem.id} size="xs" showIcon={false} />
                   </div>
 
-                  <p className="text-[11.5px] text-muted-foreground min-h-[30px] leading-relaxed">
-                    {planItem.target}
+                  <p className="text-xs text-muted-foreground min-h-[32px] leading-relaxed">
+                    {planItem.target || planItem.description}
                   </p>
 
                   {/* Price Section */}
-                  <div className="my-4 pt-3 border-t border-border/60">
+                  <div className="my-5 pt-3.5 border-t border-border/60">
                     <div className="flex items-baseline gap-1">
-                      <span className="text-2xl font-black text-foreground tracking-tight">
+                      <span className="text-3xl font-black text-foreground tracking-tight">
                         {pricingInfo.priceText}
                       </span>
                     </div>
-                    <span className="text-[10.5px] text-muted-foreground block mt-0.5">
+                    <span className="text-xs text-muted-foreground block mt-0.5">
                       {pricingInfo.periodText}
                     </span>
                     {billingCycle === "annual" && pricingInfo.savingsText && (
@@ -331,9 +334,9 @@ export default function PricingPage() {
                   </div>
 
                   {/* Key Features List */}
-                  <ul className="space-y-2.5 my-4 text-xs text-foreground/90">
+                  <ul className="space-y-3 my-5 text-xs text-foreground/90">
                     {planItem.featureDescriptions.map((desc, idx) => (
-                      <li key={idx} className="flex items-start gap-2">
+                      <li key={idx} className="flex items-start gap-2.5">
                         <div
                           className={`p-0.5 rounded-full mt-0.5 shrink-0 ${
                             isGrowth
@@ -341,9 +344,9 @@ export default function PricingPage() {
                               : "bg-emerald-500/20 text-emerald-600 dark:text-emerald-400"
                           }`}
                         >
-                          <Check className="w-3 h-3" />
+                          <Check className="w-3.5 h-3.5" />
                         </div>
-                        <span className="leading-tight text-[11.5px]">{desc}</span>
+                        <span className="leading-snug text-xs">{desc}</span>
                       </li>
                     ))}
                   </ul>
@@ -355,7 +358,7 @@ export default function PricingPage() {
                     <Button
                       disabled
                       variant="outline"
-                      className="w-full text-xs font-bold bg-muted/60 text-muted-foreground border-border cursor-default"
+                      className="w-full text-xs font-bold bg-muted/60 text-muted-foreground border-border cursor-default h-10"
                     >
                       Current Plan
                     </Button>
@@ -363,14 +366,14 @@ export default function PricingPage() {
                     <Button
                       onClick={() => setEnterpriseModalOpen(true)}
                       variant="outline"
-                      className="w-full text-xs font-bold border-border hover:bg-muted"
+                      className="w-full text-xs font-bold border-border hover:bg-muted h-10"
                     >
                       Contact Sales
                     </Button>
                   ) : (
                     <Button
                       onClick={() => handleOpenUpgradeModal(planItem)}
-                      className={`w-full text-xs font-bold shadow-xs ${
+                      className={`w-full text-xs font-bold shadow-xs h-10 ${
                         isGrowth
                           ? "bg-primary text-primary-foreground hover:brightness-110"
                           : isUpgrade
@@ -381,7 +384,7 @@ export default function PricingPage() {
                       {isUpgrade
                         ? `Upgrade to ${planItem.name}`
                         : isDowngrade
-                        ? `Downgrade`
+                        ? `Downgrade to ${planItem.name}`
                         : `Choose ${planItem.name}`}
                     </Button>
                   )}
@@ -391,8 +394,8 @@ export default function PricingPage() {
           })}
         </div>
 
-        {/* 12-CATEGORY DETAILED COMPARISON TABLE */}
-        <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-xs mt-14">
+        {/* 3-TIER DETAILED COMPARISON TABLE */}
+        <div className="rounded-2xl border border-border/80 bg-card p-6 shadow-xs mt-14 max-w-5xl mx-auto">
           <div
             className="flex items-center justify-between cursor-pointer select-none"
             onClick={() => setShowComparison(!showComparison)}
@@ -413,17 +416,15 @@ export default function PricingPage() {
 
           {showComparison && (
             <div className="mt-6 overflow-x-auto">
-              <table className="w-full text-left text-xs border-collapse min-w-[760px]">
+              <table className="w-full text-left text-xs border-collapse min-w-[650px]">
                 <thead>
                   <tr className="border-b border-border/80 bg-muted/40">
-                    <th className="p-3.5 font-bold text-foreground w-[28%]">Feature Category</th>
-                    <th className="p-3.5 font-bold text-foreground text-center w-[14%]">Free</th>
-                    <th className="p-3.5 font-bold text-foreground text-center w-[14%]">Starter (₹499)</th>
-                    <th className="p-3.5 font-bold text-primary text-center bg-primary/5 w-[16%]">
-                      Growth (₹999) ⭐
+                    <th className="p-3.5 font-bold text-foreground w-[37%]">Feature Category</th>
+                    <th className="p-3.5 font-bold text-foreground text-center w-[21%]">Free</th>
+                    <th className="p-3.5 font-bold text-primary text-center bg-primary/5 w-[21%]">
+                      Growth (₹499) ⭐
                     </th>
-                    <th className="p-3.5 font-bold text-foreground text-center w-[14%]">Business (₹1,799)</th>
-                    <th className="p-3.5 font-bold text-foreground text-center w-[14%]">Enterprise</th>
+                    <th className="p-3.5 font-bold text-foreground text-center w-[21%]">Business (₹999)</th>
                   </tr>
                 </thead>
                 <tbody className="divide-y divide-border/40">
@@ -431,7 +432,7 @@ export default function PricingPage() {
                     <React.Fragment key={category.category}>
                       <tr className="bg-muted/60">
                         <td
-                          colSpan={6}
+                          colSpan={4}
                           className="py-2.5 px-3.5 font-bold text-xs text-foreground uppercase tracking-wider"
                         >
                           {category.category}
@@ -444,12 +445,10 @@ export default function PricingPage() {
                             <div className="text-[11px] text-muted-foreground">{feature.description}</div>
                           </td>
                           <td className="p-3.5 text-center">{renderMatrixCell(feature.free)}</td>
-                          <td className="p-3.5 text-center">{renderMatrixCell(feature.starter)}</td>
                           <td className="p-3.5 text-center bg-primary/5 font-semibold text-primary">
                             {renderMatrixCell(feature.growth)}
                           </td>
                           <td className="p-3.5 text-center">{renderMatrixCell(feature.business)}</td>
-                          <td className="p-3.5 text-center font-medium">{renderMatrixCell(feature.enterprise)}</td>
                         </tr>
                       ))}
                     </React.Fragment>
