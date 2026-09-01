@@ -35,8 +35,11 @@ import { useViewMode } from "@/shared/hooks/useViewMode";
 import { ContactsSkeleton } from "@/features/contacts/components/ContactsSkeleton";
 import { BulkImportModal } from "@/features/leads/components/BulkImportModal";
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 const ContactsPage = () => {
   const searchParams = useSearchParams();
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
 
   // URL State Sync
   const initialStatus = searchParams.get("status") || "all";
@@ -44,8 +47,8 @@ const ContactsPage = () => {
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useViewMode("contacts", "list");
 
-  const { data: leadsData, isLoading: leadsLoading, error: leadsError, refetch: refetchLeads } = useLeads();
-  const { data: customersData, isLoading: customersLoading, error: customersError, refetch: refetchCustomers } = useCustomers();
+  const { data: leadsData, isLoading: leadsLoading, isPending: leadsPending, error: leadsError, refetch: refetchLeads } = useLeads();
+  const { data: customersData, isLoading: customersLoading, isPending: customersPending, error: customersError, refetch: refetchCustomers } = useCustomers();
 
   const { mutate: deleteLead } = useDeleteLead();
   const { mutate: deleteCustomer } = useDeleteCustomer();
@@ -137,7 +140,11 @@ const ContactsPage = () => {
     });
   }, [combinedContacts, searchQuery, statusFilter]);
 
-  if ((leadsLoading || customersLoading) && combinedContacts.length === 0) {
+  const isInitialLoading =
+    (!leadsData || !customersData) &&
+    (leadsLoading || customersLoading || leadsPending || customersPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading && combinedContacts.length === 0) {
     return <ContactsSkeleton viewMode={viewMode} />;
   }
 

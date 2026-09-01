@@ -32,13 +32,16 @@ import { useRouter } from "next/navigation";
 import { LayoutDashboard, UserPlus } from "lucide-react";
 import React from "react";
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 const ReportsPage = () => {
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const router = useRouter();
   const searchParams = useSearchParams();
   const [filters, setFilters] = useState<{ startDate?: string, endDate?: string, assignedToId?: string }>({});
   const [isTargetsConfigOpen, setIsTargetsConfigOpen] = useState(false);
   
-  const { data, isLoading: loading, error, refetch, isFetching } = useReports(filters);
+  const { data, isLoading: loading, isPending, error, refetch, isFetching } = useReports(filters);
   
   const { CurrencyIcon } = useCurrency();
 
@@ -140,7 +143,9 @@ const ReportsPage = () => {
     }
   };
 
-  if (loading && !data) {
+  const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading) {
     return <ReportsSkeleton />;
   }
 

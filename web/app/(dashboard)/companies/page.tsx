@@ -32,12 +32,15 @@ const CompaniesGrid = dynamic(() => import("@/features/companies/components/Comp
 });
 import { useViewMode } from "@/shared/hooks/useViewMode";
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 const CompaniesPage = () => {
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useViewMode("companies", "list");
 
-  const { data, isLoading: loading, error, refetch } = useCompanies();
+  const { data, isLoading: loading, isPending, error, refetch } = useCompanies();
   const safeCompanies = useMemo(() => Array.isArray(data?.companies) ? data.companies : [], [data]);
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -96,7 +99,10 @@ const CompaniesPage = () => {
   const handleNewCompany = () => {
     setIsAddModalOpen(true);
   };
-  if (loading && safeCompanies.length === 0) {
+
+  const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading && safeCompanies.length === 0) {
     return <CompaniesSkeleton viewMode={viewMode} />;
   }
 

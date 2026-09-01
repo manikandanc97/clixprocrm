@@ -44,7 +44,10 @@ import { formatCurrency } from "@/lib/crm-formatters";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { DealContextualSettings } from "@/features/deals/components/DealContextualSettings";
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 const DealsPage = () => {
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const searchParams = useSearchParams();
   const currency = useCRMStore((state) => state.currency);
   
@@ -73,8 +76,8 @@ const DealsPage = () => {
     }
   }, [searchParams, viewMode, setViewMode]);
 
-  const { data: dealsData, isLoading: dealsLoading, error: dealsError, refetch: refetchDeals } = useDeals();
-  const { data: pipelineData, isLoading: pipelineLoading, error: pipelineError, refetch: refetchPipeline } = usePipeline();
+  const { data: dealsData, isLoading: dealsLoading, isPending: dealsPending, error: dealsError, refetch: refetchDeals } = useDeals();
+  const { data: pipelineData, isLoading: pipelineLoading, isPending: pipelinePending, error: pipelineError, refetch: refetchPipeline } = usePipeline();
 
   const deleteDeal = useDeleteDeal();
   const deleteDealsBulk = useBulkDeleteDeals();
@@ -137,7 +140,13 @@ const DealsPage = () => {
     setPreselectedStage(stage);
     setIsAddModalOpen(true);
   };
-  if ((dealsLoading && viewMode !== "pipeline") || (pipelineLoading && viewMode === "pipeline")) {
+
+  const isInitialLoading =
+    viewMode === "pipeline"
+      ? !pipelineData && (pipelineLoading || pipelinePending || !isHydrated || !isAuthenticated || isInitializing)
+      : !dealsData && (dealsLoading || dealsPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading) {
     return <DealsSkeleton viewMode={viewMode} />;
   }
 

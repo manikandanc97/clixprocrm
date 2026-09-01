@@ -317,7 +317,18 @@ export default function SecurityCenterPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">
-                {paginatedIncidents.length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse h-14">
+                      <td className="py-3 px-4 sm:px-6"><div className="h-4 w-24 bg-muted rounded font-mono" /></td>
+                      <td className="py-3 px-4 sm:px-6"><div className="h-5 w-16 bg-muted rounded-full" /></td>
+                      <td className="py-3 px-4 sm:px-6"><div className="h-5 w-16 bg-muted rounded-full" /></td>
+                      <td className="py-3 px-4 sm:px-6"><div className="h-4 w-48 bg-muted rounded" /></td>
+                      <td className="py-3 px-4 sm:px-6"><div className="h-4 w-24 bg-muted rounded" /></td>
+                      <td className="py-3 px-4 sm:px-6 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
+                    </tr>
+                  ))
+                ) : paginatedIncidents.length === 0 ? (
                   <tr>
                     <td colSpan={6} className="text-center py-12 text-muted-foreground">
                       <ShieldCheck className="h-8 w-8 mx-auto text-emerald-500 mb-2" />

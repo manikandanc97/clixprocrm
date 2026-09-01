@@ -47,6 +47,8 @@ import { EditTaskModal } from "@/features/tasks/components/EditTaskModal";
 import { useSearchParams } from "next/navigation";
 import { TaskContextualSettings } from "@/features/tasks/components/TaskContextualSettings";
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 const VIEW_MODES = [
   { id: "list", icon: List, label: "List" },
   { id: "grid", icon: Grid, label: "Grid" },
@@ -66,6 +68,7 @@ const STATUS_FILTERS = [
 ];
 
 const TasksPage = () => {
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -97,7 +100,7 @@ const TasksPage = () => {
     return params;
   }, [searchQuery, statusFilter]);
 
-  const { data, isLoading: loading, error, refetch } = useTasks(queryParams);
+  const { data, isLoading: loading, isPending, error, refetch } = useTasks(queryParams);
 
   useEffect(() => {
     if (searchParams.get("new") === "true") {
@@ -152,7 +155,10 @@ const TasksPage = () => {
   const handleNewTask = () => {
     setIsAddModalOpen(true);
   };
-  if (loading && safeTasks.length === 0) {
+
+  const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading && safeTasks.length === 0) {
     return <TasksSkeleton viewMode={viewMode} />;
   }
 

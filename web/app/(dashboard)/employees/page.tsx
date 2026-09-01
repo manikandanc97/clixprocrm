@@ -67,6 +67,8 @@ import { useViewMode } from "@/shared/hooks/useViewMode";
 import { EmployeesGrid } from "@/features/employees/components/EmployeesGrid";
 import { AnimatePresence, motion } from "framer-motion";
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 const STAT_ICONS: Record<string, typeof Users> = {
   "Total Employees": Users,
   "Active Now": UserCheck,
@@ -84,9 +86,10 @@ const STAT_COLORS: Record<string, "indigo" | "emerald" | "orange" | "violet"> = 
 const getSafeStr = (val: unknown) => (typeof val === 'string' ? val : typeof val === 'object' && val !== null ? (val as Record<string, unknown>).name as string || '' : String(val || ''));
 
 export default function EmployeesPage() {
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [viewMode, setViewMode] = useViewMode("employees", "list");
-  const { data: hrmData, isLoading: loading } = useEmployees();
+  const { data: hrmData, isLoading: loading, isPending } = useEmployees();
   
   const employees = hrmData?.employees || [];
   const employeeStats = hrmData?.stats || [];
@@ -157,7 +160,9 @@ export default function EmployeesPage() {
     currentPage * rowsPerPage
   );
 
-  if (loading) {
+  const isInitialLoading = !hrmData && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading && employees.length === 0) {
     return <EmployeesSkeleton viewMode={viewMode} />;
   }
 

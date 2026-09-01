@@ -146,7 +146,18 @@ export default function SuperAdminAnalyticsPage() {
           </div>
 
           <div className="h-64 flex items-end justify-between gap-3 pt-6 pb-2">
-            {data?.monthlyTrends && data.monthlyTrends.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 6 }).map((_, idx) => (
+                <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end animate-pulse">
+                  <div className="h-3 w-6 bg-muted rounded" />
+                  <div
+                    className="w-full max-w-[48px] rounded-t-xl bg-muted"
+                    style={{ height: `${30 + (idx % 3) * 25}%` }}
+                  />
+                  <div className="h-2.5 w-10 bg-muted/60 rounded" />
+                </div>
+              ))
+            ) : data?.monthlyTrends && data.monthlyTrends.length > 0 ? (
               data.monthlyTrends.map((t, idx) => {
                 const heightPercent = Math.max(14, Math.min(100, (t.organizations || 1) * 25));
                 return (
@@ -183,7 +194,20 @@ export default function SuperAdminAnalyticsPage() {
           </h3>
 
           <div className="space-y-3 pt-1">
-            {data?.planBreakdown && data.planBreakdown.length > 0 ? (
+            {loading ? (
+              Array.from({ length: 3 }).map((_, idx) => (
+                <div key={idx} className="p-3.5 rounded-xl bg-muted/40 border border-border/40 space-y-2 animate-pulse">
+                  <div className="flex justify-between items-center">
+                    <div className="h-3.5 w-20 bg-muted rounded" />
+                    <div className="h-3.5 w-16 bg-muted rounded" />
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <div className="h-2.5 w-24 bg-muted/60 rounded" />
+                    <div className="h-2.5 w-24 bg-muted/60 rounded" />
+                  </div>
+                </div>
+              ))
+            ) : data?.planBreakdown && data.planBreakdown.length > 0 ? (
               data.planBreakdown.map((item) => (
                 <div
                   key={item.plan}

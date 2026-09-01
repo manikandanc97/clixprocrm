@@ -412,7 +412,19 @@ export default function SuperAdminBillingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {subscriptions.length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse h-12">
+                      <td className="py-3 px-4"><div className="h-4 w-32 bg-muted rounded" /></td>
+                      <td className="py-3 px-3"><div className="h-4 w-20 bg-muted rounded" /></td>
+                      <td className="py-3 px-3 text-center"><div className="h-4 w-16 bg-muted rounded mx-auto" /></td>
+                      <td className="py-3 px-3 text-center"><div className="h-4 w-8 bg-muted rounded mx-auto" /></td>
+                      <td className="py-3 px-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
+                      <td className="py-3 px-3"><div className="h-4 w-24 bg-muted rounded" /></td>
+                      <td className="py-3 px-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
+                    </tr>
+                  ))
+                ) : subscriptions.length === 0 ? (
                   <tr>
                     <td colSpan={7} className="py-8 text-center text-muted-foreground">
                       No platform subscriptions found.
@@ -503,7 +515,20 @@ export default function SuperAdminBillingPage() {
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/60">
-                {invoices.length === 0 ? (
+                {loading ? (
+                  Array.from({ length: 5 }).map((_, i) => (
+                    <tr key={i} className="animate-pulse h-12">
+                      <td className="py-3 px-4"><div className="h-4 w-24 bg-muted rounded font-mono" /></td>
+                      <td className="py-3 px-3"><div className="h-4 w-32 bg-muted rounded" /></td>
+                      <td className="py-3 px-3"><div className="h-4 w-28 bg-muted rounded" /></td>
+                      <td className="py-3 px-3"><div className="h-4 w-20 bg-muted rounded" /></td>
+                      <td className="py-3 px-3 text-right"><div className="h-4 w-16 bg-muted rounded ml-auto" /></td>
+                      <td className="py-3 px-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
+                      <td className="py-3 px-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
+                      <td className="py-3 px-3 text-center"><div className="h-6 w-14 bg-muted rounded mx-auto" /></td>
+                    </tr>
+                  ))
+                ) : invoices.length === 0 ? (
                   <tr>
                     <td colSpan={8} className="py-8 text-center text-muted-foreground">
                       No platform SaaS invoices found.

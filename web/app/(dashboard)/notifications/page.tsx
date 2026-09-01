@@ -62,9 +62,12 @@ function safeFormatDistanceToNow(time: string | Date | number | null | undefined
   }
 }
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 export default function NotificationsPage() {
   const router = useRouter();
-  const { data, isLoading, refetch, isRefetching } = useNotifications();
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
+  const { data, isLoading, isPending, refetch, isRefetching } = useNotifications();
   const markReadMutation = useMarkNotificationRead();
   const markAllReadMutation = useMarkAllNotificationsRead();
   const deleteMutation = useDeleteNotification();
@@ -286,7 +289,7 @@ export default function NotificationsPage() {
       {/* Notifications List */}
       <CRMCard className="flex-1 min-h-0 overflow-hidden flex flex-col p-0">
         <div className="flex-1 overflow-y-auto divide-y divide-border/40 custom-scrollbar">
-          {isLoading ? (
+          {(!data && (isLoading || isPending || !isHydrated || !isAuthenticated || isInitializing)) ? (
             <div className="p-4 space-y-4">
               {[1, 2, 3, 4, 5].map((i) => (
                 <div key={i} className="flex gap-4 items-center">

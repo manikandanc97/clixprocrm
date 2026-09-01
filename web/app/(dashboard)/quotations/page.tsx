@@ -36,7 +36,10 @@ import { useSearchParams } from "next/navigation";
 import { QuotationType } from "@/shared/types/quotation";
 import { QuotationContextualSettings } from "@/features/quotations/components/QuotationContextualSettings";
 
+import { useAuth } from "@/features/auth/components/auth-provider";
+
 const QuotationsPage = () => {
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
   const [viewMode, setViewMode] = useViewMode("quotations", "list");
@@ -45,7 +48,7 @@ const QuotationsPage = () => {
   const { quotations, setQuotations } = useCRMStore();
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const safeQuotations = Array.isArray(quotations) ? quotations : [];
-  const { data, isLoading: loading, error, refetch } = useQuotations();
+  const { data, isLoading: loading, isPending, error, refetch } = useQuotations();
 
   const searchParams = useSearchParams();
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
@@ -115,7 +118,10 @@ const QuotationsPage = () => {
     setEditQuote(null);
     setIsAddModalOpen(true);
   };
-  if (loading && safeQuotations.length === 0) {
+
+  const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading && safeQuotations.length === 0) {
     return <QuotationsSkeleton viewMode={viewMode} />;
   }
 

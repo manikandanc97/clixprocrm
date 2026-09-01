@@ -204,12 +204,15 @@ export function useCustomers() {
 export function useDashboardInitializer(timeframeProp?: string) {
   const storeTimeframe = useCRMStore((state) => state.activeTimeframe);
   const timeframe = timeframeProp || storeTimeframe;
-  const { isAuthenticated, isInitializing: isAuthInitializing } = useAuth();
+  const { isAuthenticated, isHydrated, isInitializing: isAuthInitializing } = useAuth();
   
   // Primary dashboard data
   const dashboard = useDashboardData(timeframe);
 
-  const isInitializing = isAuthInitializing || (isAuthenticated && dashboard.isLoading && !dashboard.data);
+  const isInitializing =
+    !isHydrated ||
+    isAuthInitializing ||
+    (isAuthenticated && (dashboard.isLoading || dashboard.isPending) && !dashboard.data);
 
   return {
     isAuthenticated,

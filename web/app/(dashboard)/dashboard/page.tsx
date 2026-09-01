@@ -115,7 +115,7 @@ const DashboardPage = () => {
   const { data: pipelineData, isLoading: isPipelineLoading } = usePipeline();
 
   const isWorkspaceEmpty = useMemo(() => {
-    if (isDashboardLoading || isLeadsLoading || isPipelineLoading) return false;
+    if (!dashboardData || isDashboardLoading || isLeadsLoading || isPipelineLoading) return false;
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const leads = (leadsData as any)?.leads || [];

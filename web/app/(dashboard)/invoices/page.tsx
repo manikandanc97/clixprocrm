@@ -48,8 +48,10 @@ import { CreateInvoiceModal } from "@/features/invoices/components/CreateInvoice
 import { InvoiceDetailModal } from "@/features/invoices/components/InvoiceDetailModal";
 import { RecordPaymentModal } from "@/features/invoices/components/RecordPaymentModal";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "@/features/auth/components/auth-provider";
 
 export default function InvoicesPage() {
+  const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const searchParams = useSearchParams();
   const [searchQuery, setSearchQuery] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -82,7 +84,7 @@ export default function InvoicesPage() {
 
   const { formatCurrency } = useCurrency();
 
-  const { data, isLoading: loading, error, refetch } = useInvoices({
+  const { data, isLoading: loading, isPending, error, refetch } = useInvoices({
     search: searchQuery || undefined,
     status: statusFilter !== "all" ? statusFilter : undefined,
   });
@@ -112,14 +114,11 @@ export default function InvoicesPage() {
         const dateB = b.dueDate ? new Date(b.dueDate).getTime() : 0;
         return (dateA - dateB) * dir;
       }
-      if (sortConfig.key === "totalAmount") {
-        return ((a.totalAmount || 0) - (b.totalAmount || 0)) * dir;
+      if (sortConfig.key === "total") {
+        return ((a.total || 0) - (b.total || 0)) * dir;
       }
-      if (sortConfig.key === "paidAmount") {
-        return ((a.paidAmount || 0) - (b.paidAmount || 0)) * dir;
-      }
-      if (sortConfig.key === "balanceAmount") {
-        return ((a.balanceAmount || 0) - (b.balanceAmount || 0)) * dir;
+      if (sortConfig.key === "balance") {
+        return ((a.balance || 0) - (b.balance || 0)) * dir;
       }
       if (sortConfig.key === "status") {
         return (a.status || "").localeCompare(b.status || "") * dir;
@@ -127,16 +126,21 @@ export default function InvoicesPage() {
       return 0;
     });
   }, [invoices, sortConfig]);
-  const stats = data?.stats || {
-    totalInvoiced: 0,
-    totalPaid: 0,
-    totalPending: 0,
-    totalOverdue: 0,
-    paidCount: 0,
-    pendingCount: 0,
-    overdueCount: 0,
-    totalCount: 0,
-  };
+
+  const stats = useMemo(() => {
+    return (
+      data?.stats || {
+        totalInvoiced: invoices.reduce((acc: number, inv: any) => acc + (inv.totalAmount || inv.total || 0), 0),
+        totalPaid: invoices.reduce((acc: number, inv: any) => acc + (inv.paidAmount || 0), 0),
+        totalPending: invoices.reduce((acc: number, inv: any) => acc + (inv.balanceAmount || inv.balance || 0), 0),
+        totalOverdue: invoices.filter((inv: any) => inv.isOverdue || inv.status === "OVERDUE").reduce((acc: number, inv: any) => acc + (inv.balanceAmount || inv.balance || 0), 0),
+        paidCount: invoices.filter((inv: any) => inv.paymentStatus === "PAID" || inv.status === "PAID").length,
+        pendingCount: invoices.filter((inv: any) => inv.status === "SENT" || inv.paymentStatus === "PARTIALLY_PAID" || inv.paymentStatus === "UNPAID").length,
+        overdueCount: invoices.filter((inv: any) => inv.isOverdue || inv.status === "OVERDUE").length,
+        totalCount: invoices.length,
+      }
+    );
+  }, [data?.stats, invoices]);
 
   const getStatusBadge = (st: string) => {
     switch (st?.toUpperCase()) {
@@ -194,7 +198,9 @@ export default function InvoicesPage() {
     window.open(`/api/crm/invoices/${id}/pdf`, "_blank");
   };
 
-  if (loading && invoices.length === 0) {
+  const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isInitialLoading && invoices.length === 0) {
     return <InvoicesSkeleton />;
   }
 

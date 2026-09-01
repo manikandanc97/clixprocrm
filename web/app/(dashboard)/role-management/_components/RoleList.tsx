@@ -89,7 +89,7 @@ export const getRoleColor = (role?: Role | null): string => {
 
 export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => void }) {
   const queryClient = useQueryClient();
-  const { user } = useAuth();
+  const { user, isHydrated, isAuthenticated, isInitializing } = useAuth();
   const currentUserRole = (user?.role || "EMPLOYEE").toUpperCase();
   const canManageRoles =
     currentUserRole === "SUPER ADMIN" ||
@@ -118,7 +118,7 @@ export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => 
   });
 
   // Queries
-  const { data: rolesData, isLoading: isRolesLoading } = useQuery<{
+  const { data: rolesData, isLoading: isRolesLoading, isPending: isRolesPending } = useQuery<{
     success: boolean;
     data: Role[];
   }>({
@@ -168,7 +168,7 @@ export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => 
     };
   }, [roles, statsData]);
 
-  const isLoading = isRolesLoading;
+  const isLoading = !rolesData && (isRolesLoading || isRolesPending || !isHydrated || !isAuthenticated || isInitializing);
 
   // Pagination State
   const [currentPage, setCurrentPage] = useState(1);
