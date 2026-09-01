@@ -301,6 +301,7 @@ export default function InvoicesPage() {
               searchQuery={searchQuery}
               setSearchQuery={setSearchQuery}
               placeholder="Search invoices by number, client, company..."
+              sticky={false}
             >
               <div className="flex items-center gap-1.5 flex-wrap">
                 {[
@@ -335,7 +336,7 @@ export default function InvoicesPage() {
                     exit={{ opacity: 0 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    <div className="crm-table-wrap">
+                    <div className="crm-table-wrap crm-table-no-pagination">
                       <div className="overflow-auto flex-1 min-h-0">
                         <table className="w-full text-xs">
                           <thead className="sticky top-0 z-20 bg-card border-b border-border/80 text-muted-foreground font-semibold">

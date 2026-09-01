@@ -232,6 +232,7 @@ export default function EmployeesPage() {
             viewMode={viewMode}
             setViewMode={setViewMode}
             placeholder="Search employees by name or department..."
+            sticky={false}
           />
 
           <AnimatePresence mode="wait">

@@ -278,6 +278,7 @@ const DealsPage = () => {
                   { id: "pipeline", icon: GitBranch, label: "Pipeline" },
                 ]}
                 placeholder="Search deals by name or company..."
+                sticky={false}
               >
                 {viewMode === "pipeline" ? (
                   <div className="flex items-center gap-2">

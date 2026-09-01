@@ -389,6 +389,7 @@ export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => 
           searchQuery={searchQuery}
           setSearchQuery={setSearchQuery}
           placeholder="Search roles by name or description..."
+          sticky={false}
         >
           {canManageRoles && (
             <Button

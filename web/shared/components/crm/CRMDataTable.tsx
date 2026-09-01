@@ -29,7 +29,7 @@ export const CRMDataTable = ({
 }: CRMDataTableProps) => {
   return (
     <div className={cn(crmTableStyles.container, !hasPagination && "crm-table-no-pagination", containerClassName)}>
-      <div className="overflow-x-auto w-full">
+      <div className="overflow-auto flex-1 min-h-0">
         <table className={cn(crmTableStyles.table, className)}>
           {children}
         </table>

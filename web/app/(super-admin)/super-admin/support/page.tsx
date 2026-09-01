@@ -245,7 +245,7 @@ export default function SuperAdminSupportPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Standard CRM Page Header */}
       <CRMPageHeader
         title="Platform Support Desk & Inbox"
@@ -300,15 +300,17 @@ export default function SuperAdminSupportPage() {
         </CRMMetricsGrid>
       </div>
 
-      {/* 3. Standard CRM Toolbar */}
-      <CRMToolbar
-        searchQuery={search}
-        setSearchQuery={(val) => {
-          setSearch(val);
-          setPage(1);
-        }}
-        placeholder="Search ticket #, subject, workspace, customer email..."
-      >
+      {/* 3. Two-Stage Scroll Workspace */}
+      <div className="crm-table-workspace-sticky">
+        <CRMToolbar
+          searchQuery={search}
+          setSearchQuery={(val) => {
+            setSearch(val);
+            setPage(1);
+          }}
+          placeholder="Search ticket #, subject, workspace, customer email..."
+          sticky={false}
+        >
         <div className="flex items-center gap-2 flex-wrap">
           {/* Priority Filter */}
           <Select
@@ -613,22 +615,19 @@ export default function SuperAdminSupportPage() {
         </CRMTableBody>
       </CRMDataTable>
 
-      {/* Pagination */}
-      {totalPages > 1 && (
-        <div className="p-3 border-t border-border/70 flex items-center justify-between">
-          <span className="text-xs text-muted-foreground">
-            Showing {tickets.length} of {totalCount} tickets
-          </span>
-          <CRMPagination
-            currentPage={page}
-            totalPages={totalPages}
-            totalItems={totalCount}
-            rowsPerPage={15}
-            onPageChange={setPage}
-            onRowsPerPageChange={() => {}}
-          />
-        </div>
+      {/* 5. Pagination */}
+      {!loading && totalPages > 1 && (
+        <CRMPagination
+          currentPage={page}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          rowsPerPage={15}
+          onPageChange={setPage}
+          onRowsPerPageChange={() => {}}
+          itemName="Tickets"
+        />
       )}
+      </div>
 
       {/* Delete Confirmation Dialog */}
       <Dialog open={isDeleteDialogOpen} onOpenChange={setIsDeleteDialogOpen}>

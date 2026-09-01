@@ -626,7 +626,8 @@
     z-index: 10;
     /* Matches the page background so scrolled-away KPI cards don't bleed through */
     background-color: var(--background);
-    /* Preserve the existing bottom breathing space that CRMPageContainer provided */
+    /* Preserve the existing top and bottom breathing space so search toolbar is never clipped */
+    padding-top: 0.75rem;
     padding-bottom: 0.875rem;
   }
 

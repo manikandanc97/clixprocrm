@@ -279,6 +279,7 @@ const ContactsPage = () => {
               viewMode={viewMode}
               setViewMode={setViewMode}
               placeholder="Search contacts by name, email, company, or phone..."
+              sticky={false}
             >
               <div className="flex items-center gap-2">
                 {[

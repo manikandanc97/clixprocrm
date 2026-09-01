@@ -32,7 +32,7 @@ export const CRMToolbar = ({
   children,
   placeholder = "Search...",
   className,
-  sticky = true,
+  sticky = false,
 }: CRMToolbarProps) => {
   const toolbarRef = useRef<HTMLDivElement>(null);
 

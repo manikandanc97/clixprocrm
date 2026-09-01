@@ -175,11 +175,13 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
       ),
     },
     {
-      header: "Value / Revenue",
+      header: "Revenue",
       align: "right" as const,
       sortable: true,
       sortDirection: sortConfig?.key === "valueAmount" ? (sortConfig.direction as "asc" | "desc") : null,
       onSort: (dir: import("@/shared/components/DataTableColumnHeader").SortDirection) => setSort("valueAmount", dir),
+      className: "w-[120px]",
+      headerClassName: "w-[120px]",
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       cell: (contact: any) => {
         const val = contact.valueAmount ?? contact.revenueValue ?? 0;
@@ -267,15 +269,17 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
   );
 
   return (
-    <div className="flex flex-col w-full relative gap-3.5 sm:gap-4">
-      <DataTable
-        data={paginatedContacts}
-        columns={columns}
-        rowClassName="h-16 hover:bg-muted/30 transition-colors"
-        emptyTitle="No contacts found"
-        emptyDescription="No contacts match the current search or filters."
-        hasPagination={sortedContacts.length > rowsPerPage}
-      />
+    <div className="flex-1 min-h-0 flex flex-col w-full relative gap-3.5 sm:gap-4">
+      <div className="flex flex-col min-h-0 flex-1">
+        <DataTable
+          data={paginatedContacts}
+          columns={columns}
+          rowClassName="h-16 hover:bg-muted/30 transition-colors"
+          emptyTitle="No contacts found"
+          emptyDescription="No contacts match the current search or filters."
+          hasPagination={sortedContacts.length > rowsPerPage}
+        />
+      </div>
 
       <CRMPagination
         currentPage={currentPage}

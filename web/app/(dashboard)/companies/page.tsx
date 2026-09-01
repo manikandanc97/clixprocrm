@@ -197,6 +197,7 @@ const CompaniesPage = () => {
               viewMode={viewMode}
               setViewMode={setViewMode}
               placeholder="Search companies by name or industry..."
+              sticky={false}
             >
               <div className="flex items-center gap-2">
                 {["All", "Active", "Inactive"].map((status) => (

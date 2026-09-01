@@ -618,7 +618,7 @@ const LeadsTable = ({
   }
 
   return (
-    <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4">
+    <div className="flex-1 min-h-0 flex flex-col w-full relative gap-3.5 sm:gap-4">
 
 
       {/* Desktop & Tablet Table View */}

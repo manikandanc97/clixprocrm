@@ -169,7 +169,7 @@ const TasksPage = () => {
   }
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* Page Header */}
       <CRMPageHeader
         title="Tasks"
@@ -242,7 +242,7 @@ const TasksPage = () => {
             </CRMMetricsGrid>
           </div>
 
-          <div className="flex-1 flex flex-col gap-3.5 sm:gap-4 min-h-0">
+          <div className="crm-table-workspace-sticky">
             {/* Toolbar */}
             <CRMToolbar
               searchQuery={searchQuery}
@@ -251,6 +251,7 @@ const TasksPage = () => {
               setViewMode={setViewMode}
               viewOptions={VIEW_MODES}
               placeholder="Search tasks, assignees, tags..."
+              sticky={false}
             >
               {/* Status filters */}
               <div className="flex items-center gap-1 overflow-x-auto scrollbar-hide max-w-full">

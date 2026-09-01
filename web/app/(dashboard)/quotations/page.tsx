@@ -220,6 +220,7 @@ const QuotationsPage = () => {
               viewMode={viewMode}
               setViewMode={setViewMode}
               placeholder="Search quotes, clients..."
+              sticky={false}
             >
               <div className="flex items-center gap-2">
                 {["All", "Draft", "Sent", "Accepted", "Rejected", "Expired"].map((status) => (

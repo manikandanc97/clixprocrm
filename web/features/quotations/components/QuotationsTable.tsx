@@ -143,7 +143,7 @@ const QuotationsTable = ({ quotations }: QuotationsTableProps) => {
   );
 
   return (
-    <div className="flex-auto flex flex-col min-h-0 relative gap-3.5 sm:gap-4 h-full">
+    <div className="flex-1 min-h-0 flex flex-col w-full relative gap-3.5 sm:gap-4">
       <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden flex-1 min-h-0">
       <CRMDataTable hasPagination={sortedQuotations.length > rowsPerPage} containerClassName="border-0 shadow-none rounded-none w-full flex-1 min-h-0 h-full" className="w-full">
         <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
