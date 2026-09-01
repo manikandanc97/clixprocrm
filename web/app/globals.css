@@ -941,10 +941,11 @@
     color: oklch(0.48 0.22 25);
   }
 
-  /* Sidebar Themed Scroll Styling — Matches Active Theme Primary */
+  /* Sidebar Themed Scroll Styling — Auto-hide / Show on scroll or hover with 1s fadeout */
   .sidebar-scroll {
     scrollbar-width: thin;
-    scrollbar-color: var(--scrollbar-thumb) transparent;
+    scrollbar-color: transparent transparent;
+    transition: scrollbar-color 0.3s ease;
   }
 
   .sidebar-scroll::-webkit-scrollbar {
@@ -957,18 +958,31 @@
   }
 
   .sidebar-scroll::-webkit-scrollbar-thumb {
-    background-color: var(--scrollbar-thumb);
+    background-color: transparent;
     border-radius: 9999px;
     border: 1px solid transparent;
     background-clip: padding-box;
-    transition: background-color 0.2s ease;
+    transition: background-color 0.3s ease;
   }
 
-  .sidebar-scroll::-webkit-scrollbar-thumb:hover {
+  .sidebar-scroll[data-scrolling="true"],
+  .sidebar-scroll.is-scrolling {
+    scrollbar-color: var(--scrollbar-thumb) transparent;
+  }
+
+  .sidebar-scroll[data-scrolling="true"]::-webkit-scrollbar-thumb,
+  .sidebar-scroll.is-scrolling::-webkit-scrollbar-thumb {
+    background-color: var(--scrollbar-thumb);
+    transition: background-color 0.15s ease;
+  }
+
+  .sidebar-scroll[data-scrolling="true"]::-webkit-scrollbar-thumb:hover,
+  .sidebar-scroll.is-scrolling::-webkit-scrollbar-thumb:hover {
     background-color: var(--scrollbar-thumb-hover);
   }
 
-  .sidebar-scroll::-webkit-scrollbar-thumb:active {
+  .sidebar-scroll[data-scrolling="true"]::-webkit-scrollbar-thumb:active,
+  .sidebar-scroll.is-scrolling::-webkit-scrollbar-thumb:active {
     background-color: var(--scrollbar-thumb-active);
   }
 

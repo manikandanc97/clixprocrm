@@ -25,8 +25,7 @@ export const CRMPageContainer = ({
   twoStageScroll = false,
 }: CRMPageContainerProps) => {
   const baseClass = cn(
-    "mx-auto w-full flex flex-col gap-4 sm:gap-5 px-4 sm:px-6 pt-1 relative",
-    !twoStageScroll && "flex-1 min-h-0 pb-3.5",
+    "mx-auto w-full flex-1 min-h-0 flex flex-col gap-4 sm:gap-5 px-4 sm:px-6 pt-1 pb-3.5 relative",
     maxWidth,
     className
   );

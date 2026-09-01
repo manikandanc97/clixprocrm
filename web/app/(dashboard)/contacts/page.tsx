@@ -183,7 +183,7 @@ const ContactsPage = () => {
       />
 
       {combinedContacts.length === 0 ? (
-        <div className="flex-1 min-h-0 flex flex-col pt-2">
+        <div className="flex-1 min-h-0 flex flex-col">
           {statusFilter === "lead" ? (
             <EmptyState
               module="leads"
@@ -293,7 +293,7 @@ const ContactsPage = () => {
               </div>
             </CRMToolbar>
 
-            <div className="w-full flex flex-col">
+            <div className="flex-1 min-h-0 flex flex-col">
               <AnimatePresence mode="wait">
                 {filteredContacts.length > 0 ? (
                   <motion.div
@@ -301,7 +301,7 @@ const ContactsPage = () => {
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
-                    className="w-full flex flex-col"
+                    className="flex-1 flex flex-col min-h-0"
                   >
                     <ContactsTable
                       contacts={filteredContacts}

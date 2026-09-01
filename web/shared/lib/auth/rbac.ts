@@ -34,6 +34,9 @@ export type NavItem = {
   exact?: boolean;
   match?: "exact" | "prefix";
   badge?: string | number;
+  children?: NavItem[];
+  permission?: string;
+  isAuthorized?: (ctx: { role: string; permissions: string[]; isSuperAdmin?: boolean }) => boolean;
 };
 
 export type NavGroup = {
@@ -42,14 +45,15 @@ export type NavGroup = {
 };
 
 /**
- * Resolves whether a navigation item is active given the current pathname,
- * with segment awareness, mutual exclusivity, and longest-prefix priority.
+ * Resolves whether a navigation item is active given the current pathname and URL,
+ * with segment awareness, query parameter matching, mutual exclusivity, and longest-prefix priority.
  */
 export function isNavRouteActive(
   targetHref: string | undefined,
   currentPathname: string,
   allHrefs: string[] = [],
-  exactOnly?: boolean
+  exactOnly?: boolean,
+  currentUrl?: string
 ): boolean {
   if (!targetHref || targetHref === "#" || !currentPathname) return false;
 
@@ -58,8 +62,26 @@ export function isNavRouteActive(
     return withoutTrailing;
   };
 
+  const activeUrl = normalize(currentUrl || currentPathname);
   const target = normalize(targetHref);
   const current = normalize(currentPathname);
+
+  // If target has query params (e.g. /settings?section=general)
+  if (target.includes("?")) {
+    return activeUrl === target;
+  }
+
+  // If activeUrl has query params but target does not (e.g. /settings vs /settings?section=profile)
+  if (activeUrl.includes("?")) {
+    const [activePath] = activeUrl.split("?");
+    if (activePath === target) {
+      // Check if any other item in allHrefs exactly matches the full activeUrl
+      const hasSpecificQueryMatch = allHrefs.some((h) => normalize(h) === activeUrl);
+      if (!hasSpecificQueryMatch) {
+        return true;
+      }
+    }
+  }
 
   // 1. Direct exact match
   if (current === target) return true;
@@ -201,11 +223,32 @@ export function getRoleMenu(role?: string, permissions?: string[]) {
   
   // 1. Filter base menu using permissions
   for (const group of baseMenu) {
-    const filteredItems = group.items.filter(item => {
+    const filteredItems: NavItem[] = [];
+    for (const item of group.items) {
       const hasPerm = hasModuleAccess(item.title, permissions, role);
-      if (hasPerm) handledTitles.add(item.title);
-      return hasPerm;
-    });
+      if (hasPerm) {
+        handledTitles.add(item.title);
+        if (item.children && item.children.length > 0) {
+          const filteredChildren = item.children.filter((child) => {
+            if (child.isAuthorized) {
+              return child.isAuthorized({ role: role || "", permissions: permissions || [] });
+            }
+            if (child.permission) {
+              return permissions?.includes(child.permission) || permissions?.includes("settings.manage") || permissions?.includes("Settings");
+            }
+            return true;
+          });
+          if (filteredChildren.length > 0) {
+            filteredItems.push({
+              ...item,
+              children: filteredChildren,
+            });
+          }
+        } else {
+          filteredItems.push(item);
+        }
+      }
+    }
     
     if (filteredItems.length > 0) {
       resultGroups.push({

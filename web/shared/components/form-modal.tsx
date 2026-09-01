@@ -27,6 +27,7 @@ interface FormModalProps {
   variant?: "dialog" | "sheet";
   size?: "sm" | "md" | "lg" | "xl" | "full";
   isDirty?: boolean; // Added for unsaved changes detection
+  contentClassName?: string;
 }
 
 export const FormModal = ({
@@ -38,6 +39,7 @@ export const FormModal = ({
   variant = "dialog",
   size = "md",
   isDirty = false,
+  contentClassName,
 }: FormModalProps) => {
   const [showWarning, setShowWarning] = useState(false);
 
@@ -113,7 +115,7 @@ export const FormModal = ({
               </DialogDescription>
             )}
           </DialogHeader>
-          <div className="p-6 overflow-y-auto max-h-[80vh]">
+          <div className={cn("p-6 overflow-y-auto max-h-[85vh] custom-scrollbar", contentClassName)}>
             {children}
           </div>
         </DialogContent>

@@ -182,9 +182,24 @@ export default function EmployeesPage() {
         ]}
       />
 
-      {/* Stats Grid */}
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={4}>
+      {employees.length === 0 && !searchQuery ? (
+        <div className="flex-1 min-h-0 flex flex-col">
+          <EmptyState
+            icon={Users}
+            title="No employees found"
+            description="Build and organize your team by adding your first employee."
+            action={{
+              label: "Add Employee",
+              onClick: handleAddEmployee,
+              icon: UserPlus,
+            }}
+          />
+        </div>
+      ) : (
+        <>
+          {/* Stats Grid */}
+          <div className="shrink-0">
+            <CRMMetricsGrid cols={4}>
           {employeeStats.map((stat, i) => {
             const defaultColors = ["indigo", "emerald", "orange", "violet"] as const;
             const icon = STAT_ICONS[stat.title] || Users;
@@ -438,6 +453,8 @@ export default function EmployeesPage() {
           </CRMPageSection>
         </div>
       </div>
+      </>
+      )}
 
       <FormModal
         title="Onboard New Employee"

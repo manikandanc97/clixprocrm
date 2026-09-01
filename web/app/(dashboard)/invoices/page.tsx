@@ -235,7 +235,7 @@ export default function InvoicesPage() {
 
       {/* Empty State or Main Content */}
       {stats.totalCount === 0 || (invoices.length === 0 && !searchQuery && statusFilter === "all") ? (
-        <div className="flex-1 min-h-0 flex flex-col pt-2">
+        <div className="flex-1 min-h-0 flex flex-col">
           <EmptyState
             module="invoices"
             action={{

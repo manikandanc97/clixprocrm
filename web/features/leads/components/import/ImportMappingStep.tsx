@@ -2,15 +2,7 @@
 
 import React from "react";
 import { motion } from "framer-motion";
-import {
-  CheckCircle2,
-  Settings2,
-  ChevronDown,
-  AlertTriangle,
-  FileText,
-  ArrowLeft,
-  ArrowRight,
-} from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { CRM_FIELDS, CRMField, slideVariants } from "./import-types";
@@ -64,87 +56,87 @@ export function ImportMappingStep({
     const hasRequired = mapping["name"] && mapping["email"];
 
     return (
-      <div className="bg-background p-5 rounded-xl border border-border shadow-sm flex flex-col gap-4">
-        <div className="flex justify-between items-center mb-1 pb-3 border-b border-border/50">
-          <div className="flex items-center gap-2">
-            <FileText className="w-4 h-4 text-muted-foreground" />
-            <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground">
+      <div className="bg-card p-3.5 rounded-xl border border-border/70 shadow-2xs flex flex-col gap-2.5">
+        <div className="flex justify-between items-center pb-2 border-b border-border/50">
+          <div className="flex items-center gap-1.5">
+            <AppIcon name="file" size={14} className="text-muted-foreground" />
+            <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground">
               Record Preview
             </h4>
           </div>
           {hasRequired && (mapping["email"] ? isEmailValid : true) ? (
-            <Badge className="bg-emerald-50 text-emerald-600 hover:bg-emerald-100 border border-emerald-200 font-bold px-2.5 py-0.5">
+            <Badge className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 font-bold px-2 py-0.5 text-[10px]">
               ✓ Valid
             </Badge>
           ) : (
-            <Badge className="bg-amber-50 text-amber-700 hover:bg-amber-100 border border-amber-200 font-bold px-2.5 py-0.5">
+            <Badge className="bg-amber-500/10 text-amber-600 dark:text-amber-400 border border-amber-500/20 font-bold px-2 py-0.5 text-[10px]">
               ⚠ Needs Fix
             </Badge>
           )}
         </div>
 
-        <div className="grid grid-cols-2 gap-y-4 gap-x-2">
+        <div className="grid grid-cols-2 gap-y-2 gap-x-2 text-xs">
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-1">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-0.5">
               Full Name
             </p>
             <p
-              className="font-medium text-sm truncate text-foreground"
+              className="font-medium truncate text-foreground text-xs"
               title={renderPreviewValue("name")}
             >
               {renderPreviewValue("name")}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-1">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-0.5">
               Company
             </p>
             <p
-              className="font-medium text-sm truncate text-foreground"
+              className="font-medium truncate text-foreground text-xs"
               title={renderPreviewValue("company")}
             >
               {renderPreviewValue("company")}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-1">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-0.5">
               Email
             </p>
             <p
-              className="font-medium text-sm truncate text-foreground"
+              className="font-medium truncate text-foreground text-xs"
               title={renderPreviewValue("email")}
             >
               {renderPreviewValue("email")}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-1">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-0.5">
               Phone
             </p>
             <p
-              className="font-medium text-sm truncate text-foreground"
+              className="font-medium truncate text-foreground text-xs"
               title={renderPreviewValue("phone")}
             >
               {renderPreviewValue("phone")}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-1">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-0.5">
               Status
             </p>
             <p
-              className="font-medium text-sm truncate text-foreground"
+              className="font-medium truncate text-foreground text-xs"
               title={renderPreviewValue("status")}
             >
               {renderPreviewValue("status")}
             </p>
           </div>
           <div>
-            <p className="text-[11px] font-semibold text-muted-foreground uppercase mb-1">
+            <p className="text-[10px] font-semibold text-muted-foreground uppercase mb-0.5">
               Deal Value
             </p>
             <p
-              className="font-medium text-sm truncate text-foreground"
+              className="font-medium truncate text-foreground text-xs"
               title={renderPreviewValue("valueAmount")}
             >
               {renderPreviewValue("valueAmount")}
@@ -162,46 +154,46 @@ export function ImportMappingStep({
       initial="hidden"
       animate="visible"
       exit="exit"
-      className="flex flex-col h-full overflow-hidden"
+      className="flex flex-col w-full"
     >
-      <div className="bg-muted/10 p-6 rounded-xl border border-border/50 flex flex-col h-full shadow-sm relative overflow-hidden">
+      <div className="flex flex-col w-full">
         {isOfficialTemplate ? (
           // Official Template View
-          <div className="flex-1 flex flex-col items-center justify-center text-center space-y-8">
+          <div className="flex flex-col items-center justify-center text-center py-6 space-y-5">
             <div className="relative">
-              <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-2xl animate-pulse"></div>
-              <div className="w-24 h-24 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center relative z-10 border-4 border-white dark:border-background shadow-xl">
-                <CheckCircle2 className="w-12 h-12 text-emerald-600" />
+              <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse"></div>
+              <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center relative z-10 border-4 border-white dark:border-background shadow-lg">
+                <AppIcon name="circleCheck" size={40} className="text-emerald-600 dark:text-emerald-400" />
               </div>
             </div>
             <div>
-              <h3 className="text-3xl font-bold mb-3 text-foreground">
+              <h3 className="text-2xl font-bold mb-2 text-foreground">
                 Official Template Detected
               </h3>
-              <div className="inline-flex items-center gap-2 px-4 py-2 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20 mb-8">
-                <CheckCircle2 className="w-4 h-4 text-emerald-600" />
-                <span className="text-emerald-700 dark:text-emerald-400 font-semibold text-sm">
-                  16 of 16 columns mapped automatically
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
+                <AppIcon name="circleCheck" size={14} className="text-emerald-600 dark:text-emerald-400" />
+                <span className="text-emerald-700 dark:text-emerald-400 font-semibold text-xs">
+                  All 16 standard columns mapped automatically
                 </span>
               </div>
             </div>
           </div>
         ) : (
           // Custom File View
-          <div className="flex flex-col h-full overflow-hidden">
-            <div className="flex justify-between items-center mb-6 flex-shrink-0">
+          <div className="flex flex-col w-full">
+            <div className="flex justify-between items-center mb-3 flex-shrink-0">
               <div>
-                <h3 className="text-xl font-bold flex items-center gap-2 text-foreground">
-                  <Settings2 className="w-5 h-5 text-primary" />
+                <h3 className="text-base font-bold flex items-center gap-1.5 text-foreground">
+                  <AppIcon name="settings" size={16} className="text-primary" />
                   Map Columns
                 </h3>
-                <div className="flex items-center gap-2 mt-1.5">
-                  <span className="text-sm text-muted-foreground">
+                <div className="flex items-center gap-2 mt-0.5">
+                  <span className="text-xs text-muted-foreground">
                     Mapped Successfully
                   </span>
                   <Badge
                     variant="secondary"
-                    className="px-2 py-0.5 text-xs font-bold bg-primary/10 text-primary border-none"
+                    className="px-1.5 py-0 text-[10px] font-bold bg-primary/10 text-primary border-none"
                   >
                     {Object.keys(mapping).length} of {CRM_FIELDS.length}
                   </Badge>
@@ -209,25 +201,25 @@ export function ImportMappingStep({
               </div>
 
               {/* Summary Badges */}
-              <div className="flex items-center gap-4 bg-background px-4 py-2 rounded-full border border-border shadow-sm">
-                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <div className="w-2.5 h-2.5 rounded-full bg-emerald-500"></div>{" "}
+              <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-full border border-border/70 text-[11px]">
+                <div className="flex items-center gap-1 font-medium text-muted-foreground">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>{" "}
                   Auto Mapped
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <div className="w-2.5 h-2.5 rounded-full bg-amber-500"></div>{" "}
+                <div className="flex items-center gap-1 font-medium text-muted-foreground">
+                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>{" "}
                   Manual
                 </div>
-                <div className="flex items-center gap-1.5 text-xs font-medium text-muted-foreground">
-                  <div className="w-2.5 h-2.5 rounded-full bg-destructive"></div>{" "}
+                <div className="flex items-center gap-1 font-medium text-muted-foreground">
+                  <div className="w-2 h-2 rounded-full bg-destructive"></div>{" "}
                   Missing
                 </div>
               </div>
             </div>
 
-            <div className="flex flex-col md:flex-row gap-6 flex-1 min-h-0">
+            <div className="flex flex-col md:flex-row gap-3.5 flex-1 min-h-0">
               {/* Mapping Table Area */}
-              <div className="flex-1 flex flex-col min-h-0 bg-card border border-border rounded-xl shadow-sm overflow-hidden">
+              <div className="flex-1 flex flex-col min-h-0 bg-card border border-border/70 rounded-xl shadow-2xs overflow-hidden max-h-[310px]">
                 {(() => {
                   const unmappedBasic = getUnmappedFields(
                     CRM_FIELDS.filter((f) => !f.advanced),
@@ -241,14 +233,14 @@ export function ImportMappingStep({
                   // If everything basic is mapped and we aren't showing advanced
                   if (unmappedBasic.length === 0 && !showAdvancedMapping) {
                     return (
-                      <div className="flex-1 flex flex-col items-center justify-center text-center p-8 bg-muted/10">
-                        <div className="w-16 h-16 rounded-full bg-emerald-50 text-emerald-600 flex items-center justify-center mb-4 shadow-sm border border-emerald-100">
-                          <CheckCircle2 className="w-8 h-8" />
+                      <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-muted/10">
+                        <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 shadow-2xs border border-emerald-500/20">
+                          <AppIcon name="circleCheck" size={24} />
                         </div>
-                        <h4 className="text-lg font-bold mb-2">
+                        <h4 className="text-sm font-bold mb-1">
                           No Action Required
                         </h4>
-                        <p className="text-sm text-muted-foreground max-w-xs mb-6">
+                        <p className="text-xs text-muted-foreground max-w-xs mb-4">
                           All primary fields have been successfully mapped.
                         </p>
                         {unmappedAdvanced.length > 0 && (
@@ -256,10 +248,10 @@ export function ImportMappingStep({
                             variant="outline"
                             size="sm"
                             onClick={() => setShowAdvancedMapping(true)}
-                            className="rounded-xl font-semibold text-xs border-border bg-background shadow-sm hover:bg-muted"
+                            className="rounded-xl font-semibold text-xs border-border bg-background shadow-2xs hover:bg-muted cursor-pointer gap-1.5 h-8"
                           >
-                            Show Advanced Mapping{" "}
-                            <ChevronDown className="w-3 h-3 ml-1" />
+                            <span>Show Advanced Mapping</span>
+                            <AppIcon name="chevronDown" size={12} />
                           </Button>
                         )}
                       </div>
@@ -268,30 +260,30 @@ export function ImportMappingStep({
 
                   // Show the table
                   return (
-                    <div className="flex-1 overflow-y-auto">
-                      <table className="w-full text-sm text-left">
-                        <thead className="bg-card sticky top-0 z-10 border-b border-border shadow-xs">
+                    <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[290px]">
+                      <table className="w-full text-xs text-left">
+                        <thead className="bg-muted/40 sticky top-0 z-10 border-b border-border/70 text-[11px] uppercase tracking-wider text-muted-foreground">
                           <tr>
-                            <th className="px-6 py-4 font-bold text-foreground w-1/3 bg-card">
+                            <th className="px-4 py-2.5 font-bold text-foreground w-1/3">
                               CRM Field
                             </th>
-                            <th className="px-6 py-4 font-bold text-foreground bg-card">
+                            <th className="px-4 py-2.5 font-bold text-foreground">
                               File Column
                             </th>
-                            <th className="px-6 py-4 font-bold text-foreground text-center w-16 bg-card">
+                            <th className="px-4 py-2.5 font-bold text-foreground text-center w-14">
                               Status
                             </th>
                           </tr>
                         </thead>
-                        <tbody className="divide-y divide-border/50">
+                        <tbody className="divide-y divide-border/60">
                           {hasMissingRequired && (
                             <tr>
                               <td
                                 colSpan={3}
-                                className="px-6 py-3 bg-destructive/5 text-destructive text-xs font-semibold border-b border-destructive/10"
+                                className="px-4 py-2 bg-destructive/5 text-destructive text-xs font-semibold border-b border-destructive/10"
                               >
-                                <div className="flex items-center gap-2">
-                                  <AlertTriangle className="w-4 h-4" /> Required
+                                <div className="flex items-center gap-1.5">
+                                  <AppIcon name="alert" size={14} /> Required
                                   fields are missing. Please map them to
                                   continue.
                                 </div>
@@ -305,7 +297,7 @@ export function ImportMappingStep({
                               key={field.key}
                               className="bg-destructive/5 hover:bg-destructive/10 transition-colors"
                             >
-                              <td className="px-6 py-4">
+                              <td className="px-4 py-2">
                                 <span className="font-semibold text-foreground">
                                   {field.label}
                                 </span>
@@ -315,9 +307,9 @@ export function ImportMappingStep({
                                   </span>
                                 )}
                               </td>
-                              <td className="px-6 py-4">
+                              <td className="px-4 py-2">
                                 <select
-                                  className="w-full max-w-[220px] bg-background border-2 border-destructive/30 rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm cursor-pointer outline-none"
+                                  className="w-full max-w-[200px] bg-background border border-destructive/40 rounded-lg px-2.5 py-1 text-xs font-medium focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-2xs cursor-pointer outline-none"
                                   value={mapping[field.key] || ""}
                                   onChange={(e) =>
                                     setMapping({
@@ -339,8 +331,8 @@ export function ImportMappingStep({
                                   ))}
                                 </select>
                               </td>
-                              <td className="px-6 py-4 text-center">
-                                <div className="w-3 h-3 rounded-full bg-destructive mx-auto shadow-sm"></div>
+                              <td className="px-4 py-2 text-center">
+                                <div className="w-2.5 h-2.5 rounded-full bg-destructive mx-auto shadow-2xs"></div>
                               </td>
                             </tr>
                           ))}
@@ -351,7 +343,7 @@ export function ImportMappingStep({
                               <tr>
                                 <td
                                   colSpan={3}
-                                  className="px-6 py-4 bg-muted/20 text-[11px] font-bold uppercase tracking-wider text-muted-foreground border-y border-border"
+                                  className="px-4 py-2 bg-muted/20 text-[10px] font-bold uppercase tracking-wider text-muted-foreground border-y border-border/70"
                                 >
                                   Optional Mappings
                                 </td>
@@ -364,7 +356,7 @@ export function ImportMappingStep({
                                   key={field.key}
                                   className="hover:bg-muted/10 transition-colors"
                                 >
-                                  <td className="px-6 py-4">
+                                  <td className="px-4 py-2">
                                     <span className="font-medium text-foreground">
                                       {field.label}
                                     </span>
@@ -374,9 +366,9 @@ export function ImportMappingStep({
                                       </span>
                                     )}
                                   </td>
-                                  <td className="px-6 py-4">
+                                  <td className="px-4 py-2">
                                     <select
-                                      className={`w-full max-w-[220px] bg-background border rounded-lg px-3 py-2 text-sm font-medium focus:ring-2 focus:ring-primary focus:border-primary transition-all shadow-sm cursor-pointer outline-none ${!mapping[field.key] ? "border-border text-muted-foreground" : "border-primary/30 text-foreground"}`}
+                                      className={`w-full max-w-[200px] bg-background border rounded-lg px-2.5 py-1 text-xs font-medium focus:ring-1 focus:ring-primary focus:border-primary transition-all shadow-2xs cursor-pointer outline-none ${!mapping[field.key] ? "border-border text-muted-foreground" : "border-primary/30 text-foreground"}`}
                                       value={mapping[field.key] || ""}
                                       onChange={(e) =>
                                         setMapping({
@@ -398,11 +390,11 @@ export function ImportMappingStep({
                                       ))}
                                     </select>
                                   </td>
-                                  <td className="px-6 py-4 text-center">
+                                  <td className="px-4 py-2 text-center">
                                     {mapping[field.key] ? (
-                                      <div className="w-3 h-3 rounded-full bg-emerald-500 mx-auto shadow-sm"></div>
+                                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 mx-auto shadow-2xs"></div>
                                     ) : (
-                                      <div className="w-3 h-3 rounded-full bg-amber-400 mx-auto shadow-sm"></div>
+                                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400 mx-auto shadow-2xs"></div>
                                     )}
                                   </td>
                                 </tr>
@@ -414,16 +406,16 @@ export function ImportMappingStep({
                             <tr>
                               <td
                                 colSpan={3}
-                                className="px-6 py-4 text-center border-t border-border bg-card"
+                                className="px-4 py-2 text-center border-t border-border/70 bg-card"
                               >
                                 <Button
                                   variant="ghost"
                                   size="sm"
                                   onClick={() => setShowAdvancedMapping(true)}
-                                  className="text-xs font-semibold hover:bg-muted/50 rounded-xl"
+                                  className="text-xs font-semibold hover:bg-muted/50 rounded-xl cursor-pointer gap-1.5 h-7"
                                 >
-                                  Show Advanced Mapping{" "}
-                                  <ChevronDown className="w-3 h-3 ml-1" />
+                                  <span>Show Advanced Mapping</span>
+                                  <AppIcon name="chevronDown" size={12} />
                                 </Button>
                               </td>
                             </tr>
@@ -436,18 +428,18 @@ export function ImportMappingStep({
               </div>
 
               {/* Preview Panel Area */}
-              <div className="w-full md:w-72 flex-shrink-0 flex flex-col gap-4">
+              <div className="w-full md:w-64 flex-shrink-0 flex flex-col gap-2.5">
                 {renderPreviewCard()}
-                <div className="bg-muted/20 p-5 rounded-xl border border-border shadow-sm">
-                  <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground mb-4">
+                <div className="bg-card p-3 rounded-xl border border-border/70 shadow-2xs">
+                  <h4 className="text-[11px] font-bold uppercase tracking-wider text-muted-foreground mb-2">
                     Import Summary
                   </h4>
-                  <div className="space-y-3 text-sm">
+                  <div className="space-y-1.5 text-xs">
                     <div className="flex justify-between items-center">
                       <span className="text-muted-foreground font-medium">
                         Records Found
                       </span>
-                      <span className="font-bold text-foreground bg-background px-2 py-0.5 rounded border border-border">
+                      <span className="font-bold text-foreground bg-muted/40 px-1.5 py-0.5 rounded border border-border/50 text-[11px]">
                         {parsedData.length}
                       </span>
                     </div>
@@ -455,7 +447,7 @@ export function ImportMappingStep({
                       <span className="text-muted-foreground font-medium">
                         Mapped Columns
                       </span>
-                      <span className="font-bold text-foreground bg-background px-2 py-0.5 rounded border border-border">
+                      <span className="font-bold text-foreground bg-muted/40 px-1.5 py-0.5 rounded border border-border/50 text-[11px]">
                         {Object.keys(mapping).length} / {CRM_FIELDS.length}
                       </span>
                     </div>
@@ -463,7 +455,7 @@ export function ImportMappingStep({
                       <span className="text-muted-foreground font-medium">
                         Required Fields
                       </span>
-                      <span className="font-bold text-foreground bg-background px-2 py-0.5 rounded border border-border">
+                      <span className="font-bold text-foreground bg-muted/40 px-1.5 py-0.5 rounded border border-border/50 text-[11px]">
                         {
                           CRM_FIELDS.filter(
                             (f) => f.required && mapping[f.key],
@@ -479,21 +471,23 @@ export function ImportMappingStep({
           </div>
         )}
 
-        <div className="mt-6 flex justify-between items-center flex-shrink-0 border-t border-border/50 pt-6">
+        <div className="mt-3.5 flex justify-between items-center flex-shrink-0 border-t border-border/60 pt-3">
           <Button
-            variant="ghost"
+            type="button"
+            variant="outline"
             onClick={onBack}
-            className="rounded-xl font-semibold"
+            className="rounded-xl font-semibold text-xs h-9 px-4 cursor-pointer gap-1.5 hover:bg-muted/70"
           >
-            <ArrowLeft className="w-4 h-4 mr-2" /> Back
+            <AppIcon name="arrowLeft" size={14} /> Back
           </Button>
           <Button
+            type="button"
             onClick={onContinue}
             disabled={getMissingRequiredFields().length > 0}
-            size="lg"
-            className={`rounded-xl font-semibold px-8 shadow-md transition-all ${isOfficialTemplate ? "w-full max-w-xs text-md h-12" : ""}`}
+            className={`rounded-xl font-bold text-xs h-9 px-6 shadow-sm hover:shadow transition-all cursor-pointer gap-2 bg-primary hover:bg-primary/90 text-primary-foreground ${isOfficialTemplate ? "w-full max-w-xs" : ""}`}
           >
-            Continue to Validation <ArrowRight className="w-4 h-4 ml-2" />
+            <span>Continue to Validation</span>
+            <AppIcon name="arrowRight" size={14} />
           </Button>
         </div>
       </div>

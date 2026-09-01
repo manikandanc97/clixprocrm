@@ -200,7 +200,7 @@ const DealsPage = () => {
       />
 
       {(viewMode === "pipeline" ? safePipelineItems.length === 0 : safeDeals.length === 0) ? (
-        <div className="flex-1 min-h-0 flex flex-col pt-2">
+        <div className="flex-1 min-h-0 flex flex-col">
           <EmptyState
             module="deals"
             action={{

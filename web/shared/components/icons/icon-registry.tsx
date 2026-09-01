@@ -597,16 +597,20 @@ export function AppIcon({
     const el = containerRef.current;
     if (!el) return;
 
-    // Check if the icon is inside a direct interactive control (button, link, menu item, tab, etc.)
-    const noDelegateParent = el.closest('[data-no-icon-delegate="true"]');
+    // 1. Direct interactive control (button, link, menu item, tab, etc.)
+    const directButton = el.closest(
+      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"]'
+    );
+    // 2. Explicit custom animate target (e.g. card with data-animate-target="true")
     const localTarget = el.closest('[data-animate-target="true"]');
-    const parentInteractive =
-      standalone || noDelegateParent
-        ? localTarget
-        : (localTarget ||
-           el.closest(
-            'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [data-slot="button"]'
-          ));
+
+    // Determine the controlling interactive parent:
+    // - If standalone: only bind to localTarget if specified, otherwise direct icon hover (CASE 3)
+    // - Direct button/link ALWAYS takes priority so icons inside buttons only react to their own button!
+    // - If not inside a button, bind to localTarget card if present
+    const parentInteractive = standalone
+      ? localTarget
+      : (directButton || localTarget);
 
     const handleCustomTrigger = () => {
       if (!hasAnimatedForCurrentHoverRef.current) {
@@ -671,7 +675,7 @@ export function AppIcon({
     // CASE 2: Icon is an adornment for an input field (NOT inside a button).
     // Find the immediate sibling or enclosing control wrapper with an input/textarea/select.
     const findAssociatedInput = (): HTMLElement | null => {
-      if (standalone || noDelegateParent) return null;
+      if (standalone) return null;
 
       // 1. Direct relative wrapper for this input
       const relativeParent = el.closest('.relative, [data-slot="control"], .form-control');

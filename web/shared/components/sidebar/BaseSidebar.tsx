@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect } from "react";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
-import { ChevronLeft, ChevronsUpDown } from "lucide-react";
+import { usePathname, useSearchParams } from "next/navigation";
+import { ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 import { ClixProIcon } from "@/shared/ui/logo";
 import { NavAnimatedIcon } from "@/shared/components/sidebar/NavAnimatedIcon";
 import { MOTION_EASINGS } from "@/shared/lib/motion";
 import { type NavGroup, type NavItem, isNavRouteActive } from "@/shared/lib/auth/rbac";
+import { useAutoFadeScrollbar } from "@/shared/hooks/use-auto-fade-scrollbar";
 
 export interface SidebarHeaderConfig {
   title: string;
@@ -97,6 +98,105 @@ function MobileNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: I
   );
 }
 
+function MobileExpandableNavItem({
+  item,
+  isChildActive,
+  themeClasses,
+}: {
+  item: NavItem;
+  isChildActive: (child: NavItem) => boolean;
+  themeClasses: any;
+}) {
+  const isAnyChildActive = item.children?.some(isChildActive) ?? false;
+  const [isOpen, setIsOpen] = useState(isAnyChildActive);
+  const [isHovered, setIsHovered] = useState(false);
+  const [clickKey, setClickKey] = useState(0);
+  const Icon = item.icon;
+
+  useEffect(() => {
+    if (isAnyChildActive) {
+      setIsOpen(true);
+    }
+  }, [isAnyChildActive]);
+
+  return (
+    <div className="flex flex-col">
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.98 }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={() => {
+          setClickKey((c) => c + 1);
+          setIsOpen((prev) => !prev);
+        }}
+        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer ${
+          isAnyChildActive
+            ? "text-sidebar-foreground font-semibold"
+            : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
+        }`}
+      >
+        <NavAnimatedIcon
+          icon={Icon}
+          name={item.title}
+          href={item.href}
+          isActive={isAnyChildActive}
+          isHovered={isHovered}
+          triggerAnimation={clickKey}
+          size={18}
+          className={`w-[18px] h-[18px] shrink-0 transition-colors z-10 ${
+            isAnyChildActive ? "text-primary" : "text-sidebar-foreground/50 group-hover:text-primary"
+          }`}
+        />
+        <span className="truncate flex-1 text-left z-10">{item.title}</span>
+        <ChevronRight
+          className={`w-3.5 h-3.5 text-sidebar-foreground/40 group-hover:text-primary transition-transform duration-200 shrink-0 z-10 ${
+            isOpen ? "rotate-90" : "rotate-0"
+          }`}
+        />
+      </motion.button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="overflow-hidden space-y-0.5 mt-1 ml-4 pl-3 border-l border-sidebar-border/50"
+          >
+            {item.children?.map((child) => {
+              const active = isChildActive(child);
+              const ChildIcon = child.icon;
+              return (
+                <Link
+                  key={child.href || child.title}
+                  href={child.href}
+                  className={`w-full flex items-center gap-2.5 px-3 py-2 rounded-lg transition-colors duration-150 text-[13px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    active
+                      ? `${themeClasses.itemActiveText} font-semibold ${themeClasses.itemActiveBg} shadow-sm`
+                      : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
+                  }`}
+                >
+                  <ChildIcon
+                    className={`w-4 h-4 shrink-0 transition-colors ${
+                      active ? themeClasses.itemActiveText : "text-sidebar-foreground/50 group-hover:text-primary"
+                    }`}
+                  />
+                  <span className="truncate flex-1">{child.title}</span>
+                  {active && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${themeClasses.activePill} shrink-0`} />
+                  )}
+                </Link>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 function DesktopCollapsedNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: ItemComponentProps) {
   const [isHovered, setIsHovered] = useState(false);
   const [clickKey, setClickKey] = useState(0);
@@ -151,6 +251,91 @@ function DesktopCollapsedNavItem({ item, isActive, themeClasses, activeLayoutIdP
             <span
               className={`text-[9.5px] leading-tight mt-1 text-center font-medium truncate max-w-[58px] z-10 transition-colors duration-150 ${
                 isActive
+                  ? `${themeClasses.itemActiveText} font-bold`
+                  : "text-sidebar-foreground/70 group-hover:text-primary"
+              }`}
+            >
+              {item.title}
+            </span>
+          </Link>
+        </motion.div>
+      </TooltipTrigger>
+      <TooltipContent
+        side="right"
+        sideOffset={14}
+        className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
+      >
+        {item.title}
+      </TooltipContent>
+    </Tooltip>
+  );
+}
+
+function DesktopCollapsedExpandableItem({
+  item,
+  isChildActive,
+  themeClasses,
+  activeLayoutIdPrefix,
+}: {
+  item: NavItem;
+  isChildActive: (child: NavItem) => boolean;
+  themeClasses: any;
+  activeLayoutIdPrefix: string;
+}) {
+  const isAnyChildActive = item.children?.some(isChildActive) ?? false;
+  const [isHovered, setIsHovered] = useState(false);
+  const [clickKey, setClickKey] = useState(0);
+  const Icon = item.icon;
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <motion.div
+          whileTap={{ scale: 0.96 }}
+          onMouseEnter={() => setIsHovered(true)}
+          onMouseLeave={() => setIsHovered(false)}
+          onClick={() => setClickKey((c) => c + 1)}
+        >
+          <Link
+            href={item.href || item.children?.[0]?.href || "#"}
+            aria-current={isAnyChildActive ? "page" : undefined}
+            className={`flex flex-col items-center justify-center py-2 px-1 rounded-xl transition-colors duration-150 group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 ${
+              isAnyChildActive
+                ? `${themeClasses.itemActiveText} font-semibold shadow-sm`
+                : "text-sidebar-foreground/60 hover:text-primary hover:bg-primary/10"
+            }`}
+          >
+            {isAnyChildActive && (
+              <>
+                <motion.div
+                  layoutId={`${activeLayoutIdPrefix}CollapsedActiveBg`}
+                  transition={MOTION_EASINGS.springGlider}
+                  className={`absolute inset-0 rounded-xl ${themeClasses.itemActiveCollapsedBg}`}
+                />
+                <motion.div
+                  layoutId={`${activeLayoutIdPrefix}CollapsedActiveIndicator`}
+                  transition={MOTION_EASINGS.springGlider}
+                  className={`absolute -left-1 top-1/2 -translate-y-1/2 w-[3px] h-5 rounded-r-full z-10 ${themeClasses.activePill}`}
+                />
+              </>
+            )}
+            <NavAnimatedIcon
+              icon={Icon}
+              name={item.title}
+              href={item.href}
+              isActive={isAnyChildActive}
+              isHovered={isHovered}
+              triggerAnimation={clickKey}
+              size={18}
+              className={`w-[18px] h-[18px] shrink-0 transition-colors z-10 ${
+                isAnyChildActive
+                  ? themeClasses.itemActiveText
+                  : "text-sidebar-foreground/60 group-hover:text-primary"
+              }`}
+            />
+            <span
+              className={`text-[9.5px] leading-tight mt-1 text-center font-medium truncate max-w-[58px] z-10 transition-colors duration-150 ${
+                isAnyChildActive
                   ? `${themeClasses.itemActiveText} font-bold`
                   : "text-sidebar-foreground/70 group-hover:text-primary"
               }`}
@@ -226,6 +411,107 @@ function DesktopExpandedNavItem({ item, isActive, themeClasses, activeLayoutIdPr
   );
 }
 
+function DesktopExpandedExpandableItem({
+  item,
+  isChildActive,
+  themeClasses,
+}: {
+  item: NavItem;
+  isChildActive: (child: NavItem) => boolean;
+  themeClasses: any;
+}) {
+  const isAnyChildActive = item.children?.some(isChildActive) ?? false;
+  const [isOpen, setIsOpen] = useState(isAnyChildActive);
+  const [isHovered, setIsHovered] = useState(false);
+  const [clickKey, setClickKey] = useState(0);
+  const Icon = item.icon;
+
+  useEffect(() => {
+    if (isAnyChildActive) {
+      setIsOpen(true);
+    }
+  }, [isAnyChildActive]);
+
+  return (
+    <div className="flex flex-col">
+      <motion.button
+        type="button"
+        whileTap={{ scale: 0.98 }}
+        onMouseEnter={() => setIsHovered(true)}
+        onMouseLeave={() => setIsHovered(false)}
+        onClick={() => {
+          setClickKey((c) => c + 1);
+          setIsOpen((prev) => !prev);
+        }}
+        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer ${
+          isAnyChildActive
+            ? "text-sidebar-foreground font-semibold"
+            : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
+        }`}
+      >
+        <NavAnimatedIcon
+          icon={Icon}
+          name={item.title}
+          href={item.href}
+          isActive={isAnyChildActive}
+          isHovered={isHovered}
+          triggerAnimation={clickKey}
+          size={18}
+          className={`w-[18px] h-[18px] transition-colors shrink-0 z-10 ${
+            isAnyChildActive
+              ? "text-primary"
+              : "text-sidebar-foreground/50 group-hover:text-primary"
+          }`}
+        />
+        <span className="truncate flex-1 text-left z-10">{item.title}</span>
+        <ChevronRight
+          className={`w-3.5 h-3.5 text-sidebar-foreground/40 group-hover:text-primary transition-transform duration-200 shrink-0 z-10 ${
+            isOpen ? "rotate-90" : "rotate-0"
+          }`}
+        />
+      </motion.button>
+
+      <AnimatePresence initial={false}>
+        {isOpen && (
+          <motion.div
+            initial={{ height: 0, opacity: 0 }}
+            animate={{ height: "auto", opacity: 1 }}
+            exit={{ height: 0, opacity: 0 }}
+            transition={{ duration: 0.18, ease: "easeOut" }}
+            className="overflow-hidden space-y-0.5 mt-0.5 ml-3 pl-3 border-l border-sidebar-border/50"
+          >
+            {item.children?.map((child) => {
+              const active = isChildActive(child);
+              const ChildIcon = child.icon;
+              return (
+                <Link
+                  key={child.href || child.title}
+                  href={child.href}
+                  className={`w-full flex items-center gap-2.5 px-2.5 py-1.5 rounded-lg transition-colors duration-150 text-[12.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${
+                    active
+                      ? `${themeClasses.itemActiveText} font-semibold ${themeClasses.itemActiveBg} shadow-sm`
+                      : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
+                  }`}
+                >
+                  <ChildIcon
+                    className={`w-3.5 h-3.5 shrink-0 transition-colors ${
+                      active ? themeClasses.itemActiveText : "text-sidebar-foreground/50 group-hover:text-primary"
+                    }`}
+                  />
+                  <span className="truncate flex-1">{child.title}</span>
+                  {active && (
+                    <span className={`w-1.5 h-1.5 rounded-full ${themeClasses.activePill} shrink-0`} />
+                  )}
+                </Link>
+              );
+            })}
+          </motion.div>
+        )}
+      </AnimatePresence>
+    </div>
+  );
+}
+
 export function BaseSidebarContent({
   groups,
   header,
@@ -238,11 +524,22 @@ export function BaseSidebarContent({
   activeLayoutIdPrefix = "sidebar",
 }: BaseSidebarProps) {
   const pathname = usePathname();
+  const searchParams = useSearchParams();
+  const searchString = searchParams?.toString();
+  const currentUrl = searchString ? `${pathname}?${searchString}` : pathname;
   const collapsedState = isMobile ? false : isCollapsed;
+  const { scrollbarProps } = useAutoFadeScrollbar(1000);
 
-  // Flatten all navigation item hrefs for segment-aware longest-prefix resolution
+  // Flatten all navigation item hrefs including children for segment-aware longest-prefix resolution
   const allItemHrefs = React.useMemo(() => {
-    return groups.flatMap((group) => group.items.map((item) => item.href)).filter(Boolean);
+    return groups
+      .flatMap((group) =>
+        group.items.flatMap((item) => [
+          item.href,
+          ...(item.children?.map((c) => c.href) || []),
+        ])
+      )
+      .filter(Boolean);
   }, [groups]);
 
   // Theme variant styling tokens
@@ -278,7 +575,8 @@ export function BaseSidebarContent({
       item.href,
       pathname,
       allItemHrefs,
-      item.exact || item.match === "exact"
+      item.exact || item.match === "exact",
+      currentUrl
     );
   };
 
@@ -324,7 +622,7 @@ export function BaseSidebarContent({
         </div>
 
         <TooltipProvider delayDuration={0}>
-          <div className="flex-1 overflow-y-auto sidebar-scroll px-3 pb-4">
+          <div className="flex-1 overflow-y-auto sidebar-scroll px-3 pb-4" {...scrollbarProps}>
             {groups.map((group, groupIdx) => (
               <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-4" : ""}>
                 {group.label && (
@@ -335,15 +633,29 @@ export function BaseSidebarContent({
                   </div>
                 )}
                 <nav className="space-y-1">
-                  {group.items.map((item) => (
-                    <MobileNavItem
-                      key={item.href || item.title}
-                      item={item}
-                      isActive={isItemActive(item)}
-                      themeClasses={themeClasses}
-                      activeLayoutIdPrefix={activeLayoutIdPrefix}
-                    />
-                  ))}
+                  {group.items.map((item) => {
+                    const hasChildren = item.children && item.children.length > 0;
+                    if (hasChildren) {
+                      return (
+                        <MobileExpandableNavItem
+                          key={item.href || item.title}
+                          item={item}
+                          isChildActive={isItemActive}
+                          themeClasses={themeClasses}
+                        />
+                      );
+                    }
+
+                    return (
+                      <MobileNavItem
+                        key={item.href || item.title}
+                        item={item}
+                        isActive={isItemActive(item)}
+                        themeClasses={themeClasses}
+                        activeLayoutIdPrefix={activeLayoutIdPrefix}
+                      />
+                    );
+                  })}
                 </nav>
               </div>
             ))}
@@ -448,7 +760,7 @@ export function BaseSidebarContent({
         className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl overflow-hidden flex flex-col"
       >
         <TooltipProvider delayDuration={0}>
-          <div className={`flex-1 overflow-y-auto sidebar-scroll pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`}>
+          <div className={`flex-1 overflow-y-auto sidebar-scroll pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`} {...scrollbarProps}>
             {groups.map((group, groupIdx) => (
               <div key={group.label || groupIdx} className={groupIdx > 0 ? "mt-3.5" : ""}>
                 <AnimatePresence mode="wait">
@@ -474,9 +786,23 @@ export function BaseSidebarContent({
 
                 <nav className="flex flex-col gap-1">
                   {group.items.map((item) => {
-                    const isActive = isItemActive(item);
+                    const hasChildren = item.children && item.children.length > 0;
 
                     if (collapsedState) {
+                      if (hasChildren) {
+                        return (
+                          <div key={item.title}>
+                            <DesktopCollapsedExpandableItem
+                              item={item}
+                              isChildActive={isItemActive}
+                              themeClasses={themeClasses}
+                              activeLayoutIdPrefix={activeLayoutIdPrefix}
+                            />
+                          </div>
+                        );
+                      }
+
+                      const isActive = isItemActive(item);
                       return (
                         <div key={item.title}>
                           <DesktopCollapsedNavItem
@@ -489,6 +815,20 @@ export function BaseSidebarContent({
                       );
                     }
 
+                    if (hasChildren) {
+                      return (
+                        <div key={item.title}>
+                          <DesktopExpandedExpandableItem
+                            key={item.title}
+                            item={item}
+                            isChildActive={isItemActive}
+                            themeClasses={themeClasses}
+                          />
+                        </div>
+                      );
+                    }
+
+                    const isActive = isItemActive(item);
                     return (
                       <div key={item.title}>
                         <DesktopExpandedNavItem

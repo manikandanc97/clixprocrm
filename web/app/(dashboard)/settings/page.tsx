@@ -3,7 +3,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import SettingsHeader from "@/features/settings/components/SettingsHeader";
-import SettingsSidebar from "@/features/settings/components/SettingsSidebar";
 import ProfileSettings from "@/features/settings/components/ProfileSettings";
 import NotificationsSettings from "@/features/settings/components/NotificationsSettings";
 import WorkspaceSettings from "@/features/settings/components/WorkspaceSettings";
@@ -175,34 +174,23 @@ const SettingsPage = () => {
         <SettingsHeader activeSection={activeSection} />
       </div>
 
-      {/* Body - Independent scrolling on desktop */}
-      <div className="flex-1 min-h-0 flex flex-col lg:flex-row gap-5 lg:gap-7 lg:overflow-hidden">
-        {/* Secondary Sidebar Navigation (215px) */}
-        <div className="w-full lg:w-[215px] shrink-0 lg:h-full lg:overflow-y-auto pr-1.5 sidebar-scroll">
-          <SettingsSidebar
-            activeSection={activeSection}
-            onSectionChange={handleSectionChange}
-          />
-        </div>
-
-        {/* Content Column */}
-        <div
-          ref={contentRef}
-          className="flex-1 min-w-0 w-full lg:h-full lg:overflow-y-auto pr-1.5 sidebar-scroll"
-        >
-          <AnimatePresence mode="wait" initial={false}>
-            <motion.div
-              key={activeSection}
-              initial={{ opacity: 0, y: 5 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0, y: -5 }}
-              transition={{ duration: 0.12, ease: "easeOut" }}
-              className="min-h-full flex flex-col"
-            >
-              {renderSection()}
-            </motion.div>
-          </AnimatePresence>
-        </div>
+      {/* Content Area - Full width with independent smooth vertical scrolling */}
+      <div
+        ref={contentRef}
+        className="flex-1 min-h-0 min-w-0 w-full h-full overflow-y-auto pr-1.5 sidebar-scroll"
+      >
+        <AnimatePresence mode="wait" initial={false}>
+          <motion.div
+            key={activeSection}
+            initial={{ opacity: 0, y: 5 }}
+            animate={{ opacity: 1, y: 0 }}
+            exit={{ opacity: 0, y: -5 }}
+            transition={{ duration: 0.12, ease: "easeOut" }}
+            className="min-h-full flex flex-col"
+          >
+            {renderSection()}
+          </motion.div>
+        </AnimatePresence>
       </div>
     </CRMPageContainer>
   );

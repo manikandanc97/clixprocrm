@@ -2,7 +2,7 @@
 
 import React, { useState, useRef } from "react";
 import { FormModal } from "@/shared/components/form-modal";
-import { CheckCircle2 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 import { parseFile, IMPORT_TEMPLATE_HEADERS } from "@/lib/bulk-import-utils";
 import client from "@/shared/lib/api/client";
@@ -87,13 +87,12 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
     setTimeout(resetState, 300);
   };
 
-  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const uploadedFile = e.target.files?.[0];
+  const processFile = async (uploadedFile: File) => {
     if (!uploadedFile) return;
 
     const ext = uploadedFile.name.split(".").pop()?.toLowerCase();
     if (ext !== "csv" && ext !== "xlsx" && ext !== "xls") {
-      toast.error("Unsupported file type. Please upload a CSV or Excel file.");
+      toast.error("Unsupported file type. Please upload a CSV or Excel file (.csv, .xlsx, .xls).");
       return;
     }
 
@@ -144,6 +143,13 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
     } catch (error) {
       toast.error("Failed to parse the file.");
       console.error(error);
+    }
+  };
+
+  const handleFileUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const uploadedFile = e.target.files?.[0];
+    if (uploadedFile) {
+      await processFile(uploadedFile);
     }
   };
 
@@ -306,39 +312,39 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
       onOpenChange={handleClose}
       size="xl"
     >
-      <div className="flex flex-col min-h-[600px] max-h-[85vh]">
+      <div className="flex flex-col w-full">
         {/* Stepper Header */}
-        <div className="relative mb-10 mt-4 px-12 flex-shrink-0">
-          <div className="absolute top-5 left-16 right-16 h-1 bg-muted rounded-full -z-10 -translate-y-1/2">
+        <div className="relative mb-4 mt-0.5 px-4 sm:px-8 flex-shrink-0">
+          <div className="absolute top-4 left-12 right-12 h-0.5 bg-muted rounded-full -z-0">
             <div
               className="h-full bg-primary transition-all duration-500 ease-in-out"
               style={{ width: `${((Math.min(step, 4) - 1) / 3) * 100}%` }}
             />
           </div>
-          <div className="flex justify-between">
+          <div className="flex justify-between relative z-10">
             {IMPORT_STEPS.map((s) => {
               const isCompleted = step > s.num;
               const isActive = step === s.num;
 
               return (
-                <div key={s.num} className="flex flex-col items-center">
+                <div key={s.num} className="group/step flex flex-col items-center cursor-default">
                   <div
-                    className={`w-10 h-10 rounded-full flex items-center justify-center font-bold transition-all duration-500 ${
+                    className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-all duration-300 group-hover/step:scale-110 group-hover/step:shadow-md ${
                       isCompleted
-                        ? "bg-primary text-primary-foreground shadow-md"
+                        ? "bg-primary text-primary-foreground shadow-xs"
                         : isActive
-                          ? "bg-primary text-primary-foreground ring-4 ring-primary/20 shadow-lg scale-110"
-                          : "bg-card border-2 border-muted text-muted-foreground"
+                          ? "bg-primary text-primary-foreground ring-4 ring-primary/20 shadow-sm scale-105"
+                          : "bg-card border border-border text-muted-foreground group-hover/step:border-primary/50 group-hover/step:text-foreground"
                     }`}
                   >
                     {isCompleted ? (
-                      <CheckCircle2 className="w-5 h-5" />
+                      <AppIcon name="check" size={13} className="text-primary-foreground" />
                     ) : (
                       s.num
                     )}
                   </div>
                   <span
-                    className={`text-xs mt-3 font-semibold tracking-wide ${isActive ? "text-primary" : isCompleted ? "text-foreground" : "text-muted-foreground"}`}
+                    className={`text-[11px] mt-1.5 font-medium tracking-tight transition-colors duration-200 ${isActive ? "text-primary font-semibold" : isCompleted ? "text-foreground" : "text-muted-foreground group-hover/step:text-foreground"}`}
                   >
                     {s.label}
                   </span>
@@ -349,9 +355,14 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
         </div>
 
         {/* Content Area */}
-        <div className="flex-1 relative min-h-0 px-2 pb-2">
+        <div className="flex-1 relative min-h-0">
           <AnimatePresence mode="wait">
-            {step === 1 && <ImportUploadStep onFileUpload={handleFileUpload} />}
+            {step === 1 && (
+              <ImportUploadStep
+                onFileUpload={handleFileUpload}
+                onFileSelect={processFile}
+              />
+            )}
 
             {step === 2 && (
               <ImportMappingStep
