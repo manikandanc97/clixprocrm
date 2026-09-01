@@ -41,7 +41,7 @@ export const CRMPageHeader = ({
       >
         <div className="flex items-center gap-2.5">
           {Icon && (
-            <div className={cn("crm-icon-box", iconColor)}>
+            <div data-animate-target="true" className={cn("crm-icon-box group cursor-pointer", iconColor)}>
               <AppIcon name={title} icon={Icon} size={16} className="w-4 h-4" />
             </div>
           )}

@@ -49,6 +49,8 @@ import {
   ArrowLeft,
   ChevronRight,
   ChevronLeft,
+  ChevronsRight,
+  ChevronsLeft,
   ChevronDown,
   ChevronUp,
   Pencil,
@@ -104,6 +106,8 @@ export type IconName =
   | "userPlus"
   | "platformUsers"
   | "companies"
+  | "building"
+  | "organizations"
   | "deals"
   | "tasks"
   | "calendar"
@@ -893,10 +897,6 @@ export function AppIcon({
       case "arrowLeft":
       case "back":
         return <ArrowLeft {...props} />;
-      case "chevronRight":
-        return <ChevronRight {...props} />;
-      case "chevronLeft":
-        return <ChevronLeft {...props} />;
       case "chevronDown":
         return <ChevronDown {...props} />;
       case "chevronUp":
@@ -964,6 +964,66 @@ export function AppIcon({
         return <Play {...props} />;
 
       // Animated Lucide Icons with smooth micro-interaction
+      case "chevronRight":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && isAnimating
+                ? { x: [0, 3, 0] }
+                : { x: 0 }
+            }
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            <ChevronRight size={size} className={className} />
+          </motion.div>
+        );
+
+      case "chevronLeft":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && isAnimating
+                ? { x: [0, -3, 0] }
+                : { x: 0 }
+            }
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            <ChevronLeft size={size} className={className} />
+          </motion.div>
+        );
+
+      case "chevronsRight":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && isAnimating
+                ? { x: [0, 4, 0], scale: [1, 1.08, 1] }
+                : { x: 0, scale: 1 }
+            }
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            <ChevronsRight size={size} className={className} />
+          </motion.div>
+        );
+
+      case "chevronsLeft":
+        return (
+          <motion.div
+            animate={
+              !reducedMotion && isAnimating
+                ? { x: [0, -4, 0], scale: [1, 1.08, 1] }
+                : { x: 0, scale: 1 }
+            }
+            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
+            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+          >
+            <ChevronsLeft size={size} className={className} />
+          </motion.div>
+        );
+
       case "arrowUpRight":
         return (
           <motion.div
@@ -999,15 +1059,17 @@ export function AppIcon({
         );
 
       case "companies":
+      case "building":
+      case "organizations":
         return (
           <motion.div
             animate={
               !reducedMotion && isAnimating
-                ? { scaleY: [1, 1.08, 0.96, 1], y: [0, -1.5, 0] }
-                : { scaleY: 1, y: 0 }
+                ? { scale: [1, 1.18, 0.95, 1], y: [0, -3, 0], rotate: [0, -6, 5, 0] }
+                : { scale: 1, y: 0, rotate: 0 }
             }
             style={{ transformOrigin: "bottom center" }}
-            transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
+            transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
             className="shrink-0 select-none flex items-center justify-center pointer-events-none"
           >
             <Building2 size={size} className={className} />

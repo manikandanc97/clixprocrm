@@ -53,7 +53,7 @@ export default function Topbar() {
   return (
     <header ref={headerRef} className="w-full px-4 sm:px-6 pt-3.5 pb-2.5 sm:pb-3 shrink-0">
       {/* ── Single Floating Card Container ── */}
-      <div className="flex items-center justify-between gap-3 sm:gap-4 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl px-3.5 sm:px-5 backdrop-blur-md h-[58px]">
+      <div className="flex items-center justify-between gap-3 sm:gap-4 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xs rounded-2xl px-3.5 sm:px-5 backdrop-blur-md h-[58px]">
         {/* Left: Mobile Nav Drawer & Search */}
         <div className="flex flex-1 items-center gap-2.5 max-w-full md:max-w-[460px]">
           <Sheet open={isMobileMenuOpen} onOpenChange={setIsMobileMenuOpen}>

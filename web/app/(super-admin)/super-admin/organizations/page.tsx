@@ -4,22 +4,20 @@ import { useEffect, useState, useMemo } from "react";
 import {
   Building2,
   Plus,
-  ShieldCheck,
-  RefreshCw,
-  Users,
-  Layers,
+  Search,
   X,
-  MoreHorizontal,
   Download,
-  FileText,
-  Trash2,
-  AlertTriangle,
-  Loader2,
+  MoreVertical,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ChevronDown,
+  Loader2,
+  Trash2,
+  AlertTriangle,
+  Users,
+  Eye,
+  RotateCcw,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
@@ -43,9 +41,6 @@ import {
 } from "@/shared/ui/dropdown-menu";
 import {
   CRMPageContainer,
-  CRMPageHeader,
-  CRMMetricsGrid,
-  CRMMetricCard,
   CRMToolbar,
   CRMPagination,
   CRMRoleBadge,
@@ -59,15 +54,27 @@ import { Skeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
 import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
 
-export default function SuperAdminOrganizationsPage() {
+import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
+
+export default function OrganizationsPage() {
   const [organizations, setOrganizations] = useState<PlatformOrganization[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [planFilter, setPlanFilter] = useState<string>("ALL");
-
-  // Pagination State
+  const [planFilter, setPlanFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [selectedOrgIds, setSelectedOrgIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
+  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
+  const setSort = (key: string, dir: "asc" | "desc" | null) => {
+    setSortConfig(dir === null ? null : { key, direction: dir });
+  };
+
+  // Delete Confirmation State
+  const [orgToDelete, setOrgToDelete] = useState<PlatformOrganization | null>(null);
+  const [deleting, setDeleting] = useState(false);
+  const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
+  const [bulkDeleting, setBulkDeleting] = useState(false);
 
   // Create Modal State
   const [createModalOpen, setCreateModalOpen] = useState(false);
@@ -82,15 +89,39 @@ export default function SuperAdminOrganizationsPage() {
   const [selectedOrgDetails, setSelectedOrgDetails] = useState<any>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
-  // Sort state
-  const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
-  const setSort = (key: string, dir: "asc" | "desc" | null) => {
-    setSortConfig(dir === null ? null : { key, direction: dir });
+  const getOrgColor = (name: string) => {
+    return getOrgAvatarColor(name);
   };
 
-  // Delete Confirmation State
-  const [orgToDelete, setOrgToDelete] = useState<PlatformOrganization | null>(null);
-  const [deleting, setDeleting] = useState(false);
+  const formatDate = (dateStr: string) => {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return { date: dateStr, time: "" };
+    const date = d.toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
+    const time = d.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+    return { date, time };
+  };
+
+  const getPlanPrice = (plan?: string) => {
+    switch (plan?.toLowerCase()) {
+      case "starter":
+        return "$29.00";
+      case "pro":
+        return "$69.00";
+      case "enterprise":
+        return "$199.00";
+      case "free":
+      default:
+        return "$0.00";
+    }
+  };
 
   const loadOrganizations = async () => {
     try {
@@ -120,7 +151,7 @@ export default function SuperAdminOrganizationsPage() {
 
   useEffect(() => {
     setCurrentPage(1);
-  }, [search, planFilter]);
+  }, [search, planFilter, statusFilter]);
 
   const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -175,6 +206,35 @@ export default function SuperAdminOrganizationsPage() {
     }
   };
 
+  const handleBulkDelete = async () => {
+    if (selectedOrgIds.length === 0) return;
+    try {
+      setBulkDeleting(true);
+      await Promise.all(selectedOrgIds.map((id) => deletePlatformOrganization(id)));
+      toast.success(`${selectedOrgIds.length} workspace(s) deleted successfully.`);
+      setSelectedOrgIds([]);
+      setBulkDeleteModalOpen(false);
+      await loadOrganizations();
+    } catch (err: any) {
+      toast.error(
+        err?.response?.data?.message ||
+          err?.message ||
+          "Failed to delete selected workspaces."
+      );
+    } finally {
+      setBulkDeleting(false);
+    }
+  };
+
+  const hasActiveFilters = planFilter !== "ALL" || statusFilter !== "ALL" || search.trim().length > 0;
+
+  const handleClearFilters = () => {
+    setPlanFilter("ALL");
+    setStatusFilter("ALL");
+    setSearch("");
+    setCurrentPage(1);
+  };
+
   const handleOpenDetails = async (orgId: string) => {
     try {
       setLoadingDetails(true);
@@ -221,12 +281,12 @@ export default function SuperAdminOrganizationsPage() {
     () => organizations.filter((o) => o.status === "ACTIVE").length,
     [organizations]
   );
-  const totalPro = useMemo(
+  const totalPaid = useMemo(
     () =>
       organizations.filter(
         (o) =>
-          o.plan?.toLowerCase() === "pro" ||
-          o.plan?.toLowerCase() === "enterprise"
+          o.plan &&
+          o.plan.toLowerCase() !== "free"
       ).length,
     [organizations]
   );
@@ -234,6 +294,7 @@ export default function SuperAdminOrganizationsPage() {
   const filteredOrganizations = useMemo(() => {
     const filtered = organizations.filter((org) => {
       if (planFilter !== "ALL" && org.plan?.toLowerCase() !== planFilter.toLowerCase()) return false;
+      if (statusFilter !== "ALL" && org.status?.toUpperCase() !== statusFilter.toUpperCase()) return false;
       if (!search.trim()) return true;
       const q = search.toLowerCase();
       return org.name.toLowerCase().includes(q) || org.slug.toLowerCase().includes(q);
@@ -246,7 +307,7 @@ export default function SuperAdminOrganizationsPage() {
       if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
     });
-  }, [organizations, search, planFilter, sortConfig]);
+  }, [organizations, search, planFilter, statusFilter, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrganizations.length / rowsPerPage));
   const paginatedOrganizations = filteredOrganizations.slice(
@@ -256,84 +317,47 @@ export default function SuperAdminOrganizationsPage() {
 
   return (
     <CRMPageContainer twoStageScroll>
-      {/* 1. Standard CRM Page Header */}
-      <CRMPageHeader
-        title="Organizations"
-        subtitle="Manage multi-tenant workspaces, subscription plans, and tenant lifecycle."
-        icon={Building2}
-        badge="Multi-Tenant Control"
-        actions={[
-          {
-            label: "Export CSV",
-            icon: Download,
-            onClick: exportCSV,
-            variant: "outline",
-          },
-          {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadOrganizations,
-            variant: "outline",
-          },
-          {
-            label: "Create Organization",
-            icon: Plus,
-            onClick: () => setCreateModalOpen(true),
-            variant: "default",
-          },
-        ]}
-      />
+      {/* 1. Header Layout */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div
+            data-animate-target="true"
+            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+          >
+            <AppIcon name="companies" icon={Building2} size={18} className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              Organizations
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Manage multi-tenant workspaces, subscription plans, and tenant lifecycle.
+            </p>
+          </div>
+        </div>
 
-      {/* 2. Standard CRM KPI Metrics Grid */}
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={3}>
-          <CRMMetricCard
-            title="Total Workspaces"
-            value={organizations.length}
-            change={`${organizations.length} Total`}
-            trend="neutral"
-            icon={Building2}
-            color="blue"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Active Workspaces"
-            value={totalActive}
-            change={`${totalActive} Active`}
-            trend={totalActive > 0 ? "up" : "neutral"}
-            icon={ShieldCheck}
-            color="emerald"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Paid Tiers (Pro/Ent)"
-            value={totalPro}
-            change={`${totalPro} Active`}
-            trend="up"
-            icon={Layers}
-            color="purple"
-            loading={loading}
-          />
-        </CRMMetricsGrid>
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={() => setCreateModalOpen(true)}
+            className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
+          >
+            <AppIcon name="plus" icon={Plus} size={14} className="w-3.5 h-3.5 text-white shrink-0" />
+            <span>Create Organization</span>
+          </Button>
+        </div>
       </div>
 
-      {/* 3. Two-Stage Scroll Workspace: Search + Table
-           Stage 1 — outer page scrolls KPI cards away;
-           this div sticks at top-0 and fills remaining viewport.
-           Stage 2 — inner overflow-auto div scrolls table rows. */}
-      <div className="crm-table-workspace-sticky">
-        <CRMToolbar
-          searchQuery={search}
-          setSearchQuery={setSearch}
-          placeholder="Search by workspace name or slug..."
-          sticky={false}
-        >
-          <div className="flex items-center gap-2">
-            {/* Plan Selector */}
+      {/* 2. Main Card Container matching Image 2 */}
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        {/* Top Controls Toolbar */}
+        <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
+          {/* Left: Filter Selects & Search */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Stock / Plan Filter */}
             <select
               value={planFilter}
               onChange={(e) => setPlanFilter(e.target.value)}
-              className="h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="ALL">All Plans</option>
               <option value="free">Free</option>
@@ -341,173 +365,430 @@ export default function SuperAdminOrganizationsPage() {
               <option value="pro">Pro</option>
               <option value="enterprise">Enterprise</option>
             </select>
-          </div>
-        </CRMToolbar>
 
-        {/* 4. Standard CRM Data Table */}
-        <div className={cn("crm-table-wrap", (loading || filteredOrganizations.length <= rowsPerPage) && "crm-table-no-pagination")}>
-          {/* Inner scroll container — vertical scroll owner for table rows */}
-          <div className="overflow-auto flex-1 min-h-0">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none" onClick={() => setSort("name", sortConfig?.key === "name" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}>
-                    <DataTableColumnHeader title="Organization" sortable sortDirection={sortConfig?.key === "name" ? sortConfig.direction : null} onSort={(d) => setSort("name", d)} />
-                  </th>
-                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
-                    <DataTableColumnHeader title="Plan" sortable sortDirection={sortConfig?.key === "plan" ? sortConfig.direction : null} onSort={(d) => setSort("plan", d)} />
-                  </th>
-                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap cursor-pointer select-none">
-                    <DataTableColumnHeader title="Users" align="right" sortable sortDirection={sortConfig?.key === "userCount" ? sortConfig.direction : null} onSort={(d) => setSort("userCount", d)} />
-                  </th>
-                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader title="CRM Activity" />
-                  </th>
-                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader title="Status" />
-                  </th>
-                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
-                    <DataTableColumnHeader title="Created Date" sortable sortDirection={sortConfig?.key === "createdAt" ? sortConfig.direction : null} onSort={(d) => setSort("createdAt", d)} />
-                  </th>
-                  <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
-                    <DataTableColumnHeader title="Actions" align="right" />
-                  </th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="animate-pulse h-16">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 bg-muted rounded-xl" />
-                          <div className="space-y-1.5">
-                            <div className="h-3.5 w-32 bg-muted rounded" />
-                            <div className="h-2.5 w-24 bg-muted/60 rounded" />
-                          </div>
+            {/* Publish / Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
+            >
+              <option value="ALL">All Status</option>
+              <option value="ACTIVE">Published (Active)</option>
+              <option value="SUSPENDED">Draft (Suspended)</option>
+            </select>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 group">
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+                <AppIcon name="search" icon={Search} size={14} className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              </div>
+              <Input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search..."
+                className="h-9 pl-8 pr-8 rounded-lg bg-background border-border/70 text-xs shadow-xs focus-visible:ring-2 focus-visible:ring-primary/20"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground self-end lg:self-auto flex-wrap">
+            {/* Multi-Select Delete Button with count */}
+            {selectedOrgIds.length > 0 && (
+              <button
+                onClick={() => setBulkDeleteModalOpen(true)}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
+              >
+                <AppIcon name="trash" icon={Trash2} size={14} className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <span>Delete ({selectedOrgIds.length})</span>
+              </button>
+            )}
+
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
+              >
+                <AppIcon name="reset" icon={RotateCcw} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                <span>Reset Filters</span>
+              </button>
+            )}
+
+            {/* Export Button */}
+            <button
+              onClick={exportCSV}
+              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/50 text-foreground text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+            >
+              <AppIcon name="export" icon={Download} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Table Content - Vertical & Horizontal Scroll Owner with Sticky Header */}
+        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
+          <table className="w-full text-left text-xs border-collapse min-w-[1100px] table-fixed">
+            <colgroup>
+              <col style={{ width: "48px" }} />
+              <col style={{ width: "280px" }} />
+              <col style={{ width: "130px" }} />
+              <col style={{ width: "130px" }} />
+              <col style={{ width: "220px" }} />
+              <col style={{ width: "130px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "64px" }} />
+            </colgroup>
+            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+              <tr className="text-xs font-bold text-foreground">
+                <th className="w-12 px-4 py-3.5 text-center bg-emerald-50/80 dark:bg-emerald-950/40 border-r border-emerald-500/15">
+                  <input
+                    type="checkbox"
+                    checked={
+                      paginatedOrganizations.length > 0 &&
+                      paginatedOrganizations.every((o) => selectedOrgIds.includes(o.id))
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedOrgIds(Array.from(new Set([...selectedOrgIds, ...paginatedOrganizations.map((o) => o.id)])));
+                      } else {
+                        const pageIds = new Set(paginatedOrganizations.map((o) => o.id));
+                        setSelectedOrgIds(selectedOrgIds.filter((id) => !pageIds.has(id)));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20 accent-primary cursor-pointer"
+                  />
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => setSort("name", sortConfig?.key === "name" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Organization</span>
+                    {sortConfig?.key === "name" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => setSort("plan", sortConfig?.key === "plan" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Plan</span>
+                    {sortConfig?.key === "plan" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => setSort("userCount", sortConfig?.key === "userCount" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Users</span>
+                    {sortConfig?.key === "userCount" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                  <span>CRM Activity</span>
+                </th>
+                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                  <span>Status</span>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => setSort("createdAt", sortConfig?.key === "createdAt" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Created Date</span>
+                    {sortConfig?.key === "createdAt" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th className="w-16 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40 text-xs">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse h-16">
+                    <td className="px-4 py-4 text-center">
+                      <div className="h-4 w-4 bg-muted rounded mx-auto" />
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-muted rounded-lg shrink-0" />
+                        <div className="space-y-1.5 min-w-0">
+                          <div className="h-3.5 w-32 bg-muted rounded" />
+                          <div className="h-2.5 w-20 bg-muted/60 rounded" />
                         </div>
-                      </td>
-                      <td className="px-6 py-4"><div className="h-6 w-16 bg-muted rounded-full" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-12 bg-muted rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-6 w-16 bg-muted rounded-full" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded" /></td>
-                      <td className="px-6 py-4 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
-                    </tr>
-                  ))
-                ) : paginatedOrganizations.length > 0 ? (
-                  paginatedOrganizations.map((org) => (
+                      </div>
+                    </td>
+                    <td className="px-4 py-4"><div className="h-6 w-16 bg-muted rounded-md" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-12 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-3.5 w-28 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-6 w-16 bg-muted rounded-md" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-6 w-6 bg-muted rounded ml-auto" /></td>
+                  </tr>
+                ))
+              ) : paginatedOrganizations.length > 0 ? (
+                paginatedOrganizations.map((org) => {
+                  const color = getOrgColor(org.name);
+                  const { date, time } = formatDate(org.createdAt);
+                  const isSelected = selectedOrgIds.includes(org.id);
+
+                  return (
                     <tr
                       key={org.id}
-                      className="group h-16 hover:bg-muted/[0.03] transition-colors"
+                      className={cn(
+                        "group h-16 hover:bg-muted/30 transition-colors",
+                        isSelected && "bg-primary/[0.03]"
+                      )}
                     >
+                      {/* Checkbox */}
+                      <td className="px-4 py-3.5 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {
+                            setSelectedOrgIds((prev) =>
+                              prev.includes(org.id) ? prev.filter((id) => id !== org.id) : [...prev, org.id]
+                            );
+                          }}
+                          className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20 accent-primary cursor-pointer"
+                        />
+                      </td>
+
                       {/* Organization Name & Avatar */}
-                      <td className="px-6 py-4 font-medium">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center font-bold text-sm shadow-sm shrink-0">
+                      <td className="px-4 py-3.5 font-medium overflow-hidden">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={cn(
+                              "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm shadow-xs border shrink-0",
+                              color.bg,
+                              color.text,
+                              color.border
+                            )}
+                          >
                             {org.name.charAt(0).toUpperCase()}
                           </div>
-                          <div className="min-w-0 max-w-[240px]">
-                            <TruncatedText
-                              text={org.name}
-                              lines={1}
+                          <div className="min-w-0 flex-1">
+                            <p
                               onClick={() => handleOpenDetails(org.id)}
-                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer"
-                            />
-                            <TruncatedText
-                              text={`/${org.slug}`}
-                              lines={1}
-                              className="text-[11px] text-muted-foreground font-mono"
-                            />
+                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate"
+                            >
+                              {org.name}
+                            </p>
+                            <p className="text-xs text-muted-foreground font-mono truncate">
+                              /{org.slug}
+                            </p>
                           </div>
                         </div>
                       </td>
 
                       {/* Plan */}
-                      <td className="px-6 py-4">
-                        <PlanBadge plan={org.plan} />
+                      <td className="px-4 py-3.5">
+                        <PlanBadge plan={org.plan} size="sm" className="rounded-md font-bold text-[10.5px] px-2 py-0.5" />
                       </td>
 
                       {/* Users */}
-                      <td className="px-6 py-4 text-sm font-semibold text-foreground">
+                      <td className="px-4 py-3.5 font-semibold text-foreground">
                         <div className="flex items-center gap-1.5 text-muted-foreground">
-                          <Users className="h-3.5 w-3.5 text-primary" />
+                          <Users className="h-3.5 w-3.5 text-primary shrink-0" />
                           <span className="text-foreground font-bold">{org.userCount}</span>
+                          <span className="text-[11px] font-normal text-muted-foreground">
+                            {org.userCount === 1 ? "user" : "users"}
+                          </span>
                         </div>
                       </td>
 
                       {/* CRM Activity */}
-                      <td className="px-6 py-4 text-xs text-muted-foreground font-medium">
+                      <td className="px-4 py-3.5 text-xs text-muted-foreground font-medium truncate">
                         <span className="text-foreground font-semibold">{org.leadCount}</span> leads • <span className="text-foreground font-semibold">{org.customerCount}</span> customers
                       </td>
 
                       {/* Status */}
-                      <td className="px-6 py-4">
-                        <StatusBadge
-                          status={org.status === "ACTIVE" ? "Active" : "Suspended"}
-                          variant={org.status === "ACTIVE" ? "emerald" : "rose"}
-                        />
+                      <td className="px-4 py-3.5">
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2.5 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider uppercase border shadow-xs",
+                            org.status === "ACTIVE"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              : "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                          )}
+                        >
+                          {org.status === "ACTIVE" ? "Active" : "Suspended"}
+                        </span>
                       </td>
 
                       {/* Created Date */}
-                      <td className="px-6 py-4 text-xs text-muted-foreground font-medium">
-                        {new Date(org.createdAt).toLocaleDateString()}
+                      <td className="px-4 py-3.5">
+                        <p className="text-xs font-semibold text-foreground">{date}</p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">{time}</p>
                       </td>
 
-                      {/* Actions Menu */}
-                      <td className="px-6 py-4 text-right">
-                        <div className="flex items-center justify-end">
-                          <CRMActionMenu
-                            triggerOrientation="horizontal"
-                            items={[
-                              {
-                                label: "View Overview",
-                                icon: "quotations",
-                                variant: "primary" as const,
-                                onClick: () => handleOpenDetails(org.id),
-                              },
-                              {
-                                label: "Delete Workspace",
-                                icon: "trash",
-                                variant: "destructive" as const,
-                                separatorBefore: true,
-                                onClick: () => setOrgToDelete(org),
-                              },
-                            ]}
-                          />
-                        </div>
+                      {/* Actions */}
+                      <td className="px-4 py-3.5 text-right">
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button
+                              variant="ghost"
+                              size="icon"
+                              className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
+                            >
+                              <MoreVertical className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="w-48 rounded-xl p-1.5 shadow-lg border-border bg-popover text-popover-foreground">
+                            <DropdownMenuItem
+                              onClick={() => handleOpenDetails(org.id)}
+                              className="group cursor-pointer text-xs rounded-lg py-2 px-2.5 font-medium flex items-center gap-2 hover:bg-muted focus:bg-muted"
+                            >
+                              <AppIcon name="overview" icon={Eye} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                              <span>View Overview</span>
+                            </DropdownMenuItem>
+                            <DropdownMenuSeparator className="my-1" />
+                            <DropdownMenuItem
+                              onClick={() => setOrgToDelete(org)}
+                              className="group cursor-pointer text-xs rounded-lg py-2 px-2.5 font-medium flex items-center gap-2 text-destructive hover:bg-destructive/10 focus:bg-destructive/10 focus:text-destructive"
+                            >
+                              <AppIcon name="trash" icon={Trash2} size={14} className="w-3.5 h-3.5 text-destructive shrink-0" />
+                              <span>Delete Workspace</span>
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={7} className="p-4 border-0">
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={8} className="p-8 text-center text-muted-foreground align-middle">
+                    <div className="flex flex-col items-center justify-center min-h-[420px] py-16">
                       <EmptyState
                         icon={Building2}
                         title="No organizations found"
-                        description="No workspaces match your search or filter criteria. Click 'Create Organization' to add one."
-                        className="border-none bg-transparent shadow-none p-8 min-h-[220px]"
+                        description="No workspaces match your search or filter criteria."
+                        className="border-none bg-transparent shadow-none p-0"
                       />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* 5. Pagination */}
-        {!loading && filteredOrganizations.length > 0 && (
-          <CRMPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={filteredOrganizations.length}
-            rowsPerPage={rowsPerPage}
-            onPageChange={setCurrentPage}
-            onRowsPerPageChange={setRowsPerPage}
-            itemName="Organizations"
-          />
-        )}
+        {/* Bottom Pagination */}
+        <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
+          <div>
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {filteredOrganizations.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
+            </span>
+            -
+            <span className="font-semibold text-foreground">
+              {Math.min(currentPage * rowsPerPage, filteredOrganizations.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{filteredOrganizations.length}</span> Organizations
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span>Rows per page:</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span>
+                Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                <strong className="text-foreground">{totalPages}</strong>
+              </span>
+
+              <div className="flex items-center gap-1">
+                {/* First Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(1)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="First page"
+                  aria-label="First page"
+                >
+                  <AppIcon name="chevronsLeft" icon={ChevronsLeft} size={14} className="h-4 w-4" />
+                </Button>
+
+                {/* Previous Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Previous page"
+                  aria-label="Previous page"
+                >
+                  <AppIcon name="chevronLeft" icon={ChevronLeft} size={14} className="h-4 w-4" />
+                </Button>
+
+                {/* Next Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Next page"
+                  aria-label="Next page"
+                >
+                  <AppIcon name="chevronRight" icon={ChevronRight} size={14} className="h-4 w-4" />
+                </Button>
+
+                {/* Last Page */}
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Last page"
+                  aria-label="Last page"
+                >
+                  <AppIcon name="chevronsRight" icon={ChevronsRight} size={14} className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 5. Create Organization Modal */}
@@ -632,9 +913,21 @@ export default function SuperAdminOrganizationsPage() {
           <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-2xl w-full p-6 space-y-6 max-h-[85vh] overflow-y-auto">
             <div className="flex items-center justify-between border-b border-border/60 pb-4">
               <div className="flex items-center gap-3">
-                <div className="h-11 w-11 rounded-2xl bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-extrabold text-base border border-emerald-500/20">
-                  {selectedOrgDetails?.name?.charAt(0) || "O"}
-                </div>
+                {(() => {
+                  const modalColor = getOrgColor(selectedOrgDetails?.name || "O");
+                  return (
+                    <div
+                      className={cn(
+                        "h-11 w-11 rounded-2xl flex items-center justify-center font-extrabold text-base border shadow-xs",
+                        modalColor.bg,
+                        modalColor.text,
+                        modalColor.border
+                      )}
+                    >
+                      {selectedOrgDetails?.name?.charAt(0)?.toUpperCase() || "O"}
+                    </div>
+                  );
+                })()}
                 <div>
                   <h3 className="text-lg font-bold text-foreground">
                     {selectedOrgDetails?.name}
@@ -849,6 +1142,65 @@ export default function SuperAdminOrganizationsPage() {
                   <>
                     <Trash2 className="h-3.5 w-3.5" />
                     <span>Delete Workspace</span>
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </div>
+      )}
+
+      {/* 8. Bulk Delete Workspaces Confirmation Modal */}
+      {bulkDeleteModalOpen && selectedOrgIds.length > 0 && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
+          <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
+            <div className="flex items-center gap-3">
+              <div className="h-11 w-11 rounded-2xl bg-destructive/10 border border-destructive/20 flex items-center justify-center shrink-0">
+                <AlertTriangle className="h-5 w-5 text-destructive" />
+              </div>
+              <div>
+                <h3 className="text-base font-bold text-foreground">
+                  Delete {selectedOrgIds.length} Selected Workspaces
+                </h3>
+                <p className="text-xs text-muted-foreground">
+                  This action is permanent and irreversible.
+                </p>
+              </div>
+            </div>
+
+            <p className="text-xs text-muted-foreground leading-relaxed">
+              Are you sure you want to permanently delete{" "}
+              <strong className="text-foreground">{selectedOrgIds.length} workspace(s)</strong>? All associated users, CRM leads, deals, quotations, invoices, and activity history across these workspaces will be completely removed.
+            </p>
+
+            <div className="flex items-center justify-end gap-3 pt-2">
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setBulkDeleteModalOpen(false)}
+                disabled={bulkDeleting}
+                className="rounded-xl text-xs font-semibold h-9 px-4"
+              >
+                Cancel
+              </Button>
+              <Button
+                type="button"
+                variant="destructive"
+                size="sm"
+                onClick={handleBulkDelete}
+                disabled={bulkDeleting}
+                className="rounded-xl text-xs font-bold h-9 px-4 gap-1.5"
+              >
+                {bulkDeleting ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 animate-spin" />
+                    <span>Deleting {selectedOrgIds.length}...</span>
+                  </>
+                ) : (
+                  <>
+                    <Trash2 className="h-3.5 w-3.5" />
+                    <span>Delete {selectedOrgIds.length} Workspaces</span>
                   </>
                 )}
               </Button>

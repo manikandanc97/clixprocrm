@@ -679,7 +679,7 @@ export function BaseSidebarContent({
       <motion.div
         initial={false}
         animate={{ opacity: 1 }}
-        className="relative shrink-0 h-[58px] flex items-center bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl overflow-hidden"
+        className="relative shrink-0 h-[58px] flex items-center bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xs rounded-2xl overflow-hidden"
       >
         {collapsedState ? (
           <TooltipProvider delayDuration={0}>
@@ -757,7 +757,7 @@ export function BaseSidebarContent({
       {/* ── CARD 2: Navigation Menu ── */}
       <motion.div
         initial={false}
-        className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl overflow-hidden flex flex-col"
+        className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xs rounded-2xl overflow-hidden flex flex-col"
       >
         <TooltipProvider delayDuration={0}>
           <div className={`flex-1 overflow-y-auto sidebar-scroll pt-2.5 pb-2.5 ${collapsedState ? "px-1.5" : "px-2.5"}`} {...scrollbarProps}>
@@ -851,7 +851,7 @@ export function BaseSidebarContent({
       {(footer || collapsedFooter) && (
         <motion.div
           initial={false}
-          className={`shrink-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-none rounded-2xl overflow-hidden ${
+          className={`shrink-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xs rounded-2xl overflow-hidden ${
             collapsedState ? "p-1.5" : "p-2"
           }`}
         >

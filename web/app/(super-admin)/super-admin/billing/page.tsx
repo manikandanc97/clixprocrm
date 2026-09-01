@@ -75,6 +75,7 @@ import {
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PlanBadge } from "@/shared/components/PlanBadge";
 import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
+import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
 import {
   ResponsiveContainer,
@@ -962,9 +963,21 @@ export default function SuperAdminBillingPage() {
                       <tr key={sub.id} className="hover:bg-muted/20 transition-colors">
                         <td className="px-6 py-3.5 font-bold text-foreground">
                           <div className="flex items-center gap-2.5 min-w-0">
-                            <div className="w-8 h-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0 font-bold text-xs">
-                              {sub.tenantName?.charAt(0)?.toUpperCase() || "O"}
-                            </div>
+                            {(() => {
+                              const orgColor = getOrgAvatarColor(sub.tenantName);
+                              return (
+                                <div
+                                  className={cn(
+                                    "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs border shadow-xs",
+                                    orgColor.bg,
+                                    orgColor.text,
+                                    orgColor.border
+                                  )}
+                                >
+                                  {sub.tenantName?.charAt(0)?.toUpperCase() || "O"}
+                                </div>
+                              );
+                            })()}
                             <div className="min-w-0">
                               <TruncatedText text={sub.tenantName} lines={1} className="font-bold text-foreground text-xs" />
                               <span className="text-[10px] text-muted-foreground font-mono block">

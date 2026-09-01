@@ -58,6 +58,8 @@ import {
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PlanBadge } from "@/shared/components/PlanBadge";
 import { SuperAdminDashboardSkeleton } from "../components/SuperAdminDashboardSkeleton";
+import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
+import { cn } from "@/shared/lib/utils";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -1188,9 +1190,21 @@ export default function SuperAdminDashboardPage() {
                   >
                     <td className="px-3.5 py-2 font-medium text-foreground">
                       <div className="flex items-center gap-2.5">
-                        <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center font-bold text-xs border border-emerald-500/20 shadow-xs shrink-0">
-                          {org.name.charAt(0).toUpperCase()}
-                        </div>
+                        {(() => {
+                          const orgColor = getOrgAvatarColor(org.name);
+                          return (
+                            <div
+                              className={cn(
+                                "h-7 w-7 rounded-lg flex items-center justify-center font-bold text-xs border shadow-xs shrink-0",
+                                orgColor.bg,
+                                orgColor.text,
+                                orgColor.border
+                              )}
+                            >
+                              {org.name.charAt(0).toUpperCase()}
+                            </div>
+                          );
+                        })()}
                         <div className="min-w-0">
                           <Link
                             href="/super-admin/organizations"

@@ -110,20 +110,20 @@ export function CRMPagination({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
+            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
             onClick={() => onPageChange(1)}
             disabled={currentPage <= 1}
             aria-label="First page"
             title="First page"
           >
-            <AppIcon icon={ChevronsLeft} name="chevronLeft" size={16} />
+            <AppIcon icon={ChevronsLeft} name="chevronsLeft" size={16} />
           </Button>
 
           {/* Previous Page */}
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
+            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
             onClick={() => onPageChange(Math.max(1, currentPage - 1))}
             disabled={currentPage <= 1}
             aria-label="Previous page"
@@ -141,7 +141,7 @@ export function CRMPagination({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
+            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
             onClick={() => onPageChange(Math.min(safeTotalPages, currentPage + 1))}
             disabled={currentPage >= safeTotalPages}
             aria-label="Next page"
@@ -154,13 +154,13 @@ export function CRMPagination({
           <Button
             variant="outline"
             size="icon"
-            className="h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
+            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
             onClick={() => onPageChange(safeTotalPages)}
             disabled={currentPage >= safeTotalPages}
             aria-label="Last page"
             title="Last page"
           >
-            <AppIcon icon={ChevronsRight} name="chevronRight" size={16} />
+            <AppIcon icon={ChevronsRight} name="chevronsRight" size={16} />
           </Button>
         </div>
       </div>

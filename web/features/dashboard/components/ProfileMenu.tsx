@@ -82,7 +82,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
         <DropdownMenuTrigger asChild>
           <button 
             type="button"
-            className="relative flex items-center gap-2.5 p-1 sm:py-1 sm:pl-1 sm:pr-2.5 rounded-xl hover:bg-sidebar-accent/50 transition-all duration-200 group outline-none cursor-pointer text-left"
+            className="relative flex items-center p-1 rounded-xl hover:bg-sidebar-accent/50 transition-all duration-200 group outline-none cursor-pointer"
             aria-label="User Profile Menu"
           >
             <div className="relative shrink-0">
@@ -108,17 +108,6 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                 className="absolute -bottom-0.5 -right-0.5 w-2.5 h-2.5 rounded-full border-2 border-background ring-1 ring-black/5 dark:ring-white/10 transition-all duration-300"
                 style={{ backgroundColor: "var(--primary)" }}
               />
-            </div>
-            <div className="hidden sm:flex flex-col min-w-0 pr-0.5 items-start">
-              <span className="text-xs font-semibold text-sidebar-foreground truncate max-w-[120px] leading-tight">
-                {displayName}
-              </span>
-              <div className="mt-0.5">
-                <span className={`inline-flex items-center gap-1 text-[9px] font-bold px-1.5 py-0.5 rounded-md uppercase tracking-wider border leading-none ${badgeStyle.badge}`}>
-                  <RoleIcon className="w-2.5 h-2.5 shrink-0" />
-                  {roleDisplay}
-                </span>
-              </div>
             </div>
           </button>
         </DropdownMenuTrigger>
