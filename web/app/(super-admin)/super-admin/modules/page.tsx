@@ -24,6 +24,11 @@ import {
   MoreHorizontal,
   Loader2,
   Users,
+  X,
+  ChevronLeft,
+  ChevronRight,
+  ChevronsLeft,
+  ChevronsRight,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -884,25 +889,17 @@ export default function SuperAdminModulesPage() {
         </div>
       </div>
 
-      {/* 4. Toolbar & Data Table Workspace */}
-      <div className="crm-table-workspace-sticky space-y-3">
-        {/* Search & Filter Toolbar */}
-        <CRMToolbar
-          placeholder={
-            activeScope === "tenant"
-              ? "Search modules by name, route, group..."
-              : "Search Super Admin menus..."
-          }
-          searchQuery={search}
-          setSearchQuery={setSearch}
-          sticky={false}
-        >
-          <div className="flex items-center gap-2">
+      {/* 4. Main Card Container matching Organizations Page */}
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        {/* Top Controls Toolbar */}
+        <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
+          {/* Left: Filter Selects & Search */}
+          <div className="flex flex-wrap items-center gap-2.5">
             {/* Group Filter */}
             <select
               value={groupFilter}
               onChange={(e) => setGroupFilter(e.target.value)}
-              className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="ALL">All Groups</option>
               {availableGroups.map((g) => (
@@ -916,26 +913,65 @@ export default function SuperAdminModulesPage() {
             <select
               value={statusFilter}
               onChange={(e) => setStatusFilter(e.target.value as any)}
-              className="h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
               <option value="ENABLED">Active Only</option>
               <option value="DISABLED">Inactive Only</option>
             </select>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 group">
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+                <Search className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              </div>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder={
+                  activeScope === "tenant"
+                    ? "Search modules by name, route..."
+                    : "Search admin menus..."
+                }
+                className="h-9 w-full pl-8 pr-8 rounded-lg bg-background border border-border/70 text-xs shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
           </div>
-        </CRMToolbar>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground self-end lg:self-auto flex-wrap">
+            {(groupFilter !== "ALL" || statusFilter !== "ALL" || search.trim()) && (
+              <button
+                onClick={() => {
+                  setSearch("");
+                  setGroupFilter("ALL");
+                  setStatusFilter("ALL");
+                  setCurrentPage(1);
+                }}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                <span>Reset Filters</span>
+              </button>
+            )}
+          </div>
+        </div>
 
         {/* 5. Unified Data Table */}
-        <div
-          className={cn(
-            "crm-table-wrap",
-            (loading || filteredModules.length <= rowsPerPage) && "crm-table-no-pagination"
-          )}
-        >
+        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
           {loading ? (
             <ModulesTableSkeleton />
           ) : filteredModules.length === 0 ? (
-            <div className="p-12">
+            <div className="flex flex-col items-center justify-center min-h-[360px] py-12">
               <EmptyState
                 icon={activeScope === "tenant" ? Boxes : Shield}
                 title={
@@ -948,239 +984,307 @@ export default function SuperAdminModulesPage() {
                     ? "Try clearing your search query or group filter to view all navigation menus."
                     : "Click '+ Add Menu' to register your first navigation item."
                 }
-                action={{
-                  label:
-                    search || groupFilter !== "ALL" || statusFilter !== "ALL"
-                      ? "Clear Filters"
-                      : "Add Menu",
-                  onClick:
-                    search || groupFilter !== "ALL" || statusFilter !== "ALL"
-                      ? () => {
-                          setSearch("");
-                          setGroupFilter("ALL");
-                          setStatusFilter("ALL");
-                        }
-                      : handleOpenCreate,
-                }}
+                className="border-none bg-transparent shadow-none p-0"
               />
             </div>
           ) : (
-            <div className="overflow-auto flex-1 min-h-0">
-              <table className="w-full text-left text-sm border-collapse">
-                <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-                  <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                    <th className="h-10 sm:h-11 px-3 sm:px-4 py-2.5 w-20 text-center bg-card whitespace-nowrap">
-                      <DataTableColumnHeader
-                        title="Order"
-                        align="center"
-                        sortable
-                        sortDirection={sortConfig.key === "order" ? sortConfig.direction : null}
-                        onSort={(dir) => handleSort("order", dir)}
-                      />
-                    </th>
-                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                      <DataTableColumnHeader
-                        title="Menu"
-                        sortable
-                        sortDirection={sortConfig.key === "label" ? sortConfig.direction : null}
-                        onSort={(dir) => handleSort("label", dir)}
-                      />
-                    </th>
-                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                      <DataTableColumnHeader
-                        title="Group"
-                        sortable
-                        sortDirection={sortConfig.key === "group" ? sortConfig.direction : null}
-                        onSort={(dir) => handleSort("group", dir)}
-                      />
-                    </th>
-                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
-                      Access
-                    </th>
-                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
-                      <DataTableColumnHeader
-                        title="Status"
-                        align="center"
-                        sortable
-                        sortDirection={sortConfig.key === "isEnabled" ? sortConfig.direction : null}
-                        onSort={(dir) => handleSort("isEnabled", dir)}
-                      />
-                    </th>
-                    <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
-                      Actions
-                    </th>
-                  </tr>
-                </thead>
-                <tbody className="divide-y divide-border/50">
-                  {paginatedModules.map((mod, pageIndex) => {
-                    const Icon = getDynamicIcon(mod.icon);
-                    const globalIndex = (currentPage - 1) * rowsPerPage + pageIndex;
-                    const isFirst = globalIndex === 0;
-                    const isLast = globalIndex === sortedModules.length - 1;
+            <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
+              <colgroup>
+                <col style={{ width: "90px" }} />
+                <col style={{ width: "280px" }} />
+                <col style={{ width: "160px" }} />
+                <col style={{ width: "160px" }} />
+                <col style={{ width: "140px" }} />
+                <col style={{ width: "80px" }} />
+              </colgroup>
+              <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+                <tr className="text-xs font-bold text-foreground">
+                  <th className="px-3 py-3.5 text-center border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                    <DataTableColumnHeader
+                      title="Order"
+                      align="center"
+                      sortable
+                      sortDirection={sortConfig.key === "order" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("order", dir)}
+                    />
+                  </th>
+                  <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                    <DataTableColumnHeader
+                      title="Menu"
+                      sortable
+                      sortDirection={sortConfig.key === "label" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("label", dir)}
+                    />
+                  </th>
+                  <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                    <DataTableColumnHeader
+                      title="Group"
+                      sortable
+                      sortDirection={sortConfig.key === "group" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("group", dir)}
+                    />
+                  </th>
+                  <th className="px-4 py-3.5 text-center border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                    <span>Access</span>
+                  </th>
+                  <th className="px-4 py-3.5 text-center border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                    <DataTableColumnHeader
+                      title="Status"
+                      align="center"
+                      sortable
+                      sortDirection={sortConfig.key === "isEnabled" ? sortConfig.direction : null}
+                      onSort={(dir) => handleSort("isEnabled", dir)}
+                    />
+                  </th>
+                  <th className="w-20 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+                    <span>Actions</span>
+                  </th>
+                </tr>
+              </thead>
+              <tbody className="divide-y divide-border/40 text-xs">
+                {paginatedModules.map((mod, pageIndex) => {
+                  const Icon = getDynamicIcon(mod.icon);
+                  const globalIndex = (currentPage - 1) * rowsPerPage + pageIndex;
+                  const isFirst = globalIndex === 0;
+                  const isLast = globalIndex === sortedModules.length - 1;
 
-                    return (
-                      <tr
-                        key={mod.id}
-                        className="group h-16 hover:bg-muted/[0.03] transition-colors"
-                      >
-                        {/* ORDER: Up/Down Buttons + Number */}
-                        <td className="px-3 sm:px-4 py-4 text-center">
-                          <div className="flex items-center justify-center gap-1">
-                            <button
-                              type="button"
-                              disabled={isFirst || reordering}
-                              onClick={() => handleMoveOrder(globalIndex, "up")}
-                              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
-                              title="Move Up"
-                            >
-                              <ArrowUp className="w-3.5 h-3.5" />
-                            </button>
-                            <span className="font-mono text-xs font-bold text-foreground w-5 text-center">
-                              {mod.sortOrder}
-                            </span>
-                            <button
-                              type="button"
-                              disabled={isLast || reordering}
-                              onClick={() => handleMoveOrder(globalIndex, "down")}
-                              className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
-                              title="Move Down"
-                            >
-                              <ArrowDown className="w-3.5 h-3.5" />
-                            </button>
-                          </div>
-                        </td>
-
-                        {/* MENU: Icon + Label + Subtitle Route */}
-                        <td className="px-4 sm:px-6 py-4">
-                          <div className="flex items-center gap-3">
-                            <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-sm">
-                              <Icon className="w-4 h-4" />
-                            </div>
-                            <div className="min-w-0">
-                              <div className="flex items-center gap-2">
-                                <button
-                                  type="button"
-                                  onClick={() => handleOpenEdit(mod)}
-                                  className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate text-left"
-                                >
-                                  {mod.label}
-                                </button>
-                                {mod.badge && (
-                                  <Badge
-                                    variant="outline"
-                                    className="text-[10px] px-1.5 py-0 font-semibold bg-primary/10 text-primary border-primary/20 shrink-0"
-                                  >
-                                    {mod.badge}
-                                  </Badge>
-                                )}
-                                {mod.isSystem && (
-                                  <span
-                                    title="Core system module (Protected)"
-                                    className="inline-flex items-center text-[10px] text-muted-foreground"
-                                  >
-                                    <Lock className="w-2.5 h-2.5 text-muted-foreground" />
-                                  </span>
-                                )}
-                              </div>
-                              <div className="flex items-center gap-1.5 mt-0.5">
-                                <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted/60 font-mono text-[11px] text-muted-foreground border border-border/50">
-                                  <LinkIcon className="w-2.5 h-2.5" />
-                                  {mod.route}
-                                </span>
-                              </div>
-                            </div>
-                          </div>
-                        </td>
-
-                        {/* GROUP */}
-                        <td className="px-4 sm:px-6 py-4">
-                          <span className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-semibold bg-muted text-foreground border border-border/60">
-                            <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
-                            {mod.group}
+                  return (
+                    <tr
+                      key={mod.id}
+                      className="group h-16 hover:bg-muted/30 transition-colors"
+                    >
+                      {/* ORDER */}
+                      <td className="px-3 py-3.5 text-center">
+                        <div className="flex items-center justify-center gap-1">
+                          <button
+                            type="button"
+                            disabled={isFirst || reordering}
+                            onClick={() => handleMoveOrder(globalIndex, "up")}
+                            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
+                            title="Move Up"
+                          >
+                            <ArrowUp className="w-3.5 h-3.5" />
+                          </button>
+                          <span className="font-mono text-xs font-bold text-foreground w-5 text-center">
+                            {mod.sortOrder}
                           </span>
-                        </td>
+                          <button
+                            type="button"
+                            disabled={isLast || reordering}
+                            onClick={() => handleMoveOrder(globalIndex, "down")}
+                            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted disabled:opacity-20 disabled:hover:bg-transparent cursor-pointer"
+                            title="Move Down"
+                          >
+                            <ArrowDown className="w-3.5 h-3.5" />
+                          </button>
+                        </div>
+                      </td>
 
-                        {/* ACCESS */}
-                        <td className="px-4 sm:px-6 py-4 text-center">
-                          {renderAccessBadge(mod)}
-                        </td>
-
-                        {/* STATUS (Single Unified Active / Inactive Toggle) */}
-                        <td className="px-4 sm:px-6 py-4 text-center">
-                          <div className="flex items-center justify-center gap-2">
-                            <Switch
-                              checked={mod.isEnabled}
-                              onCheckedChange={(checked) =>
-                                handleToggleStatus(mod, checked)
-                              }
-                              className="data-[state=checked]:bg-emerald-600 cursor-pointer"
-                            />
-                            <span
-                              className={cn(
-                                "text-xs font-bold w-14 text-left",
-                                mod.isEnabled
-                                  ? "text-emerald-600 dark:text-emerald-400"
-                                  : "text-muted-foreground"
-                              )}
-                            >
-                              {mod.isEnabled ? "Active" : "Inactive"}
-                            </span>
+                      {/* MENU */}
+                      <td className="px-4 py-3.5">
+                        <div className="flex items-center gap-3">
+                          <div className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-xs">
+                            <Icon className="w-4 h-4" />
                           </div>
-                        </td>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2">
+                              <button
+                                type="button"
+                                onClick={() => handleOpenEdit(mod)}
+                                className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate text-left"
+                              >
+                                {mod.label}
+                              </button>
+                              {mod.badge && (
+                                <Badge
+                                  variant="outline"
+                                  className="text-[10px] px-1.5 py-0 font-semibold bg-primary/10 text-primary border-primary/20 shrink-0"
+                                >
+                                  {mod.badge}
+                                </Badge>
+                              )}
+                              {mod.isSystem && (
+                                <span
+                                  title="Core system module (Protected)"
+                                  className="inline-flex items-center text-[10px] text-muted-foreground"
+                                >
+                                  <Lock className="w-2.5 h-2.5 text-muted-foreground" />
+                                </span>
+                              )}
+                            </div>
+                            <div className="flex items-center gap-1.5 mt-0.5">
+                              <span className="inline-flex items-center gap-1 px-1.5 py-0.5 rounded bg-muted/60 font-mono text-[11px] text-muted-foreground border border-border/50">
+                                <LinkIcon className="w-2.5 h-2.5" />
+                                {mod.route}
+                              </span>
+                            </div>
+                          </div>
+                        </div>
+                      </td>
 
-                        {/* ACTIONS */}
-                        <td className="px-4 sm:px-6 py-4 text-right">
-                          <CRMActionMenu
-                            triggerOrientation="horizontal"
-                            items={[
-                              {
-                                label: "Edit Menu",
-                                icon: Edit2,
-                                variant: "primary" as const,
-                                onClick: () => handleOpenEdit(mod),
-                              },
-                              {
-                                label: mod.isEnabled ? "Disable Menu" : "Enable Menu",
-                                icon: mod.isEnabled ? XCircle : CheckCircle2,
-                                variant: mod.isEnabled ? ("destructive" as const) : ("default" as const),
-                                className: !mod.isEnabled ? "text-emerald-600 dark:text-emerald-400 font-medium" : undefined,
-                                onClick: () => handleToggleStatus(mod, !mod.isEnabled),
-                              },
-                              {
-                                label: mod.isSystem ? "System Menu (Protected)" : "Delete Menu",
-                                icon: Trash2,
-                                variant: mod.isSystem ? ("default" as const) : ("destructive" as const),
-                                disabled: mod.isSystem,
-                                separatorBefore: true,
-                                onClick: () => !mod.isSystem && setModuleToDelete(mod),
-                              },
-                            ]}
+                      {/* GROUP */}
+                      <td className="px-4 py-3.5">
+                        <span className="inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-md text-xs font-semibold bg-muted text-foreground border border-border/60">
+                          <FolderTree className="w-3 h-3 text-muted-foreground shrink-0" />
+                          {mod.group}
+                        </span>
+                      </td>
+
+                      {/* ACCESS */}
+                      <td className="px-4 py-3.5 text-center">
+                        {renderAccessBadge(mod)}
+                      </td>
+
+                      {/* STATUS */}
+                      <td className="px-4 py-3.5 text-center">
+                        <div className="flex items-center justify-center gap-2">
+                          <Switch
+                            checked={mod.isEnabled}
+                            onCheckedChange={(checked) =>
+                              handleToggleStatus(mod, checked)
+                            }
+                            className="data-[state=checked]:bg-emerald-600 cursor-pointer"
                           />
-                        </td>
-                      </tr>
-                    );
-                  })}
-                </tbody>
-              </table>
-            </div>
+                          <span
+                            className={cn(
+                              "text-xs font-bold w-14 text-left",
+                              mod.isEnabled
+                                ? "text-emerald-600 dark:text-emerald-400"
+                                : "text-muted-foreground"
+                            )}
+                          >
+                            {mod.isEnabled ? "Active" : "Inactive"}
+                          </span>
+                        </div>
+                      </td>
+
+                      {/* ACTIONS */}
+                      <td className="px-4 py-3.5 text-right">
+                        <CRMActionMenu
+                          triggerOrientation="vertical"
+                          items={[
+                            {
+                              label: "Edit Menu",
+                              icon: Edit2,
+                              variant: "primary" as const,
+                              onClick: () => handleOpenEdit(mod),
+                            },
+                            {
+                              label: mod.isEnabled ? "Disable Menu" : "Enable Menu",
+                              icon: mod.isEnabled ? XCircle : CheckCircle2,
+                              variant: mod.isEnabled ? ("destructive" as const) : ("default" as const),
+                              className: !mod.isEnabled ? "text-emerald-600 dark:text-emerald-400 font-medium" : undefined,
+                              onClick: () => handleToggleStatus(mod, !mod.isEnabled),
+                            },
+                            {
+                              label: mod.isSystem ? "System Menu (Protected)" : "Delete Menu",
+                              icon: Trash2,
+                              variant: mod.isSystem ? ("default" as const) : ("destructive" as const),
+                              disabled: mod.isSystem,
+                              separatorBefore: true,
+                              onClick: () => !mod.isSystem && setModuleToDelete(mod),
+                            },
+                          ]}
+                        />
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
           )}
         </div>
 
-        {/* 6. Pagination */}
-        {!loading && sortedModules.length > 0 && (
-          <CRMPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={sortedModules.length}
-            rowsPerPage={rowsPerPage}
-            onPageChange={setCurrentPage}
-            onRowsPerPageChange={(rpp) => {
-              setRowsPerPage(rpp);
-              setCurrentPage(1);
-            }}
-            itemName="Menus"
-          />
-        )}
+        {/* 6. Bottom Pagination */}
+        <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
+          <div>
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {sortedModules.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
+            </span>
+            -
+            <span className="font-semibold text-foreground">
+              {Math.min(currentPage * rowsPerPage, sortedModules.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{sortedModules.length}</span> Menus
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span>Rows per page:</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span>
+                Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                <strong className="text-foreground">{totalPages}</strong>
+              </span>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(1)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="First page"
+                  aria-label="First page"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Previous page"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Next page"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Last page"
+                  aria-label="Last page"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 7. Add / Edit Modal */}

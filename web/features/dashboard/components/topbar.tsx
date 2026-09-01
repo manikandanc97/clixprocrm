@@ -6,7 +6,6 @@ import { Menu } from "lucide-react";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import ProfileMenu from "./ProfileMenu";
 import NotificationPanel from "./NotificationPanel";
-import CreateNewMenu from "./CreateNewMenu";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Sheet, SheetContent, SheetTrigger, SheetTitle } from "@/shared/ui/sheet";
 import { SidebarContent } from "./sidebar";
@@ -72,10 +71,8 @@ export default function Topbar() {
           <GlobalSearch />
         </div>
 
-        {/* Right: Action, Utilities, Profile */}
+        {/* Right: Utilities, Profile */}
         <div className="flex items-center gap-2.5 sm:gap-3 shrink-0">
-          <CreateNewMenu />
-
           <div className="flex items-center gap-1">
             <ThemeToggle />
             <div className="hidden sm:block h-4 w-px bg-sidebar-border/60 mx-0.5" />

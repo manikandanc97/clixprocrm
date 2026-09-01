@@ -61,7 +61,7 @@ export function DataTableColumnHeader({
     return (
       <div
         className={cn(
-          "inline-flex items-center gap-1.5 text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground select-none",
+          "inline-flex items-center gap-1.5 text-xs font-bold text-foreground select-none",
           alignmentClass,
           className
         )}
@@ -81,20 +81,20 @@ export function DataTableColumnHeader({
       onClick={handleToggleSort}
       onKeyDown={handleKeyDown}
       className={cn(
-        "group inline-flex items-center gap-1.5 cursor-pointer text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight select-none transition-colors duration-150 outline-none focus-visible:ring-1 focus-visible:ring-ring rounded py-0.5",
-        isSorted ? "text-foreground font-bold" : "text-muted-foreground hover:text-foreground",
+        "group inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold select-none transition-colors duration-150 outline-none rounded py-0.5",
+        isSorted ? "text-emerald-700 dark:text-emerald-300 font-bold" : "text-foreground hover:text-emerald-600 dark:hover:text-emerald-400",
         alignmentClass,
         className
       )}
-      >
-        <span>{content}</span>
+    >
+      <span>{content}</span>
       <span className={cn("inline-flex shrink-0 items-center transition-colors", iconClassName)}>
         {sortDirection === "asc" ? (
-          <ArrowUp className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          <ArrowUp className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
         ) : sortDirection === "desc" ? (
-          <ArrowDown className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
+          <ArrowDown className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
         ) : (
-          <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-muted-foreground transition-opacity" aria-hidden="true" />
+          <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-opacity" aria-hidden="true" />
         )}
       </span>
     </div>

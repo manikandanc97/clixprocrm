@@ -39,129 +39,117 @@ export function CRMPagination({
   onPageChange,
   onRowsPerPageChange,
   itemName = "items",
-  pageSizeOptions = [10, 25, 50, 100],
+  pageSizeOptions = [10, 20, 50, 100],
   className,
   alwaysShow = false,
 }: CRMPaginationProps) {
   if (totalItems === 0 || (!alwaysShow && totalItems <= rowsPerPage)) return null;
 
-  const startItem = (currentPage - 1) * rowsPerPage + 1;
+  const startItem = totalItems === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
   const endItem = Math.min(currentPage * rowsPerPage, totalItems);
   const safeTotalPages = Math.max(1, totalPages);
 
   return (
     <div
       className={cn(
-        "flex flex-col md:flex-row items-center justify-between gap-3 sm:gap-4 bg-card border border-border rounded-2xl p-3.5 sm:p-4 shadow-card shrink-0 w-full transition-all",
+        "p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto",
         className
       )}
     >
       {/* Showing item range */}
-      <div className="text-xs sm:text-sm text-muted-foreground font-medium w-full md:w-auto text-center md:text-left">
-        Showing <span className="font-bold text-foreground">{startItem}</span>–
-        <span className="font-bold text-foreground">{endItem}</span> of{" "}
-        <span className="font-bold text-foreground">
-          {new Intl.NumberFormat().format(totalItems)}
+      <div>
+        Showing{" "}
+        <span className="font-semibold text-foreground">
+          {startItem}
+        </span>
+        -
+        <span className="font-semibold text-foreground">
+          {endItem}
         </span>{" "}
-        {itemName}
+        of <span className="font-semibold text-foreground">{totalItems}</span> {itemName}
       </div>
 
       {/* Controls */}
-      <div className="flex flex-col sm:flex-row items-center gap-3 sm:gap-5 w-full md:w-auto justify-center md:justify-end">
+      <div className="flex items-center gap-4 flex-wrap justify-end">
         {/* Rows per page selector */}
         <div className="flex items-center gap-2">
-          <span className="text-xs sm:text-sm text-muted-foreground font-medium">
-            Rows per page:
-          </span>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                size="sm"
-                className="h-8 gap-1 font-semibold text-xs rounded-lg"
-              >
-                {rowsPerPage}{" "}
-                <AppIcon icon={ChevronDown} name="chevronDown" size={14} className="text-muted-foreground" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="min-w-[4.5rem]">
-              {pageSizeOptions.map((size) => (
-                <DropdownMenuItem
-                  key={size}
-                  onClick={() => {
-                    onRowsPerPageChange(size);
-                    onPageChange(1);
-                  }}
-                  className={cn(
-                    "font-medium text-xs cursor-pointer hover:bg-muted",
-                    rowsPerPage === size && "bg-muted/80 font-bold text-foreground"
-                  )}
-                >
-                  {size}
-                </DropdownMenuItem>
-              ))}
-            </DropdownMenuContent>
-          </DropdownMenu>
+          <span>Rows per page:</span>
+          <select
+            value={rowsPerPage}
+            onChange={(e) => {
+              onRowsPerPageChange(Number(e.target.value));
+              onPageChange(1);
+            }}
+            className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+          >
+            {pageSizeOptions.map((size) => (
+              <option key={size} value={size}>
+                {size}
+              </option>
+            ))}
+          </select>
         </div>
 
-        {/* Page navigation buttons */}
-        <div className="flex items-center gap-1">
-          {/* First Page */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
-            onClick={() => onPageChange(1)}
-            disabled={currentPage <= 1}
-            aria-label="First page"
-            title="First page"
-          >
-            <AppIcon icon={ChevronsLeft} name="chevronsLeft" size={16} />
-          </Button>
+        {/* Page indicator & navigation buttons */}
+        <div className="flex items-center gap-3">
+          <span>
+            Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+            <strong className="text-foreground">{safeTotalPages}</strong>
+          </span>
 
-          {/* Previous Page */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
-            onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-            disabled={currentPage <= 1}
-            aria-label="Previous page"
-            title="Previous page"
-          >
-            <AppIcon icon={ChevronLeft} name="chevronLeft" size={16} />
-          </Button>
+          <div className="flex items-center gap-1">
+            {/* First Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage <= 1}
+              onClick={() => onPageChange(1)}
+              className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+              title="First page"
+              aria-label="First page"
+            >
+              <AppIcon name="chevronsLeft" icon={ChevronsLeft} size={14} className="h-4 w-4" />
+            </Button>
 
-          {/* Page indicator */}
-          <div className="flex items-center justify-center px-3 text-xs sm:text-sm font-semibold text-foreground min-w-[5.5rem]">
-            Page {currentPage} of {safeTotalPages}
+            {/* Previous Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage <= 1}
+              onClick={() => onPageChange(Math.max(1, currentPage - 1))}
+              className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+              title="Previous page"
+              aria-label="Previous page"
+            >
+              <AppIcon name="chevronLeft" icon={ChevronLeft} size={14} className="h-4 w-4" />
+            </Button>
+
+            {/* Next Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage >= safeTotalPages}
+              onClick={() => onPageChange(Math.min(safeTotalPages, currentPage + 1))}
+              className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+              title="Next page"
+              aria-label="Next page"
+            >
+              <AppIcon name="chevronRight" icon={ChevronRight} size={14} className="h-4 w-4" />
+            </Button>
+
+            {/* Last Page */}
+            <Button
+              variant="outline"
+              size="icon"
+              disabled={currentPage >= safeTotalPages}
+              onClick={() => onPageChange(safeTotalPages)}
+              className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+              title="Last page"
+              aria-label="Last page"
+            >
+              <AppIcon name="chevronsRight" icon={ChevronsRight} size={14} className="h-4 w-4" />
+            </Button>
           </div>
-
-          {/* Next Page */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
-            onClick={() => onPageChange(Math.min(safeTotalPages, currentPage + 1))}
-            disabled={currentPage >= safeTotalPages}
-            aria-label="Next page"
-            title="Next page"
-          >
-            <AppIcon icon={ChevronRight} name="chevronRight" size={16} />
-          </Button>
-
-          {/* Last Page */}
-          <Button
-            variant="outline"
-            size="icon"
-            className="group h-8 w-8 rounded-lg hover:bg-muted hover:text-foreground transition-colors disabled:opacity-30 cursor-pointer"
-            onClick={() => onPageChange(safeTotalPages)}
-            disabled={currentPage >= safeTotalPages}
-            aria-label="Last page"
-            title="Last page"
-          >
-            <AppIcon icon={ChevronsRight} name="chevronsRight" size={16} />
-          </Button>
         </div>
       </div>
     </div>

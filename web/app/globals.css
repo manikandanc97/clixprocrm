@@ -646,7 +646,7 @@
 
   .crm-table-wrap,
   .crm-table-container {
-    @apply overflow-hidden rounded-xl border border-border bg-card shadow-card flex flex-col w-full flex-1 min-h-0;
+    @apply overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs flex flex-col w-full flex-1 min-h-0;
   }
 
   .crm-table-no-pagination {
@@ -654,11 +654,11 @@
   }
 
   .crm-table-th {
-    @apply h-10 sm:h-11 px-4 sm:px-6 text-left align-middle text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground bg-card whitespace-nowrap;
+    @apply h-11 px-4 py-3.5 text-left align-middle text-xs font-bold text-foreground border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap last:border-r-0 select-none;
   }
 
   .crm-table-td {
-    @apply h-16 px-4 sm:px-6 align-middle text-sm;
+    @apply h-16 px-4 py-3.5 align-middle text-xs;
   }
 
   .crm-muted-panel {

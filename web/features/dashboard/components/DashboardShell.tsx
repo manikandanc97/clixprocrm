@@ -45,9 +45,9 @@ export default function DashboardShell({
         </div>
 
         {/* Scrollable page content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col kanban-board-scroll">
           <motion.div
-            className="w-full flex-1 flex flex-col pb-20 md:pb-0"
+            className="w-full flex-1 min-h-0 flex flex-col pb-20 md:pb-0"
             initial={{ opacity: 0 }}
             animate={{ opacity: 1 }}
             transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}

@@ -53,23 +53,25 @@ import {
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { getUserAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
 
 export default function SuperAdminUsersPage() {
   const [users, setUsers] = useState<PlatformUser[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [statusFilter, setStatusFilter] = useState<string>("ALL");
+  const [statusFilter, setStatusFilter] = useState("ALL");
   const [superAdminOnly, setSuperAdminOnly] = useState(false);
+  const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
   const [transferTargetUser, setTransferTargetUser] = useState<PlatformUser | null>(null);
   const [transferConfirmText, setTransferConfirmText] = useState("");
-  const [isTransferring, setIsTransferring] = useState(false);
   const [deleteTargetUser, setDeleteTargetUser] = useState<PlatformUser | null>(null);
   const [deleteConfirmText, setDeleteConfirmText] = useState("");
+  const [isTransferring, setIsTransferring] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  // Pagination State
+  // Pagination & Sorting State
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
 
@@ -268,35 +270,66 @@ export default function SuperAdminUsersPage() {
     });
   }, [filteredUsers, sortConfig]);
 
-  const totalPages = Math.max(1, Math.ceil(sortedUsers.length / rowsPerPage));
+  const totalPages = Math.max(1, Math.ceil(filteredUsers.length / rowsPerPage));
   const paginatedUsers = sortedUsers.slice(
     (currentPage - 1) * rowsPerPage,
     currentPage * rowsPerPage
   );
 
+  const hasActiveFilters = statusFilter !== "ALL" || superAdminOnly || search.trim().length > 0;
+
+  const handleClearFilters = () => {
+    setStatusFilter("ALL");
+    setSuperAdminOnly(false);
+    setSearch("");
+    setCurrentPage(1);
+  };
+
+  const handleBulkDelete = async () => {
+    if (selectedUserIds.length === 0) return;
+    if (!confirm(`Are you sure you want to delete ${selectedUserIds.length} user(s)?`)) return;
+    try {
+      await Promise.all(selectedUserIds.map((id) => deletePlatformUser(id)));
+      toast.success(`${selectedUserIds.length} user(s) deleted successfully.`);
+      setSelectedUserIds([]);
+      loadUsers();
+    } catch (err: any) {
+      toast.error("Failed to delete selected users.");
+    }
+  };
+
   return (
     <CRMPageContainer twoStageScroll>
-      {/* 1. Standard CRM Page Header */}
-      <CRMPageHeader
-        title="Platform Users"
-        subtitle="Global user directory, administrative privilege control, and cross-organization access."
-        icon={Users}
-        badge="Platform Directory"
-        actions={[
-          {
-            label: "Export CSV",
-            icon: Download,
-            onClick: exportCSV,
-            variant: "outline",
-          },
-          {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadUsers,
-            variant: "outline",
-          },
-        ]}
-      />
+      {/* 1. Header Layout */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div
+            data-animate-target="true"
+            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+          >
+            <AppIcon name="users" icon={Users} size={18} className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors" />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              Platform Users
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Manage platform authentication, global roles, and user lifecycle.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={exportCSV}
+            variant="outline"
+            className="text-xs h-9 px-3.5 rounded-lg border-border/70 font-semibold gap-1.5 cursor-pointer hover:bg-muted/60 transition-colors"
+          >
+            <AppIcon name="export" icon={Download} size={14} className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
+            <span>Export CSV</span>
+          </Button>
+        </div>
+      </div>
 
       {/* 2. Standard CRM KPI Metrics Grid */}
       <div className="shrink-0">
@@ -331,162 +364,278 @@ export default function SuperAdminUsersPage() {
         </CRMMetricsGrid>
       </div>
 
-      {/* 3. Two-Stage Scroll Workspace */}
-      <div className="crm-table-workspace-sticky">
-        <CRMToolbar
-          searchQuery={search}
-          setSearchQuery={setSearch}
-          placeholder="Search by name, email, or role..."
-          sticky={false}
-        >
-          <div className="flex flex-wrap items-center gap-2">
-            {/* Super Admin filter chip */}
-            <button
-              onClick={() => setSuperAdminOnly(!superAdminOnly)}
-              className={`px-3 py-1.5 rounded-xl text-xs font-semibold flex items-center gap-1.5 transition-all shadow-sm ${
-                superAdminOnly
-                  ? "bg-emerald-600 text-white font-bold"
-                  : "bg-card text-muted-foreground hover:text-foreground border border-border"
-              }`}
+      {/* 3. Main Card Container matching Organizations Page */}
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        {/* Top Controls Toolbar */}
+        <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
+          {/* Left: Filter Selects & Search */}
+          <div className="flex flex-wrap items-center gap-2.5">
+            {/* Role Filter */}
+            <select
+              value={superAdminOnly ? "SUPER_ADMIN" : "ALL"}
+              onChange={(e) => setSuperAdminOnly(e.target.value === "SUPER_ADMIN")}
+              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
-              <Crown className="h-3.5 w-3.5" />
-              <span>Super Admins</span>
-            </button>
+              <option value="ALL">All Roles</option>
+              <option value="SUPER_ADMIN">Super Admins Only</option>
+            </select>
 
-            {/* Status Tabs */}
-            <div className="flex items-center bg-muted/60 p-1 rounded-xl border border-border/60 shadow-sm">
-              {(["ALL", "ACTIVE", "INACTIVE", "SUSPENDED"] as const).map((st) => (
+            {/* Status Filter */}
+            <select
+              value={statusFilter}
+              onChange={(e) => setStatusFilter(e.target.value)}
+              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
+            >
+              <option value="ALL">All Status</option>
+              <option value="ACTIVE">Active</option>
+              <option value="INACTIVE">Inactive</option>
+              <option value="SUSPENDED">Suspended</option>
+            </select>
+
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 group">
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+                <AppIcon name="search" icon={Search} size={14} className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              </div>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Search by name, email..."
+                className="h-9 w-full pl-8 pr-8 rounded-lg bg-background border border-border/70 text-xs shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+              {search && (
                 <button
-                  key={st}
-                  onClick={() => setStatusFilter(st)}
-                  className={`px-3 py-1 rounded-lg text-xs font-semibold transition-all ${
-                    statusFilter === st
-                      ? "bg-card text-foreground shadow-sm font-bold"
-                      : "text-muted-foreground hover:text-foreground"
-                  }`}
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
-                  {st === "ALL" ? "All" : st.charAt(0) + st.slice(1).toLowerCase()}
+                  <X className="w-3.5 h-3.5" />
                 </button>
-              ))}
+              )}
             </div>
           </div>
-        </CRMToolbar>
 
-        {/* 4. Standard CRM Data Table */}
-        <div className={cn("crm-table-wrap", (loading || sortedUsers.length <= rowsPerPage) && "crm-table-no-pagination")}>
-          <div className="overflow-auto flex-1 min-h-0">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="User"
-                      sortable
-                      sortDirection={sortConfig.key === "name" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("name", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Platform Role"
-                      sortable
-                      sortDirection={sortConfig.key === "role" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("role", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card">Organizations &amp; Role</th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Status"
-                      sortable
-                      sortDirection={sortConfig.key === "status" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("status", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Created Date"
-                      sortable
-                      sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("createdAt", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Actions</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="animate-pulse h-16">
-                      <td className="px-6 py-4">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 bg-muted rounded-xl" />
-                          <div className="space-y-1.5">
-                            <div className="h-3.5 w-32 bg-muted rounded" />
-                            <div className="h-2.5 w-24 bg-muted/60 rounded" />
-                          </div>
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground self-end lg:self-auto flex-wrap">
+            {/* Multi-Select Delete Button */}
+            {selectedUserIds.length > 0 && (
+              <button
+                onClick={handleBulkDelete}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
+              >
+                <AppIcon name="trash" icon={Trash2} size={14} className="w-3.5 h-3.5 text-rose-500 shrink-0" />
+                <span>Delete ({selectedUserIds.length})</span>
+              </button>
+            )}
+
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
+              <button
+                onClick={handleClearFilters}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
+              >
+                <AppIcon name="reset" icon={RefreshCw} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                <span>Reset Filters</span>
+              </button>
+            )}
+
+            {/* Export Button */}
+            <button
+              onClick={exportCSV}
+              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/50 text-foreground text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+            >
+              <AppIcon name="export" icon={Download} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+              <span>Export</span>
+            </button>
+          </div>
+        </div>
+
+        {/* Table Content */}
+        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
+          <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
+            <colgroup>
+              <col style={{ width: "48px" }} />
+              <col style={{ width: "280px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "240px" }} />
+              <col style={{ width: "130px" }} />
+              <col style={{ width: "160px" }} />
+              <col style={{ width: "64px" }} />
+            </colgroup>
+            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+              <tr className="text-xs font-bold text-foreground">
+                <th className="w-12 px-4 py-3.5 text-center bg-emerald-50/80 dark:bg-emerald-950/40 border-r border-emerald-500/15">
+                  <input
+                    type="checkbox"
+                    checked={
+                      paginatedUsers.length > 0 &&
+                      paginatedUsers.every((u) => selectedUserIds.includes(u.id))
+                    }
+                    onChange={(e) => {
+                      if (e.target.checked) {
+                        setSelectedUserIds(Array.from(new Set([...selectedUserIds, ...paginatedUsers.map((u) => u.id)])));
+                      } else {
+                        const pageIds = new Set(paginatedUsers.map((u) => u.id));
+                        setSelectedUserIds(selectedUserIds.filter((id) => !pageIds.has(id)));
+                      }
+                    }}
+                    className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20 accent-primary cursor-pointer"
+                  />
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("name", sortConfig.key === "name" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>User</span>
+                    {sortConfig.key === "name" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("role", sortConfig.key === "role" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Platform Role</span>
+                    {sortConfig.key === "role" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                  <span>Organizations &amp; Role</span>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("status", sortConfig.key === "status" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Status</span>
+                    {sortConfig.key === "status" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("createdAt", sortConfig.key === "createdAt" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Created Date</span>
+                    {sortConfig.key === "createdAt" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th className="w-16 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+                  <span className="sr-only">Actions</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40 text-xs">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse h-16">
+                    <td className="px-4 py-4 text-center">
+                      <div className="h-4 w-4 bg-muted rounded mx-auto" />
+                    </td>
+                    <td className="px-4 py-4">
+                      <div className="flex items-center gap-3">
+                        <div className="h-10 w-10 bg-muted rounded-lg shrink-0" />
+                        <div className="space-y-1.5 min-w-0">
+                          <div className="h-3.5 w-32 bg-muted rounded" />
+                          <div className="h-2.5 w-20 bg-muted/60 rounded" />
                         </div>
-                      </td>
-                      <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded-full" /></td>
-                      <td className="px-6 py-4"><div className="h-3.5 w-28 bg-muted rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-16 bg-muted rounded-full" /></td>
-                      <td className="px-6 py-4"><div className="h-3.5 w-20 bg-muted rounded" /></td>
-                      <td className="px-6 py-4 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
-                    </tr>
-                  ))
-                ) : paginatedUsers.length > 0 ? (
-                  paginatedUsers.map((u) => (
+                      </div>
+                    </td>
+                    <td className="px-4 py-4"><div className="h-6 w-24 bg-muted rounded-md" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-6 w-16 bg-muted rounded-md" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-6 w-6 bg-muted rounded ml-auto" /></td>
+                  </tr>
+                ))
+              ) : paginatedUsers.length > 0 ? (
+                paginatedUsers.map((u) => {
+                  const color = getUserAvatarColor(u.name || u.email);
+                  const isSelected = selectedUserIds.includes(u.id);
+
+                  return (
                     <tr
                       key={u.id}
-                      className="group h-16 hover:bg-muted/[0.03] transition-colors"
+                      className={cn(
+                        "group h-16 hover:bg-muted/30 transition-colors",
+                        isSelected && "bg-primary/[0.03]"
+                      )}
                     >
-                      {/* User Avatar & Info */}
-                      <td className="px-6 py-4 font-medium">
-                        <div className="flex items-center gap-3">
-                          <div className="h-9 w-9 rounded-xl bg-emerald-500/10 text-emerald-600 border border-emerald-500/20 flex items-center justify-center font-bold text-xs shadow-sm shrink-0">
+                      {/* Checkbox */}
+                      <td className="px-4 py-3.5 text-center">
+                        <input
+                          type="checkbox"
+                          checked={isSelected}
+                          onChange={() => {
+                            setSelectedUserIds((prev) =>
+                              prev.includes(u.id) ? prev.filter((id) => id !== u.id) : [...prev, u.id]
+                            );
+                          }}
+                          className="h-4 w-4 rounded border-border text-primary focus:ring-primary/20 accent-primary cursor-pointer"
+                        />
+                      </td>
+
+                      {/* User Name & Avatar */}
+                      <td className="px-4 py-3.5 font-medium overflow-hidden">
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div
+                            className={cn(
+                              "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm shadow-xs border shrink-0",
+                              color.bg,
+                              color.text,
+                              color.border
+                            )}
+                          >
                             {u.name?.charAt(0).toUpperCase() || u.email.charAt(0).toUpperCase()}
                           </div>
-                          <div className="min-w-0 max-w-[200px]">
-                            <TruncatedText
-                              text={u.name || "No name registered"}
-                              lines={1}
+                          <div className="min-w-0 flex-1">
+                            <p
                               onClick={() => setSelectedUser(u)}
-                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer"
-                            />
-                            <TruncatedText
-                              text={u.email}
-                              lines={1}
-                              className="text-xs text-muted-foreground"
-                            />
+                              className="font-bold text-sm text-foreground hover:text-emerald-600 transition-colors cursor-pointer truncate"
+                            >
+                              {u.name || "No name registered"}
+                            </p>
+                            <p className="text-xs text-muted-foreground font-mono truncate">
+                              {u.email}
+                            </p>
                           </div>
                         </div>
                       </td>
 
                       {/* Platform Role */}
-                      <td className="px-6 py-4 whitespace-nowrap">
+                      <td className="px-4 py-3.5">
                         {u.isSuperAdmin ? (
-                          <span className="inline-flex items-center gap-1.5 text-xs px-2.5 py-1 rounded-lg bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold shadow-sm whitespace-nowrap">
-                            <Crown className="h-3.5 w-3.5 shrink-0" />
+                          <span className="inline-flex items-center gap-1.5 text-[10.5px] px-2.5 py-0.5 rounded-md bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border border-emerald-500/30 font-bold shadow-xs whitespace-nowrap uppercase tracking-wider">
+                            <Crown className="h-3 w-3 shrink-0" />
                             SUPER ADMIN
                           </span>
                         ) : (
-                          <span className="text-xs text-muted-foreground font-medium whitespace-nowrap">
+                          <span className="text-xs text-muted-foreground font-medium">
                             Standard User
                           </span>
                         )}
                       </td>
 
                       {/* Organizations */}
-                      <td className="px-6 py-4">
+                      <td className="px-4 py-3.5">
                         {u.organizations && u.organizations.length > 0 ? (
-                          <div className="flex flex-wrap gap-1.5 max-w-[300px]">
+                          <div className="flex flex-wrap gap-1.5 max-w-[240px]">
                             {u.organizations.map((org: any) => (
                               <div
                                 key={org.tenantId}
-                                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg bg-muted/60 border border-border text-xs max-w-[200px]"
+                                className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/60 border border-border/70 text-[11px] max-w-[200px]"
                               >
                                 <Building2 className="h-3 w-3 text-muted-foreground shrink-0" />
-                                <TruncatedText text={org.name} lines={1} className="font-semibold text-foreground" />
+                                <span className="font-semibold text-foreground truncate">{org.name}</span>
                                 <CRMRoleBadge role={org.role} size="xs" />
                               </div>
                             ))}
@@ -499,23 +648,36 @@ export default function SuperAdminUsersPage() {
                       </td>
 
                       {/* Status */}
-                      <td className="px-6 py-4">
-                        <StatusBadge
-                          status={u.status === "ACTIVE" ? "Active" : u.status === "SUSPENDED" ? "Suspended" : "Inactive"}
-                          variant={u.status === "ACTIVE" ? "emerald" : u.status === "SUSPENDED" ? "rose" : "neutral"}
-                        />
+                      <td className="px-4 py-3.5">
+                        <span
+                          className={cn(
+                            "inline-flex items-center px-2.5 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider uppercase border shadow-xs",
+                            u.status === "ACTIVE"
+                              ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                              : u.status === "SUSPENDED"
+                              ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                              : "bg-muted text-muted-foreground border-border"
+                          )}
+                        >
+                          {u.status === "ACTIVE" ? "Active" : u.status === "SUSPENDED" ? "Suspended" : "Inactive"}
+                        </span>
                       </td>
 
                       {/* Created Date */}
-                      <td className="px-6 py-4 text-xs text-muted-foreground font-medium">
-                        {new Date(u.createdAt).toLocaleDateString()}
+                      <td className="px-4 py-3.5">
+                        <p className="text-xs font-semibold text-foreground">
+                          {new Date(u.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+                        </p>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          {new Date(u.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+                        </p>
                       </td>
 
                       {/* Actions */}
-                      <td className="px-6 py-4 text-right">
+                      <td className="px-4 py-3.5 text-right">
                         <div className="flex items-center justify-end">
                           <CRMActionMenu
-                            triggerOrientation="horizontal"
+                            triggerOrientation="vertical"
                             width="w-56"
                             items={[
                               {
@@ -557,36 +719,116 @@ export default function SuperAdminUsersPage() {
                         </div>
                       </td>
                     </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="p-4 border-0">
+                  );
+                })
+              ) : (
+                <tr>
+                  <td colSpan={7} className="p-8 text-center text-muted-foreground align-middle">
+                    <div className="flex flex-col items-center justify-center min-h-[360px] py-12">
                       <EmptyState
                         icon={Users}
                         title="No users found"
                         description="No platform users match your search query or filter criteria."
-                        className="border-none bg-transparent shadow-none p-8 min-h-[220px]"
+                        className="border-none bg-transparent shadow-none p-0"
                       />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* 5. Pagination */}
-        {!loading && filteredUsers.length > 0 && (
-          <CRMPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={filteredUsers.length}
-            rowsPerPage={rowsPerPage}
-            onPageChange={setCurrentPage}
-            onRowsPerPageChange={setRowsPerPage}
-            itemName="Platform Users"
-          />
-        )}
+        {/* Bottom Pagination */}
+        <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
+          <div>
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {filteredUsers.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
+            </span>
+            -
+            <span className="font-semibold text-foreground">
+              {Math.min(currentPage * rowsPerPage, filteredUsers.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{filteredUsers.length}</span> Users
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span>Rows per page:</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span>
+                Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                <strong className="text-foreground">{totalPages}</strong>
+              </span>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(1)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="First page"
+                  aria-label="First page"
+                >
+                  <AppIcon name="chevronsLeft" icon={ChevronsLeft} size={14} className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Previous page"
+                  aria-label="Previous page"
+                >
+                  <AppIcon name="chevronLeft" icon={ChevronLeft} size={14} className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Next page"
+                  aria-label="Next page"
+                >
+                  <AppIcon name="chevronRight" icon={ChevronRight} size={14} className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Last page"
+                  aria-label="Last page"
+                >
+                  <AppIcon name="chevronsRight" icon={ChevronsRight} size={14} className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 6. User Details Modal */}

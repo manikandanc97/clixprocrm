@@ -327,19 +327,16 @@ export default function SuperAdminAuditLogsPage() {
         </CRMMetricsGrid>
       </div>
 
-      {/* 3. Two-Stage Scroll Workspace */}
-      <div className="crm-table-workspace-sticky">
-        <CRMToolbar
-          searchQuery={search}
-          setSearchQuery={setSearch}
-          placeholder="Filter audit logs by actor, action, details..."
-          sticky={false}
-        >
-          <div className="flex items-center gap-2">
+      {/* 3. Main Card Container matching Organizations Page */}
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        {/* Top Controls Toolbar */}
+        <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
+          {/* Left: Filter Selects & Search */}
+          <div className="flex flex-wrap items-center gap-2.5">
             <select
               value={moduleFilter}
               onChange={(e) => setModuleFilter(e.target.value)}
-              className="h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="">All Modules</option>
               {modules.map((m) => (
@@ -348,134 +345,277 @@ export default function SuperAdminAuditLogsPage() {
                 </option>
               ))}
             </select>
-          </div>
-        </CRMToolbar>
 
-        {/* 4. Standard CRM Data Table */}
-        <div className={cn("crm-table-wrap", (loading || sortedLogs.length <= rowsPerPage) && "crm-table-no-pagination")}>
-          <div className="overflow-auto flex-1 min-h-0">
-            <table className="w-full text-left text-sm border-collapse">
-              <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-                <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Action"
-                      sortable
-                      sortDirection={sortConfig.key === "action" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("action", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Module"
-                      sortable
-                      sortDirection={sortConfig.key === "module" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("module", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Organization"
-                      sortable
-                      sortDirection={sortConfig.key === "organization" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("organization", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Actor"
-                      sortable
-                      sortDirection={sortConfig.key === "actor" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("actor", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
-                    <DataTableColumnHeader
-                      title="Timestamp"
-                      sortable
-                      sortDirection={sortConfig.key === "createdAt" ? sortConfig.direction : null}
-                      onSort={(dir) => handleSort("createdAt", dir)}
-                    />
-                  </th>
-                  <th className="h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">Details</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/50">
-                {loading ? (
-                  Array.from({ length: 5 }).map((_, i) => (
-                    <tr key={i} className="animate-pulse h-16">
-                      <td className="px-6 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-32 bg-muted rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
-                      <td className="px-6 py-4"><div className="h-4 w-20 bg-muted rounded" /></td>
-                      <td className="px-6 py-4 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
-                    </tr>
-                  ))
-                ) : paginatedLogs.length > 0 ? (
-                  paginatedLogs.map((log) => (
-                    <tr
-                      key={log.id}
-                      className="group h-16 hover:bg-muted/[0.03] transition-colors"
-                    >
-                      <td className="px-6 py-4 font-mono text-xs font-bold text-foreground max-w-[180px]">
-                        <TruncatedText text={log.action} lines={1} />
-                      </td>
-                      <td className="px-6 py-4 text-xs font-semibold text-muted-foreground whitespace-nowrap">
-                        <span className="px-2 py-0.5 rounded-full bg-muted border border-border">
-                          {log.module}
-                        </span>
-                      </td>
-                      <td className="px-6 py-4 text-xs font-semibold text-foreground max-w-[200px]">
-                        <TruncatedText text={log.organizationName} lines={1} />
-                      </td>
-                      <td className="px-6 py-4 text-xs text-muted-foreground max-w-[180px]">
-                        <TruncatedText text={log.actor} lines={1} />
-                      </td>
-                      <td className="px-6 py-4 text-xs text-muted-foreground">
-                        {new Date(log.createdAt).toLocaleString()}
-                      </td>
-                      <td className="px-6 py-4 text-right">
-                        <Button
-                          variant="ghost"
-                          size="sm"
-                          onClick={() => setSelectedLog(log)}
-                          className="h-8 px-2.5 text-xs font-medium text-muted-foreground hover:text-foreground hover:bg-muted"
-                        >
-                          View
-                        </Button>
-                      </td>
-                    </tr>
-                  ))
-                ) : (
-                  <tr>
-                    <td colSpan={6} className="p-4 border-0">
+            {/* Search Input */}
+            <div className="relative w-full sm:w-64 group">
+              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
+                <Search className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+              </div>
+              <input
+                value={search}
+                onChange={(e) => setSearch(e.target.value)}
+                placeholder="Filter logs by actor, action..."
+                className="h-9 w-full pl-8 pr-8 rounded-lg bg-background border border-border/70 text-xs shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+              />
+              {search && (
+                <button
+                  type="button"
+                  onClick={() => setSearch("")}
+                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
+                >
+                  <X className="w-3.5 h-3.5" />
+                </button>
+              )}
+            </div>
+          </div>
+
+          {/* Right: Actions */}
+          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground self-end lg:self-auto flex-wrap">
+            {(moduleFilter || search.trim()) && (
+              <button
+                onClick={() => {
+                  setModuleFilter("");
+                  setSearch("");
+                  setCurrentPage(1);
+                }}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer"
+              >
+                <RefreshCw className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                <span>Reset Filters</span>
+              </button>
+            )}
+          </div>
+        </div>
+
+        {/* Table Content */}
+        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
+          <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
+            <colgroup>
+              <col style={{ width: "200px" }} />
+              <col style={{ width: "130px" }} />
+              <col style={{ width: "220px" }} />
+              <col style={{ width: "180px" }} />
+              <col style={{ width: "180px" }} />
+              <col style={{ width: "80px" }} />
+            </colgroup>
+            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+              <tr className="text-xs font-bold text-foreground">
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("action", sortConfig.key === "action" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Action</span>
+                    {sortConfig.key === "action" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("module", sortConfig.key === "module" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Module</span>
+                    {sortConfig.key === "module" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("organization", sortConfig.key === "organization" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Organization</span>
+                    {sortConfig.key === "organization" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("actor", sortConfig.key === "actor" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Actor</span>
+                    {sortConfig.key === "actor" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th
+                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  onClick={() => handleSort("createdAt", sortConfig.key === "createdAt" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
+                >
+                  <div className="flex items-center gap-1.5">
+                    <span>Timestamp</span>
+                    {sortConfig.key === "createdAt" && (
+                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
+                    )}
+                  </div>
+                </th>
+                <th className="w-20 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+                  <span>Details</span>
+                </th>
+              </tr>
+            </thead>
+            <tbody className="divide-y divide-border/40 text-xs">
+              {loading ? (
+                Array.from({ length: 5 }).map((_, i) => (
+                  <tr key={i} className="animate-pulse h-16">
+                    <td className="px-4 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-5 w-20 bg-muted rounded-md" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-32 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-8 w-14 bg-muted rounded-lg ml-auto" /></td>
+                  </tr>
+                ))
+              ) : paginatedLogs.length > 0 ? (
+                paginatedLogs.map((log) => (
+                  <tr
+                    key={log.id}
+                    className="group h-16 hover:bg-muted/30 transition-colors"
+                  >
+                    <td className="px-4 py-3.5 font-mono text-xs font-bold text-foreground truncate">
+                      <TruncatedText text={log.action} lines={1} />
+                    </td>
+                    <td className="px-4 py-3.5 text-xs font-semibold whitespace-nowrap">
+                      <span className="px-2.5 py-0.5 rounded-md bg-muted/70 border border-border/70 text-[11px] font-bold">
+                        {log.module}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3.5 text-xs font-semibold text-foreground truncate">
+                      <TruncatedText text={log.organizationName} lines={1} />
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-muted-foreground truncate">
+                      <TruncatedText text={log.actor} lines={1} />
+                    </td>
+                    <td className="px-4 py-3.5 text-xs text-muted-foreground">
+                      <p className="font-semibold text-foreground">{new Date(log.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</p>
+                      <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(log.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}</p>
+                    </td>
+                    <td className="px-4 py-3.5 text-right">
+                      <Button
+                        variant="ghost"
+                        size="sm"
+                        onClick={() => setSelectedLog(log)}
+                        className="h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg cursor-pointer"
+                      >
+                        View
+                      </Button>
+                    </td>
+                  </tr>
+                ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="p-8 text-center text-muted-foreground align-middle">
+                    <div className="flex flex-col items-center justify-center min-h-[360px] py-12">
                       <EmptyState
                         icon={ScrollText}
                         title="No audit logs found"
                         description="No logs match your filter criteria."
-                        className="border-none bg-transparent shadow-none p-8 min-h-[220px]"
+                        className="border-none bg-transparent shadow-none p-0"
                       />
-                    </td>
-                  </tr>
-                )}
-              </tbody>
-            </table>
-          </div>
+                    </div>
+                  </td>
+                </tr>
+              )}
+            </tbody>
+          </table>
         </div>
 
-        {/* 5. Pagination */}
-        {!loading && filteredLogs.length > 0 && (
-          <CRMPagination
-            currentPage={currentPage}
-            totalPages={totalPages}
-            totalItems={filteredLogs.length}
-            rowsPerPage={rowsPerPage}
-            onPageChange={setCurrentPage}
-            onRowsPerPageChange={setRowsPerPage}
-            itemName="Logs"
-          />
-        )}
+        {/* Bottom Pagination */}
+        <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
+          <div>
+            Showing{" "}
+            <span className="font-semibold text-foreground">
+              {filteredLogs.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
+            </span>
+            -
+            <span className="font-semibold text-foreground">
+              {Math.min(currentPage * rowsPerPage, filteredLogs.length)}
+            </span>{" "}
+            of <span className="font-semibold text-foreground">{filteredLogs.length}</span> Logs
+          </div>
+
+          <div className="flex items-center gap-4">
+            <div className="flex items-center gap-2">
+              <span>Rows per page:</span>
+              <select
+                value={rowsPerPage}
+                onChange={(e) => {
+                  setRowsPerPage(Number(e.target.value));
+                  setCurrentPage(1);
+                }}
+                className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
+              >
+                <option value={10}>10</option>
+                <option value={20}>20</option>
+                <option value={50}>50</option>
+                <option value={100}>100</option>
+              </select>
+            </div>
+
+            <div className="flex items-center gap-3">
+              <span>
+                Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+                <strong className="text-foreground">{totalPages}</strong>
+              </span>
+
+              <div className="flex items-center gap-1">
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage(1)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="First page"
+                  aria-label="First page"
+                >
+                  <ChevronsLeft className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage <= 1}
+                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Previous page"
+                  aria-label="Previous page"
+                >
+                  <ChevronLeft className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Next page"
+                  aria-label="Next page"
+                >
+                  <ChevronRight className="h-4 w-4" />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  disabled={currentPage >= totalPages}
+                  onClick={() => setCurrentPage(totalPages)}
+                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
+                  title="Last page"
+                  aria-label="Last page"
+                >
+                  <ChevronsRight className="h-4 w-4" />
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
       </div>
 
       {/* 5. Details Modal */}
