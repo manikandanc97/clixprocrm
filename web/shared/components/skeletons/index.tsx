@@ -49,22 +49,26 @@ export function DashboardWidgetSkeleton({
 
 export function MetricCardSkeleton({ className }: { className?: string } = {}) {
   return (
-    <CRMCard className={cn("p-5 flex flex-col justify-between h-[156px] relative overflow-hidden", className)}>
-      <div className="flex items-center justify-between">
-        <div className="space-y-1.5">
-          <Skeleton className="h-3.5 w-24" />
-          <Skeleton className="h-2.5 w-16" />
-        </div>
+    <div
+      className={cn(
+        "p-4 sm:p-5 flex flex-col justify-between min-h-[140px] rounded-2xl border border-border/50 bg-card/60 relative overflow-hidden",
+        className
+      )}
+    >
+      {/* Top Row: Icon on left + Trend on right */}
+      <div className="flex items-center justify-between gap-3">
         <Skeleton className="w-10 h-10 rounded-xl shrink-0" />
+        <Skeleton className="h-5 w-14 rounded-full shrink-0" />
       </div>
-      <div className="space-y-2 mt-2">
-        <Skeleton className="h-7 w-28" />
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-4 w-12 rounded-full" />
-          <Skeleton className="h-3 w-20" />
+      {/* Bottom Row: Title + Hero Value on left, Sparkline on right */}
+      <div className="flex items-end justify-between gap-2 mt-4">
+        <div className="space-y-1.5 flex-1">
+          <Skeleton className="h-3.5 w-24" />
+          <Skeleton className="h-7 w-28 rounded-md" />
         </div>
+        <Skeleton className="h-6 w-16 rounded-md shrink-0 mb-0.5" />
       </div>
-    </CRMCard>
+    </div>
   );
 }
 

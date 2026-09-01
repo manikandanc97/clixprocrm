@@ -82,7 +82,7 @@ export default function DashboardKPIs() {
         return dashboardLeads.positive ? ("up" as const) : ("down" as const);
       },
       icon: Users,
-      color: "indigo" as const,
+      color: "violet" as const,
       loading: dashboardQuery.isLoading || leadsQuery.isLoading,
       sparklineData: dashboardLeads?.sparklineData || [],
       comparisonText: "vs last week",
@@ -102,7 +102,7 @@ export default function DashboardKPIs() {
         return (pipelineActiveDeals as ReturnType<typeof JSON.parse>).positive ? ("up" as const) : ("down" as const);
       },
       icon: Target,
-      color: "cyan" as const,
+      color: "orange" as const,
       loading: pipelineQuery.isLoading || leadsQuery.isLoading,
       sparklineData: (pipelineActiveDeals as ReturnType<typeof JSON.parse>)?.sparklineData || [],
       comparisonText: "vs last week",
@@ -122,7 +122,7 @@ export default function DashboardKPIs() {
         return (pipelineWinRate as ReturnType<typeof JSON.parse>).positive ? ("up" as const) : ("down" as const);
       },
       icon: TrendingUp,
-      color: "orange" as const,
+      color: "pink" as const,
       loading: pipelineQuery.isLoading || leadsQuery.isLoading,
       sparklineData: (pipelineWinRate as ReturnType<typeof JSON.parse>)?.sparklineData || [],
       comparisonText: "vs last week",

@@ -1,11 +1,9 @@
 "use client";
 
-import React from "react";
-import { LucideIcon, TrendingUp, TrendingDown, Minus } from "lucide-react";
-import { Area, AreaChart, YAxis } from "recharts";
+import React, { useId } from "react";
+import { LucideIcon, TrendingUp, TrendingDown, Minus, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { ChartContainer } from "../charts/ChartContainer";
 import { motion } from "framer-motion";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
@@ -13,7 +11,7 @@ import { AppIcon } from "@/shared/components/icons/icon-registry";
 // Types & Config
 // ─────────────────────────────────────────────────────────────────────────────
 
-type MetricColor =
+export type MetricColor =
   | "emerald"
   | "cyan"
   | "indigo"
@@ -25,158 +23,291 @@ type MetricColor =
   | "primary"
   | "slate";
 
-type SparklineDotProps = {
-  cx?: number;
-  cy?: number;
-  index?: number;
+// ─────────────────────────────────────────────────────────────────────────────
+// Enterprise Theme Tokens (Image 2 Aesthetic)
+// Rich pastel gradient surfaces + deep contrast typography + vibrant accents
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface ColorConfig {
+  cardBg: string;
+  cardBorder: string;
+  titleColor: string;
+  valueColor: string;
+  trendUpColor: string;
+  trendDownColor: string;
+  trendNeutralColor: string;
+  iconBackdrop: string;
+  iconFrontBg: string;
+  iconColor: string;
+  sparklineStroke: string;
+  dotFill: string;
+}
+
+const COLOR_TOKENS: Record<MetricColor, ColorConfig> = {
+  emerald: {
+    cardBg: "bg-gradient-to-br from-[#D8F5E5] via-[#E2F8EC] to-[#C9F2DC] dark:from-emerald-950/40 dark:via-emerald-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#B2E8CB]/80 dark:border-emerald-500/20",
+    titleColor: "text-[#0B4628] dark:text-emerald-100",
+    valueColor: "text-[#004B50] dark:text-[#A7F3D0]",
+    trendUpColor: "text-[#007A48] dark:text-emerald-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#0B4628]/80 dark:text-emerald-200/80",
+    iconBackdrop: "bg-[#7BE3A8]/60 dark:bg-emerald-500/30",
+    iconFrontBg: "bg-[#00A76F] dark:bg-emerald-500",
+    iconColor: "text-white",
+    sparklineStroke: "#00A76F",
+    dotFill: "fill-[#00A76F]",
+  },
+  violet: {
+    cardBg: "bg-gradient-to-br from-[#EAD9FF] via-[#F1E6FF] to-[#E1CAFE] dark:from-purple-950/40 dark:via-purple-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#D4B5FC]/80 dark:border-purple-500/20",
+    titleColor: "text-[#3B1475] dark:text-purple-100",
+    valueColor: "text-[#300D61] dark:text-[#DDD6FE]",
+    trendUpColor: "text-[#5B10B8] dark:text-purple-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#3B1475]/80 dark:text-purple-200/80",
+    iconBackdrop: "bg-[#C495FD]/60 dark:bg-purple-500/30",
+    iconFrontBg: "bg-[#8E33FF] dark:bg-purple-500",
+    iconColor: "text-white",
+    sparklineStroke: "#8E33FF",
+    dotFill: "fill-[#8E33FF]",
+  },
+  purple: {
+    cardBg: "bg-gradient-to-br from-[#EAD9FF] via-[#F1E6FF] to-[#E1CAFE] dark:from-purple-950/40 dark:via-purple-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#D4B5FC]/80 dark:border-purple-500/20",
+    titleColor: "text-[#3B1475] dark:text-purple-100",
+    valueColor: "text-[#300D61] dark:text-[#DDD6FE]",
+    trendUpColor: "text-[#5B10B8] dark:text-purple-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#3B1475]/80 dark:text-purple-200/80",
+    iconBackdrop: "bg-[#C495FD]/60 dark:bg-purple-500/30",
+    iconFrontBg: "bg-[#8E33FF] dark:bg-purple-500",
+    iconColor: "text-white",
+    sparklineStroke: "#8E33FF",
+    dotFill: "fill-[#8E33FF]",
+  },
+  orange: {
+    cardBg: "bg-gradient-to-br from-[#FFF1C2] via-[#FFF6D6] to-[#FFE7A0] dark:from-amber-950/40 dark:via-amber-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#FCE08F]/80 dark:border-amber-500/20",
+    titleColor: "text-[#7A4F01] dark:text-amber-100",
+    valueColor: "text-[#5C3B00] dark:text-[#FDE68A]",
+    trendUpColor: "text-[#B76E00] dark:text-amber-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#7A4F01]/80 dark:text-amber-200/80",
+    iconBackdrop: "bg-[#FFD666]/70 dark:bg-amber-500/30",
+    iconFrontBg: "bg-[#FFAB00] dark:bg-amber-500",
+    iconColor: "text-white",
+    sparklineStroke: "#B76E00",
+    dotFill: "fill-[#FFAB00]",
+  },
+  pink: {
+    cardBg: "bg-gradient-to-br from-[#FFE3D9] via-[#FFECE5] to-[#FFD4C5] dark:from-rose-950/40 dark:via-rose-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#FCBEAC]/80 dark:border-rose-500/20",
+    titleColor: "text-[#7A0916] dark:text-rose-100",
+    valueColor: "text-[#5B0410] dark:text-[#FECDD3]",
+    trendUpColor: "text-[#B71D18] dark:text-rose-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#7A0916]/80 dark:text-rose-200/80",
+    iconBackdrop: "bg-[#FFA48D]/70 dark:bg-rose-500/30",
+    iconFrontBg: "bg-[#FF5630] dark:bg-rose-500",
+    iconColor: "text-white",
+    sparklineStroke: "#B71D18",
+    dotFill: "fill-[#FF5630]",
+  },
+  cyan: {
+    cardBg: "bg-gradient-to-br from-[#D0F2FE] via-[#E0F6FE] to-[#BEECFC] dark:from-cyan-950/40 dark:via-cyan-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#A1E4FA]/80 dark:border-cyan-500/20",
+    titleColor: "text-[#044463] dark:text-cyan-100",
+    valueColor: "text-[#003750] dark:text-[#A5F3FC]",
+    trendUpColor: "text-[#007B8C] dark:text-cyan-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#044463]/80 dark:text-cyan-200/80",
+    iconBackdrop: "bg-[#70D7F9]/60 dark:bg-cyan-500/30",
+    iconFrontBg: "bg-[#00B8D9] dark:bg-cyan-500",
+    iconColor: "text-white",
+    sparklineStroke: "#007B8C",
+    dotFill: "fill-[#00B8D9]",
+  },
+  indigo: {
+    cardBg: "bg-gradient-to-br from-[#E0E7FF] via-[#EBF0FE] to-[#D3DCFE] dark:from-indigo-950/40 dark:via-indigo-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#C2D0FC]/80 dark:border-indigo-500/20",
+    titleColor: "text-[#1E2E6B] dark:text-indigo-100",
+    valueColor: "text-[#1A237E] dark:text-[#C7D2FE]",
+    trendUpColor: "text-[#3730A3] dark:text-indigo-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#1E2E6B]/80 dark:text-indigo-200/80",
+    iconBackdrop: "bg-[#A5B4FC]/60 dark:bg-indigo-500/30",
+    iconFrontBg: "bg-[#4F46E5] dark:bg-indigo-500",
+    iconColor: "text-white",
+    sparklineStroke: "#4F46E5",
+    dotFill: "fill-[#4F46E5]",
+  },
+  blue: {
+    cardBg: "bg-gradient-to-br from-[#E0E7FF] via-[#EBF0FE] to-[#D3DCFE] dark:from-indigo-950/40 dark:via-indigo-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#C2D0FC]/80 dark:border-indigo-500/20",
+    titleColor: "text-[#1E2E6B] dark:text-indigo-100",
+    valueColor: "text-[#1A237E] dark:text-[#C7D2FE]",
+    trendUpColor: "text-[#3730A3] dark:text-indigo-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#1E2E6B]/80 dark:text-indigo-200/80",
+    iconBackdrop: "bg-[#A5B4FC]/60 dark:bg-indigo-500/30",
+    iconFrontBg: "bg-[#4F46E5] dark:bg-indigo-500",
+    iconColor: "text-white",
+    sparklineStroke: "#4F46E5",
+    dotFill: "fill-[#4F46E5]",
+  },
+  primary: {
+    cardBg: "bg-gradient-to-br from-[#E0E7FF] via-[#EBF0FE] to-[#D3DCFE] dark:from-indigo-950/40 dark:via-indigo-900/25 dark:to-slate-900/60",
+    cardBorder: "border-[#C2D0FC]/80 dark:border-indigo-500/20",
+    titleColor: "text-[#1E2E6B] dark:text-indigo-100",
+    valueColor: "text-[#1A237E] dark:text-[#C7D2FE]",
+    trendUpColor: "text-[#3730A3] dark:text-indigo-300",
+    trendDownColor: "text-[#B71D18] dark:text-rose-300",
+    trendNeutralColor: "text-[#1E2E6B]/80 dark:text-indigo-200/80",
+    iconBackdrop: "bg-[#A5B4FC]/60 dark:bg-indigo-500/30",
+    iconFrontBg: "bg-[#4F46E5] dark:bg-indigo-500",
+    iconColor: "text-white",
+    sparklineStroke: "#4F46E5",
+    dotFill: "fill-[#4F46E5]",
+  },
+  slate: {
+    cardBg: "bg-gradient-to-br from-[#E2E8F0] via-[#EDF2F7] to-[#CBD5E1] dark:from-slate-900/70 dark:via-slate-800/40 dark:to-slate-900/80",
+    cardBorder: "border-slate-300/80 dark:border-slate-700/50",
+    titleColor: "text-slate-700 dark:text-slate-200",
+    valueColor: "text-slate-900 dark:text-slate-100",
+    trendUpColor: "text-emerald-600 dark:text-emerald-400",
+    trendDownColor: "text-rose-600 dark:text-rose-400",
+    trendNeutralColor: "text-slate-600 dark:text-slate-400",
+    iconBackdrop: "bg-slate-300/60 dark:bg-slate-700/40",
+    iconFrontBg: "bg-slate-700 dark:bg-slate-600",
+    iconColor: "text-white",
+    sparklineStroke: "#64748B",
+    dotFill: "fill-slate-500",
+  },
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Unified Premium Color Token Map
-// 6 strategic accent colors — no rainbow overload
+// Halftone Dot Matrix Pattern Component (Bottom-Left Corner)
 // ─────────────────────────────────────────────────────────────────────────────
 
-const COLOR_TOKENS: Record<
-  MetricColor,
-  {
-    // Recharts sparkline stroke/fill
-    stroke: string;
-    gradientId: string;
-    // Tailwind: left border accent
-    border: string;
-    // Tailwind: hover border glow
-    hoverBorder: string;
-    // Tailwind: icon container (light + dark)
-    iconBg: string;
-    iconText: string;
-    // Tailwind: radial glow behind card
-    glowBg: string;
-    // Tailwind: trend badge (up/neutral)
-    badgeBg: string;
-    badgeText: string;
+const HalftoneDots = ({ dotFill = "fill-current" }: { dotFill?: string }) => {
+  return (
+    <svg
+      className={cn("pointer-events-none absolute -bottom-3 -left-3 w-28 h-28 opacity-[0.14] dark:opacity-[0.08]", dotFill)}
+      viewBox="0 0 100 100"
+      fill="none"
+      xmlns="http://www.w3.org/2000/svg"
+    >
+      <circle cx="10" cy="90" r="4.5" />
+      <circle cx="25" cy="90" r="4.0" />
+      <circle cx="40" cy="90" r="3.5" />
+      <circle cx="55" cy="90" r="3.0" />
+      <circle cx="70" cy="90" r="2.2" />
+      <circle cx="85" cy="90" r="1.5" />
+
+      <circle cx="10" cy="75" r="4.0" />
+      <circle cx="25" cy="75" r="3.5" />
+      <circle cx="40" cy="75" r="3.0" />
+      <circle cx="55" cy="75" r="2.5" />
+      <circle cx="70" cy="75" r="1.8" />
+      <circle cx="85" cy="75" r="1.2" />
+
+      <circle cx="10" cy="60" r="3.5" />
+      <circle cx="25" cy="60" r="3.0" />
+      <circle cx="40" cy="60" r="2.5" />
+      <circle cx="55" cy="60" r="1.8" />
+      <circle cx="70" cy="60" r="1.2" />
+
+      <circle cx="10" cy="45" r="3.0" />
+      <circle cx="25" cy="45" r="2.5" />
+      <circle cx="40" cy="45" r="1.8" />
+      <circle cx="55" cy="45" r="1.2" />
+
+      <circle cx="10" cy="30" r="2.2" />
+      <circle cx="25" cy="30" r="1.8" />
+      <circle cx="40" cy="30" r="1.2" />
+
+      <circle cx="10" cy="15" r="1.5" />
+      <circle cx="25" cy="15" r="1.2" />
+    </svg>
+  );
+};
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Sparkline Wave Curve Component (Bottom-Right)
+// Renders smooth curved trend line matching Image 2
+// ─────────────────────────────────────────────────────────────────────────────
+
+interface SparklineCurveProps {
+  data?: { value: number }[];
+  trend?: "up" | "down" | "neutral";
+  strokeColor: string;
+}
+
+const SparklineCurve = ({ data, trend = "neutral", strokeColor }: SparklineCurveProps) => {
+  // If custom numeric points exist, compute smooth cubic bezier path
+  if (data && data.length >= 2) {
+    const values = data.map((d) => d.value);
+    const min = Math.min(...values);
+    const max = Math.max(...values);
+    const range = max - min === 0 ? 1 : max - min;
+    const width = 64;
+    const height = 28;
+    const padding = 3;
+
+    const points = values.map((v, i) => ({
+      x: padding + (i / (values.length - 1)) * (width - 2 * padding),
+      y: height - padding - ((v - min) / range) * (height - 2 * padding),
+    }));
+
+    // Generate smooth bezier curve path
+    let d = `M ${points[0].x} ${points[0].y}`;
+    for (let i = 0; i < points.length - 1; i++) {
+      const p0 = points[i];
+      const p1 = points[i + 1];
+      const cpX = (p0.x + p1.x) / 2;
+      d += ` C ${cpX} ${p0.y}, ${cpX} ${p1.y}, ${p1.x} ${p1.y}`;
+    }
+
+    return (
+      <svg className="w-16 h-7 shrink-0 overflow-visible" viewBox={`0 0 ${width} ${height}`}>
+        <path
+          d={d}
+          fill="none"
+          stroke={strokeColor}
+          strokeWidth="2.5"
+          strokeLinecap="round"
+          strokeLinejoin="round"
+        />
+      </svg>
+    );
   }
-> = {
-  emerald: {
-    stroke: "#10b981",
-    gradientId: "sparkline-emerald",
-    border: "border-l-emerald-500",
-    hoverBorder: "hover:border-l-emerald-400",
-    iconBg:
-      "bg-emerald-50 border-emerald-100 dark:bg-emerald-500/10 dark:border-emerald-500/20",
-    iconText: "text-emerald-600 dark:text-emerald-400",
-    glowBg: "bg-emerald-400",
-    badgeBg: "bg-emerald-500/10 border-emerald-500/20",
-    badgeText: "text-emerald-700 dark:text-emerald-400",
-  },
-  cyan: {
-    stroke: "#06b6d4",
-    gradientId: "sparkline-cyan",
-    border: "border-l-cyan-500",
-    hoverBorder: "hover:border-l-cyan-400",
-    iconBg:
-      "bg-cyan-50 border-cyan-100 dark:bg-cyan-500/10 dark:border-cyan-500/20",
-    iconText: "text-cyan-600 dark:text-cyan-400",
-    glowBg: "bg-cyan-400",
-    badgeBg: "bg-cyan-500/10 border-cyan-500/20",
-    badgeText: "text-cyan-700 dark:text-cyan-400",
-  },
-  indigo: {
-    stroke: "#6366f1",
-    gradientId: "sparkline-indigo",
-    border: "border-l-indigo-500",
-    hoverBorder: "hover:border-l-indigo-400",
-    iconBg:
-      "bg-indigo-50 border-indigo-100 dark:bg-indigo-500/10 dark:border-indigo-500/20",
-    iconText: "text-indigo-600 dark:text-indigo-400",
-    glowBg: "bg-indigo-400",
-    badgeBg: "bg-indigo-500/10 border-indigo-500/20",
-    badgeText: "text-indigo-700 dark:text-indigo-400",
-  },
-  violet: {
-    stroke: "#8b5cf6",
-    gradientId: "sparkline-violet",
-    border: "border-l-violet-500",
-    hoverBorder: "hover:border-l-violet-400",
-    iconBg:
-      "bg-violet-50 border-violet-100 dark:bg-violet-500/10 dark:border-violet-500/20",
-    iconText: "text-violet-600 dark:text-violet-400",
-    glowBg: "bg-violet-400",
-    badgeBg: "bg-violet-500/10 border-violet-500/20",
-    badgeText: "text-violet-700 dark:text-violet-400",
-  },
-  orange: {
-    stroke: "#f97316",
-    gradientId: "sparkline-orange",
-    border: "border-l-orange-500",
-    hoverBorder: "hover:border-l-orange-400",
-    iconBg:
-      "bg-orange-50 border-orange-100 dark:bg-orange-500/10 dark:border-orange-500/20",
-    iconText: "text-orange-600 dark:text-orange-400",
-    glowBg: "bg-orange-400",
-    badgeBg: "bg-orange-500/10 border-orange-500/20",
-    badgeText: "text-orange-700 dark:text-orange-400",
-  },
-  pink: {
-    stroke: "#ec4899",
-    gradientId: "sparkline-pink",
-    border: "border-l-pink-500",
-    hoverBorder: "hover:border-l-pink-400",
-    iconBg:
-      "bg-pink-50 border-pink-100 dark:bg-pink-500/10 dark:border-pink-500/20",
-    iconText: "text-pink-600 dark:text-pink-400",
-    glowBg: "bg-pink-400",
-    badgeBg: "bg-pink-500/10 border-pink-500/20",
-    badgeText: "text-pink-700 dark:text-pink-400",
-  },
-  // Legacy aliases — map to primary 6
-  blue: {
-    stroke: "#6366f1",
-    gradientId: "sparkline-indigo",
-    border: "border-l-indigo-500",
-    hoverBorder: "hover:border-l-indigo-400",
-    iconBg:
-      "bg-indigo-50 border-indigo-100 dark:bg-indigo-500/10 dark:border-indigo-500/20",
-    iconText: "text-indigo-600 dark:text-indigo-400",
-    glowBg: "bg-indigo-400",
-    badgeBg: "bg-indigo-500/10 border-indigo-500/20",
-    badgeText: "text-indigo-700 dark:text-indigo-400",
-  },
-  purple: {
-    stroke: "#8b5cf6",
-    gradientId: "sparkline-violet",
-    border: "border-l-violet-500",
-    hoverBorder: "hover:border-l-violet-400",
-    iconBg:
-      "bg-violet-50 border-violet-100 dark:bg-violet-500/10 dark:border-violet-500/20",
-    iconText: "text-violet-600 dark:text-violet-400",
-    glowBg: "bg-violet-400",
-    badgeBg: "bg-violet-500/10 border-violet-500/20",
-    badgeText: "text-violet-700 dark:text-violet-400",
-  },
-  primary: {
-    stroke: "#6366f1",
-    gradientId: "sparkline-indigo",
-    border: "border-l-indigo-500",
-    hoverBorder: "hover:border-l-indigo-400",
-    iconBg:
-      "bg-indigo-50 border-indigo-100 dark:bg-indigo-500/10 dark:border-indigo-500/20",
-    iconText: "text-indigo-600 dark:text-indigo-400",
-    glowBg: "bg-indigo-400",
-    badgeBg: "bg-indigo-500/10 border-indigo-500/20",
-    badgeText: "text-indigo-700 dark:text-indigo-400",
-  },
-  slate: {
-    stroke: "#6366f1",
-    gradientId: "sparkline-indigo",
-    border: "border-l-indigo-500",
-    hoverBorder: "hover:border-l-indigo-400",
-    iconBg:
-      "bg-indigo-50 border-indigo-100 dark:bg-indigo-500/10 dark:border-indigo-500/20",
-    iconText: "text-indigo-600 dark:text-indigo-400",
-    glowBg: "bg-indigo-400",
-    badgeBg: "bg-indigo-500/10 border-indigo-500/20",
-    badgeText: "text-indigo-700 dark:text-indigo-400",
-  },
+
+  // Pre-configured natural organic sparkline waves matching reference image
+  let pathD = "";
+  if (trend === "up") {
+    // Elegant rising wave (like Card 1 in Image 2)
+    pathD = "M 4 22 C 10 24, 18 16, 26 14 C 34 12, 40 4, 48 4 C 54 4, 58 12, 62 20";
+  } else if (trend === "down") {
+    // Sharp valley wave (like Card 2 in Image 2)
+    pathD = "M 4 10 C 12 10, 18 18, 24 16 C 30 14, 34 4, 40 6 C 46 8, 48 24, 54 22 C 58 20, 60 14, 62 16";
+  } else {
+    // Dynamic multi-wave (like Card 3 & 4 in Image 2)
+    pathD = "M 4 18 C 10 24, 16 12, 22 14 C 28 16, 32 8, 38 6 C 44 4, 48 22, 54 18 C 58 14, 60 8, 62 6";
+  }
+
+  return (
+    <svg className="w-16 h-7 shrink-0 overflow-visible" viewBox="0 0 66 28">
+      <path
+        d={pathD}
+        fill="none"
+        stroke={strokeColor}
+        strokeWidth="2.5"
+        strokeLinecap="round"
+        strokeLinejoin="round"
+      />
+    </svg>
+  );
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
@@ -199,12 +330,12 @@ export interface CRMMetricCardProps {
   comparisonText?: string;
   /** Additional classes for the card root */
   className?: string;
-  /** Hide the bottom skeletons (change, comparison, sparkline) during loading state */
+  /** Hide the bottom skeletons during loading state */
   hideBottomSkeletons?: boolean;
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Core Premium KPI Card Component
+// Core Enterprise Metric Card Component (Matching Image 2 Reference)
 // ─────────────────────────────────────────────────────────────────────────────
 
 export const CRMMetricCard = ({
@@ -225,202 +356,123 @@ export const CRMMetricCard = ({
   const t = COLOR_TOKENS[color] ?? COLOR_TOKENS.indigo;
   const isUp = trend === "up";
   const isDown = trend === "down";
-  
-  const chartData = sparklineData && sparklineData.length > 0 ? sparklineData : [{ value: 0 }, { value: 0 }, { value: 0 }];
-  const isFlat = chartData.every(d => d.value === chartData[0]?.value);
+
+  // Trend text styling
+  const trendColorClass = isUp
+    ? t.trendUpColor
+    : isDown
+    ? t.trendDownColor
+    : t.trendNeutralColor;
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 14 }}
+      initial={{ opacity: 0, y: 12 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.35, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+      transition={{ duration: 0.3, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
       className={cn(
-        // ── Base surface ──
-        "group relative overflow-hidden min-w-0",
-        "bg-card text-card-foreground",
-        // ── Premium border system: subtle all-around + left accent ──
-        "border border-border/70 border-l-4",
-        t.border,
-        // ── Rounded corners matching CRM design system ──
-        "rounded-xl",
-        // ── Breathing layout ──
-        "p-4 sm:p-5 flex flex-col justify-between h-full",
-        // ── Clean border surface with enterprise subtle drop shadow ──
-        "shadow-card hover:shadow-card-hover",
-        // ── Premium subtle hover ──
-        "transition-all duration-200 ease-out",
-        t.hoverBorder,
-        "hover:border-t-border/70 hover:border-r-border/70 hover:border-b-border/70",
+        // Base container: rounded-2xl + pastel gradient background
+        "group relative overflow-hidden min-w-0 flex flex-col justify-between select-none",
+        "rounded-2xl p-4 sm:p-5",
+        "border shadow-sm hover:shadow-md transition-all duration-300 hover:-translate-y-0.5",
+        t.cardBg,
+        t.cardBorder,
         className
       )}
     >
-      {/* ── Ambient Radial Glow (top-right) ── */}
-      <div
-        className={cn(
-          "pointer-events-none absolute -right-8 -top-8 h-28 w-28 rounded-full",
-          "blur-2xl opacity-[0.06] transition-opacity duration-500",
-          "group-hover:opacity-[0.12]",
-          t.glowBg
-        )}
-      />
+      {/* Corner Halftone Dot Matrix Pattern */}
+      <HalftoneDots dotFill={t.dotFill} />
 
-      {/* ── Top Row: Label + Icon ── */}
-      <div className="flex items-start justify-between gap-3 mb-3.5 min-w-0">
-        <div className="space-y-1 flex-1 min-w-0">
-          {/* Label */}
-          <p className="text-[11px] font-semibold uppercase tracking-wider text-muted-foreground/80 truncate leading-none">
-            {title}
-          </p>
-
-          {/* Metric value */}
-          {loading ? (
-            <Skeleton className="h-7 w-24 mt-1 rounded-md" />
-          ) : (
-            <h3 className="text-xl sm:text-2xl font-bold tracking-tight tabular-nums truncate text-foreground leading-tight mt-1">
-              {value}
-            </h3>
-          )}
-        </div>
-
-        {/* Floating Icon Container */}
+      {/* ── TOP ROW: Layered 3D Icon Badge (Left) + Trend Percentage (Right) ── */}
+      <div className="flex items-center justify-between gap-3 z-10">
+        {/* Layered 3D Icon Container */}
         {Icon && (
-          <div
-            className={cn(
-              "flex shrink-0 size-9 sm:size-10 items-center justify-center",
-              "rounded-lg border",
-              "transition-all duration-300",
-              "group-hover:scale-105",
-              // Premium icon glow on hover
-              "group-hover:shadow-[0_3px_10px_-3px_currentColor]",
-              t.iconBg,
-              t.iconText,
-              iconColor // optional override
-            )}
-          >
-            <AppIcon icon={Icon} name={title} size={18} />
+          <div className="relative flex items-center justify-center shrink-0">
+            {/* Frosted Offset Backdrop Pill (3D layered look) */}
+            <div
+              className={cn(
+                "absolute -left-1 -top-1 w-9 h-9 sm:w-10 sm:h-10 rounded-xl transition-all duration-300 group-hover:-translate-y-0.5 group-hover:-translate-x-0.5",
+                t.iconBackdrop
+              )}
+            />
+            {/* Front Solid Saturated Icon Badge */}
+            <div
+              className={cn(
+                "relative z-10 flex size-9 sm:size-10 items-center justify-center rounded-xl shadow-sm transition-all duration-300 group-hover:scale-105",
+                t.iconFrontBg,
+                t.iconColor,
+                iconColor
+              )}
+            >
+              <AppIcon icon={Icon} name={title} size={18} />
+            </div>
           </div>
+        )}
+
+        {/* Trend Indicator Badge (Top Right) */}
+        {loading && !hideBottomSkeletons ? (
+          <Skeleton className="h-5 w-14 rounded-full opacity-60" />
+        ) : (
+          change && (
+            <div
+              className={cn(
+                "flex items-center gap-0.5 text-xs sm:text-sm font-bold tracking-tight shrink-0",
+                trendColorClass
+              )}
+            >
+              {isUp && <ArrowUpRight className="w-3.5 h-3.5 stroke-[2.5]" />}
+              {isDown && <ArrowDownRight className="w-3.5 h-3.5 stroke-[2.5]" />}
+              {!isUp && !isDown && <Minus className="w-3 h-3 stroke-[2.5]" />}
+              <span>{change}</span>
+            </div>
+          )
         )}
       </div>
 
-      {/* ── Bottom Row: Trend Badge + Sparkline ── */}
-      <div className="flex items-center justify-between gap-2 mt-auto pt-1 min-w-0">
-        {/* Trend badge + comparison text */}
-        <div className="flex items-center gap-1.5 min-w-0 flex-1">
-          {loading && !hideBottomSkeletons ? (
-            <Skeleton className="h-4.5 w-14 rounded-full" />
-          ) : (
-            change && (
-              <div className="flex items-center gap-1.5 flex-wrap min-w-0">
-                {/* Pill badge */}
-                <div
-                  className={cn(
-                    "inline-flex items-center gap-1 text-[10px] font-semibold",
-                    "px-2 py-0.5 rounded-full border tracking-normal shrink-0",
-                    isUp
-                      ? "bg-emerald-500/10 text-emerald-700 border-emerald-500/20 dark:text-emerald-400"
-                      : isDown
-                      ? "bg-rose-500/10 text-rose-700 border-rose-500/20 dark:text-rose-400"
-                      : "bg-muted/60 text-muted-foreground border-border/60"
-                  )}
-                >
-                  {isUp && <TrendingUp className="w-2.5 h-2.5 shrink-0" />}
-                  {isDown && <TrendingDown className="w-2.5 h-2.5 shrink-0" />}
-                  {!isUp && !isDown && (
-                    <Minus className="w-2.5 h-2.5 shrink-0" />
-                  )}
-                  <span className="truncate max-w-[120px]">{change}</span>
-                </div>
+      {/* ── BOTTOM ROW: Metric Label & Bold Value (Left) + Sparkline (Right) ── */}
+      <div className="flex items-end justify-between gap-2 mt-4 sm:mt-5 z-10">
+        {/* Metric Label and Hero Value */}
+        <div className="flex-1 min-w-0 space-y-0.5">
+          <p
+            className={cn(
+              "text-xs sm:text-[13px] font-semibold truncate tracking-tight",
+              t.titleColor
+            )}
+          >
+            {title}
+          </p>
 
-                {/* Comparison context text */}
-                {comparisonText && (
-                  <span className="text-[10px] sm:text-[11px] font-medium text-muted-foreground/65 tracking-tight truncate">
-                    {comparisonText}
-                  </span>
-                )}
-              </div>
-            )
+          {loading ? (
+            <Skeleton className="h-8 w-24 rounded-md opacity-60 mt-1" />
+          ) : (
+            <h3
+              className={cn(
+                "text-2xl sm:text-3xl font-extrabold tracking-tight tabular-nums truncate leading-tight",
+                t.valueColor
+              )}
+            >
+              {value}
+            </h3>
+          )}
+
+          {/* Comparison text if present */}
+          {comparisonText && !loading && (
+            <p className="text-[10px] sm:text-[11px] font-medium opacity-65 truncate leading-tight pt-0.5">
+              {comparisonText}
+            </p>
           )}
         </div>
 
-        {/* Sparkline chart */}
-        {(sparklineData || (loading && !hideBottomSkeletons)) && (
-          <div className="h-8 w-20 -mr-1 min-h-[32px] min-w-0 shrink-0">
-            <ChartContainer
-              height="100%"
-              loading={loading}
-              hasData={true}
-              className="w-full h-full"
-            >
-              <AreaChart data={chartData}>
-                <YAxis hide domain={[0, isFlat ? (dataMax: number) => (dataMax || 1) * 100 : 'dataMax']} />
-                <defs>
-                  <linearGradient
-                    id={t.gradientId}
-                    x1="0"
-                    y1="0"
-                    x2="0"
-                    y2="1"
-                  >
-                    <stop
-                      offset="0%"
-                      stopColor={t.stroke}
-                      stopOpacity={0.15}
-                    />
-                    <stop
-                      offset="100%"
-                      stopColor={t.stroke}
-                      stopOpacity={0}
-                    />
-                  </linearGradient>
-                </defs>
-                <Area
-                  type="monotone"
-                  dataKey="value"
-                  stroke={t.stroke}
-                  strokeWidth={2}
-                  fill={`url(#${t.gradientId})`}
-                  isAnimationActive={true}
-                  animationDuration={1200}
-                  animationEasing="ease-out"
-                  dot={({ cx, cy, index }: SparklineDotProps) => {
-                    // Premium pulsing dot only on the last data point
-                    if (
-                      index === chartData.length - 1 &&
-                      cx !== undefined &&
-                      cy !== undefined
-                    ) {
-                      return (
-                        <g key={`dot-last-${index}`}>
-                          {/* Outer pulse ring */}
-                          <circle
-                            cx={cx}
-                            cy={cy}
-                            r={5}
-                            fill={t.stroke}
-                            fillOpacity={0.2}
-                          />
-                          {/* Inner solid dot */}
-                          <circle
-                            cx={cx}
-                            cy={cy}
-                            r={2.5}
-                            fill={t.stroke}
-                            stroke="white"
-                            strokeWidth={1.5}
-                          />
-                        </g>
-                      );
-                    }
-                    return <g key={`dot-${index}`} />;
-                  }}
-                />
-              </AreaChart>
-            </ChartContainer>
+        {/* Sparkline Curve */}
+        {!loading && (
+          <div className="shrink-0 mb-0.5">
+            <SparklineCurve
+              data={sparklineData}
+              trend={trend}
+              strokeColor={t.sparklineStroke}
+            />
           </div>
         )}
       </div>
     </motion.div>
   );
 };
-
-
