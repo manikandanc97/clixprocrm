@@ -6,6 +6,7 @@ import { LucideIcon, HelpCircle } from "lucide-react";
 import { Switch } from "@/shared/ui/switch";
 import { Label } from "@/shared/ui/label";
 import { Badge } from "@/shared/ui/badge";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   Tooltip,
   TooltipContent,
@@ -34,22 +35,27 @@ export function SettingsSection({
 }: SettingsSectionProps) {
   return (
     <div
+      data-animate-target="true"
       className={cn(
-        "rounded-xl border border-border/70 bg-card p-4 sm:p-5 shadow-xs transition-colors",
+        "rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs transition-all space-y-4",
         className
       )}
     >
-      <div className="flex items-start justify-between gap-3 pb-3.5 border-b border-border/50">
-        <div className="space-y-0.5 min-w-0">
+      <div className="flex items-start justify-between gap-4 pb-3.5 border-b border-border/50">
+        <div className="space-y-1 min-w-0 flex-1">
           <div className="flex items-center gap-2">
-            {Icon && <Icon className="w-4 h-4 text-primary shrink-0" />}
-            <h4 className="text-sm font-semibold text-foreground tracking-tight truncate">
+            {Icon && (
+              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <AppIcon name={title} icon={Icon} size={14} className="w-3.5 h-3.5" />
+              </div>
+            )}
+            <h4 className="text-sm font-bold text-foreground tracking-tight">
               {title}
             </h4>
             {badge && (
               <Badge
                 variant="outline"
-                className="text-[10px] py-0 px-1.5 font-medium border-primary/20 bg-primary/5 text-primary"
+                className="text-[10px] py-0 px-1.5 font-semibold border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
               >
                 {badge}
               </Badge>
@@ -61,9 +67,9 @@ export function SettingsSection({
             </p>
           )}
         </div>
-        {headerAction && <div className="shrink-0">{headerAction}</div>}
+        {headerAction && <div className="shrink-0 pt-0.5">{headerAction}</div>}
       </div>
-      <div className="pt-4 space-y-4">{children}</div>
+      <div className="space-y-1">{children}</div>
     </div>
   );
 }
@@ -89,17 +95,25 @@ export function SettingsRow({
 }: SettingsRowProps) {
   return (
     <div
+      data-animate-target="true"
       className={cn(
-        "flex flex-col sm:flex-row sm:items-center justify-between gap-3 py-2 text-xs",
+        "group flex items-center justify-between gap-4 py-2.5 px-2 -mx-2 rounded-lg hover:bg-muted/30 transition-colors text-xs",
         className
       )}
     >
-      <div className="space-y-0.5 max-w-lg min-w-0 pr-2">
+      <div className="space-y-0.5 max-w-lg min-w-0 pr-2 flex-1">
         <div className="flex items-center gap-1.5">
-          {Icon && <Icon className="w-3.5 h-3.5 text-muted-foreground shrink-0" />}
-          <span className="font-medium text-foreground">{label}</span>
+          {Icon && (
+            <AppIcon
+              name={label}
+              icon={Icon}
+              size={14}
+              className="w-3.5 h-3.5 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors shrink-0"
+            />
+          )}
+          <span className="font-semibold text-foreground">{label}</span>
           {badge && (
-            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 h-4 font-normal">
+            <Badge variant="secondary" className="text-[10px] py-0 px-1.5 h-4 font-normal bg-muted text-muted-foreground">
               {badge}
             </Badge>
           )}
@@ -107,7 +121,7 @@ export function SettingsRow({
             <TooltipProvider delayDuration={200}>
               <Tooltip>
                 <TooltipTrigger asChild>
-                  <button type="button" className="text-muted-foreground hover:text-foreground">
+                  <button type="button" className="text-muted-foreground hover:text-foreground cursor-pointer">
                     <HelpCircle className="w-3 h-3 text-muted-foreground/70" />
                   </button>
                 </TooltipTrigger>
@@ -119,7 +133,7 @@ export function SettingsRow({
           )}
         </div>
         {description && (
-          <p className="text-[11px] text-muted-foreground leading-normal">
+          <p className="text-[11.5px] text-muted-foreground leading-normal">
             {description}
           </p>
         )}
@@ -165,7 +179,7 @@ export function SettingsToggleRow({
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}
-        className="data-[state=checked]:bg-primary"
+        className="data-[state=checked]:bg-emerald-600 cursor-pointer"
       />
     </SettingsRow>
   );

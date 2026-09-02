@@ -55,6 +55,7 @@ import { LeadContextualSettings } from "@/features/leads/components/LeadContextu
 import { ContactContextualSettings } from "@/features/contacts/components/ContactContextualSettings";
 import { BulkImportModal } from "@/features/leads/components/BulkImportModal";
 import { useAuth } from "@/features/auth/components/auth-provider";
+import { useContactSettings } from "@/features/contacts/hooks/use-contact-settings";
 
 const LeadForm = dynamic(
   () => import("@/features/forms/LeadForm").then((mod) => ({ default: mod.LeadForm })),
@@ -73,6 +74,7 @@ export default function ContactsPage() {
   const searchParams = useSearchParams();
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
   const { currency } = useCurrency();
+  const { settings: contactSettings } = useContactSettings();
 
   // URL State Sync
   const initialType = searchParams.get("type") || searchParams.get("status") || "ALL";
@@ -841,7 +843,7 @@ export default function ContactsPage() {
                           ) : (
                             <span className="text-muted-foreground text-[11px]">—</span>
                           )}
-                          {contact.phone && (
+                          {contactSettings.showPhone !== false && contact.phone && (
                             <span className="flex items-center gap-1.5 font-medium text-muted-foreground truncate">
                               <Phone className="w-3 h-3 text-muted-foreground shrink-0" />
                               <span className="truncate">{contact.phone}</span>

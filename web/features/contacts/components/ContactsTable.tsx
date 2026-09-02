@@ -22,12 +22,14 @@ import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components
 import { useState } from "react";
 import { formatCurrency } from "@/lib/crm-formatters";
 import { useCurrency } from "@/shared/hooks/use-currency";
+import { useContactSettings } from "../hooks/use-contact-settings";
 import { cn } from "@/shared/lib/utils";
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLead, onDeleteCustomer }: any) => {
   const [selectedIds, setSelectedIds] = useState<string[]>([]);
   const { currency } = useCurrency();
+  const { settings: contactSettings } = useContactSettings();
 
   const handleSelectAll = (checked: boolean) => {
     if (checked) {
@@ -160,10 +162,12 @@ export const ContactsTable = ({ contacts, onEditLead, onEditCustomer, onDeleteLe
             <Mail className="w-3 h-3 shrink-0" />
             <TruncatedText text={contact.email || "—"} lines={1} className="font-medium text-foreground" />
           </span>
-          <span className="flex items-center gap-1.5 font-medium text-foreground min-w-0">
-            <Phone className="w-3 h-3 shrink-0" />
-            <TruncatedText text={contact.phone || "—"} lines={1} className="font-medium text-foreground" />
-          </span>
+          {contactSettings.showPhone !== false && contact.phone && (
+            <span className="flex items-center gap-1.5 font-medium text-foreground min-w-0">
+              <Phone className="w-3 h-3 shrink-0" />
+              <TruncatedText text={contact.phone || "—"} lines={1} className="font-medium text-foreground" />
+            </span>
+          )}
         </div>
       ),
     },

@@ -56,7 +56,7 @@ export function ContextualSettingsDrawer({
   title,
   subtitle = "Configure module preferences, custom fields, and automated workflows.",
   icon: Icon,
-  badge = "Customization",
+  badge,
   sections,
   defaultSection,
   isSaving = false,
@@ -70,13 +70,19 @@ export function ContextualSettingsDrawer({
   );
   const [showExitConfirm, setShowExitConfirm] = useState(false);
 
+  // Sync active section ONLY when drawer opens
   useEffect(() => {
-    if (defaultSection) {
-      setActiveSectionId(defaultSection);
-    } else if (sections.length > 0 && !sections.some((s) => s.id === activeSectionId)) {
+    if (open) {
+      setActiveSectionId(defaultSection || sections[0]?.id || "");
+    }
+  }, [open, defaultSection]);
+
+  // Fallback if current activeSectionId no longer exists
+  useEffect(() => {
+    if (sections.length > 0 && !sections.some((s) => s.id === activeSectionId)) {
       setActiveSectionId(sections[0].id);
     }
-  }, [defaultSection, sections, activeSectionId]);
+  }, [sections, activeSectionId]);
 
   const handleRequestClose = (nextOpen: boolean) => {
     if (!nextOpen && hasUnsavedChanges) {
@@ -99,34 +105,37 @@ export function ContextualSettingsDrawer({
       <Dialog open={open} onOpenChange={handleRequestClose}>
         <DialogContent
           className={cn(
-            "max-w-4xl lg:max-w-5xl w-[95vw] h-[85vh] max-h-[85vh] p-0 overflow-hidden border border-border/80 bg-card text-foreground shadow-2xl rounded-2xl flex flex-col duration-200 outline-none",
+            "w-full sm:max-w-4xl lg:max-w-5xl md:w-[860px] lg:w-[980px] h-[600px] max-h-[85vh] p-0 gap-0 overflow-hidden border border-border/80 bg-card text-foreground shadow-2xl rounded-2xl flex flex-col duration-200 outline-none",
             className
           )}
           showCloseButton={false}
         >
           {/* Header */}
-          <DialogHeader className="shrink-0 px-5 sm:px-6 py-4 border-b border-border/60 bg-muted/20 flex-row items-center justify-between gap-4 space-y-0">
+          <DialogHeader className="shrink-0 px-5 sm:px-6 py-3 border-b border-border/60 bg-muted/20 flex-row items-center justify-between gap-4 space-y-0">
             <div className="flex items-center gap-3 min-w-0">
               {Icon && (
-                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-xs">
-                  <AppIcon name={title} icon={Icon} size={18} className="w-4.5 h-4.5" />
+                <div
+                  data-animate-target="true"
+                  className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-xs group"
+                >
+                  <AppIcon name={title} icon={Icon} size={18} className="w-4.5 h-4.5" animateOnMount />
                 </div>
               )}
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <DialogTitle className="text-base font-bold text-foreground tracking-tight truncate">
+                  <DialogTitle className="text-sm sm:text-base font-bold text-foreground tracking-tight truncate">
                     {title}
                   </DialogTitle>
                   {badge && (
                     <Badge
                       variant="outline"
-                      className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border-primary/20 bg-primary/10 text-primary shrink-0"
+                      className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 shrink-0"
                     >
                       {badge}
                     </Badge>
                   )}
                 </div>
-                <DialogDescription className="text-xs text-muted-foreground truncate max-w-md sm:max-w-lg mt-0.5">
+                <DialogDescription className="text-xs text-muted-foreground truncate max-w-md sm:max-w-xl mt-0.5">
                   {subtitle}
                 </DialogDescription>
               </div>
@@ -136,9 +145,9 @@ export function ContextualSettingsDrawer({
               variant="ghost"
               size="icon-sm"
               onClick={() => handleRequestClose(false)}
-              className="text-muted-foreground hover:text-foreground h-8 w-8 rounded-lg shrink-0 cursor-pointer"
+              className="group text-muted-foreground hover:text-foreground h-8 w-8 rounded-lg shrink-0 cursor-pointer hover:bg-muted/60"
             >
-              <X className="w-4 h-4" />
+              <AppIcon name="close" icon={X} size={16} className="w-4 h-4 text-muted-foreground group-hover:text-foreground" />
               <span className="sr-only">Close</span>
             </Button>
           </DialogHeader>
@@ -146,8 +155,8 @@ export function ContextualSettingsDrawer({
           {/* Modal Body: Sidebar Tabs + Content Area */}
           <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
             {/* Navigation Tabs Rail */}
-            <div className="w-full md:w-56 lg:w-64 shrink-0 border-b md:border-b-0 md:border-r border-border/60 bg-muted/10 p-3 overflow-x-auto md:overflow-y-auto flex md:flex-col gap-1 custom-scrollbar">
-              <div className="hidden md:block px-2.5 py-1.5 text-[10.5px] font-bold text-muted-foreground/75 uppercase tracking-wider mb-1">
+            <div className="w-full md:w-56 shrink-0 border-b md:border-b-0 md:border-r border-border/60 bg-muted/10 p-3 overflow-x-auto md:overflow-y-auto flex md:flex-col gap-1.5 custom-scrollbar">
+              <div className="hidden md:block px-2.5 py-1 text-[10.5px] font-bold text-muted-foreground/75 uppercase tracking-wider mb-1">
                 Configuration Sections
               </div>
               {sections.map((section) => {
@@ -157,40 +166,38 @@ export function ContextualSettingsDrawer({
                   <button
                     key={section.id}
                     type="button"
+                    data-animate-target="true"
                     onClick={() => setActiveSectionId(section.id)}
                     className={cn(
-                      "group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-lg transition-all duration-150 text-left outline-none cursor-pointer whitespace-nowrap md:whitespace-normal",
+                      "group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-xl transition-all duration-150 text-left outline-none cursor-pointer whitespace-nowrap md:whitespace-normal font-medium",
                       isSelected
-                        ? "text-primary font-semibold bg-primary/10 border border-primary/20 shadow-xs"
-                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground font-medium"
+                        ? "text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-500/10 border border-emerald-500/20 shadow-xs"
+                        : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border border-transparent"
                     )}
                   >
                     {SecIcon && (
-                      <SecIcon
-                        className={cn(
-                          "w-3.5 h-3.5 shrink-0 transition-colors",
-                          isSelected
-                            ? "text-primary"
-                            : "text-muted-foreground group-hover:text-foreground"
-                        )}
-                      />
+                      <div className="shrink-0 flex items-center justify-center">
+                        <AppIcon
+                          name={section.label}
+                          icon={SecIcon}
+                          size={16}
+                          className={cn(
+                            "w-4 h-4 transition-colors",
+                            isSelected
+                              ? "text-emerald-600 dark:text-emerald-400"
+                              : "text-muted-foreground group-hover:text-foreground"
+                          )}
+                        />
+                      </div>
                     )}
                     <span className="flex-1 truncate">{section.label}</span>
-                    {section.badge && (
-                      <Badge
-                        variant="secondary"
-                        className="text-[9px] px-1.5 py-0 h-4 font-medium hidden sm:inline-flex"
-                      >
-                        {section.badge}
-                      </Badge>
-                    )}
                   </button>
                 );
               })}
             </div>
 
             {/* Active Section Content */}
-            <div className="flex-1 min-w-0 h-full overflow-y-auto p-4 sm:p-6 custom-scrollbar bg-background/50">
+            <div className="flex-1 min-w-0 h-full overflow-y-auto p-4 sm:p-5 custom-scrollbar bg-background/50">
               <AnimatePresence mode="wait" initial={false}>
                 <motion.div
                   key={activeSection?.id || "empty"}
@@ -198,7 +205,7 @@ export function ContextualSettingsDrawer({
                   animate={{ opacity: 1, y: 0 }}
                   exit={{ opacity: 0, y: -4 }}
                   transition={{ duration: 0.15, ease: [0.16, 1, 0.3, 1] }}
-                  className="space-y-6 max-w-4xl"
+                  className="space-y-4 max-w-4xl"
                 >
                   {activeSection?.component}
                 </motion.div>
@@ -210,13 +217,14 @@ export function ContextualSettingsDrawer({
           <div className="shrink-0 px-5 sm:px-6 py-3.5 border-t border-border/60 bg-muted/20 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs">
               {hasUnsavedChanges ? (
-                <span className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400 font-medium">
-                  <AlertTriangle className="w-3.5 h-3.5" />
+                <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-semibold animate-in fade-in duration-200">
+                  <AppIcon name="alert" icon={AlertTriangle} size={14} className="w-3.5 h-3.5 text-amber-500" />
                   Unsaved changes
                 </span>
               ) : (
-                <span className="text-muted-foreground flex items-center gap-1 text-[11px]">
-                  <Check className="w-3 h-3 text-primary" /> Auto-synced with workspace
+                <span className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-medium">
+                  <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  Auto-synced with workspace
                 </span>
               )}
             </div>
@@ -227,7 +235,7 @@ export function ContextualSettingsDrawer({
                 variant="outline"
                 size="sm"
                 onClick={() => handleRequestClose(false)}
-                className="h-8.5 px-3.5 text-xs font-semibold"
+                className="h-8.5 px-3.5 text-xs font-semibold rounded-lg border-border/70 bg-background hover:bg-muted/50 cursor-pointer"
                 disabled={isSaving}
               >
                 Close
@@ -235,20 +243,32 @@ export function ContextualSettingsDrawer({
               {onSave && (
                 <Button
                   type="button"
-                  variant="default"
                   size="sm"
                   onClick={onSave}
-                  disabled={isSaving}
-                  className="h-8.5 px-4 text-xs font-semibold gap-1.5 shadow-sm"
+                  disabled={isSaving || !hasUnsavedChanges}
+                  className={cn(
+                    "group h-8.5 px-4 text-xs font-semibold gap-1.5 rounded-lg shadow-sm transition-all duration-150",
+                    hasUnsavedChanges
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-xs active:scale-98"
+                      : "bg-muted text-muted-foreground/60 border border-border/50 cursor-not-allowed opacity-60 hover:bg-muted hover:text-muted-foreground/60"
+                  )}
                 >
                   {isSaving ? (
                     <>
-                      <Loader2 className="w-3.5 h-3.5 animate-spin" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-white" />
                       Saving...
                     </>
                   ) : (
                     <>
-                      <Save className="w-3.5 h-3.5" />
+                      <AppIcon
+                        name="save"
+                        icon={Save}
+                        size={14}
+                        className={cn(
+                          "w-3.5 h-3.5 shrink-0",
+                          hasUnsavedChanges ? "text-white" : "text-muted-foreground/60"
+                        )}
+                      />
                       Save Changes
                     </>
                   )}

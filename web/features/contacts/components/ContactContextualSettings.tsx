@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
@@ -11,10 +11,7 @@ import {
   SettingsToggleRow,
   SettingsField,
 } from "@/shared/components/crm/ContextualSettingsComponents";
-import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
-import { Switch } from "@/shared/ui/switch";
-import { Badge } from "@/shared/ui/badge";
 import {
   Select,
   SelectContent,
@@ -22,75 +19,86 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 import {
   Users,
   CheckSquare,
   CopyX,
   SlidersHorizontal,
-  Plus,
-  Trash2,
   Tag,
+  RotateCcw,
 } from "lucide-react";
+import {
+  ContactSettingsConfig,
+  DEFAULT_CONTACT_SETTINGS,
+  getStoredContactSettings,
+  saveStoredContactSettings,
+} from "../hooks/use-contact-settings";
 
 export interface ContactContextualSettingsProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   defaultSection?: string;
+  onSettingsSaved?: (settings: ContactSettingsConfig) => void;
 }
 
 export function ContactContextualSettings({
   open,
   onOpenChange,
   defaultSection = "fields",
+  onSettingsSaved,
 }: ContactContextualSettingsProps) {
-  // Contact Fields
-  const [showJobTitle, setShowJobTitle] = useState(true);
-  const [showDepartment, setShowDepartment] = useState(true);
-  const [showSocialProfiles, setShowSocialProfiles] = useState(true);
-  const [showSecondaryEmail, setShowSecondaryEmail] = useState(false);
-
-  // Required Fields
-  const [requireEmail, setRequireEmail] = useState(true);
-  const [requirePhone, setRequirePhone] = useState(false);
-  const [requireCompany, setRequireCompany] = useState(false);
-  const [requireJobTitle, setRequireJobTitle] = useState(false);
-
-  // Duplicate Rules
-  const [preventEmailDupes, setPreventEmailDupes] = useState(true);
-  const [preventPhoneDupes, setPreventPhoneDupes] = useState(true);
-  const [duplicatePolicy, setDuplicatePolicy] = useState("warn");
-
-  // Default Values
-  const [defaultContactType, setDefaultContactType] = useState("Customer");
-  const [defaultLifecycleStage, setDefaultLifecycleStage] = useState("ACTIVE");
-  const [tags, setTags] = useState<string[]>(["VIP", "Decision Maker", "Billing Contact", "Technical Lead"]);
-  const [newTag, setNewTag] = useState("");
-
+  const [savedSettings, setSavedSettings] = useState<ContactSettingsConfig>(DEFAULT_CONTACT_SETTINGS);
+  const [draft, setDraft] = useState<ContactSettingsConfig>(DEFAULT_CONTACT_SETTINGS);
   const [isSaving, setIsSaving] = useState(false);
-  const [hasChanges, setHasChanges] = useState(false);
 
-  const handleAddTag = (e: React.FormEvent) => {
-    e.preventDefault();
-    if (!newTag.trim() || tags.includes(newTag.trim())) return;
-    setTags([...tags, newTag.trim()]);
-    setNewTag("");
-    setHasChanges(true);
-    toast.success(`Tag "${newTag.trim()}" added`);
+  // Load persisted configuration on modal open
+  useEffect(() => {
+    if (open) {
+      const stored = getStoredContactSettings();
+      setSavedSettings(stored);
+      setDraft(stored);
+    }
+  }, [open]);
+
+  // Strict dirty checking against saved state
+  const hasChanges = useMemo(() => {
+    return JSON.stringify(draft) !== JSON.stringify(savedSettings);
+  }, [draft, savedSettings]);
+
+  const updateDraft = (updates: Partial<ContactSettingsConfig>) => {
+    setDraft((prev) => ({ ...prev, ...updates }));
   };
 
-  const handleRemoveTag = (tag: string) => {
-    setTags(tags.filter((t) => t !== tag));
-    setHasChanges(true);
+  const handleRestoreDefaults = () => {
+    setDraft({ ...DEFAULT_CONTACT_SETTINGS });
+    toast.info("Restored standard CRM defaults. Click Save Changes to apply.");
+  };
+
+  const handleResetDraft = () => {
+    setDraft({ ...savedSettings });
   };
 
   const handleSave = async () => {
-    setIsSaving(true);
-    await new Promise((resolve) => setTimeout(resolve, 500));
-    setIsSaving(false);
-    setHasChanges(false);
-    toast.success("Contact settings saved successfully");
-    onOpenChange(false);
+    try {
+      setIsSaving(true);
+      await new Promise((resolve) => setTimeout(resolve, 350));
+
+      saveStoredContactSettings(draft);
+      setSavedSettings(draft);
+
+      if (onSettingsSaved) {
+        onSettingsSaved(draft);
+      }
+
+      toast.success("Contact settings saved successfully");
+      onOpenChange(false);
+    } catch (err: any) {
+      toast.error(err?.message || "Failed to save contact settings.");
+    } finally {
+      setIsSaving(false);
+    }
   };
 
   const sections: ContextualSettingSection[] = [
@@ -99,52 +107,56 @@ export function ContactContextualSettings({
       label: "Contact Fields",
       icon: SlidersHorizontal,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Contact Field Visibility & Layout"
-            description="Control which standard profile fields and metadata attributes are displayed."
-            icon={SlidersHorizontal}
-          >
-            <div className="divide-y divide-border/40">
-              <SettingsToggleRow
-                label="Job Title & Position"
-                description="Show job designation field on contact cards and detail drawers."
-                checked={showJobTitle}
-                onCheckedChange={(c) => {
-                  setShowJobTitle(c);
-                  setHasChanges(true);
-                }}
-              />
-              <SettingsToggleRow
-                label="Department / Unit"
-                description="Enable department grouping on contact profiles."
-                checked={showDepartment}
-                onCheckedChange={(c) => {
-                  setShowDepartment(c);
-                  setHasChanges(true);
-                }}
-              />
-              <SettingsToggleRow
-                label="Social Profiles (LinkedIn, Twitter)"
-                description="Display social profile links on contact cards."
-                checked={showSocialProfiles}
-                onCheckedChange={(c) => {
-                  setShowSocialProfiles(c);
-                  setHasChanges(true);
-                }}
-              />
-              <SettingsToggleRow
-                label="Secondary Contact Email"
-                description="Allow multiple email addresses per individual contact record."
-                checked={showSecondaryEmail}
-                onCheckedChange={(c) => {
-                  setShowSecondaryEmail(c);
-                  setHasChanges(true);
-                }}
-              />
-            </div>
-          </SettingsSection>
-        </div>
+        <SettingsSection
+          title="Contact Fields"
+          description="Choose which contact information is available across the CRM."
+          icon={SlidersHorizontal}
+          headerAction={
+            <Button
+              type="button"
+              variant="ghost"
+              size="sm"
+              onClick={handleRestoreDefaults}
+              className="group text-xs text-muted-foreground hover:text-foreground h-8 gap-1.5 cursor-pointer hover:bg-muted/60"
+            >
+              <AppIcon name="reset" icon={RotateCcw} size={13} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground" />
+              <span>Restore Defaults</span>
+            </Button>
+          }
+        >
+          <div className="divide-y divide-border/40">
+            <SettingsToggleRow
+              label="Job Title / Position"
+              description="Show job title and professional designation across contact profiles and cards."
+              checked={draft.showJobTitle}
+              onCheckedChange={(val) => updateDraft({ showJobTitle: val })}
+            />
+            <SettingsToggleRow
+              label="Department / Business Unit"
+              description="Enable department grouping and organizational unit taxonomy on contacts."
+              checked={draft.showDepartment}
+              onCheckedChange={(val) => updateDraft({ showDepartment: val })}
+            />
+            <SettingsToggleRow
+              label="Primary Phone / Mobile"
+              description="Display direct mobile and telephone number for rapid outreach."
+              checked={draft.showPhone}
+              onCheckedChange={(val) => updateDraft({ showPhone: val })}
+            />
+            <SettingsToggleRow
+              label="Secondary Email"
+              description="Allow secondary and alternate email addresses on individual contact records."
+              checked={draft.showSecondaryEmail}
+              onCheckedChange={(val) => updateDraft({ showSecondaryEmail: val })}
+            />
+            <SettingsToggleRow
+              label="Social Profile Links"
+              description="Enable social profile attributes including LinkedIn and Twitter / X."
+              checked={draft.showSocialProfiles}
+              onCheckedChange={(val) => updateDraft({ showSocialProfiles: val })}
+            />
+          </div>
+        </SettingsSection>
       ),
     },
     {
@@ -152,54 +164,34 @@ export function ContactContextualSettings({
       label: "Required Fields",
       icon: CheckSquare,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Enforced / Mandatory Fields"
-            description="Enforce mandatory validation rules before contacts can be saved."
-            icon={CheckSquare}
-          >
-            <div className="divide-y divide-border/40">
-              <SettingsToggleRow
-                label="Require Valid Email Address"
-                description="Email is strictly mandatory for all newly created contacts."
-                checked={requireEmail}
-                onCheckedChange={(c) => {
-                  setRequireEmail(c);
-                  setHasChanges(true);
-                }}
-                disabled
-                badge="Mandatory"
-              />
-              <SettingsToggleRow
-                label="Require Phone Number"
-                description="Ensure phone number is populated when creating contacts."
-                checked={requirePhone}
-                onCheckedChange={(c) => {
-                  setRequirePhone(c);
-                  setHasChanges(true);
-                }}
-              />
-              <SettingsToggleRow
-                label="Require Linked Company"
-                description="Contacts must be associated with an existing or new company account."
-                checked={requireCompany}
-                onCheckedChange={(c) => {
-                  setRequireCompany(c);
-                  setHasChanges(true);
-                }}
-              />
-              <SettingsToggleRow
-                label="Require Job Title"
-                description="Ensure job title is provided for B2B relationship tracking."
-                checked={requireJobTitle}
-                onCheckedChange={(c) => {
-                  setRequireJobTitle(c);
-                  setHasChanges(true);
-                }}
-              />
-            </div>
-          </SettingsSection>
-        </div>
+        <SettingsSection
+          title="Required Fields"
+          description="Define the information users must provide when creating or updating contacts."
+          icon={CheckSquare}
+        >
+          <div className="divide-y divide-border/40">
+            <SettingsToggleRow
+              label="Primary Email"
+              description="Valid email address is mandatory for contact identification and communication."
+              checked={draft.requireEmail}
+              onCheckedChange={() => {}}
+              disabled
+              badge="Mandatory"
+            />
+            <SettingsToggleRow
+              label="Phone / Mobile"
+              description="Require telephone or mobile number before saving contact records."
+              checked={draft.requirePhone}
+              onCheckedChange={(val) => updateDraft({ requirePhone: val })}
+            />
+            <SettingsToggleRow
+              label="Job Title / Role"
+              description="Mandate job designation for business relationship tracking."
+              checked={draft.requireJobTitle}
+              onCheckedChange={(val) => updateDraft({ requireJobTitle: val })}
+            />
+          </div>
+        </SettingsSection>
       ),
     },
     {
@@ -207,55 +199,56 @@ export function ContactContextualSettings({
       label: "Duplicate Rules",
       icon: CopyX,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Contact Deduplication"
-            description="Detect and handle duplicate contacts across your CRM workspace."
-            icon={CopyX}
-          >
-            <div className="divide-y divide-border/40">
-              <SettingsToggleRow
-                label="Deduplicate by Email"
-                description="Check for existing contacts with matching primary or secondary email."
-                checked={preventEmailDupes}
-                onCheckedChange={(c) => {
-                  setPreventEmailDupes(c);
-                  setHasChanges(true);
-                }}
-              />
-              <SettingsToggleRow
-                label="Deduplicate by Phone"
-                description="Flag contacts with matching internationalized mobile number."
-                checked={preventPhoneDupes}
-                onCheckedChange={(c) => {
-                  setPreventPhoneDupes(c);
-                  setHasChanges(true);
-                }}
-              />
-              <SettingsRow
-                label="Duplicate Policy"
-                description="Action to take when a potential duplicate contact is identified."
+        <SettingsSection
+          title="Duplicate Rules"
+          description="Control how the CRM detects potential duplicate contacts."
+          icon={CopyX}
+        >
+          <div className="divide-y divide-border/40">
+            <SettingsToggleRow
+              label="Email Matching"
+              description="Check for existing contacts with matching primary or secondary email."
+              checked={draft.matchEmail}
+              onCheckedChange={(val) => updateDraft({ matchEmail: val })}
+            />
+            <SettingsToggleRow
+              label="Phone / Mobile Matching"
+              description="Identify potential duplicates with matching phone or mobile numbers."
+              checked={draft.matchPhone}
+              onCheckedChange={(val) => updateDraft({ matchPhone: val })}
+            />
+            <SettingsToggleRow
+              label="Normalize Email Addresses"
+              description="Strip whitespace and treat email comparison as case-insensitive."
+              checked={draft.normalizeEmail}
+              onCheckedChange={(val) => updateDraft({ normalizeEmail: val })}
+            />
+            <SettingsRow
+              label="When a duplicate is found"
+              description="Action to take when an existing matching contact is detected."
+            >
+              <Select
+                value={draft.duplicateResolution}
+                onValueChange={(val: "warn" | "block" | "merge") => updateDraft({ duplicateResolution: val })}
               >
-                <Select
-                  value={duplicatePolicy}
-                  onValueChange={(val) => {
-                    setDuplicatePolicy(val);
-                    setHasChanges(true);
-                  }}
-                >
-                  <SelectTrigger className="w-40 h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="warn">Warn User</SelectItem>
-                    <SelectItem value="block">Block Creation</SelectItem>
-                    <SelectItem value="merge">Auto-merge</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingsRow>
-            </div>
-          </SettingsSection>
-        </div>
+                <SelectTrigger className="w-48 h-8.5 text-xs rounded-lg border-border/80 bg-background font-semibold cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border shadow-lg">
+                  <SelectItem value="warn" className="text-xs cursor-pointer font-medium">
+                    Warn & Allow Override
+                  </SelectItem>
+                  <SelectItem value="block" className="text-xs cursor-pointer font-medium">
+                    Block Duplicate Creation
+                  </SelectItem>
+                  <SelectItem value="merge" className="text-xs cursor-pointer font-medium">
+                    Auto-merge Records
+                  </SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingsRow>
+          </div>
+        </SettingsSection>
       ),
     },
     {
@@ -263,89 +256,54 @@ export function ContactContextualSettings({
       label: "Default Values",
       icon: Tag,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Default Lifecycle Stage & Pre-set Tags"
-            description="Configure default contact values and reusable organization tags."
-            icon={Tag}
-          >
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              <SettingsField label="Default Contact Category">
-                <Select
-                  value={defaultContactType}
-                  onValueChange={(val) => {
-                    setDefaultContactType(val);
-                    setHasChanges(true);
-                  }}
-                >
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="Lead">Lead</SelectItem>
-                    <SelectItem value="Customer">Customer</SelectItem>
-                    <SelectItem value="Partner">Partner</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingsField>
+        <SettingsSection
+          title="Default Values"
+          description="Set the values automatically applied to new contacts."
+          icon={Tag}
+        >
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+            <SettingsField
+              label="Default Contact Type"
+              description="Initial classification assigned when creating new contact records."
+            >
+              <Select
+                value={draft.defaultContactType}
+                onValueChange={(val: "Lead" | "Customer" | "Partner" | "Vendor") => updateDraft({ defaultContactType: val })}
+              >
+                <SelectTrigger className="h-9 text-xs rounded-lg border-border/80 bg-background font-semibold cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border shadow-lg">
+                  <SelectItem value="Lead" className="text-xs cursor-pointer font-medium">Lead</SelectItem>
+                  <SelectItem value="Customer" className="text-xs cursor-pointer font-medium">Customer</SelectItem>
+                  <SelectItem value="Partner" className="text-xs cursor-pointer font-medium">Partner</SelectItem>
+                  <SelectItem value="Vendor" className="text-xs cursor-pointer font-medium">Vendor</SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingsField>
 
-              <SettingsField label="Default Lifecycle State">
-                <Select
-                  value={defaultLifecycleStage}
-                  onValueChange={(val) => {
-                    setDefaultLifecycleStage(val);
-                    setHasChanges(true);
-                  }}
-                >
-                  <SelectTrigger className="h-9 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="ACTIVE">Active Account</SelectItem>
-                    <SelectItem value="ONBOARDING">Onboarding</SelectItem>
-                    <SelectItem value="INACTIVE">Inactive / Dormant</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingsField>
-            </div>
-
-            <div className="pt-2">
-              <label className="text-xs font-semibold text-foreground mb-1.5 block">
-                Standard Contact Tags & Badges
-              </label>
-              <div className="flex flex-wrap gap-1.5 p-3 rounded-xl border border-border/70 bg-card">
-                {tags.map((tag) => (
-                  <Badge
-                    key={tag}
-                    variant="secondary"
-                    className="text-xs py-1 px-2.5 gap-1.5 bg-muted hover:bg-muted/80 text-foreground"
-                  >
-                    <span>{tag}</span>
-                    <button
-                      type="button"
-                      onClick={() => handleRemoveTag(tag)}
-                      className="text-muted-foreground hover:text-destructive"
-                    >
-                      <Trash2 className="w-3 h-3" />
-                    </button>
-                  </Badge>
-                ))}
-              </div>
-
-              <form onSubmit={handleAddTag} className="mt-2.5 flex items-center gap-2">
-                <Input
-                  placeholder="New tag label (e.g., Executive, Key Account)..."
-                  value={newTag}
-                  onChange={(e) => setNewTag(e.target.value)}
-                  className="text-xs h-8.5 flex-1"
-                />
-                <Button type="submit" size="sm" variant="secondary" className="text-xs font-semibold h-8.5">
-                  <Plus className="w-3.5 h-3.5 mr-1" /> Add Tag
-                </Button>
-              </form>
-            </div>
-          </SettingsSection>
-        </div>
+            <SettingsField
+              label="Default Lifecycle Stage"
+              description="Starting lifecycle status pre-selected during contact onboarding."
+            >
+              <Select
+                value={draft.defaultLifecycleStage}
+                onValueChange={(val: "NEW" | "CONTACTED" | "ACTIVE" | "ONBOARDING" | "PROSPECT") => updateDraft({ defaultLifecycleStage: val })}
+              >
+                <SelectTrigger className="h-9 text-xs rounded-lg border-border/80 bg-background font-semibold cursor-pointer">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="rounded-xl border-border shadow-lg">
+                  <SelectItem value="NEW" className="text-xs cursor-pointer font-medium">New Lead (NEW)</SelectItem>
+                  <SelectItem value="CONTACTED" className="text-xs cursor-pointer font-medium">Contacted (CONTACTED)</SelectItem>
+                  <SelectItem value="ACTIVE" className="text-xs cursor-pointer font-medium">Active Account (ACTIVE)</SelectItem>
+                  <SelectItem value="ONBOARDING" className="text-xs cursor-pointer font-medium">Onboarding (ONBOARDING)</SelectItem>
+                  <SelectItem value="PROSPECT" className="text-xs cursor-pointer font-medium">Prospect (PROSPECT)</SelectItem>
+                </SelectContent>
+              </Select>
+            </SettingsField>
+          </div>
+        </SettingsSection>
       ),
     },
   ];
@@ -355,14 +313,16 @@ export function ContactContextualSettings({
       open={open}
       onOpenChange={onOpenChange}
       title="Contact Settings"
-      subtitle="Manage contact visibility, required validation fields, tags, and deduplication rules."
+      subtitle="Configure available fields, mandatory input rules, duplicate detection, and default values."
       icon={Users}
-      badge="Contacts Module"
       sections={sections}
       defaultSection={defaultSection}
       isSaving={isSaving}
       hasUnsavedChanges={hasChanges}
       onSave={handleSave}
+      onReset={handleResetDraft}
     />
   );
 }
+export { DEFAULT_CONTACT_SETTINGS } from "../hooks/use-contact-settings";
+export type { ContactSettingsConfig } from "../hooks/use-contact-settings";
