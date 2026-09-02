@@ -29,20 +29,46 @@ import * as z from 'zod';
 
 const roleSchema = z.object({
   name: z.string().min(1, 'Name is required'),
-  description: z.string().optional(),
-  color: z.string().optional(),
+  description: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
   priority: z.number().optional().default(0),
   isActive: z.boolean().optional().default(true),
-  permissions: z.array(z.string()).default([]),
+  permissions: z
+    .array(
+      z.union([
+        z.string(),
+        z.object({
+          module: z.string(),
+          hasAccess: z.boolean().optional(),
+        }),
+      ]),
+    )
+    .transform((arr) =>
+      arr.map((p) => (typeof p === 'string' ? p : p.module)),
+    )
+    .default([]),
 });
 
 const roleUpdateSchema = z.object({
   name: z.string().min(1).optional(),
-  description: z.string().optional(),
-  color: z.string().optional(),
+  description: z.string().optional().nullable(),
+  color: z.string().optional().nullable(),
   priority: z.number().optional(),
   isActive: z.boolean().optional(),
-  permissions: z.array(z.string()).optional(),
+  permissions: z
+    .array(
+      z.union([
+        z.string(),
+        z.object({
+          module: z.string(),
+          hasAccess: z.boolean().optional(),
+        }),
+      ]),
+    )
+    .transform((arr) =>
+      arr.map((p) => (typeof p === 'string' ? p : p.module)),
+    )
+    .optional(),
 });
 
 const statusToggleSchema = z.object({

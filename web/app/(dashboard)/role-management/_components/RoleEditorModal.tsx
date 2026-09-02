@@ -73,12 +73,12 @@ export function RoleEditorModal({
             <ShieldCheck className="h-5 w-5 text-primary" />
             {editingRole
               ? `Edit Role: ${editingRole.name}`
-              : "Create New Custom Role"}
+              : "Add New Role"}
           </DialogTitle>
           <DialogDescription>
             {editingRole
               ? "Configure role metadata and fine-tune module access permissions."
-              : "Define a new custom organizational role and assign granular module permissions."}
+              : "Define a new organizational role and assign granular module permissions."}
           </DialogDescription>
         </DialogHeader>
 
@@ -170,7 +170,7 @@ export function RoleEditorModal({
               ? "Saving..."
               : editingRole
                 ? "Save Changes"
-                : "Create Role"}
+                : "Add Role"}
           </Button>
         </DialogFooter>
       </DialogContent>

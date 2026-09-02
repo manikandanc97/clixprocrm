@@ -245,7 +245,7 @@ export function ContextualSettingsDrawer({
               ) : (
                 <span className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-medium">
                   <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
-                  Auto-synced with workspace
+                  All settings up to date
                 </span>
               )}
             </div>

@@ -124,8 +124,8 @@ export class RolesService {
     actorRoleName: string,
     data: {
       name: string;
-      description?: string;
-      color?: string;
+      description?: string | null;
+      color?: string | null;
       priority?: number;
       permissions?: string[];
       isActive?: boolean;
@@ -215,8 +215,8 @@ export class RolesService {
     actorRoleName: string,
     parsedData: {
       name?: string;
-      description?: string;
-      color?: string;
+      description?: string | null;
+      color?: string | null;
       priority?: number;
       isActive?: boolean;
       permissions?: string[];

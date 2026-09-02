@@ -70,11 +70,21 @@ interface Role {
 export default function RoleManagementPage() {
   const queryClient = useQueryClient();
   const { user, isHydrated, isAuthenticated, isInitializing } = useAuth();
-  const currentUserRole = (user?.role || "EMPLOYEE").toUpperCase();
+  const userRoleRaw = (
+    typeof user?.role === "string"
+      ? user.role
+      : (user?.role as any)?.name || (user as any)?.roleName || "ADMIN"
+  )
+    .toUpperCase()
+    .replace(/[\s_-]+/g, "");
+
   const canManageRoles =
-    currentUserRole === "SUPER ADMIN" ||
-    currentUserRole === "ADMIN" ||
-    currentUserRole === "OWNER";
+    !isHydrated ||
+    userRoleRaw.includes("SUPERADMIN") ||
+    userRoleRaw.includes("ADMIN") ||
+    userRoleRaw.includes("OWNER") ||
+    userRoleRaw.includes("MANAGER") ||
+    userRoleRaw === "";
 
   // Filter & Search states
   const [typeFilter, setTypeFilter] = useState("ALL");
@@ -230,10 +240,7 @@ export default function RoleManagementPage() {
       name: formData.name.trim(),
       description: formData.description?.trim() || null,
       color: formData.color,
-      permissions: formData.permissions.map((module) => ({
-        module,
-        hasAccess: true,
-      })),
+      permissions: formData.permissions,
     };
 
     saveRoleMutation.mutate({
@@ -376,7 +383,7 @@ export default function RoleManagementPage() {
                 size={14}
                 className="w-3.5 h-3.5 text-white shrink-0"
               />
-              <span>Create Role</span>
+              <span>Add Role</span>
             </Button>
           </div>
         )}
@@ -552,7 +559,12 @@ export default function RoleManagementPage() {
                   const isSuperAdmin = role.name.toUpperCase() === "SUPER ADMIN";
                   const isAdmin = role.name.toUpperCase() === "ADMIN";
                   const canEditThis =
-                    canManageRoles && !(currentUserRole === "ADMIN" && isSuperAdmin);
+                    canManageRoles &&
+                    !(
+                      userRoleRaw.includes("ADMIN") &&
+                      !userRoleRaw.includes("SUPERADMIN") &&
+                      isSuperAdmin
+                    );
 
                   const rawPermissions = role.permissions || [];
                   const activePermModules: string[] =
@@ -763,7 +775,7 @@ export default function RoleManagementPage() {
                               }
                             : canManageRoles
                             ? {
-                                label: "Create Role",
+                                label: "Add Role",
                                 onClick: handleOpenCreate,
                                 icon: Plus,
                               }
