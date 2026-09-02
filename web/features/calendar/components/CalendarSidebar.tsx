@@ -9,13 +9,6 @@ import { ChevronLeft, ChevronRight, Users, Phone, CheckSquare } from "lucide-rea
 import { cn } from "@/shared/lib/utils";
 import { motion } from "framer-motion";
 
-interface Filters {
-  meetings: boolean;
-  calls: boolean;
-  tasks: boolean;
-  leaves: boolean;
-}
-
 interface Summary {
   meetings: number;
   calls: number;
@@ -25,17 +18,8 @@ interface Summary {
 interface CalendarSidebarProps {
   currentDate: Date;
   onDateSelect: (date: Date) => void;
-  filters: Filters;
-  onFilterChange: (key: keyof Filters, value: boolean) => void;
   summary: Summary;
 }
-
-const filterConfig = [
-  { key: "meetings" as const, label: "Meetings", dot: "bg-emerald-500" },
-  { key: "calls" as const, label: "Calls & Follow-ups", dot: "bg-orange-500" },
-  { key: "tasks" as const, label: "Tasks Due", dot: "bg-indigo-500" },
-  { key: "leaves" as const, label: "Holidays & Leave", dot: "bg-rose-400" },
-];
 
 function MiniCalendar({ selected, onSelect }: { selected: Date; onSelect: (d: Date) => void }) {
   const [viewDate, setViewDate] = useState(new Date(selected));
@@ -117,7 +101,7 @@ function MiniCalendar({ selected, onSelect }: { selected: Date; onSelect: (d: Da
   );
 }
 
-export function CalendarSidebar({ currentDate, onDateSelect, filters, onFilterChange, summary }: CalendarSidebarProps) {
+export function CalendarSidebar({ currentDate, onDateSelect, summary }: CalendarSidebarProps) {
   return (
     <motion.aside
       initial={{ opacity: 0, x: -16 }}
@@ -149,37 +133,6 @@ export function CalendarSidebar({ currentDate, onDateSelect, filters, onFilterCh
                 <span className="text-[11px] font-medium text-muted-foreground flex-1">{label}</span>
                 <span className={cn("text-sm font-bold tabular-nums", text)}>{value}</span>
               </div>
-            ))}
-          </div>
-        </div>
-
-        {/* Calendar Filters */}
-        <div>
-          <p className="text-[10px] font-bold uppercase tracking-[0.08em] text-muted-foreground/60 mb-3">
-            My Calendars
-          </p>
-          <div className="space-y-4">
-            {filterConfig.map(({ key, label, dot }) => (
-              <button
-                key={key}
-                onClick={() => onFilterChange(key, !filters[key])}
-                className="flex items-center gap-3 w-full px-2 py-2 rounded-lg hover:bg-muted/60 transition-colors group"
-              >
-                <div className={cn(
-                  "w-4 h-4 rounded border-2 flex items-center justify-center flex-shrink-0 transition-all",
-                  filters[key] ? `${dot} border-transparent` : "border-muted-foreground/30 bg-transparent"
-                )}>
-                  {filters[key] && (
-                    <svg className="w-2.5 h-2.5 text-white" viewBox="0 0 10 10" fill="none">
-                      <path d="M2 5l2.5 2.5 3.5-4" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
-                    </svg>
-                  )}
-                </div>
-                <div className={cn("w-2 h-2 rounded-full flex-shrink-0", dot)} />
-                <span className="text-xs font-medium text-muted-foreground group-hover:text-foreground transition-colors text-left">
-                  {label}
-                </span>
-              </button>
             ))}
           </div>
         </div>

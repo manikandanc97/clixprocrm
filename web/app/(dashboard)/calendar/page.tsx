@@ -3,23 +3,16 @@
 import React, { useState, useEffect, useMemo } from "react";
 import client from "@/shared/lib/api/client";
 import { startOfMonth, endOfMonth, startOfWeek, endOfWeek, addMonths, addDays, subDays } from "date-fns";
-import { CalendarDays, Users, Phone, CheckSquare } from "lucide-react";
 import { CalendarHeader } from "@/features/calendar/components/CalendarHeader";
 import { CalendarSidebar } from "@/features/calendar/components/CalendarSidebar";
 import { CalendarGrid } from "@/features/calendar/components/CalendarGrid";
+import { CalendarFilterBar, CalendarFilters } from "@/features/calendar/components/CalendarFilterBar";
 import { EventModal } from "@/features/calendar/components/EventModal";
-import { CRMMetricCard, CRMMetricsGrid, CRMPageContainer } from "@/shared/components/crm";
+import { CRMPageContainer } from "@/shared/components/crm";
 import { toast } from "sonner";
 import { CalendarSkeleton } from "@/features/calendar/components/CalendarSkeleton";
 
 type ViewType = "month" | "week" | "day" | "agenda";
-
-interface Filters {
-  meetings: boolean;
-  calls: boolean;
-  tasks: boolean;
-  leaves: boolean;
-}
 
 export default function CalendarPage() {
   const [currentDate, setCurrentDate] = useState(new Date());
@@ -27,7 +20,7 @@ export default function CalendarPage() {
   const [events, setEvents] = useState<ReturnType<typeof JSON.parse>[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedEvent, setSelectedEvent] = useState<ReturnType<typeof JSON.parse> | null>(null);
-  const [filters, setFilters] = useState<Filters>({ meetings: true, calls: true, tasks: true, leaves: true });
+  const [filters, setFilters] = useState<CalendarFilters>({ meetings: true, calls: true, tasks: true, leaves: true });
 
   const fetchEvents = async () => {
     try {
@@ -72,6 +65,13 @@ export default function CalendarPage() {
     });
   }, [events, filters]);
 
+  const filterCounts = useMemo(() => ({
+    meetings: events.filter(e => e.type === "MEETING").length,
+    calls: events.filter(e => e.type === "CALL" || e.type === "FOLLOW_UP").length,
+    tasks: events.filter(e => e.type === "TASK").length,
+    leaves: events.filter(e => e.type === "HOLIDAY" || e.type === "LEAVE" || e.type === "BIRTHDAY").length,
+  }), [events]);
+
   const today = new Date().toDateString();
   const summary = useMemo(() => ({
     meetings: events.filter(e => e.type === "MEETING" && new Date(e.startTime).toDateString() === today).length,
@@ -98,81 +98,39 @@ export default function CalendarPage() {
   return (
     <CRMPageContainer>
       {/* ── HEADER ── */}
-        <CalendarHeader
+      <CalendarHeader
+        currentDate={currentDate}
+        view={view}
+        onViewChange={setView}
+        onDateChange={setCurrentDate}
+        onNewEvent={() => toast.info("Event creation coming soon!")}
+      />
+
+      {/* ── MAIN: Sidebar + Grid ── */}
+      <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
+        <CalendarSidebar
           currentDate={currentDate}
-          view={view}
-          onViewChange={setView}
-          onDateChange={setCurrentDate}
-          onNewEvent={() => toast.info("Event creation coming soon!")}
+          onDateSelect={setCurrentDate}
+          summary={summary}
         />
 
-        {/* ── METRIC CARDS ── */}
-        <div>
-          <CRMMetricsGrid className="gap-3 md:gap-4">
-          <CRMMetricCard
-            title="Today's Meetings"
-            value={summary.meetings}
-            loading={loading}
-            hideBottomSkeletons={true}
-            icon={Users}
-            color="emerald"
-            trend="neutral"
-            delay={0}
-          />
-          <CRMMetricCard
-            title="Calls Today"
-            value={summary.calls}
-            loading={loading}
-            hideBottomSkeletons={true}
-            icon={Phone}
-            color="orange"
-            trend="neutral"
-            delay={0.05}
-          />
-          <CRMMetricCard
-            title="Tasks Due"
-            value={summary.tasks}
-            loading={loading}
-            hideBottomSkeletons={true}
-            icon={CheckSquare}
-            color="indigo"
-            trend="neutral"
-            delay={0.1}
-          />
-          <CRMMetricCard
-            title="Total Events"
-            value={summary.total}
-            loading={loading}
-            hideBottomSkeletons={true}
-            icon={CalendarDays}
-            color="violet"
-            trend="neutral"
-            delay={0.15}
-          />
-        </CRMMetricsGrid>
-        </div>
-
-        {/* ── MAIN: Sidebar + Grid ── */}
-        <div className="flex flex-col lg:flex-row gap-6 lg:gap-8 items-start">
-          <CalendarSidebar
-            currentDate={currentDate}
-            onDateSelect={setCurrentDate}
+        <div className="flex-1 min-w-0 w-full space-y-4">
+          <CalendarFilterBar
             filters={filters}
             onFilterChange={(key, val) => setFilters(prev => ({ ...prev, [key]: val }))}
-            summary={summary}
+            counts={filterCounts}
           />
 
-          <div className="flex-1 min-w-0 w-full">
-            <CalendarGrid
-              events={filteredEvents}
-              currentDate={currentDate}
-              view={view}
-              onEventClick={setSelectedEvent}
-              onViewChange={(v) => setView(v)}
-              onNewEvent={() => toast.info("Event creation coming soon!")}
-            />
-          </div>
+          <CalendarGrid
+            events={filteredEvents}
+            currentDate={currentDate}
+            view={view}
+            onEventClick={setSelectedEvent}
+            onViewChange={(v) => setView(v)}
+            onNewEvent={() => toast.info("Event creation coming soon!")}
+          />
         </div>
+      </div>
       <EventModal
         event={selectedEvent}
         onClose={() => setSelectedEvent(null)}
