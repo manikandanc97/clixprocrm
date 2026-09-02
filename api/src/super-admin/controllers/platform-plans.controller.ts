@@ -18,7 +18,7 @@ import {
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 
-@Controller('super-admin/plans')
+@Controller(['super-admin/plans', 'super_admin/plans'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)
 export class PlatformPlansController {
   constructor(private readonly platformPlansService: PlatformPlansService) {}

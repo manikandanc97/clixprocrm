@@ -51,42 +51,31 @@ export function SuperAdminPlansSkeleton() {
   return (
     <CRMPageContainer>
       <CRMPageHeader
-        title="Subscription Plans & Tiers"
-        subtitle="Manage SaaS tiers, feature limits, pricing packaging, and tenant entitlements."
+        title="Plans & Subscriptions"
+        subtitle="Manage canonical subscription tiers, real-time pricing models, resource quotas, AI entitlements, and custom tiers."
         icon={CreditCard}
-        badge="Monetization Engine"
       />
 
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={4}>
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </CRMMetricsGrid>
-      </div>
-
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-6 mt-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {Array.from({ length: 4 }).map((_, i) => (
-          <Card key={i} className="p-6 space-y-6 flex flex-col justify-between">
-            <div className="space-y-4">
-              <div className="flex items-center justify-between">
-                <Skeleton className="h-5 w-28" />
-                <Skeleton className="h-5 w-16 rounded-full" />
-              </div>
-              <Skeleton className="h-8 w-24" />
-              <Skeleton className="h-3.5 w-full" />
-              <div className="pt-3 border-t border-border/50 space-y-2.5">
-                {Array.from({ length: 5 }).map((_, j) => (
-                  <div key={j} className="flex items-center gap-2">
-                    <Skeleton className="w-4 h-4 rounded-full shrink-0" />
-                    <Skeleton className="h-3 w-36" />
-                  </div>
-                ))}
+          <div
+            key={i}
+            className="rounded-2xl bg-card border border-border p-6 flex flex-col justify-between shadow-card animate-pulse space-y-4 min-h-[420px]"
+          >
+            <div className="space-y-3">
+              <div className="h-5 bg-muted rounded-lg w-1/2" />
+              <div className="h-3.5 bg-muted/60 rounded-md w-4/5" />
+              <div className="h-8 bg-muted rounded-lg w-2/3 mt-4" />
+              <div className="h-8 bg-muted/40 rounded-xl w-full mt-2" />
+              <div className="space-y-2 pt-4">
+                <div className="h-3 bg-muted/60 rounded w-1/3" />
+                <div className="h-3 bg-muted/40 rounded w-full" />
+                <div className="h-3 bg-muted/40 rounded w-5/6" />
+                <div className="h-3 bg-muted/40 rounded w-4/6" />
               </div>
             </div>
-            <Skeleton className="h-10 w-full rounded-xl" />
-          </Card>
+            <div className="h-10 bg-muted rounded-xl w-full" />
+          </div>
         ))}
       </div>
     </CRMPageContainer>
@@ -305,10 +294,10 @@ export function SuperAdminAnalyticsSkeleton() {
   return (
     <CRMPageContainer>
       <CRMPageHeader
-        title="Global Platform Analytics"
-        subtitle="Multi-tenant growth metrics, system capacity, and operational telemetry."
+        title="Platform Analytics"
+        subtitle="Multi-tenant SaaS business performance, revenue growth, and workspace health."
         icon={TrendingUp}
-        badge="Real-time Analytics"
+        badge="Business Analytics"
       />
 
       <div className="shrink-0">
@@ -323,12 +312,32 @@ export function SuperAdminAnalyticsSkeleton() {
       <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 mt-6">
         <Card className="lg:col-span-2 p-6 space-y-4">
           <Skeleton className="h-5 w-44" />
-          <ChartSkeleton height={280} type="area" />
+          <ChartSkeleton height={280} type="bar" />
         </Card>
-        <Card className="p-6 space-y-4 flex flex-col items-center justify-center">
-          <Skeleton className="h-5 w-36 self-start" />
-          <ChartSkeleton height={200} type="donut" />
+        <Card className="p-6 space-y-4">
+          <Skeleton className="h-5 w-36" />
+          <div className="space-y-3 pt-2">
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+            <Skeleton className="h-14 w-full rounded-xl" />
+          </div>
         </Card>
+      </div>
+
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-6 mt-6">
+        <MetricCardSkeleton />
+        <MetricCardSkeleton />
+        <MetricCardSkeleton />
+      </div>
+
+      <div className="rounded-2xl bg-card border border-border p-6 space-y-4 mt-6">
+        <Skeleton className="h-5 w-40" />
+        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+          <Skeleton className="h-24 w-full rounded-xl" />
+        </div>
       </div>
     </CRMPageContainer>
   );

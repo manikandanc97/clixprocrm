@@ -870,7 +870,7 @@ export function BaseSidebar(props: BaseSidebarProps) {
       initial={false}
       animate={{ width: isCollapsed ? 72 : 256 }}
       transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-      className={`hidden md:flex flex-col fixed top-3.5 left-3.5 h-[calc(100dvh-28px)] z-40 overflow-visible gap-2.5 select-none ${props.className || ""}`}
+      className={`hidden md:flex flex-col fixed top-3.5 left-3.5 h-[calc(100dvh-32px)] z-40 overflow-visible gap-2.5 select-none ${props.className || ""}`}
     >
       <BaseSidebarContent {...props} />
     </motion.div>

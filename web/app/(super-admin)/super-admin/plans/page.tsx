@@ -1,13 +1,11 @@
 "use client";
 
-import { useEffect, useState, useMemo } from "react";
+import { useEffect, useState, useMemo, useCallback } from "react";
 import {
   CreditCard,
   Check,
   Building2,
-  Shield,
   Sparkles,
-  RefreshCw,
   Edit,
   X,
   Sliders,
@@ -17,13 +15,16 @@ import {
   HardDrive,
   Users,
   Target,
-  FileSpreadsheet,
   AlertCircle,
   Plus,
   Trash2,
   AlertTriangle,
-  ArrowRight,
   Loader2,
+  Shield,
+  TrendingUp,
+  Zap,
+  ChevronRight,
+  Crown,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -45,8 +46,92 @@ import {
 } from "@/shared/components/crm";
 import { compareFormValues } from "@/shared/hooks/use-dirty-form";
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipTrigger,
+} from "@/shared/ui/tooltip";
 
 type ConfigTab = "basic" | "pricing" | "limits" | "ai" | "features";
+
+function PlanEntitlementsList({ features }: { features: string[] }) {
+  const MAX_INITIAL_VISIBLE = 8;
+  const shouldTruncate = features.length > MAX_INITIAL_VISIBLE;
+  const visibleFeatures = shouldTruncate ? features.slice(0, MAX_INITIAL_VISIBLE) : features;
+  const remainingFeatures = shouldTruncate ? features.slice(MAX_INITIAL_VISIBLE) : [];
+
+  return (
+    <div className="pt-3 border-t border-border/50 flex flex-col space-y-2.5">
+      <div>
+        <div className="flex items-center justify-between mb-2 shrink-0">
+          <p className="text-[11px] font-extrabold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
+            <Sparkles className="h-3 w-3 text-emerald-500" />
+            Included Entitlements
+          </p>
+          <span className="text-[10px] font-semibold px-1.5 py-0.5 rounded-md bg-muted/60 text-muted-foreground border border-border/40">
+            {features.length}
+          </span>
+        </div>
+
+        <div className="space-y-1.5">
+          {visibleFeatures.map((feat, fIdx) => (
+            <div key={fIdx} className="flex items-center gap-2 text-xs py-0.5">
+              <div className="h-4 w-4 rounded-full bg-emerald-500/15 dark:bg-emerald-500/20 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                <Check className="h-2.5 w-2.5 stroke-[3]" />
+              </div>
+              <span className="text-foreground/90 font-medium leading-tight line-clamp-1">
+                {feat}
+              </span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      {remainingFeatures.length > 0 && (
+        <div className="pt-1 shrink-0">
+          <Tooltip delayDuration={150}>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                className="inline-flex items-center gap-1.5 text-xs font-bold text-emerald-600 dark:text-emerald-400 hover:text-emerald-700 dark:hover:text-emerald-300 transition-all cursor-pointer py-1 px-2.5 rounded-lg bg-emerald-500/10 hover:bg-emerald-500/15 border border-emerald-500/20 focus:outline-none focus:ring-2 focus:ring-emerald-500/30"
+              >
+                <span>+ {remainingFeatures.length} more features included</span>
+                <ChevronRight className="h-3 w-3 opacity-70" />
+              </button>
+            </TooltipTrigger>
+            <TooltipContent
+              side="top"
+              align="start"
+              sideOffset={6}
+              className="bg-zinc-950/95 backdrop-blur-md text-zinc-100 dark:bg-zinc-900/95 dark:text-zinc-100 border border-zinc-800 shadow-2xl p-3.5 rounded-xl w-72 max-w-xs space-y-2.5 z-50 animate-in fade-in-0 zoom-in-95"
+            >
+              <div className="flex items-center justify-between gap-3 border-b border-zinc-800 pb-2">
+                <span className="font-bold text-xs text-white">
+                  Additional Entitlements
+                </span>
+                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold tracking-wide border border-emerald-500/30">
+                  +{remainingFeatures.length} more
+                </span>
+              </div>
+              <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
+                {remainingFeatures.map((feat, rIdx) => (
+                  <div key={rIdx} className="flex items-center gap-2 text-xs py-0.5">
+                    <div className="h-4 w-4 rounded-full bg-emerald-500/20 text-emerald-400 flex items-center justify-center shrink-0">
+                      <Check className="h-2.5 w-2.5 stroke-[3]" />
+                    </div>
+                    <span className="text-zinc-200 font-medium leading-tight">
+                      {feat}
+                    </span>
+                  </div>
+                ))}
+              </div>
+            </TooltipContent>
+          </Tooltip>
+        </div>
+      )}
+    </div>
+  );
+}
 
 export default function SuperAdminPlansPage() {
   const [plans, setPlans] = useState<PlatformPlanItem[]>([]);
@@ -76,46 +161,49 @@ export default function SuperAdminPlansPage() {
     return !compareFormValues(originalPlan, editingPlan);
   }, [editingPlan, originalPlan, isCreatingNew]);
 
-  const loadData = async () => {
+  const loadData = useCallback(async () => {
     try {
       setLoading(true);
       setError(null);
       const res = await fetchPlatformPlans();
-      setPlans(res.plans);
-      setDistribution(res.distribution);
-      setFeatureCatalog(res.featureCatalog);
-      setAiModels(res.aiModels);
+      setPlans(Array.isArray(res?.plans) ? res.plans : []);
+      setDistribution(res?.distribution || {});
+      setFeatureCatalog(Array.isArray(res?.featureCatalog) ? res.featureCatalog : []);
+      setAiModels(Array.isArray(res?.aiModels) ? res.aiModels : []);
     } catch (err: any) {
+      console.error("Failed to load subscription plans:", err);
       const msg = err?.response?.data?.message || err?.message || "Failed to load subscription plans.";
       setError(msg);
       toast.error(msg);
     } finally {
       setLoading(false);
     }
-  };
+  }, []);
 
   useEffect(() => {
     loadData();
-  }, []);
+  }, [loadData]);
 
-  // Filtered feature catalog for search
+  // Filtered Catalog for modal search
   const filteredCatalog = useMemo(() => {
+    if (!featureCatalog || !Array.isArray(featureCatalog)) return [];
     if (!featureSearch.trim()) return featureCatalog;
     const q = featureSearch.toLowerCase();
     return featureCatalog.filter(
       (f) =>
-        f.name.toLowerCase().includes(q) ||
-        f.category.toLowerCase().includes(q) ||
-        f.description.toLowerCase().includes(q)
+        (f?.name || "").toLowerCase().includes(q) ||
+        (f?.category || "").toLowerCase().includes(q) ||
+        (f?.description || "").toLowerCase().includes(q)
     );
   }, [featureCatalog, featureSearch]);
 
   // Group features by category
   const groupedFeatures = useMemo(() => {
     const map: Record<string, FeatureCatalogItem[]> = {};
-    filteredCatalog.forEach((item) => {
-      if (!map[item.category]) map[item.category] = [];
-      map[item.category].push(item);
+    (filteredCatalog || []).forEach((item) => {
+      const cat = item?.category || "Core CRM";
+      if (!map[cat]) map[cat] = [];
+      map[cat].push(item);
     });
     return map;
   }, [filteredCatalog]);
@@ -130,14 +218,13 @@ export default function SuperAdminPlansPage() {
       priceNum: 1999,
       annualPriceNum: 19990,
       currency: "INR",
-      billing: "per month",
+      billing: "month",
       pricingMode: "FIXED",
       features: [
-        "Lead Management",
-        "Contact Management",
-        "Deal Pipeline",
-        "Standard Reports",
-        "Tasks & Reminders",
+        "Lead & Contact Management",
+        "Visual Sales Pipelines",
+        "Tasks & Calendar Reminders",
+        "Standard Reports & Analytics",
       ],
       maxUsers: 5,
       maxLeads: 2500,
@@ -169,7 +256,6 @@ export default function SuperAdminPlansPage() {
   };
 
   const handleOpenConfigure = (plan: PlatformPlanItem) => {
-    // Clone plan object for safe editing and baseline comparison
     const cloned: PlatformPlanItem = {
       ...plan,
       features: Array.isArray(plan.features) ? [...plan.features] : [],
@@ -320,7 +406,6 @@ export default function SuperAdminPlansPage() {
       ? currentAllowed.filter((id) => id !== modelId)
       : [...currentAllowed, modelId];
 
-    // If default model was unchecked, pick another available one
     let newDefaultId = editingPlan.defaultModelId;
     if (exists && editingPlan.defaultModelId === modelId) {
       newDefaultId = updated.length > 0 ? updated[0] : null;
@@ -334,8 +419,8 @@ export default function SuperAdminPlansPage() {
   };
 
   return (
-    <CRMPageContainer>
-      {/* 1. Standard CRM Page Header with Create Plan & Refresh */}
+    <CRMPageContainer twoStageScroll>
+      {/* 1. Page Header */}
       <CRMPageHeader
         title="Plans & Subscriptions"
         subtitle="Manage canonical subscription tiers, real-time pricing models, resource quotas, AI entitlements, and custom tiers."
@@ -347,12 +432,6 @@ export default function SuperAdminPlansPage() {
             onClick: handleOpenCreate,
             variant: "default",
           },
-          {
-            label: "Refresh Data",
-            icon: RefreshCw,
-            onClick: loadData,
-            variant: "outline",
-          },
         ]}
       />
 
@@ -363,170 +442,307 @@ export default function SuperAdminPlansPage() {
             <AlertCircle className="h-5 w-5 shrink-0" />
             <p className="text-sm font-semibold">{error}</p>
           </div>
-          <Button size="sm" variant="outline" onClick={loadData}>
+          <Button size="sm" variant="outline" onClick={loadData} className="rounded-xl">
             Retry
           </Button>
         </div>
       )}
 
-      {/* 2. Subscription Plans Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {loading
-          ? Array.from({ length: 4 }).map((_, idx) => (
-              <div
-                key={idx}
-                className="rounded-2xl bg-card border border-border p-6 flex flex-col justify-between shadow-card animate-pulse space-y-4 min-h-[420px]"
-              >
-                <div className="space-y-3">
-                  <div className="h-5 bg-muted rounded-lg w-1/2" />
-                  <div className="h-3.5 bg-muted/60 rounded-md w-4/5" />
-                  <div className="h-8 bg-muted rounded-lg w-2/3 mt-4" />
-                  <div className="h-8 bg-muted/40 rounded-xl w-full mt-2" />
-                  <div className="space-y-2 pt-4">
-                    <div className="h-3 bg-muted/60 rounded w-1/3" />
-                    <div className="h-3 bg-muted/40 rounded w-full" />
-                    <div className="h-3 bg-muted/40 rounded w-5/6" />
-                    <div className="h-3 bg-muted/40 rounded w-4/6" />
-                  </div>
+      {/* 2. Subscription Plans Cards Grid - Consistent header spacing matching all super admin screens */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5 items-stretch">
+        {loading ? (
+          Array.from({ length: 3 }).map((_, idx) => (
+            <div
+              key={idx}
+              className="rounded-2xl bg-card border border-border p-5 flex flex-col justify-between shadow-xs animate-pulse space-y-4 min-h-[440px]"
+            >
+              <div className="space-y-3">
+                <div className="h-5 bg-muted rounded-lg w-1/3" />
+                <div className="h-3.5 bg-muted/60 rounded-md w-3/4" />
+                <div className="h-8 bg-muted rounded-lg w-1/2 mt-2" />
+                <div className="space-y-2 pt-3">
+                  <div className="h-3 bg-muted/50 rounded w-full" />
+                  <div className="h-3 bg-muted/50 rounded w-4/5" />
+                  <div className="h-3 bg-muted/50 rounded w-3/4" />
                 </div>
-                <div className="h-10 bg-muted rounded-xl w-full" />
               </div>
-            ))
-          : plans.map((plan) => {
-              const planId = (plan.id || "").toLowerCase();
-              const orgCount = planId ? (distribution[planId] || 0) : 0;
-              const isPopular = Boolean(plan.highlight);
-              const isCustom = plan.pricingMode === "CUSTOM";
-              const planFeatures = Array.isArray(plan.features) ? plan.features : [];
+              <div className="h-9 bg-muted rounded-xl w-full" />
+            </div>
+          ))
+        ) : plans.length === 0 ? (
+          <div className="col-span-full py-16 px-6 text-center rounded-2xl border border-dashed border-border bg-card/40 space-y-4">
+            <div className="h-12 w-12 mx-auto rounded-2xl bg-muted/60 flex items-center justify-center text-muted-foreground">
+              <CreditCard className="h-6 w-6" />
+            </div>
+            <div className="space-y-1">
+              <h3 className="text-base font-bold text-foreground">No Subscription Plans Found</h3>
+              <p className="text-xs text-muted-foreground max-w-sm mx-auto">
+                No active subscription tiers are currently configured for this platform.
+              </p>
+            </div>
+            <Button
+              size="sm"
+              onClick={handleOpenCreate}
+              className="rounded-xl gap-1.5 font-semibold bg-emerald-600 hover:bg-emerald-700 text-white"
+            >
+              <Plus className="h-4 w-4" />
+              Create First Plan
+            </Button>
+          </div>
+        ) : (
+          plans.map((plan, idx) => {
+            const planId = (plan.id || "").toLowerCase();
+            const planName = (plan.name || "").toLowerCase();
+            const orgCount = planId ? (distribution[planId] || 0) : 0;
 
-              return (
-                <div
-                  key={plan.id || Math.random().toString()}
-                  className={`rounded-2xl bg-card border p-6 flex flex-col justify-between shadow-card relative transition-all duration-200 hover:shadow-lg ${
-                    isPopular
-                      ? "border-emerald-500/50 ring-2 ring-emerald-500/20 bg-gradient-to-b from-card to-emerald-500/[0.02]"
-                      : plan.status === "ARCHIVED"
-                      ? "border-dashed border-border opacity-70"
-                      : "border-border"
-                  }`}
-                >
-                  {isPopular && (
-                    <span className="absolute -top-3 left-1/2 -translate-x-1/2 px-3.5 py-0.5 rounded-full bg-emerald-600 text-white text-[10px] font-extrabold tracking-wider uppercase shadow-md flex items-center gap-1">
-                      <Sparkles className="h-3 w-3" />
-                      Most Popular
+            // Starter is prominently designated as the Most Popular tier
+            const isPopular = Boolean(plan.highlight || planId === "starter" || planName === "starter");
+            const isCustom = plan.pricingMode === "CUSTOM";
+            const planFeatures = Array.isArray(plan.features) ? plan.features : [];
+
+            // Distinctive theme styling per tier matching Orbit design system
+            const getTierTheme = () => {
+              if (planName.includes("free") || planId.includes("free")) {
+                return {
+                  icon: Shield,
+                  iconBackdrop: "bg-blue-500/20",
+                  iconFront: "bg-gradient-to-br from-blue-500 to-indigo-600 shadow-sm shadow-blue-500/25",
+                  cardBorder: "border-border/80",
+                  gradientBg: "from-blue-500/[0.03] via-card to-card",
+                  watermarkIcon: Shield,
+                };
+              }
+              if (planName.includes("starter") || planId.includes("starter") || isPopular) {
+                return {
+                  icon: Sparkles,
+                  iconBackdrop: "bg-emerald-500/25",
+                  iconFront: "bg-gradient-to-br from-emerald-500 to-teal-600 shadow-md shadow-emerald-500/30",
+                  cardBorder: "border-emerald-500/50 ring-1 ring-emerald-500/30 shadow-md shadow-emerald-500/5",
+                  gradientBg: "from-emerald-500/[0.08] via-emerald-500/[0.015] to-card",
+                  watermarkIcon: Sparkles,
+                };
+              }
+              if (planName.includes("growth") || planName.includes("pro") || planId.includes("growth")) {
+                return {
+                  icon: TrendingUp,
+                  iconBackdrop: "bg-purple-500/20",
+                  iconFront: "bg-gradient-to-br from-purple-600 to-indigo-600 shadow-sm shadow-purple-500/25",
+                  cardBorder: "border-border/80",
+                  gradientBg: "from-purple-500/[0.03] via-card to-card",
+                  watermarkIcon: TrendingUp,
+                };
+              }
+              return {
+                icon: Crown,
+                iconBackdrop: "bg-amber-500/20",
+                iconFront: "bg-gradient-to-br from-amber-500 to-orange-600 shadow-sm shadow-amber-500/25",
+                cardBorder: "border-border/80",
+                gradientBg: "from-amber-500/[0.03] via-card to-card",
+                watermarkIcon: Crown,
+              };
+            };
+
+            const tierTheme = getTierTheme();
+            const HeaderIcon = tierTheme.icon;
+            const WatermarkIcon = tierTheme.watermarkIcon;
+
+            return (
+              <div
+                key={plan.id || `plan-${idx}`}
+                className={`rounded-2xl border p-5 flex flex-col justify-between relative overflow-hidden ${
+                  isPopular
+                    ? "border-emerald-500/50 bg-gradient-to-b from-emerald-500/[0.08] via-card to-card ring-1 ring-emerald-500/30 shadow-md shadow-emerald-500/10"
+                    : `${tierTheme.cardBorder} bg-gradient-to-b ${tierTheme.gradientBg} shadow-xs`
+                }`}
+              >
+                {/* Subtle Decorative Background Watermark Icon */}
+                <div className="pointer-events-none absolute -bottom-6 -right-6 w-32 h-32 opacity-[0.03] dark:opacity-[0.05] select-none flex items-center justify-center">
+                  <WatermarkIcon className="w-full h-full text-foreground" strokeWidth={1} />
+                </div>
+
+                {/* Most Popular Floating Pill */}
+                {isPopular && (
+                  <div className="absolute -top-0.5 left-1/2 -translate-x-1/2 z-20">
+                    <span className="px-3.5 py-1 rounded-b-xl bg-gradient-to-r from-emerald-600 via-emerald-500 to-teal-600 text-white text-[10px] font-extrabold tracking-wider uppercase shadow-md shadow-emerald-600/30 flex items-center gap-1.5 border-x border-b border-emerald-400/30">
+                      <Sparkles className="h-3 w-3 animate-pulse text-amber-300" />
+                      MOST POPULAR
                     </span>
-                  )}
+                  </div>
+                )}
 
-                  <div className="space-y-4">
-                    {/* Title & Status */}
-                    <div className="flex items-start justify-between gap-2">
-                      <div>
-                        <div className="flex items-center gap-2">
-                          <h3 className="font-extrabold text-lg text-foreground tracking-tight">
+                <div className="space-y-3.5 flex flex-col z-10">
+                  {/* Card Header: 3D Layered Icon Box + Title & ACTIVE badge */}
+                  <div className="shrink-0 pt-1">
+                    <div className="flex items-center justify-between gap-3">
+                      <div className="flex items-center gap-3">
+                        {/* 3D Layered Icon */}
+                        <div className="relative flex items-center justify-center shrink-0">
+                          <div
+                            className={`absolute -left-0.5 -top-0.5 w-10 h-10 rounded-xl ${tierTheme.iconBackdrop}`}
+                          />
+                          <div
+                            className={`relative z-10 flex size-10 items-center justify-center rounded-xl text-white ${tierTheme.iconFront}`}
+                          >
+                            <HeaderIcon className="h-5 w-5" />
+                          </div>
+                        </div>
+
+                        <div>
+                          <h3 className="font-extrabold text-lg text-foreground tracking-tight leading-none">
                             {plan.name}
                           </h3>
-                        </div>
-                        <span className="text-[10px] font-mono text-muted-foreground uppercase bg-muted/60 px-1.5 py-0.5 rounded border border-border/50">
-                          {plan.id}
-                        </span>
-                        <p className="text-xs text-muted-foreground mt-1.5 min-h-[32px] leading-relaxed line-clamp-2">
-                          {plan.description || "Platform SaaS subscription tier."}
-                        </p>
-                      </div>
-                      {plan.status !== "ACTIVE" && (
-                        <span className="text-[10px] uppercase font-bold px-2 py-0.5 rounded-md bg-muted text-muted-foreground border shrink-0">
-                          {plan.status}
-                        </span>
-                      )}
-                    </div>
-
-                    {/* Price & Billing Cycle */}
-                    <div className="pt-2 border-t border-border/40">
-                      {isCustom ? (
-                        <div className="py-1">
-                          <span className="text-2xl font-black text-foreground">
-                            Custom Pricing
-                          </span>
-                          <p className="text-xs text-muted-foreground font-medium">
-                            Contact Sales / Enterprise Contract
+                          <p className="text-xs text-muted-foreground mt-1 leading-snug line-clamp-1">
+                            {plan.description || "Platform SaaS subscription tier."}
                           </p>
                         </div>
-                      ) : (
-                        <div className="flex items-baseline gap-1.5">
-                          <span className="text-3xl font-black text-foreground tracking-tight">
-                            {formatPlanPrice(plan.priceNum, plan.currency)}
-                          </span>
-                          <span className="text-xs text-muted-foreground font-semibold">
-                            / {plan.billing || "month"}
-                          </span>
-                        </div>
-                      )}
-
-                      {/* Real Active Organizations */}
-                      <div className="mt-3.5 py-2 px-3 rounded-xl bg-muted/40 border border-border/60 flex items-center justify-between text-xs">
-                        <span className="text-muted-foreground font-medium flex items-center gap-1.5">
-                          <Building2 className="h-3.5 w-3.5 text-muted-foreground" />
-                          Active Workspaces:
-                        </span>
-                        <span className="font-bold text-foreground">
-                          {orgCount} {orgCount === 1 ? "organization" : "organizations"}
-                        </span>
                       </div>
-                    </div>
 
-                    {/* Key Entitlements */}
-                    <div className="border-t border-border/60 pt-4 space-y-2.5">
-                      <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
-                        Key Entitlements:
-                      </p>
-                      <div className="space-y-2">
-                        {planFeatures.slice(0, 5).map((feat, idx) => (
-                          <div key={idx} className="flex items-start gap-2 text-xs">
-                            <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
-                            <span className="text-foreground/90 font-medium leading-tight">
-                              {feat}
-                            </span>
-                          </div>
-                        ))}
-                        {planFeatures.length > 5 && (
-                          <p className="text-[11px] font-medium text-muted-foreground pt-1">
-                            + {planFeatures.length - 5} more features included
-                          </p>
+                      {/* Status Badge */}
+                      <div className="shrink-0">
+                        {plan.status === "ACTIVE" ? (
+                          <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase tracking-wider shadow-2xs">
+                            <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
+                            ACTIVE
+                          </span>
+                        ) : (
+                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border uppercase tracking-wider">
+                            {plan.status}
+                          </span>
                         )}
                       </div>
                     </div>
                   </div>
 
-                  {/* Plan Action Buttons (Edit & Delete) */}
-                  <div className="pt-6 border-t border-border/40 mt-4 flex items-center gap-2">
-                    <Button
-                      variant={isPopular ? "default" : "outline"}
-                      className={`flex-1 rounded-xl text-xs font-bold transition-all shadow-sm ${
-                        isPopular
-                          ? "bg-emerald-600 hover:bg-emerald-700 text-white shadow-emerald-600/20"
-                          : "hover:bg-muted"
-                      }`}
-                      onClick={() => handleOpenConfigure(plan)}
-                    >
-                      <Edit className="h-3.5 w-3.5 mr-1.5" />
-                      Edit Plan
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9 w-9 shrink-0"
-                      title={`Delete Plan ${plan.name}`}
-                      onClick={() => setDeletingPlan(plan)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
+                  {/* Price & Workspaces Section */}
+                  <div className="pt-2.5 border-t border-border/50 shrink-0 flex items-center justify-between gap-2.5">
+                    {isCustom ? (
+                      <div className="flex flex-col justify-center min-w-0">
+                        <span className="text-2xl font-black text-foreground tracking-tight">
+                          Custom
+                        </span>
+                        <p className="text-[11px] text-muted-foreground font-medium truncate">
+                          Contact Sales
+                        </p>
+                      </div>
+                    ) : (
+                      <div className="flex items-baseline gap-1.5 min-w-0">
+                        <span className="text-3xl sm:text-4xl font-black text-foreground tracking-tight">
+                          {formatPlanPrice(plan.priceNum, plan.currency)}
+                        </span>
+                        <span className="text-xs font-semibold text-muted-foreground shrink-0">
+                          / month
+                        </span>
+                      </div>
+                    )}
+
+                    {/* Small Workspaces Card on Right */}
+                    <div className="flex items-center gap-2 py-1.5 px-2.5 rounded-xl bg-muted/40 border border-border/50 shadow-2xs shrink-0">
+                      <div className="h-6 w-6 rounded-lg bg-background flex items-center justify-center text-muted-foreground border border-border/40 shadow-2xs shrink-0">
+                        <Building2 className="h-3 w-3" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[9px] uppercase font-bold text-muted-foreground block leading-none tracking-wider">
+                          Workspaces
+                        </span>
+                        <span className="font-extrabold text-foreground text-xs block leading-tight mt-0.5">
+                          {orgCount} {orgCount === 1 ? "org" : "orgs"}
+                        </span>
+                      </div>
+                    </div>
                   </div>
+
+                  {/* Resource Limits: 2x2 Clean Micro-Tiles Grid */}
+                  <div className="grid grid-cols-2 gap-2 pt-2 border-t border-border/50 shrink-0">
+                    {/* Users */}
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-muted/30 border border-border/40">
+                      <div className="h-7 w-7 rounded-lg bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 flex items-center justify-center shrink-0">
+                        <Users className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block leading-none tracking-wider">Users</span>
+                        <span className="font-extrabold text-foreground text-xs truncate block mt-0.5">
+                          {plan.maxUsers === -1 ? "Unlimited" : `${plan.maxUsers} Users`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Leads & Contacts */}
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-muted/30 border border-border/40">
+                      <div className="h-7 w-7 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+                        <Target className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block leading-none tracking-wider">Leads</span>
+                        <span className="font-extrabold text-foreground text-xs truncate block mt-0.5">
+                          {plan.maxLeads === -1 ? "Unlimited" : `${(plan.maxLeads || 0).toLocaleString()}`}
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* Storage */}
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-muted/30 border border-border/40">
+                      <div className="h-7 w-7 rounded-lg bg-cyan-500/10 text-cyan-600 dark:text-cyan-400 flex items-center justify-center shrink-0">
+                        <HardDrive className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block leading-none tracking-wider">Storage</span>
+                        <span className="font-extrabold text-foreground text-xs truncate block mt-0.5">
+                          {plan.storageGb || 1} GB Cloud
+                        </span>
+                      </div>
+                    </div>
+
+                    {/* AI Quota */}
+                    <div className="flex items-center gap-2 p-2 rounded-xl bg-muted/30 border border-border/40">
+                      <div className="h-7 w-7 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
+                        <Bot className="h-3.5 w-3.5" />
+                      </div>
+                      <div className="min-w-0">
+                        <span className="text-[10px] uppercase font-bold text-muted-foreground block leading-none tracking-wider">AI Daily</span>
+                        <span className="font-extrabold text-foreground text-xs truncate block mt-0.5">
+                          {plan.aiEnabled ? `${((plan.dailyTokenLimit || 0) / 1000).toFixed(0)}k tokens` : "Disabled"}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Included Entitlements */}
+                  <PlanEntitlementsList features={planFeatures} />
                 </div>
-              );
-            })}
+
+                {/* Card Action Footer */}
+                <div className="pt-4 mt-3.5 border-t border-border/40 shrink-0 flex items-center gap-2 z-10">
+                  <Button
+                    variant={isPopular ? "default" : "outline"}
+                    size="sm"
+                    className={`flex-1 rounded-xl text-xs font-bold h-9.5 transition-all shadow-2xs cursor-pointer ${
+                      isPopular
+                        ? "bg-gradient-to-r from-emerald-600 to-teal-600 hover:from-emerald-500 hover:to-teal-500 text-white shadow-md shadow-emerald-600/25 border-none"
+                        : "bg-background hover:bg-muted text-foreground border-border/80 hover:border-border"
+                    }`}
+                    onClick={() => handleOpenConfigure(plan)}
+                  >
+                    <Edit className="h-3.5 w-3.5 mr-1.5" />
+                    Edit Plan
+                  </Button>
+
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="rounded-xl text-muted-foreground hover:text-destructive hover:bg-destructive/10 h-9.5 w-9.5 shrink-0 transition-colors cursor-pointer"
+                    title={`Delete Plan ${plan.name}`}
+                    onClick={() => setDeletingPlan(plan)}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+              </div>
+            );
+          })
+        )}
       </div>
 
-      {/* 4. Super Admin 5-Section Configuration / Create Modal */}
+      {/* 3. Super Admin 5-Section Configuration / Create Modal */}
       {editingPlan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-150">
           <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-2xl w-full flex flex-col max-h-[90vh] overflow-hidden">
@@ -578,9 +794,9 @@ export default function SuperAdminPlansPage() {
                     key={tab.id}
                     type="button"
                     onClick={() => setActiveTab(tab.id as ConfigTab)}
-                    className={`flex items-center gap-2 py-3 px-3.5 text-xs font-bold border-b-2 transition-all shrink-0 ${
+                    className={`flex items-center gap-2 py-3 px-3.5 text-xs font-bold border-b-2 transition-all shrink-0 cursor-pointer ${
                       isActive
-                        ? "border-emerald-600 text-emerald-600 bg-background/60 rounded-t-lg"
+                        ? "border-emerald-600 text-emerald-600 bg-background/80 rounded-t-lg"
                         : "border-transparent text-muted-foreground hover:text-foreground hover:bg-background/30"
                     }`}
                   >
@@ -594,9 +810,7 @@ export default function SuperAdminPlansPage() {
             {/* Modal Body: Tab Content */}
             <form onSubmit={handleSavePlan} className="flex flex-col flex-1 overflow-hidden">
               <div className="p-6 overflow-y-auto space-y-5 flex-1">
-                {/* =================================================== */}
                 {/* SECTION 1: BASIC */}
-                {/* =================================================== */}
                 {activeTab === "basic" && (
                   <div className="space-y-4 animate-in fade-in duration-100">
                     <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
@@ -625,7 +839,7 @@ export default function SuperAdminPlansPage() {
                               })
                             }
                             className="rounded-xl h-10 font-mono text-xs"
-                            placeholder="Enter plan slug (auto-generated if empty)"
+                            placeholder="Enter plan slug"
                           />
                         </div>
                       ) : (
@@ -691,11 +905,14 @@ export default function SuperAdminPlansPage() {
 
                     <div className="p-4 rounded-xl border border-border bg-muted/20 flex items-center justify-between mt-4">
                       <div>
-                        <p className="text-xs font-bold text-foreground">
-                          Most Popular Tier Badge
-                        </p>
-                        <p className="text-[11px] text-muted-foreground">
-                          Highlight this plan in pricing views. Marking this will automatically clear other plans.
+                        <div className="flex items-center gap-1.5">
+                          <p className="text-xs font-bold text-foreground">
+                            Most Popular Tier Badge
+                          </p>
+                          <Sparkles className="h-3.5 w-3.5 text-emerald-600" />
+                        </div>
+                        <p className="text-[11px] text-muted-foreground mt-0.5">
+                          Highlight this tier as the recommended / most popular choice across tenant pricing views.
                         </p>
                       </div>
                       <Switch
@@ -708,9 +925,7 @@ export default function SuperAdminPlansPage() {
                   </div>
                 )}
 
-                {/* =================================================== */}
                 {/* SECTION 2: PRICING */}
-                {/* =================================================== */}
                 {activeTab === "pricing" && (
                   <div className="space-y-4 animate-in fade-in duration-100">
                     <div className="grid grid-cols-2 gap-4">
@@ -795,7 +1010,7 @@ export default function SuperAdminPlansPage() {
 
                     <div className="grid grid-cols-2 gap-4 pt-2">
                       <div className="space-y-1.5">
-                        <Label className="text-xs font-semibold">Free Trial Period</Label>
+                        <Label className="text-xs font-semibold">Free Trial Period (Days)</Label>
                         <Input
                           type="number"
                           min="0"
@@ -807,7 +1022,7 @@ export default function SuperAdminPlansPage() {
                             })
                           }
                           className="rounded-xl h-10"
-                          placeholder="Enter trial duration in days"
+                          placeholder="e.g. 14"
                         />
                       </div>
 
@@ -848,9 +1063,7 @@ export default function SuperAdminPlansPage() {
                   </div>
                 )}
 
-                {/* =================================================== */}
                 {/* SECTION 3: LIMITS */}
-                {/* =================================================== */}
                 {activeTab === "limits" && (
                   <div className="space-y-4 animate-in fade-in duration-100">
                     <p className="text-xs text-muted-foreground">
@@ -941,7 +1154,7 @@ export default function SuperAdminPlansPage() {
                       <div className="flex items-center justify-between">
                         <Label className="text-xs font-semibold">Max Monthly API Requests</Label>
                         <span className="text-[10px] text-muted-foreground">
-                          {editingPlan.maxApiRequests === -1 ? "Unlimited" : `${editingPlan.maxApiRequests.toLocaleString()} req/mo`}
+                          {editingPlan.maxApiRequests === -1 ? "Unlimited" : `${(Number(editingPlan.maxApiRequests) || 0).toLocaleString()} req/mo`}
                         </span>
                       </div>
                       <Input
@@ -959,9 +1172,7 @@ export default function SuperAdminPlansPage() {
                   </div>
                 )}
 
-                {/* =================================================== */}
-                {/* SECTION 4: AI CONFIGURATION */}
-                {/* =================================================== */}
+                {/* SECTION 4: AI ENTITLEMENTS */}
                 {activeTab === "ai" && (
                   <div className="space-y-4 animate-in fade-in duration-100">
                     <div className="p-4 rounded-xl border border-border bg-muted/20 flex items-center justify-between">
@@ -970,7 +1181,7 @@ export default function SuperAdminPlansPage() {
                           AI Features Enabled
                         </p>
                         <p className="text-[11px] text-muted-foreground">
-                          Enables AI Copilot, summary, RAG, and lead scoring for this plan.
+                          Enables AI Copilot, summary, RAG, and predictive lead scoring for this tier.
                         </p>
                       </div>
                       <Switch
@@ -1039,16 +1250,13 @@ export default function SuperAdminPlansPage() {
                           </option>
                         ))}
                       </select>
-                      <p className="text-[11px] text-muted-foreground">
-                        All new conversations initiated by users in this plan will immediately use this model.
-                      </p>
                     </div>
 
                     <div className="space-y-2 pt-2">
                       <Label className="text-xs font-semibold">Allowed AI Models Catalog</Label>
                       <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 max-h-40 overflow-y-auto p-3 rounded-xl border border-border bg-muted/20">
                         {aiModels.map((model) => {
-                          const isChecked = editingPlan.allowedModelIds.includes(model.id);
+                          const isChecked = Array.isArray(editingPlan.allowedModelIds) && editingPlan.allowedModelIds.includes(model.id);
                           return (
                             <label
                               key={model.id}
@@ -1078,9 +1286,7 @@ export default function SuperAdminPlansPage() {
                   </div>
                 )}
 
-                {/* =================================================== */}
                 {/* SECTION 5: FEATURES */}
-                {/* =================================================== */}
                 {activeTab === "features" && (
                   <div className="space-y-4 animate-in fade-in duration-100">
                     <div className="relative">
@@ -1101,7 +1307,7 @@ export default function SuperAdminPlansPage() {
                           </p>
                           <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
                             {groupedFeatures[cat].map((feat) => {
-                              const isIncluded = editingPlan.features.includes(feat.name);
+                              const isIncluded = Array.isArray(editingPlan.features) && editingPlan.features.includes(feat.name);
                               return (
                                 <div
                                   key={feat.key}
@@ -1191,7 +1397,7 @@ export default function SuperAdminPlansPage() {
         </div>
       )}
 
-      {/* 5. Standard Uniform CRM Delete Plan Confirmation Modal */}
+      {/* 4. Standard Uniform CRM Delete Plan Confirmation Modal */}
       {deletingPlan && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/60 backdrop-blur-sm p-4 animate-in fade-in duration-200">
           <div className="bg-card border border-border rounded-2xl shadow-2xl max-w-md w-full p-6 space-y-5">
@@ -1213,11 +1419,10 @@ export default function SuperAdminPlansPage() {
               Are you sure you want to delete <strong className="text-foreground">{deletingPlan.name}</strong> (<span className="font-mono text-[11px]">{deletingPlan.id}</span>)?
             </p>
 
-            {/* Clean Uniform Info Box for ALL plans */}
             <div className="p-3.5 rounded-xl bg-muted/60 border border-border/60 text-xs text-muted-foreground leading-relaxed">
-              {(distribution[deletingPlan.id.toLowerCase()] || 0) > 0 ? (
+              {(distribution[(deletingPlan?.id || "").toLowerCase()] || 0) > 0 ? (
                 <>
-                  This plan currently has <strong className="text-foreground">{distribution[deletingPlan.id.toLowerCase()]} active organization(s)</strong>. Deleting this tier will permanently remove the plan and automatically reassign all subscribed organizations to the <strong className="text-foreground">Free tier</strong>.
+                  This plan currently has <strong className="text-foreground">{distribution[(deletingPlan?.id || "").toLowerCase()]} active organization(s)</strong>. Deleting this tier will permanently remove the plan and automatically reassign all subscribed organizations to the <strong className="text-foreground">Free tier</strong>.
                 </>
               ) : (
                 <>

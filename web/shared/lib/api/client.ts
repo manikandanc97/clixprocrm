@@ -51,11 +51,19 @@ client.interceptors.request.use(
       const isRemembered = localStorage.getItem("clixpro_remember_me") === "1";
       config.headers["X-Remember-Me"] = isRemembered ? "true" : "false";
 
-      const supabase = createClient();
-      const { data: { session } } = await supabase.auth.getSession();
-      
-      if (session?.access_token) {
-        config.headers['Authorization'] = `Bearer ${session.access_token}`;
+      try {
+        const supabase = createClient();
+        const sessionPromise = supabase.auth.getSession();
+        const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
+          setTimeout(() => resolve({ data: { session: null } }), 1500)
+        );
+        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
+        
+        if (session?.access_token) {
+          config.headers['Authorization'] = `Bearer ${session.access_token}`;
+        }
+      } catch (authErr) {
+        // Continue request even if session retrieval failed
       }
 
       // Allow browser and Axios to set correct multipart/form-data header with boundary

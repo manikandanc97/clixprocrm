@@ -1,24 +1,16 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ShieldAlert,
   ShieldCheck,
-  Shield,
-  AlertTriangle,
   Lock,
-  Unlock,
   Radio,
   RefreshCw,
   Search,
-  Filter,
   Eye,
   CheckCircle,
   X,
-  UserX,
-  Building,
-  KeyRound,
-  FileCheck,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
@@ -41,22 +33,21 @@ import {
   SecurityIncidentItem,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
+import { Input } from "@/shared/ui/input";
 import { toast } from "sonner";
 import {
   CRMPageContainer,
   CRMPageHeader,
-  CRMMetricsGrid,
-  CRMMetricCard,
-  CRMToolbar,
-  CRMPagination,
+  EmptyState,
 } from "@/shared/components/crm";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export default function SecurityCenterPage() {
   const [status, setStatus] = useState<SecurityCenterStatus | null>(null);
   const [incidents, setIncidents] = useState<SecurityIncidentItem[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [severityFilter, setSeverityFilter] = useState("");
+  const [severityFilter, setSeverityFilter] = useState("ALL");
   const [selectedIncident, setSelectedIncident] = useState<SecurityIncidentItem | null>(null);
   const [resolutionNotes, setResolutionNotes] = useState("");
   const [resolving, setResolving] = useState(false);
@@ -176,17 +167,27 @@ export default function SecurityCenterPage() {
     }
   };
 
-  const filteredIncidents = incidents.filter((inc) => {
-    if (severityFilter && inc.severity !== severityFilter) return false;
-    if (!search) return true;
-    const q = search.toLowerCase();
-    return (
-      inc.title.toLowerCase().includes(q) ||
-      inc.incidentNumber.toLowerCase().includes(q) ||
-      inc.description.toLowerCase().includes(q) ||
-      (inc.tenantId && inc.tenantId.toLowerCase().includes(q))
-    );
-  });
+  const filteredIncidents = useMemo(() => {
+    return incidents.filter((inc) => {
+      if (severityFilter !== "ALL" && inc.severity !== severityFilter) return false;
+      if (!search.trim()) return true;
+      const q = search.toLowerCase();
+      return (
+        inc.title.toLowerCase().includes(q) ||
+        inc.incidentNumber.toLowerCase().includes(q) ||
+        inc.description.toLowerCase().includes(q) ||
+        (inc.tenantId && inc.tenantId.toLowerCase().includes(q))
+      );
+    });
+  }, [incidents, severityFilter, search]);
+
+  const hasActiveFilters = severityFilter !== "ALL" || search.trim().length > 0;
+
+  const handleClearFilters = () => {
+    setSeverityFilter("ALL");
+    setSearch("");
+    setCurrentPage(1);
+  };
 
   const totalPages = Math.max(1, Math.ceil(filteredIncidents.length / rowsPerPage));
   const paginatedIncidents = filteredIncidents.slice(
@@ -195,25 +196,18 @@ export default function SecurityCenterPage() {
   );
 
   return (
-    <CRMPageContainer twoStageScroll>
+    <CRMPageContainer>
       {/* 1. Page Header */}
       <CRMPageHeader
         title="Security Incident & Emergency Center"
         subtitle="Active incident triage, emergency session revocation, tenant lockdown kill-switches, and WORM integrity status."
         icon={ShieldAlert}
-        badge="Enterprise SecOps"
         actions={[
           {
             label: "Emergency Controls",
             icon: Lock,
             onClick: () => setEmergencyAction("LOCK_USER"),
             variant: "default",
-          },
-          {
-            label: "Refresh Status",
-            icon: RefreshCw,
-            onClick: loadData,
-            variant: "outline",
           },
         ]}
       />
@@ -243,57 +237,19 @@ export default function SecurityCenterPage() {
         </div>
       )}
 
-      {/* 2. Security KPI Metrics */}
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={4}>
-          <CRMMetricCard
-            title="Open Incidents"
-            value={status?.openIncidents ?? 0}
-            change="Active Triage"
-            trend="neutral"
-            icon={ShieldAlert}
-            color="orange"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Critical Incidents"
-            value={status?.criticalIncidents ?? 0}
-            change="Requires Immediate Action"
-            trend="down"
-            icon={AlertTriangle}
-            color="pink"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Locked Accounts"
-            value={`${status?.lockedUsers ?? 0} Users / ${status?.lockedTenants ?? 0} Tenants`}
-            change="Access Terminated"
-            trend="neutral"
-            icon={Lock}
-            color="purple"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="WORM Archive Coverage"
-            value={`${status?.archiveCoveragePercent ?? 100}%`}
-            change={`${status?.checkedRecords ?? 0} Verified Immutable`}
-            trend="up"
-            icon={FileCheck}
-            color="emerald"
-            loading={loading}
-          />
-        </CRMMetricsGrid>
-      </div>
-
-      {/* 3. Main Card Container matching Organizations Page */}
+      {/* 2. Main Card Container matching Organizations Page */}
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
           {/* Left: Filter Selects & Search */}
           <div className="flex flex-wrap items-center gap-2.5">
+            {/* Severity Filter */}
             <select
               value={severityFilter}
-              onChange={(e) => setSeverityFilter(e.target.value)}
+              onChange={(e) => {
+                setSeverityFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="ALL">All Severities</option>
@@ -306,18 +262,24 @@ export default function SecurityCenterPage() {
             {/* Search Input */}
             <div className="relative w-full sm:w-64 group">
               <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
-                <Search className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <AppIcon name="search" icon={Search} size={14} className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               </div>
-              <input
+              <Input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Filter incidents by title, ID..."
-                className="h-9 w-full pl-8 pr-8 rounded-lg bg-background border border-border/70 text-xs shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="h-9 pl-8 pr-8 rounded-lg bg-background border-border/70 text-xs shadow-xs focus-visible:ring-2 focus-visible:ring-primary/20"
               />
               {search && (
                 <button
                   type="button"
-                  onClick={() => setSearch("")}
+                  onClick={() => {
+                    setSearch("");
+                    setCurrentPage(1);
+                  }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -328,16 +290,13 @@ export default function SecurityCenterPage() {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground self-end lg:self-auto flex-wrap">
-            {(severityFilter !== "ALL" || search.trim()) && (
+            {/* Clear Filters Button */}
+            {hasActiveFilters && (
               <button
-                onClick={() => {
-                  setSeverityFilter("ALL");
-                  setSearch("");
-                  setCurrentPage(1);
-                }}
-                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                onClick={handleClearFilters}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                <AppIcon name="reset" icon={RefreshCw} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
                 <span>Reset Filters</span>
               </button>
             )}
@@ -389,17 +348,7 @@ export default function SecurityCenterPage() {
                     <td className="px-4 py-4 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
                   </tr>
                 ))
-              ) : paginatedIncidents.length === 0 ? (
-                <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground align-middle">
-                    <div className="flex flex-col items-center justify-center min-h-[360px] py-12">
-                      <ShieldCheck className="h-10 w-10 text-emerald-500 mb-2" />
-                      <p className="font-bold text-sm text-foreground">No matching security incidents found</p>
-                      <p className="text-xs text-muted-foreground mt-0.5">All systems healthy and operating normally.</p>
-                    </div>
-                  </td>
-                </tr>
-              ) : (
+              ) : paginatedIncidents.length > 0 ? (
                 paginatedIncidents.map((inc) => (
                   <tr key={inc.id} className="group h-16 hover:bg-muted/30 transition-colors">
                     <td className="px-4 py-3.5 font-mono font-bold text-foreground">{inc.incidentNumber}</td>
@@ -445,12 +394,25 @@ export default function SecurityCenterPage() {
                         onClick={() => setSelectedIncident(inc)}
                         className="gap-1.5 text-xs h-8 px-2.5 rounded-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
                       >
-                        <Eye className="h-3.5 w-3.5 text-emerald-600" />
+                        <AppIcon name="eye" icon={Eye} size={14} className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
                         <span>Inspect</span>
                       </Button>
                     </td>
                   </tr>
                 ))
+              ) : (
+                <tr>
+                  <td colSpan={6} className="p-6 text-center text-muted-foreground align-middle border-0">
+                    <div className="flex flex-col items-center justify-center py-6">
+                      <EmptyState
+                        icon={ShieldCheck}
+                        title="No matching security incidents found"
+                        description="All systems healthy and operating normally."
+                        className="border-none bg-transparent shadow-none p-0 min-h-0"
+                      />
+                    </div>
+                  </td>
+                </tr>
               )}
             </tbody>
           </table>
@@ -504,7 +466,7 @@ export default function SecurityCenterPage() {
                   title="First page"
                   aria-label="First page"
                 >
-                  <ChevronsLeft className="h-4 w-4" />
+                  <AppIcon name="chevronsLeft" icon={ChevronsLeft} size={14} className="h-4 w-4" />
                 </Button>
 
                 <Button
@@ -516,7 +478,7 @@ export default function SecurityCenterPage() {
                   title="Previous page"
                   aria-label="Previous page"
                 >
-                  <ChevronLeft className="h-4 w-4" />
+                  <AppIcon name="chevronLeft" icon={ChevronLeft} size={14} className="h-4 w-4" />
                 </Button>
 
                 <Button
@@ -528,7 +490,7 @@ export default function SecurityCenterPage() {
                   title="Next page"
                   aria-label="Next page"
                 >
-                  <ChevronRight className="h-4 w-4" />
+                  <AppIcon name="chevronRight" icon={ChevronRight} size={14} className="h-4 w-4" />
                 </Button>
 
                 <Button
@@ -540,7 +502,7 @@ export default function SecurityCenterPage() {
                   title="Last page"
                   aria-label="Last page"
                 >
-                  <ChevronsRight className="h-4 w-4" />
+                  <AppIcon name="chevronsRight" icon={ChevronsRight} size={14} className="h-4 w-4" />
                 </Button>
               </div>
             </div>

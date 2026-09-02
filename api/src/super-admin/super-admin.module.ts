@@ -33,6 +33,7 @@ import { EmergencySecurityService } from './services/emergency-security.service'
 import { SecurityIncidentsService } from './services/security-incidents.service';
 import { SecurityOperationsService } from './services/security-operations.service';
 import { SecurityGovernanceService } from './services/security-governance.service';
+import { SecurityAlertsService } from './services/security-alerts.service';
 
 @Module({
   imports: [PrismaModule, SystemModule, AiModule, NotificationsModule],
@@ -69,6 +70,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     SecurityIncidentsService,
     SecurityOperationsService,
     SecurityGovernanceService,
+    SecurityAlertsService,
   ],
   exports: [
     PlatformDashboardService,
@@ -86,6 +88,7 @@ import { SecurityGovernanceService } from './services/security-governance.servic
     SecurityIncidentsService,
     SecurityOperationsService,
     SecurityGovernanceService,
+    SecurityAlertsService,
   ],
 })
 export class SuperAdminModule {}

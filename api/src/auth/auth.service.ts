@@ -101,6 +101,7 @@ export class AuthService {
           phone: user.phone,
           avatar: (user as any).avatar || null,
           status: user.status,
+          mustResetPassword: Boolean((user as any).mustResetPassword),
           tenantId: null,
           companyName: 'ClixProCRM Platform',
           role: 'SUPER_ADMIN',
@@ -149,6 +150,7 @@ export class AuthService {
         phone: user.phone,
         avatar: (user as any).avatar || null,
         status: user.status,
+        mustResetPassword: Boolean((user as any).mustResetPassword),
         tenantId: membership.tenantId,
         companyName: membership.tenant?.name || 'My Workspace',
         companyLogo: membership.tenant?.logo || null,
@@ -760,6 +762,12 @@ export class AuthService {
       }
     }
 
+    // Clear mustResetPassword flag
+    await (this.prisma as any).user.update({
+      where: { id: userId },
+      data: { mustResetPassword: false },
+    }).catch(() => {});
+
     // Invalidate all identity & tenant caches for user
     invalidateGetMeCache(userId);
     try {
@@ -832,6 +840,12 @@ export class AuthService {
       revokedCount = priorSessions.length;
     }
 
+    // Clear mustResetPassword flag
+    await (this.prisma as any).user.update({
+      where: { id: userId },
+      data: { mustResetPassword: false },
+    }).catch(() => {});
+
     // Invalidate all identity & token caches
     invalidateGetMeCache(userId);
     try {
@@ -845,7 +859,7 @@ export class AuthService {
       await this.prisma.auditLog.create({
         data: {
           userId,
-          action: 'PASSWORD_RESET',
+          action: 'PASSWORD_RESET_COMPLETED',
           module: 'Security',
           details: {
             priorSessionsRevoked: revokedCount,
@@ -856,7 +870,7 @@ export class AuthService {
       });
     } catch (auditErr: any) {
       this.logger.warn(
-        `Failed to write PASSWORD_RESET audit log: ${auditErr?.message || auditErr}`,
+        `Failed to write PASSWORD_RESET_COMPLETED audit log: ${auditErr?.message || auditErr}`,
       );
     }
 

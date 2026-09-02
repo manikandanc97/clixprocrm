@@ -221,7 +221,7 @@ export class PlatformBillingService {
 
     const currency = config.currency || 'INR';
 
-    // 1. Calculate MRR & ARR from active subscriptions
+    // 1. Calculate MRR & ARR from active paid subscriptions
     let monthlyMRR = 0;
     const planDistMap: Record<string, { count: number; name: string; revenue: number; percentage: number }> = {
       free: { count: 0, name: 'Free', revenue: 0, percentage: 0 },
@@ -229,36 +229,49 @@ export class PlatformBillingService {
       business: { count: 0, name: 'Business', revenue: 0, percentage: 0 },
     };
 
-    const activeSubs = subscriptions.filter((s) => s.status === 'ACTIVE' || s.status === 'TRIALING');
-
+    // Deduplicate by tenantId if any duplicates exist
+    const uniqueSubsMap = new Map<string, typeof subscriptions[0]>();
     for (const sub of subscriptions) {
+      if (!uniqueSubsMap.has(sub.tenantId)) {
+        uniqueSubsMap.set(sub.tenantId, sub);
+      }
+    }
+    const uniqueSubs = Array.from(uniqueSubsMap.values());
+
+    let paidSubscriptionsCount = 0;
+    for (const sub of uniqueSubs) {
+      const pId = normalizePlanId(sub.planId);
       const recAmt = toNumber(sub.recurringAmount);
-      const mVal = sub.billingCycle === 'annual' ? recAmt / 12 : recAmt;
-      if (sub.status === 'ACTIVE' || sub.status === 'TRIALING') {
+      const isPaidTier = pId !== 'free' && recAmt > 0;
+      const isActive = sub.status === 'ACTIVE' || sub.status === 'TRIALING';
+
+      if (isActive && isPaidTier) {
+        const mVal = sub.billingCycle === 'annual' ? recAmt / 12 : recAmt;
         monthlyMRR += mVal;
+        paidSubscriptionsCount += 1;
       }
 
-      const pId = normalizePlanId(sub.planId);
       if (!planDistMap[pId]) {
         const pDef = getPlanDefinition(pId);
         planDistMap[pId] = { count: 0, name: pDef.name, revenue: 0, percentage: 0 };
       }
       planDistMap[pId].count += 1;
-      planDistMap[pId].revenue += recAmt;
+      planDistMap[pId].revenue += isPaidTier ? recAmt : 0;
     }
 
-    const totalSubCount = subscriptions.length || 1;
+    const totalWorkspaceBase = tenantsCount || uniqueSubs.length || 1;
     for (const key of Object.keys(planDistMap)) {
-      planDistMap[key].percentage = Math.round((planDistMap[key].count / totalSubCount) * 100);
+      planDistMap[key].percentage = Math.round((planDistMap[key].count / totalWorkspaceBase) * 100);
     }
 
     const projectedARR = monthlyMRR * 12;
 
-    // 2. Invoice revenue breakdowns
+    // 2. Invoice revenue breakdowns & pending count
     let totalRevenue = 0;
     let paidRevenue = 0;
     let pendingRevenue = 0;
     let overdueRevenue = 0;
+    let pendingInvoicesCount = 0;
 
     const now = new Date();
     now.setHours(0, 0, 0, 0);
@@ -275,8 +288,10 @@ export class PlatformBillingService {
 
       if (isOverdue) {
         overdueRevenue += bal;
+        pendingInvoicesCount += 1;
       } else if (bal > 0 && inv.status !== 'CANCELLED' && inv.status !== 'VOID') {
         pendingRevenue += bal;
+        pendingInvoicesCount += 1;
       }
     }
 
@@ -296,7 +311,7 @@ export class PlatformBillingService {
         return idate.getFullYear() === yr && idate.getMonth() === mo;
       });
 
-      const mRev = mInvoices.reduce((s, inv) => s + toNumber(inv.paidAmount || inv.totalAmount), 0);
+      const mRev = mInvoices.reduce((s, inv) => s + toNumber(inv.paidAmount || (inv.paymentStatus === 'PAID' ? inv.totalAmount : 0)), 0);
       monthlyTrend.push({
         month: mLabel,
         revenue: roundTo2(mRev),
@@ -315,14 +330,16 @@ export class PlatformBillingService {
         totalRevenueFormatted: formatCurrency(roundTo2(totalRevenue), currency),
         paidRevenue: roundTo2(paidRevenue),
         paidRevenueFormatted: formatCurrency(roundTo2(paidRevenue), currency),
-        pendingRevenue: roundTo2(pendingRevenue),
-        pendingRevenueFormatted: formatCurrency(roundTo2(pendingRevenue), currency),
+        pendingRevenue: roundTo2(pendingRevenue + overdueRevenue),
+        pendingRevenueFormatted: formatCurrency(roundTo2(pendingRevenue + overdueRevenue), currency),
+        pendingInvoicesCount,
         overdueRevenue: roundTo2(overdueRevenue),
         overdueRevenueFormatted: formatCurrency(roundTo2(overdueRevenue), currency),
         totalRefunds: roundTo2(totalRefunds),
         totalRefundsFormatted: formatCurrency(roundTo2(totalRefunds), currency),
-        activeSubscriptions: activeSubs.length || subscriptions.length,
-        totalSubscriptions: subscriptions.length,
+        paidSubscriptions: paidSubscriptionsCount,
+        activeSubscriptions: paidSubscriptionsCount,
+        totalSubscriptions: uniqueSubs.length,
         totalOrganizations: tenantsCount,
       },
       planDistribution: Object.values(planDistMap),

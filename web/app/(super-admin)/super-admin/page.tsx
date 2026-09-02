@@ -274,7 +274,7 @@ export default function SuperAdminDashboardPage() {
   }
 
   return (
-    <CRMPageContainer className="pb-8 sm:pb-10 md:pb-12">
+    <CRMPageContainer>
       {/* 0. AAL2 Security Elevation Alert Banner */}
       {aal2Required && (
         <motion.div

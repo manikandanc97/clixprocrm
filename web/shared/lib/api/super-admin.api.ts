@@ -176,7 +176,79 @@ export interface PlatformUser {
 }
 
 export interface PlatformAnalyticsData {
-  totals: {
+  dateRange?: {
+    range: string;
+    startDate: string;
+    endDate: string;
+  };
+  kpis?: {
+    mrr: {
+      value: number;
+      prevValue: number;
+      changePercent: number;
+      trend: "up" | "down" | "neutral";
+      comparisonText: string;
+    };
+    activeWorkspaces: {
+      count: number;
+      totalRegistered: number;
+      newInPeriod: number;
+      growthPercent: number;
+      trend: "up" | "down" | "neutral";
+      comparisonText: string;
+    };
+    paidConversion: {
+      ratePercent: number;
+      paidCount: number;
+      activeCount: number;
+      trend: "up" | "down" | "neutral";
+      comparisonText: string;
+    };
+    churn: {
+      ratePercent: number;
+      cancellationsCount: number;
+      trend: "up" | "down" | "neutral";
+      comparisonText: string;
+    };
+  };
+  secondaryKpis?: {
+    newWorkspaces: {
+      count: number;
+      prevCount: number;
+      growthPercent: number;
+      trend: "up" | "down" | "neutral";
+      comparisonText: string;
+    };
+    paidWorkspaces: {
+      count: number;
+      percentageOfActive: number;
+      comparisonText: string;
+    };
+    arpu: {
+      value: number;
+      comparisonText: string;
+    };
+  };
+  growthTrends?: Array<{
+    month: string;
+    newWorkspaces: number;
+    activeWorkspaces: number;
+  }>;
+  subscriptionMix?: Array<{
+    planId: string;
+    name: string;
+    badge: string;
+    count: number;
+    percentage: number;
+  }>;
+  workspaceHealth?: {
+    active: { count: number; percentage: number };
+    trialing: { count: number; percentage: number };
+    pastDue: { count: number; percentage: number };
+    suspended: { count: number; percentage: number };
+    total: number;
+  };
+  totals?: {
     totalTenants: number;
     activeTenants: number;
     totalUsers: number;
@@ -187,12 +259,12 @@ export interface PlatformAnalyticsData {
     estimatedMRR: number;
     estimatedARR: number;
   };
-  monthlyTrends: Array<{
+  monthlyTrends?: Array<{
     month: string;
     organizations: number;
     users: number;
   }>;
-  planBreakdown: Array<{
+  planBreakdown?: Array<{
     plan: string;
     count: number;
     price: number;
@@ -347,9 +419,14 @@ export const deletePlatformUser = async (id: string) => {
   return response.data;
 };
 
-export const fetchPlatformAnalytics = async (): Promise<PlatformAnalyticsData> => {
+export const fetchPlatformAnalytics = async (params?: {
+  range?: string;
+  startDate?: string;
+  endDate?: string;
+}): Promise<PlatformAnalyticsData> => {
   const response = await client.get<{ success: boolean; data: PlatformAnalyticsData }>(
-    "/super-admin/analytics"
+    "/super-admin/analytics",
+    { params }
   );
   return response.data.data;
 };
@@ -498,6 +575,27 @@ export const createSecurityIncident = async (data: {
   return response.data.data;
 };
 
+export const acknowledgeSecurityIncident = async (
+  id: string
+): Promise<SecurityIncidentItem> => {
+  const response = await client.patch<{ success: boolean; data: SecurityIncidentItem }>(
+    `/super-admin/security/incidents/${id}/acknowledge`
+  );
+  return response.data.data;
+};
+
+export const updateSecurityIncidentStatus = async (
+  id: string,
+  status: string,
+  notes?: string
+): Promise<SecurityIncidentItem> => {
+  const response = await client.patch<{ success: boolean; data: SecurityIncidentItem }>(
+    `/super-admin/security/incidents/${id}/status`,
+    { status, notes }
+  );
+  return response.data.data;
+};
+
 export const resolveSecurityIncident = async (
   id: string,
   resolutionNotes: string
@@ -507,6 +605,144 @@ export const resolveSecurityIncident = async (
     { resolutionNotes }
   );
   return response.data.data;
+};
+
+export interface SecurityAlertItem {
+  id: string;
+  alertType: string;
+  severity: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  title: string;
+  description: string;
+  userId: string | null;
+  organizationId: string | null;
+  sourceEventId: string | null;
+  detectedAt: string;
+  status: "OPEN" | "ACKNOWLEDGED" | "RESOLVED";
+  resolvedAt: string | null;
+  resolvedBy: string | null;
+  metadata: any;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface PlatformHealthRow {
+  service: string;
+  status: "Healthy" | "Warning" | "Unavailable";
+  lastChecked: string;
+  detail: string;
+  latencyMs?: number;
+}
+
+export interface SecOpsSummaryReport {
+  overallStatus: "HEALTHY" | "DEGRADED";
+  overallStatusBadge: "System Healthy" | "Attention Required";
+  metrics: {
+    systemHealth: "HEALTHY" | "DEGRADED";
+    securityServices: string;
+    operationalServicesCount: number;
+    totalServicesCount: number;
+    securityAlertsCount: number;
+    openIncidentsCount: number;
+  };
+  servicesHealth: PlatformHealthRow[];
+  lastCheckedAt: string;
+}
+
+export const fetchSecOpsSummary = async (): Promise<SecOpsSummaryReport> => {
+  const response = await client.get<{ success: boolean; data: SecOpsSummaryReport }>(
+    "/super-admin/security/operations/summary"
+  );
+  return response.data.data;
+};
+
+export const fetchPlatformSecurityHealthRows = async (): Promise<PlatformHealthRow[]> => {
+  const response = await client.get<{ success: boolean; data: PlatformHealthRow[] }>(
+    "/super-admin/security/operations/health"
+  );
+  return response.data.data;
+};
+
+export const fetchSecurityAlerts = async (params?: {
+  status?: string;
+  severity?: string;
+  alertType?: string;
+  search?: string;
+  page?: number;
+  limit?: number;
+}): Promise<{
+  alerts: SecurityAlertItem[];
+  pagination: { page: number; limit: number; total: number; totalPages: number };
+}> => {
+  const response = await client.get<{
+    success: boolean;
+    data: {
+      alerts: SecurityAlertItem[];
+      pagination: { page: number; limit: number; total: number; totalPages: number };
+    };
+  }>("/super-admin/security/operations/alerts", { params });
+  return response.data.data;
+};
+
+export const triggerSecurityDetection = async (): Promise<{
+  success: boolean;
+  evaluatedAt: string;
+  alertsCreated: number;
+  alerts: SecurityAlertItem[];
+}> => {
+  const response = await client.post<{
+    success: boolean;
+    data: {
+      success: boolean;
+      evaluatedAt: string;
+      alertsCreated: number;
+      alerts: SecurityAlertItem[];
+    };
+  }>("/super-admin/security/operations/alerts/detect");
+  return response.data.data;
+};
+
+export const acknowledgeSecurityAlert = async (id: string): Promise<SecurityAlertItem> => {
+  const response = await client.patch<{ success: boolean; data: SecurityAlertItem }>(
+    `/super-admin/security/operations/alerts/${id}/acknowledge`
+  );
+  return response.data.data;
+};
+
+export const resolveSecurityAlert = async (
+  id: string,
+  notes?: string
+): Promise<SecurityAlertItem> => {
+  const response = await client.post<{ success: boolean; data: SecurityAlertItem }>(
+    `/super-admin/security/operations/alerts/${id}/resolve`,
+    { notes }
+  );
+  return response.data.data;
+};
+
+export const escalateAlertToIncident = async (
+  id: string
+): Promise<{ success: boolean; incident: SecurityIncidentItem; alertId: string }> => {
+  const response = await client.post<{
+    success: boolean;
+    data: { success: boolean; incident: SecurityIncidentItem; alertId: string };
+  }>(`/super-admin/security/operations/alerts/${id}/escalate`);
+  return response.data.data;
+};
+
+export const forcePasswordResetUser = async (userId: string, reason: string) => {
+  const response = await client.post<{ success: boolean; message: string }>(
+    `/super-admin/security/operations/emergency/force-password-reset/${userId}`,
+    { reason }
+  );
+  return response.data;
+};
+
+export const emergencyRevokeUser = async (userId: string, reason: string) => {
+  const response = await client.post<{ success: boolean; message: string; data?: any }>(
+    `/super-admin/security/emergency/revoke-user/${userId}`,
+    { reason }
+  );
+  return response.data;
 };
 
 export const emergencyLockUser = async (
@@ -988,21 +1224,24 @@ export interface PlatformPlansResponse {
   };
 }
 
-export const formatPlanPrice = (amount: number, currency: string = "INR"): string => {
+export const formatPlanPrice = (amount: number | null | undefined, currency: string = "INR"): string => {
+  const num = typeof amount === "number" && !isNaN(amount) ? amount : Number(amount) || 0;
   const symbol = currency === "USD" ? "$" : currency === "EUR" ? "€" : currency === "GBP" ? "£" : "₹";
-  return `${symbol}${amount.toLocaleString()}`;
+  return `${symbol}${num.toLocaleString()}`;
 };
 
 export const fetchPlatformPlans = async (): Promise<PlatformPlansResponse> => {
   const response = await client.get<{
     success: boolean;
+    data?: PlatformPlansResponse;
   } & PlatformPlansResponse>("/super-admin/plans");
+  const payload = (response?.data as any)?.data || response?.data || {};
   return {
-    plans: response.data.plans || [],
-    distribution: response.data.distribution || {},
-    featureCatalog: response.data.featureCatalog || [],
-    aiModels: response.data.aiModels || [],
-    metrics: response.data.metrics || {
+    plans: Array.isArray(payload.plans) ? payload.plans : [],
+    distribution: payload.distribution || {},
+    featureCatalog: Array.isArray(payload.featureCatalog) ? payload.featureCatalog : [],
+    aiModels: Array.isArray(payload.aiModels) ? payload.aiModels : [],
+    metrics: payload.metrics || {
       activePlans: 0,
       totalOrganizations: 0,
       monthlyMRR: 0,
@@ -1286,8 +1525,10 @@ export interface PlatformBillingOverviewData {
     pendingRevenueFormatted: string;
     overdueRevenue: number;
     overdueRevenueFormatted: string;
-    totalRefunds: number;
-    totalRefundsFormatted: string;
+    totalRefunds?: number;
+    totalRefundsFormatted?: string;
+    paidSubscriptions?: number;
+    pendingInvoicesCount?: number;
     activeSubscriptions: number;
     totalSubscriptions: number;
     totalOrganizations: number;

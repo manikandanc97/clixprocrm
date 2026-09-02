@@ -78,6 +78,7 @@ model User {
   avatar             String?
   status             UserStatus       @default(ACTIVE)
   securityStatus     String           @default("ACTIVE")
+  mustResetPassword  Boolean          @default(false)
   isSuperAdmin       Boolean          @default(false)
   notificationPrefs  Json?
   deletedAt          DateTime?
@@ -370,27 +371,53 @@ model AuditArchiveOutbox {
   @@index([status, nextAttemptAt])
 }
 
-model SecurityIncident {
+model SecurityAlert {
   id             String    @id @default(uuid())
-  incidentNumber String    @unique
-  severity       String
-  status         String    @default("OPEN")
+  alertType      String
+  severity       String    // LOW, MEDIUM, HIGH, CRITICAL
   title          String
   description    String
-  incidentType   String    @default("SECURITY_ALERT")
+  userId         String?
+  organizationId String?
+  sourceEventId  String?
   detectedAt     DateTime  @default(now())
-  detectedBy     String
-  tenantId       String?
-  affectedUserId String?
-  createdBy      String
-  resolvedBy     String?
+  status         String    @default("OPEN") // OPEN, ACKNOWLEDGED, RESOLVED
   resolvedAt     DateTime?
-  resolutionNotes String?
+  resolvedBy     String?
+  metadata       Json?
   createdAt      DateTime  @default(now())
   updatedAt      DateTime  @updatedAt
 
   @@index([status, severity])
+  @@index([organizationId])
+  @@index([userId])
+  @@index([detectedAt])
+  @@index([alertType])
+}
+
+model SecurityIncident {
+  id              String    @id @default(uuid())
+  incidentNumber  String    @unique
+  title           String
+  description     String
+  severity        String    // LOW, MEDIUM, HIGH, CRITICAL
+  status          String    @default("OPEN") // OPEN, INVESTIGATING, CONTAINED, RESOLVED
+  detectedAt      DateTime  @default(now())
+  acknowledgedAt  DateTime?
+  resolvedAt      DateTime?
+  assignedTo      String?
+  organizationId  String?
+  tenantId        String?
+  affectedUserId  String?
+  createdBy       String
+  resolutionNotes String?
+  incidentType    String    @default("SECURITY_ALERT")
+  createdAt       DateTime  @default(now())
+  updatedAt       DateTime  @updatedAt
+
+  @@index([status, severity])
   @@index([tenantId])
+  @@index([organizationId])
   @@index([affectedUserId])
   @@index([createdAt])
 }

@@ -290,11 +290,11 @@ export class SupabaseAuthGuard implements CanActivate {
           }
         }
 
-        // P4 Server-Side Check 2: User Account Lock Check
+        // P4 Server-Side Check 2: User Account Lock & Forced Password Reset Check
         const dbUser = await (this.prisma as any).user
           ?.findUnique({
             where: { id: user.id },
-            select: { securityStatus: true, isSuperAdmin: true },
+            select: { securityStatus: true, mustResetPassword: true, isSuperAdmin: true },
           })
           .catch(() => null);
 
@@ -304,6 +304,21 @@ export class SupabaseAuthGuard implements CanActivate {
           throw new ForbiddenException(
             'Your account has been locked due to security policy. Please contact your system administrator.',
           );
+        }
+
+        if (dbUser && dbUser.mustResetPassword) {
+          user.mustResetPassword = true;
+          const url = (request.originalUrl || request.url || '').toLowerCase();
+          const isAllowedPath =
+            url.includes('/auth/password') ||
+            url.includes('/auth/me') ||
+            url.includes('/auth/logout') ||
+            url.includes('/sessions');
+          if (!isAllowedPath) {
+            throw new ForbiddenException(
+              'PASSWORD_RESET_REQUIRED: An administrator has required that you reset your password before continuing.',
+            );
+          }
         }
 
         // P4 Server-Side Check 3: Tenant Organization Lockdown Check

@@ -204,6 +204,60 @@ export class EmergencySecurityService {
   }
 
   /**
+   * Forces a password reset on a user account and revokes their active sessions.
+   */
+  async forcePasswordReset(userId: string, reason: string, actorId: string) {
+    if (!reason || reason.trim().length < 5) {
+      throw new BadRequestException('Reason of at least 5 characters is required');
+    }
+
+    const user = await this.prisma.user.findUnique({ where: { id: userId } });
+    if (!user) {
+      throw new NotFoundException(`User ${userId} not found`);
+    }
+
+    const now = new Date();
+    await this.prisma.$transaction(async (tx) => {
+      await (tx as any).user.update({
+        where: { id: userId },
+        data: { mustResetPassword: true },
+      });
+
+      await tx.userSession.updateMany({
+        where: { userId, revokedAt: null },
+        data: { revokedAt: now },
+      });
+
+      await this.auditLogger.log(
+        {
+          userId: actorId,
+          targetUserId: userId,
+          action: 'PASSWORD_RESET_FORCED',
+          module: 'Security',
+          details: {
+            targetUserId: userId,
+            targetEmail: user.email,
+            reason: reason.trim(),
+            forcedAt: now.toISOString(),
+          },
+        },
+        tx,
+      );
+    });
+
+    try {
+      const { invalidateSessionCache } = require('../../auth/supabase.guard');
+      invalidateSessionCache(undefined, userId);
+    } catch (_) {}
+
+    this.logger.warn(`Password reset forced for ${user.email} (${userId}) by Super Admin ${actorId}: ${reason}`);
+    return {
+      success: true,
+      message: `Password reset has been forced for ${user.email}. All existing active sessions have been revoked.`,
+    };
+  }
+
+  /**
    * Emergency lockdown of a tenant organization.
    */
   async lockTenant(tenantId: string, reason: string, confirmation: string, actorId: string) {

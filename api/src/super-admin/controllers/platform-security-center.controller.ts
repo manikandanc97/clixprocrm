@@ -62,6 +62,13 @@ export class PlatformSecurityCenterController {
     return { success: true, data };
   }
 
+  @Patch('incidents/:id/acknowledge')
+  async acknowledgeIncident(@Param('id') id: string, @Req() req: any) {
+    const actorId = req.user?.id || 'SUPER_ADMIN';
+    const data = await this.incidentsService.acknowledgeIncident(id, actorId);
+    return { success: true, data };
+  }
+
   @Patch('incidents/:id/status')
   async updateIncidentStatus(
     @Param('id') id: string,

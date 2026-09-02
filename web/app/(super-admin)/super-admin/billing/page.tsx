@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import { useRouter } from "next/navigation";
 import {
   Receipt,
   TrendingUp,
@@ -25,6 +26,7 @@ import {
   Save,
   RefreshCw,
   Eye,
+  EyeOff,
   FileText,
   Percent,
   Check,
@@ -88,6 +90,7 @@ import {
 } from "recharts";
 
 export default function SuperAdminBillingPage() {
+  const router = useRouter();
   const { formatCurrency } = useCurrency();
 
   const [activeTab, setActiveTab] = useState<"overview" | "subscriptions" | "invoices" | "settings">("overview");
@@ -101,6 +104,7 @@ export default function SuperAdminBillingPage() {
   const [organizations, setOrganizations] = useState<PlatformOrganization[]>([]);
   const [configForm, setConfigForm] = useState<any>({});
   const [savingConfig, setSavingConfig] = useState(false);
+  const [showAccountNumber, setShowAccountNumber] = useState(false);
 
   // Subscriptions Table Filter & Sort
   const [subSearch, setSubSearch] = useState("");
@@ -420,17 +424,18 @@ export default function SuperAdminBillingPage() {
   }, [filteredInvoices, invPage, invRowsPerPage]);
 
   const totalWorkspacesCount = organizations.length || overview?.kpis?.totalOrganizations || 0;
-  const activeSubsCount = overview?.kpis?.activeSubscriptions || subscriptions.length || totalWorkspacesCount;
+  const paidSubsCount = overview?.kpis?.paidSubscriptions ?? (overview?.kpis?.activeSubscriptions && overview.planDistribution?.some(p => p.name.toLowerCase() !== 'free' && p.count > 0) ? overview.kpis.activeSubscriptions : 0);
 
-  const kpis = overview?.kpis || {
-    mrr: 0,
-    arr: 0,
-    totalRevenue: 0,
-    paidRevenue: 0,
-    pendingRevenue: 0,
-    overdueRevenue: 0,
-    totalRefunds: 0,
-    activeSubscriptions: activeSubsCount,
+  const kpis = {
+    mrr: overview?.kpis?.mrr || 0,
+    arr: overview?.kpis?.arr || 0,
+    totalRevenue: overview?.kpis?.totalRevenue || 0,
+    paidRevenue: overview?.kpis?.paidRevenue || 0,
+    pendingRevenue: overview?.kpis?.pendingRevenue || 0,
+    pendingInvoicesCount: overview?.kpis?.pendingInvoicesCount || invoices.filter((i) => i.paymentStatus === "PENDING" || i.status === "PENDING").length,
+    overdueRevenue: overview?.kpis?.overdueRevenue || 0,
+    totalRefunds: overview?.kpis?.totalRefunds || 0,
+    paidSubscriptions: paidSubsCount,
     totalSubscriptions: subscriptions.length || totalWorkspacesCount,
     totalOrganizations: totalWorkspacesCount,
   };
@@ -482,9 +487,21 @@ export default function SuperAdminBillingPage() {
             variant: "outline",
           },
           {
-            label: "Configure Subscription",
+            label: "Configure Plans",
+            icon: Layers,
+            onClick: () => router.push("/super-admin/plans"),
+            variant: "outline",
+          },
+          {
+            label: "New Subscription",
             icon: Plus,
-            onClick: () => setIsCreateSubModalOpen(true),
+            onClick: () => {
+              setSelectedTenantId("");
+              setSelectedPlanId("growth");
+              setSelectedBillingCycle("monthly");
+              setSelectedSeats(5);
+              setIsCreateSubModalOpen(true);
+            },
             variant: "default",
           },
         ]}
@@ -494,39 +511,39 @@ export default function SuperAdminBillingPage() {
       <div className="shrink-0">
         <CRMMetricsGrid cols={4}>
           <CRMMetricCard
-            title="Monthly Recurring (MRR)"
+            title="Monthly Recurring Revenue (MRR)"
             value={formatCurrency(kpis.mrr)}
-            change={kpis.arr > 0 ? `ARR: ${formatCurrency(kpis.arr)}` : "ARR: ₹0"}
+            change={kpis.mrr > 0 ? "Active recurring run-rate" : "No active recurring revenue"}
             trend={kpis.mrr > 0 ? "up" : "neutral"}
             icon={TrendingUp}
             color="indigo"
             loading={loading}
           />
           <CRMMetricCard
-            title="Total SaaS Revenue"
-            value={formatCurrency(kpis.totalRevenue)}
-            change={`Collected: ${formatCurrency(kpis.paidRevenue)}`}
-            trend={kpis.totalRevenue > 0 ? "up" : "neutral"}
+            title="Collected Revenue"
+            value={formatCurrency(kpis.paidRevenue)}
+            change="Settled billing data"
+            trend={kpis.paidRevenue > 0 ? "up" : "neutral"}
             icon={IndianRupee}
             color="emerald"
             loading={loading}
           />
           <CRMMetricCard
-            title="Active Subscriptions"
-            value={activeSubsCount}
-            change={`across ${totalWorkspacesCount} workspaces`}
-            trend="neutral"
+            title="Paid Subscriptions"
+            value={kpis.paidSubscriptions}
+            change={`${kpis.paidSubscriptions} of ${totalWorkspacesCount} workspaces`}
+            trend={kpis.paidSubscriptions > 0 ? "up" : "neutral"}
             icon={Users}
             color="blue"
             loading={loading}
           />
           <CRMMetricCard
-            title="Refunds & Disputes"
-            value={formatCurrency(kpis.totalRefunds)}
-            change="0 active disputes (0.0%)"
-            trend="neutral"
-            icon={RotateCcw}
-            color="purple"
+            title="Outstanding Revenue"
+            value={formatCurrency(kpis.pendingRevenue)}
+            change={`${kpis.pendingInvoicesCount} pending ${kpis.pendingInvoicesCount === 1 ? "invoice" : "invoices"}`}
+            trend={kpis.pendingRevenue > 0 ? "down" : "neutral"}
+            icon={Clock}
+            color="orange"
             loading={loading}
           />
         </CRMMetricsGrid>
@@ -600,17 +617,33 @@ export default function SuperAdminBillingPage() {
                     Ready to scale platform billing across {totalWorkspacesCount} workspaces
                   </h4>
                   <p className="text-xs text-muted-foreground mt-0.5">
-                    Currently all registered organizations are on the Free starter tier. Assign workspaces to Growth or Business tiers to generate recurring revenue.
+                    Currently all registered organizations are on the Free starter tier. Configure paid packages in Plans or assign workspaces to Growth or Business tiers to generate recurring revenue.
                   </p>
                 </div>
               </div>
-              <Button
-                size="sm"
-                onClick={() => setIsCreateSubModalOpen(true)}
-                className="h-8 px-3.5 text-xs font-semibold gap-1.5"
-              >
-                <Plus className="w-3.5 h-3.5" /> Configure Paid Plan
-              </Button>
+              <div className="flex items-center gap-2">
+                <Button
+                  size="sm"
+                  variant="outline"
+                  onClick={() => router.push("/super-admin/plans")}
+                  className="h-8 px-3 text-xs font-semibold gap-1.5"
+                >
+                  <Layers className="w-3.5 h-3.5" /> Configure Plans
+                </Button>
+                <Button
+                  size="sm"
+                  onClick={() => {
+                    setSelectedTenantId("");
+                    setSelectedPlanId("growth");
+                    setSelectedBillingCycle("monthly");
+                    setSelectedSeats(5);
+                    setIsCreateSubModalOpen(true);
+                  }}
+                  className="h-8 px-3 text-xs font-semibold gap-1.5"
+                >
+                  <Plus className="w-3.5 h-3.5" /> New Subscription
+                </Button>
+              </div>
             </div>
           )}
 
@@ -666,53 +699,65 @@ export default function SuperAdminBillingPage() {
                 </div>
               </div>
 
-              {/* Chart Component */}
+              {/* Chart Component / Empty State */}
               <div className="h-56 w-full pt-2">
                 {isClient ? (
-                  <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                      <defs>
-                        <linearGradient id="billingRevGrad" x1="0" y1="0" x2="0" y2="1">
-                          <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                          <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
-                        </linearGradient>
-                      </defs>
-                      <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-                      <XAxis
-                        dataKey="month"
-                        stroke="var(--muted-foreground)"
-                        fontSize={10}
-                        tickLine={false}
-                        axisLine={false}
-                      />
-                      <YAxis
-                        stroke="var(--muted-foreground)"
-                        fontSize={10}
-                        tickLine={false}
-                        axisLine={false}
-                        tickFormatter={(val) => `₹${val}`}
-                      />
-                      <RechartsTooltip
-                        contentStyle={{
-                          backgroundColor: "var(--card)",
-                          borderColor: "var(--border)",
-                          borderRadius: "12px",
-                          fontSize: "11px",
-                          boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                        }}
-                        formatter={(val: any) => [formatCurrency(Number(val)), "Revenue"]}
-                        labelStyle={{ fontWeight: "bold", color: "var(--foreground)" }}
-                      />
-                      <Area
-                        type="monotone"
-                        dataKey="revenue"
-                        stroke="#6366f1"
-                        strokeWidth={2.5}
-                        fillOpacity={1}
-                        fill="url(#billingRevGrad)"
-                      />
-                    </AreaChart>
-                  </ResponsiveContainer>
+                  kpis.totalRevenue === 0 && kpis.mrr === 0 && !trendData.some((d) => d.revenue > 0) ? (
+                    <div className="h-full w-full flex flex-col items-center justify-center rounded-xl bg-muted/10 border border-dashed border-border/60 p-6 text-center">
+                      <div className="w-10 h-10 rounded-xl bg-muted/30 border border-border/40 flex items-center justify-center text-muted-foreground/70 mb-2">
+                        <TrendingUp className="w-5 h-5" />
+                      </div>
+                      <h4 className="text-xs sm:text-sm font-bold text-foreground">No revenue recorded yet</h4>
+                      <p className="text-xs text-muted-foreground max-w-sm mt-1">
+                        Revenue trends will appear here once paid subscriptions begin.
+                      </p>
+                    </div>
+                  ) : (
+                    <ResponsiveContainer width="100%" height="100%">
+                      <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                        <defs>
+                          <linearGradient id="billingRevGrad" x1="0" y1="0" x2="0" y2="1">
+                            <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                            <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                          </linearGradient>
+                        </defs>
+                        <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
+                        <XAxis
+                          dataKey="month"
+                          stroke="var(--muted-foreground)"
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
+                        />
+                        <YAxis
+                          stroke="var(--muted-foreground)"
+                          fontSize={10}
+                          tickLine={false}
+                          axisLine={false}
+                          tickFormatter={(val) => `₹${val}`}
+                        />
+                        <RechartsTooltip
+                          contentStyle={{
+                            backgroundColor: "var(--card)",
+                            borderColor: "var(--border)",
+                            borderRadius: "12px",
+                            fontSize: "11px",
+                            boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                          }}
+                          formatter={(val: any) => [formatCurrency(Number(val)), "Revenue"]}
+                          labelStyle={{ fontWeight: "bold", color: "var(--foreground)" }}
+                        />
+                        <Area
+                          type="monotone"
+                          dataKey="revenue"
+                          stroke="#6366f1"
+                          strokeWidth={2.5}
+                          fillOpacity={1}
+                          fill="url(#billingRevGrad)"
+                        />
+                      </AreaChart>
+                    </ResponsiveContainer>
+                  )
                 ) : (
                   <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
                     Loading trend analytics...
@@ -783,18 +828,18 @@ export default function SuperAdminBillingPage() {
               </div>
 
               <div className="pt-3 border-t border-border/60 flex items-center justify-between text-xs">
-                <span className="text-muted-foreground font-semibold">Total Projected ARR</span>
-                <span className="font-mono font-bold text-emerald-600 dark:text-emerald-400">
-                  {formatCurrency(kpis.arr)}
+                <span className="text-muted-foreground font-medium">Paid Subscriptions</span>
+                <span className="font-mono font-bold text-foreground">
+                  {kpis.paidSubscriptions} of {totalWorkspacesCount} orgs
                 </span>
               </div>
             </div>
           </div>
 
-          {/* SaaS Health & Cash Flow Breakdown */}
+          {/* SaaS Health & Cash Flow Breakdown (3 Non-Duplicative Cards) */}
           <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
             <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400 shrink-0 border border-emerald-500/20">
                 <CheckCircle2 className="w-5 h-5" />
               </div>
               <div>
@@ -807,28 +852,30 @@ export default function SuperAdminBillingPage() {
             </div>
 
             <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-amber-500/10 flex items-center justify-center text-amber-600 dark:text-amber-400 shrink-0 border border-amber-500/20">
                 <Clock className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs text-muted-foreground font-semibold">Pending Invoices</span>
+                <span className="text-xs text-muted-foreground font-semibold">Outstanding Revenue</span>
                 <div className="text-lg font-black text-foreground font-mono mt-0.5">
                   {formatCurrency(kpis.pendingRevenue)}
                 </div>
-                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">Awaiting payment</span>
+                <span className="text-[11px] text-amber-600 dark:text-amber-400 font-semibold">
+                  {kpis.pendingInvoicesCount} {kpis.pendingInvoicesCount === 1 ? "invoice" : "invoices"} awaiting payment
+                </span>
               </div>
             </div>
 
             <div className="bg-card border border-border/80 rounded-2xl p-5 shadow-xs flex items-center gap-4">
-              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0">
+              <div className="w-10 h-10 rounded-xl bg-purple-500/10 flex items-center justify-center text-purple-600 dark:text-purple-400 shrink-0 border border-purple-500/20">
                 <Shield className="w-5 h-5" />
               </div>
               <div>
-                <span className="text-xs text-muted-foreground font-semibold">Gateway Status</span>
+                <span className="text-xs text-muted-foreground font-semibold">Payment Gateway</span>
                 <div className="text-lg font-black text-foreground uppercase mt-0.5">
-                  {configForm.paymentGateway || "Razorpay / Stripe"}
+                  {configForm.paymentGateway || "RAZORPAY"}
                 </div>
-                <span className="text-[11px] text-muted-foreground">GST: {configForm.gstin || "29AAAAA0000A1Z5"}</span>
+                <span className="text-[11px] text-muted-foreground">GSTIN: {configForm.gstin || "29AAAAA0000A1Z5"}</span>
               </div>
             </div>
           </div>
@@ -1140,8 +1187,8 @@ export default function SuperAdminBillingPage() {
                     <tr>
                       <td colSpan={8} className="py-6 border-0">
                         <EmptyState
-                          title="No platform SaaS invoices found"
-                          description="No platform invoices match your search or filter criteria."
+                          title="No platform invoices yet"
+                          description="Invoices will appear here when paid subscriptions generate billing."
                           icon={Receipt}
                           className="border-none bg-transparent shadow-none p-0 min-h-0"
                         />
@@ -1253,10 +1300,10 @@ export default function SuperAdminBillingPage() {
             </div>
 
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              {/* Left Column: Legal Identity & Invoicing */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Briefcase className="w-3.5 h-3.5 text-primary" /> Legal Entity & Tax
+              {/* Section 1: Legal & Tax */}
+              <div className="bg-muted/15 border border-border/60 rounded-xl p-4.5 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 pb-2 border-b border-border/40">
+                  <Briefcase className="w-3.5 h-3.5 text-primary" /> Legal & Tax
                 </h4>
 
                 <div>
@@ -1289,44 +1336,12 @@ export default function SuperAdminBillingPage() {
                     />
                   </div>
                 </div>
-
-                <div className="grid grid-cols-3 gap-3">
-                  <div>
-                    <Label className="text-xs font-semibold text-foreground mb-1">Invoice Prefix</Label>
-                    <Input
-                      value={configForm.invoicePrefix || ""}
-                      onChange={(e) => setConfigForm({ ...configForm, invoicePrefix: e.target.value.toUpperCase() })}
-                      placeholder="CP-INV"
-                      className="h-8 text-xs font-mono font-bold"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs font-semibold text-foreground mb-1">GST Rate (%)</Label>
-                    <Input
-                      type="number"
-                      value={configForm.taxRate || 18}
-                      onChange={(e) => setConfigForm({ ...configForm, taxRate: Number(e.target.value) })}
-                      placeholder="18"
-                      className="h-8 text-xs font-mono font-bold"
-                    />
-                  </div>
-                  <div>
-                    <Label className="text-xs font-semibold text-foreground mb-1">Due Terms (Days)</Label>
-                    <Input
-                      type="number"
-                      value={configForm.paymentTermsDays || 15}
-                      onChange={(e) => setConfigForm({ ...configForm, paymentTermsDays: Number(e.target.value) })}
-                      placeholder="15"
-                      className="h-8 text-xs font-mono"
-                    />
-                  </div>
-                </div>
               </div>
 
-              {/* Right Column: Address & Banking */}
-              <div className="space-y-4">
-                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5">
-                  <Building2 className="w-3.5 h-3.5 text-primary" /> Registered Address & Settlement
+              {/* Section 2: Registered Address */}
+              <div className="bg-muted/15 border border-border/60 rounded-xl p-4.5 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 pb-2 border-b border-border/40">
+                  <Building2 className="w-3.5 h-3.5 text-primary" /> Registered Address
                 </h4>
 
                 <div>
@@ -1368,6 +1383,52 @@ export default function SuperAdminBillingPage() {
                     />
                   </div>
                 </div>
+              </div>
+
+              {/* Section 3: Invoice Settings */}
+              <div className="bg-muted/15 border border-border/60 rounded-xl p-4.5 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 pb-2 border-b border-border/40">
+                  <FileText className="w-3.5 h-3.5 text-primary" /> Invoice Settings
+                </h4>
+
+                <div className="grid grid-cols-3 gap-3">
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Invoice Prefix</Label>
+                    <Input
+                      value={configForm.invoicePrefix || ""}
+                      onChange={(e) => setConfigForm({ ...configForm, invoicePrefix: e.target.value.toUpperCase() })}
+                      placeholder="CP-INV"
+                      className="h-8 text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">GST Rate (%)</Label>
+                    <Input
+                      type="number"
+                      value={configForm.taxRate || 18}
+                      onChange={(e) => setConfigForm({ ...configForm, taxRate: Number(e.target.value) })}
+                      placeholder="18"
+                      className="h-8 text-xs font-mono font-bold"
+                    />
+                  </div>
+                  <div>
+                    <Label className="text-xs font-semibold text-foreground mb-1">Due Terms (Days)</Label>
+                    <Input
+                      type="number"
+                      value={configForm.paymentTermsDays || 15}
+                      onChange={(e) => setConfigForm({ ...configForm, paymentTermsDays: Number(e.target.value) })}
+                      placeholder="15"
+                      className="h-8 text-xs font-mono"
+                    />
+                  </div>
+                </div>
+              </div>
+
+              {/* Section 4: Bank & Settlement */}
+              <div className="bg-muted/15 border border-border/60 rounded-xl p-4.5 space-y-4">
+                <h4 className="text-xs font-bold uppercase tracking-wider text-muted-foreground flex items-center gap-1.5 pb-2 border-b border-border/40">
+                  <CreditCard className="w-3.5 h-3.5 text-primary" /> Bank & Settlement
+                </h4>
 
                 <div className="grid grid-cols-2 gap-3">
                   <div>
@@ -1380,8 +1441,19 @@ export default function SuperAdminBillingPage() {
                     />
                   </div>
                   <div>
-                    <Label className="text-xs font-semibold text-foreground mb-1">Account Number</Label>
+                    <div className="flex items-center justify-between mb-1">
+                      <Label className="text-xs font-semibold text-foreground">Account Number</Label>
+                      <button
+                        type="button"
+                        onClick={() => setShowAccountNumber(!showAccountNumber)}
+                        className="text-[10px] text-muted-foreground hover:text-primary flex items-center gap-1 cursor-pointer transition-colors"
+                      >
+                        {showAccountNumber ? <EyeOff className="w-3 h-3" /> : <Eye className="w-3 h-3" />}
+                        <span>{showAccountNumber ? "Mask" : "Reveal"}</span>
+                      </button>
+                    </div>
                     <Input
+                      type={showAccountNumber ? "text" : "password"}
                       value={configForm.accountNumber || ""}
                       onChange={(e) => setConfigForm({ ...configForm, accountNumber: e.target.value })}
                       placeholder="50200012345678"

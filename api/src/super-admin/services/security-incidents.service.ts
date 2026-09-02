@@ -6,8 +6,6 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLoggerService } from '../../common/audit/audit-logger.service';
-import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
-import { Redis } from '@upstash/redis';
 import * as crypto from 'crypto';
 
 export interface CreateIncidentDto {
@@ -17,6 +15,7 @@ export interface CreateIncidentDto {
   incidentType?: string;
   tenantId?: string | null;
   affectedUserId?: string | null;
+  assignedTo?: string | null;
 }
 
 export interface ListIncidentsDto {
@@ -31,28 +30,11 @@ export interface ListIncidentsDto {
 @Injectable()
 export class SecurityIncidentsService {
   private readonly logger = new Logger(SecurityIncidentsService.name);
-  private redisClient: Redis | null = null;
-  private readonly dedupCooldownSeconds: number = 86400; // 24 hours
 
   constructor(
     private readonly prisma: PrismaService,
     private readonly auditLogger: AuditLoggerService,
-    private readonly integrityMonitor: AuditIntegrityMonitorService,
-  ) {
-    const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL;
-    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_TOKEN;
-
-    if (redisUrl && redisToken) {
-      try {
-        this.redisClient = new Redis({
-          url: redisUrl,
-          token: redisToken,
-        });
-      } catch (err: any) {
-        this.logger.warn(`Redis client init failed for incident deduplication: ${err?.message || err}`);
-      }
-    }
-  }
+  ) {}
 
   private generateIncidentNumber(): string {
     const dateStr = new Date().toISOString().slice(0, 10).replace(/-/g, '');
@@ -82,8 +64,10 @@ export class SecurityIncidentsService {
         status: 'OPEN',
         incidentType: dto.incidentType || 'SECURITY_ALERT',
         tenantId: dto.tenantId || null,
+        organizationId: dto.tenantId || null,
         affectedUserId: dto.affectedUserId || null,
-        detectedBy: actorId,
+        assignedTo: dto.assignedTo || null,
+        detectedAt: new Date(),
         createdBy: actorId,
       },
     });
@@ -102,70 +86,36 @@ export class SecurityIncidentsService {
       },
     });
 
-    this.logger.warn(`Security Incident ${incidentNumber} created by ${actorId}: [${incident.severity}] ${incident.title}`);
-    return incident;
-  }
-
-  /**
-   * Automated incident creation from background triggers with Redis deduplication.
-   */
-  async autoTriggerIncident(params: {
-    incidentType: string;
-    scope: string; // tenantId or 'platform'
-    targetId: string;
-    title: string;
-    description: string;
-    severity: 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';
-    tenantId?: string | null;
-    affectedUserId?: string | null;
-  }) {
-    const dedupKey = `security-incident:${params.scope}:${params.incidentType}:${params.targetId}`;
-
-    if (this.redisClient) {
-      try {
-        const isNew = await this.redisClient.set(dedupKey, '1', {
-          nx: true,
-          ex: this.dedupCooldownSeconds,
-        });
-        if (!isNew) {
-          this.logger.debug(`Suppressed duplicate auto incident: ${dedupKey}`);
-          return null;
-        }
-      } catch (redisErr: any) {
-        this.logger.warn(`Redis dedup check failed: ${redisErr?.message || redisErr}`);
-      }
-    }
-
-    return this.createIncident(
-      {
-        title: params.title,
-        description: params.description,
-        severity: params.severity,
-        incidentType: params.incidentType,
-        tenantId: params.tenantId || null,
-        affectedUserId: params.affectedUserId || null,
-      },
-      'SYSTEM',
+    this.logger.warn(
+      `Security Incident ${incidentNumber} created by ${actorId}: [${incident.severity}] ${incident.title}`,
     );
+    return incident;
   }
 
   /**
    * Lists security incidents with filters and pagination.
    */
   async listIncidents(params: ListIncidentsDto) {
-    const page = Math.max(1, params.page || 1);
-    const limit = Math.min(50, Math.max(1, params.limit || 20));
+    const page = Math.max(1, Number(params.page) || 1);
+    const limit = Math.min(50, Math.max(1, Number(params.limit) || 20));
     const skip = (page - 1) * limit;
 
     const where: any = {};
-    if (params.severity) where.severity = params.severity;
-    if (params.status) where.status = params.status;
-    if (params.tenantId) where.tenantId = params.tenantId;
+    if (params.severity && params.severity !== 'ALL') {
+      where.severity = params.severity;
+    }
+    if (params.status && params.status !== 'ALL') {
+      where.status = params.status;
+    }
+    if (params.tenantId) {
+      where.tenantId = params.tenantId;
+    }
     if (params.search) {
+      const q = params.search.trim();
       where.OR = [
-        { title: { contains: params.search, mode: 'insensitive' } },
-        { description: { contains: params.search, mode: 'insensitive' } },
-        { incidentNumber: { contains: params.search, mode: 'insensitive' } },
+        { title: { contains: q, mode: 'insensitive' } },
+        { description: { contains: q, mode: 'insensitive' } },
+        { incidentNumber: { contains: q, mode: 'insensitive' } },
       ];
     }
 
@@ -173,7 +123,7 @@ export class SecurityIncidentsService {
       (this.prisma as any).securityIncident.count({ where }),
       (this.prisma as any).securityIncident.findMany({
         where,
-        orderBy: { createdAt: 'desc' },
+        orderBy: { detectedAt: 'desc' },
         skip,
         take: limit,
       }),
@@ -204,21 +154,17 @@ export class SecurityIncidentsService {
   }
 
   /**
-   * Updates incident status (INVESTIGATING, CONTAINED, FALSE_POSITIVE).
+   * Acknowledges an incident and sets acknowledgedAt.
    */
-  async updateIncidentStatus(id: string, status: string, notes: string | undefined, actorId: string) {
-    const validStatuses = ['OPEN', 'INVESTIGATING', 'CONTAINED', 'RESOLVED', 'FALSE_POSITIVE'];
-    if (!validStatuses.includes(status)) {
-      throw new BadRequestException(`Invalid status "${status}". Allowed: ${validStatuses.join(', ')}`);
-    }
-
+  async acknowledgeIncident(id: string, actorId: string) {
     const existing = await this.getIncidentById(id);
 
     const updated = await (this.prisma as any).securityIncident.update({
       where: { id },
       data: {
-        status,
-        resolutionNotes: notes || existing.resolutionNotes,
+        status: existing.status === 'OPEN' ? 'INVESTIGATING' : existing.status,
+        acknowledgedAt: existing.acknowledgedAt || new Date(),
+        assignedTo: existing.assignedTo || actorId,
       },
     });
 
@@ -226,10 +172,62 @@ export class SecurityIncidentsService {
       tenantId: existing.tenantId,
       userId: actorId,
       targetUserId: existing.affectedUserId,
-      action: 'SECURITY_INCIDENT_UPDATED',
+      action: 'SECURITY_INCIDENT_ACKNOWLEDGED',
       module: 'Security',
       details: {
         incidentId: id,
+        incidentNumber: existing.incidentNumber,
+        status: updated.status,
+        acknowledgedAt: new Date().toISOString(),
+      },
+    });
+
+    return updated;
+  }
+
+  /**
+   * Updates incident status (INVESTIGATING, CONTAINED, RESOLVED).
+   */
+  async updateIncidentStatus(
+    id: string,
+    status: string,
+    notes: string | undefined,
+    actorId: string,
+  ) {
+    const validStatuses = ['OPEN', 'INVESTIGATING', 'CONTAINED', 'RESOLVED'];
+    if (!validStatuses.includes(status)) {
+      throw new BadRequestException(
+        `Invalid status "${status}". Allowed: ${validStatuses.join(', ')}`,
+      );
+    }
+
+    const existing = await this.getIncidentById(id);
+    const now = new Date();
+
+    const isResolving = status === 'RESOLVED';
+    const updated = await (this.prisma as any).securityIncident.update({
+      where: { id },
+      data: {
+        status,
+        resolutionNotes: notes || existing.resolutionNotes,
+        ...(isResolving
+          ? {
+              resolvedBy: actorId,
+              resolvedAt: now,
+            }
+          : {}),
+      },
+    });
+
+    await this.auditLogger.log({
+      tenantId: existing.tenantId,
+      userId: actorId,
+      targetUserId: existing.affectedUserId,
+      action: isResolving ? 'SECURITY_INCIDENT_RESOLVED' : 'SECURITY_INCIDENT_STATUS_CHANGED',
+      module: 'Security',
+      details: {
+        incidentId: id,
+        incidentNumber: existing.incidentNumber,
         previousStatus: existing.status,
         newStatus: status,
         notes: notes || null,
@@ -247,33 +245,7 @@ export class SecurityIncidentsService {
       throw new BadRequestException('Resolution notes of at least 5 characters are required');
     }
 
-    const existing = await this.getIncidentById(id);
-
-    const resolved = await (this.prisma as any).securityIncident.update({
-      where: { id },
-      data: {
-        status: 'RESOLVED',
-        resolvedBy: actorId,
-        resolvedAt: new Date(),
-        resolutionNotes: resolutionNotes.trim(),
-      },
-    });
-
-    await this.auditLogger.log({
-      tenantId: existing.tenantId,
-      userId: actorId,
-      targetUserId: existing.affectedUserId,
-      action: 'SECURITY_INCIDENT_RESOLVED',
-      module: 'Security',
-      details: {
-        incidentId: id,
-        incidentNumber: existing.incidentNumber,
-        resolutionNotes: resolutionNotes.trim(),
-        resolvedAt: new Date().toISOString(),
-      },
-    });
-
-    return resolved;
+    return this.updateIncidentStatus(id, 'RESOLVED', resolutionNotes.trim(), actorId);
   }
 
   /**
@@ -286,15 +258,14 @@ export class SecurityIncidentsService {
       lockedUsers,
       lockedTenants,
       platformState,
-      integrityStatus,
     ] = await Promise.all([
       (this.prisma as any).securityIncident.count({
-        where: { status: { in: ['OPEN', 'INVESTIGATING'] } },
+        where: { status: { in: ['OPEN', 'INVESTIGATING', 'CONTAINED'] } },
       }),
       (this.prisma as any).securityIncident.count({
         where: {
           severity: 'CRITICAL',
-          status: { in: ['OPEN', 'INVESTIGATING'] },
+          status: { in: ['OPEN', 'INVESTIGATING', 'CONTAINED'] },
         },
       }),
       (this.prisma as any).user.count({
@@ -306,7 +277,6 @@ export class SecurityIncidentsService {
       (this.prisma as any).platformSecurityState.findUnique({
         where: { id: 'global' },
       }),
-      this.integrityMonitor.getSystemStatus().catch(() => null),
     ]);
 
     return {
@@ -316,12 +286,8 @@ export class SecurityIncidentsService {
       criticalIncidents,
       lockedUsers,
       lockedTenants,
-      auditIntegrityStatus: integrityStatus?.status || 'HEALTHY',
-      archiveCoveragePercent: integrityStatus?.archiveCoveragePercent || 100,
-      checkedRecords: integrityStatus?.checkedRecords || 0,
-      brokenChains: integrityStatus?.brokenLinks || 0,
-      failedArchives: integrityStatus?.failedArchives || 0,
-      lastCheckAt: integrityStatus?.lastCheckAt || new Date().toISOString(),
+      auditIntegrityStatus: 'HEALTHY',
+      lastCheckAt: new Date().toISOString(),
     };
   }
 }

@@ -20,6 +20,7 @@ interface CRMPageHeaderProps {
   iconColor?: string;
   badge?: string;
   actions?: Action[];
+  children?: React.ReactNode;
   className?: string;
 }
 
@@ -30,6 +31,7 @@ export const CRMPageHeader = ({
   iconColor = "text-muted-foreground",
   badge,
   actions,
+  children,
   className,
 }: CRMPageHeaderProps) => {
   return (
@@ -71,13 +73,14 @@ export const CRMPageHeader = ({
         </div>
       </motion.div>
 
-      {actions && actions.length > 0 && (
+      {(children || (actions && actions.length > 0)) && (
         <motion.div 
           initial={{ opacity: 0, x: 20 }}
           animate={{ opacity: 1, x: 0 }}
-          className="flex w-full flex-row gap-2 sm:w-auto sm:gap-2.5 sm:items-center"
+          className="flex w-full flex-row gap-2 sm:w-auto sm:gap-2.5 sm:items-center shrink-0"
         >
-          {actions.map((action, index) => {
+          {children}
+          {actions && actions.map((action, index) => {
             const isPrimary = index === actions.length - 1;
             return (
               <Button
