@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Dialog as SheetPrimitive } from "radix-ui"
+import { Dialog as SheetPrimitive, VisuallyHidden } from "radix-ui"
 
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
@@ -67,6 +67,9 @@ function SheetContent({
         )}
         {...props}
       >
+        <VisuallyHidden.Root asChild>
+          <SheetPrimitive.Title>Side Drawer</SheetPrimitive.Title>
+        </VisuallyHidden.Root>
         {children}
         {showCloseButton && (
           <SheetPrimitive.Close data-slot="sheet-close" asChild>

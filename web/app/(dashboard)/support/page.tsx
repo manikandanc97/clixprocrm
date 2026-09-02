@@ -19,7 +19,7 @@ export default function SupportDeskPage() {
   const [activeTab, setActiveTab] = useState("ticket");
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* Page Header */}
       <CRMPageHeader
         title="Help & Support Desk"
@@ -79,26 +79,26 @@ export default function SupportDeskPage() {
         </div>
 
         {/* Tab 1: Raise Ticket */}
-        <TabsContent value="ticket" className="mt-4 focus-visible:outline-none flex-1">
+        <TabsContent value="ticket" className="mt-3 focus-visible:outline-none flex-1 flex flex-col min-h-0">
           <SupportTicketForm
             onSwitchToHistory={() => setActiveTab("history")}
           />
         </TabsContent>
 
         {/* Tab 2: My Tickets */}
-        <TabsContent value="history" className="mt-4 focus-visible:outline-none flex-1">
+        <TabsContent value="history" className="mt-3 focus-visible:outline-none flex-1 flex flex-col min-h-0">
           <TicketHistoryList
             onNewTicketClick={() => setActiveTab("ticket")}
           />
         </TabsContent>
 
         {/* Tab 3: Documentation */}
-        <TabsContent value="docs" className="mt-4 focus-visible:outline-none flex-1">
+        <TabsContent value="docs" className="mt-3 focus-visible:outline-none flex-1 flex flex-col min-h-0">
           <DocumentationHub />
         </TabsContent>
 
         {/* Tab 4: Release Notes */}
-        <TabsContent value="release" className="mt-4 focus-visible:outline-none flex-1">
+        <TabsContent value="release" className="mt-3 focus-visible:outline-none flex-1 flex flex-col min-h-0">
           <ReleaseNotesView />
         </TabsContent>
       </Tabs>

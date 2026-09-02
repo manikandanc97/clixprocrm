@@ -26,7 +26,13 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
-import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/shared/ui/sheet";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/shared/ui/dialog";
 import { toast } from "sonner";
 import RevenueTargetSettings from "@/features/settings/components/RevenueTargetSettings";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -366,33 +372,30 @@ const ReportsPage = () => {
         <PerformanceTable performance={data?.performance || []} />
       </div>
 
-      {/* Revenue Targets Configuration Drawer */}
-      <Sheet open={isTargetsConfigOpen} onOpenChange={setIsTargetsConfigOpen}>
-        <SheetContent
-          side="right"
-          className="p-0 sm:max-w-2xl md:max-w-3xl lg:max-w-4xl w-full flex flex-col h-full bg-background border-l border-border/80 shadow-2xl z-50"
+      {/* Revenue Targets Configuration Modal */}
+      <Dialog open={isTargetsConfigOpen} onOpenChange={setIsTargetsConfigOpen}>
+        <DialogContent
+          className="p-0 sm:max-w-2xl md:max-w-3xl lg:max-w-4xl w-[95vw] max-h-[85vh] flex flex-col bg-card border border-border/80 shadow-2xl rounded-2xl overflow-hidden z-50"
         >
-          <SheetHeader className="px-6 py-4.5 border-b border-border/60 bg-muted/20">
-            <div className="flex items-center justify-between">
-              <div className="flex items-center gap-3">
-                <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
-                  <Target className="w-4.5 h-4.5" />
-                </div>
-                <div>
-                  <SheetTitle className="text-base font-bold">Revenue Targets</SheetTitle>
-                  <SheetDescription className="text-xs text-muted-foreground">
-                    Set and manage monthly, quarterly, and annual sales quotas and milestones.
-                  </SheetDescription>
-                </div>
+          <DialogHeader className="px-6 py-4.5 border-b border-border/60 bg-muted/20 flex-row items-center justify-between gap-4 space-y-0">
+            <div className="flex items-center gap-3">
+              <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0">
+                <Target className="w-4.5 h-4.5" />
+              </div>
+              <div>
+                <DialogTitle className="text-base font-bold text-foreground">Revenue Targets</DialogTitle>
+                <DialogDescription className="text-xs text-muted-foreground mt-0.5">
+                  Set and manage monthly, quarterly, and annual sales quotas and milestones.
+                </DialogDescription>
               </div>
             </div>
-          </SheetHeader>
+          </DialogHeader>
 
-          <div className="flex-1 min-h-0 overflow-y-auto p-6 custom-scrollbar">
+          <div className="flex-1 min-h-0 overflow-y-auto p-6 custom-scrollbar bg-background/50">
             <RevenueTargetSettings />
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
     </CRMPageContainer>
   );
 };

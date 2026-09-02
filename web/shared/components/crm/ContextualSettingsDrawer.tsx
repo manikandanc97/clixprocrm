@@ -2,13 +2,13 @@
 
 import React, { useState, useEffect, ReactNode } from "react";
 import {
-  Sheet,
-  SheetContent,
-  SheetHeader,
-  SheetTitle,
-  SheetDescription,
-  SheetClose,
-} from "@/shared/ui/sheet";
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogClose,
+} from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import {
@@ -96,17 +96,16 @@ export function ContextualSettingsDrawer({
 
   return (
     <>
-      <Sheet open={open} onOpenChange={handleRequestClose}>
-        <SheetContent
-          side="right"
+      <Dialog open={open} onOpenChange={handleRequestClose}>
+        <DialogContent
           className={cn(
-            "p-0 sm:max-w-2xl md:max-w-3xl lg:max-w-4xl xl:max-w-5xl w-full flex flex-col h-full bg-background border-l border-border/80 shadow-2xl z-50",
+            "max-w-4xl lg:max-w-5xl w-[95vw] h-[85vh] max-h-[85vh] p-0 overflow-hidden border border-border/80 bg-card text-foreground shadow-2xl rounded-2xl flex flex-col duration-200 outline-none",
             className
           )}
           showCloseButton={false}
         >
           {/* Header */}
-          <div className="shrink-0 px-5 py-4 border-b border-border/60 bg-muted/20 flex items-center justify-between gap-4">
+          <DialogHeader className="shrink-0 px-5 sm:px-6 py-4 border-b border-border/60 bg-muted/20 flex-row items-center justify-between gap-4 space-y-0">
             <div className="flex items-center gap-3 min-w-0">
               {Icon && (
                 <div className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-xs">
@@ -115,21 +114,21 @@ export function ContextualSettingsDrawer({
               )}
               <div className="min-w-0">
                 <div className="flex items-center gap-2">
-                  <h3 className="text-base font-bold text-foreground tracking-tight truncate">
+                  <DialogTitle className="text-base font-bold text-foreground tracking-tight truncate">
                     {title}
-                  </h3>
+                  </DialogTitle>
                   {badge && (
                     <Badge
                       variant="outline"
-                      className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border-primary/20 bg-primary/10 text-primary"
+                      className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border-primary/20 bg-primary/10 text-primary shrink-0"
                     >
                       {badge}
                     </Badge>
                   )}
                 </div>
-                <p className="text-xs text-muted-foreground truncate max-w-md sm:max-w-lg">
+                <DialogDescription className="text-xs text-muted-foreground truncate max-w-md sm:max-w-lg mt-0.5">
                   {subtitle}
-                </p>
+                </DialogDescription>
               </div>
             </div>
 
@@ -137,14 +136,14 @@ export function ContextualSettingsDrawer({
               variant="ghost"
               size="icon-sm"
               onClick={() => handleRequestClose(false)}
-              className="text-muted-foreground hover:text-foreground h-8 w-8 rounded-lg shrink-0"
+              className="text-muted-foreground hover:text-foreground h-8 w-8 rounded-lg shrink-0 cursor-pointer"
             >
               <X className="w-4 h-4" />
               <span className="sr-only">Close</span>
             </Button>
-          </div>
+          </DialogHeader>
 
-          {/* Drawer Body: Sidebar Tabs + Content Area */}
+          {/* Modal Body: Sidebar Tabs + Content Area */}
           <div className="flex-1 min-h-0 flex flex-col md:flex-row overflow-hidden">
             {/* Navigation Tabs Rail */}
             <div className="w-full md:w-56 lg:w-64 shrink-0 border-b md:border-b-0 md:border-r border-border/60 bg-muted/10 p-3 overflow-x-auto md:overflow-y-auto flex md:flex-col gap-1 custom-scrollbar">
@@ -208,7 +207,7 @@ export function ContextualSettingsDrawer({
           </div>
 
           {/* Sticky Footer Save Bar */}
-          <div className="shrink-0 px-5 py-3.5 border-t border-border/60 bg-muted/20 flex items-center justify-between gap-3">
+          <div className="shrink-0 px-5 sm:px-6 py-3.5 border-t border-border/60 bg-muted/20 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs">
               {hasUnsavedChanges ? (
                 <span className="flex items-center gap-1.5 text-amber-500 dark:text-amber-400 font-medium">
@@ -257,8 +256,8 @@ export function ContextualSettingsDrawer({
               )}
             </div>
           </div>
-        </SheetContent>
-      </Sheet>
+        </DialogContent>
+      </Dialog>
 
       {/* Unsaved Changes Confirmation Dialog */}
       <AlertDialog open={showExitConfirm} onOpenChange={setShowExitConfirm}>
@@ -288,3 +287,4 @@ export function ContextualSettingsDrawer({
     </>
   );
 }
+export { ContextualSettingsDrawer as ContextualSettingsModal };

@@ -1,7 +1,7 @@
 "use client"
 
 import * as React from "react"
-import { Dialog as DialogPrimitive } from "radix-ui"
+import { Dialog as DialogPrimitive, VisuallyHidden } from "radix-ui"
 
 import { cn } from "@/shared/lib/utils"
 import { Button } from "@/shared/ui/button"
@@ -67,6 +67,9 @@ function DialogContent({
         )}
         {...props}
       >
+        <VisuallyHidden.Root asChild>
+          <DialogPrimitive.Title>Modal Dialog</DialogPrimitive.Title>
+        </VisuallyHidden.Root>
         {children}
         {showCloseButton && (
           <DialogPrimitive.Close data-slot="dialog-close" asChild>
