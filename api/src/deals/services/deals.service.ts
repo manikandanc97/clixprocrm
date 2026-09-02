@@ -4,13 +4,17 @@ import {
   BadRequestException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EncryptionService } from '../../common/encryption/encryption.service';
 import { Prisma, DealStage } from '@prisma/client';
 import { CreateDealDto } from '../dto/create-deal.dto';
 import { UpdateDealDto } from '../dto/update-deal.dto';
 
 @Injectable()
 export class DealsService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly enc: EncryptionService,
+  ) {}
 
   async getDeals(tenantId: string, page = 1, limit = 10, search = '') {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
@@ -19,13 +23,6 @@ export class DealsService {
       const skip = (page - 1) * limit;
 
       const where: Prisma.DealWhereInput = { tenantId, deletedAt: null };
-      if (search) {
-        where.OR = [
-          { name: { contains: search, mode: 'insensitive' } },
-          { company: { name: { contains: search, mode: 'insensitive' } } },
-          { customer: { name: { contains: search, mode: 'insensitive' } } },
-        ];
-      }
 
       const [deals, total] = await Promise.all([
         tx.deal.findMany({
@@ -42,8 +39,23 @@ export class DealsService {
         tx.deal.count({ where }),
       ]);
 
+      const decryptedDeals = deals.map((d) => ({
+        ...d,
+        company: d.company ? { ...d.company, name: this.enc.decrypt(d.company.name) } : null,
+        customer: d.customer ? { ...d.customer, name: this.enc.decrypt(d.customer.name) } : null,
+      }));
+
+      const filteredDeals = search
+        ? decryptedDeals.filter(
+            (d) =>
+              d.name?.toLowerCase().includes(search.toLowerCase()) ||
+              d.company?.name?.toLowerCase().includes(search.toLowerCase()) ||
+              d.customer?.name?.toLowerCase().includes(search.toLowerCase()),
+          )
+        : decryptedDeals;
+
       return {
-        deals,
+        deals: filteredDeals,
         pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       };
     });
@@ -51,7 +63,7 @@ export class DealsService {
 
   async getDealById(tenantId: string, id: string) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      return tx.deal.findFirst({
+      const deal = await tx.deal.findFirst({
         where: { id, tenantId, deletedAt: null },
         include: {
           company: {
@@ -89,6 +101,28 @@ export class DealsService {
           timelineEvents: { orderBy: { createdAt: 'desc' }, take: 50 },
         },
       });
+
+      if (!deal) return null;
+
+      return {
+        ...deal,
+        company: deal.company
+          ? {
+              ...deal.company,
+              name: this.enc.decrypt(deal.company.name),
+              email: this.enc.decrypt(deal.company.email),
+              phone: this.enc.decrypt(deal.company.phone),
+            }
+          : null,
+        customer: deal.customer
+          ? {
+              ...deal.customer,
+              name: this.enc.decrypt(deal.customer.name),
+              email: this.enc.decrypt(deal.customer.email),
+              company: this.enc.decrypt(deal.customer.company),
+            }
+          : null,
+      };
     });
   }
 

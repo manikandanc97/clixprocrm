@@ -48,6 +48,8 @@ export interface ContextualSettingsDrawerProps {
   onSave?: () => Promise<void> | void;
   onReset?: () => void;
   className?: string;
+  autoSave?: boolean;
+  autoSaveStatus?: "saved" | "saving" | "idle";
 }
 
 export function ContextualSettingsDrawer({
@@ -64,6 +66,8 @@ export function ContextualSettingsDrawer({
   onSave,
   onReset,
   className,
+  autoSave = false,
+  autoSaveStatus = "idle",
 }: ContextualSettingsDrawerProps) {
   const [activeSectionId, setActiveSectionId] = useState<string>(
     defaultSection || sections[0]?.id || ""
@@ -85,7 +89,7 @@ export function ContextualSettingsDrawer({
   }, [sections, activeSectionId]);
 
   const handleRequestClose = (nextOpen: boolean) => {
-    if (!nextOpen && hasUnsavedChanges) {
+    if (!nextOpen && hasUnsavedChanges && !autoSave) {
       setShowExitConfirm(true);
       return;
     }
@@ -216,7 +220,24 @@ export function ContextualSettingsDrawer({
           {/* Sticky Footer Save Bar */}
           <div className="shrink-0 px-5 sm:px-6 py-3.5 border-t border-border/60 bg-muted/20 flex items-center justify-between gap-3">
             <div className="flex items-center gap-2 text-xs">
-              {hasUnsavedChanges ? (
+              {autoSave ? (
+                autoSaveStatus === "saving" ? (
+                  <span className="flex items-center gap-1.5 text-muted-foreground font-medium animate-in fade-in duration-150">
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600 dark:text-emerald-400" />
+                    Saving...
+                  </span>
+                ) : autoSaveStatus === "saved" ? (
+                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold animate-in fade-in duration-150">
+                    <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    ✓ Saved
+                  </span>
+                ) : (
+                  <span className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-medium">
+                    <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    ✓ Changes saved automatically
+                  </span>
+                )
+              ) : hasUnsavedChanges ? (
                 <span className="flex items-center gap-1.5 text-amber-600 dark:text-amber-400 font-semibold animate-in fade-in duration-200">
                   <AppIcon name="alert" icon={AlertTriangle} size={14} className="w-3.5 h-3.5 text-amber-500" />
                   Unsaved changes
@@ -240,7 +261,7 @@ export function ContextualSettingsDrawer({
               >
                 Close
               </Button>
-              {onSave && (
+              {!autoSave && onSave && (
                 <Button
                   type="button"
                   size="sm"

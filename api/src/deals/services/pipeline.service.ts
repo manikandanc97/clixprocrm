@@ -1,5 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { EncryptionService } from '../../common/encryption/encryption.service';
 import {
   calculateTrend,
   formatCurrency,
@@ -12,7 +13,10 @@ import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 
 @Injectable()
 export class PipelineService {
-  constructor(private readonly prisma: PrismaService) {}
+  constructor(
+    private readonly prisma: PrismaService,
+    private readonly enc: EncryptionService,
+  ) {}
 
   private async getTenantCurrency(tenantId: string): Promise<string> {
     return getCachedTenantCurrency(this.prisma, tenantId);
@@ -120,10 +124,14 @@ export class PipelineService {
         deal.expectedCloseDate ||
         new Date(deal.createdAt.getTime() + 30 * 24 * 60 * 60 * 1000);
 
+      const decryptedCompany = this.enc.decrypt(deal.company?.name);
+      const decryptedCustomer = this.enc.decrypt(deal.customer?.name);
+      const displayCompany = decryptedCompany || decryptedCustomer || '';
+
       return {
         id: deal.id,
         name: deal.name,
-        company: deal.company?.name || 'N/A',
+        company: displayCompany,
         value: formatCurrency(deal.value, currency),
         valueAmount: toNumber(deal.value),
         followUp: formatRelativeDate(
@@ -142,7 +150,7 @@ export class PipelineService {
           deal.expectedCloseDate,
         ].filter(Boolean).length,
         isStuck,
-        aiSummary: `Deal with ${deal.company?.name || 'Customer'} is progressing well. ${temperature === 'Hot' ? 'High engagement detected.' : 'Follow-up recommended.'}`,
+        aiSummary: `Deal with ${displayCompany || 'Customer'} is progressing well. ${temperature === 'Hot' ? 'High engagement detected.' : 'Follow-up recommended.'}`,
         createdAt: deal.createdAt.toISOString(),
       };
     });

@@ -451,8 +451,8 @@ describe('Core CRM Services RLS Phase 2 - Tenant Context Integration & Isolation
 
   describe('3. Deals & Pipeline Services', () => {
     it('executes DealsService and PipelineService inside isolated tenant context', async () => {
-      const dealsService = new DealsService(prismaService);
-      const pipelineService = new PipelineService(prismaService);
+      const dealsService = new DealsService(prismaService, enc);
+      const pipelineService = new PipelineService(prismaService, enc);
 
       await dealsService.createDeal('tenant-a', 'user-1', {
         name: 'Big Deal',

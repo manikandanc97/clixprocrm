@@ -537,13 +537,13 @@ export function ModalSkeleton() {
 
 export function KanbanSkeleton() {
   return (
-    <div className="flex gap-6 h-[calc(100vh-220px)] overflow-hidden pb-4">
+    <div className="flex-1 min-h-0 flex gap-5 h-full overflow-hidden pb-2">
       {Array.from({ length: 4 }).map((_, i) => (
         <div
           key={i}
-          className="w-80 flex-shrink-0 flex flex-col gap-4 bg-muted/20 p-4 rounded-2xl border border-border/60"
+          className="w-80 flex-shrink-0 flex flex-col gap-4 bg-muted/20 p-4 rounded-2xl border border-border/60 h-full"
         >
-          <div className="flex justify-between items-center pb-2 border-b border-border/40">
+          <div className="flex justify-between items-center pb-2 border-b border-border/40 shrink-0">
             <div className="flex items-center gap-2">
               <Skeleton className="w-2.5 h-2.5 rounded-full" />
               <Skeleton className="h-4 w-24" />
@@ -551,7 +551,7 @@ export function KanbanSkeleton() {
             <Skeleton className="h-5 w-7 rounded-full" />
           </div>
 
-          <div className="flex-1 space-y-3 overflow-hidden">
+          <div className="flex-1 min-h-0 space-y-3 overflow-hidden">
             {Array.from({ length: 3 }).map((_, j) => (
               <CRMCard key={j} className="p-4 space-y-3 shadow-sm border-border/60">
                 <Skeleton className="h-4 w-3/4" />

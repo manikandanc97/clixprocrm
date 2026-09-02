@@ -261,7 +261,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
   };
 
   return (
-    <div className="relative">
+    <div className="relative flex-1 min-h-0 flex flex-col h-full">
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -269,7 +269,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
         onDragOver={handleDragOver}
         onDragEnd={handleDragEnd}
       >
-        <div className="flex gap-6 overflow-x-auto pb-4 kanban-board-scroll -mx-8 px-8 h-[calc(100vh-260px)] min-h-[600px] items-start">
+        <div className="flex-1 min-h-0 flex gap-5 overflow-x-auto overflow-y-hidden pb-2.5 kanban-board-scroll items-stretch">
           {stages.map((stage) => {
             const stageItems = items.filter((item) => item.stage === stage);
 
@@ -287,7 +287,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
           {/* Add Stage Placeholder */}
           <div 
             onClick={handleAddStage}
-            className="min-w-[340px] max-w-[340px] h-full rounded-xl border-2 border-dashed border-border/60 bg-muted/10 flex flex-col items-center justify-center gap-4 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer group shadow-sm relative overflow-hidden"
+            className="min-w-[340px] max-w-[340px] h-full rounded-xl border-2 border-dashed border-border/60 bg-muted/10 flex flex-col items-center justify-center gap-4 text-muted-foreground hover:text-primary hover:border-primary/40 hover:bg-primary/5 transition-all cursor-pointer group shadow-sm relative overflow-hidden shrink-0"
           >
              {/* Subtle Background Pattern/Glow */}
              <div className="absolute inset-0 bg-gradient-to-b from-transparent to-muted/20 pointer-events-none" />
