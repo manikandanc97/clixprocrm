@@ -4,10 +4,8 @@ import { useEffect, useState, useMemo } from "react";
 import {
   CreditCard,
   Check,
-  Zap,
   Building2,
   Shield,
-  Layers,
   Sparkles,
   RefreshCw,
   Edit,
@@ -44,8 +42,6 @@ import {
 import {
   CRMPageContainer,
   CRMPageHeader,
-  CRMMetricsGrid,
-  CRMMetricCard,
 } from "@/shared/components/crm";
 import { compareFormValues } from "@/shared/hooks/use-dirty-form";
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
@@ -57,19 +53,6 @@ export default function SuperAdminPlansPage() {
   const [distribution, setDistribution] = useState<Record<string, number>>({});
   const [featureCatalog, setFeatureCatalog] = useState<FeatureCatalogItem[]>([]);
   const [aiModels, setAiModels] = useState<Array<{ id: string; modelKey: string; displayName: string; provider: string }>>([]);
-  const [metrics, setMetrics] = useState<{
-    activePlans: number;
-    totalOrganizations: number;
-    monthlyMRR: number;
-    projectedARR: number;
-    hasBillingData: boolean;
-  }>({
-    activePlans: 0,
-    totalOrganizations: 0,
-    monthlyMRR: 0,
-    projectedARR: 0,
-    hasBillingData: false,
-  });
 
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -102,7 +85,6 @@ export default function SuperAdminPlansPage() {
       setDistribution(res.distribution);
       setFeatureCatalog(res.featureCatalog);
       setAiModels(res.aiModels);
-      setMetrics(res.metrics);
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || "Failed to load subscription plans.";
       setError(msg);
@@ -190,8 +172,8 @@ export default function SuperAdminPlansPage() {
     // Clone plan object for safe editing and baseline comparison
     const cloned: PlatformPlanItem = {
       ...plan,
-      features: [...plan.features],
-      allowedModelIds: [...plan.allowedModelIds],
+      features: Array.isArray(plan.features) ? [...plan.features] : [],
+      allowedModelIds: Array.isArray(plan.allowedModelIds) ? [...plan.allowedModelIds] : [],
     };
     setIsCreatingNew(false);
     setEditingPlan(cloned);
@@ -322,19 +304,21 @@ export default function SuperAdminPlansPage() {
 
   const toggleFeature = (featureName: string) => {
     if (!editingPlan) return;
-    const exists = editingPlan.features.includes(featureName);
+    const currentFeatures = Array.isArray(editingPlan.features) ? editingPlan.features : [];
+    const exists = currentFeatures.includes(featureName);
     const updatedFeatures = exists
-      ? editingPlan.features.filter((f) => f !== featureName)
-      : [...editingPlan.features, featureName];
+      ? currentFeatures.filter((f) => f !== featureName)
+      : [...currentFeatures, featureName];
     setEditingPlan({ ...editingPlan, features: updatedFeatures });
   };
 
   const toggleAllowedModel = (modelId: string) => {
     if (!editingPlan) return;
-    const exists = editingPlan.allowedModelIds.includes(modelId);
+    const currentAllowed = Array.isArray(editingPlan.allowedModelIds) ? editingPlan.allowedModelIds : [];
+    const exists = currentAllowed.includes(modelId);
     let updated = exists
-      ? editingPlan.allowedModelIds.filter((id) => id !== modelId)
-      : [...editingPlan.allowedModelIds, modelId];
+      ? currentAllowed.filter((id) => id !== modelId)
+      : [...currentAllowed, modelId];
 
     // If default model was unchecked, pick another available one
     let newDefaultId = editingPlan.defaultModelId;
@@ -356,7 +340,6 @@ export default function SuperAdminPlansPage() {
         title="Plans & Subscriptions"
         subtitle="Manage canonical subscription tiers, real-time pricing models, resource quotas, AI entitlements, and custom tiers."
         icon={CreditCard}
-        badge="SaaS Pricing Engine"
         actions={[
           {
             label: "Create Plan",
@@ -386,50 +369,7 @@ export default function SuperAdminPlansPage() {
         </div>
       )}
 
-      {/* 2. Top Summary KPI Cards (Real DB Data Only) */}
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={3}>
-          <CRMMetricCard
-            title="Active Plans"
-            value={loading ? "..." : `${metrics.activePlans} Active`}
-            change={`${plans.length} Tiers Configured`}
-            trend="neutral"
-            icon={Layers}
-            color="blue"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Active Organizations"
-            value={loading ? "..." : `${metrics.totalOrganizations} Orgs`}
-            change="Real Multi-Tenant Subscriptions"
-            trend="up"
-            icon={Building2}
-            color="emerald"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Monthly Recurring Revenue"
-            value={
-              loading
-                ? "..."
-                : metrics.hasBillingData
-                ? formatPlanPrice(metrics.monthlyMRR, "INR")
-                : "Not enough billing data"
-            }
-            change={
-              metrics.hasBillingData
-                ? `Projected ARR: ${formatPlanPrice(metrics.projectedARR, "INR")}`
-                : "Awaiting active paid subscriptions"
-            }
-            trend={metrics.hasBillingData ? "up" : "neutral"}
-            icon={Zap}
-            color="purple"
-            loading={loading}
-          />
-        </CRMMetricsGrid>
-      </div>
-
-      {/* 3. Subscription Plans Cards Grid */}
+      {/* 2. Subscription Plans Cards Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
         {loading
           ? Array.from({ length: 4 }).map((_, idx) => (
@@ -453,13 +393,15 @@ export default function SuperAdminPlansPage() {
               </div>
             ))
           : plans.map((plan) => {
-              const orgCount = distribution[plan.id.toLowerCase()] || 0;
-              const isPopular = plan.highlight;
+              const planId = (plan.id || "").toLowerCase();
+              const orgCount = planId ? (distribution[planId] || 0) : 0;
+              const isPopular = Boolean(plan.highlight);
               const isCustom = plan.pricingMode === "CUSTOM";
+              const planFeatures = Array.isArray(plan.features) ? plan.features : [];
 
               return (
                 <div
-                  key={plan.id}
+                  key={plan.id || Math.random().toString()}
                   className={`rounded-2xl bg-card border p-6 flex flex-col justify-between shadow-card relative transition-all duration-200 hover:shadow-lg ${
                     isPopular
                       ? "border-emerald-500/50 ring-2 ring-emerald-500/20 bg-gradient-to-b from-card to-emerald-500/[0.02]"
@@ -538,7 +480,7 @@ export default function SuperAdminPlansPage() {
                         Key Entitlements:
                       </p>
                       <div className="space-y-2">
-                        {plan.features.slice(0, 5).map((feat, idx) => (
+                        {planFeatures.slice(0, 5).map((feat, idx) => (
                           <div key={idx} className="flex items-start gap-2 text-xs">
                             <Check className="h-3.5 w-3.5 text-emerald-500 shrink-0 mt-0.5" />
                             <span className="text-foreground/90 font-medium leading-tight">
@@ -546,9 +488,9 @@ export default function SuperAdminPlansPage() {
                             </span>
                           </div>
                         ))}
-                        {plan.features.length > 5 && (
+                        {planFeatures.length > 5 && (
                           <p className="text-[11px] font-medium text-muted-foreground pt-1">
-                            + {plan.features.length - 5} more features included
+                            + {planFeatures.length - 5} more features included
                           </p>
                         )}
                       </div>

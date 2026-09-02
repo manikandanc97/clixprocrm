@@ -42,8 +42,6 @@ import {
 import {
   CRMPageContainer,
   CRMPageHeader,
-  CRMMetricsGrid,
-  CRMMetricCard,
   CRMToolbar,
   CRMPagination,
   CRMRoleBadge,
@@ -205,15 +203,6 @@ export default function SuperAdminUsersPage() {
     toast.success("Users exported successfully.");
   };
 
-  const totalSuperAdmins = useMemo(
-    () => users.filter((u) => u.isSuperAdmin).length,
-    [users]
-  );
-  const totalActiveUsers = useMemo(
-    () => users.filter((u) => u.status === "ACTIVE").length,
-    [users]
-  );
-
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: SortDirection }>({
     key: "",
     direction: null,
@@ -331,40 +320,7 @@ export default function SuperAdminUsersPage() {
         </div>
       </div>
 
-      {/* 2. Standard CRM KPI Metrics Grid */}
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={3}>
-          <CRMMetricCard
-            title="Total Accounts"
-            value={users.length}
-            change={`${users.length} Registered`}
-            trend="neutral"
-            icon={Users}
-            color="blue"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Super Admins"
-            value={totalSuperAdmins}
-            change="Platform Root Admins"
-            trend="up"
-            icon={Crown}
-            color="purple"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Active Accounts"
-            value={totalActiveUsers}
-            change={`${users.length - totalActiveUsers} Inactive/Suspended`}
-            trend="up"
-            icon={ShieldCheck}
-            color="emerald"
-            loading={loading}
-          />
-        </CRMMetricsGrid>
-      </div>
-
-      {/* 3. Main Card Container matching Organizations Page */}
+      {/* Main Card Container matching Organizations Page */}
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">

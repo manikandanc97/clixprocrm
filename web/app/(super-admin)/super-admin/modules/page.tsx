@@ -46,8 +46,6 @@ import {
 import {
   CRMPageContainer,
   CRMPageHeader,
-  CRMMetricsGrid,
-  CRMMetricCard,
   CRMToolbar,
   CRMPagination,
   CRMActionMenu,
@@ -158,12 +156,9 @@ export default function SuperAdminModulesPage() {
   // Navigation Scope Tabs: "tenant" (Tenant CRM) vs "platform" (Super Admin)
   const [activeScope, setActiveScope] = useState<"tenant" | "platform">("tenant");
 
-  // Modules State & Stats
+  // Modules State
   const [tenantModules, setTenantModules] = useState<PlatformModule[]>([]);
-  const [stats, setStats] = useState({ total: 0, enabled: 0, disabled: 0, system: 0 });
-
   const [platformModules, setPlatformModules] = useState<PlatformModule[]>([]);
-  const [platformStats, setPlatformStats] = useState({ total: 0, enabled: 0, disabled: 0, system: 0 });
 
   const [loading, setLoading] = useState(true);
 
@@ -224,7 +219,6 @@ export default function SuperAdminModulesPage() {
     try {
       const res = await fetchPlatformModules({ navigationScope: "TENANT_CRM" });
       setTenantModules(res.modules || []);
-      if (res.stats) setStats(res.stats);
     } catch (err: any) {
       const errData = err?.response?.data;
       const isAal =
@@ -246,7 +240,6 @@ export default function SuperAdminModulesPage() {
     try {
       const res = await fetchPlatformModules({ navigationScope: "SUPER_ADMIN" });
       setPlatformModules(res.modules || []);
-      if (res.stats) setPlatformStats(res.stats);
     } catch (err: any) {
       // Silently handle error
     }
@@ -278,65 +271,6 @@ export default function SuperAdminModulesPage() {
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, [loadAllModules]);
-
-  // Dynamic KPI Stats based on active scope
-  const displayStats = useMemo(() => {
-    if (activeScope === "platform") {
-      const activeCount = platformModules.filter((m) => m.isEnabled).length;
-      const groupsCount = new Set(platformModules.map((m) => m.group)).size;
-      return {
-        card1Title: "Total System Menus",
-        card1Value: platformStats.total || platformModules.length,
-        card1Icon: Shield,
-        card1Color: "indigo" as const,
-        card1Text: "Root administration controls",
-
-        card2Title: "Active Routes",
-        card2Value: activeCount,
-        card2Icon: CheckCircle2,
-        card2Color: "emerald" as const,
-        card2Text: "Active in Super Admin sidebar",
-
-        card3Title: "Platform Domains",
-        card3Value: groupsCount,
-        card3Icon: FolderTree,
-        card3Color: "orange" as const,
-        card3Text: "System domain hierarchies",
-
-        card4Title: "Access Privilege",
-        card4Value: "Root IAM",
-        card4Icon: Lock,
-        card4Color: "violet" as const,
-        card4Text: "Super Admin & AAL2 protected",
-      };
-    }
-
-    return {
-      card1Title: "Total Modules",
-      card1Value: stats.total || tenantModules.length,
-      card1Icon: Boxes,
-      card1Color: "indigo" as const,
-      card1Text: "Registered platform features",
-
-      card2Title: "Active Modules",
-      card2Value: stats.enabled,
-      card2Icon: CheckCircle2,
-      card2Color: "emerald" as const,
-      card2Text: "Globally enabled for users",
-
-      card3Title: "Disabled Modules",
-      card3Value: stats.disabled,
-      card3Icon: XCircle,
-      card3Color: "orange" as const,
-      card3Text: "Hidden from navigation",
-
-      card4Title: "Core System",
-      card4Value: stats.system,
-      card4Icon: Shield,
-      card4Color: "violet" as const,
-      card4Text: "Protected foundations",
-    };
-  }, [activeScope, stats, platformStats, tenantModules, platformModules]);
 
   // Handle "+ Add" query param from deep link
   useEffect(() => {
@@ -803,39 +737,7 @@ export default function SuperAdminModulesPage() {
         </div>
       )}
 
-      {/* 2. KPI Metrics Grid */}
-      <CRMMetricsGrid cols={4}>
-        <CRMMetricCard
-          title={displayStats.card1Title}
-          value={displayStats.card1Value}
-          icon={displayStats.card1Icon}
-          color={displayStats.card1Color}
-          comparisonText={displayStats.card1Text}
-        />
-        <CRMMetricCard
-          title={displayStats.card2Title}
-          value={displayStats.card2Value}
-          icon={displayStats.card2Icon}
-          color={displayStats.card2Color}
-          comparisonText={displayStats.card2Text}
-        />
-        <CRMMetricCard
-          title={displayStats.card3Title}
-          value={displayStats.card3Value}
-          icon={displayStats.card3Icon}
-          color={displayStats.card3Color}
-          comparisonText={displayStats.card3Text}
-        />
-        <CRMMetricCard
-          title={displayStats.card4Title}
-          value={displayStats.card4Value}
-          icon={displayStats.card4Icon}
-          color={displayStats.card4Color}
-          comparisonText={displayStats.card4Text}
-        />
-      </CRMMetricsGrid>
-
-      {/* 3. Navigation Scope Tabs */}
+      {/* Navigation Scope Tabs */}
       <div className="flex items-center justify-between gap-3 p-1.5 rounded-2xl bg-card border border-border shadow-xs">
         <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/50">
           <button

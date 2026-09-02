@@ -46,9 +46,22 @@ export class AuthService {
       return cached.data;
     }
 
-    let user = await this.prisma.withTenantContext({ userId }, async (tx) => {
-      return tx.user.findUnique({
-        where: { id: userId },
+    let user = await this.prisma.user.findUnique({
+      where: { id: userId },
+      include: {
+        memberships: {
+          where: { status: 'ACTIVE' },
+          include: {
+            role: { include: { permissions: true } },
+            tenant: true,
+          },
+        },
+      },
+    });
+
+    if (!user && email) {
+      const emailUser = await this.prisma.user.findUnique({
+        where: { email },
         include: {
           memberships: {
             where: { status: 'ACTIVE' },
@@ -59,12 +72,12 @@ export class AuthService {
           },
         },
       });
-    });
 
-    if (!user && email) {
-      const emailUser = await this.prisma.withTenantContext({ userId }, async (tx) => {
-        return tx.user.findUnique({
-          where: { email },
+      if (emailUser) {
+        // Link the existing user by updating their ID to match Supabase UUID
+        user = await this.prisma.user.update({
+          where: { id: emailUser.id },
+          data: { id: userId },
           include: {
             memberships: {
               where: { status: 'ACTIVE' },
@@ -74,25 +87,6 @@ export class AuthService {
               },
             },
           },
-        });
-      });
-
-      if (emailUser) {
-        // Link the existing user by updating their ID to match Supabase UUID
-        user = await this.prisma.withTenantContext({ userId }, async (tx) => {
-          return tx.user.update({
-            where: { id: emailUser.id },
-            data: { id: userId },
-            include: {
-              memberships: {
-                where: { status: 'ACTIVE' },
-                include: {
-                  role: { include: { permissions: true } },
-                  tenant: true,
-                },
-              },
-            },
-          });
         });
       }
     }

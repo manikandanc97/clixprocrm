@@ -193,27 +193,36 @@ export class PlatformPlansService {
    * Retrieves all canonical plans with live organization counts, real MRR/ARR, and AI models.
    */
   async getPlans() {
-    await this.seedCanonicalPlansIfEmpty();
+    try {
+      await this.seedCanonicalPlansIfEmpty();
+    } catch (err: any) {
+      this.logger.warn(`seedCanonicalPlansIfEmpty error: ${err.message}`);
+    }
 
-    const [plans, tenantDistributionRaw, aiModels] = await Promise.all([
-      (this.prisma as any).plan.findMany({
-        orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
-        include: {
-          defaultModel: true,
-          aiEntitlements: {
-            include: { model: true },
+    try {
+      const [plans, tenantDistributionRaw, aiModels] = await Promise.all([
+        (this.prisma as any).plan.findMany({
+          orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
+          include: {
+            defaultModel: true,
+            aiEntitlements: {
+              include: { model: true },
+            },
           },
-        },
-      }),
-      (this.prisma as any).tenant.groupBy({
-        by: ['plan'],
-        _count: { _all: true },
-      }),
-      (this.prisma as any).aiModel.findMany({
-        where: { isAvailable: true, status: 'ENABLED', isChatModel: true },
-        orderBy: { sortOrder: 'asc' },
-      }),
-    ]);
+        }),
+        (this.prisma as any).tenant
+          .groupBy({
+            by: ['plan'],
+            _count: { _all: true },
+          })
+          .catch(() => []),
+        (this.prisma as any).aiModel
+          .findMany({
+            where: { isAvailable: true, status: 'ENABLED', isChatModel: true },
+            orderBy: { sortOrder: 'asc' },
+          })
+          .catch(() => []),
+      ]);
 
     const distribution: Record<string, number> = {};
     let totalOrganizations = 0;
@@ -317,6 +326,55 @@ export class PlatformPlansService {
         hasBillingData: totalOrganizations > 0,
       },
     };
+    } catch (err: any) {
+      this.logger.error(`getPlans database error: ${err.message}`);
+      const fallbackPlans = Object.values(CANONICAL_PLANS).map((p) => ({
+        id: p.id,
+        name: p.name,
+        description: p.description || '',
+        price: p.price,
+        priceNum: Number(p.priceNum),
+        annualPriceNum: Number(p.annualPriceNum || 0),
+        currency: p.currency || 'INR',
+        billing: `per ${p.billingInterval}`,
+        pricingMode: p.pricingMode || 'FIXED',
+        features: p.featureDescriptions || [],
+        maxUsers: p.limits.maxUsers,
+        maxLeads: p.limits.maxLeads,
+        maxContacts: p.limits.maxContacts,
+        storageGb: p.limits.storageGb,
+        maxApiRequests: p.limits.maxApiRequests,
+        trialDays: 14,
+        billingCycleMonthly: true,
+        billingCycleAnnual: true,
+        highlight: p.recommended || false,
+        isActive: true,
+        status: 'ACTIVE',
+        sortOrder: p.displayOrder || 0,
+        aiEnabled: p.aiConfig?.enabled ?? true,
+        aiLevel: p.aiConfig?.level || 'Standard AI',
+        dailyTokenLimit: p.aiConfig?.dailyTokenLimit || 50000,
+        defaultModelId: null,
+        defaultModel: null,
+        allowedModelIds: [],
+        allowedModels: [],
+        tenantCount: 0,
+      }));
+
+      return {
+        plans: fallbackPlans,
+        distribution: {},
+        featureCatalog: FEATURE_CATALOG,
+        aiModels: [],
+        metrics: {
+          activePlans: fallbackPlans.length,
+          totalOrganizations: 0,
+          monthlyMRR: 0,
+          projectedARR: 0,
+          hasBillingData: false,
+        },
+      };
+    }
   }
 
   /**

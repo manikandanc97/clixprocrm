@@ -166,16 +166,6 @@ export function SuperAdminModulesSkeleton() {
         badge="Module Management"
       />
 
-      {/* Metric Cards */}
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={4}>
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </CRMMetricsGrid>
-      </div>
-
       {/* Tab Scope Switcher */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 p-1.5 rounded-2xl bg-card border border-border shadow-xs shrink-0">
         <div className="flex items-center gap-1.5 p-1 bg-muted/60 rounded-xl border border-border/50">

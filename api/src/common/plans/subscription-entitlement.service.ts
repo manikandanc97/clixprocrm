@@ -189,7 +189,7 @@ export class SubscriptionEntitlementService {
       const dbPlans = await (this.prisma as any).plan.findMany({
         where: {
           status: 'ACTIVE',
-          id: { in: ['free', 'growth', 'business'] },
+          isActive: true,
         },
         orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
       });

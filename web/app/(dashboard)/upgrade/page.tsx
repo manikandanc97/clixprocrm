@@ -79,7 +79,7 @@ export default function UpgradePage() {
 
   const rawDisplayPlans = availablePlans && availablePlans.length > 0 ? availablePlans : Object.values(CANONICAL_PLANS);
   const displayPlans = rawDisplayPlans
-    .filter((p) => ["free", "growth", "business"].includes(normalizePlanId(p.id)))
+    .filter((p) => p.isActive !== false)
     .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
 
   // Pre-select plan if passed in query param
@@ -249,8 +249,8 @@ export default function UpgradePage() {
           </div>
         </div>
 
-        {/* 3 PRICING CARDS - Full width responsive grid matching CRM layout */}
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-5 items-stretch w-full">
+        {/* PRICING CARDS - Full width responsive grid matching CRM layout */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-5 items-stretch w-full">
           {displayPlans.map((planItem) => {
             const isCurrent = planItem.id === activePlanId;
             const isGrowth = planItem.recommended || planItem.id === "growth";
