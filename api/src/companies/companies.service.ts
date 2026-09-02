@@ -117,4 +117,100 @@ export class CompaniesService {
       return tx.company.update({ where: { id, tenantId }, data: updateData });
     });
   }
+
+  async deleteCompany(tenantId: string, id: string) {
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      return tx.company.update({
+        where: { id, tenantId },
+        data: { deletedAt: new Date() },
+      });
+    });
+  }
+
+  async bulkDeleteCompanies(tenantId: string, ids: string[]) {
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const result = await tx.company.updateMany({
+        where: { id: { in: ids }, tenantId },
+        data: { deletedAt: new Date() },
+      });
+      return { count: result.count };
+    });
+  }
+
+  async reassignIndustry(tenantId: string, oldIndustry: string, newIndustry: string) {
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const result = await tx.company.updateMany({
+        where: { tenantId, industry: oldIndustry, deletedAt: null },
+        data: { industry: newIndustry },
+      });
+      return { count: result.count };
+    });
+  }
+
+  async mergeCompanies(
+    tenantId: string,
+    primaryId: string,
+    secondaryId: string,
+  ) {
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const [primary, secondary] = await Promise.all([
+        tx.company.findFirst({ where: { id: primaryId, tenantId, deletedAt: null } }),
+        tx.company.findFirst({ where: { id: secondaryId, tenantId, deletedAt: null } }),
+      ]);
+
+      if (!primary || !secondary) {
+        throw new Error('Primary or secondary company not found');
+      }
+
+      // Move linked relations
+      await tx.customer.updateMany({
+        where: { companyId: secondaryId, tenantId },
+        data: { companyId: primaryId },
+      });
+
+      await tx.deal.updateMany({
+        where: { companyId: secondaryId, tenantId },
+        data: { companyId: primaryId },
+      });
+
+      await tx.invoice.updateMany({
+        where: { companyId: secondaryId, tenantId },
+        data: { companyId: primaryId },
+      });
+
+      await tx.lead.updateMany({
+        where: { companyId: secondaryId, tenantId },
+        data: { companyId: primaryId },
+      });
+
+      await tx.timelineEvent.updateMany({
+        where: { companyId: secondaryId, tenantId },
+        data: { companyId: primaryId },
+      });
+
+      // Fill in any missing metadata
+      const updates: any = {};
+      if (!primary.industry && secondary.industry) updates.industry = secondary.industry;
+      if (!primary.website && secondary.website) updates.website = secondary.website;
+      if (!primary.phone && secondary.phone) updates.phone = secondary.phone;
+      if (!primary.email && secondary.email) updates.email = secondary.email;
+      if (!primary.address && secondary.address) updates.address = secondary.address;
+      if (!primary.notes && secondary.notes) updates.notes = secondary.notes;
+
+      if (Object.keys(updates).length > 0) {
+        await tx.company.update({
+          where: { id: primaryId, tenantId },
+          data: updates,
+        });
+      }
+
+      // Soft delete the secondary duplicate record
+      await tx.company.update({
+        where: { id: secondaryId, tenantId },
+        data: { deletedAt: new Date() },
+      });
+
+      return { success: true, primaryId, secondaryId };
+    });
+  }
 }

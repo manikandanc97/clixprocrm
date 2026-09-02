@@ -42,3 +42,15 @@ export function bulkDeleteCompanies(ids: string[]) {
   return unwrapResponse<{ count: number }>(client.post("/crm/companies/bulk", { ids }));
 }
 
+export function reassignIndustry(oldIndustry: string, newIndustry: string) {
+  return unwrapResponse<{ count: number }>(
+    client.post("/crm/companies/reassign-industry", { oldIndustry, newIndustry })
+  );
+}
+
+export function mergeCompanies(primaryId: string, secondaryId: string) {
+  return unwrapResponse<{ success: boolean; primaryId: string; secondaryId: string }>(
+    client.post("/crm/companies/merge", { primaryId, secondaryId })
+  );
+}
+

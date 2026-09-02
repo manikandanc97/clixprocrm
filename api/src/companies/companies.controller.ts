@@ -2,6 +2,9 @@ import {
   Controller,
   Get,
   Post,
+  Patch,
+  Delete,
+  Param,
   Body,
   Query,
   UseGuards,
@@ -37,4 +40,65 @@ export class CompaniesController {
     );
     return { success: true, data };
   }
+
+  @Patch(':id')
+  @Roles('ADMIN', 'MANAGER', 'SALES')
+  async updateCompany(
+    @Req() req: any,
+    @Param('id') id: string,
+    @Body() body: Partial<CreateCompanyDto>,
+  ) {
+    const data = await this.companiesService.updateCompany(
+      req.tenantId,
+      id,
+      body,
+    );
+    return { success: true, data };
+  }
+
+  @Delete(':id')
+  @Roles('ADMIN', 'MANAGER')
+  async deleteCompany(@Req() req: any, @Param('id') id: string) {
+    const data = await this.companiesService.deleteCompany(req.tenantId, id);
+    return { success: true, data };
+  }
+
+  @Post('bulk')
+  @Roles('ADMIN', 'MANAGER')
+  async bulkDeleteCompanies(@Req() req: any, @Body() body: { ids: string[] }) {
+    const data = await this.companiesService.bulkDeleteCompanies(
+      req.tenantId,
+      body.ids || [],
+    );
+    return { success: true, data };
+  }
+
+  @Post('reassign-industry')
+  @Roles('ADMIN', 'MANAGER')
+  async reassignIndustry(
+    @Req() req: any,
+    @Body() body: { oldIndustry: string; newIndustry: string },
+  ) {
+    const data = await this.companiesService.reassignIndustry(
+      req.tenantId,
+      body.oldIndustry,
+      body.newIndustry,
+    );
+    return { success: true, data };
+  }
+
+  @Post('merge')
+  @Roles('ADMIN', 'MANAGER')
+  async mergeCompanies(
+    @Req() req: any,
+    @Body() body: { primaryId: string; secondaryId: string },
+  ) {
+    const data = await this.companiesService.mergeCompanies(
+      req.tenantId,
+      body.primaryId,
+      body.secondaryId,
+    );
+    return { success: true, data };
+  }
 }
+
