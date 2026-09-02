@@ -199,10 +199,10 @@ function EmptyStateButton({
   const variant = act.variant || (isPrimary ? "default" : "outline");
 
   const sizeClass = isSmall
-    ? "h-8 px-4 text-xs rounded-lg min-w-[110px]"
+    ? "h-7.5 px-3 text-xs rounded-lg min-w-[90px]"
     : isLarge
-    ? "h-11 px-7 text-sm rounded-xl min-w-[140px]"
-    : "h-10 px-6 text-xs sm:text-sm rounded-xl min-w-[130px]";
+    ? "h-10 px-6 text-sm rounded-xl min-w-[130px]"
+    : "h-8.5 px-4 text-xs font-semibold rounded-xl min-w-[110px]";
 
   const btnContent = (
     <>
@@ -210,8 +210,8 @@ function EmptyStateButton({
         <AppIcon
           name={act.label}
           icon={IconComp}
-          size={isSmall ? 14 : 16}
-          className={isSmall ? "w-3.5 h-3.5 mr-1.5 shrink-0" : "w-4 h-4 mr-2 shrink-0"}
+          size={isSmall ? 13 : 15}
+          className={isSmall ? "w-3 h-3 mr-1.5 shrink-0" : "w-3.5 h-3.5 mr-1.5 shrink-0"}
           aria-hidden="true"
         />
       )}
@@ -229,8 +229,8 @@ function EmptyStateButton({
         className={cn(
           "font-semibold transition-all duration-200 active:scale-[0.98]",
           isPrimary
-            ? "shadow-sm hover:shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
-            : "hover:bg-muted/80 border-border/80",
+            ? "shadow-xs hover:shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground"
+            : "hover:bg-muted/80 border-border/80 text-foreground",
           sizeClass,
           act.className
         )}
@@ -249,8 +249,8 @@ function EmptyStateButton({
       className={cn(
         "font-semibold transition-all duration-200 active:scale-[0.98]",
         isPrimary
-          ? "shadow-sm hover:shadow-md bg-primary hover:bg-primary/90 text-primary-foreground"
-          : "hover:bg-muted/80 border-border/80",
+          ? "shadow-xs hover:shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground"
+          : "hover:bg-muted/80 border-border/80 text-foreground",
         sizeClass,
         act.className
       )}
@@ -322,16 +322,16 @@ export function EmptyState({
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 8 }}
+      initial={{ opacity: 0, y: 6 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, ease: "easeOut" }}
+      transition={{ duration: 0.25, ease: "easeOut" }}
       className={cn(
-        "relative w-full rounded-2xl border border-border/60 bg-card/60 dark:bg-card/30 backdrop-blur-md shadow-xs select-none overflow-hidden transition-all duration-300 flex flex-col items-center justify-center text-center",
+        "relative w-full rounded-2xl border border-border/50 bg-card/50 dark:bg-card/25 backdrop-blur-md shadow-xs select-none overflow-hidden transition-all duration-300 flex flex-col items-center justify-center text-center",
         isSmall
-          ? "p-6 min-h-[200px]"
+          ? "p-4 min-h-[140px]"
           : isLarge
-          ? "flex-1 h-full p-8 sm:p-12 md:p-16 min-h-[380px]"
-          : "flex-1 h-full p-6 sm:p-10 md:p-12 min-h-[300px]",
+          ? "flex-1 h-full p-8 min-h-[280px]"
+          : "flex-1 h-full p-5 sm:p-6 min-h-[180px]",
         className
       )}
       role="region"
@@ -339,29 +339,29 @@ export function EmptyState({
     >
       {/* Subtle ambient lighting */}
       <div
-        className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden opacity-50 dark:opacity-30"
+        className="pointer-events-none absolute inset-0 -z-10 flex items-center justify-center overflow-hidden opacity-30 dark:opacity-20"
         aria-hidden="true"
       >
-        <div className="h-48 w-96 rounded-full bg-gradient-to-tr from-primary/15 via-primary/5 to-transparent blur-3xl" />
+        <div className="h-32 w-64 rounded-full bg-gradient-to-tr from-primary/15 via-primary/5 to-transparent blur-2xl" />
       </div>
 
-      <div className="max-w-xl mx-auto flex flex-col items-center my-auto">
+      <div className="max-w-md mx-auto flex flex-col items-center my-auto">
         {/* Icon Pill */}
-        <div className="relative mb-4 group shrink-0">
+        <div className="relative mb-3 group shrink-0">
           <div
-            className="absolute inset-0 bg-primary/15 dark:bg-primary/20 rounded-2xl blur-lg scale-125 transition-opacity opacity-75"
+            className="absolute inset-0 bg-primary/15 dark:bg-primary/20 rounded-2xl blur-md scale-110 transition-opacity opacity-70"
             aria-hidden="true"
           />
           <div
             className={cn(
-              "relative z-10 flex items-center justify-center rounded-2xl bg-background/90 dark:bg-card/90 border border-primary/20 text-primary shadow-xs",
-              isSmall ? "w-10 h-10" : "w-14 h-14"
+              "relative z-10 flex items-center justify-center rounded-2xl bg-background/95 dark:bg-card/95 border border-primary/20 text-primary shadow-xs transition-transform duration-200 group-hover:scale-105",
+              isSmall ? "w-8 h-8 rounded-xl" : isLarge ? "w-13 h-13" : "w-11 h-11"
             )}
           >
             <AppIcon
               name={module || title}
               icon={Icon}
-              size={isSmall ? 20 : 28}
+              size={isSmall ? 16 : isLarge ? 24 : 20}
               className="text-primary"
             />
           </div>
@@ -369,8 +369,8 @@ export function EmptyState({
 
         {/* Badge */}
         {badge && (
-          <span className="inline-flex items-center gap-1.5 px-3 py-1 mb-3 text-xs font-bold tracking-wider uppercase rounded-full bg-primary/10 text-primary border border-primary/20">
-            <Sparkles className="w-3 h-3" />
+          <span className="inline-flex items-center gap-1 px-2.5 py-0.5 mb-2.5 text-[10px] font-bold tracking-wider uppercase rounded-full bg-primary/10 text-primary border border-primary/20">
+            <Sparkles className="w-2.5 h-2.5" />
             {badge}
           </span>
         )}
@@ -379,25 +379,27 @@ export function EmptyState({
         <h3
           className={cn(
             "font-bold tracking-tight text-foreground",
-            isSmall ? "text-sm" : isLarge ? "text-2xl" : "text-lg sm:text-xl"
+            isSmall ? "text-xs sm:text-sm" : isLarge ? "text-lg sm:text-xl" : "text-sm sm:text-base"
           )}
         >
           {title}
         </h3>
 
         {/* Description */}
-        <p
-          className={cn(
-            "text-muted-foreground mt-2 leading-relaxed max-w-md mx-auto",
-            isSmall ? "text-xs max-w-xs" : "text-xs sm:text-sm"
-          )}
-        >
-          {description}
-        </p>
+        {description && (
+          <p
+            className={cn(
+              "text-muted-foreground mt-1 leading-relaxed max-w-sm mx-auto",
+              isSmall ? "text-[11px] max-w-xs" : "text-xs sm:text-[13px]"
+            )}
+          >
+            {description}
+          </p>
+        )}
 
         {/* Action Buttons */}
         {hasActions && (
-          <div className="flex flex-wrap items-center justify-center gap-3 mt-6 shrink-0">
+          <div className="flex flex-wrap items-center justify-center gap-2 mt-3.5 shrink-0">
             {resolvedPrimary && <EmptyStateButton action={resolvedPrimary} isPrimary size={size} />}
             {resolvedSecondary && <EmptyStateButton action={resolvedSecondary} isPrimary={false} size={size} />}
             {children}

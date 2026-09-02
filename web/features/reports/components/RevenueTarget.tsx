@@ -1,116 +1,125 @@
 "use client";
 
-import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { motion } from "framer-motion";
-import { Target, Calendar, ArrowUpRight, Settings, IndianRupee } from "lucide-react";
-import { EmptyStateCard } from "@/shared/components/page-states";
+import { Target, Settings, ArrowUpRight } from "lucide-react";
 import { RevenueTargetType } from "@/shared/types/report";
 import { useCurrency } from "@/shared/hooks/use-currency";
-import { useRouter } from "next/navigation";
 import { Button } from "@/shared/ui/button";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
-const RevenueTarget = ({ data }: { data: RevenueTargetType | null }) => {
-  const router = useRouter();
+interface RevenueTargetProps {
+  data: RevenueTargetType | null;
+  onOpenSettings?: () => void;
+}
+
+const RevenueTarget = ({ data, onOpenSettings }: RevenueTargetProps) => {
   const { currencySymbol, CurrencyIcon } = useCurrency();
   
-  if (!data) {
-    return (
-      <EmptyStateCard 
-        icon={Target} 
-        title="No revenue target" 
-        message="Revenue target data will appear when it is available from the backend." 
-        action={{ label: "Set Target", onClick: () => router.push("/settings?section=targets"), icon: Settings }}
-      />
-    );
-  }
-
-  const currentRevenue = data.revenue;
-  const targetRevenue = data.target;
+  const currentRevenue = data?.revenue ?? 0;
+  const targetRevenue = data?.target ?? 0;
   const percentage = targetRevenue > 0 ? Math.round((currentRevenue / targetRevenue) * 100) : (currentRevenue > 0 ? 100 : 0);
-  const remaining = targetRevenue > 0 ? targetRevenue - currentRevenue : 0;
-  
+  const remaining = targetRevenue > 0 ? Math.max(0, targetRevenue - currentRevenue) : 0;
+  const isPositive = data ? data.positive : false;
+  const changeText = targetRevenue > 0 ? (data?.change ?? `${percentage}%`) : "0%";
+
   const CurrencyBgIcon = CurrencyIcon;
 
   return (
-    <Card className="relative bg-primary text-primary-foreground rounded-xl border-transparent shadow-lg overflow-hidden flex flex-col transition-all duration-300 min-w-0">
-      {/* Decorative Background SVG */}
-      <CurrencyBgIcon className="absolute -right-8 -bottom-8 w-64 h-64 text-white/10 -rotate-12 pointer-events-none" />
-      
-      {/* Subtle Gradient Overlay */}
-      <div className="absolute inset-0 bg-gradient-to-br from-white/10 to-transparent pointer-events-none" />
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.1 }}
+      className="min-w-0 h-full flex flex-col"
+    >
+      <Card className="relative bg-primary text-primary-foreground rounded-2xl border border-primary/20 shadow-md overflow-hidden group min-w-0 h-full flex-1 flex flex-col justify-between select-none">
+        {/* Large Decorative Translucent Currency Icon in Background */}
+        <CurrencyBgIcon className="absolute -right-8 -bottom-8 w-60 h-60 text-primary-foreground/[0.08] -rotate-12 pointer-events-none select-none" />
+        
+        {/* Subtle Ambient Radial Highlight */}
+        <div className="absolute inset-0 bg-gradient-to-br from-white/15 via-transparent to-black/15 pointer-events-none" />
 
-      <CardHeader className="relative z-10 p-6 pb-2 flex flex-row items-center justify-between min-w-0">
-        <div className="flex items-center gap-3">
-          <div className="w-10 h-10 bg-white/20 text-white rounded-xl flex items-center justify-center shadow-inner shrink-0 backdrop-blur-md">
-            <Target className="w-5 h-5" />
-          </div>
-          <div className="space-y-0.5 min-w-0">
-            <CardTitle className="font-bold text-white text-lg tracking-tight truncate">Goal Progress</CardTitle>
-            <div className="flex items-center gap-2 text-primary-foreground/70 text-[10px] font-medium truncate">
-              <Calendar className="w-3 h-3" />
-              Database target
+        <CardHeader className="relative z-10 flex flex-row items-center justify-between p-5 pb-2">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 bg-primary-foreground/20 text-primary-foreground rounded-2xl flex items-center justify-center shadow-inner border border-primary-foreground/20 backdrop-blur-md shrink-0 transition-transform duration-300 group-hover:scale-110">
+              <AppIcon name="target" icon={Target} size={18} className="text-primary-foreground" />
+            </div>
+            <div>
+              <CardTitle className="font-bold text-primary-foreground text-base tracking-tight">Goal Progress</CardTitle>
+              <CardDescription className="text-primary-foreground/80 text-xs mt-0.5">Revenue target progress</CardDescription>
             </div>
           </div>
-        </div>
-        <div className="flex items-center gap-2 shrink-0">
-          <Button 
-            variant="ghost" 
-            size="icon" 
-            onClick={() => router.push("/settings?section=targets")}
-            className="w-8 h-8 rounded-full text-white/70 hover:text-white hover:bg-white/20 transition-colors"
-          >
-            <Settings className="w-4 h-4" />
-          </Button>
-        </div>
-      </CardHeader>
-      
-      <CardContent className="relative z-10 p-6 pt-4 flex flex-col space-y-6 min-w-0">
-        <div className="space-y-6 min-w-0">
-          <div className="flex items-end justify-between min-w-0">
-            <div className="min-w-0">
-              <p className="text-[10px] font-black text-primary-foreground/70 uppercase tracking-wider mb-1 truncate">Current Revenue</p>
-              <h3 className="text-3xl font-bold text-white tracking-tight truncate">{currencySymbol}{(currentRevenue/1000).toFixed(0)}k</h3>
-            </div>
-            <div className="text-right min-w-0">
-              <p className="text-[10px] font-black text-primary-foreground/70 uppercase tracking-wider mb-1 truncate">Target</p>
-              <h4 className="text-lg font-bold text-primary-foreground/90 tracking-tight truncate">{currencySymbol}{(targetRevenue/1000).toFixed(0)}k</h4>
-            </div>
-          </div>
-
-          <div className="space-y-3 min-w-0">
-            <div className="flex justify-between items-center mb-1 min-w-0">
-              <span className="text-xs font-bold text-white truncate">{percentage}% Achieved</span>
-              <div className={`flex items-center gap-1 font-bold text-[10px] uppercase shrink-0 ${data.positive ? "text-emerald-300" : "text-rose-300"}`}>
-                <ArrowUpRight className="w-3 h-3" />
-                {data.positive ? "On Track" : "Needs Attention"}
+          {onOpenSettings && (
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={onOpenSettings}
+              className="w-8 h-8 rounded-lg text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/20 transition-colors"
+            >
+              <Settings className="w-3.5 h-3.5" />
+            </Button>
+          )}
+        </CardHeader>
+        
+        <CardContent className="relative z-10 p-5 pt-2 flex flex-col justify-between space-y-5 min-w-0 flex-1">
+          <div className="space-y-4 min-w-0">
+            {/* Revenue Numbers */}
+            <div className="flex items-end justify-between min-w-0 pt-1">
+              <div className="min-w-0">
+                <p className="text-[11px] font-bold text-primary-foreground/80 uppercase tracking-wider mb-1">Current Revenue</p>
+                <h3 className="text-2xl sm:text-3xl font-extrabold text-primary-foreground tracking-tight">
+                  {currencySymbol}{currentRevenue >= 1000 ? `${(currentRevenue / 1000).toFixed(0)}k` : currentRevenue}
+                </h3>
+              </div>
+              <div className="text-right min-w-0">
+                <p className="text-[11px] font-bold text-primary-foreground/80 uppercase tracking-wider mb-1">Target</p>
+                <h4 className="text-lg sm:text-xl font-bold text-primary-foreground/90 tracking-tight">
+                  {currencySymbol}{targetRevenue >= 1000 ? `${(targetRevenue / 1000).toFixed(0)}k` : targetRevenue}
+                </h4>
               </div>
             </div>
-            <div className="relative h-3 w-full bg-black/20 rounded-full overflow-hidden shadow-inner min-w-0">
-              <motion.div
-                initial={{ width: 0 }}
-                animate={{ width: `${Math.min(percentage, 100)}%` }}
-                transition={{ duration: 1.5, ease: "easeOut" }}
-                className="h-full bg-white rounded-full shadow-[0_0_10px_rgba(255,255,255,0.5)] relative"
-              >
-                <div className="absolute inset-0 bg-[linear-gradient(45deg,rgba(0,0,0,.1)_25%,transparent_25%,transparent_50%,rgba(0,0,0,.1)_50%,rgba(0,0,0,.1)_75%,transparent_75%,transparent)] bg-[length:1rem_1rem] animate-[progress-bar-stripes_1s_linear_infinite]" />
-              </motion.div>
+
+            {/* Progress Bar & Status */}
+            <div className="space-y-2 min-w-0">
+              <div className="relative h-2.5 w-full bg-black/25 rounded-full overflow-hidden shadow-inner border border-primary-foreground/15">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${Math.min(percentage, 100)}%` }}
+                  transition={{ duration: 1, ease: "easeOut" }}
+                  className="h-full bg-primary-foreground rounded-full shadow-[0_0_12px_rgba(255,255,255,0.7)]"
+                />
+              </div>
+
+              <div className="flex justify-between items-center text-xs font-bold">
+                <span className="text-primary-foreground">{percentage}% Achieved</span>
+                <span className={`flex items-center gap-0.5 ${isPositive ? "text-primary-foreground/90" : "text-rose-200"}`}>
+                  <ArrowUpRight className="w-3.5 h-3.5" />
+                  {isPositive ? "On track" : "Needs attention"}
+                </span>
+              </div>
             </div>
           </div>
-        </div>
 
-        <div className="grid grid-cols-2 gap-3 min-w-0">
-          <div className="p-4 bg-black/10 backdrop-blur-sm rounded-xl space-y-0.5 min-w-0 border border-white/5">
-            <p className="text-[9px] font-bold text-primary-foreground/70 uppercase tracking-wider truncate">Remaining</p>
-            <p className="text-base font-bold text-white truncate">{currencySymbol}{(remaining/1000).toFixed(0)}k</p>
+          {/* Bottom stats cards */}
+          <div className="grid grid-cols-2 gap-3 pt-2">
+            <div className="p-3 bg-black/20 backdrop-blur-md rounded-xl border border-primary-foreground/10 space-y-0.5">
+              <p className="text-[10px] font-bold text-primary-foreground/75 uppercase tracking-wider">Remaining</p>
+              <p className="text-base sm:text-lg font-extrabold text-primary-foreground">
+                {currencySymbol}{remaining >= 1000 ? `${(remaining / 1000).toFixed(0)}k` : remaining}
+              </p>
+            </div>
+            <div className="p-3 bg-primary-foreground/15 backdrop-blur-md rounded-xl border border-primary-foreground/20 space-y-0.5">
+              <p className="text-[10px] font-bold text-primary-foreground/85 uppercase tracking-wider">Change</p>
+              <p className="text-base sm:text-lg font-extrabold text-primary-foreground">{changeText}</p>
+            </div>
           </div>
-          <div className="p-4 bg-white/10 backdrop-blur-sm rounded-xl space-y-0.5 min-w-0 border border-white/10">
-            <p className="text-[9px] font-bold text-primary-foreground/90 uppercase tracking-wider truncate">Change</p>
-            <p className="text-base font-bold text-white truncate">{data.change}</p>
-          </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
 export default RevenueTarget;
+
+
+

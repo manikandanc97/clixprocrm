@@ -1,18 +1,9 @@
 "use client";
 
-import { useState, useMemo } from "react";
-import { Badge } from "@/shared/ui/badge";
+import React from "react";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
-import { TrendingDown, TrendingUp, Trophy, ArrowUpRight, ChevronDown, ChevronLeft, ChevronRight, ChevronsLeft, ChevronsRight, Users } from "lucide-react";
-import { Button } from "@/shared/ui/button";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+import { ArrowUpRight, TrendingUp, Users } from "lucide-react";
 import { PerformanceType } from "@/shared/types/report";
-import { Progress } from "@/shared/ui/progress";
 import { 
   CRMDataTable, 
   CRMTableHeader, 
@@ -20,184 +11,136 @@ import {
   CRMTableRow, 
   CRMTableCell, 
   CRMTableHeaderCell,
-  CRMSortIndicator,
-  CRMPagination,
 } from "@/shared/components/crm";
-import { cn } from "@/shared/lib/utils";
 import { useCurrency } from "@/shared/hooks/use-currency";
+import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shared/ui/card";
+import { motion } from "framer-motion";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface PerformanceTableProps {
   performance: PerformanceType[];
+  onViewAll?: () => void;
 }
 
-type SortConfig = {
-  key: keyof PerformanceType;
-  direction: "asc" | "desc";
-} | null;
-
-const PerformanceTable = ({ performance }: PerformanceTableProps) => {
-  const [sortConfig, setSortConfig] = useState<SortConfig>(null);
+const PerformanceTable = ({ performance, onViewAll }: PerformanceTableProps) => {
   const { formatCurrency } = useCurrency();
 
-  const sortedPerformance = useMemo(() => {
-    if (!sortConfig) return performance;
-    return [...performance].sort((a, b) => {
-      const aVal = a[sortConfig.key] ?? "";
-      const bVal = b[sortConfig.key] ?? "";
-      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [performance, sortConfig]);
-
-  const handleSort = (key: keyof PerformanceType) => {
-    setSortConfig((prev) => {
-      if (prev?.key === key) {
-        if (prev.direction === "asc") return { key, direction: "desc" };
-        return null;
-      }
-      return { key, direction: "asc" };
-    });
-  };
-
-  const [currentPage, setCurrentPage] = useState(1);
-  const [rowsPerPage, setRowsPerPage] = useState(10);
-
-  const totalPages = Math.ceil(sortedPerformance.length / rowsPerPage);
-  const paginatedPerformance = sortedPerformance.slice(
-    (currentPage - 1) * rowsPerPage,
-    currentPage * rowsPerPage
-  );
+  const safeData = Array.isArray(performance) ? performance : [];
 
   return (
-    <div className="flex-1 min-h-0 flex flex-col w-full relative gap-3.5 sm:gap-4">
-      <div className="flex flex-col bg-card rounded-xl border border-border shadow-sm overflow-hidden flex-1 min-h-0">
-        <CRMDataTable hasPagination={sortedPerformance.length > rowsPerPage} containerClassName="border-0 shadow-none rounded-none w-full flex-1 min-h-0 h-full" className="w-full">
-          <CRMTableHeader className="sticky top-0 z-20 bg-card border-b border-border/60">
-            <CRMTableRow className="h-10 sm:h-11">
-              <CRMTableHeaderCell 
-                className="cursor-pointer group select-none bg-card"
-                onClick={() => handleSort("name")}
-              >
-                <div className="flex items-center gap-1.5">
-                  Team Member <CRMSortIndicator active={sortConfig?.key === "name"} direction={sortConfig?.direction} />
-                </div>
-              </CRMTableHeaderCell>
-              <CRMTableHeaderCell 
-                className="cursor-pointer group select-none"
-                onClick={() => handleSort("dealsClosed")}
-              >
-                <div className="flex items-center gap-1.5">
-                  Deals Closed <CRMSortIndicator active={sortConfig?.key === "dealsClosed"} direction={sortConfig?.direction} />
-                </div>
-              </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="bg-card">Revenue Target</CRMTableHeaderCell>
-              <CRMTableHeaderCell 
-                className="cursor-pointer group select-none bg-card"
-                onClick={() => handleSort("conversionRate")}
-              >
-                <div className="flex items-center gap-1.5">
-                  Conversion <CRMSortIndicator active={sortConfig?.key === "conversionRate"} direction={sortConfig?.direction} />
-                </div>
-              </CRMTableHeaderCell>
-              <CRMTableHeaderCell className="text-right bg-card">Trend</CRMTableHeaderCell>
-            </CRMTableRow>
-          </CRMTableHeader>
+    <motion.div
+      initial={{ opacity: 0, y: 15 }}
+      animate={{ opacity: 1, y: 0 }}
+      transition={{ duration: 0.3, delay: 0.4 }}
+      className="w-full flex flex-col"
+    >
+      <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden w-full flex flex-col">
+        <CardHeader className="flex flex-row items-center justify-between p-5 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <AppIcon name="team" icon={Users} size={18} className="text-indigo-600 dark:text-indigo-400" />
+            </div>
+            <div>
+              <CardTitle className="font-bold text-foreground text-base tracking-tight">Team Performance</CardTitle>
+              <CardDescription className="text-muted-foreground text-xs mt-0.5">
+                Detailed breakdown of sales representatives
+              </CardDescription>
+            </div>
+          </div>
+          {onViewAll && (
+            <button
+              onClick={onViewAll}
+              className="text-xs font-bold text-emerald-600 hover:text-emerald-700 dark:text-emerald-400 hover:underline cursor-pointer transition-colors"
+            >
+              View all
+            </button>
+          )}
+        </CardHeader>
 
-          <CRMTableBody>
-            {paginatedPerformance.length === 0 ? (
-              <CRMTableRow>
-                <CRMTableCell colSpan={5} className="h-24 text-center">
-                  <div className="flex flex-col items-center justify-center text-muted-foreground space-y-1">
-                    <Users className="h-8 w-8 text-slate-300" />
-                    <p className="text-sm font-medium text-slate-500">No team performance data available</p>
-                    <p className="text-xs text-slate-400">Assign leads to team members to see their performance here.</p>
-                  </div>
-                </CRMTableCell>
+        <CardContent className="p-0 overflow-x-auto">
+          <CRMDataTable containerClassName="border-0 shadow-none rounded-none w-full" className="w-full">
+            <CRMTableHeader className="bg-muted/30 border-b border-border/60">
+              <CRMTableRow className="h-9 hover:bg-transparent">
+                <CRMTableHeaderCell className="text-xs font-semibold text-muted-foreground pl-5">
+                  Team Member
+                </CRMTableHeaderCell>
+                <CRMTableHeaderCell className="text-xs font-semibold text-muted-foreground">
+                  Deals Closed
+                </CRMTableHeaderCell>
+                <CRMTableHeaderCell className="text-xs font-semibold text-muted-foreground">
+                  Revenue
+                </CRMTableHeaderCell>
+                <CRMTableHeaderCell className="text-xs font-semibold text-muted-foreground">
+                  Conversion
+                </CRMTableHeaderCell>
+                <CRMTableHeaderCell className="text-xs font-semibold text-muted-foreground pr-5 text-right">
+                  Trend
+                </CRMTableHeaderCell>
               </CRMTableRow>
-            ) : (
-              paginatedPerformance.map((item, idx) => (
-                <CRMTableRow key={item.id}>
-                  <CRMTableCell>
-                    <div className="flex items-center gap-4">
-                      <div className="relative">
-                        <Avatar className="w-10 h-10 rounded-lg border border-border bg-muted flex items-center justify-center font-bold text-xs">
-                          <AvatarFallback>
-                            {item.name.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase()}
-                          </AvatarFallback>
-                        </Avatar>
-                        {idx === 0 && (
-                          <div className="absolute -top-1 -right-1 bg-amber-500 text-white p-0.5 rounded-full shadow-sm">
-                            <Trophy className="w-3 h-3" />
-                          </div>
-                        )}
-                      </div>
-                      <div>
-                        <p className="font-semibold text-foreground transition-colors text-sm">{item.name}</p>
-                        <p className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Sales Representative</p>
-                      </div>
-                    </div>
-                  </CRMTableCell>
+            </CRMTableHeader>
 
-                  <CRMTableCell>
-                    <div className="flex items-center gap-2">
-                      <span className="text-base font-bold text-foreground">{item.dealsClosed}</span>
-                      <span className="text-[10px] text-muted-foreground font-bold uppercase tracking-wider">Deals</span>
-                    </div>
-                  </CRMTableCell>
-
-                  <CRMTableCell>
-                    <div className="w-48 space-y-2">
-                      <div className="flex justify-between text-[11px] font-bold">
-                        <span className="text-foreground">{formatCurrency(item.revenueValue)}</span>
-                      </div>
-                      <Progress value={item.revenueValue > 0 ? 100 : 0} className="h-1.5" />
-                    </div>
-                  </CRMTableCell>
-
-                  <CRMTableCell>
-                    <Badge variant="outline" className="border-none bg-primary/10 text-primary px-2.5 py-0.5 rounded-full font-bold text-[10px] uppercase tracking-wider">
-                      {item.conversionRate}
-                    </Badge>
-                  </CRMTableCell>
-
-                  <CRMTableCell className="text-right">
-                    <div className={cn(
-                      "flex items-center justify-end gap-1.5 font-bold text-xs",
-                      item.trendPositive ? "text-success" : "text-destructive"
-                    )}>
-                      {item.trendPositive ? <TrendingUp className="w-4 h-4" /> : <TrendingDown className="w-4 h-4" />}
-                      {item.trend}
-                      <div className={cn(
-                        "p-1 rounded-md ml-1",
-                        item.trendPositive ? "bg-success/10" : "bg-destructive/10"
-                      )}>
-                        <ArrowUpRight className={cn("w-3 h-3", !item.trendPositive && "rotate-90")} />
-                      </div>
+            <CRMTableBody>
+              {safeData.length === 0 ? (
+                <CRMTableRow>
+                  <CRMTableCell colSpan={5} className="h-24 text-center">
+                    <div className="flex flex-col items-center justify-center text-muted-foreground space-y-1">
+                      <Users className="h-6 w-6 text-muted-foreground/50" />
+                      <p className="text-xs font-medium text-foreground">No team members recorded</p>
                     </div>
                   </CRMTableCell>
                 </CRMTableRow>
-              ))
-            )}
-          </CRMTableBody>
-        </CRMDataTable>
-      </div>
+              ) : (
+                safeData.slice(0, 5).map((item) => (
+                  <CRMTableRow key={item.id} className="hover:bg-muted/30 transition-colors h-14">
+                    <CRMTableCell className="pl-5">
+                      <div className="flex items-center gap-3">
+                        <Avatar className="w-8 h-8 rounded-full border border-border/80 bg-muted flex items-center justify-center font-bold text-xs text-foreground shrink-0">
+                          <AvatarFallback className="bg-muted text-foreground">
+                            {item.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'}
+                          </AvatarFallback>
+                        </Avatar>
+                        <div className="min-w-0">
+                          <p className="font-bold text-foreground text-xs truncate">{item.name || "Member"}</p>
+                          <p className="text-[10px] text-muted-foreground font-semibold uppercase tracking-wider">
+                            Sales Representative
+                          </p>
+                        </div>
+                      </div>
+                    </CRMTableCell>
 
-      <CRMPagination
-        currentPage={currentPage}
-        totalPages={totalPages || 1}
-        totalItems={sortedPerformance.length}
-        rowsPerPage={rowsPerPage}
-        onPageChange={setCurrentPage}
-        onRowsPerPageChange={(size) => {
-          setRowsPerPage(size);
-          setCurrentPage(1);
-        }}
-        itemName="Performers"
-        pageSizeOptions={[10, 25, 50, 100]}
-      />
-    </div>
+                    <CRMTableCell>
+                      <span className="text-xs font-bold text-foreground">{item.dealsClosed}</span>
+                    </CRMTableCell>
+
+                    <CRMTableCell>
+                      <span className="text-xs font-bold text-foreground">
+                        {formatCurrency(item.revenueValue || 0)}
+                      </span>
+                    </CRMTableCell>
+
+                    <CRMTableCell>
+                      <span className="inline-flex items-center px-2 py-0.5 rounded-full text-[11px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400">
+                        {item.conversionRate || "0%"}
+                      </span>
+                    </CRMTableCell>
+
+                    <CRMTableCell className="pr-5 text-right">
+                      <div className="flex items-center justify-end gap-1 text-xs font-semibold text-emerald-600 dark:text-emerald-400">
+                        <TrendingUp className="w-3.5 h-3.5" />
+                        <span>{item.trend || "0%"}</span>
+                        <ArrowUpRight className="w-3.5 h-3.5" />
+                      </div>
+                    </CRMTableCell>
+                  </CRMTableRow>
+                ))
+              )}
+            </CRMTableBody>
+          </CRMDataTable>
+        </CardContent>
+      </Card>
+    </motion.div>
   );
 };
 
-export default PerformanceTable;
+export default React.memo(PerformanceTable);
+

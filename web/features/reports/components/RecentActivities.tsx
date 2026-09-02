@@ -1,66 +1,65 @@
 "use client";
 
 import React from "react";
-import { History, ActivityIcon } from "lucide-react";
+import { History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { RecentActivityType } from "@/shared/types/report";
 import { motion } from "framer-motion";
 import { formatRelativeDate } from "@/lib/crm-formatters";
-import { EmptyStateCard } from "@/shared/components/page-states";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface RecentActivitiesProps {
   data: RecentActivityType[];
   loading?: boolean;
 }
 
-const RecentActivities = ({ data, loading: _loading }: RecentActivitiesProps) => {
+const RecentActivities = ({ data }: RecentActivitiesProps) => {
+  const safeData = Array.isArray(data) ? data : [];
+
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.6 }}
-      className="h-full flex flex-col"
+      transition={{ duration: 0.3, delay: 0.3 }}
+      className="h-full flex flex-col min-w-0"
     >
-      <Card className="bg-card rounded-xl border-border shadow-sm overflow-hidden h-full flex flex-col flex-1">
-        <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <CardTitle className="font-bold text-foreground text-lg tracking-tight">Recent Activity</CardTitle>
-              <History className="w-4 h-4 text-blue-500" />
+      <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden h-full flex flex-col flex-1">
+        <CardHeader className="flex flex-row items-center justify-between p-5 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-purple-500/10 text-purple-600 border border-purple-500/20 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <AppIcon name="history" icon={History} size={18} className="text-purple-600 dark:text-purple-400" />
             </div>
-            <CardDescription className="text-muted-foreground text-xs mt-1">Latest actions across the CRM</CardDescription>
+            <div>
+              <CardTitle className="font-bold text-foreground text-base tracking-tight">Recent Activity</CardTitle>
+              <CardDescription className="text-muted-foreground text-xs mt-0.5">Latest actions across the CRM</CardDescription>
+            </div>
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 min-w-0 flex-1 overflow-y-auto max-h-[400px]">
-          {!data || data.length === 0 ? (
-            <div className="p-6">
-              <EmptyStateCard 
-                icon={ActivityIcon} 
-                title="No recent activity" 
-                message="Start interacting with leads and deals to see history here." 
-              />
+        <CardContent className="p-5 pt-0 min-w-0 flex-1 overflow-y-auto">
+          {safeData.length === 0 ? (
+            <div className="h-full min-h-[160px] flex flex-col items-center justify-center text-center p-4">
+              <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-2">
+                <History className="w-5 h-5 opacity-60" />
+              </div>
+              <p className="text-xs font-semibold text-foreground">No recent activity</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">CRM actions and timeline events will appear here</p>
             </div>
           ) : (
-            <div className="space-y-4 relative p-6 before:absolute before:inset-0 before:ml-11 before:-translate-x-px md:before:mx-auto md:before:translate-x-0 before:h-full before:w-0.5 before:bg-gradient-to-b before:from-transparent before:via-slate-200 before:to-transparent">
-              {data.map((activity) => (
-                <div key={activity.id} className="relative flex items-center justify-between md:justify-normal md:odd:flex-row-reverse group is-active">
-                  {/* Icon */}
-                  <div className="flex items-center justify-center w-10 h-10 rounded-full border-4 border-white bg-slate-50 text-slate-500 shadow shrink-0 md:order-1 md:group-odd:-translate-x-1/2 md:group-even:translate-x-1/2 z-10">
-                    <ActivityIcon className="w-4 h-4" />
-                  </div>
-                  {/* Card */}
-                  <div className="w-[calc(100%-4rem)] md:w-[calc(50%-2.5rem)] p-4 rounded-xl border border-slate-100 bg-white shadow-sm transition-all hover:shadow-md">
-                    <div className="flex items-center justify-between mb-1">
-                      <div className="font-bold text-slate-900 text-sm">{activity.action}</div>
-                      <time className="text-[10px] font-medium text-slate-500">{formatRelativeDate(activity.createdAt)}</time>
-                    </div>
-                    {activity.description && <div className="text-xs text-slate-500">{activity.description}</div>}
-                    <div className="mt-2 text-[10px] text-slate-400 font-medium">
-                      {activity.userName && <span>By {activity.userName}</span>}
-                      {activity.userName && activity.leadName && <span> • </span>}
-                      {activity.leadName && <span>For {activity.leadName}</span>}
-                    </div>
+            <div className="space-y-4">
+              {safeData.slice(0, 5).map((activity, index) => (
+                <div key={activity.id || index} className="flex items-start gap-3">
+                  <div className="w-2 h-2 rounded-full bg-emerald-500 mt-1.5 shrink-0" />
+                  <div className="flex-1 min-w-0 space-y-0.5">
+                    <p className="text-xs font-bold text-foreground truncate">
+                      {activity.action || "Stage changed"}
+                    </p>
+                    <p className="text-xs font-medium text-muted-foreground truncate uppercase">
+                      {activity.description || (activity.leadName ? `${activity.leadName}` : "Updated record")}
+                    </p>
+                    <p className="text-[10px] text-muted-foreground/80">
+                      {formatRelativeDate(activity.createdAt)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -73,3 +72,4 @@ const RecentActivities = ({ data, loading: _loading }: RecentActivitiesProps) =>
 };
 
 export default React.memo(RecentActivities);
+

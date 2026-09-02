@@ -132,14 +132,6 @@ export default function SuperAdminSettingsPage() {
         subtitle="Global application configuration, environment settings, and multi-tenant feature toggles."
         icon={Settings}
         badge="System Configuration"
-        actions={[
-          {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadSettings,
-            variant: "outline",
-          },
-        ]}
       />
 
       <form onSubmit={handleSave} className="space-y-6">

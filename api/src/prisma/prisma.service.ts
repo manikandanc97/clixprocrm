@@ -22,31 +22,62 @@ export class PrismaService
 {
   private readonly logger = new Logger(PrismaService.name);
 
+  private isReady = false;
+  private readyPromise: Promise<void> | null = null;
+
   constructor(@Optional() private readonly tenantContext?: TenantContextService) {
     super();
   }
 
   async onModuleInit() {
+    this.readyPromise = this.connectWithRetry();
+    await this.readyPromise;
+  }
+
+  /**
+   * Helper to allow other services or background startup tasks to await DB readiness safely.
+   */
+  async waitUntilReady(): Promise<void> {
+    if (this.isReady) return;
+    if (this.readyPromise) {
+      await this.readyPromise;
+      return;
+    }
+    this.readyPromise = this.connectWithRetry();
+    await this.readyPromise;
+  }
+
+  private async connectWithRetry(): Promise<void> {
     const maxRetries = 5;
+    const initialBackoffMs = 1000;
+
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
       try {
         await this.$connect();
+        this.isReady = true;
         this.logger.log('Database connected successfully');
         return;
       } catch (err: any) {
+        this.isReady = false;
+        const delay = Math.min(initialBackoffMs * Math.pow(2, attempt - 1), 10000);
         this.logger.warn(
-          `Database connection attempt ${attempt}/${maxRetries} failed: ${err.message}`,
+          `Database connection attempt ${attempt}/${maxRetries} failed: ${err.message}. Retrying in ${delay}ms...`,
         );
         if (attempt === maxRetries) {
           throw err;
         }
-        await new Promise((resolve) => setTimeout(resolve, attempt * 1500));
+        await new Promise((resolve) => setTimeout(resolve, delay));
       }
     }
   }
 
   async onModuleDestroy() {
-    await this.$disconnect();
+    try {
+      this.isReady = false;
+      await this.$disconnect();
+    } catch (err: any) {
+      this.logger.warn(`Notice during database disconnect: ${err.message}`);
+    }
   }
 
   /**

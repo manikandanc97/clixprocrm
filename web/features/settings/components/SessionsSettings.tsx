@@ -128,16 +128,6 @@ export default function SessionsSettings() {
           </div>
 
           <div className="flex items-center gap-2">
-            <Button
-              variant="outline"
-              size="sm"
-              onClick={() => void refetchSessions()}
-              disabled={sessionsLoading}
-              className="text-xs font-semibold gap-1.5 h-9"
-            >
-              <RefreshCw className={`w-3.5 h-3.5 ${sessionsLoading ? "animate-spin" : ""}`} />
-              Refresh
-            </Button>
             {sessionsData?.sessions && sessionsData.sessions.filter((s) => !s.isCurrent && !s.isRevoked).length > 0 && (
               <Button
                 variant="outline"

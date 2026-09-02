@@ -74,14 +74,6 @@ export default function SuperAdminAnalyticsPage() {
         subtitle="Cross-tenant SaaS metrics, MRR projections, growth velocity, and system telemetry."
         icon={BarChart3}
         badge="Platform Telemetry"
-        actions={[
-          {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadData,
-            variant: "outline",
-          },
-        ]}
       />
 
       {/* 2. Standard CRM KPI Metrics Grid */}

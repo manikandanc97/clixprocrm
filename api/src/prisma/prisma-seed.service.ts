@@ -8,7 +8,7 @@ export class PrismaSeedService implements OnModuleInit {
   constructor(private readonly prisma: PrismaService) {}
 
   onModuleInit() {
-    // Run canonical sync in background to avoid blocking HTTP server startup
+    // Run canonical sync in background after ensuring DB connection is ready
     this.runCanonicalSeed().catch((err) => {
       this.logger.error(`Error during canonical data initialization: ${err?.message || err}`);
     });
@@ -16,6 +16,9 @@ export class PrismaSeedService implements OnModuleInit {
 
   async runCanonicalSeed() {
     try {
+      // Ensure database connectivity is established before running seed queries
+      await this.prisma.waitUntilReady();
+
       await this.seedCanonicalPlans();
       await this.seedCanonicalAiModels();
       await this.seedCanonicalEntitlements();
@@ -27,11 +30,6 @@ export class PrismaSeedService implements OnModuleInit {
   }
 
   async seedCanonicalPlans() {
-    const planCount = await (this.prisma as any).plan.count();
-    if (planCount > 0) {
-      return;
-    }
-
     const plans = [
       {
         id: 'free',
@@ -146,8 +144,10 @@ export class PrismaSeedService implements OnModuleInit {
     ];
 
     for (const plan of plans) {
-      await (this.prisma as any).plan.create({
-        data: plan,
+      await (this.prisma as any).plan.upsert({
+        where: { id: plan.id },
+        update: {},
+        create: plan,
       });
     }
   }

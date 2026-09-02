@@ -741,12 +741,6 @@ export default function SuperAdminModulesPage() {
         icon={Layers}
         actions={[
           {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadAllModules,
-            variant: "outline",
-          },
-          {
             label: "Add Menu",
             icon: Plus,
             onClick: handleOpenCreate,
@@ -971,7 +965,7 @@ export default function SuperAdminModulesPage() {
           {loading ? (
             <ModulesTableSkeleton />
           ) : filteredModules.length === 0 ? (
-            <div className="flex flex-col items-center justify-center min-h-[360px] py-12">
+            <div className="flex flex-col items-center justify-center py-8">
               <EmptyState
                 icon={activeScope === "tenant" ? Boxes : Shield}
                 title={
@@ -984,7 +978,7 @@ export default function SuperAdminModulesPage() {
                     ? "Try clearing your search query or group filter to view all navigation menus."
                     : "Click '+ Add Menu' to register your first navigation item."
                 }
-                className="border-none bg-transparent shadow-none p-0"
+                className="border-none bg-transparent shadow-none p-0 min-h-0"
               />
             </div>
           ) : (

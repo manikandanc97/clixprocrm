@@ -48,10 +48,6 @@ const ConversionChart = ({ data, loading }: ConversionChartProps) => {
                 label: "Export Chart Data",
                 icon: Download,
               },
-              {
-                label: "Refresh Data",
-                icon: RefreshCw,
-              },
             ]}
           />
         </CardHeader>

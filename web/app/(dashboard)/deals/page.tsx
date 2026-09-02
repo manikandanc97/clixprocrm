@@ -2,7 +2,7 @@
 
 import { useState, useMemo, useEffect } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import { Handshake, Plus, TrendingUp, Target, Banknote, List, GitBranch, Filter, ArrowUpDown, Settings } from "lucide-react";
+import { Handshake, Plus, TrendingUp, Target, Banknote, Filter, ArrowUpDown, Settings } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import dynamic from "next/dynamic";
 import {
@@ -13,30 +13,26 @@ import {
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 
-import { TableSkeleton, KanbanSkeleton } from "@/shared/components/skeletons";
+import { KanbanSkeleton } from "@/shared/components/skeletons";
 
-const DealsTable = dynamic(() => import("@/features/deals/components/DealsTable").then(mod => ({ default: mod.DealsTable })), {
-  loading: () => <TableSkeleton rows={8} cols={7} showPagination={true} />
-});
 const PipelineBoard = dynamic(() => import("@/features/pipeline/components/PipelineBoard"), {
   loading: () => <KanbanSkeleton />
 });
 
 import { PageErrorState } from "@/shared/components/page-states";
 import { DealsSkeleton } from "@/features/deals/components/DealsSkeleton";
-import { useDeals, useDeleteDeal, useBulkDeleteDeals, usePipeline } from "@/shared/hooks/use-crm";
+import { usePipeline } from "@/shared/hooks/use-crm";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { 
   CRMMetricCard, 
   CRMToolbar,
   CRMPageContainer,
-  CRMMetricsGrid,
-  CRMPageHeader
+  CRMMetricsGrid
 } from "@/shared/components/crm";
 import { FormModal } from "@/shared/components/form-modal";
 import { DealForm } from "@/features/forms/DealForm";
-import { useViewMode } from "@/shared/hooks/useViewMode";
 import { formatCurrency } from "@/lib/crm-formatters";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { DealContextualSettings } from "@/features/deals/components/DealContextualSettings";
@@ -49,38 +45,13 @@ const DealsPage = () => {
   const currency = useCRMStore((state) => state.currency);
   
   const [searchQuery, setSearchQuery] = useState("");
-  const [stageFilter, setStageFilter] = useState("all");
   
   // Pipeline specific state
   const [pipelineSort, setPipelineSort] = useState("created_desc");
   const [pipelineFilter, setPipelineFilter] = useState("all");
 
-  const [viewMode, setViewMode] = useViewMode("deals", "list");
-
-  // Sync viewMode with URL
-  useEffect(() => {
-    const v = searchParams.get("view");
-    if (v === "pipeline" && viewMode !== "pipeline") {
-      setViewMode("pipeline");
-    } else if (viewMode === "pipeline" && v !== "pipeline") {
-      const params = new URLSearchParams(searchParams.toString());
-      params.set("view", "pipeline");
-      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-    } else if (viewMode !== "pipeline" && v === "pipeline") {
-      const params = new URLSearchParams(searchParams.toString());
-      params.delete("view");
-      window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-    }
-  }, [searchParams, viewMode, setViewMode]);
-
-  const { data: dealsData, isLoading: dealsLoading, isPending: dealsPending, error: dealsError, refetch: refetchDeals } = useDeals();
   const { data: pipelineData, isLoading: pipelineLoading, isPending: pipelinePending, error: pipelineError, refetch: refetchPipeline } = usePipeline();
 
-  const deleteDeal = useDeleteDeal();
-  const deleteDealsBulk = useBulkDeleteDeals();
-  
-  const safeDeals = useMemo(() => Array.isArray(dealsData?.deals) ? dealsData.deals : [], [dealsData]);
-  
   const { pipelineItems, setPipelineItems } = useCRMStore();
   const safePipelineItems = Array.isArray(pipelineItems) ? pipelineItems : [];
 
@@ -118,55 +89,32 @@ const DealsPage = () => {
     }
   }, [pipelineData?.items, setPipelineItems]);
 
-  const filteredDeals = useMemo(() => {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return safeDeals.filter((deal: any) => {
-      const normalizedQuery = searchQuery.toLowerCase();
-      const matchesSearch =
-        deal.name?.toLowerCase().includes(normalizedQuery) ||
-        deal.company?.name?.toLowerCase().includes(normalizedQuery);
-      
-      const matchesStage =
-        stageFilter === "all" || (deal.stage || "NEW").toLowerCase() === stageFilter.toLowerCase();
-      
-      return matchesSearch && matchesStage;
-    });
-  }, [safeDeals, searchQuery, stageFilter]);
-
   const handleNewDeal = (stage?: string) => {
     setPreselectedStage(stage);
     setIsAddModalOpen(true);
   };
 
-  const isInitialLoading =
-    viewMode === "pipeline"
-      ? !pipelineData && (pipelineLoading || pipelinePending || !isHydrated || !isAuthenticated || isInitializing)
-      : !dealsData && (dealsLoading || dealsPending || !isHydrated || !isAuthenticated || isInitializing);
+  const isInitialLoading = !pipelineData && (pipelineLoading || pipelinePending || !isHydrated || !isAuthenticated || isInitializing);
 
   if (isInitialLoading) {
-    return <DealsSkeleton viewMode={viewMode} />;
+    return <DealsSkeleton />;
   }
 
-  if ((dealsError && viewMode !== "pipeline") || (pipelineError && viewMode === "pipeline")) {
+  if (pipelineError) {
     return (
       <PageErrorState
         title="Error Loading Deals"
         message="An error occurred while fetching deals"
-        onRetry={() => { refetchDeals(); refetchPipeline(); }}
+        onRetry={() => { refetchPipeline(); }}
       />
     );
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const totalValue = safeDeals.reduce((acc: number, d: any) => acc + (parseFloat(d.value) || 0), 0);
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const wonDeals = safeDeals.filter((d: any) => d.stage === "WON");
-
   let filteredPipelineItems = [...safePipelineItems];
   if (searchQuery) {
     filteredPipelineItems = filteredPipelineItems.filter(item => 
-      item.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-      item.company.toLowerCase().includes(searchQuery.toLowerCase())
+      item.name?.toLowerCase().includes(searchQuery.toLowerCase()) ||
+      item.company?.toLowerCase().includes(searchQuery.toLowerCase())
     );
   }
   if (pipelineFilter === "hot") {
@@ -184,28 +132,61 @@ const DealsPage = () => {
 
   return (
     <CRMPageContainer twoStageScroll>
-      <CRMPageHeader 
-        title="Deals & Pipeline"
-        subtitle="Track sales opportunities, manage stages, and forecast revenue."
-        icon={Handshake}
-        badge="Sales Operations"
-        actions={[
-          {
-            label: "Customize",
-            icon: Settings,
-            onClick: () => setIsCustomizeOpen(true),
-            variant: "outline",
-          },
-          {
-            label: "New Deal",
-            icon: Plus,
-            onClick: () => handleNewDeal(),
-            variant: "default"
-          }
-        ]}
-      />
+      {/* 1. Header Layout */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div
+            data-animate-target="true"
+            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+          >
+            <AppIcon
+              name="deals"
+              icon={Handshake}
+              size={18}
+              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
+            />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              Deals & Pipeline
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Track sales opportunities, manage stages, and forecast revenue.
+            </p>
+          </div>
+        </div>
 
-      {(viewMode === "pipeline" ? safePipelineItems.length === 0 : safeDeals.length === 0) ? (
+        <div className="flex items-center gap-2">
+          <Button
+            variant="outline"
+            onClick={() => setIsCustomizeOpen(true)}
+            className="group font-semibold text-xs h-9 px-3 rounded-lg shadow-xs gap-1.5 cursor-pointer border-border/70 bg-background hover:bg-muted/50 text-foreground"
+          >
+            <AppIcon
+              name="settings"
+              icon={Settings}
+              size={14}
+              className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0"
+            />
+            <span>Customize</span>
+          </Button>
+
+          <Button
+            onClick={() => handleNewDeal()}
+            className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
+          >
+            <AppIcon
+              name="plus"
+              icon={Plus}
+              size={14}
+              className="w-3.5 h-3.5 text-white shrink-0"
+            />
+            <span>Create Deal</span>
+          </Button>
+        </div>
+      </div>
+
+      {safePipelineItems.length === 0 ? (
         <div className="flex-1 min-h-0 flex flex-col">
           <EmptyState
             module="deals"
@@ -222,7 +203,7 @@ const DealsPage = () => {
             <CRMMetricsGrid cols={3}>
               <CRMMetricCard 
                 title="Total Opportunities"
-                value={viewMode === "pipeline" ? safePipelineItems.length : safeDeals.length}
+                value={safePipelineItems.length}
                 change="0%"
                 trend="up"
                 icon={Target}
@@ -230,18 +211,18 @@ const DealsPage = () => {
                 delay={0.1}
               />
               <CRMMetricCard 
-                title={viewMode === "pipeline" ? "Stuck Deals" : "Deals Won"}
-                value={viewMode === "pipeline" ? safePipelineItems.filter(item => item.isStuck).length : wonDeals.length}
+                title="Stuck Deals"
+                value={safePipelineItems.filter(item => item.isStuck).length}
                 change="0%"
-                trend={viewMode === "pipeline" && safePipelineItems.filter(item => item.isStuck).length > 0 ? "down" : "up"}
+                trend={safePipelineItems.filter(item => item.isStuck).length > 0 ? "down" : "up"}
                 icon={TrendingUp}
-                color={viewMode === "pipeline" ? "pink" : "emerald"}
+                color="pink"
                 delay={0.2}
               />
               <CRMMetricCard 
                 title="Pipeline Value"
                 value={formatCurrency(
-                  viewMode === "pipeline" ? safePipelineItems.reduce((acc, item) => acc + (item.valueAmount || 0), 0) : totalValue, 
+                  safePipelineItems.reduce((acc, item) => acc + (item.valueAmount || 0), 0), 
                   currency
                 )}
                 change="0%"
@@ -255,106 +236,60 @@ const DealsPage = () => {
 
           <div className="crm-table-workspace-sticky">
             <CRMToolbar 
-                searchQuery={searchQuery}
-                setSearchQuery={setSearchQuery}
-                viewMode={viewMode}
-                setViewMode={(m: string) => {
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  setViewMode(m as any);
-                  const params = new URLSearchParams(searchParams.toString());
-                  if (m === "pipeline") {
-                    params.set("view", "pipeline");
-                  } else {
-                    params.delete("view");
-                  }
-                  window.history.replaceState({}, "", `${window.location.pathname}?${params.toString()}`);
-                }}
-                viewOptions={[
-                  { id: "list", icon: List, label: "Table" },
-                  { id: "pipeline", icon: GitBranch, label: "Pipeline" },
-                ]}
-                placeholder="Search deals by name or company..."
-                sticky={false}
-              >
-                {viewMode === "pipeline" ? (
-                  <div className="flex items-center gap-2">
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 border-dashed">
-                          <Filter className="w-4 h-4 mr-2" />
-                          Filter
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuRadioGroup value={pipelineFilter} onValueChange={setPipelineFilter}>
-                          <DropdownMenuRadioItem value="all">All Deals</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="hot">Hot Deals</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="stuck">Stuck Deals</DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
+              searchQuery={searchQuery}
+              setSearchQuery={setSearchQuery}
+              placeholder="Search deals by name or company..."
+              sticky={false}
+            >
+              <div className="flex items-center gap-2">
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 border-dashed">
+                      <Filter className="w-4 h-4 mr-2" />
+                      Filter
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuRadioGroup value={pipelineFilter} onValueChange={setPipelineFilter}>
+                      <DropdownMenuRadioItem value="all">All Deals</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="hot">Hot Deals</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="stuck">Stuck Deals</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
 
-                    <DropdownMenu>
-                      <DropdownMenuTrigger asChild>
-                        <Button variant="outline" size="sm" className="h-8 border-dashed">
-                          <ArrowUpDown className="w-4 h-4 mr-2" />
-                          Sort
-                        </Button>
-                      </DropdownMenuTrigger>
-                      <DropdownMenuContent align="end" className="w-48">
-                        <DropdownMenuRadioGroup value={pipelineSort} onValueChange={setPipelineSort}>
-                          <DropdownMenuRadioItem value="created_desc">Newest First</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="value_desc">Highest Value</DropdownMenuRadioItem>
-                          <DropdownMenuRadioItem value="prob_desc">Highest Probability</DropdownMenuRadioItem>
-                        </DropdownMenuRadioGroup>
-                      </DropdownMenuContent>
-                    </DropdownMenu>
-                  </div>
-                ) : (
-                  <div className="flex items-center gap-2 overflow-x-auto pb-1 md:pb-0 hide-scrollbar">
-                    {["All", "New", "Qualified", "Proposal", "Negotiation", "Won", "Lost"].map((stage) => (
-                      <Button
-                        key={stage}
-                        variant={stageFilter === stage.toLowerCase() ? "secondary" : "ghost"}
-                        size="sm"
-                        onClick={() => setStageFilter(stage.toLowerCase())}
-                        className="h-8 px-3 text-xs font-semibold whitespace-nowrap"
-                      >
-                        {stage.replace("_", " ")}
-                      </Button>
-                    ))}
-                  </div>
-                )}
-              </CRMToolbar>
+                <DropdownMenu>
+                  <DropdownMenuTrigger asChild>
+                    <Button variant="outline" size="sm" className="h-8 border-dashed">
+                      <ArrowUpDown className="w-4 h-4 mr-2" />
+                      Sort
+                    </Button>
+                  </DropdownMenuTrigger>
+                  <DropdownMenuContent align="end" className="w-48">
+                    <DropdownMenuRadioGroup value={pipelineSort} onValueChange={setPipelineSort}>
+                      <DropdownMenuRadioItem value="created_desc">Newest First</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="value_desc">Highest Value</DropdownMenuRadioItem>
+                      <DropdownMenuRadioItem value="prob_desc">Highest Probability</DropdownMenuRadioItem>
+                    </DropdownMenuRadioGroup>
+                  </DropdownMenuContent>
+                </DropdownMenu>
+              </div>
+            </CRMToolbar>
 
             <div className="flex-1 min-h-0 flex flex-col">
               <AnimatePresence mode="wait">
-                {(viewMode === "pipeline" ? filteredPipelineItems.length > 0 : filteredDeals.length > 0) ? (
+                {filteredPipelineItems.length > 0 ? (
                   <motion.div
-                    key={viewMode}
+                    key="pipeline-view"
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
                     exit={{ opacity: 0 }}
                     className="flex-1 flex flex-col min-h-0"
                   >
-                    {viewMode !== "pipeline" ? (
-                      <DealsTable 
-                        deals={filteredDeals} 
-                        onEdit={(deal) => {
-                          setSelectedDeal(deal);
-                          setIsAddModalOpen(true);
-                        }}
-                        onDelete={(id) => {
-                          if (id.includes(",")) deleteDealsBulk.mutate(id.split(","));
-                          else deleteDeal.mutate(id);
-                        }}
-                      />
-                    ) : (
-                      <PipelineBoard 
-                        items={filteredPipelineItems} 
-                        onAddDeal={handleNewDeal} 
-                      />
-                    )}
+                    <PipelineBoard 
+                      items={filteredPipelineItems} 
+                      onAddDeal={handleNewDeal} 
+                    />
                   </motion.div>
                 ) : (
                   <EmptyState
@@ -365,7 +300,6 @@ const DealsPage = () => {
                       label: "Clear Filters",
                       onClick: () => {
                         setSearchQuery("");
-                        setStageFilter("all");
                         setPipelineFilter("all");
                       },
                       variant: "outline",
@@ -392,7 +326,7 @@ const DealsPage = () => {
           initialData={selectedDeal || undefined}
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
           initialStage={preselectedStage as any}
-          onSuccess={() => { setIsAddModalOpen(false); setSelectedDeal(null); refetchDeals(); refetchPipeline(); }} 
+          onSuccess={() => { setIsAddModalOpen(false); setSelectedDeal(null); refetchPipeline(); }} 
           onCancel={() => { setIsAddModalOpen(false); setSelectedDeal(null); }} 
         />
       </FormModal>

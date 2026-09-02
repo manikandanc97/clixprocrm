@@ -1,71 +1,66 @@
 "use client";
 
 import React from "react";
-import { Users, Building2, Crown } from "lucide-react";
+import { Crown, Users } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { TopCustomerType } from "@/shared/types/report";
 import { motion } from "framer-motion";
 import { useCurrency } from "@/shared/hooks/use-currency";
-import { EmptyStateCard } from "@/shared/components/page-states";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface TopCustomersProps {
   data: TopCustomerType[];
   loading?: boolean;
 }
 
-const TopCustomers = ({ data, loading: _loading }: TopCustomersProps) => {
+const TopCustomers = ({ data }: TopCustomersProps) => {
   const { formatCurrency } = useCurrency();
+
+  const safeData = Array.isArray(data) ? data : [];
 
   return (
     <motion.div
-      initial={{ opacity: 0, y: 20 }}
+      initial={{ opacity: 0, y: 15 }}
       animate={{ opacity: 1, y: 0 }}
-      transition={{ delay: 0.5 }}
-      className="h-full flex flex-col"
+      transition={{ duration: 0.3, delay: 0.25 }}
+      className="h-full flex flex-col min-w-0"
     >
-      <Card className="bg-card rounded-xl border-border shadow-sm overflow-hidden h-full flex flex-col flex-1">
-        <CardHeader className="flex flex-row items-center justify-between p-6 pb-4">
-          <div className="space-y-1">
-            <div className="flex items-center gap-2">
-              <CardTitle className="font-bold text-foreground text-lg tracking-tight">Top Customers</CardTitle>
-              <Crown className="w-4 h-4 text-amber-500" />
+      <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden h-full flex flex-col flex-1">
+        <CardHeader className="flex flex-row items-center justify-between p-5 pb-3">
+          <div className="flex items-center gap-3">
+            <div className="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <AppIcon name="topCustomers" icon={Crown} size={18} className="text-amber-600 dark:text-amber-400" />
             </div>
-            <CardDescription className="text-muted-foreground text-xs mt-1">Highest revenue generating clients</CardDescription>
+            <div>
+              <CardTitle className="font-bold text-foreground text-base tracking-tight">Top Customers</CardTitle>
+              <CardDescription className="text-muted-foreground text-xs mt-0.5">Highest revenue generating clients</CardDescription>
+            </div>
           </div>
         </CardHeader>
 
-        <CardContent className="p-0 min-w-0 flex-1 overflow-y-auto max-h-[400px]">
-          {!data || data.length === 0 || !data.some((c) => (c.revenue || 0) > 0) ? (
-            <div className="p-6">
-              <EmptyStateCard 
-                icon={Users} 
-                title="No customers yet" 
-                message="Win deals to see your top customers here." 
-              />
+        <CardContent className="p-5 pt-0 min-w-0 flex-1 overflow-y-auto">
+          {safeData.length === 0 ? (
+            <div className="h-full min-h-[160px] flex flex-col items-center justify-center text-center p-4">
+              <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-2">
+                <Users className="w-5 h-5 opacity-60" />
+              </div>
+              <p className="text-xs font-semibold text-foreground">No customers yet</p>
+              <p className="text-[11px] text-muted-foreground mt-0.5">Win deals to see top revenue clients here</p>
             </div>
           ) : (
-            <div className="divide-y divide-border">
-              {data.map((customer, index) => (
-                <div key={customer.id} className="flex items-center justify-between p-4 hover:bg-muted/50 transition-colors">
-                  <div className="flex items-center gap-3">
-                    <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-xs ${
-                      index === 0 ? 'bg-amber-100 text-amber-600' :
-                      index === 1 ? 'bg-slate-100 text-slate-600' :
-                      index === 2 ? 'bg-orange-100 text-orange-600' :
-                      'bg-blue-50 text-blue-600'
-                    }`}>
-                      #{index + 1}
-                    </div>
-                    <div>
-                      <p className="text-sm font-semibold text-foreground">{customer.name}</p>
-                      <div className="flex items-center gap-1 text-xs text-muted-foreground mt-0.5">
-                        <Building2 className="w-3 h-3" />
-                        {customer.company}
-                      </div>
-                    </div>
+            <div className="space-y-3">
+              {safeData.slice(0, 5).map((customer, index) => (
+                <div key={customer.id || index} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/40 transition-colors">
+                  <div className="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center font-bold text-[11px] shrink-0">
+                    #{index + 1}
                   </div>
-                  <div className="text-right">
-                    <p className="text-sm font-bold text-foreground">{formatCurrency(customer.revenue)}</p>
+                  <div className="flex-1 min-w-0">
+                    <p className="text-xs font-semibold text-foreground truncate">
+                      {customer.name || customer.company || `Customer ${index + 1}`}
+                    </p>
+                    <p className="text-[11px] font-bold text-muted-foreground mt-0.5">
+                      {formatCurrency(customer.revenue || 0)}
+                    </p>
                   </div>
                 </div>
               ))}
@@ -78,3 +73,4 @@ const TopCustomers = ({ data, loading: _loading }: TopCustomersProps) => {
 };
 
 export default React.memo(TopCustomers);
+

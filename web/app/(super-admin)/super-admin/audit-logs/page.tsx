@@ -234,12 +234,6 @@ export default function SuperAdminAuditLogsPage() {
             onClick: exportCSV,
             variant: "outline",
           },
-          {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadLogs,
-            variant: "outline",
-          },
         ]}
       />
 
@@ -510,13 +504,13 @@ export default function SuperAdminAuditLogsPage() {
                 ))
               ) : (
                 <tr>
-                  <td colSpan={6} className="p-8 text-center text-muted-foreground align-middle">
-                    <div className="flex flex-col items-center justify-center min-h-[360px] py-12">
+                  <td colSpan={6} className="p-6 text-center text-muted-foreground align-middle border-0">
+                    <div className="flex flex-col items-center justify-center py-6">
                       <EmptyState
                         icon={ScrollText}
                         title="No audit logs found"
                         description="No logs match your filter criteria."
-                        className="border-none bg-transparent shadow-none p-0"
+                        className="border-none bg-transparent shadow-none p-0 min-h-0"
                       />
                     </div>
                   </td>

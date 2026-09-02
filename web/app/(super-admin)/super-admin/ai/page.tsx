@@ -206,12 +206,6 @@ export default function SuperAdminAiPage() {
             onClick: () => router.push("/super-admin/copilot"),
             variant: "default",
           },
-          {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadData,
-            variant: "outline",
-          },
         ]}
       />
 

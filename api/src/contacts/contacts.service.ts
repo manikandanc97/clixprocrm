@@ -24,36 +24,7 @@ export class ContactsService implements OnModuleInit {
   ) {}
 
   async onModuleInit() {
-    this.cleanupCustomerAnomalies().catch((err) => {
-      this.logger.error('Failed to cleanup customer anomalies', err);
-    });
-  }
-
-  private async ensureDatabaseColumns() {
-    try {
-      await this.prisma.$executeRawUnsafe(
-        `ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "isConverted" BOOLEAN DEFAULT false;`,
-      );
-      await this.prisma.$executeRawUnsafe(
-        `ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "convertedAt" TIMESTAMP(3);`,
-      );
-      await this.prisma.$executeRawUnsafe(
-        `ALTER TABLE "Lead" ADD COLUMN IF NOT EXISTS "customerId" TEXT;`,
-      );
-      await this.prisma.$executeRawUnsafe(
-        `ALTER TABLE "Customer" ADD COLUMN IF NOT EXISTS "leadId" TEXT;`,
-      );
-    } catch {
-      // Ignore if columns already exist
-    }
-  }
-
-  private async cleanupCustomerAnomalies() {
-    try {
-      await this.ensureDatabaseColumns();
-    } catch (error) {
-      this.logger.error('Cleanup anomalies non-fatal error', error);
-    }
+    // Database schema is managed via Prisma migrations
   }
 
   async getCustomers(tenantId: string, query: PaginationQueryDto) {

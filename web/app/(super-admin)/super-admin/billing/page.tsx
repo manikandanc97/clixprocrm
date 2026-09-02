@@ -482,12 +482,6 @@ export default function SuperAdminBillingPage() {
             variant: "outline",
           },
           {
-            label: "Refresh",
-            icon: RefreshCw,
-            onClick: loadData,
-            variant: "outline",
-          },
-          {
             label: "Configure Subscription",
             icon: Plus,
             onClick: () => setIsCreateSubModalOpen(true),
@@ -946,11 +940,12 @@ export default function SuperAdminBillingPage() {
                     ))
                   ) : paginatedSubscriptions.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-12">
+                      <td colSpan={8} className="py-6 border-0">
                         <EmptyState
                           title="No platform subscriptions found"
                           description="No tenant organizations match your search or filter criteria."
                           icon={CreditCard}
+                          className="border-none bg-transparent shadow-none p-0 min-h-0"
                           action={{
                             label: "Create Subscription",
                             onClick: () => setIsCreateSubModalOpen(true),
@@ -1143,11 +1138,12 @@ export default function SuperAdminBillingPage() {
                     ))
                   ) : paginatedInvoices.length === 0 ? (
                     <tr>
-                      <td colSpan={8} className="py-12">
+                      <td colSpan={8} className="py-6 border-0">
                         <EmptyState
                           title="No platform SaaS invoices found"
                           description="No platform invoices match your search or filter criteria."
                           icon={Receipt}
+                          className="border-none bg-transparent shadow-none p-0 min-h-0"
                         />
                       </td>
                     </tr>

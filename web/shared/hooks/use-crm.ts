@@ -602,6 +602,27 @@ export function useDeleteTask() {
   });
 }
 
+export function useBulkDeleteTasks() {
+  const queryClient = useQueryClient();
+  return useMutation({
+    mutationFn: async (ids: string[]) => {
+      await Promise.all(ids.map((id) => deleteTask(id)));
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["tasks"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
+      queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["leads"] });
+      queryClient.invalidateQueries({ queryKey: ["customers"] });
+      queryClient.invalidateQueries({ queryKey: ["deals"] });
+    },
+    onError: (error: Error) => {
+      toast.error(error.message || "Failed to delete tasks");
+    },
+  });
+}
+
 export function useUpdateTaskStatus() {
   const queryClient = useQueryClient();
   return useMutation({

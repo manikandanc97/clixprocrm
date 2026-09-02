@@ -1,18 +1,28 @@
 import { CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
 import { 
-  PageHeaderSkeleton, 
   MetricCardSkeleton, 
   ToolbarSkeleton, 
-  TableSkeleton,
   KanbanSkeleton
 } from "@/shared/components/skeletons";
+import { Skeleton } from "@/shared/ui/skeleton";
 
-export function DealsSkeleton({ viewMode = "list" }: { viewMode?: string }) {
-  const isPipeline = viewMode === "pipeline";
-
+export function DealsSkeleton() {
   return (
     <CRMPageContainer>
-      <PageHeaderSkeleton />
+      {/* Header Skeleton */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <Skeleton className="h-10 w-10 rounded-xl" />
+          <div className="space-y-1.5">
+            <Skeleton className="h-5 w-36 rounded" />
+            <Skeleton className="h-3 w-64 rounded" />
+          </div>
+        </div>
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-9 w-24 rounded-lg" />
+          <Skeleton className="h-9 w-28 rounded-lg" />
+        </div>
+      </div>
       <div className="shrink-0">
         <CRMMetricsGrid cols={3}>
           <MetricCardSkeleton />
@@ -27,13 +37,7 @@ export function DealsSkeleton({ viewMode = "list" }: { viewMode?: string }) {
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col">
-          {isPipeline ? (
-            <KanbanSkeleton />
-          ) : (
-            <div className="p-1">
-              <TableSkeleton rows={10} cols={7} showPagination={true} />
-            </div>
-          )}
+          <KanbanSkeleton />
         </div>
       </div>
     </CRMPageContainer>

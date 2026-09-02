@@ -1,48 +1,66 @@
 "use client";
 
 import { useState, useEffect, useMemo } from "react";
-import { BarChart3, Download, Calendar, TrendingUp, Users, Target, RefreshCcw } from "lucide-react";
+import { 
+  BarChart3, 
+  Download, 
+  Calendar, 
+  RefreshCcw, 
+  Users, 
+  Target, 
+  TrendingUp, 
+  ChevronDown 
+} from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
 import { PageErrorState } from "@/shared/components/page-states";
 import { ReportsSkeleton } from "@/features/reports/components/ReportsSkeleton";
 import { useReports } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
-import { CRMPageHeader, CRMMetricCard, CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
+import { CRMMetricCard, CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { Button } from "@/shared/ui/button";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/shared/ui/dropdown-menu";
 import { Sheet, SheetContent, SheetHeader, SheetTitle, SheetDescription } from "@/shared/ui/sheet";
 import { toast } from "sonner";
 import RevenueTargetSettings from "@/features/settings/components/RevenueTargetSettings";
+import { useAuth } from "@/features/auth/components/auth-provider";
+import { cn } from "@/shared/lib/utils";
 
 const RevenueChart = dynamic(() => import("@/features/reports/components/RevenueChart"));
-const ConversionChart = dynamic(() => import("@/features/reports/components/ConversionChart"));
-const PerformanceTable = dynamic(() => import("@/features/reports/components/PerformanceTable"));
-const AnalyticsSummary = dynamic(() => import("@/features/reports/components/AnalyticsSummary"));
-const SalesFunnel = dynamic(() => import("@/features/reports/components/SalesFunnel"));
 const RevenueTarget = dynamic(() => import("@/features/reports/components/RevenueTarget"));
 const LeadSourceChart = dynamic(() => import("@/features/reports/components/LeadSourceChart"));
 const SalesActivities = dynamic(() => import("@/features/reports/components/SalesActivities"));
 const TopCustomers = dynamic(() => import("@/features/reports/components/TopCustomers"));
 const RecentActivities = dynamic(() => import("@/features/reports/components/RecentActivities"));
 const UpcomingFollowUps = dynamic(() => import("@/features/reports/components/UpcomingFollowUps"));
-const AIInsights = dynamic(() => import("@/features/reports/components/AIInsights"));
+const PerformanceTable = dynamic(() => import("@/features/reports/components/PerformanceTable"));
 
-import { EmptyState } from "@/shared/components/EmptyState";
-import { useRouter } from "next/navigation";
-import { LayoutDashboard, UserPlus } from "lucide-react";
-import React from "react";
+type PeriodKey = "all" | "today" | "this_week" | "this_month" | "this_quarter" | "this_year";
 
-import { useAuth } from "@/features/auth/components/auth-provider";
+const PERIOD_LABELS: Record<PeriodKey, string> = {
+  all: "All Time",
+  today: "Today",
+  this_week: "This Week",
+  this_month: "This Month",
+  this_quarter: "This Quarter",
+  this_year: "This Year",
+};
 
 const ReportsPage = () => {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
-  const router = useRouter();
   const searchParams = useSearchParams();
-  const [filters, setFilters] = useState<{ startDate?: string, endDate?: string, assignedToId?: string }>({});
+  const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>("this_month");
+  const [filters, setFilters] = useState<{ startDate?: string; endDate?: string; assignedToId?: string }>({});
   const [isTargetsConfigOpen, setIsTargetsConfigOpen] = useState(false);
   
   const { data, isLoading: loading, isPending, error, refetch, isFetching } = useReports(filters);
-  
-  const { CurrencyIcon } = useCurrency();
+  const { CurrencyIcon, formatCurrency } = useCurrency();
 
   useEffect(() => {
     const cust = searchParams.get("customize");
@@ -51,51 +69,51 @@ const ReportsPage = () => {
     }
   }, [searchParams]);
 
-  const hasReportsData = useMemo(() => {
-    if (!data) return false;
-
-    // Check if any metric in stats is non-zero
-    const hasNonZeroStats = (data.stats || []).some((s) => {
-      const num = typeof s.value === "string" 
-        ? parseFloat(s.value.replace(/[^0-9.-]+/g, "")) 
-        : Number(s.value);
-      return !isNaN(num) && num > 0;
-    });
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hasRevenue = (data.revenueChart || []).some((r: any) => Number(r.revenue ?? r.total ?? r.value ?? 0) > 0);
-    const hasPerformance = (data.performance || []).some((p) => Number(p.dealsClosed || p.revenueValue || 0) > 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hasFunnel = (data.funnel || []).some((f: any) => Number(f.count || f.value || 0) > 0);
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const hasSalesActivities = (data.salesActivities || []).some((s: any) => Number(s.value || 0) > 0);
-    const hasRecentActivities = (data.recentActivities?.length || 0) > 0;
-    const hasTopCustomers = (data.topCustomers || []).some((c) => Number(c.revenue || 0) > 0);
-    const hasUpcomingFollowUps = (data.upcomingFollowUps?.length || 0) > 0;
-
-    return Boolean(
-      hasNonZeroStats ||
-      hasRevenue ||
-      hasPerformance ||
-      hasFunnel ||
-      hasSalesActivities ||
-      hasRecentActivities ||
-      hasTopCustomers ||
-      hasUpcomingFollowUps
-    );
-  }, [data]);
-
-  const handleTimePeriod = () => {
-    // Demo implementation for toggling this month filter
+  // Handle date period selection
+  const handlePeriodSelect = (period: PeriodKey) => {
+    setSelectedPeriod(period);
     const now = new Date();
-    const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
-    
-    if (filters.startDate === firstDay) {
+
+    if (period === "all") {
       setFilters({});
-      toast.success("Filters cleared");
-    } else {
-      setFilters({ ...filters, startDate: firstDay });
+      toast.success("Showing All Time reports");
+      return;
+    }
+
+    if (period === "today") {
+      const today = new Date(now.getFullYear(), now.getMonth(), now.getDate()).toISOString();
+      setFilters({ startDate: today });
+      toast.info("Filtered by Today");
+      return;
+    }
+
+    if (period === "this_week") {
+      const firstDayOfWeek = new Date(now.setDate(now.getDate() - now.getDay())).toISOString();
+      setFilters({ startDate: firstDayOfWeek });
+      toast.info("Filtered by This Week");
+      return;
+    }
+
+    if (period === "this_month") {
+      const firstDay = new Date(now.getFullYear(), now.getMonth(), 1).toISOString();
+      setFilters({ startDate: firstDay });
       toast.info("Filtered by This Month");
+      return;
+    }
+
+    if (period === "this_quarter") {
+      const quarterMonth = Math.floor(now.getMonth() / 3) * 3;
+      const firstDay = new Date(now.getFullYear(), quarterMonth, 1).toISOString();
+      setFilters({ startDate: firstDay });
+      toast.info("Filtered by This Quarter");
+      return;
+    }
+
+    if (period === "this_year") {
+      const firstDay = new Date(now.getFullYear(), 0, 1).toISOString();
+      setFilters({ startDate: firstDay });
+      toast.info("Filtered by This Year");
+      return;
     }
   };
 
@@ -105,14 +123,14 @@ const ReportsPage = () => {
   };
 
   const handleDownload = () => {
-    if (!data || !data.performance) {
-       toast.error("No data available to export");
-       return;
+    if (!data || !data.performance || data.performance.length === 0) {
+      toast.error("No data available to export");
+      return;
     }
 
     try {
       const headers = ["Team Member", "Deals Closed", "Revenue Value", "Conversion Rate"];
-      const rows = data.performance.map(p => [
+      const rows = data.performance.map((p) => [
         `"${p.name}"`,
         p.dealsClosed,
         p.revenueValue,
@@ -121,26 +139,68 @@ const ReportsPage = () => {
       
       const csvContent = [
         headers.join(","),
-        ...rows.map(r => r.join(","))
+        ...rows.map((r) => r.join(","))
       ].join("\n");
 
       const blob = new Blob([csvContent], { type: "text/csv;charset=utf-8;" });
       const url = URL.createObjectURL(blob);
       const link = document.createElement("a");
       link.setAttribute("href", url);
-      link.setAttribute("download", `CRM_Performance_Report_${new Date().toISOString().split('T')[0]}.csv`);
+      link.setAttribute("download", `CRM_Reports_${new Date().toISOString().split('T')[0]}.csv`);
       link.style.visibility = "hidden";
       document.body.appendChild(link);
       link.click();
       document.body.removeChild(link);
 
       toast.success("Export Successful", {
-        description: "Your team performance report has been downloaded as a CSV.",
+        description: "Reports data has been downloaded as a CSV.",
       });
     } catch {
       toast.error("Export Failed", { description: "An error occurred while generating the report." });
     }
   };
+
+  // Extract the 4 canonical metrics from stats & report data
+  const metricStats = useMemo(() => {
+    const statsArray = data?.stats || [];
+
+    const totalLeadsStat = statsArray.find((s) => s.title.toLowerCase().includes("total lead"));
+    const wonDealsStat = statsArray.find((s) => s.title.toLowerCase().includes("won deal"));
+    const revenueStat = statsArray.find((s) => s.title.toLowerCase() === "revenue");
+    const conversionStat = statsArray.find((s) => s.title.toLowerCase().includes("conversion"));
+
+    const totalLeadsVal = totalLeadsStat?.value ?? (data?.leadSources?.reduce((acc, curr) => acc + curr.value, 0) || 0);
+    const wonDealsVal = wonDealsStat?.value ?? 0;
+    const revenueVal = revenueStat ? (typeof revenueStat.value === "number" ? formatCurrency(revenueStat.value) : revenueStat.value) : formatCurrency(data?.revenueTarget?.revenue || 0);
+    const conversionVal = conversionStat?.value ?? "0.0%";
+
+    return {
+      totalLeads: {
+        title: "Total Leads",
+        value: totalLeadsVal,
+        change: totalLeadsStat?.change || undefined,
+        trend: (totalLeadsStat?.positive ? "up" : "neutral") as "up" | "down" | "neutral",
+      },
+      wonDeals: {
+        title: "Won Deals",
+        value: wonDealsVal,
+        change: wonDealsStat?.change || undefined,
+        trend: (wonDealsStat?.positive ? "up" : "neutral") as "up" | "down" | "neutral",
+      },
+      revenue: {
+        title: "Revenue",
+        value: revenueVal,
+        change: revenueStat?.change || undefined,
+        trend: (revenueStat?.positive ? "up" : "neutral") as "up" | "down" | "neutral",
+      },
+      conversionRate: {
+        title: "Conversion Rate",
+        value: typeof conversionVal === "number" ? `${conversionVal}%` : conversionVal,
+        change: conversionStat?.change || undefined,
+        trend: (conversionStat?.positive ? "up" : "neutral") as "up" | "down" | "neutral",
+      },
+    };
+  }, [data, formatCurrency]);
 
   const isInitialLoading = !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
 
@@ -158,167 +218,151 @@ const ReportsPage = () => {
     );
   }
 
-  if (!hasReportsData) {
-    return (
-      <CRMPageContainer>
-        <CRMPageHeader 
-          title="Reports & Analytics"
-          subtitle="Comprehensive breakdown of your sales performance, revenue targets, and team efficiency."
-          icon={BarChart3}
-          badge="Business Intelligence"
-          actions={[
-            {
-              label: "Refresh",
-              icon: RefreshCcw,
-              onClick: handleRefresh,
-              variant: "outline",
-            },
-          ]}
+  return (
+    <CRMPageContainer twoStageScroll className="pb-12 sm:pb-16">
+      {/* 1. Header Layout - Consistent with Contacts, Companies, Deals, etc. */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div
+            data-animate-target="true"
+            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+          >
+            <AppIcon
+              name="reports"
+              icon={BarChart3}
+              size={18}
+              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
+            />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              Reports & Analytics
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Comprehensive breakdown of your sales performance and team efficiency.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          {/* Period Filter Dropdown */}
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button
+                variant="outline"
+                className="group font-semibold text-xs h-9 px-3 rounded-lg shadow-xs gap-1.5 cursor-pointer border-border/70 bg-background hover:bg-muted/50 text-foreground"
+              >
+                <Calendar className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                <span>{PERIOD_LABELS[selectedPeriod]}</span>
+                <ChevronDown className="w-3 h-3 text-muted-foreground ml-0.5 opacity-60" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36">
+              <DropdownMenuItem onClick={() => handlePeriodSelect("this_month")}>This Month</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handlePeriodSelect("today")}>Today</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handlePeriodSelect("this_week")}>This Week</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handlePeriodSelect("this_quarter")}>This Quarter</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handlePeriodSelect("this_year")}>This Year</DropdownMenuItem>
+              <DropdownMenuItem onClick={() => handlePeriodSelect("all")}>All Time</DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
+
+          {/* Export Button */}
+          <Button
+            onClick={handleDownload}
+            className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
+          >
+            <Download className="w-3.5 h-3.5 text-white shrink-0" />
+            <span>Export</span>
+          </Button>
+        </div>
+      </div>
+
+      {/* 2. Top 4 Metric Cards */}
+      <CRMMetricsGrid cols={4} className="gap-4 sm:gap-5">
+        {/* Card 1: Total Leads */}
+        <CRMMetricCard
+          title={metricStats.totalLeads.title}
+          value={metricStats.totalLeads.value}
+          change={metricStats.totalLeads.change}
+          trend={metricStats.totalLeads.trend}
+          icon={Users}
+          color="emerald"
+          delay={0.05}
         />
 
-        <div className="flex-1 min-h-0 flex flex-col">
-          <EmptyState
-            module="reports"
-            action={{
-              label: "Go to Dashboard",
-              onClick: () => router.push("/dashboard"),
-              icon: LayoutDashboard,
-            }}
-            secondaryAction={{
-              label: "Create First Lead",
-              onClick: () => router.push("/contacts?status=lead"),
-              icon: UserPlus,
-            }}
-          />
-        </div>
-      </CRMPageContainer>
-    );
-  }
+        {/* Card 2: Won Deals */}
+        <CRMMetricCard
+          title={metricStats.wonDeals.title}
+          value={metricStats.wonDeals.value}
+          change={metricStats.wonDeals.change}
+          trend={metricStats.wonDeals.trend}
+          icon={Target}
+          color="blue"
+          delay={0.1}
+        />
 
-  return (
-    <CRMPageContainer>
-      <CRMPageHeader 
-        title="Reports & Analytics"
-        subtitle="Comprehensive breakdown of your sales performance, revenue targets, and team efficiency."
-        icon={BarChart3}
-        badge="Business Intelligence"
-        actions={[
-          {
-            label: "Targets",
-            icon: Target,
-            onClick: () => setIsTargetsConfigOpen(true),
-            variant: "outline",
-          },
-          {
-            label: "Refresh",
-            icon: RefreshCcw,
-            onClick: handleRefresh,
-            variant: "outline",
-          },
-          {
-            label: "This Month",
-            icon: Calendar,
-            onClick: handleTimePeriod,
-            variant: filters.startDate ? "default" : "outline"
-          },
-          {
-            label: "Export",
-            icon: Download,
-            onClick: handleDownload,
-            variant: "default"
-          }
-        ]}
-      />
+        {/* Card 3: Revenue */}
+        <CRMMetricCard
+          title={metricStats.revenue.title}
+          value={metricStats.revenue.value}
+          change={metricStats.revenue.change}
+          trend={metricStats.revenue.trend}
+          icon={CurrencyIcon}
+          color="purple"
+          delay={0.15}
+        />
 
-      <CRMMetricsGrid cols={4} className="gap-4">
-        {(data?.stats ?? []).map((stat, index) => {
-          const Icon = stat.title.toLowerCase().includes("revenue") || stat.title.toLowerCase().includes("size") ? CurrencyIcon :
-            stat.title.toLowerCase().includes("conversion") || stat.title.toLowerCase().includes("win") ? Target :
-            stat.title.toLowerCase().includes("deal") || stat.title.toLowerCase().includes("lead") ? Users :
-            TrendingUp;
-
-          // Define an array of canonical metric card colors
-          const colors = ["indigo", "violet", "emerald", "pink", "cyan", "orange", "blue"] as const;
-          let assignedColor = stat.color || colors[index % colors.length];
-
-          // Refine based on the title to have semantic colors
-          const lowerTitle = stat.title.toLowerCase();
-          if (lowerTitle.includes("won") || lowerTitle.includes("conversion")) assignedColor = "emerald";
-          else if (lowerTitle.includes("lost")) assignedColor = "pink";
-          else if (lowerTitle.includes("open")) assignedColor = "cyan";
-          else if (lowerTitle.includes("total")) assignedColor = "indigo";
-          else if (lowerTitle.includes("avg") || lowerTitle.includes("size")) assignedColor = "violet";
-          else if (lowerTitle.includes("forecast")) assignedColor = "orange";
-          else if (lowerTitle.includes("revenue")) assignedColor = "blue";
-
-          return (
-            <CRMMetricCard
-              key={stat.title}
-              title={stat.title}
-              value={stat.value}
-              change={stat.change}
-              trend={stat.positive ? "up" : "down"}
-              icon={Icon}
-              color={assignedColor}
-              sparklineData={stat.sparklineData}
-              delay={0.05 * (index + 1)}
-            />
-          );
-        })}
+        {/* Card 4: Conversion Rate */}
+        <CRMMetricCard
+          title={metricStats.conversionRate.title}
+          value={metricStats.conversionRate.value}
+          change={metricStats.conversionRate.change}
+          trend={metricStats.conversionRate.trend}
+          icon={TrendingUp}
+          color="orange"
+          delay={0.2}
+        />
       </CRMMetricsGrid>
 
-      <AnalyticsSummary insights={data?.insights ?? []} />
-
-      {/* Main Charts Row */}
-      <div className="grid grid-cols-1 xl:grid-cols-3 gap-5 items-start">
-        <div className="xl:col-span-2 space-y-5 h-full flex flex-col">
-          <div className="flex-1 min-h-[400px] flex flex-col">
-             <RevenueChart data={data?.revenueChart || []} loading={isFetching} />
-          </div>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-5 flex-1">
-             <div className="min-h-[350px] flex flex-col">
-               <ConversionChart data={data?.conversionChart || []} loading={isFetching} />
-             </div>
-             <div className="min-h-[350px] flex flex-col">
-               <SalesFunnel data={data?.funnel ?? []} />
-             </div>
-          </div>
+      {/* 3. Main Row 2: Revenue Trend & Goal Progress */}
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
+        <div className="lg:col-span-7 min-h-[350px] flex flex-col">
+          <RevenueChart data={data?.revenueChart || []} loading={isFetching} />
         </div>
-        
-        <div className="space-y-5 h-full flex flex-col">
-          <RevenueTarget data={data?.revenueTarget ?? null} />
-          <div className="flex-1 min-h-[300px] flex flex-col">
-            <LeadSourceChart data={data?.leadSources ?? []} loading={isFetching} />
-          </div>
-          <div className="flex-1 min-h-[300px] flex flex-col">
-            <SalesActivities data={data?.salesActivities ?? []} loading={isFetching} />
-          </div>
+        <div className="lg:col-span-5 min-h-[350px] flex flex-col">
+          <RevenueTarget 
+            data={data?.revenueTarget ?? null} 
+            onOpenSettings={() => setIsTargetsConfigOpen(true)} 
+          />
         </div>
       </div>
 
-      {/* Secondary Row: Customers, Activities, Follow-ups, Insights */}
-      <div className="grid grid-cols-1 md:grid-cols-2 xl:grid-cols-4 gap-5">
-        <div className="min-h-[400px] flex flex-col h-full">
+      {/* 4. Row 3: Lead Sources & Sales Activities */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-stretch">
+        <div className="min-h-[260px] flex flex-col">
+          <LeadSourceChart data={data?.leadSources ?? []} loading={isFetching} />
+        </div>
+        <div className="min-h-[260px] flex flex-col">
+          <SalesActivities data={data?.salesActivities ?? []} loading={isFetching} />
+        </div>
+      </div>
+
+      {/* 5. Row 4: Top Customers, Recent Activity, Upcoming Actions */}
+      <div className="grid grid-cols-1 md:grid-cols-3 gap-4 sm:gap-5 items-stretch">
+        <div className="min-h-[260px] flex flex-col">
           <TopCustomers data={data?.topCustomers ?? []} loading={isFetching} />
         </div>
-        <div className="min-h-[400px] flex flex-col h-full">
+        <div className="min-h-[260px] flex flex-col">
           <RecentActivities data={data?.recentActivities ?? []} loading={isFetching} />
         </div>
-        <div className="min-h-[400px] flex flex-col h-full">
+        <div className="min-h-[260px] flex flex-col">
           <UpcomingFollowUps data={data?.upcomingFollowUps ?? []} loading={isFetching} />
-        </div>
-        <div className="min-h-[400px] flex flex-col h-full">
-          <AIInsights />
         </div>
       </div>
 
-      {/* Team Performance */}
-      <div className="space-y-4 pt-4">
-        <div className="flex flex-col gap-1">
-          <h2 className="text-base font-bold tracking-tight text-foreground">Team Performance</h2>
-          <p className="text-muted-foreground text-sm font-medium">Detailed breakdown of sales representative metrics and activity.</p>
-        </div>
-        
+      {/* 6. Row 5: Team Performance */}
+      <div className="w-full">
         <PerformanceTable performance={data?.performance || []} />
       </div>
 
@@ -354,3 +398,4 @@ const ReportsPage = () => {
 };
 
 export default ReportsPage;
+

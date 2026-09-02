@@ -72,14 +72,6 @@ export function SuperAdminTelemetryCard({ onTriggerAnalysis }: SuperAdminTelemet
               Platform Telemetry
             </span>
           </div>
-          <button
-            onClick={loadData}
-            disabled={refreshing}
-            className="p-1 rounded-md text-muted-foreground hover:text-foreground hover:bg-muted/60 transition-colors cursor-pointer"
-            title="Refresh Live Telemetry"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${refreshing ? 'animate-spin' : ''}`} />
-          </button>
         </div>
 
         <p className="text-[11px] text-muted-foreground leading-relaxed">

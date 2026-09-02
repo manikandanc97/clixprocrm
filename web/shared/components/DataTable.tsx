@@ -82,7 +82,7 @@ export function DataTable<T>({
         icon={emptyIcon}
         title={title}
         description={emptyDescription}
-        className="border-none bg-transparent shadow-none p-6 min-h-[220px]"
+        className="border-none bg-transparent shadow-none p-4 min-h-0"
       />
     );
   };

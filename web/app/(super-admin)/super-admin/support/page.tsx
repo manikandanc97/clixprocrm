@@ -252,14 +252,6 @@ export default function SuperAdminSupportPage() {
         subtitle="Live multi-tenant queue for customer inquiries, escalations, and technical troubleshooting."
         icon={Ticket}
         badge="Platform Operations"
-        actions={[
-          {
-            label: refreshing ? "Refreshing..." : "Refresh Queue",
-            icon: RefreshCw,
-            onClick: loadData,
-            variant: "outline",
-          },
-        ]}
       />
 
       {/* 2. Standard CRM KPI Metrics Grid */}
@@ -478,11 +470,12 @@ export default function SuperAdminSupportPage() {
             ))
           ) : tickets.length === 0 ? (
             <tr>
-              <td colSpan={8} className="py-16 text-center">
+              <td colSpan={8} className="py-6 text-center border-0">
                 <EmptyState
                   icon={Ticket}
                   title="No Support Tickets Found"
                   description="There are no support tickets matching the selected filters."
+                  className="border-none bg-transparent shadow-none p-0 min-h-0"
                 />
               </td>
             </tr>

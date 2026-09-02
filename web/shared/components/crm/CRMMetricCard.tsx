@@ -186,52 +186,6 @@ const COLOR_TOKENS: Record<MetricColor, ColorConfig> = {
   },
 };
 
-// ─────────────────────────────────────────────────────────────────────────────
-// Halftone Dot Matrix Pattern Component (Bottom-Left Corner)
-// ─────────────────────────────────────────────────────────────────────────────
-
-const HalftoneDots = ({ dotFill = "fill-current" }: { dotFill?: string }) => {
-  return (
-    <svg
-      className={cn("pointer-events-none absolute -bottom-3 -left-3 w-28 h-28 opacity-[0.14] dark:opacity-[0.08]", dotFill)}
-      viewBox="0 0 100 100"
-      fill="none"
-      xmlns="http://www.w3.org/2000/svg"
-    >
-      <circle cx="10" cy="90" r="4.5" />
-      <circle cx="25" cy="90" r="4.0" />
-      <circle cx="40" cy="90" r="3.5" />
-      <circle cx="55" cy="90" r="3.0" />
-      <circle cx="70" cy="90" r="2.2" />
-      <circle cx="85" cy="90" r="1.5" />
-
-      <circle cx="10" cy="75" r="4.0" />
-      <circle cx="25" cy="75" r="3.5" />
-      <circle cx="40" cy="75" r="3.0" />
-      <circle cx="55" cy="75" r="2.5" />
-      <circle cx="70" cy="75" r="1.8" />
-      <circle cx="85" cy="75" r="1.2" />
-
-      <circle cx="10" cy="60" r="3.5" />
-      <circle cx="25" cy="60" r="3.0" />
-      <circle cx="40" cy="60" r="2.5" />
-      <circle cx="55" cy="60" r="1.8" />
-      <circle cx="70" cy="60" r="1.2" />
-
-      <circle cx="10" cy="45" r="3.0" />
-      <circle cx="25" cy="45" r="2.5" />
-      <circle cx="40" cy="45" r="1.8" />
-      <circle cx="55" cy="45" r="1.2" />
-
-      <circle cx="10" cy="30" r="2.2" />
-      <circle cx="25" cy="30" r="1.8" />
-      <circle cx="40" cy="30" r="1.2" />
-
-      <circle cx="10" cy="15" r="1.5" />
-      <circle cx="25" cy="15" r="1.2" />
-    </svg>
-  );
-};
 
 // ─────────────────────────────────────────────────────────────────────────────
 // Sparkline Wave Curve Component (Bottom-Right)
@@ -391,8 +345,12 @@ export const CRMMetricCard = ({
         className
       )}
     >
-      {/* Corner Halftone Dot Matrix Pattern */}
-      <HalftoneDots dotFill={t.dotFill} />
+      {/* Decorative Semi-Cropped Background Icon (Static subtle watermark at bottom-right) */}
+      {Icon && (
+        <div className="pointer-events-none absolute -bottom-2 -right-2 sm:-bottom-3 sm:-right-3 w-14 h-14 sm:w-16 sm:h-16 opacity-[0.07] dark:opacity-[0.05] select-none flex items-center justify-center">
+          <Icon className={cn("w-full h-full", t.titleColor)} strokeWidth={1.5} />
+        </div>
+      )}
 
       {/* ── TOP ROW: Layered 3D Icon Badge (Left) + Trend Percentage (Right) ── */}
       <div className="flex items-center justify-between gap-3 z-10">

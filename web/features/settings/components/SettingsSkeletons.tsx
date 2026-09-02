@@ -1,6 +1,14 @@
 import React from "react";
 import { CRMCard } from "@/shared/components/crm/CRMCard";
 import { Skeleton } from "@/shared/ui/skeleton";
+import {
+  Table,
+  TableHeader,
+  TableBody,
+  TableHead,
+  TableRow,
+  TableCell,
+} from "@/shared/ui/table";
 
 export function WorkspaceSettingsSkeleton() {
   return (
@@ -227,59 +235,68 @@ export function AISettingsSkeleton() {
 
 export function AuditLogSettingsSkeleton() {
   return (
-    <div className="space-y-6">
-      <CRMCard className="p-6 space-y-5">
-        {/* Header */}
-        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 pb-4 border-b border-border/50">
-          <div className="flex items-start gap-3">
-            <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-4.5 w-48" />
-              <Skeleton className="h-3 w-80" />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-9 w-24 rounded-lg" />
-            <Skeleton className="h-9 w-28 rounded-lg" />
-          </div>
+    <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      {/* Controls Toolbar */}
+      <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
+        <div className="flex flex-wrap items-center gap-2.5">
+          <Skeleton className="h-9 w-32 rounded-lg" />
+          <Skeleton className="h-9 w-64 rounded-lg" />
         </div>
-
-        {/* Filter Bar */}
-        <div className="pt-2 pb-1">
-          <Skeleton className="h-9 max-w-sm rounded-lg" />
+        <div className="flex items-center gap-2">
+          <Skeleton className="h-8 w-20 rounded-lg" />
         </div>
+      </div>
 
-        {/* Audit Log Table Skeleton */}
-        <div className="mt-3 border rounded-xl overflow-hidden divide-y divide-border/50">
-          <div className="grid grid-cols-12 bg-card border-b border-border/60 px-4 py-2.5 h-10 sm:h-11 items-center">
-            <Skeleton className="col-span-4 h-3.5 w-28" />
-            <Skeleton className="col-span-3 h-3.5 w-24" />
-            <Skeleton className="col-span-2 h-3.5 w-20" />
-            <Skeleton className="col-span-3 h-3.5 w-20 ml-auto" />
-          </div>
+      {/* Audit Log Table Skeleton */}
+      <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
+        <Table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
+          <TableHeader>
+            <TableRow className="hover:bg-transparent">
+              <TableHead className="w-[320px]"><Skeleton className="h-3.5 w-24" /></TableHead>
+              <TableHead className="w-[130px]"><Skeleton className="h-3.5 w-16" /></TableHead>
+              <TableHead className="w-[240px]"><Skeleton className="h-3.5 w-24" /></TableHead>
+              <TableHead className="w-[140px]"><Skeleton className="h-3.5 w-20" /></TableHead>
+              <TableHead className="w-[180px] text-right"><Skeleton className="h-3.5 w-20 ml-auto" /></TableHead>
+            </TableRow>
+          </TableHeader>
+          <TableBody>
+            {Array.from({ length: 6 }).map((_, i) => (
+              <TableRow key={i} className="h-16 animate-pulse hover:bg-transparent">
+                <TableCell>
+                  <div className="flex items-center gap-2.5">
+                    <Skeleton className="h-5 w-16 rounded-md shrink-0" />
+                    <Skeleton className="h-3.5 w-28" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-14 rounded-md" />
+                </TableCell>
+                <TableCell>
+                  <div className="flex items-center gap-2">
+                    <Skeleton className="h-3.5 w-3.5 rounded-full shrink-0" />
+                    <Skeleton className="h-3.5 w-32" />
+                  </div>
+                </TableCell>
+                <TableCell>
+                  <Skeleton className="h-5 w-20 rounded font-mono" />
+                </TableCell>
+                <TableCell className="text-right">
+                  <Skeleton className="h-3.5 w-28 ml-auto" />
+                </TableCell>
+              </TableRow>
+            ))}
+          </TableBody>
+        </Table>
+      </div>
 
-          {Array.from({ length: 6 }).map((_, i) => (
-            <div
-              key={i}
-              className="grid grid-cols-12 items-center px-4 py-3 gap-3"
-            >
-              <div className="col-span-4 flex items-center gap-2.5">
-                <Skeleton className="w-6 h-6 rounded-md shrink-0" />
-                <Skeleton className="h-3.5 w-32" />
-              </div>
-              <div className="col-span-3">
-                <Skeleton className="h-3.5 w-36" />
-              </div>
-              <div className="col-span-2">
-                <Skeleton className="h-3.5 w-24 font-mono" />
-              </div>
-              <div className="col-span-3 flex justify-end">
-                <Skeleton className="h-3.5 w-28" />
-              </div>
-            </div>
-          ))}
+      {/* Bottom Pagination Skeleton */}
+      <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
+        <Skeleton className="h-4 w-48" />
+        <div className="flex items-center gap-4">
+          <Skeleton className="h-8 w-32 rounded-lg" />
+          <Skeleton className="h-8 w-40 rounded-lg" />
         </div>
-      </CRMCard>
+      </div>
     </div>
   );
 }

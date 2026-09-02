@@ -27,38 +27,48 @@ export const CRMPageHeader = ({
   title,
   subtitle,
   icon: Icon,
-  iconColor = "text-primary",
+  iconColor = "text-muted-foreground",
   badge,
   actions,
   className,
 }: CRMPageHeaderProps) => {
   return (
-    <div className={cn("flex flex-col justify-between gap-4 md:flex-row md:items-end", className)}>
+    <div className={cn("flex flex-col justify-between gap-3 sm:flex-row sm:items-center", className)}>
       <motion.div 
         initial={{ opacity: 0, x: -20 }}
         animate={{ opacity: 1, x: 0 }}
-        className="space-y-1.5"
+        className="flex items-center gap-3"
       >
-        <div className="flex items-center gap-2.5">
-          {Icon && (
-            <div data-animate-target="true" className={cn("crm-icon-box group cursor-pointer", iconColor)}>
-              <AppIcon name={title} icon={Icon} size={16} className="w-4 h-4" />
-            </div>
-          )}
-          {badge && (
-            <span className="rounded-lg border border-primary/20 bg-primary/10 px-3 py-1 text-[10px] font-bold uppercase tracking-wider text-primary shadow-sm">
-              {badge}
-            </span>
+        {Icon && (
+          <div
+            data-animate-target="true"
+            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+          >
+            <AppIcon
+              name={title}
+              icon={Icon}
+              size={18}
+              className={cn("w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors", iconColor)}
+            />
+          </div>
+        )}
+        <div>
+          <div className="flex items-center gap-2.5">
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              {title}
+            </h1>
+            {badge && (
+              <span className="rounded-lg border border-primary/20 bg-primary/10 px-2.5 py-0.5 text-[10px] font-bold uppercase tracking-wider text-primary shadow-xs">
+                {badge}
+              </span>
+            )}
+          </div>
+          {subtitle && (
+            <p className="text-xs text-muted-foreground mt-0.5 max-w-2xl">
+              {subtitle}
+            </p>
           )}
         </div>
-        <h1 className="crm-page-title tracking-tight">
-          {title}
-        </h1>
-        {subtitle && (
-          <p className="crm-description max-w-2xl">
-            {subtitle}
-          </p>
-        )}
       </motion.div>
 
       {actions && actions.length > 0 && (

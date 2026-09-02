@@ -452,17 +452,6 @@ export default function SuperAdminTicketDetailPage() {
 
         {/* Action Controls: More Menu */}
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={loadTicket}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg"
-            title="Refresh ticket thread"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span className="sr-only">Refresh</span>
-          </Button>
-
           {/* Non-destructive More menu */}
           <CRMActionMenu
             trigger={

@@ -679,13 +679,13 @@ export default function OrganizationsPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={8} className="p-8 text-center text-muted-foreground align-middle">
-                    <div className="flex flex-col items-center justify-center min-h-[420px] py-16">
+                  <td colSpan={8} className="p-6 text-center text-muted-foreground align-middle border-0">
+                    <div className="flex flex-col items-center justify-center py-6">
                       <EmptyState
                         icon={Building2}
                         title="No organizations found"
                         description="No workspaces match your search or filter criteria."
-                        className="border-none bg-transparent shadow-none p-0"
+                        className="border-none bg-transparent shadow-none p-0 min-h-0"
                       />
                     </div>
                   </td>

@@ -14,6 +14,7 @@ import AuditLogSettings from "@/features/settings/components/AuditLogSettings";
 
 import { motion, AnimatePresence } from "framer-motion";
 import { CRMPageContainer } from "@/shared/components/crm";
+import { cn } from "@/shared/lib/utils";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import {
   resolveCanonicalSectionId,
@@ -167,6 +168,8 @@ const SettingsPage = () => {
     }
   }, [activeSection]);
 
+  const isTableSection = activeSection === "audit-log";
+
   return (
     <CRMPageContainer className="flex-1 h-full min-h-0 flex flex-col gap-4 lg:gap-5">
       {/* Dynamic Page Header */}
@@ -174,10 +177,13 @@ const SettingsPage = () => {
         <SettingsHeader activeSection={activeSection} />
       </div>
 
-      {/* Content Area - Full width with independent smooth vertical scrolling */}
+      {/* Content Area - Full width with independent smooth vertical scrolling or dedicated table layout */}
       <div
         ref={contentRef}
-        className="flex-1 min-h-0 min-w-0 w-full h-full overflow-y-auto pr-1.5 sidebar-scroll"
+        className={cn(
+          "flex-1 min-h-0 min-w-0 w-full h-full",
+          isTableSection ? "flex flex-col" : "overflow-y-auto pr-1.5 sidebar-scroll"
+        )}
       >
         <AnimatePresence mode="wait" initial={false}>
           <motion.div
@@ -186,7 +192,7 @@ const SettingsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            className="min-h-full flex flex-col"
+            className={cn("flex flex-col", isTableSection ? "h-full flex-1 min-h-0" : "min-h-full")}
           >
             {renderSection()}
           </motion.div>

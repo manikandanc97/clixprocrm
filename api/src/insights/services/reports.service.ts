@@ -7,6 +7,7 @@ import {
   formatPercentage,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
+import { EncryptionService } from '../../common/encryption/encryption.service';
 
 export interface ReportFilters {
   startDate?: string;
@@ -18,7 +19,10 @@ export interface ReportFilters {
 
 @Injectable()
 export class ReportsService {
-  constructor(private prisma: PrismaService) {}
+  constructor(
+    private prisma: PrismaService,
+    private enc: EncryptionService,
+  ) {}
 
   private async getTenantCurrency(tenantId: string): Promise<string> {
     return getCachedTenantCurrency(this.prisma, tenantId);
@@ -37,6 +41,25 @@ export class ReportsService {
       if (filters.endDate) baseWhere.createdAt.lte = new Date(filters.endDate);
     }
     if (filters.assignedToId) baseWhere.assignedToId = filters.assignedToId;
+
+    const taskWhere: Prisma.TaskWhereInput = { tenantId, deletedAt: null };
+    if (filters.startDate || filters.endDate) {
+      taskWhere.createdAt = {};
+      if (filters.startDate)
+        taskWhere.createdAt.gte = new Date(filters.startDate);
+      if (filters.endDate) taskWhere.createdAt.lte = new Date(filters.endDate);
+    }
+    if (filters.assignedToId) taskWhere.assignedToId = filters.assignedToId;
+
+    const meetingWhere: Prisma.MeetingWhereInput = { tenantId };
+    if (filters.startDate || filters.endDate) {
+      meetingWhere.createdAt = {};
+      if (filters.startDate)
+        meetingWhere.createdAt.gte = new Date(filters.startDate);
+      if (filters.endDate)
+        meetingWhere.createdAt.lte = new Date(filters.endDate);
+    }
+    if (filters.assignedToId) meetingWhere.assignedToId = filters.assignedToId;
 
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const [
@@ -111,7 +134,7 @@ export class ReportsService {
         }),
         tx.task.findMany({
           where: {
-            tenantId,
+            ...taskWhere,
             status: { notIn: ['COMPLETED', 'CANCELLED'] },
             dueDate: { gt: new Date() },
           },
@@ -121,7 +144,7 @@ export class ReportsService {
         }),
         tx.meeting.findMany({
           where: {
-            tenantId,
+            ...meetingWhere,
             status: { notIn: ['COMPLETED', 'CANCELLED'] },
             startTime: { gt: new Date() },
           },
@@ -135,10 +158,10 @@ export class ReportsService {
         }),
         tx.task.groupBy({
           by: ['status'],
-          where: { tenantId },
+          where: taskWhere,
           _count: { id: true },
         }),
-        tx.meeting.count({ where: { tenantId } }),
+        tx.meeting.count({ where: meetingWhere }),
         tx.user.findMany({
           where: { memberships: { some: { tenantId } } },
           select: { id: true, name: true },
@@ -279,18 +302,18 @@ export class ReportsService {
 
       const topCustomers = topCustomersData.map((c) => ({
         id: c.id,
-        name: c.name,
-        company: c.company,
+        name: this.enc.decrypt(c.name) || c.name,
+        company: this.enc.decrypt(c.company) || c.company,
         revenue: toNumber(c.revenue),
       }));
 
       const recentActivities = recentActivitiesData.map((a) => ({
         id: a.id,
         action: a.action,
-        description: a.description,
+        description: this.enc.decrypt(a.description) || a.description,
         createdAt: a.createdAt.toISOString(),
         userName: a.user?.name,
-        leadName: a.lead?.name,
+        leadName: this.enc.decrypt(a.lead?.name) || a.lead?.name,
       }));
 
       const upcomingFollowUps = [
@@ -328,11 +351,13 @@ export class ReportsService {
         salesActivitiesTasks.find((t) => t.status === 'COMPLETED')?._count.id ||
         0;
       const pendingTasks =
-        salesActivitiesTasks.find((t) => t.status === 'PENDING')?._count.id || 0;
+        salesActivitiesTasks
+          .filter((t) => t.status === 'PENDING' || t.status === 'IN_PROGRESS')
+          .reduce((sum, t) => sum + t._count.id, 0);
       const salesActivities = [
-        { name: 'Meetings', value: salesActivitiesMeetings },
         { name: 'Completed Tasks', value: completedTasks },
         { name: 'Pending Tasks', value: pendingTasks },
+        { name: 'Meetings', value: salesActivitiesMeetings },
       ];
 
       const insights = [];

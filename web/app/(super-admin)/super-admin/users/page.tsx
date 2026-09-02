@@ -723,13 +723,13 @@ export default function SuperAdminUsersPage() {
                 })
               ) : (
                 <tr>
-                  <td colSpan={7} className="p-8 text-center text-muted-foreground align-middle">
-                    <div className="flex flex-col items-center justify-center min-h-[360px] py-12">
+                  <td colSpan={7} className="p-6 text-center text-muted-foreground align-middle border-0">
+                    <div className="flex flex-col items-center justify-center py-6">
                       <EmptyState
                         icon={Users}
                         title="No users found"
                         description="No platform users match your search query or filter criteria."
-                        className="border-none bg-transparent shadow-none p-0"
+                        className="border-none bg-transparent shadow-none p-0 min-h-0"
                       />
                     </div>
                   </td>

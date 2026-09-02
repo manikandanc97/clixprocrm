@@ -519,18 +519,6 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
             </SelectContent>
           </Select>
 
-          {/* Refresh button */}
-          <Button
-            variant="outline"
-            size="sm"
-            onClick={fetchTickets}
-            disabled={loading}
-            className="h-9 px-2.5 bg-background shadow-xs cursor-pointer"
-            title="Refresh list"
-          >
-            <AppIcon name="refresh" size={14} className={loading ? "animate-spin" : ""} />
-          </Button>
-
           {/* Create new ticket button */}
           {onNewTicketClick && (
             <Button size="sm" onClick={onNewTicketClick} className="h-9 text-xs gap-1.5 px-3.5 font-semibold cursor-pointer shadow-xs">

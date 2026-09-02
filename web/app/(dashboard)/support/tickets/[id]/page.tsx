@@ -400,17 +400,6 @@ export default function CustomerTicketDetailPage() {
         </Link>
 
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="ghost"
-            onClick={loadTicket}
-            className="h-8 w-8 p-0 text-muted-foreground hover:text-foreground cursor-pointer rounded-lg"
-            title="Refresh ticket"
-          >
-            <RefreshCw className="w-3.5 h-3.5" />
-            <span className="sr-only">Refresh</span>
-          </Button>
-
           <CRMActionMenu
             trigger={
               <Button

@@ -431,17 +431,6 @@ export default function SuperAdminDashboardPage() {
         </div>
 
         <div className="flex items-center gap-2">
-          <Button
-            size="sm"
-            variant="outline"
-            onClick={() => loadData()}
-            disabled={loading}
-            className="rounded-xl text-xs gap-1.5 h-8 px-3 border-border/70 shadow-xs"
-          >
-            <RefreshCw className={`w-3.5 h-3.5 ${loading ? "animate-spin" : ""}`} />
-            <span>Refresh</span>
-          </Button>
-
           <Link href="/super-admin/organizations">
             <Button
               size="sm"
