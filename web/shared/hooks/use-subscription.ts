@@ -8,6 +8,7 @@ import {
   getPlanDefinition,
   hasPlanFeature,
   normalizePlanId,
+  MatrixCategory,
   PlanDefinition,
   PlanLimits,
 } from "@/shared/lib/plans/plan-definitions";
@@ -49,6 +50,7 @@ export interface WorkspaceSubscriptionResponse {
   usage: WorkspaceUsageStats;
   entitledFeatures: string[];
   availablePlans: PlanDefinition[];
+  comparisonMatrix?: MatrixCategory[];
 }
 
 export interface SubscriptionQuote {
@@ -188,12 +190,66 @@ export function useSubscription() {
   );
 
   const calculateQuote = useCallback(
-    async (params: { planId: string; seats?: number; billingCycle?: "monthly" | "annual" }): Promise<SubscriptionQuote> => {
+    async (params: {
+      planId: string;
+      seats?: number;
+      billingCycle?: "monthly" | "annual";
+    }): Promise<SubscriptionQuote> => {
       const res = await api.post("/crm/subscription/quote", params);
       return res.data?.data;
     },
     []
   );
+
+  const createCheckoutOrder = useCallback(
+    async (params: {
+      planId: string;
+      seats?: number;
+      billingCycle?: "monthly" | "annual";
+    }): Promise<{ quote: SubscriptionQuote; order: any }> => {
+      const res = await api.post("/crm/subscription/create-checkout-order", params);
+      return res.data?.data;
+    },
+    []
+  );
+
+  const verifyPaymentMutation = useMutation({
+    mutationFn: async (payload: {
+      orderId: string;
+      paymentId: string;
+      signature: string;
+      planId: string;
+      billingCycle?: "monthly" | "annual";
+      seats?: number;
+    }) => {
+      const res = await api.post("/crm/subscription/verify-payment", payload);
+      return res.data?.data;
+    },
+    onSuccess: (data) => {
+      queryClient.invalidateQueries({ queryKey: ["workspace", "subscription"] });
+      queryClient.invalidateQueries({ queryKey: ["workspace", "subscription", "invoices"] });
+      toast.success("Payment verified and plan activated successfully!");
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || "Failed to verify payment.";
+      toast.error(msg);
+    },
+  });
+
+  const switchCycleMutation = useMutation({
+    mutationFn: async (billingCycle: "monthly" | "annual") => {
+      const res = await api.post("/crm/subscription/switch-cycle", { billingCycle });
+      return res.data?.data;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["workspace", "subscription"] });
+      toast.success("Billing cycle updated.");
+    },
+    onError: (err: any) => {
+      const msg = err?.response?.data?.message || err?.message || "Failed to switch billing cycle.";
+      toast.error(msg);
+    },
+  });
 
   const changePlanMutation = useMutation({
     mutationFn: async ({
@@ -255,7 +311,8 @@ export function useSubscription() {
     plan: currentPlan,
     activePlanId,
     usage: query.data?.usage,
-    availablePlans: query.data?.availablePlans || Object.values(CANONICAL_PLANS),
+    availablePlans: query.data?.availablePlans || (query.isLoading ? [] : Object.values(CANONICAL_PLANS)),
+    comparisonMatrix: query.data?.comparisonMatrix || [],
     invoices: invoicesQuery.data || [],
     isLoadingInvoices: invoicesQuery.isLoading,
     canManageBilling,
@@ -265,6 +322,11 @@ export function useSubscription() {
     canUseLimit,
     isLimitReached,
     calculateQuote,
+    createCheckoutOrder,
+    verifyPayment: verifyPaymentMutation.mutateAsync,
+    isVerifyingPayment: verifyPaymentMutation.isPending,
+    switchCycle: switchCycleMutation.mutateAsync,
+    isSwitchingCycle: switchCycleMutation.isPending,
     changePlan: changePlanMutation.mutateAsync,
     isChangingPlan: changePlanMutation.isPending,
     contactSales: contactSalesMutation.mutateAsync,
@@ -274,4 +336,5 @@ export function useSubscription() {
     closeUpgradeModal,
   };
 }
+
 

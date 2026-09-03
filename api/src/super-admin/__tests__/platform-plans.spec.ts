@@ -3,6 +3,7 @@ import { BadRequestException, NotFoundException } from '@nestjs/common';
 import { PlatformPlansService } from '../services/platform-plans.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiEntitlementService } from '../../ai/ai-entitlement.service';
+import { CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
 
 describe('PlatformPlansService SaaS Pricing Suite', () => {
   let service: PlatformPlansService;
@@ -63,7 +64,7 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
 
       await service.seedCanonicalPlansIfEmpty();
 
-      expect(prismaMock.plan.create).toHaveBeenCalledTimes(3);
+      expect(prismaMock.plan.create).toHaveBeenCalledTimes(Object.values(CANONICAL_PLANS).length);
     });
 
     it('should NOT create or modify plans when database already has plans', async () => {

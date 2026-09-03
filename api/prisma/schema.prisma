@@ -36,6 +36,10 @@ model Tenant {
   trialEnd           DateTime?
   currentPeriodEnd   DateTime?
 
+  // Platform Tenant Classification
+  type               String        @default("CUSTOMER") // "CUSTOMER" | "PLATFORM"
+  isPlatformTenant   Boolean       @default(false)
+
   attachments     Attachment[]
   customers       Customer[]
   departments     Department[]
@@ -1309,18 +1313,22 @@ model AiUsageLog {
 }
 
 model PlatformConfig {
-  id                       String   @id @default("global")
-  name                     String   @default("ClixProCRM Multi-Tenant Platform")
-  defaultTenantPlan        String   @default("free")
-  maintenanceMode          Boolean  @default(false)
-  allowPublicRegistrations Boolean  @default(true)
-  aiCopilot                Boolean  @default(true)
-  documentRag              Boolean  @default(true)
-  multiCurrency            Boolean  @default(true)
-  defaultAiModelKey        String   @default("gemini-3.6-flash")
-  fallbackAiModelKey       String   @default("gemini-3.6-flash")
-  updatedAt                DateTime @updatedAt
-  updatedBy                String?
+  id                             String   @id @default("global")
+  name                           String   @default("ClixProCRM")
+  defaultTenantPlan              String   @default("free")
+  defaultCurrency                String   @default("INR")
+  defaultTimezone                String   @default("Asia/Kolkata")
+  maintenanceMode                Boolean  @default(false)
+  allowPublicRegistrations       Boolean  @default(true)
+  requireEmailVerification       Boolean  @default(false)
+  allowWorkspaceSelfRegistration Boolean  @default(true)
+  aiCopilot                      Boolean  @default(true)
+  documentRag                    Boolean  @default(true)
+  multiCurrency                  Boolean  @default(true)
+  defaultAiModelKey              String   @default("gemini-3.6-flash")
+  fallbackAiModelKey             String   @default("gemini-3.6-flash")
+  updatedAt                      DateTime @updatedAt
+  updatedBy                      String?
 }
 
 // ----------------------------------------------------
@@ -1343,6 +1351,13 @@ model PlatformSubscription {
   trialEnd           DateTime?
   cancelAtPeriodEnd  Boolean           @default(false)
   cancelledAt        DateTime?
+  
+  // Payment Provider References
+  providerCustomerId     String?
+  providerSubscriptionId String?
+  providerPriceId        String?
+  providerOrderId        String?
+
   createdAt          DateTime          @default(now())
   updatedAt          DateTime          @updatedAt
 
@@ -1351,6 +1366,8 @@ model PlatformSubscription {
 
   @@index([tenantId])
   @@index([status])
+  @@index([providerSubscriptionId])
+  @@index([providerCustomerId])
 }
 
 model PlatformInvoice {
@@ -1418,6 +1435,12 @@ model PlatformPayment {
   paymentDate          DateTime         @default(now())
   notes                String?
   rawGatewayResponse   Json?
+  
+  // Provider References
+  providerPaymentId    String?
+  providerOrderId      String?
+  providerSignature    String?
+
   createdAt            DateTime         @default(now())
 
   tenant               Tenant           @relation(fields: [tenantId], references: [id], onDelete: Cascade)
@@ -1428,6 +1451,8 @@ model PlatformPayment {
   @@index([platformInvoiceId])
   @@index([status])
   @@index([paymentDate])
+  @@index([gatewayTransactionId])
+  @@index([providerPaymentId])
 }
 
 model PlatformRefund {
@@ -1453,28 +1478,51 @@ model PlatformRefund {
 }
 
 model PlatformBillingConfig {
-  id               String   @id @default("global")
-  companyLegalName String   @default("ClixPro Technologies Pvt. Ltd.")
-  billingAddress   String?  @default("Level 4, Cyber City, Phase II")
-  city             String?  @default("Bengaluru")
-  state            String?  @default("Karnataka")
-  postalCode       String?  @default("560100")
-  country          String?  @default("India")
-  gstin            String?  @default("29AAAAA0000A1Z5")
-  pan              String?  @default("AAAAA0000A")
-  invoicePrefix    String   @default("CP-INV")
-  currency         String   @default("INR")
-  taxRate          Decimal  @default(18.0) @db.Decimal(6, 2)
-  paymentTermsDays Int      @default(15)
-  bankName         String?  @default("HDFC Bank")
-  accountNumber    String?  @default("50200012345678")
-  ifscCode         String?  @default("HDFC0001234")
-  accountHolder    String?  @default("ClixPro Technologies Private Limited")
-  upiId            String?  @default("clixpro@hdfcbank")
-  paymentGateway   String   @default("RAZORPAY")
-  webhookSecret    String?
-  updatedAt        DateTime @updatedAt
-  updatedBy        String?
+  id                   String   @id @default("global")
+  companyLegalName     String   @default("ClixPro Technologies Pvt. Ltd.")
+  billingAddress       String?  @default("Level 4, Cyber City, Phase II")
+  city                 String?  @default("Bengaluru")
+  state                String?  @default("Karnataka")
+  postalCode           String?  @default("560100")
+  country              String?  @default("India")
+  gstin                String?  @default("29AAAAA0000A1Z5")
+  pan                  String?  @default("AAAAA0000A")
+  invoicePrefix        String   @default("CP-INV")
+  currency             String   @default("INR")
+  taxRate              Decimal  @default(18.0) @db.Decimal(6, 2)
+  paymentTermsDays     Int      @default(15)
+  bankName             String?  @default("HDFC Bank")
+  accountNumber        String?  @default("50200012345678")
+  ifscCode             String?  @default("HDFC0001234")
+  accountHolder        String?  @default("ClixPro Technologies Private Limited")
+  upiId                String?  @default("clixpro@hdfcbank")
+  paymentGateway       String   @default("RAZORPAY")
+  webhookSecret        String?
+  
+  // API Keys (Stored safely server-side)
+  razorpayKeyId        String?
+  razorpayKeySecret    String?
+  stripePublishableKey String?
+  stripeSecretKey      String?
+
+  updatedAt            DateTime @updatedAt
+  updatedBy            String?
+}
+
+model PlatformWebhookEvent {
+  id           String   @id @default(uuid())
+  provider     String   // "RAZORPAY", "STRIPE", "MANUAL"
+  eventId      String   @unique // Provider event / transaction reference for strict idempotency
+  eventType    String
+  payload      Json
+  status       String   @default("PROCESSED") // "PROCESSED", "FAILED", "IGNORED"
+  errorMessage String?
+  processedAt  DateTime @default(now())
+  createdAt    DateTime @default(now())
+
+  @@index([provider, eventId])
+  @@index([status])
+  @@index([createdAt])
 }
 
 // ----------------------------------------------------

@@ -290,6 +290,27 @@ export class SupabaseAuthGuard implements CanActivate {
           }
         }
 
+        // Global Platform Maintenance Mode Check
+        const platformConfig = await (this.prisma as any).platformConfig
+          ?.findUnique({ where: { id: 'global' } })
+          .catch(() => null);
+
+        if (platformConfig?.maintenanceMode) {
+          const isSuperAdmin = user.isSuperAdmin === true;
+          const url = (request.originalUrl || request.url || '').toLowerCase();
+          const isSuperAdminOrExemptPath =
+            url.includes('/super-admin') ||
+            url.includes('/super_admin') ||
+            url.includes('/auth/me') ||
+            url.includes('/auth/logout');
+
+          if (!isSuperAdmin && !isSuperAdminOrExemptPath) {
+            throw new ForbiddenException(
+              'The platform is currently undergoing scheduled maintenance. Please check back shortly.',
+            );
+          }
+        }
+
         // P4 Server-Side Check 2: User Account Lock & Forced Password Reset Check
         const dbUser = await (this.prisma as any).user
           ?.findUnique({

@@ -5,6 +5,7 @@ import { AppService } from './app.service';
 import { PrismaModule } from './prisma/prisma.module';
 import { EncryptionModule } from './common/encryption/encryption.module';
 import { TenantContextModule } from './common/context/tenant-context.module';
+import { BillingModule } from './common/billing/billing.module';
 import { SubscriptionEntitlementModule } from './common/plans/subscription-entitlement.module';
 import { AuthModule } from './auth/auth.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
@@ -31,6 +32,7 @@ import { CustomersModule } from './customers/customers.module';
     }),
     TenantContextModule, // Global: Request-scoped TenantContextService available everywhere
     EncryptionModule, // Global: EncryptionService available everywhere
+    BillingModule, // Global: Billing & Webhook Gateway available everywhere
     SubscriptionEntitlementModule, // Global: Subscription & Entitlement Service available everywhere
     PrismaModule,
     AuthModule,

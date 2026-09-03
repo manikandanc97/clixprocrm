@@ -322,17 +322,6 @@ export default function SuperAdminSupportPage() {
             </p>
           </div>
         </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            onClick={exportCSV}
-            variant="outline"
-            className="text-xs h-9 px-3.5 rounded-lg border-border/70 font-semibold gap-1.5 cursor-pointer hover:bg-muted/60 transition-colors"
-          >
-            <AppIcon name="export" icon={Download} size={14} className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-            <span>Export CSV</span>
-          </Button>
-        </div>
       </div>
 
       {/* 2. Main Card Container matching Organizations Page */}

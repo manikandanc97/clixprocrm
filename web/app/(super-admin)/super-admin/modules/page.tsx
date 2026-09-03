@@ -32,6 +32,7 @@ import {
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   fetchPlatformModules,
   createPlatformModule,
@@ -668,20 +669,40 @@ export default function SuperAdminModulesPage() {
 
   return (
     <CRMPageContainer twoStageScroll>
-      {/* 1. Page Header */}
-      <CRMPageHeader
-        title="Platform Modules"
-        subtitle="Manage CRM and Super Admin navigation, access, and visibility."
-        icon={Layers}
-        actions={[
-          {
-            label: "Add Menu",
-            icon: Plus,
-            onClick: handleOpenCreate,
-            variant: "emerald",
-          },
-        ]}
-      />
+      {/* 1. Header Layout */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div
+            data-animate-target="true"
+            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+          >
+            <AppIcon
+              name="modules"
+              icon={Layers}
+              size={18}
+              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
+            />
+          </div>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              Platform Modules
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Manage CRM and Super Admin navigation, access, and visibility.
+            </p>
+          </div>
+        </div>
+
+        <div className="flex items-center gap-2">
+          <Button
+            onClick={handleOpenCreate}
+            className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
+          >
+            <AppIcon name="plus" icon={Plus} size={14} className="w-3.5 h-3.5 text-white shrink-0" />
+            <span>Add Menu</span>
+          </Button>
+        </div>
+      </div>
 
       {/* AAL2 Elevated MFA Banner */}
       {aal2Required && (

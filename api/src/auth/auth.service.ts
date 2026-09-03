@@ -254,6 +254,27 @@ export class AuthService {
       }
     }
 
+    const platformConfig = await (this.prisma as any).platformConfig
+      ?.findUnique({ where: { id: 'global' } })
+      .catch(() => null);
+
+    if (platformConfig) {
+      if (platformConfig.allowPublicRegistrations === false) {
+        throw new ForbiddenException(
+          'Public registration is currently disabled by system administrators.',
+        );
+      }
+      if (platformConfig.allowWorkspaceSelfRegistration === false) {
+        throw new ForbiddenException(
+          'Workspace self-registration is currently disabled by system administrators.',
+        );
+      }
+    }
+
+    const defaultPlan = platformConfig?.defaultTenantPlan || 'free';
+    const defaultCurrency = platformConfig?.defaultCurrency || 'INR';
+    const defaultTimezone = platformConfig?.defaultTimezone || 'Asia/Kolkata';
+
     let slug = data.companyName.toLowerCase().replace(/[^a-z0-9]/g, '-');
 
     const existingTenant = await this.prisma.tenant.findUnique({
@@ -265,7 +286,13 @@ export class AuthService {
 
     return this.prisma.withTenantContext({ isSuperAdmin: true }, async (tx: any) => {
       const tenant = await tx.tenant.create({
-        data: { name: data.companyName, slug },
+        data: {
+          name: data.companyName,
+          slug,
+          plan: defaultPlan,
+          currency: defaultCurrency,
+          timezone: defaultTimezone,
+        },
       });
 
       // Handle optional logo upload during initial workspace creation

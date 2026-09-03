@@ -2,10 +2,12 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { ForbiddenException, NotFoundException } from '@nestjs/common';
 import { SubscriptionEntitlementService } from '../subscription-entitlement.service';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { BillingGatewayService } from '../../billing/billing-gateway.service';
 
 describe('SubscriptionEntitlementService Enterprise Suite', () => {
   let service: SubscriptionEntitlementService;
   let prismaMock: any;
+  let billingGatewayMock: any;
 
   beforeEach(async () => {
     prismaMock = {
@@ -33,10 +35,16 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       },
     };
 
+    billingGatewayMock = {
+      createCheckoutOrder: jest.fn(),
+      verifyPaymentSignature: jest.fn(),
+    };
+
     const module: TestingModule = await Test.createTestingModule({
       providers: [
         SubscriptionEntitlementService,
         { provide: PrismaService, useValue: prismaMock },
+        { provide: BillingGatewayService, useValue: billingGatewayMock },
       ],
     }).compile();
 
@@ -73,18 +81,17 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       expect(res.planName).toBe('Free');
       expect(res.plan.price).toBe('₹0');
       expect(res.usage.contacts.current).toBe(450);
-      expect(res.usage.contacts.limit).toBe(500);
-      expect(res.usage.contacts.remaining).toBe(50);
+      expect(res.usage.contacts.limit).toBe(1000);
+      expect(res.usage.contacts.remaining).toBe(550);
       expect(res.usage.contacts.isLimitReached).toBe(false);
-      expect(res.entitledFeatures).toContain('basic_dashboard');
-      expect(res.entitledFeatures).not.toContain('advanced_rbac');
+      expect(res.entitledFeatures).toContain('Basic CRM & pipeline management');
     });
 
-    it('should correctly resolve Growth as Most Popular / Recommended plan', async () => {
+    it('should correctly resolve Starter as Most Popular / Recommended plan', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-2',
-        name: 'Growth Inc',
-        plan: 'growth',
+        name: 'Starter Inc',
+        plan: 'starter',
         subscriptionStatus: 'ACTIVE',
         currency: 'INR',
       });
@@ -96,12 +103,11 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
 
       const res = await service.getWorkspaceSubscription('tenant-2');
 
-      expect(res.planId).toBe('growth');
+      expect(res.planId).toBe('starter');
       expect(res.plan.price).toBe('₹499');
       expect(res.plan.recommended).toBe(true);
       expect(res.plan.badge).toBe('MOST POPULAR');
-      expect(res.entitledFeatures).toContain('advanced_automation');
-      expect(res.entitledFeatures).toContain('ai_copilot');
+      expect(res.entitledFeatures).toContain('Email Integration & Tracking');
     });
   });
 
@@ -109,11 +115,11 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
     it('should allow features entitled on the workspace plan', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
-        plan: 'growth',
+        plan: 'starter',
         subscriptionStatus: 'ACTIVE',
       });
 
-      const allowed = await service.hasFeature('tenant-1', 'advanced_automation');
+      const allowed = await service.hasFeature('tenant-1', 'Email Integration & Tracking');
       expect(allowed).toBe(true);
     });
 
@@ -125,13 +131,13 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       });
 
       await expect(
-        service.assertFeature('tenant-1', 'advanced_rbac'),
+        service.assertFeature('tenant-1', 'Advanced Automation & Workflows'),
       ).rejects.toThrow(ForbiddenException);
     });
   });
 
   describe('3. Authoritative Quote & Seat Calculations', () => {
-    it('should calculate seat-based quote correctly for Growth plan', async () => {
+    it('should calculate seat-based quote correctly for Starter plan', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
         plan: 'free',
@@ -139,9 +145,9 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       });
       prismaMock.tenantUser.count.mockResolvedValue(4);
 
-      const quote = await service.calculateQuote('tenant-1', 'growth', 5, 'monthly');
+      const quote = await service.calculateQuote('tenant-1', 'starter', 5, 'monthly');
 
-      expect(quote.planId).toBe('growth');
+      expect(quote.planId).toBe('starter');
       expect(quote.seats).toBe(5);
       expect(quote.unitPricePerMonth).toBe(499);
       expect(quote.subtotal).toBe(2495); // 499 * 5
@@ -150,7 +156,7 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       expect(quote.isUpgrade).toBe(true);
     });
 
-    it('should calculate annual discount quote for Growth plan', async () => {
+    it('should calculate annual discount quote for Starter plan', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
         plan: 'free',
@@ -158,9 +164,9 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       });
       prismaMock.tenantUser.count.mockResolvedValue(2);
 
-      const quote = await service.calculateQuote('tenant-1', 'growth', 2, 'annual');
+      const quote = await service.calculateQuote('tenant-1', 'starter', 2, 'annual');
 
-      expect(quote.planId).toBe('growth');
+      expect(quote.planId).toBe('starter');
       expect(quote.seats).toBe(2);
       expect(quote.subtotal).toBe(9980); // 4990 * 2
       expect(quote.isUpgrade).toBe(true);
@@ -171,7 +177,7 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
     it('should pass if within limits', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
-        plan: 'free', // maxContacts = 500
+        plan: 'free', // maxContacts = 1000
         subscriptionStatus: 'ACTIVE',
       });
       prismaMock.customer.count.mockResolvedValue(400);
@@ -184,10 +190,10 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
     it('should throw ForbiddenException with PLAN_LIMIT_REACHED if limit exceeded', async () => {
       prismaMock.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
-        plan: 'free', // maxContacts = 500
+        plan: 'free', // maxContacts = 1000
         subscriptionStatus: 'ACTIVE',
       });
-      prismaMock.customer.count.mockResolvedValue(500);
+      prismaMock.customer.count.mockResolvedValue(1000);
 
       await expect(
         service.assertWithinLimit('tenant-1', 'maxContacts', 1),

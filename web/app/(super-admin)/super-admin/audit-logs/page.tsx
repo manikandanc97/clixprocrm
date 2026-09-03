@@ -5,6 +5,7 @@ import {
   ScrollText,
   Search,
   RefreshCw,
+  RotateCcw,
   Building2,
   Clock,
   Eye,
@@ -18,6 +19,8 @@ import {
   ChevronsRight,
   ChevronDown,
 } from "lucide-react";
+import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { Input } from "@/shared/ui/input";
 import {
   fetchPlatformAuditLogs,
   PlatformAuditLog,
@@ -30,11 +33,6 @@ import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
 import {
   CRMPageContainer,
-  CRMPageHeader,
-  CRMMetricsGrid,
-  CRMMetricCard,
-  CRMToolbar,
-  CRMPagination,
   TruncatedText,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
@@ -221,107 +219,32 @@ export default function SuperAdminAuditLogsPage() {
 
   return (
     <CRMPageContainer twoStageScroll>
-      {/* 1. Standard CRM Page Header */}
-      <CRMPageHeader
-        title="Platform Audit Logs"
-        subtitle="Immutable cross-tenant audit trail, security events, authentication records, and administrative mutations."
-        icon={ScrollText}
-        badge="Security & Compliance"
-        actions={[
-          {
-            label: "Export CSV",
-            icon: Download,
-            onClick: exportCSV,
-            variant: "outline",
-          },
-        ]}
-      />
-
-      {/* 2. Standard CRM KPI Metrics Grid */}
-      <div className="shrink-0 space-y-4">
-        {/* Continuous Audit Integrity & WORM Archival Status Banner */}
-        {integrityReport && (
-          <div className="p-4 rounded-2xl bg-card border border-border/80 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
-            <div className="flex items-center gap-3.5">
-              <div
-                className={`p-2.5 rounded-xl flex items-center justify-center ${
-                  integrityReport.status === "HEALTHY"
-                    ? "bg-emerald-500/10 text-emerald-600 border border-emerald-500/20"
-                    : integrityReport.status === "WARNING"
-                    ? "bg-amber-500/10 text-amber-600 border border-amber-500/20"
-                    : "bg-red-500/10 text-red-600 border border-red-500/20"
-                }`}
-              >
-                <Shield className="h-5 w-5" />
-              </div>
-              <div>
-                <div className="flex items-center gap-2">
-                  <span className="text-sm font-bold text-foreground">Audit Integrity & WORM Status</span>
-                  <span
-                    className={`text-[11px] font-bold px-2 py-0.5 rounded-full uppercase tracking-wider ${
-                      integrityReport.status === "HEALTHY"
-                        ? "bg-emerald-100 text-emerald-800 dark:bg-emerald-950 dark:text-emerald-300"
-                        : integrityReport.status === "WARNING"
-                        ? "bg-amber-100 text-amber-800 dark:bg-amber-950 dark:text-amber-300"
-                        : "bg-red-100 text-red-800 dark:bg-red-950 dark:text-red-300"
-                    }`}
-                  >
-                    {integrityReport.status}
-                  </span>
-                </div>
-                <p className="text-xs text-muted-foreground mt-0.5">
-                  HMAC-SHA256 Chained • S3 Object Lock Compliance • Coverage: {integrityReport.archiveCoveragePercent}% • Checked: {integrityReport.checkedRecords}
-                </p>
-              </div>
-            </div>
-
-            <div className="flex items-center gap-2 self-end md:self-auto">
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={handleVerifyIntegrity}
-                disabled={verifyingIntegrity}
-                className="gap-2 text-xs font-semibold"
-              >
-                <RefreshCw className={`h-3.5 w-3.5 ${verifyingIntegrity ? "animate-spin" : ""}`} />
-                <span>{verifyingIntegrity ? "Verifying..." : "Verify Integrity Now"}</span>
-              </Button>
-            </div>
+      {/* 1. Header Layout */}
+      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
+        <div className="flex items-center gap-3">
+          <div
+            data-animate-target="true"
+            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+          >
+            <AppIcon
+              name="auditLogs"
+              icon={ScrollText}
+              size={18}
+              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
+            />
           </div>
-        )}
-
-        <CRMMetricsGrid cols={3}>
-          <CRMMetricCard
-            title="Recorded Events"
-            value={logs.length}
-            change="Tamper-Evident Trail"
-            trend="neutral"
-            icon={ScrollText}
-            color="blue"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Active Modules"
-            value={modules.length || 1}
-            change="Cross-System Audit"
-            trend="up"
-            icon={Activity}
-            color="purple"
-            loading={loading}
-          />
-          <CRMMetricCard
-            title="Security Compliance"
-            value="100%"
-            change="Zero Breaches Detected"
-            trend="up"
-            icon={Shield}
-            color="emerald"
-            loading={loading}
-          />
-        </CRMMetricsGrid>
+          <div>
+            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
+              Platform Audit Logs
+            </h1>
+            <p className="text-xs text-muted-foreground mt-0.5">
+              Immutable cross-tenant audit trail, security events, authentication records, and administrative mutations.
+            </p>
+          </div>
+        </div>
       </div>
 
-      {/* 3. Main Card Container matching Organizations Page */}
+      {/* 2. Main Card Container matching Organizations & Users Page */}
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
@@ -329,7 +252,10 @@ export default function SuperAdminAuditLogsPage() {
           <div className="flex flex-wrap items-center gap-2.5">
             <select
               value={moduleFilter}
-              onChange={(e) => setModuleFilter(e.target.value)}
+              onChange={(e) => {
+                setModuleFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="">All Modules</option>
@@ -343,18 +269,24 @@ export default function SuperAdminAuditLogsPage() {
             {/* Search Input */}
             <div className="relative w-full sm:w-64 group">
               <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
-                <Search className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
+                <AppIcon name="search" icon={Search} size={14} className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               </div>
-              <input
+              <Input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder="Filter logs by actor, action..."
-                className="h-9 w-full pl-8 pr-8 rounded-lg bg-background border border-border/70 text-xs shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="h-9 pl-8 pr-8 rounded-lg bg-background border-border/70 text-xs shadow-xs focus-visible:ring-2 focus-visible:ring-primary/20"
               />
               {search && (
                 <button
                   type="button"
-                  onClick={() => setSearch("")}
+                  onClick={() => {
+                    setSearch("");
+                    setCurrentPage(1);
+                  }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-3.5 h-3.5" />
@@ -372,12 +304,21 @@ export default function SuperAdminAuditLogsPage() {
                   setSearch("");
                   setCurrentPage(1);
                 }}
-                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer"
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
               >
-                <RefreshCw className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                <AppIcon name="reset" icon={RotateCcw} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
                 <span>Reset Filters</span>
               </button>
             )}
+
+            {/* Export Button */}
+            <button
+              onClick={exportCSV}
+              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/50 text-foreground text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+            >
+              <AppIcon name="export" icon={Download} size={14} className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+              <span>Export</span>
+            </button>
           </div>
         </div>
 
@@ -385,11 +326,11 @@ export default function SuperAdminAuditLogsPage() {
         <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
           <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
             <colgroup>
-              <col style={{ width: "200px" }} />
-              <col style={{ width: "130px" }} />
               <col style={{ width: "220px" }} />
+              <col style={{ width: "130px" }} />
+              <col style={{ width: "200px" }} />
               <col style={{ width: "180px" }} />
-              <col style={{ width: "180px" }} />
+              <col style={{ width: "170px" }} />
               <col style={{ width: "80px" }} />
             </colgroup>
             <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">

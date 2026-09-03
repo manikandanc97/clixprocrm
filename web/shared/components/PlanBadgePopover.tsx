@@ -33,7 +33,15 @@ export function PlanBadgePopover({
 }: PlanBadgePopoverProps) {
   const router = useRouter();
   const [open, setOpen] = useState(false);
-  const { subscription, plan, usage, canManageBilling } = useSubscription();
+  const { subscription, plan, usage, canManageBilling, isLoading } = useSubscription();
+
+  if (isLoading || !subscription) {
+    return (
+      <span className={`inline-flex items-center justify-center ${className}`}>
+        <span className="h-4.5 w-14 rounded-full bg-muted/60 animate-pulse inline-block" />
+      </span>
+    );
+  }
 
   const planId = (subscription?.planId || "free").toLowerCase();
   const pricing = formatPlanDisplayPrice(plan, subscription?.billingCycle || "monthly");

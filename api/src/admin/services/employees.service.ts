@@ -1,4 +1,4 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { Injectable, HttpException, HttpStatus, Optional } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, UserStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -18,7 +18,7 @@ export class EmployeesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    private readonly entitlementService: SubscriptionEntitlementService,
+    @Optional() private readonly entitlementService?: SubscriptionEntitlementService,
   ) {}
 
   async getEmployees(tenantId: string, page = 1, limit = 10) {
@@ -98,7 +98,7 @@ export class EmployeesService {
     const normalizedEmail = email.toLowerCase().trim();
 
     // Enforce workspace active user limit
-    await this.entitlementService.assertWithinLimit(tenantId, 'maxUsers', 1);
+    await this.entitlementService?.assertWithinLimit(tenantId, 'maxUsers', 1);
 
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const existingTenantUser = await tx.tenantUser.findFirst({
@@ -356,7 +356,7 @@ export class EmployeesService {
     status: string,
   ) {
     if (status === 'ACTIVE') {
-      await this.entitlementService.assertWithinLimit(tenantId, 'maxUsers', 1);
+      await this.entitlementService?.assertWithinLimit(tenantId, 'maxUsers', 1);
     }
 
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {

@@ -1,10 +1,8 @@
 /**
- * ClixProCRM Centralized Plan Definitions & Feature Matrix (API Source of Truth)
+ * ClixProCRM Centralized Plan Definitions & Feature Matrix (API Fallback & Types)
  *
- * Exact 3-Tier Plan Structure:
- * 1. Free:       ₹0/user/month       (For individuals and small teams getting started)
- * 2. Growth ⭐:   ₹499/user/month     (For growing SMB teams - Most Popular)
- * 3. Business:   ₹999/user/month     (For established businesses)
+ * Canonical Database Source of Truth: prisma.plan
+ * The values below serve strictly as robust fallbacks if the database is unreachable.
  */
 
 export interface PlanLimits {
@@ -37,13 +35,25 @@ export interface PlanDefinition {
   displayOrder: number;
   isActive: boolean;
   limits: PlanLimits;
-  features: string[]; // Feature keys
+  features: string[]; // Feature descriptions & included entitlements
   featureDescriptions: string[]; // Key highlights
   aiConfig: {
     enabled: boolean;
     level: 'Basic AI' | 'Standard AI' | 'Advanced AI' | 'Premium AI' | 'Full AI';
     dailyTokenLimit: number;
   };
+}
+
+export interface MatrixFeatureItem {
+  key: string;
+  name: string;
+  description: string;
+  values: Record<string, string | boolean>; // planId -> value
+}
+
+export interface MatrixCategory {
+  category: string;
+  features: MatrixFeatureItem[];
 }
 
 export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
@@ -56,15 +66,15 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
     currency: 'INR',
     billingInterval: 'user/month',
     pricingMode: 'FIXED',
-    description: 'Basic CRM & Pipeline Management for individuals and small teams getting started',
-    target: 'For individuals and small teams getting started',
+    description: 'Basic CRM tools, contacts, leads, and tasks for getting started',
+    target: 'For individuals & early evaluation',
     recommended: false,
     displayOrder: 1,
     isActive: true,
     limits: {
-      maxUsers: 2,
-      maxContacts: 500,
-      maxLeads: 250,
+      maxUsers: 3,
+      maxContacts: 1000,
+      maxLeads: 500,
       maxPipelines: 1,
       maxTasks: 500,
       maxCustomFields: 5,
@@ -75,29 +85,16 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
       dailyTokenLimit: 10000,
     },
     features: [
-      'contacts',
-      'companies',
-      'leads',
-      'deals',
-      'tasks',
-      'basic_crm',
-      'basic_pipeline',
-      'basic_dashboard',
-      'basic_timeline',
-      'limited_email',
-      'limited_automation',
-      'basic_permissions',
-      'import_export',
-      'basic_notifications',
-      'ai_basic',
+      'Basic CRM & pipeline management',
+      'Lead & task tracking',
+      'Standard activity timeline',
+      'Email notifications',
     ],
     featureDescriptions: [
-      'Basic CRM & Pipeline Management',
-      'Basic Dashboard',
-      'Basic Activity Timeline',
-      'Limited Email Integration',
-      'Limited Automation',
-      'Basic permissions',
+      'Basic CRM & pipeline management',
+      'Lead & task tracking',
+      'Standard activity timeline',
+      'Email notifications',
     ],
     aiConfig: {
       enabled: true,
@@ -106,17 +103,17 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
     },
   },
 
-  growth: {
-    id: 'growth',
-    name: 'Growth',
+  starter: {
+    id: 'starter',
+    name: 'Starter',
     price: '₹499',
     priceNum: 499,
     annualPriceNum: 4990,
     currency: 'INR',
     billingInterval: 'user/month',
     pricingMode: 'FIXED',
-    description: 'Advanced Automation, Workflows, Sales Pipeline Customization, and Email Tracking for growing SMB teams',
-    target: 'For growing SMB teams',
+    description: 'Everything in Free plus custom fields, email integration, and basic automation for small teams',
+    target: 'Best for scaling SMBs & active teams',
     recommended: true,
     badge: 'MOST POPULAR',
     displayOrder: 2,
@@ -129,53 +126,74 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
       maxTasks: -1,
       maxCustomFields: -1,
       maxDeals: -1,
-      maxAutomations: 50,
-      storageGb: 50,
-      maxApiRequests: 50000,
-      dailyTokenLimit: 75000,
+      maxAutomations: 10,
+      storageGb: 10,
+      maxApiRequests: 25000,
+      dailyTokenLimit: 25000,
     },
     features: [
-      'contacts',
-      'companies',
-      'leads',
-      'deals',
-      'tasks',
-      'basic_crm',
-      'basic_pipeline',
-      'basic_dashboard',
-      'basic_timeline',
-      'limited_email',
-      'limited_automation',
-      'basic_permissions',
-      'import_export',
-      'basic_notifications',
-      'advanced_automation',
-      'workflow_automation',
-      'pipeline_customization',
-      'email_integration',
-      'email_tracking',
-      'saved_views',
-      'advanced_analytics',
-      'advanced_reports',
-      'team_permissions',
-      'role_based_permissions',
-      'additional_integrations',
-      'priority_support',
-      'custom_fields',
-      'ai_copilot',
-      'lead_scoring',
-      'ai_advanced',
+      'Everything in Free',
+      'Email Integration & Tracking',
+      'Custom Fields & Saved Views',
+      'Basic Automation (10 workflows)',
+      'Team Collaboration & Shared Views',
     ],
     featureDescriptions: [
       'Everything in Free',
+      'Email Integration & Tracking',
+      'Custom Fields & Saved Views',
+      'Basic Automation (10 workflows)',
+      'Team Collaboration & Shared Views',
+    ],
+    aiConfig: {
+      enabled: true,
+      level: 'Standard AI',
+      dailyTokenLimit: 25000,
+    },
+  },
+
+  growth: {
+    id: 'growth',
+    name: 'Growth',
+    price: '₹999',
+    priceNum: 999,
+    annualPriceNum: 9990,
+    currency: 'INR',
+    billingInterval: 'user/month',
+    pricingMode: 'FIXED',
+    description: 'Everything in Starter plus advanced automations, custom analytics, team permissions, and AI copilot',
+    target: 'Best for scaling SMBs & active teams',
+    recommended: false,
+    displayOrder: 3,
+    isActive: true,
+    limits: {
+      maxUsers: 25,
+      maxContacts: 50000,
+      maxLeads: 25000,
+      maxPipelines: -1,
+      maxTasks: -1,
+      maxCustomFields: -1,
+      maxDeals: -1,
+      maxAutomations: 50,
+      storageGb: 50,
+      maxApiRequests: 75000,
+      dailyTokenLimit: 75000,
+    },
+    features: [
+      'Everything in Starter',
       'Advanced Automation & Workflows',
       'Sales Pipeline Customization',
-      'Email Integration & Tracking',
-      'Saved Views',
-      'Advanced Analytics & Reports',
-      'Team Permissions',
-      'Additional integrations',
-      'Priority support',
+      'Team Permissions & RBAC',
+      'AI Lead Scoring & Copilot',
+      'Custom Reporting & Dashboards',
+    ],
+    featureDescriptions: [
+      'Everything in Starter',
+      'Advanced Automation & Workflows',
+      'Sales Pipeline Customization',
+      'Team Permissions & RBAC',
+      'AI Lead Scoring & Copilot',
+      'Custom Reporting & Dashboards',
     ],
     aiConfig: {
       enabled: true,
@@ -187,16 +205,16 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
   business: {
     id: 'business',
     name: 'Business',
-    price: '₹999',
-    priceNum: 999,
-    annualPriceNum: 9990,
+    price: '₹1,999',
+    priceNum: 1999,
+    annualPriceNum: 19990,
     currency: 'INR',
     billingInterval: 'user/month',
     pricingMode: 'FIXED',
     description: 'Advanced RBAC, Departments, Custom Modules, Audit Logs, and API Access for established businesses',
     target: 'For established businesses',
     recommended: false,
-    displayOrder: 3,
+    displayOrder: 4,
     isActive: true,
     limits: {
       maxUsers: -1,
@@ -212,57 +230,20 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
       dailyTokenLimit: 200000,
     },
     features: [
-      'contacts',
-      'companies',
-      'leads',
-      'deals',
-      'tasks',
-      'basic_crm',
-      'basic_pipeline',
-      'basic_dashboard',
-      'basic_timeline',
-      'limited_email',
-      'limited_automation',
-      'basic_permissions',
-      'import_export',
-      'basic_notifications',
-      'advanced_automation',
-      'workflow_automation',
-      'pipeline_customization',
-      'email_integration',
-      'email_tracking',
-      'saved_views',
-      'advanced_analytics',
-      'advanced_reports',
-      'team_permissions',
-      'role_based_permissions',
-      'additional_integrations',
-      'priority_support',
-      'custom_fields',
-      'ai_copilot',
-      'lead_scoring',
-      'advanced_rbac',
-      'departments',
-      'multiple_departments',
-      'custom_modules',
-      'audit_logs',
-      'advanced_audit_logs',
-      'api_access',
-      'webhooks',
-      'ai_premium',
+      'Everything in Growth',
+      'Advanced RBAC & Departments',
+      'Custom Modules & Entity Builder',
+      'Audit Logs & Full API Access',
+      'Priority Support & SLA',
+      'Webhooks & Custom Integrations',
     ],
     featureDescriptions: [
       'Everything in Growth',
-      'Advanced Automation',
-      'Advanced Workflows',
-      'Advanced RBAC',
-      'Departments',
-      'Custom Modules',
-      'Advanced Analytics & Reports',
-      'Audit Logs',
-      'API Access',
-      'Advanced Integrations',
-      'Priority support',
+      'Advanced RBAC & Departments',
+      'Custom Modules & Entity Builder',
+      'Audit Logs & Full API Access',
+      'Priority Support & SLA',
+      'Webhooks & Custom Integrations',
     ],
     aiConfig: {
       enabled: true,
@@ -273,16 +254,19 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
 };
 
 /**
- * Normalizes any legacy or alias plan string to standard canonical plan ID
+ * Normalizes any legacy or alias plan string to standard stable plan ID
  */
 export function normalizePlanId(rawPlanId?: string | null): string {
   if (!rawPlanId) return 'free';
   const clean = rawPlanId.toLowerCase().trim();
   if (clean === 'free') return 'free';
-  if (clean === 'starter' || clean === 'pro' || clean === 'growth' || clean === 'professional') return 'growth';
-  if (clean === 'business' || clean === 'enterprise' || clean === 'custom') return 'business';
+  if (clean === 'starter') return 'starter';
+  if (clean === 'growth') return 'growth';
+  if (clean === 'business') return 'business';
+  if (clean === 'enterprise') return 'enterprise';
+  if (clean === 'pro' || clean === 'professional') return 'growth';
   if (CANONICAL_PLANS[clean]) return clean;
-  return 'free';
+  return clean;
 }
 
 /**
@@ -292,4 +276,5 @@ export function getPlanDefinition(planId?: string | null): PlanDefinition {
   const normalized = normalizePlanId(planId);
   return CANONICAL_PLANS[normalized] || CANONICAL_PLANS.free;
 }
+
 

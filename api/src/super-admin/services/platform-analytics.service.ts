@@ -262,12 +262,34 @@ export class PlatformAnalyticsService {
       ).length;
     });
 
-    // ── 7. SUBSCRIPTION MIX (Free, Growth, Business) ─────────────────────────
-    const planCounts: Record<string, number> = {
-      free: 0,
-      growth: 0,
-      business: 0,
-    };
+    // ── 7. SUBSCRIPTION MIX ──────────────────────────────────────────────────
+    let dbPlans: any[] = [];
+    try {
+      dbPlans = await this.prisma.plan.findMany({
+        where: { status: 'ACTIVE', isActive: true },
+        orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
+      });
+    } catch {
+      dbPlans = [];
+    }
+
+    const activePlanDefs =
+      dbPlans.length > 0
+        ? dbPlans.map((p) => ({
+            id: p.id.toLowerCase(),
+            name: p.name,
+            badge: p.highlight ? 'MOST POPULAR' : undefined,
+          }))
+        : Object.values(CANONICAL_PLANS).map((p) => ({
+            id: p.id.toLowerCase(),
+            name: p.name,
+            badge: p.badge || (p.recommended ? 'MOST POPULAR' : undefined),
+          }));
+
+    const planCounts: Record<string, number> = {};
+    for (const def of activePlanDefs) {
+      planCounts[def.id] = 0;
+    }
 
     for (const tenant of activeTenants) {
       const sub = subByTenantMap.get(tenant.id);
@@ -275,43 +297,25 @@ export class PlatformAnalyticsService {
       const normPlan = normalizePlanId(rawPlan);
       if (planCounts[normPlan] !== undefined) {
         planCounts[normPlan] += 1;
-      } else {
-        planCounts.free += 1;
+      } else if (planCounts['free'] !== undefined) {
+        planCounts['free'] += 1;
       }
     }
 
-    const subscriptionMix = [
-      {
-        planId: 'free',
-        name: 'Free',
-        badge: 'STARTER',
-        count: planCounts.free,
-        percentage:
-          activeTenantsCount > 0
-            ? Number(((planCounts.free / activeTenantsCount) * 100).toFixed(1))
-            : 0,
-      },
-      {
-        planId: 'growth',
-        name: 'Growth',
-        badge: 'MOST POPULAR',
-        count: planCounts.growth,
-        percentage:
-          activeTenantsCount > 0
-            ? Number(((planCounts.growth / activeTenantsCount) * 100).toFixed(1))
-            : 0,
-      },
-      {
-        planId: 'business',
-        name: 'Business',
-        badge: 'ENTERPRISE',
-        count: planCounts.business,
-        percentage:
-          activeTenantsCount > 0
-            ? Number(((planCounts.business / activeTenantsCount) * 100).toFixed(1))
-            : 0,
-      },
-    ];
+    const subscriptionMix = activePlanDefs.map((def) => {
+      const count = planCounts[def.id] || 0;
+      const percentage =
+        activeTenantsCount > 0
+          ? Number(((count / activeTenantsCount) * 100).toFixed(1))
+          : 0;
+      return {
+        planId: def.id,
+        name: def.name,
+        badge: def.badge,
+        count,
+        percentage,
+      };
+    });
 
     // ── 8. WORKSPACE HEALTH ──────────────────────────────────────────────────
     let healthActive = 0;

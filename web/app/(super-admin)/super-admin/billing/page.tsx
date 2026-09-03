@@ -447,8 +447,8 @@ export default function SuperAdminBillingPage() {
     }
     return [
       { name: "Free", count: totalWorkspacesCount || 0, revenue: 0, percentage: 100 },
+      { name: "Starter", count: 0, revenue: 0, percentage: 0 },
       { name: "Growth", count: 0, revenue: 0, percentage: 0 },
-      { name: "Business", count: 0, revenue: 0, percentage: 0 },
     ];
   }, [overview, totalWorkspacesCount]);
 
@@ -804,13 +804,17 @@ export default function SuperAdminBillingPage() {
                         {/* Progress bar */}
                         <div className="w-full bg-muted/60 rounded-full h-2 overflow-hidden">
                           <div
-                            style={{ width: `${Math.max(4, pct)}%` }}
+                            style={{ width: `${Math.max(p.count > 0 ? 4 : 0, pct)}%` }}
                             className={`h-full rounded-full transition-all ${
                               p.name.toLowerCase() === "free"
                                 ? "bg-slate-400 dark:bg-slate-600"
+                                : p.name.toLowerCase() === "starter"
+                                ? "bg-blue-500"
                                 : p.name.toLowerCase() === "growth" || p.name.toLowerCase() === "pro"
                                 ? "bg-emerald-500"
-                                : "bg-indigo-500"
+                                : p.name.toLowerCase() === "business"
+                                ? "bg-indigo-500"
+                                : "bg-amber-500"
                             }`}
                           />
                         </div>

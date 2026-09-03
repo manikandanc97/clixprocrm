@@ -434,15 +434,32 @@ export default function SuperAdminAnalyticsPage() {
               ))
             ) : subscriptionMix.length > 0 ? (
               subscriptionMix.map((tier) => {
-                const isFree = tier.planId === "free";
-                const isGrowth = tier.planId === "growth";
-                const isBusiness = tier.planId === "business";
+                const planKey = (tier.planId || "").toLowerCase();
+                const isFree = planKey === "free";
+                const isStarter = planKey === "starter";
+                const isGrowth = planKey === "growth";
+                const isBusiness = planKey === "business";
+                const isEnterprise = planKey === "enterprise";
 
-                const progressColor = isBusiness
-                  ? "bg-indigo-600 dark:bg-indigo-500"
+                const progressColor = isStarter
+                  ? "bg-blue-600 dark:bg-blue-500"
                   : isGrowth
                   ? "bg-emerald-600 dark:bg-emerald-500"
+                  : isBusiness
+                  ? "bg-indigo-600 dark:bg-indigo-500"
+                  : isEnterprise
+                  ? "bg-amber-600 dark:bg-amber-500"
                   : "bg-slate-500 dark:bg-slate-400";
+
+                const badgeStyle = isStarter
+                  ? "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+                  : isGrowth
+                  ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                  : isBusiness
+                  ? "bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 border-indigo-500/20"
+                  : isEnterprise
+                  ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                  : "bg-slate-500/10 text-slate-600 dark:text-slate-400 border-slate-500/20";
 
                 return (
                   <div
@@ -458,11 +475,7 @@ export default function SuperAdminAnalyticsPage() {
                           <span
                             className={cn(
                               "text-[9px] font-bold px-1.5 py-0.5 rounded-md border",
-                              isGrowth
-                                ? "bg-emerald-500/10 text-emerald-600 border-emerald-500/20"
-                                : isBusiness
-                                ? "bg-indigo-500/10 text-indigo-600 border-indigo-500/20"
-                                : "bg-slate-500/10 text-slate-600 border-slate-500/20"
+                              badgeStyle
                             )}
                           >
                             {tier.badge}

@@ -7,7 +7,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import { toNumber, formatCurrency } from '../../common/utils/crm-formatters.util';
-import { getPlanDefinition, normalizePlanId } from '../../common/plans/plan-definitions.constant';
+import { getPlanDefinition, normalizePlanId, CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
 import { roundTo2 } from '../../finance/utils/invoice-calculation.util';
 
 export class UpdatePlatformBillingConfigDto {
@@ -30,6 +30,10 @@ export class UpdatePlatformBillingConfigDto {
   upiId?: string;
   paymentGateway?: string;
   webhookSecret?: string;
+  razorpayKeyId?: string;
+  razorpayKeySecret?: string;
+  stripePublishableKey?: string;
+  stripeSecretKey?: string;
 }
 
 export class CreatePlatformSubscriptionDto {
@@ -190,8 +194,9 @@ export class PlatformBillingService {
       invoices,
       payments,
       refunds,
-      tenantsCount,
+      allTenants,
       config,
+      dbPlans,
     ] = await Promise.all([
       this.prisma.platformSubscription.findMany({
         include: { tenant: { select: { id: true, name: true, plan: true } } },
@@ -215,51 +220,72 @@ export class PlatformBillingService {
         where: { status: 'COMPLETED' },
         select: { amount: true },
       }),
-      this.prisma.tenant.count(),
+      this.prisma.tenant.findMany({
+        select: { id: true, name: true, slug: true, plan: true, status: true, subscriptionStatus: true },
+      }),
       this.getBillingConfig(),
+      this.prisma.plan.findMany({
+        where: { status: 'ACTIVE', isActive: true },
+        orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
+      }).catch(() => []),
     ]);
 
+    const customerTenants = allTenants.filter(
+      (t) => t.slug !== 'clixpro-platform' && (t as any).isPlatformTenant !== true && (t as any).type !== 'PLATFORM',
+    );
+
     const currency = config.currency || 'INR';
+    const tenantsCount = customerTenants.length;
 
     // 1. Calculate MRR & ARR from active paid subscriptions
     let monthlyMRR = 0;
-    const planDistMap: Record<string, { count: number; name: string; revenue: number; percentage: number }> = {
-      free: { count: 0, name: 'Free', revenue: 0, percentage: 0 },
-      growth: { count: 0, name: 'Growth', revenue: 0, percentage: 0 },
-      business: { count: 0, name: 'Business', revenue: 0, percentage: 0 },
-    };
+    
+    // Resolve active canonical or dynamic database plans
+    const activePlanDefs = dbPlans.length > 0
+      ? dbPlans.map((p) => ({ id: p.id.toLowerCase(), name: p.name }))
+      : Object.values(CANONICAL_PLANS).map((p) => ({ id: p.id.toLowerCase(), name: p.name }));
 
-    // Deduplicate by tenantId if any duplicates exist
-    const uniqueSubsMap = new Map<string, typeof subscriptions[0]>();
+    const planDistMap: Record<string, { count: number; name: string; revenue: number; percentage: number }> = {};
+    for (const pDef of activePlanDefs) {
+      planDistMap[pDef.id] = { count: 0, name: pDef.name, revenue: 0, percentage: 0 };
+    }
+    if (!planDistMap['free']) {
+      planDistMap['free'] = { count: 0, name: 'Free', revenue: 0, percentage: 0 };
+    }
+
+    // Map subscriptions by tenantId
+    const subByTenantMap = new Map<string, typeof subscriptions[0]>();
     for (const sub of subscriptions) {
-      if (!uniqueSubsMap.has(sub.tenantId)) {
-        uniqueSubsMap.set(sub.tenantId, sub);
+      if (!subByTenantMap.has(sub.tenantId)) {
+        subByTenantMap.set(sub.tenantId, sub);
       }
     }
-    const uniqueSubs = Array.from(uniqueSubsMap.values());
 
     let paidSubscriptionsCount = 0;
-    for (const sub of uniqueSubs) {
-      const pId = normalizePlanId(sub.planId);
-      const recAmt = toNumber(sub.recurringAmount);
-      const isPaidTier = pId !== 'free' && recAmt > 0;
-      const isActive = sub.status === 'ACTIVE' || sub.status === 'TRIALING';
+    for (const tenant of customerTenants) {
+      const sub = subByTenantMap.get(tenant.id);
+      const rawPlan = sub?.planId || tenant.plan || 'free';
+      const pId = normalizePlanId(rawPlan);
+      const recAmt = toNumber(sub?.recurringAmount);
+      const isPaidTier = pId !== 'free';
+      const isSubActive = (sub?.status || tenant.subscriptionStatus || 'ACTIVE').toUpperCase() === 'ACTIVE' || (sub?.status || '').toUpperCase() === 'TRIALING';
 
-      if (isActive && isPaidTier) {
-        const mVal = sub.billingCycle === 'annual' ? recAmt / 12 : recAmt;
+      if (isSubActive && isPaidTier && (recAmt > 0 || CANONICAL_PLANS[pId]?.priceNum > 0)) {
+        const canonicalPrice = recAmt > 0 ? recAmt : (CANONICAL_PLANS[pId]?.priceNum || 0);
+        const mVal = sub?.billingCycle === 'annual' ? canonicalPrice / 12 : canonicalPrice;
         monthlyMRR += mVal;
         paidSubscriptionsCount += 1;
       }
 
       if (!planDistMap[pId]) {
-        const pDef = getPlanDefinition(pId);
-        planDistMap[pId] = { count: 0, name: pDef.name, revenue: 0, percentage: 0 };
+        const pName = pId === 'enterprise' ? 'Enterprise' : pId === 'business' ? 'Business' : (CANONICAL_PLANS[pId]?.name || pId.charAt(0).toUpperCase() + pId.slice(1));
+        planDistMap[pId] = { count: 0, name: pName, revenue: 0, percentage: 0 };
       }
       planDistMap[pId].count += 1;
-      planDistMap[pId].revenue += isPaidTier ? recAmt : 0;
+      planDistMap[pId].revenue += isPaidTier ? (recAmt > 0 ? recAmt : (CANONICAL_PLANS[pId]?.priceNum || 0)) : 0;
     }
 
-    const totalWorkspaceBase = tenantsCount || uniqueSubs.length || 1;
+    const totalWorkspaceBase = tenantsCount || 1;
     for (const key of Object.keys(planDistMap)) {
       planDistMap[key].percentage = Math.round((planDistMap[key].count / totalWorkspaceBase) * 100);
     }
@@ -339,7 +365,7 @@ export class PlatformBillingService {
         totalRefundsFormatted: formatCurrency(roundTo2(totalRefunds), currency),
         paidSubscriptions: paidSubscriptionsCount,
         activeSubscriptions: paidSubscriptionsCount,
-        totalSubscriptions: uniqueSubs.length,
+        totalSubscriptions: subByTenantMap.size || tenantsCount,
         totalOrganizations: tenantsCount,
       },
       planDistribution: Object.values(planDistMap),
@@ -823,6 +849,10 @@ export class PlatformBillingService {
         ...(dto.upiId !== undefined && { upiId: dto.upiId }),
         ...(dto.paymentGateway !== undefined && { paymentGateway: dto.paymentGateway }),
         ...(dto.webhookSecret !== undefined && { webhookSecret: dto.webhookSecret }),
+        ...(dto.razorpayKeyId !== undefined && { razorpayKeyId: dto.razorpayKeyId }),
+        ...(dto.razorpayKeySecret !== undefined && { razorpayKeySecret: dto.razorpayKeySecret }),
+        ...(dto.stripePublishableKey !== undefined && { stripePublishableKey: dto.stripePublishableKey }),
+        ...(dto.stripeSecretKey !== undefined && { stripeSecretKey: dto.stripeSecretKey }),
         updatedBy: userId,
       },
     });

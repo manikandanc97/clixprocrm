@@ -27,7 +27,6 @@ import {
 import { Button } from "@/shared/ui/button";
 import {
   CANONICAL_PLANS,
-  COMPARISON_MATRIX,
   formatPlanDisplayPrice,
   getPlanDefinition,
   normalizePlanId,
@@ -286,26 +285,26 @@ export default function SubscriptionSettings() {
       </div>
 
       {/* 3. QUICK UPGRADE PROMPT (IF ON FREE) */}
-      {!isEnterprise && activePlanId !== "growth" && activePlanId !== "business" && (
+      {isFree && (
         <div className="rounded-2xl border border-primary/30 bg-primary/5 p-5 flex flex-col sm:flex-row items-start sm:items-center justify-between gap-4">
           <div className="space-y-1">
             <div className="flex items-center gap-2">
               <Sparkles className="w-4 h-4 text-primary" />
               <h4 className="text-sm font-bold text-foreground">
-                Unlock Advanced Workflows & Pipelines with Growth
+                Unlock Advanced Workflows & Higher Limits
               </h4>
             </div>
             <p className="text-xs text-muted-foreground">
-              Upgrade to the Growth plan (₹499/user/month) for sales pipeline customization, team permissions, email integration & tracking, and 10,000 contacts.
+              Upgrade your workspace to access custom fields, sales pipelines, email tracking, team permissions, and expanded contact limits.
             </p>
           </div>
 
           <Button
             size="sm"
-            onClick={() => router.push("/upgrade?plan=growth")}
+            onClick={() => router.push("/upgrade")}
             className="bg-primary text-primary-foreground text-xs font-bold shrink-0 shadow-xs"
           >
-            Upgrade to Growth ⭐
+            Explore Plans ⭐
           </Button>
         </div>
       )}
@@ -390,10 +389,10 @@ export default function SubscriptionSettings() {
       <div className="p-4 rounded-xl border border-border/80 bg-muted/20 flex items-center justify-between gap-4">
         <div>
           <h4 className="text-xs font-bold text-foreground">
-            Looking for full feature comparisons across all 3 plans?
+            Looking for full feature comparisons across all plans?
           </h4>
           <p className="text-[11px] text-muted-foreground mt-0.5">
-            Compare Free, Growth, and Business side-by-side.
+            Compare plans, limits, and capabilities side-by-side.
           </p>
         </div>
 

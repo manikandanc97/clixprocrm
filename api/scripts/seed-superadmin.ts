@@ -187,6 +187,86 @@ async function main() {
   // 2. Seed the single canonical platform Super Admin
   await seedAdminForEmail(supabase, canonicalEmail, defaultName, defaultPassword);
 
+  const superAdminUser = await prisma.user.findUnique({
+    where: { email: canonicalEmail },
+    include: {
+      memberships: {
+        include: { tenant: true },
+      },
+    },
+  });
+
+  if (superAdminUser) {
+    // 3. Ensure Super Admin internal platform tenant exists and is classified as PLATFORM
+    let platformTenantId: string | null = null;
+    if (superAdminUser.memberships.length > 0) {
+      platformTenantId = superAdminUser.memberships[0].tenantId;
+    } else {
+      // Find or create platform tenant
+      let platTenant = await (prisma as any).tenant.findFirst({
+        where: { OR: [{ slug: 'clixpro-platform' }, { isPlatformTenant: true }, { type: 'PLATFORM' }] },
+      });
+
+      if (!platTenant) {
+        platTenant = await (prisma as any).tenant.create({
+          data: {
+            name: 'ClixPro Platform Workspace',
+            slug: 'clixpro-platform',
+            type: 'PLATFORM',
+            isPlatformTenant: true,
+            plan: 'enterprise',
+            subscriptionStatus: 'ACTIVE',
+            billingCycle: 'monthly',
+          },
+        });
+      }
+      const targetTenantId: string = platTenant.id;
+      platformTenantId = targetTenantId;
+
+      // Assign membership
+      let adminRole = await prisma.role.findFirst({
+        where: { tenantId: targetTenantId, name: 'ADMIN' },
+      });
+      if (!adminRole) {
+        adminRole = await prisma.role.create({
+          data: {
+            tenantId: targetTenantId,
+            name: 'ADMIN',
+            isSystem: true,
+            description: 'Platform Administrator',
+          },
+        });
+      }
+
+      await prisma.tenantUser.create({
+        data: {
+          tenantId: targetTenantId,
+          userId: superAdminUser.id,
+          roleId: adminRole.id,
+          isOrgOwner: true,
+        },
+      });
+    }
+
+    if (platformTenantId) {
+      await (prisma as any).tenant.update({
+        where: { id: platformTenantId },
+        data: {
+          type: 'PLATFORM',
+          isPlatformTenant: true,
+          plan: 'enterprise',
+          subscriptionStatus: 'ACTIVE',
+        },
+      });
+
+      // Clean up any accidental platform invoices / subscriptions for this internal tenant
+      await (prisma as any).platformInvoice?.deleteMany({ where: { tenantId: platformTenantId } });
+      await (prisma as any).platformSubscription?.deleteMany({ where: { tenantId: platformTenantId } });
+
+      console.log(`✓ Super Admin internal CRM tenant secured: ID ${platformTenantId} (Type: PLATFORM, Plan: Enterprise)`);
+    }
+  }
+
   // Summary of all Super Admins
   const allSuperAdmins = await prisma.user.findMany({
     where: { isSuperAdmin: true },

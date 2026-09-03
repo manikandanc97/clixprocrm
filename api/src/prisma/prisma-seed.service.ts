@@ -30,6 +30,13 @@ export class PrismaSeedService implements OnModuleInit {
   }
 
   async seedCanonicalPlans() {
+    // Only seed initial default plans if the database has 0 plans.
+    // If plans already exist, preserve Super Admin deletions, edits, and customizations.
+    const planCount = await (this.prisma as any).plan.count();
+    if (planCount > 0) {
+      return;
+    }
+
     const plans = [
       {
         id: 'free',

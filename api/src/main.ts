@@ -23,6 +23,7 @@ async function bootstrap() {
     new FastifyAdapter({
       bodyLimit: 30 * 1024 * 1024, // 30MB
     }),
+    { rawBody: true },
   );
 
   // Register fastify-multipart to support file uploads
@@ -39,8 +40,9 @@ async function bootstrap() {
         defaultSrc: ["'self'"],
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:'],
-        scriptSrc: ["'self'"],
-        connectSrc: ["'self'", 'https:'],
+        scriptSrc: ["'self'", 'https://checkout.razorpay.com'],
+        frameSrc: ["'self'", 'https://api.razorpay.com', 'https://checkout.razorpay.com'],
+        connectSrc: ["'self'", 'https:', 'https://api.razorpay.com'],
       },
     },
     crossOriginResourcePolicy: { policy: 'cross-origin' },
