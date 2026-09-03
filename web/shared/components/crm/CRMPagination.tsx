@@ -6,15 +6,15 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ChevronDown,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { cn } from "@/shared/lib/utils";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
@@ -50,14 +50,16 @@ export function CRMPagination({
   const safeTotalPages = Math.max(1, totalPages);
 
   return (
-    <div
+    <nav
+      role="navigation"
+      aria-label="Pagination"
       className={cn(
-        "p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto",
+        "p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto",
         className
       )}
     >
       {/* Showing item range */}
-      <div>
+      <div className="w-full sm:w-auto text-center sm:text-left">
         Showing{" "}
         <span className="font-semibold text-foreground">
           {startItem}
@@ -70,29 +72,36 @@ export function CRMPagination({
       </div>
 
       {/* Controls */}
-      <div className="flex items-center gap-4 flex-wrap justify-end">
+      <div className="flex items-center gap-3 sm:gap-4 flex-wrap justify-center sm:justify-end w-full sm:w-auto">
         {/* Rows per page selector */}
         <div className="flex items-center gap-2">
           <span>Rows per page:</span>
-          <select
-            value={rowsPerPage}
-            onChange={(e) => {
-              onRowsPerPageChange(Number(e.target.value));
+          <Select
+            value={String(rowsPerPage)}
+            onValueChange={(val) => {
+              onRowsPerPageChange(Number(val));
               onPageChange(1);
             }}
-            className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
           >
-            {pageSizeOptions.map((size) => (
-              <option key={size} value={size}>
-                {size}
-              </option>
-            ))}
-          </select>
+            <SelectTrigger
+              aria-label="Rows per page"
+              className="h-8 w-[72px] px-2.5 rounded-lg border-border/60 bg-background text-xs font-semibold text-foreground cursor-pointer"
+            >
+              <SelectValue placeholder={String(rowsPerPage)} />
+            </SelectTrigger>
+            <SelectContent side="top" align="end">
+              {pageSizeOptions.map((size) => (
+                <SelectItem key={size} value={String(size)} className="text-xs font-medium cursor-pointer">
+                  {size}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
         </div>
 
         {/* Page indicator & navigation buttons */}
-        <div className="flex items-center gap-3">
-          <span>
+        <div className="flex items-center gap-2.5 sm:gap-3">
+          <span className="whitespace-nowrap">
             Page <strong className="text-foreground">{currentPage}</strong> of{" "}
             <strong className="text-foreground">{safeTotalPages}</strong>
           </span>
@@ -152,6 +161,6 @@ export function CRMPagination({
           </div>
         </div>
       </div>
-    </div>
+    </nav>
   );
 }

@@ -24,6 +24,55 @@ export class CustomersService {
 
       const where: Prisma.CustomerWhereInput = { tenantId, deletedAt: null };
 
+      const searchTrimmed = search?.trim() || '';
+
+      if (searchTrimmed) {
+        // When searching encrypted records, fetch tenant records to filter across the full dataset
+        const allCustomers = await tx.customer.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          include: {
+            _count: {
+              select: { deals: { where: { status: { not: 'LOST' } } } },
+            },
+            deals: {
+              select: { value: true, stage: true },
+            },
+          },
+        });
+
+        const mapped = allCustomers.map((c) => {
+          const dealsRevenue = c.deals
+            .filter((d) => d.stage !== 'LOST')
+            .reduce((sum, d) => sum + Number(d.value || 0), 0);
+
+          return {
+            ...c,
+            name: this.enc.decrypt(c.name),
+            email: this.enc.decrypt(c.email),
+            company: this.enc.decrypt(c.company),
+            dealsCount: c._count.deals,
+            revenueValue: dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
+          };
+        });
+
+        const searchLower = searchTrimmed.toLowerCase();
+        const filtered = mapped.filter(
+          (c) =>
+            (c.name || '').toLowerCase().includes(searchLower) ||
+            (c.email || '').toLowerCase().includes(searchLower) ||
+            (c.company || '').toLowerCase().includes(searchLower),
+        );
+
+        const total = filtered.length;
+        const paginated = filtered.slice(skip, skip + limit);
+
+        return {
+          customers: paginated,
+          pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        };
+      }
+
       const [customers, total] = await Promise.all([
         tx.customer.findMany({
           where,
@@ -59,18 +108,8 @@ export class CustomersService {
         return decrypted;
       });
 
-      // Apply search post-decryption
-      const filtered = search
-        ? mappedCustomers.filter(
-            (c) =>
-              (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
-              (c.email || '').toLowerCase().includes(search.toLowerCase()) ||
-              (c.company || '').toLowerCase().includes(search.toLowerCase()),
-          )
-        : mappedCustomers;
-
       return {
-        customers: filtered,
+        customers: mappedCustomers,
         pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       };
     });

@@ -31,6 +31,7 @@
   --color-accent: var(--accent);
   --color-accent-foreground: var(--accent-foreground);
   --color-destructive: var(--destructive);
+  --color-destructive-foreground: var(--destructive-foreground);
   --color-border: var(--border);
   --color-input: var(--input);
   --color-ring: var(--ring);
@@ -60,15 +61,14 @@
   --color-info-foreground: var(--info-foreground);
 
   /* Radius system */
-  --radius: 10px;
-  --radius-xs: 6px;
-  --radius-sm: 8px;      /* Badges, Tooltips */
-  --radius-md: 10px;     /* Buttons, Inputs, Dropdowns, Selects, Alerts */
-  --radius-lg: 12px;     /* Cards, Search bars, Tables, Sidebar, Widgets */
-  --radius-xl: 14px;     /* Modals & Dialogs */
-  --radius-2xl: 14px;    /* Capped to prevent overly rounded corners */
-  --radius-3xl: 14px;    /* Capped to prevent overly rounded corners */
-  --radius-full: 9999px; /* Reserved strictly for avatars and indicator dots */
+  --radius: 8px;
+  --radius-xs: 4px;
+  --radius-sm: 6px;
+  --radius-md: 8px;
+  --radius-lg: 10px;
+  --radius-xl: 12px;
+  --radius-2xl: 16px;
+  --radius-full: 9999px;
 }
 
 /* ============================================================
@@ -103,6 +103,7 @@
 
   /* Destructive */
   --destructive: oklch(0.58 0.22 25);
+  --destructive-foreground: oklch(0.99 0.005 25);
 
   /* Borders & Inputs */
   --border: oklch(0.91 0.008 255);
@@ -110,11 +111,11 @@
   --ring: oklch(0.42 0.18 270);
 
   /* Radius */
-  --radius: 10px;
+  --radius: 8px;
 
   /* CRM Specific Tokens */
   --crm-radius-card: 12px;
-  --crm-radius-control: 10px;
+  --crm-radius-control: 8px;
   --crm-radius-modal: 14px;
   --crm-radius-pill: 9999px;
   --crm-control-height: 2.5rem;
@@ -210,6 +211,7 @@
   --accent-foreground: oklch(0.85 0.1 157);
 
   --destructive: oklch(0.65 0.22 25);
+  --destructive-foreground: oklch(0.99 0.005 25);
 
   --border: oklch(0.24 0.018 265);
   --input: oklch(0.24 0.018 265);
@@ -224,7 +226,7 @@
 
   /* CRM Specific Tokens Dark */
   --crm-radius-card: 12px;
-  --crm-radius-control: 10px;
+  --crm-radius-control: 8px;
   --crm-radius-modal: 14px;
   --crm-radius-pill: 9999px;
   --crm-card-radius: var(--crm-radius-card);

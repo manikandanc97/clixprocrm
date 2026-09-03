@@ -32,13 +32,11 @@ export default function DashboardShell({
       <Sidebar />
 
       {/* Main Content Column — offset by sidebar width, fills remaining height */}
-      <motion.div
-        initial={false}
-        animate={{
+      <div
+        style={{
           paddingLeft: mounted && isDesktop ? (isCollapsed ? "86px" : "270px") : "0px",
         }}
-        transition={{ duration: 0.25, ease: [0.4, 0, 0.2, 1] }}
-        className="flex flex-col flex-1 min-w-0 h-full w-full"
+        className="flex flex-col flex-1 min-w-0 h-full w-full transition-[padding-left] duration-250 ease-[cubic-bezier(0.4,0,0.2,1)]"
       >
         <div className="shrink-0">
           <Topbar />
@@ -55,7 +53,7 @@ export default function DashboardShell({
             {children}
           </motion.div>
         </main>
-      </motion.div>
+      </div>
 
       {/* Global Components */}
       <MobileBottomNav />

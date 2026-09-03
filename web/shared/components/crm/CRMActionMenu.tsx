@@ -118,13 +118,7 @@ export function CRMActionMenu({
           avoidCollisions={true}
           collisionPadding={8}
           className={cn(
-            // Minimal-style premium SaaS popover styling matching reference
-            "z-50 min-w-[168px] p-1.5 rounded-2xl border border-border/75 dark:border-border/60",
-            "bg-popover bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_5.5%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_3.5%,transparent)_0%,transparent_45%)]",
-            "dark:bg-card dark:bg-[radial-gradient(ellipse_at_top_right,color-mix(in_srgb,var(--primary)_8%,transparent)_0%,transparent_55%),radial-gradient(ellipse_at_bottom_left,color-mix(in_srgb,#ef4444_5.5%,transparent)_0%,transparent_45%)]",
-            "shadow-[0_12px_32px_-6px_rgba(0,0,0,0.08),0_4px_12px_-2px_rgba(0,0,0,0.04)]",
-            "dark:shadow-[0_16px_36px_-6px_rgba(0,0,0,0.5),0_6px_16px_-2px_rgba(0,0,0,0.35)]",
-            "backdrop-blur-none text-foreground font-sans",
+            "z-50 min-w-[168px] p-1.5 rounded-xl border border-border bg-popover text-popover-foreground shadow-md",
             width,
             className
           )}
@@ -139,7 +133,7 @@ export function CRMActionMenu({
 
                   const content = (
                     <React.Fragment key={itemKey}>
-                      {item.separatorBefore && <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />}
+                      {item.separatorBefore && <DropdownMenuSeparator className="my-1 -mx-1" />}
                       <DropdownMenuItem
                         variant={isDestructive ? "destructive" : "default"}
                         disabled={item.disabled || item.loading}
@@ -150,12 +144,12 @@ export function CRMActionMenu({
                           }
                         }}
                         className={cn(
-                          "min-h-[34px] px-2.5 py-1.5 text-[13px] font-medium leading-none gap-2.5 rounded-xl cursor-pointer",
-                          "transition-all duration-140 outline-hidden select-none",
-                          "hover:bg-primary/[0.07] hover:text-foreground focus:bg-primary/[0.07] focus:text-foreground",
+                          "min-h-[34px] px-2.5 py-1.5 text-xs font-medium leading-none gap-2.5 rounded-lg cursor-pointer",
+                          "transition-colors duration-150 outline-hidden select-none",
+                          "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
                           isPrimary && "text-primary font-medium hover:bg-primary/10 focus:bg-primary/10",
                           isDestructive &&
-                            "text-[#f95738] dark:text-[#ff6b4a] font-medium hover:bg-rose-500/10 hover:text-[#f95738] focus:bg-rose-500/10 focus:text-[#f95738]",
+                            "text-destructive font-medium hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive",
                           item.className
                         )}
                       >
@@ -169,7 +163,7 @@ export function CRMActionMenu({
                               className={cn(
                                 "h-4 w-4 shrink-0 transition-colors",
                                 isDestructive
-                                  ? "text-[#f95738] dark:text-[#ff6b4a]"
+                                  ? "text-destructive"
                                   : isPrimary
                                   ? "text-primary"
                                   : "text-muted-foreground group-hover/dropdown-menu-item:text-foreground",
@@ -181,7 +175,7 @@ export function CRMActionMenu({
                               className={cn(
                                 "h-4 w-4 shrink-0 transition-colors",
                                 isDestructive
-                                  ? "text-[#f95738] dark:text-[#ff6b4a]"
+                                  ? "text-destructive"
                                   : isPrimary
                                   ? "text-primary"
                                   : "text-muted-foreground group-hover/dropdown-menu-item:text-foreground",
@@ -192,7 +186,7 @@ export function CRMActionMenu({
                         ) : null}
                         <span className="truncate flex-1">{item.label}</span>
                       </DropdownMenuItem>
-                      {item.separatorAfter && <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />}
+                      {item.separatorAfter && <DropdownMenuSeparator className="my-1 -mx-1" />}
                     </React.Fragment>
                   );
 
@@ -243,12 +237,12 @@ export function CRMActionMenuItem({
         if (!disabled && onClick) onClick(e);
       }}
       className={cn(
-        "min-h-[34px] px-2.5 py-1.5 text-[13px] font-medium leading-none gap-2.5 rounded-xl cursor-pointer",
-        "transition-all duration-140 outline-hidden select-none",
-        "hover:bg-primary/[0.07] hover:text-foreground focus:bg-primary/[0.07] focus:text-foreground",
+        "min-h-[34px] px-2.5 py-1.5 text-xs font-medium leading-none gap-2.5 rounded-lg cursor-pointer",
+        "transition-colors duration-150 outline-hidden select-none",
+        "hover:bg-accent hover:text-accent-foreground focus:bg-accent focus:text-accent-foreground",
         isPrimary && "text-primary font-medium hover:bg-primary/10 focus:bg-primary/10",
         isDestructive &&
-          "text-[#f95738] dark:text-[#ff6b4a] font-medium hover:bg-rose-500/10 hover:text-[#f95738] focus:bg-rose-500/10 focus:text-[#f95738]",
+          "text-destructive font-medium hover:bg-destructive/10 hover:text-destructive focus:bg-destructive/10 focus:text-destructive",
         className
       )}
       {...props}
@@ -258,7 +252,7 @@ export function CRMActionMenuItem({
           className={cn(
             "h-4 w-4 shrink-0 transition-colors",
             isDestructive
-              ? "text-[#f95738] dark:text-[#ff6b4a]"
+              ? "text-destructive"
               : isPrimary
               ? "text-primary"
               : "text-muted-foreground group-hover/dropdown-menu-item:text-foreground",
@@ -272,7 +266,7 @@ export function CRMActionMenuItem({
           className={cn(
             "h-4 w-4 shrink-0 transition-colors",
             isDestructive
-              ? "text-[#f95738] dark:text-[#ff6b4a]"
+              ? "text-destructive"
               : isPrimary
               ? "text-primary"
               : "text-muted-foreground group-hover/dropdown-menu-item:text-foreground",

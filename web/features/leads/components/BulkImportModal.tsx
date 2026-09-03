@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useRef } from "react";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 import { parseFile, IMPORT_TEMPLATE_HEADERS } from "@/lib/bulk-import-utils";
@@ -293,7 +293,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
       // Invalidate all relevant caches
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
 
       if (onSuccess) onSuccess();

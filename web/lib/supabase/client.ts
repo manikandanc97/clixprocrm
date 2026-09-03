@@ -30,7 +30,7 @@ function serializeCookie(name: string, value: string, options: any = {}): string
   return cookieStr;
 }
 
-export function createClient() {
+function initBrowserClient() {
   return createBrowserClient(
     process.env.NEXT_PUBLIC_SUPABASE_URL!,
     process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY!,
@@ -79,4 +79,20 @@ export function createClient() {
       },
     }
   );
+}
+
+let clientInstance: ReturnType<typeof initBrowserClient> | null = null;
+
+export function createClient() {
+  if (typeof window !== 'undefined' && clientInstance) {
+    return clientInstance;
+  }
+
+  const client = initBrowserClient();
+
+  if (typeof window !== 'undefined') {
+    clientInstance = client;
+  }
+
+  return client;
 }

@@ -1,5 +1,4 @@
 import Papa from 'papaparse';
-import * as XLSX from 'xlsx';
 
 export const IMPORT_TEMPLATE_HEADERS = [
   "Full Name *",
@@ -29,7 +28,7 @@ export const SAMPLE_DATA = [
   ]
 ];
 
-export function downloadSampleTemplate(type: 'csv' | 'xlsx' = 'csv') {
+export async function downloadSampleTemplate(type: 'csv' | 'xlsx' = 'csv') {
   const data = [IMPORT_TEMPLATE_HEADERS, ...SAMPLE_DATA];
   
   if (type === 'csv') {
@@ -40,6 +39,7 @@ export function downloadSampleTemplate(type: 'csv' | 'xlsx' = 'csv') {
     link.download = "lead_import_template.csv";
     link.click();
   } else {
+    const XLSX = await import('xlsx');
     const ws = XLSX.utils.aoa_to_sheet(data);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Template");
@@ -48,7 +48,7 @@ export function downloadSampleTemplate(type: 'csv' | 'xlsx' = 'csv') {
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function downloadFailedRows(failedRows: any[], type: 'csv' | 'xlsx' = 'csv') {
+export async function downloadFailedRows(failedRows: any[], type: 'csv' | 'xlsx' = 'csv') {
   if (failedRows.length === 0) return;
   
   if (type === 'csv') {
@@ -59,6 +59,7 @@ export function downloadFailedRows(failedRows: any[], type: 'csv' | 'xlsx' = 'cs
     link.download = "failed_leads_import.csv";
     link.click();
   } else {
+    const XLSX = await import('xlsx');
     const ws = XLSX.utils.json_to_sheet(failedRows);
     const wb = XLSX.utils.book_new();
     XLSX.utils.book_append_sheet(wb, ws, "Failed Rows");
@@ -68,17 +69,20 @@ export function downloadFailedRows(failedRows: any[], type: 'csv' | 'xlsx' = 'cs
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function parseFile(file: File): Promise<any[]> {
-  return new Promise((resolve, reject) => {
-    const fileExtension = file.name.split('.').pop()?.toLowerCase();
-    
-    if (fileExtension === 'csv') {
+  const fileExtension = file.name.split('.').pop()?.toLowerCase();
+  
+  if (fileExtension === 'csv') {
+    return new Promise((resolve, reject) => {
       Papa.parse(file, {
         header: true,
         skipEmptyLines: true,
         complete: (results) => resolve(results.data),
         error: (error) => reject(error)
       });
-    } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+    });
+  } else if (fileExtension === 'xlsx' || fileExtension === 'xls') {
+    const XLSX = await import('xlsx');
+    return new Promise((resolve, reject) => {
       const reader = new FileReader();
       reader.onload = (e) => {
         try {
@@ -94,8 +98,8 @@ export async function parseFile(file: File): Promise<any[]> {
       };
       reader.onerror = (error) => reject(error);
       reader.readAsArrayBuffer(file);
-    } else {
-      reject(new Error("Unsupported file format"));
-    }
-  });
+    });
+  } else {
+    throw new Error("Unsupported file format");
+  }
 }

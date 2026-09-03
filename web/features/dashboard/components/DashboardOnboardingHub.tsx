@@ -8,7 +8,7 @@ import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useQueryClient } from "@tanstack/react-query";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { BulkImportModal } from "@/features/leads/components/BulkImportModal";
 import { EmptyState } from "@/shared/components/EmptyState";
 

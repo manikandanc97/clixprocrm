@@ -23,8 +23,16 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
   }
 }
 
-export function fetchLeadsData() {
-  return unwrapResponse<LeadsDataType>(client.get("/crm/leads"));
+export interface LeadsQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  stage?: string;
+  status?: string;
+}
+
+export function fetchLeadsData(params?: LeadsQueryParams) {
+  return unwrapResponse<LeadsDataType>(client.get("/crm/leads", { params }));
 }
 
 export function createLead(data: Partial<LeadType>) {

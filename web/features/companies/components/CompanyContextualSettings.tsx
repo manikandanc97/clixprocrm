@@ -687,7 +687,7 @@ export function CompanyContextualSettings({
               <div className="text-center py-6 border border-dashed border-border/70 rounded-lg text-muted-foreground text-xs">
                 <p>No custom fields defined.</p>
                 <p className="text-[11px] text-muted-foreground/80 mt-0.5">
-                  Click "+ Add Custom Field" to capture custom data points.
+                  Click &quot;+ Add Custom Field&quot; to capture custom data points.
                 </p>
               </div>
             ) : (
@@ -957,7 +957,7 @@ export function CompanyContextualSettings({
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground leading-relaxed pt-1">
               <strong className="text-foreground font-semibold">
-                "{industryToDelete}"
+                &quot;{industryToDelete}&quot;
               </strong>{" "}
               is currently assigned to{" "}
               <strong className="text-foreground font-semibold">

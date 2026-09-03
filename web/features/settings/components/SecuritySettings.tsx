@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CRMCard } from "@/shared/components/crm";
-import { PageErrorState } from "@/shared/components/page-states";
+import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { SecuritySettingsSkeleton } from "./SettingsSkeletons";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";

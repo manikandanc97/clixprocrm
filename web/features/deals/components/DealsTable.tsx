@@ -2,21 +2,13 @@
 
 import { useState } from "react";
 import { motion, AnimatePresence } from "framer-motion";
-import {
-  MoreVertical, 
-  Trash2,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
-  Edit
-} from "lucide-react";
+
+
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
-import { DataTable } from "@/shared/components/DataTable";
+import { CRMDataTable } from "@/shared/components/crm/CRMDataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components/crm";
 import { useDealsLocal } from "../hooks/useDealsLocal";
@@ -174,7 +166,7 @@ export const DealsTable = ({ deals, onEdit, onDelete }: DealsTableProps) => {
   return (
     <div className="flex-1 min-h-0 flex flex-col w-full relative gap-3.5 sm:gap-4">
       <div className="flex flex-col min-h-0 flex-1">
-        <DataTable 
+        <CRMDataTable 
           data={paginatedDeals}
           columns={columns}
           rowClassName="h-16 hover:bg-muted/30 transition-colors"

@@ -45,7 +45,7 @@ import {
   useBulkDeleteTasks,
   useUpdateTask,
 } from "@/shared/hooks/use-crm";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { MeetingForm } from "@/features/forms/MeetingForm";
 import { CreateTaskModal } from "@/features/tasks/components/CreateTaskModal";
 import { EditTaskModal } from "@/features/tasks/components/EditTaskModal";

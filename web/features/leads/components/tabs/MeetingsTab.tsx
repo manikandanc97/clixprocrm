@@ -3,7 +3,7 @@ import { Button } from "@/shared/ui/button";
 import { Calendar, Clock, MapPin, Video } from "lucide-react";
 import { format } from "date-fns";
 import { useLeadMeetings } from "@/shared/hooks/use-crm";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { MeetingForm } from "@/features/forms/MeetingForm";
 import { MeetingsSkeleton } from "@/shared/components/skeletons";

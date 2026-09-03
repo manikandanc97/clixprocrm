@@ -7,7 +7,6 @@ import {
   updateInvoice,
   deleteInvoice,
   sendInvoiceEmail,
-  fetchInvoicePdfHtml,
   fetchPayments,
   recordInvoicePayment,
   deletePayment,
@@ -82,7 +81,7 @@ export function useCreateInvoice() {
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["crm-invoices"] });
       queryClient.invalidateQueries({ queryKey: ["revenue"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast.success("Invoice created successfully");
     },
@@ -101,7 +100,7 @@ export function useUpdateInvoice() {
       queryClient.invalidateQueries({ queryKey: ["crm-invoices"] });
       queryClient.invalidateQueries({ queryKey: ["crm-invoice-detail", id] });
       queryClient.invalidateQueries({ queryKey: ["revenue"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Invoice updated successfully");
     },
     onError: (error: any) => {

@@ -3,7 +3,7 @@
 import { Card, CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { motion } from "framer-motion";
 import { Info } from "lucide-react";
-import { EmptyStateCard } from "@/shared/components/page-states";
+import { EmptyStateCard } from "@/shared/components/crm/PageFeedbackStates";
 import { ActivityHeatmapPointType } from "@/shared/types/report";
 
 const ActivityHeatmap = ({ data }: { data: ActivityHeatmapPointType[] }) => {

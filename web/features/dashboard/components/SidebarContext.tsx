@@ -14,10 +14,18 @@ export function SidebarProvider({ children }: { children: React.ReactNode }) {
   const sidebarCollapsed = useCRMStore(state => state.sidebarCollapsed);
   const setSidebarCollapsed = useCRMStore(state => state.setSidebarCollapsed);
   
-  const toggleSidebar = () => setSidebarCollapsed(!sidebarCollapsed);
+  const toggleSidebar = React.useCallback(
+    () => setSidebarCollapsed(!sidebarCollapsed),
+    [sidebarCollapsed, setSidebarCollapsed]
+  );
+
+  const contextValue = React.useMemo(
+    () => ({ isCollapsed: sidebarCollapsed, toggleSidebar }),
+    [sidebarCollapsed, toggleSidebar]
+  );
   
   return (
-    <SidebarContext.Provider value={{ isCollapsed: sidebarCollapsed, toggleSidebar }}>
+    <SidebarContext.Provider value={contextValue}>
       {children}
     </SidebarContext.Provider>
   );

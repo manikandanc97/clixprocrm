@@ -4,7 +4,7 @@ import React from "react";
 import { Bot, Brain, Loader2 } from "lucide-react";
 import { Switch } from "@/shared/ui/switch";
 import { CRMCard } from "@/shared/components/crm";
-import { EmptyStateCard, PageErrorState } from "@/shared/components/page-states";
+import { EmptyStateCard, PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { useAiSettings, useUpdateAiSettings } from "@/shared/hooks/use-settings";
 import { AISettingsSkeleton } from "./SettingsSkeletons";
 

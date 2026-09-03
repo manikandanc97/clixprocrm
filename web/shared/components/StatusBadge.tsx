@@ -4,7 +4,21 @@ import * as React from "react";
 import { Badge } from "@/shared/ui/badge";
 import { cn } from "@/shared/lib/utils";
 
-export type StatusVariant = "success" | "warning" | "danger" | "info" | "neutral" | "primary" | "amber" | "blue" | "indigo" | "rose" | "emerald" | "purple";
+export type StatusVariant =
+  | "success"
+  | "warning"
+  | "danger"
+  | "destructive"
+  | "info"
+  | "neutral"
+  | "primary"
+  | "amber"
+  | "blue"
+  | "indigo"
+  | "rose"
+  | "emerald"
+  | "purple"
+  | "slate";
 
 interface StatusBadgeProps {
   status: string;
@@ -14,19 +28,21 @@ interface StatusBadgeProps {
   className?: string;
 }
 
-const variantStyles: Record<StatusVariant, { bg: string, text: string, dot: string }> = {
-  success: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
-  emerald: { bg: "bg-emerald-500/10", text: "text-emerald-600 dark:text-emerald-400", dot: "bg-emerald-500" },
-  warning: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" },
-  amber: { bg: "bg-amber-500/10", text: "text-amber-600 dark:text-amber-400", dot: "bg-amber-500" },
-  danger: { bg: "bg-rose-500/10", text: "text-rose-600 dark:text-rose-400", dot: "bg-rose-500" },
-  rose: { bg: "bg-rose-500/10", text: "text-rose-600 dark:text-rose-400", dot: "bg-rose-500" },
-  info: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", dot: "bg-blue-500" },
-  blue: { bg: "bg-blue-500/10", text: "text-blue-600 dark:text-blue-400", dot: "bg-blue-500" },
-  indigo: { bg: "bg-indigo-500/10", text: "text-indigo-600 dark:text-indigo-400", dot: "bg-indigo-500" },
-  purple: { bg: "bg-purple-500/10", text: "text-purple-600 dark:text-purple-400", dot: "bg-purple-500" },
-  neutral: { bg: "bg-slate-500/10", text: "text-slate-600 dark:text-slate-400", dot: "bg-slate-500" },
-  primary: { bg: "bg-primary/10", text: "text-primary", dot: "bg-primary" },
+const variantStyles: Record<StatusVariant, { bg: string; text: string; dot: string; border: string }> = {
+  success: { bg: "bg-success/15", text: "text-success", dot: "bg-success", border: "border-success/25" },
+  emerald: { bg: "bg-success/15", text: "text-success", dot: "bg-success", border: "border-success/25" },
+  warning: { bg: "bg-warning/15", text: "text-warning", dot: "bg-warning", border: "border-warning/25" },
+  amber: { bg: "bg-warning/15", text: "text-warning", dot: "bg-warning", border: "border-warning/25" },
+  danger: { bg: "bg-destructive/15", text: "text-destructive", dot: "bg-destructive", border: "border-destructive/25" },
+  destructive: { bg: "bg-destructive/15", text: "text-destructive", dot: "bg-destructive", border: "border-destructive/25" },
+  rose: { bg: "bg-destructive/15", text: "text-destructive", dot: "bg-destructive", border: "border-destructive/25" },
+  info: { bg: "bg-info/15", text: "text-info", dot: "bg-info", border: "border-info/25" },
+  blue: { bg: "bg-info/15", text: "text-info", dot: "bg-info", border: "border-info/25" },
+  indigo: { bg: "bg-info/15", text: "text-info", dot: "bg-info", border: "border-info/25" },
+  purple: { bg: "bg-info/15", text: "text-info", dot: "bg-info", border: "border-info/25" },
+  neutral: { bg: "bg-muted", text: "text-muted-foreground", dot: "bg-muted-foreground", border: "border-border/50" },
+  slate: { bg: "bg-muted", text: "text-muted-foreground", dot: "bg-muted-foreground", border: "border-border/50" },
+  primary: { bg: "bg-primary/15", text: "text-primary", dot: "bg-primary", border: "border-primary/25" },
 };
 
 export function StatusBadge({
@@ -42,10 +58,11 @@ export function StatusBadge({
     <Badge 
       variant="outline" 
       className={cn(
-        "inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border-none shadow-sm transition-all",
+        "inline-flex items-center justify-center px-2.5 py-0.5 rounded-full text-[10px] font-bold uppercase tracking-wider border shadow-xs transition-colors",
         showDot && "gap-1.5",
         styles.bg,
         styles.text,
+        styles.border,
         className
       )}
     >

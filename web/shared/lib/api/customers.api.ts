@@ -23,8 +23,15 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
   }
 }
 
-export function fetchCustomersData() {
-  return unwrapResponse<CustomersDataType>(client.get("/crm/customers"));
+export interface CustomersQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: string;
+}
+
+export function fetchCustomersData(params?: CustomersQueryParams) {
+  return unwrapResponse<CustomersDataType>(client.get("/crm/customers", { params }));
 }
 
 export function createCustomer(data: Partial<CustomerType>) {

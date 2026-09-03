@@ -2,6 +2,11 @@
 
 import { cn } from "@/shared/lib/utils";
 
+/**
+ * Architectural Rule — Metric Card Usage:
+ * CRMMetricCard and CRMMetricsGrid are NOT global CRM page requirements.
+ * Designated strictly for Dashboard and Analytics/Reports.
+ */
 interface CRMMetricsGridProps {
   children: React.ReactNode;
   className?: string;

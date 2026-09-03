@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { LeadForm } from "@/features/forms/LeadForm";
 import { TaskForm } from "@/features/forms/TaskForm";
 import { CustomerForm } from "@/features/forms/CustomerForm";
@@ -172,7 +172,7 @@ export function LeadModalsHost({
               try {
                 await updateLead(customerLead.id, { stage: LeadStatus.WON });
                 queryClient.invalidateQueries({ queryKey: ["leads"] });
-                queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+                queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
                 toast.success(`${customerLead.name} has been marked as Won.`);
               } catch {
                 toast.error("Failed to update lead status to Won.");

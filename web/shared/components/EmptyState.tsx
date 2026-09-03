@@ -20,7 +20,6 @@ import {
   Sparkles,
   BarChart3,
   BrainCircuit,
-  LayoutDashboard,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";

@@ -42,7 +42,7 @@ import {
   useUpdateWorkspace,
   useUploadWorkspaceLogo,
 } from "@/shared/hooks/use-settings";
-import { PageErrorState } from "@/shared/components/page-states";
+import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { WorkspaceSettingsSkeleton } from "./SettingsSkeletons";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { useCRMStore } from "@/shared/store/useCRMStore";

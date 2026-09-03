@@ -2,7 +2,7 @@
 
 import dynamic from "next/dynamic";
 import { useGlobalModalStore } from "@/shared/store/useGlobalModalStore";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { FormSkeleton } from "@/shared/components/skeletons";
 
 const LeadForm = dynamic(() => import("@/features/forms/LeadForm").then(mod => mod.LeadForm), {

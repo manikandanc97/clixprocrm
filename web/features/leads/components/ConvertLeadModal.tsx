@@ -1,5 +1,5 @@
 import { useState, useEffect } from "react";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
@@ -66,7 +66,7 @@ export function ConvertLeadModal({
         queryClient.invalidateQueries({ queryKey: ["companies"] });
         queryClient.invalidateQueries({ queryKey: ["deals"] });
         queryClient.invalidateQueries({ queryKey: ["pipeline"] });
-        queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+        queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
         onClose();
         
         // Optionally navigate if deal is created

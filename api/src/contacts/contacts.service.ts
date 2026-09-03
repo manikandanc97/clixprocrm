@@ -34,7 +34,62 @@ export class ContactsService implements OnModuleInit {
       const search = query.search?.trim() || '';
       const skip = (page - 1) * limit;
 
-      // Fetch customers using Prisma
+      if (search) {
+        // When searching encrypted records, fetch tenant records to filter across the full dataset
+        const allCustomers = await tx.customer.findMany({
+          where: { tenantId, deletedAt: null },
+          orderBy: { createdAt: 'desc' },
+          include: {
+            _count: {
+              select: { deals: { where: { status: { not: 'LOST' } } } },
+            },
+            deals: { select: { value: true, stage: true } },
+          },
+        });
+
+        const mapped = allCustomers.map((c) => {
+          const dealsRevenue = c.deals
+            .filter((d) => d.stage !== 'LOST')
+            .reduce((sum, d) => sum + Number(d.value || 0), 0);
+
+          return {
+            id: c.id,
+            tenantId: c.tenantId,
+            assignedToId: c.assignedToId,
+            name: this.enc.decrypt(c.name),
+            company: this.enc.decrypt(c.company),
+            email: this.enc.decrypt(c.email),
+            status: c.status,
+            revenue: c.revenue,
+            lastContactAt: c.lastContactAt,
+            deletedAt: c.deletedAt,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+            leadId: c.leadId,
+            companyId: c.companyId,
+            dealsCount: c._count.deals,
+            revenueValue: dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
+          };
+        });
+
+        const searchLower = search.toLowerCase();
+        const filtered = mapped.filter(
+          (c) =>
+            (c.name || '').toLowerCase().includes(searchLower) ||
+            (c.email || '').toLowerCase().includes(searchLower) ||
+            (c.company || '').toLowerCase().includes(searchLower),
+        );
+
+        const total = filtered.length;
+        const paginated = filtered.slice(skip, skip + limit);
+
+        return {
+          customers: paginated,
+          pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        };
+      }
+
+      // Fast DB-level pagination when no search query is active
       const [customers, total] = await Promise.all([
         tx.customer.findMany({
           where: { tenantId, deletedAt: null },
@@ -77,18 +132,8 @@ export class ContactsService implements OnModuleInit {
         };
       });
 
-      // Post-decryption search filter
-      const filtered = search
-        ? mappedCustomers.filter(
-            (c) =>
-              (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
-              (c.email || '').toLowerCase().includes(search.toLowerCase()) ||
-              (c.company || '').toLowerCase().includes(search.toLowerCase()),
-          )
-        : mappedCustomers;
-
       return {
-        customers: filtered,
+        customers: mappedCustomers,
         pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
       };
     });

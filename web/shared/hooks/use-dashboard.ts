@@ -148,12 +148,16 @@ export function useAiInsights() {
 
 // ─── Entity Hooks ────────────────────────────────────────────────────────────
 
-export function useLeads() {
+export function useLeads(
+  params?: import("@/shared/lib/api/crm").LeadsQueryParams,
+  options?: { enabled?: boolean }
+) {
   const { isAuthenticated, isHydrated } = useAuth();
+  const isEnabled = (options?.enabled !== undefined ? options.enabled : true) && isHydrated && isAuthenticated;
   return useQuery({
-    queryKey: ["leads"],
-    queryFn: fetchLeadsData,
-    enabled: isHydrated && isAuthenticated,
+    queryKey: params && Object.keys(params).length > 0 ? ["leads", params] : ["leads"],
+    queryFn: () => fetchLeadsData(params),
+    enabled: isEnabled,
     staleTime: 3 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -184,12 +188,16 @@ export function usePipeline() {
   });
 }
 
-export function useCustomers() {
+export function useCustomers(
+  params?: import("@/shared/lib/api/crm").CustomersQueryParams,
+  options?: { enabled?: boolean }
+) {
   const { isAuthenticated, isHydrated } = useAuth();
+  const isEnabled = (options?.enabled !== undefined ? options.enabled : true) && isHydrated && isAuthenticated;
   return useQuery({
-    queryKey: ["customers"],
-    queryFn: fetchCustomersData,
-    enabled: isHydrated && isAuthenticated,
+    queryKey: params && Object.keys(params).length > 0 ? ["customers", params] : ["customers"],
+    queryFn: () => fetchCustomersData(params),
+    enabled: isEnabled,
     staleTime: 3 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,

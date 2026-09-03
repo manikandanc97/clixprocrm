@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { useSearchParams } from "next/navigation";
-import { PageErrorState } from "@/shared/components/page-states";
+import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { ReportsSkeleton } from "@/features/reports/components/ReportsSkeleton";
 import { useReports } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";

@@ -3,7 +3,7 @@
 import { Sparkles, TrendingUp, Users, Target, ArrowRight, Lightbulb } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { motion } from "framer-motion";
-import { EmptyStateCard } from "@/shared/components/page-states";
+import { EmptyStateCard } from "@/shared/components/crm/PageFeedbackStates";
 import { ReportInsightType } from "@/shared/types/report";
 import { useRouter } from "next/navigation";
 

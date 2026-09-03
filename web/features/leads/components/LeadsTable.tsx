@@ -2,21 +2,10 @@
 
 import { 
   Mail, 
-  Phone, 
-  MoreVertical, 
-  ChevronLeft,
-  ChevronRight,
+  Phone,
   ChevronDown,
-  ChevronsLeft,
-  ChevronsRight,
-  Calendar, 
-  User,
-  Trash2,
-  CheckCircle2,
-  Edit2,
-  RefreshCw
+  CheckCircle2
 } from "lucide-react";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
@@ -31,7 +20,6 @@ import { LeadModalsHost } from "./LeadModalsHost";
 
 
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
-import { Button } from "@/shared/ui/button";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -41,7 +29,7 @@ import {
 } from "@/shared/ui/dropdown-menu";
 import { LeadType, LeadStatus } from "@/shared/types/lead";
 import { Checkbox } from "@/shared/ui/checkbox";
-import { DataTable } from "@/shared/components/DataTable";
+import { CRMDataTable } from "@/shared/components/crm/CRMDataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components/crm";
 import { cn } from "@/shared/lib/utils";
@@ -49,7 +37,6 @@ import { useLeads } from "../hooks/useLeads";
 import { Badge } from "@/shared/ui/badge";
 import { formatDistanceToNow } from "date-fns";
 import { LeadEmptyState } from "./LeadEmptyState";
-import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
 
 interface LeadsTableProps {
   leads: LeadType[];
@@ -656,7 +643,7 @@ const LeadsTable = ({
 
       {/* Desktop & Tablet Table View */}
       <div className="hidden md:flex flex-col min-h-0 flex-1">
-        <DataTable 
+        <CRMDataTable 
           data={paginatedLeads}
           columns={columns}
           rowClassName="h-16 hover:bg-muted/30 transition-colors"

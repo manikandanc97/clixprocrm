@@ -1,7 +1,6 @@
-import { CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
+import { CRMPageContainer } from "@/shared/components/crm";
 import { 
   PageHeaderSkeleton, 
-  MetricCardSkeleton, 
   ToolbarSkeleton, 
   TableSkeleton 
 } from "@/shared/components/skeletons";
@@ -10,15 +9,6 @@ export function QuotationsSkeleton() {
   return (
     <CRMPageContainer>
       <PageHeaderSkeleton />
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={4}>
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </CRMMetricsGrid>
-      </div>
-      
       <div className="flex-1 flex flex-col gap-4">
         <div className="shrink-0 mb-2 py-4">
           <ToolbarSkeleton />
@@ -33,3 +23,4 @@ export function QuotationsSkeleton() {
     </CRMPageContainer>
   );
 }
+

@@ -18,11 +18,15 @@ import {
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 import { cn } from "@/shared/lib/utils";
 
-interface FormModalProps {
+export interface FormModalProps {
   title: string;
   description?: string;
   children: React.ReactNode;
-  isOpen: boolean;
+  /** Optional footer action buttons slot */
+  footer?: React.ReactNode;
+  isOpen?: boolean;
+  /** Canonical open prop (alias for isOpen) */
+  open?: boolean;
   onOpenChange: (open: boolean) => void;
   variant?: "dialog" | "sheet";
   size?: "sm" | "md" | "lg" | "xl" | "full";
@@ -34,13 +38,16 @@ export const FormModal = ({
   title,
   description,
   children,
+  footer,
   isOpen,
+  open: directOpen,
   onOpenChange,
   variant = "dialog",
   size = "md",
   isDirty = false,
   contentClassName,
 }: FormModalProps) => {
+  const effectiveOpen = directOpen ?? isOpen ?? false;
   const [showWarning, setShowWarning] = useState(false);
 
   const handleOpenChange = (open: boolean) => {
@@ -72,22 +79,29 @@ export const FormModal = ({
   if (variant === "sheet") {
     return (
       <>
-        <Sheet open={isOpen} onOpenChange={handleOpenChange}>
+        <Sheet open={effectiveOpen} onOpenChange={handleOpenChange}>
           <SheetContent className={cn(
-            "overflow-y-auto sm:max-w-xl",
+            "overflow-y-auto sm:max-w-xl flex flex-col",
             size === "lg" && "sm:max-w-2xl",
             size === "xl" && "sm:max-w-3xl",
             size === "full" && "sm:max-w-[90vw]"
           )}>
             <SheetHeader className="mb-6">
-              <SheetTitle className="text-2xl font-bold tracking-tight">{title}</SheetTitle>
+              <SheetTitle className="text-xl font-bold tracking-tight text-foreground">{title}</SheetTitle>
               {description && (
-                <SheetDescription className="text-sm text-muted-foreground">
+                <SheetDescription className="text-xs sm:text-sm text-muted-foreground">
                   {description}
                 </SheetDescription>
               )}
             </SheetHeader>
-            {children}
+            <div className="flex-1 min-h-0">
+              {children}
+            </div>
+            {footer && (
+              <div className="mt-auto pt-4 border-t border-border flex items-center justify-end gap-2.5">
+                {footer}
+              </div>
+            )}
           </SheetContent>
         </Sheet>
         {UnsavedChangesWarning}
@@ -105,19 +119,24 @@ export const FormModal = ({
 
   return (
     <>
-      <Dialog open={isOpen} onOpenChange={handleOpenChange}>
+      <Dialog open={effectiveOpen} onOpenChange={handleOpenChange}>
         <DialogContent className={cn("overflow-hidden p-0", sizeClasses[size])}>
           <DialogHeader className="p-6 pb-0">
-            <DialogTitle className="text-xl font-bold tracking-tight">{title}</DialogTitle>
+            <DialogTitle className="text-lg sm:text-xl font-bold tracking-tight text-foreground">{title}</DialogTitle>
             {description && (
-              <DialogDescription className="text-sm text-muted-foreground">
+              <DialogDescription className="text-xs sm:text-sm text-muted-foreground">
                 {description}
               </DialogDescription>
             )}
           </DialogHeader>
-          <div className={cn("p-6 overflow-y-auto max-h-[85vh] custom-scrollbar", contentClassName)}>
+          <div className={cn("p-6 overflow-y-auto max-h-[80vh] custom-scrollbar", contentClassName)}>
             {children}
           </div>
+          {footer && (
+            <div className="flex items-center justify-end gap-2.5 p-4 sm:px-6 border-t border-border bg-muted/20">
+              {footer}
+            </div>
+          )}
         </DialogContent>
       </Dialog>
       {UnsavedChangesWarning}

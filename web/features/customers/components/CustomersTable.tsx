@@ -2,24 +2,14 @@
 
 import { useState } from "react";
 import {
-  MoreVertical, 
-  Mail, 
-  ExternalLink,
-  User,
   TrendingUp,
-  Trash2,
-  ChevronDown,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Avatar, AvatarFallback, AvatarImage } from "@/shared/ui/avatar";
 import { Button } from "@/shared/ui/button";
 import { CustomerType } from "@/shared/types/customer";
 import { Checkbox } from "@/shared/ui/checkbox";
-import { DataTable } from "@/shared/components/DataTable";
+import { CRMDataTable } from "@/shared/components/crm/CRMDataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import { CRMPagination, TruncatedText, CRMActionMenu } from "@/shared/components/crm";
 import { useCustomers } from "../hooks/useCustomers";
@@ -196,7 +186,7 @@ export const CustomersTable = ({ customers, onEdit, onDelete }: CustomersTablePr
   return (
     <div className="flex-1 min-h-0 flex flex-col w-full relative gap-3.5 sm:gap-4">
       <div className="flex flex-col min-h-0 flex-1">
-        <DataTable 
+        <CRMDataTable 
           data={paginatedCustomers}
           columns={columns}
           rowClassName="h-16 hover:bg-muted/30 transition-colors"

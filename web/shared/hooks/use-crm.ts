@@ -60,12 +60,16 @@ import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
 import { useAuth } from "@/features/auth/components/auth-provider";
 
-export function useCustomers() {
+export function useCustomers(
+  params?: import("@/shared/lib/api/crm").CustomersQueryParams,
+  options?: { enabled?: boolean }
+) {
   const { isAuthenticated, isHydrated } = useAuth();
+  const isEnabled = (options?.enabled !== undefined ? options.enabled : true) && isHydrated && isAuthenticated;
   return useQuery({
-    queryKey: ["customers"],
-    queryFn: fetchCustomersData,
-    enabled: isHydrated && isAuthenticated,
+    queryKey: params && Object.keys(params).length > 0 ? ["customers", params] : ["customers"],
+    queryFn: () => fetchCustomersData(params),
+    enabled: isEnabled,
     staleTime: 3 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -96,12 +100,16 @@ export function useDeals() {
   });
 }
 
-export function useLeads() {
+export function useLeads(
+  params?: import("@/shared/lib/api/crm").LeadsQueryParams,
+  options?: { enabled?: boolean }
+) {
   const { isAuthenticated, isHydrated } = useAuth();
+  const isEnabled = (options?.enabled !== undefined ? options.enabled : true) && isHydrated && isAuthenticated;
   return useQuery({
-    queryKey: ["leads"],
-    queryFn: fetchLeadsData,
-    enabled: isHydrated && isAuthenticated,
+    queryKey: params && Object.keys(params).length > 0 ? ["leads", params] : ["leads"],
+    queryFn: () => fetchLeadsData(params),
+    enabled: isEnabled,
     staleTime: 3 * 60 * 1000,
     gcTime: 10 * 60 * 1000,
     refetchOnWindowFocus: false,
@@ -212,7 +220,7 @@ export function useCreateLead() {
     mutationFn: createLead,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["companies"] });
@@ -232,7 +240,7 @@ export function useUpdateLead() {
     mutationFn: ({ id, data }: { id: string; data: Omit<Partial<LeadType>, "notes"> & { wonReason?: string; lostReason?: string; wonDate?: string; actualRevenue?: number; competitor?: string; notes?: string | unknown[] } }) => updateLead(id, data as Partial<LeadType>),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
@@ -276,7 +284,7 @@ export function useUpdatePipelineItem() {
     onSettled: (_data, _error, _variables) => {
       queryClient.invalidateQueries({ queryKey: ["pipeline"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
@@ -319,7 +327,7 @@ export function useDeleteLead() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
@@ -359,7 +367,7 @@ export function useBulkDeleteLeads() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["leads"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["reports"] });
@@ -398,7 +406,7 @@ export function useDeleteCompany() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
     }
   });
 }
@@ -434,7 +442,7 @@ export function useBulkDeleteCompanies() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["companies"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
     }
   });
 }
@@ -445,7 +453,7 @@ export function useCreateCustomer() {
     mutationFn: createCustomer,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Customer created successfully");
     },
     onError: (error: Error) => {
@@ -460,7 +468,7 @@ export function useUpdateCustomer() {
     mutationFn: ({ id, data }: { id: string; data: Partial<import('@/shared/types/customer').CustomerType> }) => updateCustomer(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Customer updated successfully");
     },
     onError: (error: Error) => {
@@ -499,7 +507,7 @@ export function useDeleteCustomer() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
     }
   });
 }
@@ -535,7 +543,7 @@ export function useBulkDeleteCustomers() {
     },
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["customers"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
     }
   });
 }
@@ -549,7 +557,7 @@ export function useCreateTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-dashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
@@ -570,7 +578,7 @@ export function useUpdateTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-dashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
@@ -590,7 +598,7 @@ export function useDeleteTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
@@ -612,7 +620,7 @@ export function useBulkDeleteTasks() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
@@ -631,7 +639,7 @@ export function useUpdateTaskStatus() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["leads"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
@@ -651,7 +659,7 @@ export function useCompleteTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Task marked as completed");
     },
     onError: (error: Error) => {
@@ -713,7 +721,7 @@ export function useAssignTask() {
       queryClient.invalidateQueries({ queryKey: ["tasks-board"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-calendar"] });
       queryClient.invalidateQueries({ queryKey: ["tasks-dashboard"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Task reassigned successfully");
     },
     onError: (error: Error) => {
@@ -730,7 +738,7 @@ export function useCreateQuotation() {
     mutationFn: createQuotation,
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Quotation created successfully");
     },
     onError: (error: Error) => {
@@ -745,7 +753,7 @@ export function useUpdateQuotation() {
     mutationFn: ({ id, data }: { id: string; data: Partial<import('@/shared/types/quotation').QuotationType> }) => updateQuotation(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Quotation updated successfully");
     },
     onError: (error: Error) => {
@@ -760,7 +768,7 @@ export function useUpdateQuotationStatus() {
     mutationFn: ({ id, status }: { id: string; status: string }) => updateQuotationStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Quotation status updated successfully");
     },
     onError: (error: Error) => {
@@ -775,7 +783,7 @@ export function useDeleteQuotation() {
     mutationFn: (id: string) => import("@/shared/lib/api/crm").then(m => m.deleteQuotation(id)),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["quotations"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Quotation deleted successfully");
     },
     onError: (error: Error) => {
@@ -828,7 +836,7 @@ export function useDeleteDeal() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["deals"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
     },
   });
 }
@@ -878,7 +886,7 @@ export function useBulkDeleteDeals() {
     onSettled: () => {
       queryClient.invalidateQueries({ queryKey: ["deals"] });
       queryClient.invalidateQueries({ queryKey: ["pipeline"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
     },
   });
 }
@@ -1102,7 +1110,7 @@ export function useCreateInvoice() {
     mutationFn: (data: Record<string, ReturnType<typeof JSON.parse>>) => createInvoice(data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
       queryClient.invalidateQueries({ queryKey: ["customers"] });
       toast.success("Invoice created successfully");
@@ -1119,7 +1127,7 @@ export function useUpdateInvoice() {
     mutationFn: ({ id, data }: { id: string; data: Record<string, ReturnType<typeof JSON.parse>> }) => updateInvoice(id, data),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Invoice updated successfully");
     },
     onError: (error: Error) => {
@@ -1134,7 +1142,7 @@ export function useUpdateInvoiceStatus() {
     mutationFn: ({ id, status }: { id: string; status: string }) => updateInvoiceStatus(id, status),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Invoice status updated");
     },
     onError: (error: Error) => {
@@ -1149,7 +1157,7 @@ export function useDeleteInvoice() {
     mutationFn: (id: string) => deleteInvoice(id),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["invoices"] });
-      queryClient.invalidateQueries({ queryKey: ["dashboard"] });
+      queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       queryClient.invalidateQueries({ queryKey: ["deals"] });
       toast.success("Invoice deleted successfully");
     },

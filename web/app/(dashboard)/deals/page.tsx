@@ -12,14 +12,14 @@ const PipelineBoard = dynamic(() => import("@/features/pipeline/components/Pipel
   loading: () => <KanbanSkeleton />
 });
 
-import { PageErrorState } from "@/shared/components/page-states";
+import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { DealsSkeleton } from "@/features/deals/components/DealsSkeleton";
 import { usePipeline } from "@/shared/hooks/use-crm";
 import { Button } from "@/shared/ui/button";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { CRMPageContainer } from "@/shared/components/crm";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { DealForm } from "@/features/forms/DealForm";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { DealContextualSettings } from "@/features/deals/components/DealContextualSettings";

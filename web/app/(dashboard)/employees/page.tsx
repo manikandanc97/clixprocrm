@@ -57,7 +57,7 @@ import { EmptyState } from "@/shared/components/EmptyState";
 import { cn } from "@/shared/lib/utils";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { useEmployees, useToggleEmployeeStatus, useDeleteEmployee } from "@/shared/hooks/use-hrm";
-import { FormModal } from "@/shared/components/form-modal";
+import { FormModal } from "@/shared/components/crm/FormModal";
 import { EmployeeForm } from "@/features/forms/EmployeeForm";
 import { useAuth } from "@/features/auth/components/auth-provider";
 
