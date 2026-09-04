@@ -98,6 +98,7 @@ export function TaskRelatedRecordPicker({
           <button
             type="button"
             onClick={() => onSelectRecord(null)}
+            aria-label="Remove related record"
             className="text-muted-foreground hover:text-destructive shrink-0"
           >
             <X className="size-3.5" />

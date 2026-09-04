@@ -1059,6 +1059,7 @@ export default function UpgradePage() {
                           size="icon"
                           disabled={seats <= Math.max(currentActiveUsers, 1)}
                           onClick={() => handleSeatChange(seats - 1)}
+                          aria-label="Decrease seat count"
                           className="h-8 w-8 rounded-lg cursor-pointer"
                         >
                           <Minus className="w-3.5 h-3.5" />
@@ -1069,6 +1070,7 @@ export default function UpgradePage() {
                           max={targetPlan?.limits.maxUsers === -1 ? 500 : targetPlan?.limits.maxUsers || 100}
                           value={seats}
                           onChange={(e) => handleSeatChange(parseInt(e.target.value) || Math.max(currentActiveUsers, 1))}
+                          aria-label="Number of seats"
                           className="h-8 text-center text-sm font-bold w-16 border-0 focus-visible:ring-0"
                         />
                         <Button
@@ -1076,6 +1078,7 @@ export default function UpgradePage() {
                           variant="ghost"
                           size="icon"
                           onClick={() => handleSeatChange(seats + 1)}
+                          aria-label="Increase seat count"
                           className="h-8 w-8 rounded-lg cursor-pointer"
                         >
                           <Plus className="w-3.5 h-3.5" />

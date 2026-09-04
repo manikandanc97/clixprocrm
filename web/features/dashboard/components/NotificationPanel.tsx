@@ -19,6 +19,7 @@ import {
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { Badge } from "@/shared/ui/badge";
 
 type Notification = {
   id: string;
@@ -160,9 +161,9 @@ export default function NotificationPanel() {
           <div className="flex items-center gap-2">
             <h3 className="font-bold text-sm tracking-tight text-foreground">Notifications</h3>
             {unreadCount > 0 && (
-              <span className="bg-primary/15 text-primary text-[10px] font-black px-2 py-0.5 rounded-full uppercase tracking-wider">
+              <Badge variant="default" className="text-[10px] font-black uppercase tracking-wider">
                 {unreadCount} New
-              </span>
+              </Badge>
             )}
           </div>
           <div className="flex items-center gap-2">

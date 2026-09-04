@@ -1316,6 +1316,7 @@ export function InvoiceContextualSettings({
               <button
                 type="button"
                 onClick={() => setShowAdvancedSettlement((prev) => !prev)}
+                aria-expanded={showAdvancedSettlement}
                 className="w-full px-4 py-2.5 bg-muted/20 hover:bg-muted/40 flex items-center justify-between text-xs font-semibold text-foreground transition-colors cursor-pointer"
               >
                 <span>Advanced Settlement & Grace Period Rules</span>

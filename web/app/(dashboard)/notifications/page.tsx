@@ -354,7 +354,7 @@ export default function NotificationsPage() {
                   </div>
 
                   {/* Actions on hover */}
-                  <div className="flex items-center gap-1 self-center opacity-0 group-hover:opacity-100 transition-opacity">
+                  <div className="flex items-center gap-1 self-center opacity-0 group-hover:opacity-100 focus-within:opacity-100 transition-opacity">
                     {!n.read && (
                       <Button
                         variant="ghost"
@@ -363,6 +363,7 @@ export default function NotificationsPage() {
                           e.stopPropagation();
                           markReadMutation.mutate(n.id);
                         }}
+                        aria-label="Mark notification as read"
                         className="w-8 h-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-primary cursor-pointer"
                         title="Mark as read"
                       >
@@ -373,6 +374,7 @@ export default function NotificationsPage() {
                       variant="ghost"
                       size="icon"
                       onClick={(e) => handleDeleteItem(e, n.id)}
+                      aria-label="Delete notification"
                       className="w-8 h-8 rounded-lg hover:bg-destructive/10 text-muted-foreground hover:text-destructive cursor-pointer"
                       title="Remove notification"
                     >

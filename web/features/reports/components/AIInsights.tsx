@@ -168,7 +168,8 @@ export default function AIInsights() {
                           </div>
                           <button
                             onClick={(e) => handleDismiss(e, activeTab, item.id)}
-                            className="opacity-0 group-hover:opacity-100 p-1 hover:bg-white/10 rounded transition-all text-white/30 absolute top-3 right-3"
+                            aria-label="Dismiss insight"
+                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 p-1 hover:bg-white/10 rounded transition-all text-white/30 absolute top-3 right-3"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>

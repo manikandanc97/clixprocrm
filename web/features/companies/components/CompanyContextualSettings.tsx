@@ -506,6 +506,7 @@ export function CompanyContextualSettings({
                         size="icon"
                         variant="ghost"
                         onClick={() => handleInitiateDeleteIndustry(ind)}
+                        aria-label={`Delete industry ${ind}`}
                         className="w-7 h-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                         title={
                           count > 0
@@ -572,6 +573,7 @@ export function CompanyContextualSettings({
                       variant="ghost"
                       onClick={() => handleRemoveAccountType(type)}
                       disabled={accountTypes.length <= 1}
+                      aria-label={`Delete account type ${type}`}
                       className="w-7 h-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
                     >
                       <Trash2 className="w-3.5 h-3.5" />

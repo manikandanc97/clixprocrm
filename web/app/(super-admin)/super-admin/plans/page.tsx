@@ -52,6 +52,7 @@ import {
   TooltipContent,
   TooltipTrigger,
 } from "@/shared/ui/tooltip";
+import { Badge } from "@/shared/ui/badge";
 
 type ConfigTab = "basic" | "pricing" | "limits" | "ai" | "features";
 
@@ -125,9 +126,9 @@ function PlanEntitlementsList({ features }: { features: string[] }) {
                 <span className="font-bold text-xs text-white">
                   Additional Entitlements
                 </span>
-                <span className="text-[10px] px-2 py-0.5 rounded-full bg-emerald-500/20 text-emerald-400 font-extrabold tracking-wide border border-emerald-500/30">
+                <Badge variant="success">
                   +{remainingFeatures.length} more
-                </span>
+                </Badge>
               </div>
               <div className="space-y-1.5 max-h-48 overflow-y-auto pr-1 custom-scrollbar">
                 {remainingFeatures.map((feat, rIdx) => (
@@ -636,14 +637,14 @@ export default function SuperAdminPlansPage() {
                       {/* Status Badge */}
                       <div className="shrink-0">
                         {plan.status === "ACTIVE" ? (
-                          <span className="inline-flex items-center gap-1.5 text-[10px] font-extrabold px-2.5 py-1 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 uppercase tracking-wider shadow-2xs">
+                          <Badge variant="success" className="gap-1.5 shadow-2xs">
                             <span className="h-1.5 w-1.5 rounded-full bg-emerald-500 animate-pulse" />
                             ACTIVE
-                          </span>
+                          </Badge>
                         ) : (
-                          <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-muted text-muted-foreground border uppercase tracking-wider">
+                          <Badge variant="neutral">
                             {plan.status}
-                          </span>
+                          </Badge>
                         )}
                       </div>
                     </div>

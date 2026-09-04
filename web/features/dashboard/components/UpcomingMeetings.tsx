@@ -212,6 +212,7 @@ export default function UpcomingMeetings() {
                             e.stopPropagation();
                             handleMeetingClick(meeting.title);
                           }}
+                          aria-label={`View details for ${meeting.title}`}
                           className="rounded-xl w-10 h-10 hover:bg-muted"
                         >
                           <ArrowRight className="w-4 h-4 text-muted-foreground" />

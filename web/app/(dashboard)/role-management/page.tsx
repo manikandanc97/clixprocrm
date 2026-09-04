@@ -697,6 +697,7 @@ export default function RoleManagementPage() {
                             <Button
                               variant="ghost"
                               size="icon"
+                              aria-label="Row actions menu"
                               className="h-8 w-8 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer"
                             >
                               <MoreVertical className="h-4 w-4" />

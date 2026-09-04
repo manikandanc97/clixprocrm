@@ -54,6 +54,7 @@ const RevenueTarget = ({ data, onOpenSettings }: RevenueTargetProps) => {
               variant="ghost" 
               size="icon" 
               onClick={onOpenSettings}
+              aria-label="Target settings"
               className="w-8 h-8 rounded-lg text-primary-foreground/80 hover:text-primary-foreground hover:bg-primary-foreground/20 transition-colors"
             >
               <Settings className="w-3.5 h-3.5" />

@@ -66,7 +66,7 @@ export default function QuotationPdfPage() {
       {/* Interactive Toolbar (Hidden during print) */}
       <div className="print:hidden sticky top-0 w-full bg-slate-900 text-white shadow-xl z-50 flex flex-wrap items-center justify-between px-6 py-3 border-b border-slate-800">
         <div className="flex items-center gap-4">
-          <Button variant="ghost" size="icon" onClick={() => window.close()} className="text-slate-300 hover:text-white hover:bg-slate-800 rounded-full h-9 w-9">
+          <Button variant="ghost" size="icon" onClick={() => window.close()} aria-label="Close" className="text-slate-300 hover:text-white hover:bg-slate-800 rounded-full h-9 w-9">
             <X className="w-5 h-5" />
           </Button>
           <div className="h-6 w-px bg-slate-700" />
@@ -78,15 +78,15 @@ export default function QuotationPdfPage() {
         
         <div className="flex items-center gap-2 mt-3 sm:mt-0">
           <div className="flex items-center bg-slate-800 rounded-lg p-1 mr-4">
-            <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.max(50, z - 10))} className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-700">
+            <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.max(50, z - 10))} aria-label="Zoom out" className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-700">
               <ZoomOut className="w-4 h-4" />
             </Button>
             <span className="text-xs font-bold w-12 text-center text-slate-200">{zoom}%</span>
-            <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.min(200, z + 10))} className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-700">
+            <Button variant="ghost" size="icon" onClick={() => setZoom(z => Math.min(200, z + 10))} aria-label="Zoom in" className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-700">
               <ZoomIn className="w-4 h-4" />
             </Button>
             <div className="w-px h-4 bg-slate-600 mx-1" />
-            <Button variant="ghost" size="icon" onClick={() => setZoom(100)} className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-700" title="Fit Width">
+            <Button variant="ghost" size="icon" onClick={() => setZoom(100)} aria-label="Fit width" className="h-8 w-8 text-slate-300 hover:text-white hover:bg-slate-700" title="Fit Width">
               <Maximize className="w-4 h-4" />
             </Button>
           </div>
