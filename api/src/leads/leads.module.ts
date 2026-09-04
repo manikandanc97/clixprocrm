@@ -19,7 +19,13 @@ import { ActivitiesModule } from '../activities/activities.module';
     LeadsConvertService,
     StorageService,
   ],
-  exports: [LeadsService, LeadsQueryService, LeadsConvertService, StorageService],
+  exports: [
+    LeadsService,
+    LeadsImportService,
+    LeadsQueryService,
+    LeadsConvertService,
+    StorageService,
+  ],
 })
 export class LeadsModule {}
 

@@ -1,7 +1,8 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService, escapeHtml } from '../../common/services/email.service';
 import { formatCurrency, toNumber } from '../../common/utils/crm-formatters.util';
+import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 
 @Injectable()
 export class InvoiceEmailService {
@@ -10,12 +11,49 @@ export class InvoiceEmailService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly emailService: EmailService,
+    @Optional() private readonly emailQueueProducer?: EmailQueueProducer,
   ) {}
 
   /**
    * Sends an invoice notification email to the customer with billing details.
+   * Dispatches asynchronously to crm-email-queue via BullMQ.
    */
   async sendInvoiceEmail(
+    tenantId: string,
+    invoiceId: string,
+    userId: string,
+    options?: { recipientEmail?: string; subject?: string; message?: string; cc?: string[] },
+  ): Promise<{ success: boolean; message: string; messageId?: string }> {
+    if (this.emailQueueProducer && this.emailQueueProducer.isQueueAvailable()) {
+      try {
+        const queueResult = await this.emailQueueProducer.enqueueInvoiceNotification({
+          tenantId,
+          userId,
+          invoiceId,
+          options,
+        });
+
+        if (queueResult.enqueued) {
+          return {
+            success: true,
+            message: `Invoice email queued for processing`,
+            messageId: queueResult.jobId,
+          };
+        }
+      } catch (queueErr: any) {
+        this.logger.warn(
+          `Queue dispatch failed for invoice ${invoiceId}, falling back to direct send: ${queueErr?.message || queueErr}`,
+        );
+      }
+    }
+
+    return this.processInvoiceEmailDirect(tenantId, invoiceId, userId, options);
+  }
+
+  /**
+   * Direct execution of invoice email sending and timeline recording.
+   */
+  async processInvoiceEmailDirect(
     tenantId: string,
     invoiceId: string,
     userId: string,
@@ -137,8 +175,38 @@ export class InvoiceEmailService {
 
   /**
    * Sends payment receipt email upon payment confirmation.
+   * Dispatches asynchronously to crm-email-queue via BullMQ.
    */
   async sendPaymentReceiptEmail(
+    tenantId: string,
+    paymentId: string,
+    userId: string,
+  ): Promise<{ success: boolean; message: string }> {
+    if (this.emailQueueProducer && this.emailQueueProducer.isQueueAvailable()) {
+      try {
+        const queueResult = await this.emailQueueProducer.enqueuePaymentReceipt({
+          tenantId,
+          userId,
+          paymentId,
+        });
+
+        if (queueResult.enqueued) {
+          return { success: true, message: `Payment receipt email queued for processing` };
+        }
+      } catch (queueErr: any) {
+        this.logger.warn(
+          `Queue dispatch failed for payment receipt ${paymentId}, falling back to direct send: ${queueErr?.message || queueErr}`,
+        );
+      }
+    }
+
+    return this.processPaymentReceiptDirect(tenantId, paymentId, userId);
+  }
+
+  /**
+   * Direct execution of payment receipt email sending and timeline recording.
+   */
+  async processPaymentReceiptDirect(
     tenantId: string,
     paymentId: string,
     userId: string,
@@ -186,3 +254,4 @@ export class InvoiceEmailService {
     });
   }
 }
+

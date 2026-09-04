@@ -11,10 +11,12 @@ import {
   Req,
   HttpException,
   HttpStatus,
+  Optional,
 } from '@nestjs/common';
 import { LeadsService } from './services/leads.service';
 import { LeadsImportService } from './services/leads.import.service';
 import { MeetingsService } from '../activities/services/meetings.service';
+import { ImportQueueProducer } from '../queue/producers/import-queue.producer';
 import { CreateLeadDto } from './dto/create-lead.dto';
 import { ConvertLeadDto } from './dto/convert-lead.dto';
 import { UpdateLeadDto } from './dto/update-lead.dto';
@@ -42,6 +44,7 @@ export class LeadsController {
     private readonly leadsService: LeadsService,
     private readonly leadsImportService: LeadsImportService,
     private readonly meetingsService: MeetingsService,
+    @Optional() private readonly importQueueProducer?: ImportQueueProducer,
   ) {}
 
   @Get()
@@ -385,6 +388,28 @@ export class LeadsController {
       );
     }
 
+    if (this.importQueueProducer?.isQueueAvailable()) {
+      const enqueueResult = await this.importQueueProducer.enqueueLeadsImport({
+        tenantId: req.tenantId,
+        userId: req.user.sub,
+        leads: body.leads,
+        duplicateStrategy: body.duplicateStrategy,
+      });
+
+      if (enqueueResult.enqueued) {
+        return {
+          success: true,
+          data: {
+            jobId: enqueueResult.jobId,
+            status: 'queued',
+            count: body.leads.length,
+            message: 'Leads import job enqueued successfully',
+          },
+        };
+      }
+    }
+
+    // Direct execution fallback if queue is unavailable
     const data = await this.leadsImportService.bulkImportLeads(
       req.tenantId,
       req.user.sub,

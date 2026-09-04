@@ -2,8 +2,10 @@ import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenEx
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/services/notifications.service';
 import { StorageService } from '../../common/services/storage.service';
+import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
+
 
 export interface SupportTicketRecord {
   id: string;
@@ -75,9 +77,9 @@ export function formatTicketOutput(ticket: any, includeInternal = false): Suppor
     .map((m: any) => ({
       id: m.id,
       author: m.sender?.name || m.sender?.email || (m.isStaff ? 'ClixPro Support Staff' : 'Customer'),
-      authorRole: m.isStaff ? 'Support Engineer' : 'Client',
+      authorRole: m.isStaff ? ('Support Engineer' as const) : ('Client' as const),
       message: m.message,
-      createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : m.createdAt,
+      createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : String(m.createdAt),
       isStaff: m.isStaff,
       isInternal: m.isInternal || false,
     }));
@@ -104,11 +106,38 @@ export function formatTicketOutput(ticket: any, includeInternal = false): Suppor
     diagnostics: ticket.diagnostics,
     attachments,
     estimatedResponseTime: ticket.estimatedResponseTime || 'Within 24 Hours',
-    createdAt: ticket.createdAt instanceof Date ? ticket.createdAt.toISOString() : ticket.createdAt,
-    updatedAt: ticket.updatedAt instanceof Date ? ticket.updatedAt.toISOString() : ticket.updatedAt,
+    createdAt: ticket.createdAt instanceof Date ? ticket.createdAt.toISOString() : String(ticket.createdAt),
+    updatedAt: ticket.updatedAt instanceof Date ? ticket.updatedAt.toISOString() : String(ticket.updatedAt),
     replies,
   };
 }
+
+function formatTicketSummary(ticket: any): SupportTicketRecord {
+  return {
+    id: ticket.id,
+    ticketId: ticket.ticketNumber,
+    userId: ticket.createdById || '',
+    userEmail: ticket.createdBy?.email || 'support@clixprocrm.com',
+    userName: ticket.createdBy?.name || 'Workspace Member',
+    tenantId: ticket.tenantId,
+    subject: ticket.subject,
+    category: ticket.category,
+    priority: mapEnumToPriority(ticket.priority),
+    status: ticket.status,
+    description: ticket.description,
+    diagnostics: ticket.diagnostics,
+    attachments: (ticket.attachments || []).map((a: any) => ({
+      filename: a.fileName,
+      size: a.fileSize,
+      contentType: a.fileType,
+    })),
+    estimatedResponseTime: ticket.estimatedResponseTime || 'Within 24 Hours',
+    createdAt: ticket.createdAt instanceof Date ? ticket.createdAt.toISOString() : String(ticket.createdAt),
+    updatedAt: ticket.updatedAt instanceof Date ? ticket.updatedAt.toISOString() : String(ticket.updatedAt),
+    replies: [],
+  };
+}
+
 
 @Injectable()
 export class SupportService {
@@ -119,6 +148,7 @@ export class SupportService {
     @Optional() private readonly prisma?: PrismaService,
     @Optional() private readonly notificationsService?: NotificationsService,
     @Optional() private readonly storageService?: StorageService,
+    @Optional() private readonly emailQueueProducer?: EmailQueueProducer,
   ) {
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -332,7 +362,30 @@ export class SupportService {
       };
     }
 
-    // 5. Send SMTP notification email (sanitizes all user input against HTML injection)
+    // 5. Send support notification email (Enqueues to BullMQ crm-email-queue with fallback)
+    if (this.emailQueueProducer && this.emailQueueProducer.isQueueAvailable()) {
+      try {
+        await this.emailQueueProducer.enqueueSupportTicketEmail({
+          tenantId: tenantId || 'system',
+          userId: userId || 'system',
+          ticketId,
+          subject,
+          category,
+          priority,
+          description,
+          diagnostics,
+          userEmail,
+          userName,
+          attachmentsCount: attachments.length,
+        });
+        return { ticketId, estimatedResponseTime, ticket: createdRecord };
+      } catch (queueErr: any) {
+        this.logger.warn(
+          `Failed to enqueue support ticket email for ${ticketId}, attempting direct send: ${queueErr?.message || queueErr}`,
+        );
+      }
+    }
+
     const safeSubject = escapeHtml(subject);
     const safeCategory = escapeHtml(category);
     const safePriority = escapeHtml(priority);

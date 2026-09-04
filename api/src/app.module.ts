@@ -7,6 +7,7 @@ import { EncryptionModule } from './common/encryption/encryption.module';
 import { TenantContextModule } from './common/context/tenant-context.module';
 import { BillingModule } from './common/billing/billing.module';
 import { SubscriptionEntitlementModule } from './common/plans/subscription-entitlement.module';
+import { QueueModule } from './queue/queue.module';
 import { AuthModule } from './auth/auth.module';
 import { SuperAdminModule } from './super-admin/super-admin.module';
 import { ContactsModule } from './contacts/contacts.module';
@@ -34,6 +35,7 @@ import { CustomersModule } from './customers/customers.module';
     EncryptionModule, // Global: EncryptionService available everywhere
     BillingModule, // Global: Billing & Webhook Gateway available everywhere
     SubscriptionEntitlementModule, // Global: Subscription & Entitlement Service available everywhere
+    QueueModule, // Global: BullMQ Queue Infrastructure
     PrismaModule,
     AuthModule,
     SuperAdminModule,

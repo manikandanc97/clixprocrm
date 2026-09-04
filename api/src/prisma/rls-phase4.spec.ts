@@ -435,7 +435,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
       );
 
       expect(mockPrisma.withTenantContext).toHaveBeenCalledWith(
-        { tenantId: 'tenant-imp-1' },
+        expect.objectContaining({ tenantId: 'tenant-imp-1' }),
         expect.any(Function),
       );
       expect(mockTx.lead.create).toHaveBeenCalled();

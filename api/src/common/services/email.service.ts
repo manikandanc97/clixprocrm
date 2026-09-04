@@ -1,6 +1,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
 import { getSharedRedisClient } from '../utils/rate-limit.util';
+import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 
 export function escapeHtml(str: any): string {
   if (str === null || str === undefined) return '';
@@ -55,7 +56,10 @@ export class EmailService {
   private transporter: nodemailer.Transporter;
   private customRedisClient?: any;
 
-  constructor(@Optional() customRedisClient?: any) {
+  constructor(
+    @Optional() customRedisClient?: any,
+    @Optional() private readonly emailQueueProducer?: EmailQueueProducer,
+  ) {
     this.customRedisClient = customRedisClient;
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -67,6 +71,7 @@ export class EmailService {
       },
     });
   }
+
 
   /**
    * P2 Distributed Redis Alert Deduplication
@@ -123,6 +128,10 @@ export class EmailService {
   /**
    * Asynchronously send a transactional security alert when a new device / browser signs in.
    *
+   * Architectural Flow:
+   * - Enqueues a job to crm-email-queue via BullMQ for asynchronous background delivery.
+   * - Gracefully falls back to direct SMTP delivery if queue is unavailable (e.g. unit tests).
+   *
    * Guarantees:
    * - HTML-escaped dynamic values
    * - Zero credential / secret exposure
@@ -130,11 +139,53 @@ export class EmailService {
    */
   async sendNewDeviceAlert(
     payload: NewDeviceAlertPayload,
+    context?: { tenantId?: string; userId?: string; correlationId?: string },
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
     const { to, deviceType, browser, operatingSystem, ipAddress, time } = payload;
 
     if (!to || typeof to !== 'string' || !to.includes('@')) {
       this.logger.warn('Skipping new device alert email: No valid recipient email address provided.');
+      return { success: false, error: 'Invalid recipient email' };
+    }
+
+    // Try enqueuing to BullMQ if producer is available
+    if (this.emailQueueProducer && this.emailQueueProducer.isQueueAvailable()) {
+      try {
+        const queueResult = await this.emailQueueProducer.enqueueSecurityAlert({
+          tenantId: context?.tenantId || 'system',
+          userId: context?.userId || 'system',
+          correlationId: context?.correlationId,
+          to,
+          deviceType,
+          browser,
+          operatingSystem,
+          ipAddress,
+          time,
+        });
+
+        if (queueResult.enqueued) {
+          return { success: true, messageId: queueResult.jobId };
+        }
+      } catch (queueErr: any) {
+        this.logger.warn(
+          `Queue dispatch failed, falling back to direct delivery: ${queueErr?.message || queueErr}`,
+        );
+      }
+    }
+
+    // Direct SMTP delivery fallback
+    return this.executeDirectNewDeviceAlert(payload);
+  }
+
+  /**
+   * Direct execution of new-device alert SMTP delivery.
+   */
+  async executeDirectNewDeviceAlert(
+    payload: NewDeviceAlertPayload,
+  ): Promise<{ success: boolean; messageId?: string; error?: string }> {
+    const { to, deviceType, browser, operatingSystem, ipAddress, time } = payload;
+
+    if (!to || typeof to !== 'string' || !to.includes('@')) {
       return { success: false, error: 'Invalid recipient email' };
     }
 
@@ -218,3 +269,4 @@ export class EmailService {
     }
   }
 }
+
