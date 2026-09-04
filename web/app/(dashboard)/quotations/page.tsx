@@ -11,7 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import dynamic from "next/dynamic";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { Button } from "@/shared/ui/button";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -217,47 +217,38 @@ export default function QuotationsPage() {
             </Select>
           }
           bulkActions={
-            <button
+            <Button
+              variant="destructive"
+              size="sm"
               onClick={() => setBulkDeleteModalOpen(true)}
-              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-all shadow-xs cursor-pointer"
+              className="h-8 text-xs font-semibold px-2.5 gap-1.5 cursor-pointer shadow-xs"
             >
-              <AppIcon
-                name="trash"
-                icon={Trash2}
-                size={14}
-                className="w-3.5 h-3.5 text-rose-500 shrink-0"
-              />
+              <Trash2 className="w-3.5 h-3.5 shrink-0" />
               <span>Delete ({selectedQuoteIds.length})</span>
-            </button>
+            </Button>
           }
           actions={
             <>
               {hasActiveFilters && (
-                <button
+                <Button
+                  variant="outline"
+                  size="sm"
                   onClick={handleClearFilters}
-                  className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
+                  className="h-9 gap-1.5 text-xs font-semibold cursor-pointer animate-in fade-in zoom-in-95 duration-150"
                 >
-                  <AppIcon
-                    name="reset"
-                    icon={RotateCcw}
-                    size={14}
-                    className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0"
-                  />
+                  <RotateCcw className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                   <span>Reset Filters</span>
-                </button>
+                </Button>
               )}
-              <button
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={exportCSV}
-                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/50 text-foreground text-xs font-semibold transition-colors shadow-xs cursor-pointer"
+                className="h-9 gap-1.5 text-xs font-semibold cursor-pointer"
               >
-                <AppIcon
-                  name="export"
-                  icon={Download}
-                  size={14}
-                  className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0"
-                />
+                <Download className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
                 <span>Export</span>
-              </button>
+              </Button>
             </>
           }
         />
@@ -361,9 +352,9 @@ export default function QuotationsPage() {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={handleDeleteSingle}
               disabled={deleting}
-              className="text-xs h-9 rounded-xl font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
             >
               {deleting ? "Deleting..." : "Delete Quotation"}
             </AlertDialogAction>
@@ -393,9 +384,9 @@ export default function QuotationsPage() {
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
+              variant="destructive"
               onClick={handleBulkDelete}
               disabled={bulkDeleting}
-              className="text-xs h-9 rounded-xl font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
             >
               {bulkDeleting ? "Deleting..." : "Delete Selected"}
             </AlertDialogAction>

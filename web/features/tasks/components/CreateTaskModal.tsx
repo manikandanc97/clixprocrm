@@ -15,6 +15,13 @@ import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
@@ -283,22 +290,23 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
                             <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                               Assign To <span className="text-destructive">*</span>
                             </Label>
-                            <FormControl>
-                              <select
-                                {...field}
-                                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                              >
-                                <option value="">Select...</option>
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-10 w-full text-sm font-medium">
+                                  <SelectValue placeholder="Select..." />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
                                 {employees.map((emp: any) => (
-                                  <option key={emp.id} value={emp.id || emp.userId}>
+                                  <SelectItem key={emp.id} value={emp.id || emp.userId}>
                                     {emp.name}
-                                  </option>
+                                  </SelectItem>
                                 ))}
                                 {employees.length === 0 && user?.id && (
-                                  <option value={user.id}>{user.name || "Me"}</option>
+                                  <SelectItem value={user.id}>{user.name || "Me"}</SelectItem>
                                 )}
-                              </select>
-                            </FormControl>
+                              </SelectContent>
+                            </Select>
                             <FormMessage className="text-xs" />
                           </FormItem>
                         )}
@@ -312,18 +320,20 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
                             <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
                               Priority
                             </Label>
-                            <FormControl>
-                              <select
-                                {...field}
-                                className="h-10 w-full rounded-lg border border-input bg-background px-3 text-sm font-medium shadow-sm transition-colors focus:outline-none focus:ring-2 focus:ring-ring"
-                              >
+                            <Select onValueChange={field.onChange} value={field.value}>
+                              <FormControl>
+                                <SelectTrigger className="h-10 w-full text-sm font-medium">
+                                  <SelectValue placeholder="Select priority" />
+                                </SelectTrigger>
+                              </FormControl>
+                              <SelectContent>
                                 {PRIORITY_OPTIONS.map((p) => (
-                                  <option key={p.value} value={p.value}>
+                                  <SelectItem key={p.value} value={p.value}>
                                     {p.label}
-                                  </option>
+                                  </SelectItem>
                                 ))}
-                              </select>
-                            </FormControl>
+                              </SelectContent>
+                            </Select>
                           </FormItem>
                         )}
                       />

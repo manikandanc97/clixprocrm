@@ -1,7 +1,20 @@
 "use client";
 
 import { useMemo } from "react";
-import { FileText, Plus, RotateCcw, Building2, Calendar } from "lucide-react";
+import {
+  FileText,
+  Plus,
+  RotateCcw,
+  Building2,
+  Calendar,
+  Eye,
+  Edit,
+  Download,
+  Copy,
+  Trash2,
+  Check,
+  Send,
+} from "lucide-react";
 import {
   CRMDataTable,
   CRMTableHeader,
@@ -129,10 +142,10 @@ export function QuotationsDataTable({
         className="w-full text-left text-xs border-collapse table-fixed"
       >
         {/* ── Header ─────────────────────────────────────────────────── */}
-        <CRMTableHeader className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+        <CRMTableHeader className="sticky top-0 z-20 bg-muted/60 dark:bg-muted/40 border-b border-border shadow-xs backdrop-blur-xs">
           <CRMTableRow className="text-xs font-bold text-foreground hover:bg-transparent">
             {/* Master checkbox */}
-            <CRMTableHeaderCell className="w-12 px-4 py-3.5 text-center bg-emerald-50/80 dark:bg-emerald-950/40 border-r border-emerald-500/15">
+            <CRMTableHeaderCell className="w-12 px-4 py-3.5 text-center bg-muted/60 dark:bg-muted/40 border-r border-border/40">
               <Checkbox
                 checked={allPageSelected ? true : somePageSelected ? "indeterminate" : false}
                 onCheckedChange={(checked) => {
@@ -151,7 +164,7 @@ export function QuotationsDataTable({
             </CRMTableHeaderCell>
 
             {/* Quote # */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Quote #"
                 sortable
@@ -161,7 +174,7 @@ export function QuotationsDataTable({
             </CRMTableHeaderCell>
 
             {/* Customer */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Customer"
                 sortable
@@ -171,12 +184,12 @@ export function QuotationsDataTable({
             </CRMTableHeaderCell>
 
             {/* Related Deal */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40">
               <DataTableColumnHeader title="Related Deal" />
             </CRMTableHeaderCell>
 
             {/* Quote Value */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Quote Value"
                 sortable
@@ -186,7 +199,7 @@ export function QuotationsDataTable({
             </CRMTableHeaderCell>
 
             {/* Valid Until */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Valid Until"
                 sortable
@@ -196,7 +209,7 @@ export function QuotationsDataTable({
             </CRMTableHeaderCell>
 
             {/* Status */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Status"
                 sortable
@@ -206,7 +219,7 @@ export function QuotationsDataTable({
             </CRMTableHeaderCell>
 
             {/* Actions */}
-            <CRMTableHeaderCell className="w-16 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+            <CRMTableHeaderCell className="w-16 px-4 py-3.5 text-right bg-muted/60 dark:bg-muted/40">
               <span className="sr-only">Actions</span>
             </CRMTableHeaderCell>
           </CRMTableRow>
@@ -261,7 +274,7 @@ export function QuotationsDataTable({
                       <div className="min-w-0 flex-1">
                         <p
                           onClick={() => onViewQuote(quote)}
-                          className="font-bold text-sm text-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer truncate font-mono"
+                          className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate font-mono"
                         >
                           {quote.quoteId}
                         </p>
@@ -328,29 +341,29 @@ export function QuotationsDataTable({
                       items={[
                         {
                           label: "View Details",
-                          icon: "eye",
+                          icon: Eye,
                           onClick: () => onViewQuote(quote),
                         },
                         {
                           label: "Edit Quote",
-                          icon: "edit",
+                          icon: Edit,
                           onClick: () => onEditQuote(quote),
                         },
                         {
                           label: "Download PDF",
-                          icon: "download",
+                          icon: Download,
                           onClick: () => window.open(`/quotations/${quote.id}/pdf`, "_blank"),
                         },
                         {
                           label: "Duplicate Quote",
-                          icon: "copy",
+                          icon: Copy,
                           onClick: () => onDuplicateQuote(quote),
                         },
                         ...(quote.status !== "ACCEPTED"
                           ? [
                               {
                                 label: "Mark Accepted",
-                                icon: "check" as const,
+                                icon: Check,
                                 separatorBefore: true,
                                 className: "text-emerald-600 dark:text-emerald-400 font-medium",
                                 onClick: () => onUpdateStatus(quote.id, "ACCEPTED"),
@@ -361,7 +374,7 @@ export function QuotationsDataTable({
                           ? [
                               {
                                 label: "Mark Sent",
-                                icon: "send" as const,
+                                icon: Send,
                                 separatorBefore: quote.status === "ACCEPTED",
                                 className: "text-blue-600 dark:text-blue-400 font-medium",
                                 onClick: () => onUpdateStatus(quote.id, "SENT"),
@@ -370,7 +383,7 @@ export function QuotationsDataTable({
                           : []),
                         {
                           label: "Delete Quote",
-                          icon: "trash",
+                          icon: Trash2,
                           variant: "destructive" as const,
                           separatorBefore: true,
                           onClick: (e: React.MouseEvent) => {
