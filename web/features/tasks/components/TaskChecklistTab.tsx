@@ -76,6 +76,7 @@ export function TaskChecklistTab({
             variant="outline"
             size="sm"
             onClick={handleAdd}
+            aria-label="Add subtask"
             className="h-9 px-3 text-xs font-bold"
           >
             <Plus className="size-3.5" />
@@ -97,7 +98,8 @@ export function TaskChecklistTab({
               <button
                 type="button"
                 onClick={() => onRemoveChecklist(idx)}
-                className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity shrink-0"
+                aria-label="Delete subtask"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive transition-opacity shrink-0"
               >
                 <Trash2 className="size-3.5" />
               </button>
@@ -153,7 +155,8 @@ export function TaskChecklistTab({
                 <button
                   type="button"
                   onClick={() => onRemoveAttachment(att.id)}
-                  className="opacity-0 group-hover:opacity-100 text-muted-foreground hover:text-destructive transition-opacity shrink-0"
+                  aria-label="Remove attachment"
+                  className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive transition-opacity shrink-0"
                 >
                   <X className="size-3.5" />
                 </button>

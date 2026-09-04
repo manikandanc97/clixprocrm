@@ -20,6 +20,7 @@ import {
   AlertDialogDescription,
   AlertDialogFooter,
   AlertDialogHeader,
+  AlertDialogMedia,
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
 import {
@@ -330,25 +331,22 @@ export default function QuotationsPage() {
 
       {/* Single Delete Dialog */}
       <AlertDialog open={Boolean(quoteToDelete)} onOpenChange={(open) => !open && setQuoteToDelete(null)}>
-        <AlertDialogContent className="rounded-2xl border-border bg-card">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <div className="h-10 w-10 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mb-2">
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-            </div>
-            <AlertDialogTitle className="text-base font-bold text-foreground">
+            </AlertDialogMedia>
+            <AlertDialogTitle>
               Delete Quotation?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
+            <AlertDialogDescription>
               Are you sure you want to delete quotation{" "}
               <strong className="text-foreground">{quoteToDelete?.quoteId}</strong>? This action cannot be
               undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 gap-2">
-            <AlertDialogCancel
-              disabled={deleting}
-              className="text-xs h-9 rounded-xl font-semibold border-border hover:bg-muted"
-            >
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleting}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction
@@ -364,23 +362,20 @@ export default function QuotationsPage() {
 
       {/* Bulk Delete Dialog */}
       <AlertDialog open={bulkDeleteModalOpen} onOpenChange={setBulkDeleteModalOpen}>
-        <AlertDialogContent className="rounded-2xl border-border bg-card">
+        <AlertDialogContent>
           <AlertDialogHeader>
-            <div className="h-10 w-10 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mb-2">
+            <AlertDialogMedia className="bg-destructive/10 text-destructive">
               <AlertTriangle className="h-5 w-5" />
-            </div>
-            <AlertDialogTitle className="text-base font-bold text-foreground">
+            </AlertDialogMedia>
+            <AlertDialogTitle>
               Delete {selectedQuoteIds.length} Selected Quotations?
             </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
+            <AlertDialogDescription>
               This will permanently delete all selected quotations. This action cannot be undone.
             </AlertDialogDescription>
           </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 gap-2">
-            <AlertDialogCancel
-              disabled={bulkDeleting}
-              className="text-xs h-9 rounded-xl font-semibold border-border hover:bg-muted"
-            >
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={bulkDeleting}>
               Cancel
             </AlertDialogCancel>
             <AlertDialogAction

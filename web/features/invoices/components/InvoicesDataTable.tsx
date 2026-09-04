@@ -176,10 +176,10 @@ export function InvoicesDataTable({
         className="w-full text-left text-xs border-collapse table-fixed"
       >
         {/* ── Header ─────────────────────────────────────────────────── */}
-        <CRMTableHeader className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+        <CRMTableHeader className="sticky top-0 z-20 bg-muted/60 dark:bg-muted/40 border-b border-border shadow-xs backdrop-blur-xs">
           <CRMTableRow className="text-xs font-bold text-foreground hover:bg-transparent">
             {/* Master checkbox */}
-            <CRMTableHeaderCell className="w-12 px-4 py-3.5 text-center bg-emerald-50/80 dark:bg-emerald-950/40 border-r border-emerald-500/15">
+            <CRMTableHeaderCell className="w-12 px-4 py-3.5 text-center bg-muted/60 dark:bg-muted/40 border-r border-border/40">
               <Checkbox
                 checked={isAllSelected ? true : somePageSelected ? "indeterminate" : false}
                 onCheckedChange={() => {
@@ -202,7 +202,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Invoice # */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Invoice #"
                 sortable
@@ -212,7 +212,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Customer / Company */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Customer / Company"
                 sortable
@@ -222,7 +222,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Due Date */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Due Date"
                 sortable
@@ -232,7 +232,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Total Amount */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Total Amount"
                 sortable
@@ -242,7 +242,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Paid */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Paid"
                 sortable
@@ -252,7 +252,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Balance */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Balance"
                 sortable
@@ -262,7 +262,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Status */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 select-none">
+            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
               <DataTableColumnHeader
                 title="Status"
                 sortable
@@ -272,7 +272,7 @@ export function InvoicesDataTable({
             </CRMTableHeaderCell>
 
             {/* Actions */}
-            <CRMTableHeaderCell className="w-16 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+            <CRMTableHeaderCell className="w-16 px-4 py-3.5 text-right bg-muted/60 dark:bg-muted/40">
               <span className="sr-only">Actions</span>
             </CRMTableHeaderCell>
           </CRMTableRow>

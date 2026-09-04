@@ -521,6 +521,7 @@ export function InvoiceDetailModal({
                                   size="icon-xs"
                                   onClick={() => handleDeletePayment(p.id)}
                                   title="Delete Payment"
+                                  aria-label="Delete payment"
                                   className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
                                 >
                                   <AppIcon name="trash" size={14} />

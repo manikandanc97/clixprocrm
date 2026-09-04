@@ -130,7 +130,7 @@ export function ConvertLeadModal({
         {/* Contact Info */}
         <div className="grid grid-cols-2 gap-4">
           <div className="space-y-2">
-            <Label>Customer Name <span className="text-rose-500">*</span></Label>
+            <Label>Customer Name <span className="text-destructive">*</span></Label>
             <Input 
               required 
               value={formData.customerName} 
@@ -148,7 +148,7 @@ export function ConvertLeadModal({
         </div>
         
         <div className="space-y-2">
-          <Label>Company Name <span className="text-rose-500">*</span></Label>
+          <Label>Company Name <span className="text-destructive">*</span></Label>
           <Input 
             required 
             value={formData.companyName} 
@@ -170,7 +170,7 @@ export function ConvertLeadModal({
         {formData.createDeal && (
           <div className="grid grid-cols-2 gap-4 p-5 border rounded-xl bg-muted/20">
             <div className="space-y-2 col-span-2">
-              <Label>Deal Name <span className="text-rose-500">*</span></Label>
+              <Label>Deal Name <span className="text-destructive">*</span></Label>
               <Input 
                 required={formData.createDeal} 
                 value={formData.dealName} 
@@ -179,7 +179,7 @@ export function ConvertLeadModal({
             </div>
             
             <div className="space-y-2">
-              <Label>Deal Value <span className="text-rose-500">*</span></Label>
+              <Label>Deal Value <span className="text-destructive">*</span></Label>
               <Input 
                 type="number"
                 required={formData.createDeal} 

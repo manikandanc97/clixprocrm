@@ -31,6 +31,7 @@ import { useAuth } from "@/features/auth/components/auth-provider";
 import { TaskType } from "@/shared/types/task";
 import { AlertCircle } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
 import { TaskRelatedRecordPicker, RelatedRecord } from "./TaskRelatedRecordPicker";
 import { TaskChecklistTab } from "./TaskChecklistTab";
 
@@ -251,42 +252,41 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
 
           <Form {...form}>
             <form onSubmit={form.handleSubmit(onSubmit)} className="flex-1 flex flex-col min-h-0">
-              {/* ── TAB BAR ── */}
-              <div className="flex border-b border-border bg-background px-6 shrink-0">
-                {[
-                  { key: "general" as const, label: "General", iconName: "file" },
-                  { key: "checklist" as const, label: "Checklist", iconName: "tasks" },
-                ].map((tab) => {
-                  const isActive = activeTab === tab.key;
-                  return (
-                    <button
-                      key={tab.key}
-                      type="button"
-                      onClick={() => setActiveTab(tab.key)}
-                      className={cn(
-                        "flex items-center gap-1.5 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest border-b-2 transition-colors",
-                        isActive
-                          ? "border-primary text-primary"
-                          : "border-transparent text-muted-foreground hover:text-foreground",
-                      )}
-                    >
-                      <AppIcon name={tab.iconName} size={14} />
-                      {tab.label}
-                      {tab.key === "checklist" && checklistFields.length > 0 && (
-                        <span className="ml-1 text-[9px] font-bold bg-primary/10 text-primary rounded-full size-4 inline-flex items-center justify-center">
-                          {checklistFields.length}
-                        </span>
-                      )}
-                    </button>
-                  );
-                })}
-              </div>
+              <Tabs
+                value={activeTab}
+                onValueChange={(val) => setActiveTab(val as "general" | "checklist")}
+                className="flex-1 flex flex-col min-h-0"
+              >
+                {/* ── TAB BAR ── */}
+                <TabsList className="w-full justify-start rounded-none border-b border-border bg-background px-6 h-auto p-0 gap-0 shrink-0">
+                  <TabsTrigger
+                    value="general"
+                    className="flex items-center gap-1.5 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest border-b-2 rounded-none bg-transparent shadow-none transition-colors border-transparent text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  >
+                    <AppIcon name="file" size={14} />
+                    General
+                  </TabsTrigger>
+                  <TabsTrigger
+                    value="checklist"
+                    className="flex items-center gap-1.5 px-4 py-2.5 text-[11px] font-bold uppercase tracking-widest border-b-2 rounded-none bg-transparent shadow-none transition-colors border-transparent text-muted-foreground hover:text-foreground data-[state=active]:border-primary data-[state=active]:text-primary data-[state=active]:bg-transparent data-[state=active]:shadow-none"
+                  >
+                    <AppIcon name="tasks" size={14} />
+                    Checklist
+                    {checklistFields.length > 0 && (
+                      <span className="ml-1 text-[9px] font-bold bg-primary/10 text-primary rounded-full size-4 inline-flex items-center justify-center">
+                        {checklistFields.length}
+                      </span>
+                    )}
+                  </TabsTrigger>
+                </TabsList>
 
-              {/* ── BODY ── */}
-              <div className="flex-1 overflow-y-auto p-6">
-                {/* ===== GENERAL TAB ===== */}
-                {activeTab === "general" && (
-                  <div className="space-y-4">
+                {/* ── BODY ── */}
+                <div className="flex-1 overflow-y-auto p-6">
+                  {/* ===== GENERAL TAB ===== */}
+                  <TabsContent
+                    value="general"
+                    className="mt-0 space-y-4 focus-visible:outline-none"
+                  >
                     {/* Title */}
                     <FormField
                       control={form.control}
@@ -330,7 +330,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                     />
 
                     {/* Assign To + Priority — side by side */}
-                    <div className="grid grid-cols-2 gap-4">
+                    <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                       <FormField
                         control={form.control}
                         name="assignedToId"
@@ -416,21 +416,24 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                       relatedRecord={relatedRecord}
                       onSelectRecord={setRelatedRecord}
                     />
-                  </div>
-                )}
+                  </TabsContent>
 
-                {/* ===== CHECKLIST TAB ===== */}
-                {activeTab === "checklist" && (
-                  <TaskChecklistTab
-                    checklistFields={checklistFields as any}
-                    onAddChecklist={handleAddChecklist}
-                    onRemoveChecklist={removeChecklist}
-                    attachments={attachments}
-                    onFileUpload={handleFileUpload}
-                    onRemoveAttachment={handleRemoveAttachment}
-                  />
-                )}
-              </div>
+                  {/* ===== CHECKLIST TAB ===== */}
+                  <TabsContent
+                    value="checklist"
+                    className="mt-0 focus-visible:outline-none"
+                  >
+                    <TaskChecklistTab
+                      checklistFields={checklistFields as any}
+                      onAddChecklist={handleAddChecklist}
+                      onRemoveChecklist={removeChecklist}
+                      attachments={attachments}
+                      onFileUpload={handleFileUpload}
+                      onRemoveAttachment={handleRemoveAttachment}
+                    />
+                  </TabsContent>
+                </div>
+              </Tabs>
 
               {/* ── FOOTER ── */}
               <div className="shrink-0 px-6 py-4 border-t border-border bg-muted/10 flex items-center justify-between">

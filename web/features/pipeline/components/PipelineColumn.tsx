@@ -167,7 +167,12 @@ const PipelineColumn = ({ title, items, onSelectDeal, onAddDeal }: Props) => {
             </Badge>
           </div>
           <div className="flex items-center gap-1">
-            <button onClick={() => onAddDeal?.(title)} className={cn("p-1 text-muted-foreground rounded-md transition-colors", colors.hoverText, colors.hoverBg)} title="Add deal to this stage">
+            <button
+              onClick={() => onAddDeal?.(title)}
+              className={cn("p-1 text-muted-foreground rounded-md transition-colors", colors.hoverText, colors.hoverBg)}
+              title="Add deal to this stage"
+              aria-label="Add deal to this stage"
+            >
               <Plus className="w-4 h-4" />
             </button>
             <CRMActionMenu

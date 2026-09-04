@@ -111,15 +111,16 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
                 {company.name ? company.name.charAt(0).toUpperCase() : "C"}
               </div>
               <div className="min-w-0 flex-1">
-                <p
+                <button
+                  type="button"
                   onClick={(e) => {
                     e.stopPropagation();
                     onEditCompany(company);
                   }}
-                  className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate"
+                  className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate block text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xs"
                 >
                   {company.name || "Unnamed Company"}
-                </p>
+                </button>
                 <p className="text-xs text-muted-foreground font-mono truncate">
                   {company.industry || "No Industry"}
                 </p>

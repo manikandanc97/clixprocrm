@@ -86,27 +86,27 @@ export const FormInput = ({
       render={({ field }) => (
         <FormItem className={cn("group", className)}>
           <FormLabel>{label}</FormLabel>
-          <FormControl>
-            <div className="relative flex items-center w-full">
-              {(icon || resolvedIconName) && (
-                <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
-                  <AppIcon
-                    name={resolvedIconName}
-                    icon={icon}
-                    size={16}
-                    disableHover={true}
-                    className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
-                  />
-                </div>
-              )}
+          <div className="relative flex items-center w-full">
+            {(icon || resolvedIconName) && (
+              <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
+                <AppIcon
+                  name={resolvedIconName}
+                  icon={icon}
+                  size={16}
+                  disableHover={true}
+                  className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
+                />
+              </div>
+            )}
+            <FormControl>
               <Input
                 type={type}
                 placeholder={placeholder}
                 className={cn((icon || resolvedIconName) ? "pl-9" : "")}
                 {...field}
               />
-            </div>
-          </FormControl>
+            </FormControl>
+          </div>
           {description && <FormDescription>{description}</FormDescription>}
           <FormMessage />
         </FormItem>
@@ -183,24 +183,24 @@ export const FormSelect = ({
         <FormItem className={cn("group", className)}>
           <FormLabel>{label}</FormLabel>
           <Select onValueChange={field.onChange} value={field.value} defaultValue={field.value}>
-            <FormControl>
-              <div className="relative flex items-center w-full">
-                {(icon || resolvedIconName) && (
-                  <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
-                    <AppIcon
-                      name={resolvedIconName}
-                      icon={icon}
-                      size={16}
-                      disableHover={true}
-                      className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
-                    />
-                  </div>
-                )}
+            <div className="relative flex items-center w-full">
+              {(icon || resolvedIconName) && (
+                <div className="absolute left-3 top-1/2 -translate-y-1/2 flex items-center justify-center text-muted-foreground/70 pointer-events-none z-10 transition-colors group-focus-within:text-primary">
+                  <AppIcon
+                    name={resolvedIconName}
+                    icon={icon}
+                    size={16}
+                    disableHover={true}
+                    className="text-muted-foreground/70 group-focus-within:text-primary transition-colors"
+                  />
+                </div>
+              )}
+              <FormControl>
                 <SelectTrigger className={cn("w-full", (icon || resolvedIconName) ? "pl-9" : "", className)}>
                   <SelectValue placeholder={placeholder} />
                 </SelectTrigger>
-              </div>
-            </FormControl>
+              </FormControl>
+            </div>
             <SelectContent>
               {options.map((opt) => (
                 <SelectItem key={opt.value} value={opt.value}>

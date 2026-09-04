@@ -111,13 +111,14 @@ export const ContactsDataTable: React.FC<ContactsDataTableProps> = ({
                 {contact.name ? contact.name.charAt(0).toUpperCase() : "C"}
               </div>
               <div className="min-w-0 flex-1">
-                <p
+                <button
+                  type="button"
                   onClick={() => onEditContact(contact)}
-                  className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate"
+                  className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate block text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xs"
                   title={contact.name || "Unnamed Contact"}
                 >
                   {contact.name || "Unnamed Contact"}
-                </p>
+                </button>
                 <p className="text-xs text-muted-foreground truncate" title={contact.company || ""}>
                   {contact.company || "No Company"}
                 </p>

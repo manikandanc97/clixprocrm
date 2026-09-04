@@ -196,7 +196,7 @@ const QuotationPreview = ({ quotation, isOpen, onClose }: QuotationPreviewProps)
           </DialogHeader>
 
           {/* ── Sticky header ──────────────────────────────────────────────── */}
-          <div className="bg-card p-8 border-b border-border sticky top-0 z-20">
+          <div className="bg-card p-4 sm:p-8 border-b border-border sticky top-0 z-20">
             <div className="flex justify-between items-start mb-6">
               <div className="flex items-center gap-4">
                 <div className="w-16 h-16 rounded-xl bg-emerald-600 flex items-center justify-center shadow-lg shadow-emerald-100">
@@ -226,6 +226,7 @@ const QuotationPreview = ({ quotation, isOpen, onClose }: QuotationPreviewProps)
                   variant="ghost"
                   className="rounded-xl text-muted-foreground hover:text-foreground"
                   onClick={() => window.print()}
+                  aria-label="Print quotation"
                   title="Print"
                 >
                   <Printer className="w-4 h-4" />
@@ -235,6 +236,7 @@ const QuotationPreview = ({ quotation, isOpen, onClose }: QuotationPreviewProps)
                   variant="ghost"
                   className="rounded-xl text-muted-foreground hover:text-foreground"
                   onClick={onClose}
+                  aria-label="Close quotation preview"
                   title="Close"
                 >
                   <X className="w-5 h-5" />
@@ -264,7 +266,7 @@ const QuotationPreview = ({ quotation, isOpen, onClose }: QuotationPreviewProps)
           </div>
 
           {/* ── Scrollable body ────────────────────────────────────────────── */}
-          <div className="p-8 space-y-8">
+          <div className="p-4 sm:p-8 space-y-8">
 
             {/* Quotation Details */}
             <section className="bg-card rounded-xl p-6 border border-border shadow-sm">
@@ -382,7 +384,7 @@ const QuotationPreview = ({ quotation, isOpen, onClose }: QuotationPreviewProps)
             </section>
 
             {/* Footer Actions */}
-            <div className="grid grid-cols-3 gap-4 pb-8">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 pb-8">
               {/* hover:bg-muted replaces the previous dark-mode-broken hover:bg-white */}
               <Button
                 variant="outline"

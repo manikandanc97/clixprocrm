@@ -502,7 +502,7 @@ export function CreateInvoiceModal({
             </Button>
           </div>
 
-          <div className="border border-border/80 rounded-xl overflow-hidden shadow-xs">
+          <div className="border border-border/80 rounded-xl overflow-x-auto overflow-y-hidden shadow-xs">
             <table className="w-full text-xs">
               <thead className="bg-muted/50 border-b border-border/80 text-muted-foreground font-semibold">
                 <tr>
@@ -526,12 +526,14 @@ export function CreateInvoiceModal({
                           value={item.name}
                           onChange={(e) => updateItem(idx, "name", e.target.value)}
                           className="h-8 text-xs font-semibold"
+                          aria-label={`Item name, row ${idx + 1}`}
                         />
                         <Input
                           placeholder="Description (Optional)"
                           value={item.description}
                           onChange={(e) => updateItem(idx, "description", e.target.value)}
                           className="h-7 text-[11px] text-muted-foreground"
+                          aria-label={`Item description, row ${idx + 1}`}
                         />
                       </td>
                       <td className="p-2">
@@ -542,12 +544,14 @@ export function CreateInvoiceModal({
                             value={item.quantity}
                             onChange={(e) => updateItem(idx, "quantity", e.target.value)}
                             className="h-8 text-xs text-center px-1"
+                            aria-label={`Quantity, row ${idx + 1}`}
                           />
                           <Input
                             placeholder="unit"
                             value={item.unit}
                             onChange={(e) => updateItem(idx, "unit", e.target.value)}
                             className="h-8 text-[11px] text-center w-14 px-1"
+                            aria-label={`Unit, row ${idx + 1}`}
                           />
                         </div>
                       </td>
@@ -559,6 +563,7 @@ export function CreateInvoiceModal({
                           value={item.unitPrice}
                           onChange={(e) => updateItem(idx, "unitPrice", e.target.value)}
                           className="h-8 text-xs text-right font-mono"
+                          aria-label={`Unit price, row ${idx + 1}`}
                         />
                       </td>
                       <td className="p-2">
@@ -569,6 +574,7 @@ export function CreateInvoiceModal({
                           value={item.discountValue}
                           onChange={(e) => updateItem(idx, "discountValue", e.target.value)}
                           className="h-8 text-xs text-right"
+                          aria-label={`Discount, row ${idx + 1}`}
                         />
                       </td>
                       <td className="p-2">
@@ -576,7 +582,7 @@ export function CreateInvoiceModal({
                           value={String(item.taxRate)}
                           onValueChange={(val) => updateItem(idx, "taxRate", Number(val))}
                         >
-                          <SelectTrigger className="h-8 text-xs text-right">
+                          <SelectTrigger className="h-8 text-xs text-right" aria-label={`Tax rate, row ${idx + 1}`}>
                             <SelectValue />
                           </SelectTrigger>
                           <SelectContent>
@@ -595,6 +601,7 @@ export function CreateInvoiceModal({
                         <button
                           type="button"
                           onClick={() => removeItem(idx)}
+                          aria-label="Delete line item"
                           className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
                         >
                           <Trash2 className="w-4 h-4" />

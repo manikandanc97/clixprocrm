@@ -272,12 +272,13 @@ export function QuotationsDataTable({
                         <FileText className="h-4 w-4" />
                       </div>
                       <div className="min-w-0 flex-1">
-                        <p
+                        <button
+                          type="button"
                           onClick={() => onViewQuote(quote)}
-                          className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate font-mono"
+                          className="font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate font-mono block text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xs"
                         >
                           {quote.quoteId}
-                        </p>
+                        </button>
                         <p className="text-[11px] text-muted-foreground truncate">
                           {quote.lastActivity || "Created Recently"}
                         </p>

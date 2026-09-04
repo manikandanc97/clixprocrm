@@ -201,7 +201,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                       name={`items.${index}.name`}
                       render={({ field }) => (
                         <FormItem>
-                          <FormControl><Input placeholder="Enter product or service description" {...field} className="h-9" /></FormControl>
+                          <FormControl><Input placeholder="Enter product or service description" {...field} className="h-9" aria-label={`Item name, row ${index + 1}`} /></FormControl>
                           <FormMessage />
                         </FormItem>
                       )}
@@ -213,7 +213,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px]">Quantity</FormLabel>
-                            <FormControl><Input type="number" min="1" {...field} className="h-9" /></FormControl>
+                            <FormControl><Input type="number" min="1" {...field} className="h-9" aria-label={`Quantity, row ${index + 1}`} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -224,7 +224,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px]">Unit Price</FormLabel>
-                            <FormControl><Input type="number" min="0" step="0.01" {...field} className="h-9" /></FormControl>
+                            <FormControl><Input type="number" min="0" step="0.01" {...field} className="h-9" aria-label={`Unit price, row ${index + 1}`} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -235,7 +235,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                         render={({ field }) => (
                           <FormItem>
                             <FormLabel className="text-[10px]">Discount</FormLabel>
-                            <FormControl><Input type="number" min="0" step="0.01" {...field} className="h-9" /></FormControl>
+                            <FormControl><Input type="number" min="0" step="0.01" {...field} className="h-9" aria-label={`Discount, row ${index + 1}`} /></FormControl>
                             <FormMessage />
                           </FormItem>
                         )}
@@ -246,6 +246,7 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                     type="button" 
                     variant="ghost" 
                     size="icon" 
+                    aria-label="Delete line item"
                     className="h-9 w-9 text-muted-foreground hover:text-destructive shrink-0 mt-1"
                     onClick={() => remove(index)}
                     disabled={fields.length === 1}
