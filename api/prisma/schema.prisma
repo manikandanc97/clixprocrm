@@ -72,6 +72,10 @@ model Tenant {
   teamMembers     TeamMember[]
   recordShares    RecordShare[]
   supportTickets  SupportTicket[]
+  emailAccounts   EmailAccount[]
+  emailThreads    EmailThread[]
+  emailMessages   EmailMessage[]
+  emailAttachments EmailAttachment[]
 }
 
 model User {
@@ -117,6 +121,7 @@ model User {
   createdSupportTickets  SupportTicket[]        @relation("TicketCreatedBy")
   assignedSupportTickets SupportTicket[]        @relation("TicketAssignedTo")
   supportTicketMessages  SupportTicketMessage[] @relation("TicketMessageSender")
+  emailAccounts          EmailAccount[]
 }
 
 model TenantUser {
@@ -174,6 +179,7 @@ model Customer {
   companyRecord  Company?        @relation(fields: [companyId], references: [id])
   deals          Deal[]
   timelineEvents TimelineEvent[]
+  emailThreads   EmailThread[]
   teamId         String?
   branchId       String?
 
@@ -226,6 +232,7 @@ model Lead {
   companyId         String?
   companyRecord     Company?        @relation(fields: [companyId], references: [id])
   deals             Deal[]
+  emailThreads      EmailThread[]
   teamId            String?
   branchId          String?
 
@@ -784,21 +791,24 @@ model TimelineEvent {
   dealId      String?
   companyId   String?
   customerId  String?
-  taskId      String?
-  invoiceId   String?
-  metadata    Json?
+  taskId         String?
+  invoiceId      String?
+  emailMessageId String?
+  metadata       Json?
   
-  deal        Deal?     @relation("TimelineDeal", fields: [dealId], references: [id], onDelete: Cascade)
-  company     Company?  @relation(fields: [companyId], references: [id], onDelete: Cascade)
-  customer    Customer? @relation(fields: [customerId], references: [id], onDelete: Cascade)
-  task        Task?     @relation("TimelineTask", fields: [taskId], references: [id], onDelete: Cascade)
-  invoice     Invoice?  @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  deal        Deal?         @relation("TimelineDeal", fields: [dealId], references: [id], onDelete: Cascade)
+  company     Company?      @relation(fields: [companyId], references: [id], onDelete: Cascade)
+  customer    Customer?     @relation(fields: [customerId], references: [id], onDelete: Cascade)
+  task        Task?         @relation("TimelineTask", fields: [taskId], references: [id], onDelete: Cascade)
+  invoice     Invoice?      @relation(fields: [invoiceId], references: [id], onDelete: Cascade)
+  emailMessage EmailMessage? @relation(fields: [emailMessageId], references: [id], onDelete: SetNull)
 
   @@index([tenantId])
   @@index([leadId])
   @@index([invoiceId])
   @@index([tenantId, leadId])
   @@index([tenantId, createdAt])
+  @@index([tenantId, emailMessageId])
 }
 
 model Attachment {
@@ -1019,6 +1029,7 @@ model Company {
   invoices       Invoice[]
   leads          Lead[]
   timelineEvents TimelineEvent[]
+  emailThreads   EmailThread[]
   teamId         String?
   branchId       String?
 
@@ -1059,6 +1070,7 @@ model Deal {
   quotations     Quotation[]     @relation("QuotationDeal")
   invoices       Invoice[]       @relation("InvoiceDeal")
   timelineEvents TimelineEvent[] @relation("TimelineDeal")
+  emailThreads   EmailThread[]
   teamId         String?
   branchId       String?
 
@@ -1609,4 +1621,219 @@ model SupportTicketAttachment {
 
   @@index([ticketId])
 }
+
+// ==========================================
+// EMAIL & COMMUNICATION SYSTEM ENUMS & MODELS
+// ==========================================
+
+enum EmailProviderType {
+  CUSTOM_SMTP_IMAP
+  GMAIL
+  OUTLOOK
+  POSTMARK
+  SENDGRID
+}
+
+enum EmailAuthType {
+  PASSWORD
+  OAUTH2
+}
+
+enum EmailSyncStatus {
+  IDLE
+  SYNCING
+  SUCCESS
+  ERROR
+  AUTH_FAILED
+  DISABLED
+}
+
+enum EmailDirection {
+  INBOUND
+  OUTBOUND
+}
+
+enum EmailMessageStatus {
+  DRAFT
+  QUEUED
+  SENDING
+  SENT
+  DELIVERED
+  FAILED
+  RECEIVED
+  BOUNCED
+}
+
+model EmailAccount {
+  id                    String            @id @default(uuid())
+  tenantId              String
+  userId                String?           // Null for shared organization mailboxes (sales@, support@)
+  email                 String            // Plaintext display email address
+  emailHash             String            // HMAC-SHA256 blind index hash for unique lookups
+  displayName           String?
+  provider              EmailProviderType @default(CUSTOM_SMTP_IMAP)
+  authType              EmailAuthType     @default(PASSWORD)
+
+  // Encrypted Credentials (AES-256-GCM via EncryptionService)
+  encryptedSmtpPass     String?
+  encryptedImapPass     String?
+  encryptedOauthRefresh String?
+  encryptedOauthAccess  String?
+  oauthExpiresAt        DateTime?
+
+  // SMTP Settings
+  smtpHost              String?
+  smtpPort              Int?              @default(587)
+  smtpSecure            Boolean           @default(false)
+  smtpUser              String?
+
+  // IMAP Settings
+  imapHost              String?
+  imapPort              Int?              @default(993)
+  imapSecure            Boolean           @default(true)
+  imapUser              String?
+
+  // Mailbox State
+  isShared              Boolean           @default(false)
+  isActive              Boolean           @default(true)
+  syncStatus            EmailSyncStatus   @default(IDLE)
+  lastSyncedAt          DateTime?
+  lastError             String?
+  syncCursor            String?           // Last seen IMAP UID / provider historyId
+
+  createdAt             DateTime          @default(now())
+  updatedAt             DateTime          @updatedAt
+  deletedAt             DateTime?
+
+  tenant                Tenant            @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  user                  User?             @relation(fields: [userId], references: [id], onDelete: SetNull)
+  threads               EmailThread[]
+  messages              EmailMessage[]
+
+  // Mandatory Tenant-Level Unique Mailbox Constraint
+  @@unique([tenantId, emailHash])
+  @@index([tenantId])
+  @@index([tenantId, userId])
+  @@index([tenantId, isActive, syncStatus])
+}
+
+model EmailThread {
+  id                String          @id @default(uuid())
+  tenantId          String
+  accountId         String
+  subject           String
+  normalizedSubject String          // Stripped of Re:, Fwd:, and whitespace
+  snippet           String?
+
+  // Counters & Flags
+  messageCount      Int             @default(1)
+  unreadCount       Int             @default(0)
+  hasAttachments    Boolean         @default(false)
+  isArchived        Boolean         @default(false)
+  isSpam            Boolean         @default(false)
+  isTrash           Boolean         @default(false)
+  lastMessageAt     DateTime        @default(now())
+  externalThreadId  String?         // Provider thread identifier (e.g. Gmail threadId)
+
+  // Explicit CRM Entity Relations
+  leadId            String?
+  customerId        String?
+  companyId         String?
+  dealId            String?
+
+  createdAt         DateTime        @default(now())
+  updatedAt         DateTime        @updatedAt
+  deletedAt         DateTime?
+
+  tenant            Tenant          @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  account           EmailAccount    @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  lead              Lead?           @relation(fields: [leadId], references: [id], onDelete: SetNull)
+  customer          Customer?       @relation(fields: [customerId], references: [id], onDelete: SetNull)
+  company           Company?        @relation(fields: [companyId], references: [id], onDelete: SetNull)
+  deal              Deal?           @relation(fields: [dealId], references: [id], onDelete: SetNull)
+  messages          EmailMessage[]
+
+  @@index([tenantId])
+  @@index([tenantId, accountId, lastMessageAt])
+  @@index([tenantId, leadId])
+  @@index([tenantId, customerId])
+  @@index([tenantId, companyId])
+  @@index([tenantId, dealId])
+  @@index([tenantId, externalThreadId])
+}
+
+model EmailMessage {
+  id                String              @id @default(uuid())
+  tenantId          String
+  threadId          String
+  accountId         String
+
+  direction         EmailDirection
+  status            EmailMessageStatus  @default(DRAFT)
+
+  // RFC 5322 Headers & Identifiers
+  internetMessageId String?             // Message-ID header (<CAD+123@mail.gmail.com>)
+  inReplyTo         String?             // In-Reply-To header
+  references        String[]            @default([]) // Lineage array
+
+  // Address Headers
+  fromAddress       String
+  fromName          String?
+  toRecipients      String[]            // Target recipient addresses
+  ccRecipients      String[]            @default([])
+  bccRecipients     String[]            @default([]) // Outbound audit only
+  replyTo           String?
+
+  // Body & Curated Transport Metadata
+  subject           String
+  bodyPlain         String?             @db.Text
+  bodyHtml          String?             @db.Text
+  headers           Json?               // Curated whitelist: authResults, returnPath, autoSubmitted
+
+  // Operational State
+  hasAttachments    Boolean             @default(false)
+  sentAt            DateTime?
+  receivedAt        DateTime?
+  failedReason      String?
+  sendAttemptCount  Int                 @default(0)
+  lastAttemptAt     DateTime?
+
+  createdAt         DateTime            @default(now())
+  updatedAt         DateTime            @updatedAt
+  deletedAt         DateTime?
+
+  tenant            Tenant              @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  thread            EmailThread         @relation(fields: [threadId], references: [id], onDelete: Cascade)
+  account           EmailAccount        @relation(fields: [accountId], references: [id], onDelete: Cascade)
+  attachments       EmailAttachment[]
+  timelineEvents    TimelineEvent[]
+
+  @@index([tenantId])
+  @@index([tenantId, threadId])
+  @@index([tenantId, accountId])
+  @@index([tenantId, internetMessageId])
+  @@index([tenantId, direction, status])
+  @@index([tenantId, createdAt])
+}
+
+model EmailAttachment {
+  id             String        @id @default(uuid())
+  tenantId       String
+  messageId      String
+  fileName       String        // Sanitized original filename
+  fileSize       Int           // Size in bytes
+  contentType    String        // Validated MIME type via magic numbers
+  contentId      String?       // For cid: inline body references
+  storageKey     String        // Private object storage path (e.g. tenants/:tenantId/emails/...)
+  isInline       Boolean       @default(false)
+  isQuarantined  Boolean       @default(false)
+  createdAt      DateTime      @default(now())
+
+  tenant         Tenant        @relation(fields: [tenantId], references: [id], onDelete: Cascade)
+  message        EmailMessage  @relation(fields: [messageId], references: [id], onDelete: Cascade)
+
+  @@index([tenantId])
+  @@index([tenantId, messageId])
+}
+
 

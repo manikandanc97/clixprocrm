@@ -1,0 +1,987 @@
+{
+  "prismaMigrationsTable": [
+    {
+      "id": "c305858b-b1eb-4cc9-a197-aa1b96ad177d",
+      "checksum": "9b46a01bb59733e8260799d43c3a8ac27ad2d3cf60cf6d2929cdd8ca94dd1aea",
+      "finished_at": "2026-08-08T13:41:08.511Z",
+      "migration_name": "20260808133900_cleanup_legacy_auth",
+      "logs": "",
+      "rolled_back_at": null,
+      "started_at": "2026-08-08T13:41:08.511Z",
+      "applied_steps_count": 0
+    },
+    {
+      "id": "e4e94c25-988b-449c-b24d-36b342deeb4a",
+      "checksum": "63a38c476259fff18775e7a49c8ad5dfc14eabd9a53a2cc937d10f3bab6db798",
+      "finished_at": "2026-08-08T13:56:11.644Z",
+      "migration_name": "20260808135500_cleanup_unused_ailog",
+      "logs": "",
+      "rolled_back_at": null,
+      "started_at": "2026-08-08T13:56:11.644Z",
+      "applied_steps_count": 0
+    },
+    {
+      "id": "dcfa395a-dfe3-4b77-a6c7-3c540bc83f60",
+      "checksum": "535166b0820735588b174df77df7acc37fe10aab6325dfa24a5fb000d9cd9b18",
+      "finished_at": "2026-08-10T11:13:32.964Z",
+      "migration_name": "20260810110000_add_invoice_number_and_counter",
+      "logs": "",
+      "rolled_back_at": null,
+      "started_at": "2026-08-10T11:13:32.964Z",
+      "applied_steps_count": 0
+    },
+    {
+      "id": "3f127955-b958-4510-b6da-24678f80cfe9",
+      "checksum": "6bbda8008cf2634832a426dd07b928dc35889f35c35dc4a2fe90dd03ec3fe2c0",
+      "finished_at": "2026-08-20T03:37:43.442Z",
+      "migration_name": "20260820090121_add_encryption_hash_fields",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-20T03:37:42.698Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "2b44f403-a1f4-4bdf-9e0d-dc7e73cc10f2",
+      "checksum": "5a61df3663dfb198705cac44aeec70104a15fef1b4b7f9607d09afb12cfeb7f2",
+      "finished_at": "2026-08-20T14:34:51.638Z",
+      "migration_name": "20260820180500_stage1_enable_row_level_security",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-20T14:34:49.135Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "05444025-2b1d-43eb-a641-66573a92db10",
+      "checksum": "802d4e6a0a96d26f151dbdd942a081e2a39e8d959e741f4e2de92a385202c74b",
+      "finished_at": "2026-08-20T14:34:52.582Z",
+      "migration_name": "20260820193000_stage2_tenant_user_self_lookup",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-20T14:34:51.898Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "770aa4f6-1f2a-4330-87f1-8f392fbb9f7d",
+      "checksum": "763770419b67f44413bcf8fe24d4aeaae4000f65fff388dec807da5b871d09d3",
+      "finished_at": "2026-08-20T14:34:54.075Z",
+      "migration_name": "20260820201500_stage3_force_row_level_security",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-20T14:34:52.865Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "8db3eaac-0877-47c6-aa1d-24472230b9ca",
+      "checksum": "16f38b2c4ebb91ab569bf217b762e9865c296f57741976963b9029b3e262e9cf",
+      "finished_at": "2026-08-21T03:32:59.444Z",
+      "migration_name": "20260820220000_audit_log_immutability",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-21T03:32:58.772Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "125ef0e9-d26d-4310-8d80-cc1d40082d88",
+      "checksum": "f24184cd9b16f9963f55840afd93bb0b3136341e19348f7ad5a01c7df496c5d1",
+      "finished_at": "2026-08-21T03:33:00.364Z",
+      "migration_name": "20260820223000_audit_log_hash_chain",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-21T03:32:59.705Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "9efaa110-0735-4780-920c-14874a568dcc",
+      "checksum": "550dc3ffcf8e3cf1db0f487f3f7d882ba7bbacf1aa1a19ba39b2b6c3cfc90d2f",
+      "finished_at": "2026-08-21T03:33:01.458Z",
+      "migration_name": "20260820230000_audit_archive_outbox",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-21T03:33:00.623Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "a1dedb00-e807-4bbe-aff0-6aebbbb5ca9e",
+      "checksum": "5f89690c3522c16da51bb069729ec1e0be4f000226a7ce45362c13f621bf6180",
+      "finished_at": "2026-08-21T03:33:02.436Z",
+      "migration_name": "20260820233000_security_incidents_and_emergency",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-21T03:33:01.712Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "6efbd152-27c8-42a4-8507-b75437963c1b",
+      "checksum": "67fbc0a0d734db69c1d57e5de61c5bb438b4a50c5b351184197a5b1ae919da54",
+      "finished_at": "2026-08-25T06:47:11.971Z",
+      "migration_name": "20260825123000_enforce_single_super_admin",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-25T06:47:11.231Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "e9226d99-276d-4bba-a3d5-8705edb37f6c",
+      "checksum": "6871d246975315a3e1d614474b649e49a3f7156547597f371b94b7567367e62d",
+      "finished_at": "2026-08-25T10:58:29.067Z",
+      "migration_name": "20260825153000_ai_subscription_entitlements",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-25T10:58:28.403Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "f4d7efc6-434d-497c-b038-5a2ca4b6b0ae",
+      "checksum": "a9cc66a0a0d6bd3a074c1b99ca338410133ebaee43cc433bc17a6cf4eaeb8720",
+      "finished_at": "2026-08-25T10:58:29.955Z",
+      "migration_name": "20260825163000_enhanced_saas_plans",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-08-25T10:58:29.336Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "5d50bc34-1c17-41d2-9a3b-79fed657e350",
+      "checksum": "7f0641376b1cb34c001670b8b0aaf6defe99234bb4931f6005225e4c072615a0",
+      "finished_at": "2026-09-04T16:20:12.889Z",
+      "migration_name": "20260825173000_tenant_subscription_billing",
+      "logs": null,
+      "rolled_back_at": null,
+      "started_at": "2026-09-04T16:20:12.185Z",
+      "applied_steps_count": 1
+    },
+    {
+      "id": "de70ce06-d562-4cc5-9738-1c71359c8193",
+      "checksum": "95967ae2d0abb2394268699348642aeffae7803d5a64235138c1e875ddb7bdf5",
+      "finished_at": null,
+      "migration_name": "20260826120000_enterprise_invoice_and_billing",
+      "logs": "A migration failed to apply. New migrations cannot be applied before the error is recovered from. Read more about how to resolve migration issues in a production database: https://pris.ly/d/migrate-resolve\n\nMigration name: 20260826120000_enterprise_invoice_and_billing\n\nDatabase error code: 42P07\n\nDatabase error:\nERROR: relation \"TenantInvoiceSettings_tenantId_key\" already exists\n\nDbError { severity: \"ERROR\", parsed_severity: Some(Error), code: SqlState(E42P07), message: \"relation \\\"TenantInvoiceSettings_tenantId_key\\\" already exists\", detail: None, hint: None, position: None, where_: Some(\"SQL statement \\\"ALTER TABLE \\\"TenantInvoiceSettings\\\" ADD CONSTRAINT \\\"TenantInvoiceSettings_tenantId_key\\\" UNIQUE (\\\"tenantId\\\")\\\"\\nPL/pgSQL function inline_code_block line 3 at SQL statement\"), schema: None, table: None, column: None, datatype: None, constraint: None, file: Some(\"index.c\"), line: Some(897), routine: Some(\"index_create\") }\n\n   0: sql_schema_connector::apply_migration::apply_script\n           with migration_name=\"20260826120000_enterprise_invoice_and_billing\"\n             at schema-engine\\connectors\\sql-schema-connector\\src\\apply_migration.rs:113\n   1: schema_commands::commands::apply_migrations::Applying migration\n           with migration_name=\"20260826120000_enterprise_invoice_and_billing\"\n             at schema-engine\\commands\\src\\commands\\apply_migrations.rs:95\n   2: schema_core::state::ApplyMigrations\n             at schema-engine\\core\\src\\state.rs:260",
+      "rolled_back_at": null,
+      "started_at": "2026-09-04T16:20:13.149Z",
+      "applied_steps_count": 0
+    }
+  ],
+  "diskMigrationsCount": 18,
+  "diskMigrationsSummary": [
+    {
+      "name": "20260808133900_cleanup_legacy_auth",
+      "createsCount": 0,
+      "creates": [],
+      "altersCount": 0,
+      "altersSample": [],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260808135500_cleanup_unused_ailog",
+      "createsCount": 0,
+      "creates": [],
+      "altersCount": 0,
+      "altersSample": [],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260810110000_add_invoice_number_and_counter",
+      "createsCount": 3,
+      "creates": [
+        "TABLE InvoiceCounter",
+        "UNIQUE INDEX InvoiceCounter_tenantId_key",
+        "UNIQUE INDEX Invoice_tenantId_invoiceNumber_key"
+      ],
+      "altersCount": 2,
+      "altersSample": [
+        "Invoice: ADD COLUMN     \"invoiceNumber\" TEXT",
+        "InvoiceCounter: ADD CONSTRAINT \"InvoiceCounter_tenantId_fkey\" FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": [
+        "References Tenant(\"id\")"
+      ]
+    },
+    {
+      "name": "20260820090121_add_encryption_hash_fields",
+      "createsCount": 3,
+      "creates": [
+        "INDEX Lead_tenantId_emailHash_idx",
+        "INDEX Customer_tenantId_emailHash_idx",
+        "INDEX Company_tenantId_nameHash_idx"
+      ],
+      "altersCount": 6,
+      "altersSample": [
+        "Lead: ADD COLUMN IF NOT EXISTS \"emailHash\" TEXT",
+        "Customer: ADD COLUMN IF NOT EXISTS \"emailHash\" TEXT",
+        "Company: ADD COLUMN IF NOT EXISTS \"nameHash\" TEXT",
+        "Meeting: DROP COLUMN IF EXISTS \"oldStartAt\"",
+        "Meeting: DROP COLUMN IF EXISTS \"oldEndAt\"",
+        "Meeting: DROP COLUMN IF EXISTS \"cancelledBy\""
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260820180500_stage1_enable_row_level_security",
+      "createsCount": 0,
+      "creates": [],
+      "altersCount": 3,
+      "altersSample": [
+        "AiMessage: ENABLE ROW LEVEL SECURITY",
+        "DocumentChunk: ENABLE ROW LEVEL SECURITY",
+        "RolePermission: ENABLE ROW LEVEL SECURITY"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260820193000_stage2_tenant_user_self_lookup",
+      "createsCount": 0,
+      "creates": [],
+      "altersCount": 0,
+      "altersSample": [],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260820201500_stage3_force_row_level_security",
+      "createsCount": 0,
+      "creates": [],
+      "altersCount": 10,
+      "altersSample": [
+        "Lead: FORCE ROW LEVEL SECURITY",
+        "Customer: FORCE ROW LEVEL SECURITY",
+        "Deal: FORCE ROW LEVEL SECURITY",
+        "Task: FORCE ROW LEVEL SECURITY",
+        "Meeting: FORCE ROW LEVEL SECURITY",
+        "Quotation: FORCE ROW LEVEL SECURITY",
+        "Invoice: FORCE ROW LEVEL SECURITY",
+        "InvoiceCounter: FORCE ROW LEVEL SECURITY",
+        "Note: FORCE ROW LEVEL SECURITY",
+        "Attachment: FORCE ROW LEVEL SECURITY"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260820220000_audit_log_immutability",
+      "createsCount": 0,
+      "creates": [],
+      "altersCount": 2,
+      "altersSample": [
+        "AuditLog: DROP CONSTRAINT IF EXISTS \"AuditLog_userId_fkey\"",
+        "AuditLog: DROP CONSTRAINT IF EXISTS \"AuditLog_targetUserId_fkey\""
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260820223000_audit_log_hash_chain",
+      "createsCount": 2,
+      "creates": [
+        "INDEX AuditLog_tenantId_createdAt_idx",
+        "INDEX AuditLog_createdAt_idx"
+      ],
+      "altersCount": 2,
+      "altersSample": [
+        "AuditLog: ADD COLUMN IF NOT EXISTS \"previousHash\" TEXT",
+        "AuditLog: ADD COLUMN IF NOT EXISTS \"recordHash\" TEXT"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260820230000_audit_archive_outbox",
+      "createsCount": 3,
+      "creates": [
+        "TABLE AuditArchiveOutbox",
+        "UNIQUE INDEX AuditArchiveOutbox_auditLogId_key",
+        "INDEX AuditArchiveOutbox_status_nextAttemptAt_idx"
+      ],
+      "altersCount": 1,
+      "altersSample": [
+        "AuditArchiveOutbox: ADD CONSTRAINT \"AuditArchiveOutbox_auditLogId_fkey\""
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": [
+        "References AuditLog(\"id\")"
+      ]
+    },
+    {
+      "name": "20260820233000_security_incidents_and_emergency",
+      "createsCount": 7,
+      "creates": [
+        "TABLE SecurityIncident",
+        "UNIQUE INDEX SecurityIncident_incidentNumber_key",
+        "INDEX SecurityIncident_status_severity_idx",
+        "INDEX SecurityIncident_tenantId_idx",
+        "INDEX SecurityIncident_affectedUserId_idx",
+        "INDEX SecurityIncident_createdAt_idx",
+        "TABLE PlatformSecurityState"
+      ],
+      "altersCount": 2,
+      "altersSample": [
+        "Tenant: ADD COLUMN IF NOT EXISTS \"securityStatus\" TEXT NOT NULL DEFAULT 'ACTIVE'",
+        "User: ADD COLUMN IF NOT EXISTS \"securityStatus\" TEXT NOT NULL DEFAULT 'ACTIVE'"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260825123000_enforce_single_super_admin",
+      "createsCount": 1,
+      "creates": [
+        "UNIQUE INDEX unique_active_super_admin"
+      ],
+      "altersCount": 0,
+      "altersSample": [],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260825153000_ai_subscription_entitlements",
+      "createsCount": 2,
+      "creates": [
+        "INDEX AiModel_status_idx",
+        "INDEX AiModel_provider_status_idx"
+      ],
+      "altersCount": 9,
+      "altersSample": [
+        "Plan: ADD COLUMN IF NOT EXISTS \"aiEnabled\" BOOLEAN NOT NULL DEFAULT true",
+        "Plan: ADD COLUMN IF NOT EXISTS \"aiLevel\" TEXT NOT NULL DEFAULT 'Standard AI'",
+        "Plan: ADD COLUMN IF NOT EXISTS \"dailyTokenLimit\" INTEGER NOT NULL DEFAULT 50000",
+        "Plan: ADD COLUMN IF NOT EXISTS \"defaultModelId\" TEXT",
+        "AiModel: ADD COLUMN IF NOT EXISTS \"status\" TEXT NOT NULL DEFAULT 'ENABLED'",
+        "AiModel: ADD COLUMN IF NOT EXISTS \"isChatModel\" BOOLEAN NOT NULL DEFAULT true",
+        "AiMessage: ADD COLUMN IF NOT EXISTS \"modelKey\" TEXT",
+        "AiMessage: ADD COLUMN IF NOT EXISTS \"provider\" TEXT",
+        "Plan: ADD CONSTRAINT \"Plan_defaultModelId_fkey\" FOREIGN KEY (\"defaultModelId\") REFERENCES \"AiModel\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": [
+        "References AiModel(\"id\")"
+      ]
+    },
+    {
+      "name": "20260825163000_enhanced_saas_plans",
+      "createsCount": 2,
+      "creates": [
+        "INDEX Plan_status_idx",
+        "INDEX Plan_sortOrder_idx"
+      ],
+      "altersCount": 10,
+      "altersSample": [
+        "Plan: ADD COLUMN IF NOT EXISTS \"annualPriceNum\" DECIMAL(12,2) NOT NULL DEFAULT 0",
+        "Plan: ADD COLUMN IF NOT EXISTS \"currency\" TEXT NOT NULL DEFAULT 'INR'",
+        "Plan: ADD COLUMN IF NOT EXISTS \"pricingMode\" TEXT NOT NULL DEFAULT 'FIXED'",
+        "Plan: ADD COLUMN IF NOT EXISTS \"maxContacts\" INTEGER NOT NULL DEFAULT 1000",
+        "Plan: ADD COLUMN IF NOT EXISTS \"maxApiRequests\" INTEGER NOT NULL DEFAULT 10000",
+        "Plan: ADD COLUMN IF NOT EXISTS \"trialDays\" INTEGER NOT NULL DEFAULT 0",
+        "Plan: ADD COLUMN IF NOT EXISTS \"billingCycleMonthly\" BOOLEAN NOT NULL DEFAULT true",
+        "Plan: ADD COLUMN IF NOT EXISTS \"billingCycleAnnual\" BOOLEAN NOT NULL DEFAULT true",
+        "Plan: ADD COLUMN IF NOT EXISTS \"status\" TEXT NOT NULL DEFAULT 'ACTIVE'",
+        "Plan: ADD COLUMN IF NOT EXISTS \"sortOrder\" INTEGER NOT NULL DEFAULT 0"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260825173000_tenant_subscription_billing",
+      "createsCount": 0,
+      "creates": [],
+      "altersCount": 6,
+      "altersSample": [
+        "Tenant: ADD COLUMN IF NOT EXISTS \"subscriptionStatus\" TEXT NOT NULL DEFAULT 'ACTIVE'",
+        "Tenant: ADD COLUMN IF NOT EXISTS \"billingCycle\" TEXT NOT NULL DEFAULT 'monthly'",
+        "Tenant: ADD COLUMN IF NOT EXISTS \"trialStart\" TIMESTAMP(3)",
+        "Tenant: ADD COLUMN IF NOT EXISTS \"trialEnd\" TIMESTAMP(3)",
+        "Tenant: ADD COLUMN IF NOT EXISTS \"currentPeriodEnd\" TIMESTAMP(3)",
+        "Tenant: ADD COLUMN IF NOT EXISTS \"brandPrimaryColor\" TEXT"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": []
+    },
+    {
+      "name": "20260826120000_enterprise_invoice_and_billing",
+      "createsCount": 19,
+      "creates": [
+        "TABLE InvoiceItem",
+        "TABLE Payment",
+        "TABLE TenantInvoiceSettings",
+        "TABLE PlatformSubscription",
+        "TABLE PlatformInvoice",
+        "TABLE PlatformInvoiceItem",
+        "TABLE PlatformPayment",
+        "TABLE PlatformRefund",
+        "TABLE PlatformBillingConfig",
+        "INDEX InvoiceItem_invoiceId_idx",
+        "INDEX Payment_tenantId_idx",
+        "INDEX Payment_invoiceId_idx",
+        "INDEX Payment_status_idx",
+        "INDEX PlatformSubscription_tenantId_idx",
+        "INDEX PlatformSubscription_status_idx",
+        "INDEX PlatformInvoice_tenantId_idx",
+        "INDEX PlatformInvoice_status_idx",
+        "INDEX PlatformPayment_tenantId_idx",
+        "INDEX TimelineEvent_invoiceId_idx"
+      ],
+      "altersCount": 10,
+      "altersSample": [
+        "Invoice: ADD COLUMN IF NOT EXISTS \"companyId\" TEXT",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"quotationId\" TEXT",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"invoiceDate\" TIMESTAMP(3) NOT NULL DEFAULT CURRENT_TIMESTAMP",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"currency\" TEXT NOT NULL DEFAULT 'INR'",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"paymentTerms\" TEXT DEFAULT 'DUE_ON_RECEIPT'",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"subtotal\" DECIMAL(12,2) NOT NULL DEFAULT 0",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"discountType\" TEXT",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"discountValue\" DECIMAL(12,2) DEFAULT 0",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"discountAmount\" DECIMAL(12,2) NOT NULL DEFAULT 0",
+        "Invoice: ADD COLUMN IF NOT EXISTS \"taxableAmount\" DECIMAL(12,2) NOT NULL DEFAULT 0"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": [
+        "References Invoice(\"id\")",
+        "References Tenant(\"id\")",
+        "References PlatformSubscription(\"id\")",
+        "References PlatformInvoice(\"id\")"
+      ]
+    },
+    {
+      "name": "20260829103000_add_support_tickets_and_rls",
+      "createsCount": 18,
+      "creates": [
+        "TYPE SupportTicketPriority",
+        "TYPE SupportTicketStatus",
+        "TABLE SupportTicket",
+        "TABLE SupportTicketMessage",
+        "TABLE SupportTicketAttachment",
+        "UNIQUE INDEX SupportTicket_ticketNumber_key",
+        "INDEX SupportTicket_tenantId_idx",
+        "INDEX SupportTicket_createdById_idx",
+        "INDEX SupportTicket_assignedToId_idx",
+        "INDEX SupportTicket_status_idx",
+        "INDEX SupportTicket_priority_idx",
+        "INDEX SupportTicket_createdAt_idx",
+        "INDEX SupportTicket_tenantId_status_idx",
+        "INDEX SupportTicket_tenantId_createdById_idx",
+        "INDEX SupportTicketMessage_ticketId_idx",
+        "INDEX SupportTicketMessage_senderId_idx",
+        "INDEX SupportTicketMessage_createdAt_idx",
+        "INDEX SupportTicketAttachment_ticketId_idx"
+      ],
+      "altersCount": 9,
+      "altersSample": [
+        "SupportTicket: ADD CONSTRAINT \"SupportTicket_tenantId_fkey\" FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "SupportTicket: ADD CONSTRAINT \"SupportTicket_createdById_fkey\" FOREIGN KEY (\"createdById\") REFERENCES \"User\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "SupportTicket: ADD CONSTRAINT \"SupportTicket_assignedToId_fkey\" FOREIGN KEY (\"assignedToId\") REFERENCES \"User\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE",
+        "SupportTicketMessage: ADD CONSTRAINT \"SupportTicketMessage_ticketId_fkey\" FOREIGN KEY (\"ticketId\") REFERENCES \"SupportTicket\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "SupportTicketMessage: ADD CONSTRAINT \"SupportTicketMessage_senderId_fkey\" FOREIGN KEY (\"senderId\") REFERENCES \"User\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "SupportTicketAttachment: ADD CONSTRAINT \"SupportTicketAttachment_ticketId_fkey\" FOREIGN KEY (\"ticketId\") REFERENCES \"SupportTicket\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "SupportTicket: ENABLE ROW LEVEL SECURITY",
+        "SupportTicketMessage: ENABLE ROW LEVEL SECURITY",
+        "SupportTicketAttachment: ENABLE ROW LEVEL SECURITY"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": [
+        "References Tenant(\"id\")",
+        "References User(\"id\")",
+        "References SupportTicket(\"id\")"
+      ]
+    },
+    {
+      "name": "20260904162500_add_communication_models",
+      "createsCount": 29,
+      "creates": [
+        "TYPE EmailProviderType",
+        "TYPE EmailAuthType",
+        "TYPE EmailSyncStatus",
+        "TYPE EmailDirection",
+        "TYPE EmailMessageStatus",
+        "TABLE EmailAccount",
+        "TABLE EmailThread",
+        "TABLE EmailMessage",
+        "TABLE EmailAttachment",
+        "INDEX EmailAccount_tenantId_idx",
+        "INDEX EmailAccount_tenantId_userId_idx",
+        "INDEX EmailAccount_tenantId_isActive_syncStatus_idx",
+        "UNIQUE INDEX EmailAccount_tenantId_emailHash_key",
+        "INDEX EmailThread_tenantId_idx",
+        "INDEX EmailThread_tenantId_accountId_lastMessageAt_idx",
+        "INDEX EmailThread_tenantId_leadId_idx",
+        "INDEX EmailThread_tenantId_customerId_idx",
+        "INDEX EmailThread_tenantId_companyId_idx",
+        "INDEX EmailThread_tenantId_dealId_idx",
+        "INDEX EmailThread_tenantId_externalThreadId_idx",
+        "INDEX EmailMessage_tenantId_idx",
+        "INDEX EmailMessage_tenantId_threadId_idx",
+        "INDEX EmailMessage_tenantId_accountId_idx",
+        "INDEX EmailMessage_tenantId_internetMessageId_idx",
+        "INDEX EmailMessage_tenantId_direction_status_idx",
+        "INDEX EmailMessage_tenantId_createdAt_idx",
+        "INDEX EmailAttachment_tenantId_idx",
+        "INDEX EmailAttachment_tenantId_messageId_idx",
+        "INDEX TimelineEvent_tenantId_emailMessageId_idx"
+      ],
+      "altersCount": 10,
+      "altersSample": [
+        "TimelineEvent: ADD COLUMN     \"emailMessageId\" TEXT",
+        "TimelineEvent: ADD CONSTRAINT \"TimelineEvent_emailMessageId_fkey\" FOREIGN KEY (\"emailMessageId\") REFERENCES \"EmailMessage\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE",
+        "EmailAccount: ADD CONSTRAINT \"EmailAccount_tenantId_fkey\" FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "EmailAccount: ADD CONSTRAINT \"EmailAccount_userId_fkey\" FOREIGN KEY (\"userId\") REFERENCES \"User\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE",
+        "EmailThread: ADD CONSTRAINT \"EmailThread_tenantId_fkey\" FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "EmailThread: ADD CONSTRAINT \"EmailThread_accountId_fkey\" FOREIGN KEY (\"accountId\") REFERENCES \"EmailAccount\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE",
+        "EmailThread: ADD CONSTRAINT \"EmailThread_leadId_fkey\" FOREIGN KEY (\"leadId\") REFERENCES \"Lead\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE",
+        "EmailThread: ADD CONSTRAINT \"EmailThread_customerId_fkey\" FOREIGN KEY (\"customerId\") REFERENCES \"Customer\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE",
+        "EmailThread: ADD CONSTRAINT \"EmailThread_companyId_fkey\" FOREIGN KEY (\"companyId\") REFERENCES \"Company\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE",
+        "EmailThread: ADD CONSTRAINT \"EmailThread_dealId_fkey\" FOREIGN KEY (\"dealId\") REFERENCES \"Deal\"(\"id\") ON DELETE SET NULL ON UPDATE CASCADE"
+      ],
+      "dropsCount": 0,
+      "drops": [],
+      "dependencies": [
+        "References EmailMessage(\"id\")",
+        "References Tenant(\"id\")",
+        "References User(\"id\")",
+        "References EmailAccount(\"id\")",
+        "References Lead(\"id\")",
+        "References Customer(\"id\")",
+        "References Company(\"id\")",
+        "References Deal(\"id\")",
+        "References EmailThread(\"id\")"
+      ]
+    }
+  ],
+  "liveTablesCount": 57,
+  "allLiveTables": [
+    "AiConversation",
+    "AiMessage",
+    "AiModel",
+    "AiUsageLog",
+    "Attachment",
+    "AuditArchiveOutbox",
+    "AuditLog",
+    "Company",
+    "Customer",
+    "Deal",
+    "Department",
+    "Document",
+    "DocumentChunk",
+    "Invitation",
+    "Invoice",
+    "InvoiceCounter",
+    "InvoiceItem",
+    "Lead",
+    "Meeting",
+    "MfaRecoveryCode",
+    "Note",
+    "Notification",
+    "Payment",
+    "Plan",
+    "PlanAiEntitlement",
+    "PlatformBillingConfig",
+    "PlatformConfig",
+    "PlatformInvoice",
+    "PlatformInvoiceItem",
+    "PlatformModule",
+    "PlatformPayment",
+    "PlatformRefund",
+    "PlatformSecurityState",
+    "PlatformSubscription",
+    "PlatformWebhookEvent",
+    "Product",
+    "Quotation",
+    "RecordShare",
+    "RevenueTarget",
+    "Role",
+    "RolePermission",
+    "SecurityAlert",
+    "SecurityIncident",
+    "SupportTicket",
+    "SupportTicketAttachment",
+    "SupportTicketMessage",
+    "Task",
+    "Team",
+    "TeamMember",
+    "Tenant",
+    "TenantAiConfig",
+    "TenantInvoiceSettings",
+    "TenantUser",
+    "TimelineEvent",
+    "User",
+    "UserSession",
+    "_prisma_migrations"
+  ],
+  "coreTableStatus": [
+    {
+      "table": "Tenant",
+      "exists": true,
+      "rowCount": 26
+    },
+    {
+      "table": "User",
+      "exists": true,
+      "rowCount": 27
+    },
+    {
+      "table": "Invoice",
+      "exists": true,
+      "rowCount": 52
+    },
+    {
+      "table": "Customer",
+      "exists": true,
+      "rowCount": 8
+    },
+    {
+      "table": "Lead",
+      "exists": true,
+      "rowCount": 45
+    },
+    {
+      "table": "Company",
+      "exists": true,
+      "rowCount": 58
+    },
+    {
+      "table": "Deal",
+      "exists": true,
+      "rowCount": 20
+    },
+    {
+      "table": "TimelineEvent",
+      "exists": true,
+      "rowCount": 29
+    },
+    {
+      "table": "TenantInvoiceSettings",
+      "exists": true,
+      "rowCount": 3
+    },
+    {
+      "table": "InvoiceCounter",
+      "exists": true,
+      "rowCount": 7
+    },
+    {
+      "table": "InvoiceItem",
+      "exists": true,
+      "rowCount": 0
+    },
+    {
+      "table": "Payment",
+      "exists": true,
+      "rowCount": 0
+    },
+    {
+      "table": "PlatformSubscription",
+      "exists": true,
+      "rowCount": 26
+    },
+    {
+      "table": "PlatformInvoice",
+      "exists": true,
+      "rowCount": 3
+    },
+    {
+      "table": "PlatformInvoiceItem",
+      "exists": true,
+      "rowCount": 3
+    },
+    {
+      "table": "PlatformPayment",
+      "exists": true,
+      "rowCount": 3
+    },
+    {
+      "table": "PlatformRefund",
+      "exists": true,
+      "rowCount": 0
+    },
+    {
+      "table": "PlatformBillingConfig",
+      "exists": true,
+      "rowCount": 1
+    },
+    {
+      "table": "SupportTicket",
+      "exists": true,
+      "rowCount": 1
+    },
+    {
+      "table": "EmailAccount",
+      "exists": false
+    },
+    {
+      "table": "EmailThread",
+      "exists": false
+    },
+    {
+      "table": "EmailMessage",
+      "exists": false
+    },
+    {
+      "table": "EmailAttachment",
+      "exists": false
+    }
+  ],
+  "tenantInvoiceSettings": {
+    "constraints": [
+      {
+        "constraint_name": "TenantInvoiceSettings_pkey",
+        "constraint_type": "p",
+        "constraint_definition": "PRIMARY KEY (id)"
+      },
+      {
+        "constraint_name": "TenantInvoiceSettings_tenantId_fkey",
+        "constraint_type": "f",
+        "constraint_definition": "FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(id) ON UPDATE CASCADE ON DELETE CASCADE"
+      }
+    ],
+    "indexes": [
+      {
+        "indexname": "TenantInvoiceSettings_pkey",
+        "indexdef": "CREATE UNIQUE INDEX \"TenantInvoiceSettings_pkey\" ON public.\"TenantInvoiceSettings\" USING btree (id)"
+      },
+      {
+        "indexname": "TenantInvoiceSettings_tenantId_key",
+        "indexdef": "CREATE UNIQUE INDEX \"TenantInvoiceSettings_tenantId_key\" ON public.\"TenantInvoiceSettings\" USING btree (\"tenantId\")"
+      }
+    ]
+  },
+  "coreTableOrigins": [
+    {
+      "table": "Tenant",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "User",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "Invoice",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "Customer",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "Lead",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "Company",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "Deal",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "TimelineEvent",
+      "firstCreateMigration": null,
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "UNMIGRATED BASELINE: Exists live but never created by any migration file"
+    },
+    {
+      "table": "TenantInvoiceSettings",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "InvoiceCounter",
+      "firstCreateMigration": "20260810110000_add_invoice_number_and_counter",
+      "recordedAsApplied": true,
+      "existsLive": true,
+      "finding": "NORMAL: Created by migration and tracked in _prisma_migrations"
+    },
+    {
+      "table": "InvoiceItem",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "Payment",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "PlatformSubscription",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "PlatformInvoice",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "PlatformInvoiceItem",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "PlatformPayment",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "PlatformRefund",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "PlatformBillingConfig",
+      "firstCreateMigration": "20260826120000_enterprise_invoice_and_billing",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "SupportTicket",
+      "firstCreateMigration": "20260829103000_add_support_tickets_and_rls",
+      "recordedAsApplied": false,
+      "existsLive": true,
+      "finding": "APPLIED EXTERNALLY: Created in migration file but not recorded in _prisma_migrations"
+    },
+    {
+      "table": "EmailAccount",
+      "firstCreateMigration": "20260904162500_add_communication_models",
+      "recordedAsApplied": false,
+      "existsLive": false,
+      "finding": "PENDING: Defined in migration file but not yet applied to live DB"
+    },
+    {
+      "table": "EmailThread",
+      "firstCreateMigration": "20260904162500_add_communication_models",
+      "recordedAsApplied": false,
+      "existsLive": false,
+      "finding": "PENDING: Defined in migration file but not yet applied to live DB"
+    },
+    {
+      "table": "EmailMessage",
+      "firstCreateMigration": "20260904162500_add_communication_models",
+      "recordedAsApplied": false,
+      "existsLive": false,
+      "finding": "PENDING: Defined in migration file but not yet applied to live DB"
+    },
+    {
+      "table": "EmailAttachment",
+      "firstCreateMigration": "20260904162500_add_communication_models",
+      "recordedAsApplied": false,
+      "existsLive": false,
+      "finding": "PENDING: Defined in migration file but not yet applied to live DB"
+    }
+  ],
+  "shadowFailureTrace": {
+    "migration": "20260810110000_add_invoice_number_and_counter",
+    "referencesToInvoice": [
+      "ALTER TABLE \"Invoice\" ADD COLUMN     \"invoiceNumber\" TEXT;",
+      "CREATE TABLE \"InvoiceCounter\" (",
+      "CONSTRAINT \"InvoiceCounter_pkey\" PRIMARY KEY (\"id\")",
+      "CREATE UNIQUE INDEX \"InvoiceCounter_tenantId_key\" ON \"InvoiceCounter\"(\"tenantId\");",
+      "CREATE UNIQUE INDEX \"Invoice_tenantId_invoiceNumber_key\" ON \"Invoice\"(\"tenantId\", \"invoiceNumber\");",
+      "ALTER TABLE \"InvoiceCounter\" ADD CONSTRAINT \"InvoiceCounter_tenantId_fkey\" FOREIGN KEY (\"tenantId\") REFERENCES \"Tenant\"(\"id\") ON DELETE CASCADE ON UPDATE CASCADE;"
+    ]
+  },
+  "schemaVsLive": {
+    "totalSchemaModels": 60,
+    "modelsMissingFromLive": [
+      {
+        "name": "EmailAccount",
+        "mappedTo": "EmailAccount"
+      },
+      {
+        "name": "EmailThread",
+        "mappedTo": "EmailThread"
+      },
+      {
+        "name": "EmailMessage",
+        "mappedTo": "EmailMessage"
+      },
+      {
+        "name": "EmailAttachment",
+        "mappedTo": "EmailAttachment"
+      }
+    ],
+    "liveTablesMissingFromSchema": [],
+    "commStatus": [
+      {
+        "model": "EmailAccount",
+        "inSchema": true,
+        "inLiveDb": false,
+        "inMigrations": true
+      },
+      {
+        "model": "EmailThread",
+        "inSchema": true,
+        "inLiveDb": false,
+        "inMigrations": true
+      },
+      {
+        "model": "EmailMessage",
+        "inSchema": true,
+        "inLiveDb": false,
+        "inMigrations": true
+      },
+      {
+        "model": "EmailAttachment",
+        "inSchema": true,
+        "inLiveDb": false,
+        "inMigrations": true
+      }
+    ]
+  }
+}
