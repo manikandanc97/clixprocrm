@@ -1,7 +1,6 @@
-import { CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
+import { CRMPageContainer } from "@/shared/components/crm";
 import { 
   PageHeaderSkeleton, 
-  MetricCardSkeleton, 
   ToolbarSkeleton, 
   TableSkeleton,
   KanbanSkeleton
@@ -13,14 +12,6 @@ export function TasksSkeleton({ viewMode = "list" }: { viewMode?: string }) {
   return (
     <CRMPageContainer>
       <PageHeaderSkeleton />
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={4}>
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </CRMMetricsGrid>
-      </div>
       
       <div className="flex-1 flex flex-col gap-4">
         <div className="shrink-0 mb-2 py-4">
@@ -40,3 +31,4 @@ export function TasksSkeleton({ viewMode = "list" }: { viewMode?: string }) {
     </CRMPageContainer>
   );
 }
+

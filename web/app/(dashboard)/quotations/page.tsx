@@ -4,13 +4,7 @@ import { useState } from "react";
 import {
   FileText,
   Plus,
-  Search,
-  X,
   Download,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Trash2,
   AlertTriangle,
   RotateCcw,
@@ -18,8 +12,6 @@ import {
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
-import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
 import {
   AlertDialog,
   AlertDialogAction,
@@ -30,7 +22,19 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
-import { CRMPageContainer } from "@/shared/components/crm";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
+import {
+  CRMPageContainer,
+  CRMPageHeader,
+  CRMToolbar,
+  CRMPagination,
+} from "@/shared/components/crm";
 import {
   useDeleteQuotation,
   useUpdateQuotationStatus,
@@ -41,6 +45,7 @@ import { FormModal } from "@/shared/components/crm/FormModal";
 import { QuoteFormSkeleton } from "@/shared/components/skeletons";
 import { QuotationContextualSettings } from "@/features/quotations/components/QuotationContextualSettings";
 import { QuotationType } from "@/shared/types/quotation";
+import { buildQuotationDuplicatePayload } from "@/features/quotations/utils/quotation-duplicate";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useQuotationsData } from "@/features/quotations/hooks/use-quotations-data";
 import { useQuotationsUrlState } from "@/features/quotations/hooks/use-quotations-url-state";
@@ -118,11 +123,7 @@ export default function QuotationsPage() {
 
   // ─── Helpers ──────────────────────────────────────────────────────────────
   const handleDuplicate = (quote: QuotationType) => {
-    const duplicateData = {
-      ...quote,
-      quoteId: `QT-${Math.floor(1000 + Math.random() * 9000)}`,
-      status: "DRAFT" as const,
-    };
+    const duplicateData = buildQuotationDuplicatePayload(quote);
     createQuotationMutate(duplicateData);
   };
 
@@ -163,160 +164,103 @@ export default function QuotationsPage() {
 
   return (
     <CRMPageContainer twoStageScroll>
-      {/* 1. Header Layout */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <div
-            data-animate-target="true"
-            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
-          >
-            <AppIcon
-              name="quotations"
-              icon={FileText}
-              size={18}
-              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
-            />
-          </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-              Quotations
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Generate and manage sales quotes with real-time tracking and conversion status.
-            </p>
-          </div>
-        </div>
-
-        <div className="flex items-center gap-2">
-          <Button
-            variant="outline"
-            onClick={() => setIsCustomizeOpen(true)}
-            className="group font-semibold text-xs h-9 px-3 rounded-lg shadow-xs gap-1.5 cursor-pointer border-border/70 bg-background hover:bg-muted/50 text-foreground"
-          >
-            <AppIcon
-              name="settings"
-              icon={Settings}
-              size={14}
-              className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0"
-            />
-            <span>Customize</span>
-          </Button>
-
-          <Button
-            onClick={() => {
-              setQuoteToEdit(null);
-              setIsAddModalOpen(true);
-            }}
-            className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
-          >
-            <AppIcon
-              name="plus"
-              icon={Plus}
-              size={14}
-              className="w-3.5 h-3.5 text-white shrink-0"
-            />
-            <span>Create Quote</span>
-          </Button>
-        </div>
-      </div>
+      {/* 1. Canonical Page Header */}
+      <CRMPageHeader
+        title="Quotations"
+        description="Generate and manage sales quotes with real-time tracking and conversion status."
+        icon={FileText}
+        secondaryActions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+            variant: "outline",
+          },
+        ]}
+        primaryAction={{
+          label: "Create Quote",
+          icon: Plus,
+          onClick: () => {
+            setQuoteToEdit(null);
+            setIsAddModalOpen(true);
+          },
+        }}
+      />
 
       {/* 2. Main Card Container */}
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
-        {/* Top Controls Toolbar */}
-        <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
-          {/* Left: Filter Selects & Search */}
-          <div className="flex flex-wrap items-center gap-2.5">
-            {/* Status Filter */}
-            <select
+        {/* Canonical Toolbar */}
+        <CRMToolbar
+          searchQuery={search}
+          setSearchQuery={setSearch}
+          placeholder="Search quotes, clients..."
+          selectedCount={selectedQuoteIds.length}
+          filters={
+            <Select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as typeof statusFilter)}
-              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
+              onValueChange={(val) => setStatusFilter(val as typeof statusFilter)}
             >
-              <option value="ALL">All Status</option>
-              <option value="DRAFT">Draft</option>
-              <option value="SENT">Sent</option>
-              <option value="ACCEPTED">Accepted</option>
-              <option value="REJECTED">Rejected</option>
-              <option value="EXPIRED">Expired</option>
-            </select>
-
-            {/* Search Input */}
-            <div className="relative w-full sm:w-64 group">
-              <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
-                <AppIcon
-                  name="search"
-                  icon={Search}
-                  size={14}
-                  className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors"
-                />
-              </div>
-              <Input
-                value={search}
-                onChange={(e) => setSearch(e.target.value)}
-                placeholder="Search quotes, clients..."
-                className="h-9 pl-8 pr-8 rounded-lg bg-background border-border/70 text-xs shadow-xs focus-visible:ring-2 focus-visible:ring-primary/20"
+              <SelectTrigger
+                aria-label="Status filter"
+                className="h-9 w-[130px] px-3 rounded-lg bg-background border-border/70 text-xs font-semibold text-foreground shadow-xs focus:ring-2 focus:ring-primary/20 cursor-pointer"
+              >
+                <SelectValue placeholder="All Status" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL" className="text-xs font-medium cursor-pointer">All Status</SelectItem>
+                <SelectItem value="DRAFT" className="text-xs font-medium cursor-pointer">Draft</SelectItem>
+                <SelectItem value="SENT" className="text-xs font-medium cursor-pointer">Sent</SelectItem>
+                <SelectItem value="ACCEPTED" className="text-xs font-medium cursor-pointer">Accepted</SelectItem>
+                <SelectItem value="REJECTED" className="text-xs font-medium cursor-pointer">Rejected</SelectItem>
+                <SelectItem value="EXPIRED" className="text-xs font-medium cursor-pointer">Expired</SelectItem>
+              </SelectContent>
+            </Select>
+          }
+          bulkActions={
+            <button
+              onClick={() => setBulkDeleteModalOpen(true)}
+              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-all shadow-xs cursor-pointer"
+            >
+              <AppIcon
+                name="trash"
+                icon={Trash2}
+                size={14}
+                className="w-3.5 h-3.5 text-rose-500 shrink-0"
               />
-              {search && (
+              <span>Delete ({selectedQuoteIds.length})</span>
+            </button>
+          }
+          actions={
+            <>
+              {hasActiveFilters && (
                 <button
-                  type="button"
-                  onClick={() => setSearch("")}
-                  className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground cursor-pointer"
+                  onClick={handleClearFilters}
+                  className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
                 >
-                  <X className="w-3.5 h-3.5" />
+                  <AppIcon
+                    name="reset"
+                    icon={RotateCcw}
+                    size={14}
+                    className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0"
+                  />
+                  <span>Reset Filters</span>
                 </button>
               )}
-            </div>
-          </div>
-
-          {/* Right: Actions */}
-          <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground self-end lg:self-auto flex-wrap">
-            {/* Multi-Select Delete Button */}
-            {selectedQuoteIds.length > 0 && (
               <button
-                onClick={() => setBulkDeleteModalOpen(true)}
-                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
+                onClick={exportCSV}
+                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/50 text-foreground text-xs font-semibold transition-colors shadow-xs cursor-pointer"
               >
                 <AppIcon
-                  name="trash"
-                  icon={Trash2}
-                  size={14}
-                  className="w-3.5 h-3.5 text-rose-500 shrink-0"
-                />
-                <span>Delete ({selectedQuoteIds.length})</span>
-              </button>
-            )}
-
-            {/* Clear Filters Button */}
-            {hasActiveFilters && (
-              <button
-                onClick={handleClearFilters}
-                className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
-              >
-                <AppIcon
-                  name="reset"
-                  icon={RotateCcw}
+                  name="export"
+                  icon={Download}
                   size={14}
                   className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0"
                 />
-                <span>Reset Filters</span>
+                <span>Export</span>
               </button>
-            )}
-
-            {/* Export Button */}
-            <button
-              onClick={exportCSV}
-              className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-border/70 bg-background hover:bg-muted/50 text-foreground text-xs font-semibold transition-colors shadow-xs cursor-pointer"
-            >
-              <AppIcon
-                name="export"
-                icon={Download}
-                size={14}
-                className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0"
-              />
-              <span>Export</span>
-            </button>
-          </div>
-        </div>
+            </>
+          }
+        />
 
         {/* Table Content — QuotationsDataTable (canonical CRM table system) */}
         <QuotationsDataTable
@@ -345,82 +289,18 @@ export default function QuotationsPage() {
           }}
         />
 
-        {/* Bottom Pagination */}
-        <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
-          <div>
-            Showing{" "}
-            <span className="font-semibold text-foreground">
-              {filteredQuotations.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
-            </span>{" "}
-            to{" "}
-            <span className="font-semibold text-foreground">
-              {Math.min(currentPage * rowsPerPage, filteredQuotations.length)}
-            </span>{" "}
-            of <span className="font-semibold text-foreground">{filteredQuotations.length}</span> Quotes
-          </div>
-
-          <div className="flex items-center gap-6">
-            <div className="flex items-center gap-2">
-              <span>Rows per page:</span>
-              <select
-                value={rowsPerPage}
-                onChange={(e) => setRowsPerPage(Number(e.target.value))}
-                className="h-8 px-2 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 cursor-pointer"
-              >
-                <option value={10}>10</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-2">
-              <span>
-                Page <span className="font-semibold text-foreground">{currentPage}</span> of{" "}
-                <span className="font-semibold text-foreground">{totalPages}</span>
-              </span>
-
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(1)}
-                  disabled={currentPage === 1}
-                  className="h-8 w-8 rounded-lg shadow-xs cursor-pointer disabled:opacity-40"
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  disabled={currentPage === 1}
-                  className="h-8 w-8 rounded-lg shadow-xs cursor-pointer disabled:opacity-40"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  disabled={currentPage === totalPages}
-                  className="h-8 w-8 rounded-lg shadow-xs cursor-pointer disabled:opacity-40"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  onClick={() => setCurrentPage(totalPages)}
-                  disabled={currentPage === totalPages}
-                  className="h-8 w-8 rounded-lg shadow-xs cursor-pointer disabled:opacity-40"
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        {/* Canonical Pagination */}
+        <CRMPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={filteredQuotations.length}
+          rowsPerPage={rowsPerPage}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={setRowsPerPage}
+          itemName="Quotes"
+          pageSizeOptions={[10, 25, 50, 100]}
+          alwaysShow
+        />
       </div>
 
       {/* Modals */}
@@ -449,11 +329,13 @@ export default function QuotationsPage() {
         />
       </FormModal>
 
-      <QuotationPreview
-        quotation={selectedQuote}
-        isOpen={Boolean(selectedQuote)}
-        onClose={() => setSelectedQuote(null)}
-      />
+      {selectedQuote && (
+        <QuotationPreview
+          quotation={selectedQuote}
+          isOpen
+          onClose={() => setSelectedQuote(null)}
+        />
+      )}
 
       {/* Single Delete Dialog */}
       <AlertDialog open={Boolean(quoteToDelete)} onOpenChange={(open) => !open && setQuoteToDelete(null)}>

@@ -19,19 +19,7 @@ import { cn } from "@/shared/lib/utils";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { QuotationType } from "@/shared/types/quotation";
 import { QuotationSortConfig } from "@/features/quotations/hooks/use-quotations-data";
-
-// ─── Status variant mapping ────────────────────────────────────────────────
-const QUOTATION_STATUS_VARIANT = {
-  ACCEPTED: "emerald",
-  SENT: "blue",
-  DRAFT: "slate",
-  REJECTED: "rose",
-  EXPIRED: "amber",
-} as const satisfies Record<string, import("@/shared/components/StatusBadge").StatusVariant>;
-
-function getStatusVariant(status: string | undefined) {
-  return QUOTATION_STATUS_VARIANT[status as keyof typeof QUOTATION_STATUS_VARIANT] ?? "neutral";
-}
+import { getQuotationStatusVariant } from "@/features/quotations/utils/quotation-status";
 
 // ─── Props ─────────────────────────────────────────────────────────────────
 export interface QuotationsDataTableProps {
@@ -329,7 +317,7 @@ export function QuotationsDataTable({
                   <CRMTableCell className="px-4 py-3.5">
                     <StatusBadge
                       status={quote.status || "DRAFT"}
-                      variant={getStatusVariant(quote.status)}
+                      variant={getQuotationStatusVariant(quote.status)}
                     />
                   </CRMTableCell>
 

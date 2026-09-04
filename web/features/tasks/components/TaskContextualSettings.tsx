@@ -1570,7 +1570,7 @@ export function TaskContextualSettings({
             </AlertDialogTitle>
             <AlertDialogDescription className="text-xs text-muted-foreground pt-1">
               Are you sure you want to delete the custom task type{" "}
-              <strong className="text-foreground">"{typeToDelete?.name}"</strong>?
+              <strong className="text-foreground">&quot;{typeToDelete?.name}&quot;</strong>?
               {typeToDelete && getTypeUsageCount(typeToDelete.name) > 0 ? (
                 <span className="block mt-2 font-medium text-amber-600 dark:text-amber-400">
                   Warning: This task type is actively referenced by {getTypeUsageCount(typeToDelete.name)} task(s). Deleting it may cause data inconsistencies. Consider deactivating instead.
@@ -1604,7 +1604,7 @@ export function TaskContextualSettings({
             </AlertDialogTitle>
             <AlertDialogDescription className="text-xs text-muted-foreground pt-1">
               Are you sure you want to delete status{" "}
-              <strong className="text-foreground">"{statusToDelete?.name}"</strong>?
+              <strong className="text-foreground">&quot;{statusToDelete?.name}&quot;</strong>?
               {statusToDelete && getStatusUsageCount(statusToDelete.key) > 0 ? (
                 <span className="block mt-2 font-medium text-amber-600 dark:text-amber-400">
                   Warning: This status is actively assigned to {getStatusUsageCount(statusToDelete.key)} task(s). Deletion is blocked to prevent data corruption.
