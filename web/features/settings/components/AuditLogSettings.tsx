@@ -150,7 +150,7 @@ export default function AuditLogSettings() {
     const act = action.toLowerCase();
     if (act.includes("login") || act.includes("signin")) {
       return (
-        <Badge variant="outline" className="text-[10px] font-bold text-emerald-600 dark:text-emerald-400 bg-emerald-500/10 border-emerald-500/20 gap-1 shrink-0">
+        <Badge variant="success" className="text-[10px] font-bold gap-1 shrink-0">
           <LogIn className="w-3 h-3" />
           Sign In
         </Badge>
@@ -158,7 +158,7 @@ export default function AuditLogSettings() {
     }
     if (act.includes("password")) {
       return (
-        <Badge variant="outline" className="text-[10px] font-bold text-amber-600 dark:text-amber-400 bg-amber-500/10 border-amber-500/20 gap-1 shrink-0">
+        <Badge variant="warning" className="text-[10px] font-bold gap-1 shrink-0">
           <Key className="w-3 h-3" />
           Password Change
         </Badge>
@@ -166,7 +166,7 @@ export default function AuditLogSettings() {
     }
     if (act.includes("mfa") || act.includes("2fa")) {
       return (
-        <Badge variant="outline" className="text-[10px] font-bold text-indigo-600 dark:text-indigo-400 bg-indigo-500/10 border-indigo-500/20 gap-1 shrink-0">
+        <Badge variant="info" className="text-[10px] font-bold gap-1 shrink-0">
           <ShieldCheck className="w-3 h-3" />
           MFA Event
         </Badge>
@@ -174,14 +174,14 @@ export default function AuditLogSettings() {
     }
     if (act.includes("revoke") || act.includes("logout")) {
       return (
-        <Badge variant="outline" className="text-[10px] font-bold text-destructive bg-destructive/10 border-destructive/20 gap-1 shrink-0">
+        <Badge variant="destructive" className="text-[10px] font-bold gap-1 shrink-0">
           <LogOut className="w-3 h-3" />
           Session Revoke
         </Badge>
       );
     }
     return (
-      <Badge variant="outline" className="text-[10px] font-bold text-muted-foreground shrink-0">
+      <Badge variant="neutral" className="text-[10px] font-bold shrink-0">
         {action}
       </Badge>
     );

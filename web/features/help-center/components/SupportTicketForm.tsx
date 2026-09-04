@@ -64,25 +64,25 @@ const PRIORITY_METRICS = {
   Critical: {
     sla: "< 1 Hour Response SLA",
     desc: "Production blocker or severe data issue",
-    color: "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400",
+    variant: "destructive" as const,
     dot: "bg-rose-500",
   },
   High: {
     sla: "< 4 Hours Response SLA",
     desc: "Core business feature impaired",
-    color: "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400",
+    variant: "warning" as const,
     dot: "bg-amber-500",
   },
   Medium: {
     sla: "< 12 Hours Response SLA",
     desc: "Normal workflow / non-critical issue",
-    color: "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400",
+    variant: "info" as const,
     dot: "bg-blue-500",
   },
   Low: {
     sla: "< 24 Hours Response SLA",
     desc: "General inquiry or minor feedback",
-    color: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400",
+    variant: "success" as const,
     dot: "bg-emerald-500",
   },
 };
@@ -246,7 +246,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
 
             <div className="flex justify-between items-center">
               <span className="font-medium text-muted-foreground">Expected SLA Response</span>
-              <Badge variant="outline" className="bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/30 text-[10px] font-bold">
+              <Badge variant="success" className="text-[10px] font-bold">
                 {successData.time}
               </Badge>
             </div>
@@ -516,7 +516,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
             <div className="space-y-3 text-xs">
               <div className="flex items-center justify-between">
                 <span className="text-muted-foreground">Active SLA Target</span>
-                <Badge variant="outline" className={`text-[10px] font-bold ${selectedPriorityInfo.color}`}>
+                <Badge variant={selectedPriorityInfo.variant} className="text-[10px] font-bold">
                   {selectedPriorityInfo.sla}
                 </Badge>
               </div>

@@ -337,11 +337,11 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
           ) : (
             <FormSubmitButton
               isDirty={isDirty}
-              isPending={createQuote.isPending}
-              loadingText="Generating..."
+              isPending={createQuote.isPending || updateQuote.isPending}
+              loadingText={initialData ? "Updating..." : "Generating..."}
               className="h-10 px-8"
             >
-              Generate Quote
+              {initialData ? "Update Quotation" : "Generate Quote"}
             </FormSubmitButton>
           )}
         </div>

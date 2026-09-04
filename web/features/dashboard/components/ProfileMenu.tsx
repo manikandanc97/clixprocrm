@@ -359,8 +359,8 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
           
           <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />
 
-          <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} variant="destructive" className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5 text-[#f95738] dark:text-[#ff6b4a] hover:bg-rose-500/10 hover:text-[#f95738] group">
-            <AppIcon name="logout" size={16} className="text-[#f95738] dark:text-[#ff6b4a] transition-colors" />
+          <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} variant="destructive" className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive group">
+            <AppIcon name="logout" size={16} className="text-destructive transition-colors" />
             <span className="font-medium text-[13px] transition-colors">Sign out</span>
           </DropdownMenuItem>
         </DropdownMenuContent>

@@ -23,7 +23,7 @@ const ActivityHeatmap = ({ data }: { data: ActivityHeatmapPointType[] }) => {
     <Card className="bg-card rounded-xl border-border shadow-sm overflow-hidden transition-all duration-300 hover:shadow-md">
       <CardHeader className="p-8 pb-4 flex flex-row items-center justify-between">
         <CardTitle className="font-bold text-foreground tracking-tight">Sales Activity</CardTitle>
-        <Info className="w-4 h-4 text-slate-300" />
+        <Info className="w-4 h-4 text-muted-foreground" />
       </CardHeader>
       <CardContent className="p-8 pt-4">
         {data.length === 0 ? (
@@ -69,7 +69,7 @@ const ActivityHeatmap = ({ data }: { data: ActivityHeatmapPointType[] }) => {
           </div>
           <div className="flex items-center gap-4">
             {hours.map(hour => (
-              <span key={hour} className="text-[9px] font-bold text-slate-300 uppercase">{hour}</span>
+              <span key={hour} className="text-[9px] font-bold text-muted-foreground uppercase">{hour}</span>
             ))}
           </div>
         </div>

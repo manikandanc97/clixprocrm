@@ -141,11 +141,11 @@ export function RoleTableRows({
                               +{activePermModules.length - 3} More
                             </Badge>
                           </TooltipTrigger>
-                          <TooltipContent className="p-3 max-w-xs bg-slate-900 text-white border border-slate-700/60 rounded-xl shadow-2xl">
-                            <p className="text-[10px] font-bold uppercase tracking-wider text-slate-400 mb-1">
+                          <TooltipContent className="p-3 max-w-xs rounded-xl shadow-2xl">
+                            <p className="text-[10px] font-bold uppercase tracking-wider opacity-70 mb-1">
                               Additional Modules ({activePermModules.length - 3})
                             </p>
-                            <p className="text-xs text-slate-100 font-medium leading-relaxed">
+                            <p className="text-xs font-medium leading-relaxed">
                               {activePermModules.slice(3).join(", ")}
                             </p>
                           </TooltipContent>

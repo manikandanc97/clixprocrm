@@ -146,7 +146,7 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
                               </span>
                             </div>
                           </TooltipTrigger>
-                          <TooltipContent side="top" className="bg-slate-950 text-white border-white/10 rounded-xl px-3 py-1.5 text-xs shadow-2xl">
+                          <TooltipContent side="top" className="rounded-xl px-3 py-1.5 text-xs shadow-2xl">
                             <span className="font-bold">{entry.name || "Unknown"}:</span> {entry.value} leads ({percentage}% of total)
                           </TooltipContent>
                         </Tooltip>

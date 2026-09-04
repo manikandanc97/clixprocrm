@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
+import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle } from "@/shared/ui/dialog";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/shared/ui/tabs";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import { ScrollArea } from "@/shared/ui/scroll-area";
@@ -44,6 +44,9 @@ export function LeadDetailsDrawer({ isOpen, onOpenChange, leadId, defaultTab = "
             </Avatar>
             <div className="flex flex-col text-left">
               <DialogTitle className="text-base font-bold m-0">{lead.name}</DialogTitle>
+              <DialogDescription className="sr-only">
+                Detailed view and activity history for {lead.name}
+              </DialogDescription>
               <span className="text-xs text-muted-foreground font-medium">{lead.company}</span>
             </div>
           </div>

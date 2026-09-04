@@ -1564,7 +1564,7 @@ export function TaskContextualSettings({
       <AlertDialog open={!!typeToDelete} onOpenChange={(o) => !o && setTypeToDelete(null)}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-rose-600">
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertCircle className="w-5 h-5 shrink-0" />
               Delete Task Type
             </AlertDialogTitle>
@@ -1598,7 +1598,7 @@ export function TaskContextualSettings({
       <AlertDialog open={!!statusToDelete} onOpenChange={(o) => !o && setStatusToDelete(null)}>
         <AlertDialogContent className="max-w-md">
           <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-rose-600">
+            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
               <AlertCircle className="w-5 h-5 shrink-0" />
               Delete Task Status
             </AlertDialogTitle>

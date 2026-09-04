@@ -59,7 +59,7 @@ function HelpFooterItem({
           <TooltipContent
             side="right"
             sideOffset={14}
-            className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
+            className="rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
           >
             Support
           </TooltipContent>
@@ -143,7 +143,7 @@ function UpgradeFooterItem({
           <TooltipContent
             side="right"
             sideOffset={14}
-            className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
+            className="rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
           >
             Upgrade & Plans
           </TooltipContent>

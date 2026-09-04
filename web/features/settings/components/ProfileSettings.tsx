@@ -276,7 +276,7 @@ const ProfileSettings = () => {
                   {user?.name || "User Name"}
                 </h2>
                 {completion === 100 && (
-                  <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10 border-none rounded-md px-1.5 py-0.2 text-[8.5px] font-bold uppercase tracking-widest">
+                  <Badge variant="success" className="px-1.5 py-0.2 text-[8.5px] font-bold uppercase tracking-widest">
                     Verified
                   </Badge>
                 )}
@@ -333,7 +333,7 @@ const ProfileSettings = () => {
           <div>
             <div className="flex items-center gap-2">
               <h3 className="text-sm sm:text-base font-bold tracking-tight text-foreground">Personal Information</h3>
-              <Badge variant="outline" className="text-[9.5px] font-semibold text-muted-foreground bg-muted/40 border-border/60 px-1.5 py-0">
+              <Badge variant="neutral" className="text-[9.5px] font-semibold px-1.5 py-0">
                 Verified Credentials
               </Badge>
             </div>
@@ -428,7 +428,7 @@ const ProfileSettings = () => {
                 <AppIcon name="alert" icon={AlertTriangleIcon} size={14} className="text-destructive" />
                 Danger Zone
               </h3>
-              <Badge variant="destructive" className="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.2 rounded bg-destructive/10 text-destructive border border-destructive/20">
+              <Badge variant="destructive" className="text-[8.5px] font-bold uppercase tracking-wider px-1.5 py-0.2">
                 Irreversible
               </Badge>
             </div>

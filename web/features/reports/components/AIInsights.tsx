@@ -58,7 +58,7 @@ export default function AIInsights() {
         animate={false}
         accentSeed="AI Insights"
         noPadding
-        className="relative flex flex-col overflow-hidden bg-[#0d111c] border-primary/20 shadow-2xl"
+        className="relative flex flex-col overflow-hidden bg-card border-primary/20 shadow-2xl"
       >
         {/* Subtle Background Glow */}
         <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />

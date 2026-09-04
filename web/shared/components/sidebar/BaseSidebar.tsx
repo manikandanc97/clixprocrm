@@ -263,7 +263,7 @@ function DesktopCollapsedNavItem({ item, isActive, themeClasses, activeLayoutIdP
       <TooltipContent
         side="right"
         sideOffset={14}
-        className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
+        className="rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
       >
         {item.title}
       </TooltipContent>
@@ -348,7 +348,7 @@ function DesktopCollapsedExpandableItem({
       <TooltipContent
         side="right"
         sideOffset={14}
-        className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
+        className="rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
       >
         {item.title}
       </TooltipContent>
@@ -698,7 +698,7 @@ export function BaseSidebarContent({
               <TooltipContent
                 side="right"
                 sideOffset={14}
-                className="bg-slate-900 dark:bg-slate-950 text-white border border-white/10 rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
+                className="rounded-lg px-3 py-1.5 font-semibold text-xs shadow-xl z-50"
               >
                 {header.title}
               </TooltipContent>

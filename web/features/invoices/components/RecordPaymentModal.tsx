@@ -141,14 +141,14 @@ function RecordPaymentForm({
               </span>
             </div>
             <div>
-              <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 block mb-0.5">Paid So Far</span>
-              <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
+              <span className="text-[11px] font-medium text-success block mb-0.5">Paid So Far</span>
+              <span className="text-xs font-bold text-success font-mono">
                 {formatCurrency(invoice.paidAmount, curr)}
               </span>
             </div>
             <div>
-              <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400 block mb-0.5">Balance Due</span>
-              <span className="text-xs font-black text-rose-600 dark:text-rose-400 font-mono">
+              <span className="text-[11px] font-medium text-destructive block mb-0.5">Balance Due</span>
+              <span className="text-xs font-black text-destructive font-mono">
                 {formatCurrency(invoice.balanceAmount, curr)}
               </span>
             </div>

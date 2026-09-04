@@ -72,7 +72,7 @@ export function SuperAdminSidebar() {
         <TooltipContent
           side="right"
           sideOffset={14}
-          className="bg-slate-900 text-white rounded-lg text-xs font-medium z-50 shadow-xl"
+          className="rounded-lg text-xs font-medium z-50 shadow-xl"
         >
           Sign Out
         </TooltipContent>

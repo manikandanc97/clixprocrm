@@ -203,7 +203,7 @@ export default function DashboardKPIs() {
                   />
                 </Link>
               </TooltipTrigger>
-              <TooltipContent side="bottom" className="text-xs bg-slate-950 text-white border-white/10 rounded-xl px-3 py-2 max-w-[200px] text-center shadow-2xl">
+              <TooltipContent side="bottom" className="text-xs rounded-xl px-3 py-2 max-w-[200px] text-center shadow-2xl">
                 {kpi.tooltip}
               </TooltipContent>
             </Tooltip>

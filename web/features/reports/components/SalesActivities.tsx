@@ -41,8 +41,8 @@ const SalesActivities = ({ data }: SalesActivitiesProps) => {
     {
       name: "Meetings",
       value: meetings,
-      trackBg: "bg-slate-200 dark:bg-slate-800",
-      barBg: "bg-slate-400 dark:bg-slate-600",
+      trackBg: "bg-muted",
+      barBg: "bg-muted-foreground/40",
       pct: (meetings / maxVal) * 100,
       description: `${meetings} ${meetings === 1 ? 'meeting' : 'meetings'} booked with clients`,
     },
@@ -94,7 +94,7 @@ const SalesActivities = ({ data }: SalesActivitiesProps) => {
                     </span>
                   </div>
                 </TooltipTrigger>
-                <TooltipContent side="top" className="bg-slate-950 text-white border-white/10 rounded-xl px-3 py-1.5 text-xs shadow-2xl">
+                <TooltipContent side="top" className="rounded-xl px-3 py-1.5 text-xs shadow-2xl">
                   <span className="font-bold text-cyan-300">{act.name}:</span> {act.description}
                 </TooltipContent>
               </Tooltip>

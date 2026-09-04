@@ -24,6 +24,16 @@ import {
   DialogFooter,
 } from "@/shared/ui/dialog";
 import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/ui/alert-dialog";
+import {
   Tabs,
   TabsList,
   TabsTrigger,
@@ -64,11 +74,13 @@ export function InvoiceDetailModal({
   const { formatCurrency } = useCurrency();
 
   const { mutateAsync: deleteInvoiceMutate, isPending: isDeletingInvoice } = useDeleteInvoice();
-  const { mutateAsync: deletePaymentMutate } = useDeletePayment();
+  const { mutateAsync: deletePaymentMutate, isPending: isDeletingPayment } = useDeletePayment();
   const { mutateAsync: sendEmailMutate, isPending: isSendingEmail } = useSendInvoiceEmail();
 
   const [activeTab, setActiveTab] = useState<"document" | "payments" | "timeline">("document");
   const [isRecordPaymentOpen, setIsRecordPaymentOpen] = useState(false);
+  const [isDeleteInvoiceOpen, setIsDeleteInvoiceOpen] = useState(false);
+  const [paymentToDelete, setPaymentToDelete] = useState<{ id: string; paymentNumber?: string } | null>(null);
 
   if (!isOpen || !invoiceId) return null;
 
@@ -134,29 +146,37 @@ export function InvoiceDetailModal({
     }
   };
 
-  const handleDeleteInvoice = async () => {
-    if (invoice.payments && invoice.payments.length > 0) {
+  const onRequestDeleteInvoice = () => {
+    if (invoice?.payments && invoice.payments.length > 0) {
       toast.error("Cannot delete an invoice with recorded payments. Please void or cancel the invoice instead.");
       return;
     }
-    if (confirm(`Are you sure you want to delete invoice ${invoice.invoiceNumber}?`)) {
-      try {
-        await deleteInvoiceMutate(invoice.id);
-        onClose();
-      } catch {
-        // Error handled by hook toast
-      }
+    setIsDeleteInvoiceOpen(true);
+  };
+
+  const handleConfirmDeleteInvoice = async () => {
+    if (!invoice?.id) return;
+    try {
+      await deleteInvoiceMutate(invoice.id);
+      setIsDeleteInvoiceOpen(false);
+      onClose();
+    } catch {
+      // Error handled by hook toast
     }
   };
 
-  const handleDeletePayment = async (paymentId: string) => {
-    if (confirm("Are you sure you want to delete this payment record? Outstanding balance will be restored.")) {
-      try {
-        await deletePaymentMutate(paymentId);
-        refetch();
-      } catch {
-        // Error handled by hook toast
-      }
+  const onRequestDeletePayment = (payment: { id: string; paymentNumber?: string }) => {
+    setPaymentToDelete(payment);
+  };
+
+  const handleConfirmDeletePayment = async () => {
+    if (!paymentToDelete?.id) return;
+    try {
+      await deletePaymentMutate(paymentToDelete.id);
+      setPaymentToDelete(null);
+      refetch();
+    } catch {
+      // Error handled by hook toast
     }
   };
 
@@ -519,7 +539,7 @@ export function InvoiceDetailModal({
                                 <Button
                                   variant="ghost"
                                   size="icon-xs"
-                                  onClick={() => handleDeletePayment(p.id)}
+                                  onClick={() => onRequestDeletePayment(p)}
                                   title="Delete Payment"
                                   aria-label="Delete payment"
                                   className="text-muted-foreground hover:text-destructive hover:bg-destructive/10"
@@ -578,7 +598,7 @@ export function InvoiceDetailModal({
             <Button
               variant="ghost"
               size="sm"
-              onClick={handleDeleteInvoice}
+              onClick={onRequestDeleteInvoice}
               disabled={isDeletingInvoice || (invoice?.payments && invoice.payments.length > 0)}
               className="text-xs text-destructive hover:bg-destructive/10 hover:text-destructive gap-1.5 font-semibold h-8"
             >
@@ -595,6 +615,55 @@ export function InvoiceDetailModal({
           </DialogFooter>
         </DialogContent>
       </Dialog>
+
+      {/* Delete Invoice Confirmation Dialog */}
+      <AlertDialog open={isDeleteInvoiceOpen} onOpenChange={setIsDeleteInvoiceOpen}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete invoice {invoice?.invoiceNumber}? This action cannot be undone.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingInvoice}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleConfirmDeleteInvoice}
+              disabled={isDeletingInvoice}
+            >
+              {isDeletingInvoice ? "Deleting..." : "Delete Invoice"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
+
+      {/* Delete Payment Confirmation Dialog */}
+      <AlertDialog
+        open={Boolean(paymentToDelete)}
+        onOpenChange={(open) => {
+          if (!open) setPaymentToDelete(null);
+        }}
+      >
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Delete Payment</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to delete this payment record{paymentToDelete?.paymentNumber ? ` (${paymentToDelete.paymentNumber})` : ""}? Outstanding balance will be restored.
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={isDeletingPayment}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              onClick={handleConfirmDeletePayment}
+              disabled={isDeletingPayment}
+            >
+              {isDeletingPayment ? "Deleting..." : "Delete Payment"}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
 
       {/* Record Payment Sub-Modal */}
       {invoice && (

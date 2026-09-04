@@ -3,9 +3,7 @@
 import { PipelineLeadType } from "@/shared/types/pipeline";
 import { 
   Clock, 
-  MessageSquare, 
-  UserPlus, 
-  Zap
+  MessageSquare 
 } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { CRMActionMenu } from "@/shared/components/crm";
@@ -105,16 +103,6 @@ const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
               label: "Edit / Quick Note",
               icon: MessageSquare,
               onClick: () => onSelect?.(),
-            },
-            {
-              label: "Assign Owner",
-              icon: UserPlus,
-            },
-            {
-              label: "AI Summary",
-              icon: Zap,
-              variant: "primary" as const,
-              separatorBefore: true,
             },
           ]}
         />

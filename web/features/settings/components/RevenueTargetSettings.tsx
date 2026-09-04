@@ -160,10 +160,10 @@ export default function RevenueTargetSettings() {
     const startDate = new Date(target.startDate);
     const endDate = new Date(target.endDate);
     
-    if (target.isActive === false) return <Badge variant="secondary">Draft</Badge>;
-    if (now < startDate) return <Badge variant="outline" className="text-blue-500 border-blue-200 bg-blue-50 dark:bg-blue-900/20">Upcoming</Badge>;
-    if (now > endDate) return <Badge variant="outline" className="text-rose-500 border-rose-200 bg-rose-50 dark:bg-rose-900/20">Expired</Badge>;
-    return <Badge variant="outline" className="text-emerald-500 border-emerald-200 bg-emerald-50 dark:bg-emerald-900/20">Active</Badge>;
+    if (target.isActive === false) return <Badge variant="neutral">Draft</Badge>;
+    if (now < startDate) return <Badge variant="info">Upcoming</Badge>;
+    if (now > endDate) return <Badge variant="destructive">Expired</Badge>;
+    return <Badge variant="success">Active</Badge>;
   };
 
   return (

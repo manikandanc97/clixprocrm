@@ -108,7 +108,7 @@
   /* Borders & Inputs */
   --border: oklch(0.91 0.008 255);
   --input: oklch(0.91 0.008 255);
-  --ring: oklch(0.42 0.18 270);
+  --ring: oklch(0.58 0.165 157);
 
   /* Radius */
   --radius: 8px;
@@ -656,7 +656,7 @@
   }
 
   .crm-table-th {
-    @apply h-11 px-4 py-3.5 text-left align-middle text-xs font-bold text-foreground border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap last:border-r-0 select-none;
+    @apply h-11 px-4 py-3.5 text-left align-middle text-xs font-bold text-foreground border-r border-border/40 bg-muted/60 dark:bg-muted/40 whitespace-nowrap last:border-r-0 select-none;
   }
 
   .crm-table-td {

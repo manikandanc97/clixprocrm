@@ -205,12 +205,12 @@ export default function SessionsSettings() {
                           {session.browser || "Web Browser"} on {session.operatingSystem || "Device"}
                         </span>
                         {session.isCurrent && (
-                          <Badge className="bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 border-emerald-500/20 text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
+                          <Badge variant="success" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
                             This Device
                           </Badge>
                         )}
                         {session.isRevoked && (
-                          <Badge variant="secondary" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
+                          <Badge variant="neutral" className="text-[9px] font-bold uppercase tracking-wider px-1.5 py-0.2">
                             Revoked
                           </Badge>
                         )}

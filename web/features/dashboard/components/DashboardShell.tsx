@@ -24,8 +24,6 @@ export default function DashboardShell({
 
   return (
     <div className="flex h-screen h-dvh bg-background overflow-hidden relative">
-      {/* Subtle Background Surface */}
-      <div className="absolute inset-0 bg-[#fafafa] dark:bg-[#050505] -z-10" />
       <div className="absolute top-0 left-0 right-0 h-px bg-gradient-to-r from-transparent via-border to-transparent opacity-50" />
 
       {/* Desktop Sidebar — fixed, sits outside flow */}

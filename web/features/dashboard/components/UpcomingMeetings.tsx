@@ -196,7 +196,7 @@ export default function UpcomingMeetings() {
                     <div className="flex items-center gap-2">
                       {meeting.isOnline && meeting.isToday ? (
                         <Button 
-                          variant="premium"
+                          variant="default"
                           size="sm"
                           onClick={(e) => handleJoin(e, meeting.title)}
                           className="h-10 px-5 rounded-xl font-bold shadow-[0_8px_16px_-6px_rgba(16,185,129,0.3)] hover:shadow-[0_12px_20px_-8px_rgba(16,185,129,0.4)]"

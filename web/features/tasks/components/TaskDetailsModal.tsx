@@ -140,8 +140,8 @@ const TaskDetailsModal = ({
           description: `Unassigned from ${log.previousAssignee || 'Unknown'} by ${log.actor}.`,
           time: new Date(log.createdAt).toLocaleString(),
           icon: UserMinus,
-          iconBg: "bg-rose-500/10",
-          iconColor: "text-rose-600",
+          iconBg: "bg-destructive/10",
+          iconColor: "text-destructive",
         });
       }
     });
@@ -190,8 +190,8 @@ const TaskDetailsModal = ({
       } else if (event.action === "BLOCKER_REPORTED") {
         icon = ShieldAlert;
         title = "Blocker Reported";
-        iconColor = "text-rose-600";
-        iconBg = "bg-rose-500/10";
+        iconColor = "text-destructive";
+        iconBg = "bg-destructive/10";
       } else if (event.action === "BLOCKER_RESOLVED") {
         icon = CheckCircle2;
         title = "Blocker Resolved";
@@ -255,7 +255,7 @@ const TaskDetailsModal = ({
                 {task.status}
               </Badge>
               {task.isUrgent && (
-                <Badge className="border border-rose-500/30 bg-rose-500/10 text-[10px] font-semibold uppercase tracking-wide text-rose-600">
+                <Badge variant="destructive" className="text-[10px] font-semibold uppercase tracking-wide">
                   Urgent
                 </Badge>
               )}
@@ -464,7 +464,7 @@ const TaskDetailsModal = ({
                       <Button
                         variant={composerType === "BLOCKER" ? "secondary" : "ghost"}
                         size="sm"
-                        className="h-7 px-3 text-xs text-rose-600 hover:bg-rose-50 hover:text-rose-700"
+                        className="h-7 px-3 text-xs text-destructive hover:bg-destructive/10 hover:text-destructive"
                         onClick={() => setComposerType("BLOCKER")}
                       >
                         <ShieldAlert className="mr-1.5 h-3.5 w-3.5" />
@@ -511,15 +511,15 @@ const TaskDetailsModal = ({
               </section>
 
               {task.status === "BLOCKED" && canEditTask && (
-                <section className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4">
+                <section className="rounded-xl border border-destructive/30 bg-destructive/10 p-4">
                   <div className="flex items-start justify-between gap-3">
                     <div className="flex items-start gap-3">
-                      <AlertCircle className="mt-0.5 h-4 w-4 text-rose-600" />
+                      <AlertCircle className="mt-0.5 h-4 w-4 text-destructive" />
                       <div>
-                        <h4 className="text-sm font-semibold text-rose-700">
+                        <h4 className="text-sm font-semibold text-destructive">
                           Task is blocked
                         </h4>
-                        <p className="mt-1 text-xs text-rose-700/80">
+                        <p className="mt-1 text-xs text-destructive/80">
                           Work cannot continue until the blocker is resolved.
                         </p>
                       </div>
@@ -527,7 +527,7 @@ const TaskDetailsModal = ({
                     <Button
                       variant="outline"
                       size="sm"
-                      className="border-rose-200 text-rose-700 hover:bg-rose-50 hover:text-rose-800"
+                      className="border-destructive/30 text-destructive hover:bg-destructive/10 hover:text-destructive"
                       onClick={() => resolveBlocker(task.id)}
                     >
                       Resolve Blocker
@@ -537,14 +537,14 @@ const TaskDetailsModal = ({
               )}
 
               {task.isOverdue && task.status !== "BLOCKED" && (
-                <section className="rounded-xl border border-rose-500/30 bg-rose-500/5 p-4">
+                <section className="rounded-xl border border-destructive/30 bg-destructive/10 p-4">
                   <div className="flex items-start gap-3">
-                    <AlertCircle className="mt-0.5 h-4 w-4 text-rose-600" />
+                    <AlertCircle className="mt-0.5 h-4 w-4 text-destructive" />
                     <div>
-                      <h4 className="text-sm font-semibold text-rose-700">
+                      <h4 className="text-sm font-semibold text-destructive">
                         Task is overdue
                       </h4>
-                      <p className="mt-1 text-xs text-rose-700/80">
+                      <p className="mt-1 text-xs text-destructive/80">
                         Due date has passed. Reprioritize this task or update
                         the schedule.
                       </p>

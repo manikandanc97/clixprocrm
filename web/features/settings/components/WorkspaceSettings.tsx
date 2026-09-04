@@ -384,7 +384,7 @@ const WorkspaceSettings = () => {
                 <h2 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
                   {workspace?.name || "My Workspace"}
                 </h2>
-                <Badge className="bg-emerald-500/10 text-emerald-600 hover:bg-emerald-500/10 border-none rounded-md px-1.5 py-0.2 text-[8.5px] font-bold uppercase tracking-widest">
+                <Badge variant="success" className="px-1.5 py-0.2 text-[8.5px] font-bold uppercase tracking-widest">
                   Verified
                 </Badge>
               </div>
@@ -445,8 +445,8 @@ const WorkspaceSettings = () => {
                 Organization Information
               </h3>
               <Badge
-                variant="outline"
-                className="text-[9.5px] font-semibold text-muted-foreground bg-muted/40 border-border/60 px-1.5 py-0"
+                variant="neutral"
+                className="text-[9.5px] font-semibold px-1.5 py-0"
               >
                 Business Profile
               </Badge>

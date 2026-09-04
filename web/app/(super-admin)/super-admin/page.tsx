@@ -463,7 +463,7 @@ export default function SuperAdminDashboardPage() {
                 />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-slate-950 text-white border-white/10 rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
+            <TooltipContent side="bottom" className="text-xs rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
               Total active tenant organizations operating on the multi-tenant platform.
             </TooltipContent>
           </Tooltip>
@@ -485,7 +485,7 @@ export default function SuperAdminDashboardPage() {
                 />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-slate-950 text-white border-white/10 rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
+            <TooltipContent side="bottom" className="text-xs rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
               Total registered users across all tenant workspaces and administrative roles.
             </TooltipContent>
           </Tooltip>
@@ -507,7 +507,7 @@ export default function SuperAdminDashboardPage() {
                 />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-slate-950 text-white border-white/10 rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
+            <TooltipContent side="bottom" className="text-xs rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
               Monthly Recurring Revenue recognized across active paid subscription tiers.
             </TooltipContent>
           </Tooltip>
@@ -529,7 +529,7 @@ export default function SuperAdminDashboardPage() {
                 />
               </Link>
             </TooltipTrigger>
-            <TooltipContent side="bottom" className="text-xs bg-slate-950 text-white border-white/10 rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
+            <TooltipContent side="bottom" className="text-xs rounded-xl px-3 py-2 max-w-[220px] text-center shadow-2xl">
               Overall active user adoption and platform engagement rate across active workspaces.
             </TooltipContent>
           </Tooltip>
