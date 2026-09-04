@@ -1,9 +1,9 @@
 import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { PipelineLeadType } from "@/shared/types/pipeline";
-import { Loader2 } from "lucide-react";
+import { Loader2, X, Check, ArrowRight } from "lucide-react";
+import { PIPELINE_STAGE_LABELS } from "@/lib/crm-formatters";
 
 interface ConfirmMoveModalProps {
   isOpen: boolean;
@@ -34,42 +34,48 @@ export function ConfirmMoveModal({ isOpen, onClose, deal, targetStage, onSubmit,
     onSubmit();
   };
 
+  const fromLabel = PIPELINE_STAGE_LABELS[deal.stage] || deal.stage;
+  const toLabel = PIPELINE_STAGE_LABELS[targetStage] || targetStage;
+
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent className="sm:max-w-[425px]">
+      <DialogContent className="sm:max-w-[425px] bg-background border-border rounded-xl">
         <DialogHeader>
-          <DialogTitle>Move Deal</DialogTitle>
-          <DialogDescription className="pt-2 text-sm text-foreground">
-            Are you sure you want to move this deal?
+          <DialogTitle className="text-lg font-bold">Move Deal Stage</DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-1">
+            Confirm moving this opportunity to a new pipeline stage.
           </DialogDescription>
         </DialogHeader>
         
-        <div className="space-y-4 py-2">
-          <div className="p-3 bg-muted/30 rounded-lg border border-border">
-            <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">Deal</p>
-            <p className="font-semibold text-sm">{deal.name}</p>
+        <div className="space-y-3 py-2">
+          <div className="p-3 bg-muted/30 rounded-lg border border-border/80">
+            <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Opportunity</p>
+            <p className="font-semibold text-sm text-foreground">{deal.name}</p>
+            {deal.company && deal.company !== deal.name && (
+              <p className="text-xs text-muted-foreground">{deal.company}</p>
+            )}
           </div>
           
-          <div className="grid grid-cols-2 gap-4">
-            <div className="p-3 bg-muted/30 rounded-lg border border-border">
-              <p className="text-xs text-muted-foreground uppercase tracking-wider font-bold mb-1">From</p>
-              <p className="font-semibold text-sm">{deal.stage}</p>
+          <div className="grid grid-cols-2 gap-3 items-center">
+            <div className="p-3 bg-muted/30 rounded-lg border border-border/80">
+              <p className="text-[10px] text-muted-foreground uppercase tracking-wider font-bold mb-0.5">Current Stage</p>
+              <p className="font-semibold text-xs text-foreground truncate">{fromLabel}</p>
             </div>
             <div className="p-3 bg-primary/5 rounded-lg border border-primary/20">
-              <p className="text-xs text-primary uppercase tracking-wider font-bold mb-1">To</p>
-              <p className="font-semibold text-sm text-primary">{targetStage}</p>
+              <p className="text-[10px] text-primary uppercase tracking-wider font-bold mb-0.5">Target Stage</p>
+              <p className="font-semibold text-xs text-primary truncate">{toLabel}</p>
             </div>
           </div>
         </div>
 
-        <DialogFooter className="mt-4">
-          <Button variant="outline" onClick={onClose} disabled={showLoading}>
-            <AppIcon name="close" size={15} className="mr-1.5" />
+        <DialogFooter className="mt-2 gap-2">
+          <Button variant="outline" size="sm" onClick={onClose} disabled={showLoading} className="h-9 text-xs font-semibold cursor-pointer">
+            <X className="w-3.5 h-3.5 mr-1.5" />
             Cancel
           </Button>
-          <Button variant="default" onClick={handleLocalSubmit} disabled={showLoading} className="gap-2">
-            {showLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : <AppIcon name="check" size={15} />}
-            {showLoading ? "Confirming..." : "Confirm"}
+          <Button variant="default" size="sm" onClick={handleLocalSubmit} disabled={showLoading} className="h-9 text-xs font-semibold gap-1.5 cursor-pointer">
+            {showLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : <Check className="w-3.5 h-3.5" />}
+            {showLoading ? "Moving..." : "Confirm Move"}
           </Button>
         </DialogFooter>
       </DialogContent>

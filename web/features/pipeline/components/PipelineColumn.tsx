@@ -2,7 +2,7 @@
 
 import { PipelineLeadType } from "@/shared/types/pipeline";
 import PipelineCard from "./PipelineCard";
-import { Plus, MoreHorizontal, TrendingUp, IndianRupee, Target } from "lucide-react";
+import { Plus, TrendingUp, Target } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
 import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable";
 import { useDroppable } from "@dnd-kit/core";

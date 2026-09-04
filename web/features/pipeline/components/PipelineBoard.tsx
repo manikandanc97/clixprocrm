@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState, useRef, useMemo } from "react";
 import { 
   DndContext, 
   DragOverlay, 
@@ -20,6 +20,7 @@ import {
 } from "@dnd-kit/sortable";
 import PipelineColumn from "./PipelineColumn";
 import PipelineCard from "./PipelineCard";
+import { PipelineToolbar } from "./PipelineToolbar";
 import { PipelineLeadType, DealStage } from "@/shared/types/pipeline";
 import { toast } from "sonner";
 import { Plus } from "lucide-react";
@@ -37,6 +38,10 @@ interface PipelineBoardProps {
 }
 
 const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
+  const [searchQuery, setSearchQuery] = useState("");
+  const [sortValue, setSortValue] = useState("created_desc");
+  const [filterValue, setFilterValue] = useState("all");
+
   const [activeItem, setActiveItem] = useState<PipelineLeadType | null>(null);
   const [selectedDeal, setSelectedDeal] = useState<PipelineLeadType | null>(null);
   const [wonLostModal, setWonLostModal] = useState<{ isOpen: boolean; type: DealStage.WON | DealStage.LOST | null; deal: PipelineLeadType | null; originalStage: PipelineLeadType["stage"] | null }>({
@@ -55,6 +60,44 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
   
   const { movePipelineItem, setPipelineItems } = useCRMStore();
   const { mutate: updatePipelineItem, isPending: isUpdating } = useUpdatePipelineItem();
+
+  const filteredItems = useMemo(() => {
+    let result = [...items];
+
+    if (searchQuery.trim()) {
+      const q = searchQuery.toLowerCase().trim();
+      result = result.filter(
+        (item) =>
+          item.name?.toLowerCase().includes(q) ||
+          item.company?.toLowerCase().includes(q)
+      );
+    }
+
+    if (filterValue === "hot") {
+      result = result.filter(
+        (item) =>
+          item.priority?.toUpperCase() === "HIGH" ||
+          item.priority?.toUpperCase() === "URGENT" ||
+          (item.probability || 0) >= 70
+      );
+    } else if (filterValue === "stuck") {
+      result = result.filter((item) => item.isStuck);
+    }
+
+    if (sortValue === "value_desc") {
+      result.sort((a, b) => (b.valueAmount || 0) - (a.valueAmount || 0));
+    } else if (sortValue === "prob_desc") {
+      result.sort((a, b) => (b.probability || 0) - (a.probability || 0));
+    } else if (sortValue === "created_desc") {
+      result.sort(
+        (a, b) =>
+          new Date(b.createdAt || 0).getTime() -
+          new Date(a.createdAt || 0).getTime()
+      );
+    }
+
+    return result;
+  }, [items, searchQuery, filterValue, sortValue]);
 
   const sensors = useSensors(
     useSensor(PointerSensor, {
@@ -262,6 +305,12 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
 
   return (
     <div className="relative flex-1 min-h-0 flex flex-col h-full">
+      <PipelineToolbar
+        onSearch={setSearchQuery}
+        onSort={setSortValue}
+        onFilter={setFilterValue}
+      />
+
       <DndContext
         sensors={sensors}
         collisionDetection={closestCorners}
@@ -271,7 +320,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
       >
         <div className="flex-1 min-h-0 flex gap-5 overflow-x-auto overflow-y-hidden pb-2.5 kanban-board-scroll items-stretch">
           {stages.map((stage) => {
-            const stageItems = items.filter((item) => item.stage === stage);
+            const stageItems = filteredItems.filter((item) => item.stage === stage);
 
             return (
               <PipelineColumn 

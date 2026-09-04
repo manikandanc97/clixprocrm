@@ -1,26 +1,32 @@
-import { CRMPageContainer } from "@/shared/components/crm";
+import { CRMPageContainer, CRMPageHeader } from "@/shared/components/crm";
 import { KanbanSkeleton } from "@/shared/components/skeletons";
-import { Skeleton } from "@/shared/ui/skeleton";
+import { Handshake, Plus, Settings } from "lucide-react";
 
 export function DealsSkeleton() {
   return (
     <CRMPageContainer>
-      {/* Header Skeleton */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <Skeleton className="h-10 w-10 rounded-xl" />
-          <div className="space-y-1.5">
-            <Skeleton className="h-5 w-36 rounded" />
-            <Skeleton className="h-3 w-64 rounded" />
-          </div>
-        </div>
-        <div className="flex items-center gap-2">
-          <Skeleton className="h-9 w-24 rounded-lg" />
-          <Skeleton className="h-9 w-28 rounded-lg" />
-        </div>
-      </div>
+      <CRMPageHeader
+        title="Deals & Pipeline"
+        description="Track sales opportunities, manage stages, and forecast revenue."
+        icon={Handshake}
+        secondaryActions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => {},
+            disabled: true,
+            variant: "outline",
+          },
+        ]}
+        primaryAction={{
+          label: "Create Deal",
+          icon: Plus,
+          onClick: () => {},
+          disabled: true,
+        }}
+      />
       
-      <div className="flex-1 min-h-0 flex flex-col">
+      <div className="flex-1 min-h-0 flex flex-col mt-4">
         <KanbanSkeleton />
       </div>
     </CRMPageContainer>

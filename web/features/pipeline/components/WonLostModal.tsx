@@ -1,12 +1,11 @@
 import { useState } from "react";
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog";
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { PipelineLeadType, DealStage } from "@/shared/types/pipeline";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
-import { IndianRupee, Trophy, XCircle, Loader2 } from "lucide-react";
+import { Trophy, XCircle, Loader2, X, Star } from "lucide-react";
 import { useCurrency } from "@/shared/hooks/use-currency";
 
 export interface WonLostSubmitData {
@@ -64,9 +63,9 @@ export function WonLostModal({ isOpen, onClose, type, deal, onSubmit, isLoading 
 
   return (
     <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
-      <DialogContent aria-describedby={undefined} className="sm:max-w-[450px] p-0 overflow-hidden gap-0">
-        <DialogHeader className="p-6 pb-4 border-b bg-muted/30">
-          <DialogTitle className="flex items-center gap-3 text-xl">
+      <DialogContent className="sm:max-w-[450px] p-0 overflow-hidden gap-0 bg-background border-border rounded-xl">
+        <DialogHeader className="p-6 pb-4 border-b border-border bg-muted/30">
+          <DialogTitle className="flex items-center gap-3 text-lg font-bold">
             {type === DealStage.WON ? (
               <>
                 <div className="p-2 bg-emerald-100 dark:bg-emerald-500/20 rounded-full">
@@ -83,13 +82,18 @@ export function WonLostModal({ isOpen, onClose, type, deal, onSubmit, isLoading 
               </>
             )}
           </DialogTitle>
+          <DialogDescription className="text-xs text-muted-foreground mt-1">
+            {type === DealStage.WON 
+              ? "Record actual revenue and closing details for this won deal."
+              : "Capture reasons and notes for losing this opportunity."}
+          </DialogDescription>
         </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-5">
+        <form onSubmit={handleSubmit} className="p-6 space-y-4">
           {type === DealStage.WON && (
-            <div className="grid grid-cols-2 gap-5">
-              <div className="space-y-2.5">
-                <Label>Actual Revenue <span className="text-destructive ml-0.5">*</span></Label>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">Actual Revenue <span className="text-destructive ml-0.5">*</span></Label>
                 <div className="relative">
                   <CurrencyIcon className="w-4 h-4 text-muted-foreground absolute left-3 top-1/2 -translate-y-1/2" />
                   <Input
@@ -97,28 +101,28 @@ export function WonLostModal({ isOpen, onClose, type, deal, onSubmit, isLoading 
                     required
                     value={actualRevenue}
                     onChange={(e) => setActualRevenue(e.target.value)}
-                    className="pl-9"
+                    className="pl-9 h-9 text-sm bg-card font-medium"
                     placeholder="0.00"
                   />
                 </div>
               </div>
-              <div className="space-y-2.5">
-                <Label>Won Date <span className="text-destructive ml-0.5">*</span></Label>
+              <div className="space-y-1.5">
+                <Label className="text-xs font-semibold text-muted-foreground">Won Date <span className="text-destructive ml-0.5">*</span></Label>
                 <div className="relative">
                   <Input
                     type="date"
                     required
                     value={wonDate}
                     onChange={(e) => setWonDate(e.target.value)}
-                    className="w-full"
+                    className="w-full h-9 text-sm bg-card font-medium"
                   />
                 </div>
               </div>
             </div>
           )}
 
-          <div className="space-y-2.5">
-            <Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">
               {type === DealStage.WON ? "What helped us win this deal?" : "Why was this deal lost?"}
               {type === DealStage.LOST ? (
                 <span className="text-destructive ml-0.5">*</span>
@@ -132,41 +136,43 @@ export function WonLostModal({ isOpen, onClose, type, deal, onSubmit, isLoading 
               value={reason}
               onChange={(e) => setReason(e.target.value)}
               placeholder={type === DealStage.WON ? "Great features, pricing..." : "Pricing, missing features..."}
+              className="h-9 text-sm bg-card font-medium"
             />
           </div>
 
           {type === DealStage.LOST && (
-            <div className="space-y-2.5">
-              <Label>Competitor <span className="text-muted-foreground font-normal ml-0.5">(Optional)</span></Label>
+            <div className="space-y-1.5">
+              <Label className="text-xs font-semibold text-muted-foreground">Competitor <span className="text-muted-foreground font-normal ml-0.5">(Optional)</span></Label>
               <Input
                 type="text"
                 value={competitor}
                 onChange={(e) => setCompetitor(e.target.value)}
                 placeholder="Who did we lose to?"
+                className="h-9 text-sm bg-card font-medium"
               />
             </div>
           )}
 
-          <div className="space-y-2.5">
-            <Label>
+          <div className="space-y-1.5">
+            <Label className="text-xs font-semibold text-muted-foreground">
               Notes {type === DealStage.LOST ? <span className="text-destructive ml-0.5">*</span> : <span className="text-muted-foreground font-normal ml-0.5">(Optional)</span>}
             </Label>
             <Textarea
               required={type === DealStage.LOST}
               value={notes}
               onChange={(e) => setNotes(e.target.value)}
-              className="resize-none min-h-[100px]"
+              className="resize-none min-h-[90px] text-sm bg-card font-medium"
               placeholder="Additional details..."
             />
           </div>
 
-          <DialogFooter className="pt-2">
-            <Button type="button" variant="outline" onClick={onClose} disabled={showLoading} className="w-full sm:w-auto">
-              <AppIcon name="close" size={15} className="mr-1.5" />
+          <DialogFooter className="pt-3 gap-2">
+            <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={showLoading} className="w-full sm:w-auto h-9 text-xs font-semibold cursor-pointer">
+              <X className="w-3.5 h-3.5 mr-1.5" />
               Cancel
             </Button>
-            <Button type="submit" disabled={showLoading} variant={type === DealStage.WON ? "default" : "destructive"} className="w-full sm:w-auto gap-2">
-              {showLoading ? <Loader2 className="w-4 h-4 animate-spin" /> : type === DealStage.WON ? <AppIcon name="star" size={16} /> : <AppIcon name="close" size={16} />}
+            <Button type="submit" size="sm" disabled={showLoading} variant={type === DealStage.WON ? "default" : "destructive"} className="w-full sm:w-auto h-9 text-xs font-semibold gap-1.5 cursor-pointer">
+              {showLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : type === DealStage.WON ? <Star className="w-3.5 h-3.5 fill-current" /> : <X className="w-3.5 h-3.5" />}
               {showLoading ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>

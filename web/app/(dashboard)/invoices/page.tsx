@@ -284,7 +284,7 @@ export default function InvoicesPage() {
             setCurrentPage(1);
           }}
           itemName="Invoices"
-          pageSizeOptions={[10, 25, 50, 100]}
+          pageSizeOptions={[10, 20, 50, 100]}
         />
       </div>
 

@@ -298,7 +298,7 @@ export default function QuotationsPage() {
           onPageChange={setCurrentPage}
           onRowsPerPageChange={setRowsPerPage}
           itemName="Quotes"
-          pageSizeOptions={[10, 25, 50, 100]}
+          pageSizeOptions={[10, 20, 50, 100]}
           alwaysShow
         />
       </div>
