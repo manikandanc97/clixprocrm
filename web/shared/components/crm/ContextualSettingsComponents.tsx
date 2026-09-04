@@ -179,7 +179,7 @@ export function SettingsToggleRow({
         checked={checked}
         onCheckedChange={onCheckedChange}
         disabled={disabled}
-        className="data-[state=checked]:bg-emerald-600 cursor-pointer"
+        className="cursor-pointer"
       />
     </SettingsRow>
   );

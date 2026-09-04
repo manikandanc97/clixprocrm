@@ -82,7 +82,7 @@ export function DataTableColumnHeader({
       onKeyDown={handleKeyDown}
       className={cn(
         "group inline-flex items-center gap-1.5 cursor-pointer text-xs font-bold select-none transition-colors duration-150 outline-none rounded py-0.5",
-        isSorted ? "text-emerald-700 dark:text-emerald-300 font-bold" : "text-foreground hover:text-emerald-600 dark:hover:text-emerald-400",
+        isSorted ? "text-primary font-bold" : "text-foreground hover:text-primary",
         alignmentClass,
         className
       )}
@@ -90,9 +90,9 @@ export function DataTableColumnHeader({
       <span>{content}</span>
       <span className={cn("inline-flex shrink-0 items-center transition-colors", iconClassName)}>
         {sortDirection === "asc" ? (
-          <ArrowUp className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+          <ArrowUp className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
         ) : sortDirection === "desc" ? (
-          <ArrowDown className="h-3.5 w-3.5 text-emerald-600 dark:text-emerald-400" aria-hidden="true" />
+          <ArrowDown className="h-3.5 w-3.5 text-primary" aria-hidden="true" />
         ) : (
           <ChevronsUpDown className="h-3.5 w-3.5 text-muted-foreground/40 group-hover:text-foreground transition-opacity" aria-hidden="true" />
         )}

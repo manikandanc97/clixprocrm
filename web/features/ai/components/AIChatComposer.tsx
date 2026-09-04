@@ -503,7 +503,7 @@ export function AIChatComposer({
                   disabled={disabled || !input.trim()}
                   className={`w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition-all shrink-0 ${
                     input.trim() && !disabled
-                      ? 'bg-[#0084FF] hover:bg-[#0070D8] text-white cursor-pointer hover:scale-105 active:scale-95'
+                      ? 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer hover:scale-105 active:scale-95'
                       : 'bg-muted text-muted-foreground/40 cursor-not-allowed'
                   }`}
                   title="Send message (Enter)"
