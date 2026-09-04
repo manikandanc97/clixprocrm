@@ -23,7 +23,7 @@ import {
   AlertDialogTitle,
 } from "@/shared/ui/alert-dialog";
 import { Button } from "@/shared/ui/button";
-import { RefreshCw } from "lucide-react";
+import { Loader2 } from "lucide-react";
 import { LeadType, LeadStatus } from "@/shared/types/lead";
 import { WonLostSubmitData } from "@/features/pipeline/components/WonLostModal";
 import { updateLead } from "@/shared/lib/api/crm";
@@ -257,7 +257,7 @@ export function LeadModalsHost({
             >
               {isDeletingBulk ? (
                 <>
-                  <RefreshCw className="w-4 h-4 mr-2 animate-spin" /> Deleting...
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Deleting...
                 </>
               ) : (
                 "Delete Leads"

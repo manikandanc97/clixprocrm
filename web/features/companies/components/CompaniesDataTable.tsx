@@ -8,6 +8,7 @@ import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { Checkbox } from "@/shared/ui/checkbox";
+import { formatDate } from "@/shared/utils/formatters";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
 import type { CompanyItem } from "../hooks/use-companies-data";
@@ -56,23 +57,6 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
 }) => {
   const isAllSelected =
     companies.length > 0 && companies.every((c) => selectedCompanyIds.includes(c.id));
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return { date: "—", time: "" };
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return { date: dateStr, time: "" };
-    const date = d.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-    const time = d.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-    return { date, time };
-  };
 
   const columns = useMemo<CRMDataTableColumn<CompanyItem>[]>(() => {
     return [
@@ -209,11 +193,11 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
         sortDirection: sortConfig?.key === "createdAt" ? sortConfig.direction : null,
         onSort: (dir) => onSort("createdAt", dir),
         cell: (company) => {
-          const { date, time } = formatDate(company.createdAt);
           return (
             <div>
-              <p className="text-xs font-semibold text-foreground">{date}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{time}</p>
+              <p className="text-xs font-semibold text-foreground">
+                {formatDate(company.createdAt, "—")}
+              </p>
             </div>
           );
         },
@@ -222,9 +206,9 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
 
       // 7. Actions Menu
       {
-        header: "Actions",
+        header: <span className="sr-only">Actions</span>,
         align: "right",
-        headerClassName: "text-right w-[64px]",
+        headerClassName: "w-16 text-right",
         cell: (company) => {
           return (
             <div
@@ -251,7 +235,7 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
             </div>
           );
         },
-        className: "w-[64px] text-right",
+        className: "w-16 text-right",
       },
     ];
   }, [
@@ -289,6 +273,13 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
       columns={columns}
       isLoading={isLoading}
       onRowClick={(company) => onEditCompany(company)}
+      hasPagination={false}
+      rowClassName={(company) =>
+        cn(
+          "transition-colors",
+          selectedCompanyIds.includes(company.id) && "bg-primary/[0.04]"
+        )
+      }
       emptyMessage={
         <div className="flex flex-col items-center justify-center py-10">
           <EmptyState
@@ -319,3 +310,4 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
     />
   );
 };
+

@@ -11,7 +11,7 @@ import { useQueryClient } from "@tanstack/react-query";
 import { useState, useEffect } from "react";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { useUpdateLead } from "@/shared/hooks/use-crm";
-import { LEAD_STATUS_LABELS } from "@/lib/crm-formatters";
+import { LEAD_STATUS_LABELS, formatDate } from "@/shared/utils/formatters";
 import { useRouter } from "next/navigation";
 import { WonLostSubmitData } from "@/features/pipeline/components/WonLostModal";
 import { LeadBulkActionToolbar } from "./LeadBulkActionToolbar";
@@ -62,10 +62,10 @@ const statusVariantMap: Record<string, StatusVariant> = {
 const getPriorityColor = (p?: string) => {
   if (!p) return "bg-muted text-muted-foreground border-border";
   switch (p.toUpperCase()) {
-    case "URGENT": return "bg-purple-500/10 text-purple-700 border-purple-500/25";
-    case "HIGH": return "bg-rose-500/10 text-rose-700 border-rose-500/25";
-    case "MEDIUM": return "bg-amber-500/10 text-amber-700 border-amber-500/25";
-    case "LOW": return "bg-blue-500/10 text-blue-700 border-blue-500/25";
+    case "URGENT": return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/25";
+    case "HIGH": return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25";
+    case "MEDIUM": return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25";
+    case "LOW": return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/25";
     default: return "bg-muted text-muted-foreground border-border";
   }
 };
@@ -387,14 +387,7 @@ const LeadsTable = ({
       cell: (lead: LeadType) => {
         const overdue = isOverdue(lead.followUpAt);
         const dateStr = lead.updatedAt || lead.createdAt;
-        let formattedDate = "";
-        if (dateStr) {
-          try {
-            formattedDate = new Intl.DateTimeFormat("en-US", {
-              month: "short", day: "numeric", hour: "numeric", minute: "numeric", hour12: true
-            }).format(new Date(dateStr));
-          } catch {}
-        }
+        const formattedDate = dateStr ? formatDate(dateStr, "") : "";
         
         return (
           <div className="flex flex-col gap-1.5">
@@ -482,11 +475,7 @@ const LeadsTable = ({
           return <div className="text-[11px] text-muted-foreground font-medium">No Meeting</div>;
         }
         
-        let timeStr = "";
-        try {
-          const date = new Date(meeting.startTime);
-          timeStr = new Intl.DateTimeFormat("en-US", { month: "short", day: "numeric", hour: "numeric", minute: "numeric" }).format(date);
-        } catch {}
+        const timeStr = meeting.startTime ? formatDate(meeting.startTime, "") : "";
         
         return (
           <div className="flex flex-col">

@@ -8,7 +8,7 @@ import { StatusBadge } from "@/shared/components/StatusBadge";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { Badge } from "@/shared/ui/badge";
 import { Checkbox } from "@/shared/ui/checkbox";
-import { formatCurrency } from "@/lib/crm-formatters";
+import { formatCurrency, formatDate } from "@/shared/utils/formatters";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
 import type { ContactItem } from "../hooks/use-contacts-data";
@@ -56,23 +56,6 @@ export const ContactsDataTable: React.FC<ContactsDataTableProps> = ({
 }) => {
   const isAllSelected =
     contacts.length > 0 && contacts.every((c) => selectedContactIds.includes(c.id));
-
-  const formatDate = (dateStr?: string) => {
-    if (!dateStr) return { date: "—", time: "" };
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return { date: dateStr, time: "" };
-    const date = d.toLocaleDateString("en-GB", {
-      day: "2-digit",
-      month: "short",
-      year: "numeric",
-    });
-    const time = d.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
-    return { date, time };
-  };
 
   const columns = useMemo<CRMDataTableColumn<ContactItem>[]>(() => {
     return [
@@ -242,13 +225,12 @@ export const ContactsDataTable: React.FC<ContactsDataTableProps> = ({
         sortDirection: sortConfig?.key === "date" ? sortConfig.direction : null,
         onSort: (dir) => onSort("date", dir),
         cell: (contact) => {
-          const { date, time } = formatDate(
-            (contact.createdAt as string) || (contact.lastContact as string)
-          );
+          const rawDate = (contact.createdAt as string) || (contact.lastContact as string);
           return (
             <div>
-              <p className="text-xs font-semibold text-foreground">{date}</p>
-              <p className="text-[11px] text-muted-foreground mt-0.5">{time}</p>
+              <p className="text-xs font-semibold text-foreground">
+                {formatDate(rawDate, "—")}
+              </p>
             </div>
           );
         },

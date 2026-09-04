@@ -1,15 +1,16 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
-  X,
-  CreditCard,
   CheckCircle2,
-  Calendar,
-  IndianRupee,
   Receipt,
   Mail,
-  Building,
+  Building2,
+  QrCode,
+  CreditCard,
+  Banknote,
+  CircleDollarSign,
+  Loader2,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -23,35 +24,46 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+  DialogFooter,
+} from "@/shared/ui/dialog";
 import { useRecordPayment } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
+
+interface InvoiceTarget {
+  id: string;
+  invoiceNumber: string;
+  totalAmount: number;
+  paidAmount: number;
+  balanceAmount: number;
+  currency: string;
+  customer?: { name?: string; company?: string; email?: string } | null;
+}
 
 interface RecordPaymentModalProps {
   isOpen: boolean;
   onClose: () => void;
-  invoice: {
-    id: string;
-    invoiceNumber: string;
-    totalAmount: number;
-    paidAmount: number;
-    balanceAmount: number;
-    currency: string;
-    customer?: { name?: string; company?: string; email?: string } | null;
-  } | null;
+  invoice: InvoiceTarget | null;
 }
 
-export function RecordPaymentModal({
-  isOpen,
-  onClose,
+function RecordPaymentForm({
   invoice,
-}: RecordPaymentModalProps) {
+  onClose,
+}: {
+  invoice: InvoiceTarget;
+  onClose: () => void;
+}) {
   const { formatCurrency } = useCurrency();
   const { mutateAsync: recordPaymentMutate, isPending } = useRecordPayment();
 
-  const balance = invoice?.balanceAmount ?? 0;
-  const curr = invoice?.currency || "INR";
+  const balance = invoice.balanceAmount ?? 0;
+  const curr = invoice.currency || "INR";
 
   const [amount, setAmount] = useState<number>(balance);
   const [paymentMethod, setPaymentMethod] = useState("BANK_TRANSFER");
@@ -60,15 +72,8 @@ export function RecordPaymentModal({
   const [notes, setNotes] = useState("");
   const [sendReceiptEmail, setSendReceiptEmail] = useState(true);
 
-  useEffect(() => {
-    if (invoice) {
-      setAmount(invoice.balanceAmount || 0);
-    }
-  }, [invoice]);
-
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    if (!invoice) return;
 
     if (amount <= 0) {
       toast.error("Payment amount must be greater than 0.");
@@ -99,63 +104,64 @@ export function RecordPaymentModal({
     }
   };
 
-  if (!isOpen || !invoice) return null;
+  const customerDisplay = invoice.customer?.name || invoice.customer?.company;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        className="bg-card border border-border/80 w-full max-w-lg rounded-2xl shadow-2xl overflow-hidden"
-      >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-border/80 bg-muted/30">
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 flex items-center justify-center text-emerald-600 dark:text-emerald-400">
-              <Receipt className="w-5 h-5" />
-            </div>
-            <div>
-              <h2 className="text-base font-bold text-foreground">Record Customer Payment</h2>
-              <p className="text-xs text-muted-foreground font-mono">
-                Invoice {invoice.invoiceNumber}
-              </p>
-            </div>
+    <DialogContent
+      showCloseButton={true}
+      className="sm:max-w-lg p-0 gap-0 overflow-hidden bg-card border-border/80 shadow-2xl rounded-2xl"
+    >
+      {/* Header */}
+      <DialogHeader className="shrink-0 px-6 py-4 border-b border-border/80 bg-muted/30">
+        <div className="flex items-center gap-3 pr-8">
+          <div className="size-10 rounded-xl bg-primary/10 flex items-center justify-center text-primary shrink-0">
+            <Receipt className="size-5" />
           </div>
-          <button
-            onClick={onClose}
-            className="p-1.5 rounded-lg text-muted-foreground hover:text-foreground hover:bg-muted/70 transition-colors"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div>
+            <DialogTitle className="text-base font-bold text-foreground">
+              Record Customer Payment
+            </DialogTitle>
+            <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-mono">
+              Invoice {invoice.invoiceNumber}
+              {customerDisplay ? ` • ${customerDisplay}` : ""}
+            </DialogDescription>
+          </div>
         </div>
+      </DialogHeader>
 
-        <form onSubmit={handleSubmit} className="p-6 space-y-4">
-          {/* Summary Box */}
-          <div className="grid grid-cols-3 gap-2 p-3 bg-muted/30 border border-border/60 rounded-xl text-center">
+      {/* Form Body */}
+      <form onSubmit={handleSubmit} className="flex flex-col flex-1 overflow-hidden">
+        <div className="p-6 space-y-4 max-h-[75vh] overflow-y-auto">
+          {/* Financial Summary */}
+          <div className="grid grid-cols-3 gap-2 p-3.5 bg-muted/30 border border-border/70 rounded-xl text-center">
             <div>
-              <span className="text-[11px] text-muted-foreground block">Invoice Total</span>
+              <span className="text-[11px] font-medium text-muted-foreground block mb-0.5">Invoice Total</span>
               <span className="text-xs font-bold text-foreground font-mono">
                 {formatCurrency(invoice.totalAmount, curr)}
               </span>
             </div>
             <div>
-              <span className="text-[11px] text-emerald-600 dark:text-emerald-400 block font-medium">Paid so far</span>
+              <span className="text-[11px] font-medium text-emerald-600 dark:text-emerald-400 block mb-0.5">Paid So Far</span>
               <span className="text-xs font-bold text-emerald-600 dark:text-emerald-400 font-mono">
                 {formatCurrency(invoice.paidAmount, curr)}
               </span>
             </div>
             <div>
-              <span className="text-[11px] text-rose-600 dark:text-rose-400 block font-medium">Balance Due</span>
+              <span className="text-[11px] font-medium text-rose-600 dark:text-rose-400 block mb-0.5">Balance Due</span>
               <span className="text-xs font-black text-rose-600 dark:text-rose-400 font-mono">
                 {formatCurrency(invoice.balanceAmount, curr)}
               </span>
             </div>
           </div>
 
+          {/* Amount & Payment Mode */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5">Payment Amount ({curr}) *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="payment-amount" className="text-xs font-semibold text-foreground">
+                Payment Amount ({curr}) <span className="text-destructive">*</span>
+              </Label>
               <Input
+                id="payment-amount"
                 type="number"
                 step="0.01"
                 min="0.01"
@@ -166,28 +172,64 @@ export function RecordPaymentModal({
                 className="h-9 text-xs font-mono font-bold"
               />
             </div>
-            <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5">Payment Mode *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="payment-method" className="text-xs font-semibold text-foreground">
+                Payment Mode <span className="text-destructive">*</span>
+              </Label>
               <Select value={paymentMethod} onValueChange={setPaymentMethod}>
-                <SelectTrigger className="h-9 text-xs">
-                  <SelectValue />
+                <SelectTrigger id="payment-method" className="h-9 text-xs">
+                  <SelectValue placeholder="Select payment mode" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="BANK_TRANSFER" className="text-xs">Bank Transfer / NEFT / IMPS</SelectItem>
-                  <SelectItem value="UPI" className="text-xs">UPI (GPay, PhonePe, Paytm)</SelectItem>
-                  <SelectItem value="CARD" className="text-xs">Credit / Debit Card</SelectItem>
-                  <SelectItem value="CHEQUE" className="text-xs">Cheque</SelectItem>
-                  <SelectItem value="CASH" className="text-xs">Cash</SelectItem>
-                  <SelectItem value="OTHER" className="text-xs">Other</SelectItem>
+                  <SelectItem value="BANK_TRANSFER" className="text-xs">
+                    <div className="flex items-center gap-2">
+                      <Building2 className="size-3.5 text-muted-foreground" />
+                      <span>Bank Transfer / NEFT / IMPS</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="UPI" className="text-xs">
+                    <div className="flex items-center gap-2">
+                      <QrCode className="size-3.5 text-muted-foreground" />
+                      <span>UPI (GPay, PhonePe, Paytm)</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="CARD" className="text-xs">
+                    <div className="flex items-center gap-2">
+                      <CreditCard className="size-3.5 text-muted-foreground" />
+                      <span>Credit / Debit Card</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="CHEQUE" className="text-xs">
+                    <div className="flex items-center gap-2">
+                      <Receipt className="size-3.5 text-muted-foreground" />
+                      <span>Cheque</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="CASH" className="text-xs">
+                    <div className="flex items-center gap-2">
+                      <Banknote className="size-3.5 text-muted-foreground" />
+                      <span>Cash</span>
+                    </div>
+                  </SelectItem>
+                  <SelectItem value="OTHER" className="text-xs">
+                    <div className="flex items-center gap-2">
+                      <CircleDollarSign className="size-3.5 text-muted-foreground" />
+                      <span>Other</span>
+                    </div>
+                  </SelectItem>
                 </SelectContent>
               </Select>
             </div>
           </div>
 
+          {/* Date & Reference */}
           <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-            <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5">Payment Date *</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="payment-date" className="text-xs font-semibold text-foreground">
+                Payment Date <span className="text-destructive">*</span>
+              </Label>
               <Input
+                id="payment-date"
                 type="date"
                 required
                 value={paymentDate}
@@ -195,9 +237,12 @@ export function RecordPaymentModal({
                 className="h-9 text-xs"
               />
             </div>
-            <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5">Reference # (UTR / Cheque #)</Label>
+            <div className="space-y-1.5">
+              <Label htmlFor="reference-number" className="text-xs font-semibold text-foreground">
+                Reference # (UTR / Cheque #)
+              </Label>
               <Input
+                id="reference-number"
                 placeholder="Enter UTR or transaction reference"
                 value={referenceNumber}
                 onChange={(e) => setReferenceNumber(e.target.value)}
@@ -206,9 +251,13 @@ export function RecordPaymentModal({
             </div>
           </div>
 
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5">Payment Notes (Optional)</Label>
+          {/* Notes */}
+          <div className="space-y-1.5">
+            <Label htmlFor="payment-notes" className="text-xs font-semibold text-foreground">
+              Payment Notes <span className="text-[11px] font-normal text-muted-foreground">(Optional)</span>
+            </Label>
             <Textarea
+              id="payment-notes"
               rows={2}
               placeholder="Received via ICICI Netbanking..."
               value={notes}
@@ -217,44 +266,83 @@ export function RecordPaymentModal({
             />
           </div>
 
+          {/* Email Receipt Option */}
           {invoice.customer?.email && (
-            <div className="flex items-center justify-between p-3 rounded-xl bg-muted/20 border border-border/50">
-              <div className="flex items-center gap-2">
-                <Mail className="w-4 h-4 text-primary" />
-                <div>
-                  <span className="text-xs font-semibold text-foreground block">Email Payment Receipt</span>
-                  <span className="text-[11px] text-muted-foreground">Send receipt to {invoice.customer.email}</span>
+            <div className="flex items-center justify-between p-3.5 rounded-xl bg-muted/20 border border-border/60 gap-3">
+              <div className="flex items-center gap-2.5 min-w-0">
+                <div className="size-8 rounded-lg bg-primary/10 flex items-center justify-center text-primary shrink-0">
+                  <Mail className="size-4" />
+                </div>
+                <div className="min-w-0">
+                  <Label htmlFor="send-receipt-email" className="text-xs font-semibold text-foreground block cursor-pointer">
+                    Email Payment Receipt
+                  </Label>
+                  <p className="text-[11px] text-muted-foreground truncate">
+                    Send receipt to {invoice.customer.email}
+                  </p>
                 </div>
               </div>
               <Switch
+                id="send-receipt-email"
                 checked={sendReceiptEmail}
                 onCheckedChange={setSendReceiptEmail}
               />
             </div>
           )}
+        </div>
 
-          <div className="flex justify-end gap-2.5 pt-3 border-t border-border/80">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-              disabled={isPending}
-              className="text-xs"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="submit"
-              size="sm"
-              disabled={isPending}
-              className="text-xs font-semibold gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              <CheckCircle2 className="w-3.5 h-3.5" /> Confirm Payment
-            </Button>
-          </div>
-        </form>
-      </motion.div>
-    </div>
+        {/* Footer */}
+        <DialogFooter className="shrink-0 -mx-0 -mb-0 px-6 py-3.5 border-t border-border/80 bg-muted/30 flex items-center justify-end gap-2.5">
+          <Button
+            type="button"
+            variant="outline"
+            size="sm"
+            onClick={onClose}
+            disabled={isPending}
+            className="text-xs font-semibold h-8"
+          >
+            Cancel
+          </Button>
+          <Button
+            type="submit"
+            size="sm"
+            disabled={isPending}
+            className="text-xs font-semibold h-8 gap-1.5"
+          >
+            {isPending ? (
+              <>
+                <Loader2 className="size-3.5 animate-spin" />
+                <span>Confirming...</span>
+              </>
+            ) : (
+              <>
+                <CheckCircle2 className="size-3.5" />
+                <span>Confirm Payment</span>
+              </>
+            )}
+          </Button>
+        </DialogFooter>
+      </form>
+    </DialogContent>
+  );
+}
+
+export function RecordPaymentModal({
+  isOpen,
+  onClose,
+  invoice,
+}: RecordPaymentModalProps) {
+  if (!invoice) return null;
+
+  return (
+    <Dialog open={isOpen} onOpenChange={(open) => !open && onClose()}>
+      {isOpen && (
+        <RecordPaymentForm
+          key={`${invoice.id}-${invoice.balanceAmount}`}
+          invoice={invoice}
+          onClose={onClose}
+        />
+      )}
+    </Dialog>
   );
 }

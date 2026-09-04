@@ -8,7 +8,7 @@ import { Form } from "@/shared/ui/form";
 import { FormInput, FormSelect } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { X } from "lucide-react";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateCompany, useUpdateCompany } from "@/shared/hooks/use-crm";
 
@@ -91,7 +91,7 @@ export const CompanyForm = ({ initialData, onSuccess, onCancel }: CompanyFormPro
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border mt-6">
           <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-            <AppIcon name="close" size={15} className="mr-1.5" />
+            <X className="w-3.5 h-3.5 mr-1.5 shrink-0" />
             Cancel
           </Button>
           <FormSubmitButton

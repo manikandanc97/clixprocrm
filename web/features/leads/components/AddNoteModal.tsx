@@ -90,7 +90,7 @@ export function AddNoteModal({ isOpen, onOpenChange, leadId }: AddNoteModalProps
           </div>
 
           <div className="space-y-1.5">
-            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Note Message <span className="text-red-500">*</span></Label>
+            <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">Note Message <span className="text-destructive">*</span></Label>
             <Textarea
               placeholder="Enter note details..."
               value={message}

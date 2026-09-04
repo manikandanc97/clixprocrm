@@ -1,30 +1,34 @@
 import React from "react";
-import { CRMPageContainer, CRMMetricsGrid, CRMPageHeader } from "@/shared/components/crm";
+import { CRMPageContainer, CRMPageHeader } from "@/shared/components/crm";
 import {
-  MetricCardSkeleton,
   ToolbarSkeleton,
   TableSkeleton,
 } from "@/shared/components/skeletons";
-import { Receipt } from "lucide-react";
+import { Receipt, Plus, Settings } from "lucide-react";
 
 export function InvoicesSkeleton() {
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader
         title="Invoices"
-        subtitle="Generate, send, and track client invoices and payment status in real-time."
+        description="Manage billing, tax breakdowns, track payments, and download PDF receipts."
         icon={Receipt}
-        badge="Billing & Revenue"
+        secondaryActions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => {},
+            disabled: true,
+            variant: "outline",
+          },
+        ]}
+        primaryAction={{
+          label: "Create Invoice",
+          icon: Plus,
+          onClick: () => {},
+          disabled: true,
+        }}
       />
-
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={4} className="gap-4">
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </CRMMetricsGrid>
-      </div>
 
       <div className="flex-1 flex flex-col gap-4 min-h-0 mt-4">
         <div className="shrink-0">
@@ -38,3 +42,4 @@ export function InvoicesSkeleton() {
     </CRMPageContainer>
   );
 }
+

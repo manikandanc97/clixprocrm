@@ -1,34 +1,52 @@
-import { CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
+import React from "react";
+import { CRMPageContainer, CRMPageHeader } from "@/shared/components/crm";
 import { 
-  PageHeaderSkeleton, 
-  MetricCardSkeleton, 
   ToolbarSkeleton, 
   TableSkeleton 
 } from "@/shared/components/skeletons";
+import { Users, UserPlus, Settings, Upload } from "lucide-react";
 
 export function LeadsSkeleton() {
   return (
-    <CRMPageContainer>
-      <PageHeaderSkeleton />
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={3}>
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </CRMMetricsGrid>
-      </div>
-      
-      <div className="flex-1 flex flex-col gap-4">
-        <div className="shrink-0 mb-2 py-4">
+    <CRMPageContainer twoStageScroll>
+      <CRMPageHeader
+        title="Contacts"
+        description="Manage leads and customers in one unified view with AI-powered insights."
+        icon={Users}
+        secondaryActions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => {},
+            disabled: true,
+            variant: "outline",
+          },
+          {
+            label: "Bulk Upload",
+            icon: Upload,
+            onClick: () => {},
+            disabled: true,
+            variant: "outline",
+          },
+        ]}
+        primaryAction={{
+          label: "Add Contact",
+          icon: UserPlus,
+          onClick: () => {},
+          disabled: true,
+        }}
+      />
+
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0 mt-4">
+        <div className="shrink-0">
           <ToolbarSkeleton />
         </div>
 
         <div className="flex-1 min-h-0 flex flex-col">
-          <div className="p-1">
-            <TableSkeleton rows={10} cols={7} showPagination={true} />
-          </div>
+          <TableSkeleton rows={10} cols={7} showPagination={true} />
         </div>
       </div>
     </CRMPageContainer>
   );
 }
+

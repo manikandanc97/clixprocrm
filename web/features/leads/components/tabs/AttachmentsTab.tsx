@@ -8,6 +8,16 @@ import { EmptyState } from "@/shared/components/EmptyState";
 import { AttachmentsSkeleton } from "@/shared/components/skeletons";
 import { motion, AnimatePresence } from "framer-motion";
 import { toast } from "sonner";
+import {
+  AlertDialog,
+  AlertDialogAction,
+  AlertDialogCancel,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogFooter,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from "@/shared/ui/alert-dialog";
 
 const getFileIcon = (fileType: string) => {
   if (fileType?.includes("image")) return <ImageIcon className="w-8 h-8 text-blue-500" />;
@@ -20,6 +30,7 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
   const { data: attachmentsResp, isLoading } = useLeadAttachments(leadId);
   const attachments = attachmentsResp?.data || [];
   const [isDragging, setIsDragging] = useState(false);
+  const [attachmentToDelete, setAttachmentToDelete] = useState<string | null>(null);
   const dragCounterRef = useRef(0);
   
   const uploadAttachment = useUploadLeadAttachment();
@@ -102,9 +113,7 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
   };
 
   const handleDelete = (attachmentId: string) => {
-    if (confirm("Are you sure you want to remove this attachment?")) {
-      deleteAttachment.mutate({ leadId, attachmentId });
-    }
+    setAttachmentToDelete(attachmentId);
   };
 
   return (
@@ -219,6 +228,38 @@ export function AttachmentsTab({ leadId }: { leadId: string }) {
           ))}
         </div>
       )}
+
+      <AlertDialog open={!!attachmentToDelete} onOpenChange={(open) => !open && setAttachmentToDelete(null)}>
+        <AlertDialogContent>
+          <AlertDialogHeader>
+            <AlertDialogTitle>Are you sure?</AlertDialogTitle>
+            <AlertDialogDescription>
+              Are you sure you want to remove this attachment?
+            </AlertDialogDescription>
+          </AlertDialogHeader>
+          <AlertDialogFooter>
+            <AlertDialogCancel disabled={deleteAttachment.isPending}>Cancel</AlertDialogCancel>
+            <AlertDialogAction
+              variant="destructive"
+              disabled={deleteAttachment.isPending}
+              onClick={() => {
+                if (attachmentToDelete) {
+                  deleteAttachment.mutate({ leadId, attachmentId: attachmentToDelete });
+                  setAttachmentToDelete(null);
+                }
+              }}
+            >
+              {deleteAttachment.isPending ? (
+                <>
+                  <Loader2 className="w-4 h-4 mr-2 animate-spin" /> Removing...
+                </>
+              ) : (
+                "Remove"
+              )}
+            </AlertDialogAction>
+          </AlertDialogFooter>
+        </AlertDialogContent>
+      </AlertDialog>
     </div>
   );
 }

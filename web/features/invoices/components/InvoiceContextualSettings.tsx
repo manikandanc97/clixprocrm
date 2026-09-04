@@ -44,16 +44,11 @@ import {
   EyeOff,
   Plus,
   Trash2,
-  Copy,
   ShieldCheck,
-  HelpCircle,
-  Info,
   ChevronDown,
   ChevronUp,
   QrCode,
   Printer,
-  Sparkles,
-  AlertTriangle,
 } from "lucide-react";
 import {
   useInvoiceSettings,

@@ -213,29 +213,24 @@ export default function CompaniesPage() {
       {/* 1. Header Layout */}
       <CRMPageHeader
         title="Companies"
-        subtitle="Manage B2B accounts, track pipeline value, and view customer health at the company level."
+        description="Manage B2B accounts, track pipeline value, and view customer health at the company level."
         icon={Building2}
-      >
-        <Button
-          variant="outline"
-          onClick={() => setIsCustomizeOpen(true)}
-          className="h-9 px-3 gap-1.5 text-xs font-semibold cursor-pointer"
-        >
-          <Settings className="w-3.5 h-3.5 text-muted-foreground shrink-0" />
-          <span>Customize</span>
-        </Button>
-
-        <Button
-          onClick={() => {
+        secondaryActions={[
+          {
+            label: "Customize",
+            icon: Settings,
+            onClick: () => setIsCustomizeOpen(true),
+          },
+        ]}
+        primaryAction={{
+          label: "Create Company",
+          icon: Plus,
+          onClick: () => {
             setSelectedCompany(null);
             setIsAddModalOpen(true);
-          }}
-          className="h-9 px-3.5 gap-1.5 text-xs font-semibold cursor-pointer"
-        >
-          <Plus className="w-3.5 h-3.5 shrink-0" />
-          <span>Create Company</span>
-        </Button>
-      </CRMPageHeader>
+          },
+        }}
+      />
 
       {/* 2. Main Data Card with Toolbar & Table */}
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">

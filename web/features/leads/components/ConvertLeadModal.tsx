@@ -9,6 +9,8 @@ import client from "@/shared/lib/api/client";
 import { useRouter } from "next/navigation";
 import { CheckCircle2, ArrowRight } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { Checkbox } from "@/shared/ui/checkbox";
+import { formatDate } from "@/shared/utils/formatters";
 
 export function ConvertLeadModal({ 
   isOpen, 
@@ -100,7 +102,7 @@ export function ConvertLeadModal({
           </div>
           <h3 className="text-lg font-bold text-foreground">Lead already converted</h3>
           <p className="text-sm text-muted-foreground">
-            {lead.name} was already converted on {lead.convertedAt ? new Date(lead.convertedAt).toLocaleDateString() : 'a previous date'}.
+            {lead.name} was already converted on {formatDate(lead.convertedAt, 'a previous date')}.
           </p>
           <div className="flex gap-3 pt-4 w-full">
             <Button variant="outline" className="flex-1" onClick={onClose}>Close</Button>
@@ -155,12 +157,10 @@ export function ConvertLeadModal({
         </div>
 
         <div className="flex items-center space-x-2 pt-2 border-t pt-4">
-          <input 
-            type="checkbox" 
+          <Checkbox 
             id="createDeal" 
-            className="rounded border-gray-300 w-4 h-4 text-primary focus:ring-primary"
             checked={formData.createDeal}
-            onChange={e => setFormData({ ...formData, createDeal: e.target.checked })}
+            onCheckedChange={(checked) => setFormData({ ...formData, createDeal: checked === true })}
           />
           <Label htmlFor="createDeal" className="font-semibold cursor-pointer text-foreground">
             Create a new Deal for this Customer
