@@ -130,10 +130,12 @@ export class AuthController {
     }
 
     const userId = req.user.id || req.user.sub;
+    const tenantId = req.tenantId || req.user?.tenantId || 'system';
     const result = await this.authService.uploadAvatar(
       userId,
       fileBuffer,
       filename,
+      tenantId,
     );
 
     return { success: true, data: result };

@@ -8,6 +8,9 @@ import { SubscriptionEntitlementModule } from '../common/plans/subscription-enti
 import { TenantContextModule } from '../common/context/tenant-context.module';
 import { WebhookQueueProducer } from './producers/webhook-queue.producer';
 import { WebhookQueueProcessor } from './processors/webhook-queue.processor';
+import { MediaQueueProducer } from './producers/media-queue.producer';
+import { MediaQueueProcessor } from './processors/media-queue.processor';
+import { QueueMetricsService } from './services/queue-metrics.service';
 
 jest.mock('bullmq', () => {
   const actual = jest.requireActual('bullmq');
@@ -79,6 +82,9 @@ describe('QueueModule Infrastructure', () => {
     expect(moduleRef.get(QueueModule)).toBeDefined();
     expect(moduleRef.get(WebhookQueueProducer)).toBeDefined();
     expect(moduleRef.get(WebhookQueueProcessor)).toBeDefined();
+    expect(moduleRef.get(MediaQueueProducer)).toBeDefined();
+    expect(moduleRef.get(MediaQueueProcessor)).toBeDefined();
+    expect(moduleRef.get(QueueMetricsService)).toBeDefined();
     await moduleRef.close();
   });
 

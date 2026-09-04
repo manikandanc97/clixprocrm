@@ -1,8 +1,10 @@
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
 import { SecurityIncidentsService } from './security-incidents.service';
 import { SecurityAlertsService } from './security-alerts.service';
+import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
+import type { AggregateQueueMetrics } from '../../queue/interfaces/queue-metrics.interface';
 
 export type HealthStatus = 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'NOT_CONFIGURED' | 'UNKNOWN';
 
@@ -47,6 +49,7 @@ export class SecurityOperationsService {
     private readonly integrityMonitor: AuditIntegrityMonitorService,
     private readonly incidentsService: SecurityIncidentsService,
     private readonly alertsService: SecurityAlertsService,
+    @Optional() private readonly queueMetricsService?: QueueMetricsService,
   ) {}
 
   /**
@@ -155,7 +158,7 @@ export class SecurityOperationsService {
       });
     }
 
-    // 5. Background Jobs Subsystem Check
+    // 5. Background Jobs Subsystem Check (BullMQ Queues + Database Outbox)
     try {
       const outboxPending = await (this.prisma as any).auditArchiveOutbox?.count({
         where: { status: 'PENDING' },
@@ -165,14 +168,33 @@ export class SecurityOperationsService {
         where: { status: 'FAILED' },
       }).catch(() => 0);
 
-      const isWarning = outboxFailed > 10;
+      let queueMetrics: AggregateQueueMetrics | null = null;
+      if (this.queueMetricsService) {
+        queueMetrics = await this.queueMetricsService.getAggregateMetrics().catch(() => null);
+      }
+
+      const totalFailed = (outboxFailed || 0) + (queueMetrics?.totalFailed || 0);
+      const totalPending = (outboxPending || 0) + (queueMetrics?.totalWaiting || 0) + (queueMetrics?.totalActive || 0);
+
+      const isCritical = queueMetrics?.status === 'CRITICAL' || totalFailed > 30;
+      const isWarning = isCritical || queueMetrics?.status === 'WARNING' || totalFailed > 10;
+
+      let detail = '';
+      if (queueMetrics && queueMetrics.queues.length > 0) {
+        detail = totalFailed > 0
+          ? `${queueMetrics.queues.length} queues operational (${totalFailed} failed/dead-letter, ${totalPending} pending/active)`
+          : `${queueMetrics.queues.length} queues healthy (${queueMetrics.totalCompleted} completed, ${totalPending} pending/active)`;
+      } else {
+        detail = isWarning
+          ? `${outboxFailed} failed background job(s) requiring inspection`
+          : `${outboxPending || 0} pending queue task(s) scheduled`;
+      }
+
       rows.push({
         service: 'Background Jobs',
         status: isWarning ? 'Warning' : 'Healthy',
         lastChecked: nowStr,
-        detail: isWarning
-          ? `${outboxFailed} failed background job(s) requiring inspection`
-          : `${outboxPending || 0} pending queue task(s) scheduled`,
+        detail,
       });
     } catch (jobErr: any) {
       rows.push({

@@ -3,12 +3,16 @@ import {
   ForbiddenException,
   BadRequestException,
   Logger,
+  Optional,
+  Inject,
+  forwardRef,
 } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import { SYSTEM_ROLE_PERMISSIONS } from '../common/role-permissions.constants';
 
 import { BrandingService } from '../workspace/services/branding.service';
+import { MediaQueueProducer } from '../queue/producers/media-queue.producer';
 
 interface CachedUserProfile {
   data: any;
@@ -36,6 +40,9 @@ export class AuthService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly brandingService: BrandingService,
+    @Optional()
+    @Inject(forwardRef(() => MediaQueueProducer))
+    private readonly mediaQueueProducer?: MediaQueueProducer,
   ) {}
 
   async getMe(userId: string, tenantId?: string, email?: string) {
@@ -186,7 +193,67 @@ export class AuthService {
     userId: string,
     rawBuffer: Buffer,
     originalFilename?: string,
+    tenantId?: string,
   ) {
+    if (!userId) {
+      throw new BadRequestException('User ID is required for avatar upload');
+    }
+
+    // 1. Asynchronous processing via BullMQ media queue if available
+    if (this.mediaQueueProducer?.isQueueAvailable()) {
+      try {
+        // Persist raw media to Supabase Storage staging path
+        const { storagePath, mimeType } =
+          await this.brandingService.persistRawAvatar(
+            userId,
+            rawBuffer,
+            originalFilename,
+          );
+
+        const targetStoragePath = `avatars/${userId}/avatar.webp`;
+        const expectedStorageUrl =
+          this.brandingService.getPublicAvatarUrl(userId);
+
+        // Enqueue avatar job to crm-media-queue
+        const { enqueued, jobId } =
+          await this.mediaQueueProducer.enqueueAvatarMedia({
+            tenantId: tenantId || 'system',
+            userId,
+            mediaReference: `avatar-${userId}-${Date.now()}`,
+            storageBucket: 'workspace-logos',
+            storagePath,
+            targetStoragePath,
+            originalFilename,
+            mimeType,
+            operation: 'PROCESS_USER_AVATAR',
+          });
+
+        if (enqueued) {
+          this.logger.log(
+            `[MEDIA QUEUE] Enqueued avatar media processing job ${jobId} for user ${userId}`,
+          );
+
+          invalidateGetMeCache(userId);
+
+          return {
+            success: true,
+            avatar: expectedStorageUrl,
+            user: {
+              id: userId,
+              avatar: expectedStorageUrl,
+            },
+            jobId,
+            queued: true,
+          };
+        }
+      } catch (err: any) {
+        this.logger.warn(
+          `[MEDIA QUEUE] Failed to enqueue avatar media job; falling back to synchronous processing: ${err?.message || err}`,
+        );
+      }
+    }
+
+    // Fallback: Synchronous processing if queue is offline/unavailable or enqueuing failed
     const { storageUrl } = await this.brandingService.processAndUploadAvatar(
       userId,
       rawBuffer,

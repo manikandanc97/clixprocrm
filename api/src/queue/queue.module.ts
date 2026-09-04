@@ -9,8 +9,12 @@ import { ImportQueueProducer } from './producers/import-queue.producer';
 import { ImportQueueProcessor } from './processors/import-queue.processor';
 import { WebhookQueueProducer } from './producers/webhook-queue.producer';
 import { WebhookQueueProcessor } from './processors/webhook-queue.processor';
+import { MediaQueueProducer } from './producers/media-queue.producer';
+import { MediaQueueProcessor } from './processors/media-queue.processor';
+import { QueueMetricsService } from './services/queue-metrics.service';
 import { LeadsModule } from '../leads/leads.module';
 import { BillingModule } from '../common/billing/billing.module';
+import { WorkspaceModule } from '../workspace/workspace.module';
 
 const logger = new Logger('QueueModule');
 
@@ -56,6 +60,7 @@ function parseRedisUrl(redisUrl: string) {
     PrismaModule,
     forwardRef(() => LeadsModule),
     forwardRef(() => BillingModule),
+    forwardRef(() => WorkspaceModule),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],
@@ -98,6 +103,9 @@ function parseRedisUrl(redisUrl: string) {
       {
         name: QUEUE_NAMES.WEBHOOK,
       },
+      {
+        name: QUEUE_NAMES.MEDIA,
+      },
     ),
   ],
   providers: [
@@ -107,6 +115,9 @@ function parseRedisUrl(redisUrl: string) {
     ImportQueueProcessor,
     WebhookQueueProducer,
     WebhookQueueProcessor,
+    MediaQueueProducer,
+    MediaQueueProcessor,
+    QueueMetricsService,
   ],
   exports: [
     BullModule,
@@ -116,6 +127,9 @@ function parseRedisUrl(redisUrl: string) {
     ImportQueueProcessor,
     WebhookQueueProducer,
     WebhookQueueProcessor,
+    MediaQueueProducer,
+    MediaQueueProcessor,
+    QueueMetricsService,
   ],
 })
 export class QueueModule {}

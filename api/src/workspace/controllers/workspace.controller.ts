@@ -74,6 +74,7 @@ export class WorkspaceController {
       req.tenantId,
       fileBuffer,
       filename,
+      req.user?.sub || req.user?.id,
     );
 
     return { success: true, data: result };

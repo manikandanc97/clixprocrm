@@ -1,4 +1,4 @@
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { SupabaseAuthGuard } from './supabase.guard';
 import { TenantGuard } from './tenant.guard';
 import { RolesGuard } from './roles.guard';
@@ -9,6 +9,7 @@ import { PrismaModule } from '../prisma/prisma.module';
 import { WorkspaceModule } from '../workspace/workspace.module';
 import { NotificationsModule } from '../notifications/notifications.module';
 import { EmailService } from '../common/services/email.service';
+import { QueueModule } from '../queue/queue.module';
 
 import { MfaController } from './mfa.controller';
 import { MfaService } from './mfa.service';
@@ -23,7 +24,12 @@ import { AuthorizationCacheService } from './authorization/authorization-cache.s
 import { AuthorizationGuard } from './authorization/authorization.guard';
 
 @Module({
-  imports: [PrismaModule, WorkspaceModule, NotificationsModule],
+  imports: [
+    PrismaModule,
+    WorkspaceModule,
+    NotificationsModule,
+    forwardRef(() => QueueModule),
+  ],
   controllers: [AuthController, MfaController, SessionsController, PrivacyController],
   providers: [
     AuthService,

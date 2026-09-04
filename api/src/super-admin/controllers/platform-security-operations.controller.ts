@@ -3,6 +3,7 @@ import {
   Get,
   Post,
   Patch,
+  Delete,
   Param,
   Body,
   Query,
@@ -10,6 +11,7 @@ import {
   UseGuards,
   HttpCode,
   HttpStatus,
+  Optional,
 } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
@@ -18,6 +20,8 @@ import { RequireAal } from '../../auth/aal.decorator';
 import { SecurityOperationsService } from '../services/security-operations.service';
 import { SecurityAlertsService } from '../services/security-alerts.service';
 import { EmergencySecurityService } from '../services/emergency-security.service';
+import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
+import { QUEUE_NAMES, QueueName } from '../../queue/queue.constants';
 import type { ListSecurityAlertsDto } from '../services/security-alerts.service';
 
 @Controller([
@@ -31,6 +35,7 @@ export class PlatformSecurityOperationsController {
     private readonly secOpsService: SecurityOperationsService,
     private readonly alertsService: SecurityAlertsService,
     private readonly emergencyService: EmergencySecurityService,
+    @Optional() private readonly queueMetricsService?: QueueMetricsService,
   ) {}
 
   /**
@@ -40,6 +45,112 @@ export class PlatformSecurityOperationsController {
   async getSummary() {
     const data = await this.secOpsService.getSecOpsSummary();
     return { success: true, data };
+  }
+
+  /**
+   * Real-time BullMQ background queue metrics across all 4 operational queues.
+   */
+  @Get('queue/metrics')
+  async getQueueMetrics(@Query('queueName') queueName?: string) {
+    if (!this.queueMetricsService) {
+      return {
+        success: false,
+        message: 'QueueMetricsService is not available',
+      };
+    }
+
+    if (queueName && Object.values(QUEUE_NAMES).includes(queueName as QueueName)) {
+      const data = await this.queueMetricsService.getSingleQueueMetrics(queueName as QueueName);
+      return { success: true, data };
+    }
+
+    const data = await this.queueMetricsService.getAggregateMetrics();
+    return { success: true, data };
+  }
+
+  /**
+   * Dead-letter jobs inspection across queues with sensitive data sanitization.
+   */
+  @Get('queue/dead-letter')
+  async getDeadLetterJobs(
+    @Query('queueName') queueName?: string,
+    @Query('limit') limit?: string,
+    @Query('offset') offset?: string,
+  ) {
+    if (!this.queueMetricsService) {
+      return {
+        success: false,
+        data: [],
+        message: 'QueueMetricsService is not available',
+      };
+    }
+
+    const limitNum = limit ? parseInt(limit, 10) : 20;
+    const offsetNum = offset ? parseInt(offset, 10) : 0;
+
+    const targetQueues: QueueName[] = queueName && Object.values(QUEUE_NAMES).includes(queueName as QueueName)
+      ? [queueName as QueueName]
+      : [QUEUE_NAMES.EMAIL, QUEUE_NAMES.IMPORT, QUEUE_NAMES.WEBHOOK, QUEUE_NAMES.MEDIA];
+
+    const results = await Promise.all(
+      targetQueues.map((q) =>
+        this.queueMetricsService!.getDeadLetterJobs(q, {
+          limit: limitNum,
+          offset: offsetNum,
+        }),
+      ),
+    );
+
+    const flat = results.flat();
+    return { success: true, data: flat, total: flat.length };
+  }
+
+  /**
+   * Retries a dead-letter failed job in a specific queue.
+   */
+  @Post('queue/dead-letter/:queueName/:jobId/retry')
+  @HttpCode(HttpStatus.OK)
+  async retryDeadLetterJob(
+    @Param('queueName') queueName: string,
+    @Param('jobId') jobId: string,
+  ) {
+    if (!this.queueMetricsService) {
+      return {
+        success: false,
+        message: 'QueueMetricsService is not available',
+      };
+    }
+
+    const result = await this.queueMetricsService.retryDeadLetterJob(queueName as QueueName, jobId);
+    return { success: result.success, message: result.message };
+  }
+
+  /**
+   * Cleans dead-letter failed jobs from a specific queue.
+   */
+  @Delete('queue/dead-letter/:queueName')
+  @HttpCode(HttpStatus.OK)
+  async cleanDeadLetterJobs(
+    @Param('queueName') queueName: string,
+    @Query('grace') grace?: string,
+    @Query('limit') limit?: string,
+  ) {
+    if (!this.queueMetricsService) {
+      return {
+        success: false,
+        message: 'QueueMetricsService is not available',
+      };
+    }
+
+    const graceMs = grace ? parseInt(grace, 10) : 0;
+    const limitNum = limit ? parseInt(limit, 10) : 100;
+
+    const result = await this.queueMetricsService.cleanDeadLetterJobs(
+      queueName as QueueName,
+      graceMs,
+      limitNum,
+    );
+    return { success: true, data: result };
   }
 
   /**

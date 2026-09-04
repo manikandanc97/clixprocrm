@@ -254,6 +254,147 @@ export class BrandingService {
   }
 
   /**
+   * Persists raw uploaded media into Supabase Storage staging location synchronously.
+   * Validates image format and size before saving.
+   * Returns lightweight storage reference for BullMQ job queue.
+   */
+  async persistRawMedia(
+    tenantId: string,
+    rawBuffer: Buffer,
+    originalFilename?: string,
+  ): Promise<{ storagePath: string; mimeType: string; format: string }> {
+    if (!tenantId) {
+      throw new BadRequestException('Tenant ID is required for branding upload');
+    }
+
+    const { mimeType, format } = this.validateImageBuffer(rawBuffer, originalFilename);
+
+    await this.ensureBucketExists();
+
+    const timestamp = Date.now();
+    const storagePath = `staging/${tenantId}/raw-logo-${timestamp}.${format}`;
+    const supabase = this.getSupabase();
+
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(storagePath, rawBuffer, {
+        contentType: mimeType,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      this.logger.error(`Supabase storage raw upload error: ${uploadError.message}`);
+      throw new BadRequestException(
+        `Failed to store raw logo in Supabase Storage: ${uploadError.message}`,
+      );
+    }
+
+    return {
+      storagePath,
+      mimeType,
+      format,
+    };
+  }
+
+  /**
+   * Asynchronously processes persisted raw media from Supabase Storage:
+   * 1. Downloads raw buffer from staging path
+   * 2. Optimizes & converts to WebP (512x512 max)
+   * 3. Extracts dominant brand primary color
+   * 4. Uploads processed WebP to target storage path (upsert: true)
+   * 5. Safely cleans up staging raw media file
+   * 6. Returns processed URL, path, and dominant color
+   */
+  async processPersistedLogo(
+    tenantId: string,
+    rawStoragePath: string,
+    originalFilename?: string,
+  ): Promise<ProcessedLogoResult> {
+    if (!tenantId) {
+      throw new BadRequestException('Tenant ID is required for branding upload');
+    }
+
+    const supabase = this.getSupabase();
+
+    // 1. Download raw media from Supabase storage staging path
+    const { data: rawBlob, error: downloadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .download(rawStoragePath);
+
+    if (downloadError || !rawBlob) {
+      this.logger.error(`Supabase storage download error: ${downloadError?.message}`);
+      throw new BadRequestException(
+        `Failed to retrieve raw branding media from Supabase Storage: ${downloadError?.message || 'Empty file'}`,
+      );
+    }
+
+    const rawBuffer = Buffer.from(await rawBlob.arrayBuffer());
+
+    // 2. Validate downloaded buffer
+    this.validateImageBuffer(rawBuffer, originalFilename);
+
+    // 3. Optimize & convert to WebP
+    const webpBuffer = await this.optimizeToWebP(rawBuffer);
+
+    // 4. Extract dominant color
+    const dominantColor = await this.extractDominantColor(webpBuffer);
+
+    // 5. Ensure bucket exists
+    await this.ensureBucketExists();
+
+    // 6. Upload WebP to final destination: workspace-logos/{tenantId}/logo.webp
+    const targetStoragePath = `${tenantId}/logo.webp`;
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(targetStoragePath, webpBuffer, {
+        contentType: 'image/webp',
+        upsert: true,
+        cacheControl: '3600',
+      });
+
+    if (uploadError) {
+      this.logger.error(`Supabase storage upload error: ${uploadError.message}`);
+      throw new BadRequestException(
+        `Failed to store processed logo in Supabase Storage: ${uploadError.message}`,
+      );
+    }
+
+    // 7. Clean up staging raw media file asynchronously
+    try {
+      await supabase.storage.from(BUCKET_NAME).remove([rawStoragePath]);
+    } catch (cleanupErr: any) {
+      this.logger.warn(`Staging raw media cleanup notice: ${cleanupErr?.message || cleanupErr}`);
+    }
+
+    // 8. Generate public URL
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(targetStoragePath);
+
+    const storageUrl = publicUrlData?.publicUrl || '';
+    const cacheBustedUrl = `${storageUrl}?v=${Date.now()}`;
+
+    return {
+      storageUrl: cacheBustedUrl,
+      storagePath: `${BUCKET_NAME}/${targetStoragePath}`,
+      dominantColor,
+    };
+  }
+
+  /**
+   * Helper to construct the deterministic public logo URL for a workspace.
+   */
+  getPublicLogoUrl(tenantId: string): string {
+    const supabase = this.getSupabase();
+    const targetStoragePath = `${tenantId}/logo.webp`;
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(targetStoragePath);
+    const storageUrl = publicUrlData?.publicUrl || '';
+    return `${storageUrl}?v=${Date.now()}`;
+  }
+
+  /**
    * Complete workflow: Validate → Convert to WebP → Upload to Supabase Storage → Extract Brand Color
    */
   async processAndUploadLogo(
@@ -364,6 +505,141 @@ export class BrandingService {
     return {
       storageUrl: cacheBustedUrl,
       storagePath: `${BUCKET_NAME}/${storagePath}`,
+    };
+  }
+
+  /**
+   * Returns the canonical public Supabase Storage URL for a user's avatar.
+   */
+  getPublicAvatarUrl(userId: string): string {
+    const supabase = this.getSupabase();
+    const storagePath = `avatars/${userId}/avatar.webp`;
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(storagePath);
+    return `${publicUrlData?.publicUrl || ''}?v=${Date.now()}`;
+  }
+
+  /**
+   * Persists raw uploaded avatar into Supabase Storage staging location synchronously.
+   * Validates image format and size before saving.
+   * Returns lightweight storage reference for BullMQ job queue.
+   */
+  async persistRawAvatar(
+    userId: string,
+    rawBuffer: Buffer,
+    originalFilename?: string,
+  ): Promise<{ storagePath: string; mimeType: string; format: string }> {
+    if (!userId) {
+      throw new BadRequestException('User ID is required for avatar upload');
+    }
+
+    const { mimeType, format } = this.validateImageBuffer(rawBuffer, originalFilename);
+
+    await this.ensureBucketExists();
+
+    const timestamp = Date.now();
+    const storagePath = `staging/avatars/${userId}/raw-avatar-${timestamp}.${format}`;
+    const supabase = this.getSupabase();
+
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(storagePath, rawBuffer, {
+        contentType: mimeType,
+        upsert: true,
+      });
+
+    if (uploadError) {
+      this.logger.error(`Supabase storage raw avatar upload error: ${uploadError.message}`);
+      throw new BadRequestException(
+        `Failed to store raw avatar in Supabase Storage: ${uploadError.message}`,
+      );
+    }
+
+    return {
+      storagePath,
+      mimeType,
+      format,
+    };
+  }
+
+  /**
+   * Asynchronously processes persisted raw avatar media from Supabase Storage:
+   * 1. Downloads raw buffer from staging path
+   * 2. Optimizes & converts to WebP (512x512 max square fit)
+   * 3. Uploads processed WebP to target storage path (avatars/${userId}/avatar.webp, upsert: true)
+   * 4. Safely cleans up staging raw media file
+   * 5. Returns processed URL and storage path
+   */
+  async processPersistedAvatar(
+    userId: string,
+    rawStoragePath: string,
+    originalFilename?: string,
+  ): Promise<{ storageUrl: string; storagePath: string }> {
+    if (!userId) {
+      throw new BadRequestException('User ID is required for avatar processing');
+    }
+
+    const supabase = this.getSupabase();
+
+    // 1. Download raw media from Supabase storage staging path
+    const { data: rawBlob, error: downloadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .download(rawStoragePath);
+
+    if (downloadError || !rawBlob) {
+      this.logger.error(`Supabase storage download error: ${downloadError?.message}`);
+      throw new BadRequestException(
+        `Failed to retrieve raw avatar from Supabase Storage: ${downloadError?.message || 'Empty file'}`,
+      );
+    }
+
+    const rawBuffer = Buffer.from(await rawBlob.arrayBuffer());
+
+    // 2. Validate downloaded buffer
+    this.validateImageBuffer(rawBuffer, originalFilename);
+
+    // 3. Optimize & convert to WebP (512x512 max)
+    const webpBuffer = await this.optimizeToWebP(rawBuffer);
+
+    // 4. Ensure bucket exists
+    await this.ensureBucketExists();
+
+    // 5. Upload WebP to final destination: workspace-logos/avatars/{userId}/avatar.webp
+    const targetStoragePath = `avatars/${userId}/avatar.webp`;
+    const { error: uploadError } = await supabase.storage
+      .from(BUCKET_NAME)
+      .upload(targetStoragePath, webpBuffer, {
+        contentType: 'image/webp',
+        upsert: true,
+        cacheControl: '3600',
+      });
+
+    if (uploadError) {
+      this.logger.error(`Supabase storage avatar upload error: ${uploadError.message}`);
+      throw new BadRequestException(
+        `Failed to store processed avatar in Supabase Storage: ${uploadError.message}`,
+      );
+    }
+
+    // 6. Clean up staging raw media file asynchronously
+    try {
+      await supabase.storage.from(BUCKET_NAME).remove([rawStoragePath]);
+    } catch (cleanupErr: any) {
+      this.logger.warn(`Staging raw avatar cleanup notice: ${cleanupErr?.message || cleanupErr}`);
+    }
+
+    // 7. Generate public URL
+    const { data: publicUrlData } = supabase.storage
+      .from(BUCKET_NAME)
+      .getPublicUrl(targetStoragePath);
+
+    const storageUrl = publicUrlData?.publicUrl || '';
+    const cacheBustedUrl = `${storageUrl}?v=${Date.now()}`;
+
+    return {
+      storageUrl: cacheBustedUrl,
+      storagePath: `${BUCKET_NAME}/${targetStoragePath}`,
     };
   }
 }
