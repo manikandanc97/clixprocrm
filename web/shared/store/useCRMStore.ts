@@ -143,7 +143,7 @@ export const useCRMStore = create<CRMState>()(
     {
       name: 'crm-storage',
       version: 4,
-      migrate: (persistedState: unknown, version: number) => {
+      migrate: (persistedState: unknown, _version: number) => {
         const state = persistedState as Partial<CRMState> | undefined;
         
         return {

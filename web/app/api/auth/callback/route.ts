@@ -7,8 +7,6 @@ export async function GET(request: Request) {
   const errorParam = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
 
-  const isPopupParam = requestUrl.searchParams.get('popup') === '1' || requestUrl.searchParams.get('popup') === 'true';
-
   const sendResponse = (isSuccess: boolean, errorMessage?: string) => {
     const escapedErrorMessage = (errorMessage || 'An error occurred during authentication. You can close this window and try again.')
       .replace(/\\/g, '\\\\')

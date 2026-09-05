@@ -1,7 +1,7 @@
 import { type NextRequest } from "next/server";
 import { updateSession } from "@/lib/supabase/proxy";
 
-const publicPaths = [
+const _publicPaths = [
   "/login",
   "/register",
   "/forgot-password",
@@ -10,7 +10,7 @@ const publicPaths = [
   "/account-deleted",
 ];
 
-const publicApiPaths = [
+const _publicApiPaths = [
   "/api/auth/callback",
 ];
 

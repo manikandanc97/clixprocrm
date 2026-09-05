@@ -538,7 +538,7 @@ export function AppIcon({
   icon: FallbackIcon,
   size = 18,
   className = "",
-  active = false,
+  active: _active = false,
   isHovered = false,
   disableHover = false,
   animateOnMount = false,

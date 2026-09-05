@@ -62,7 +62,7 @@ client.interceptors.request.use(
         if (session?.access_token) {
           config.headers['Authorization'] = `Bearer ${session.access_token}`;
         }
-      } catch (authErr) {
+      } catch {
         // Continue request even if session retrieval failed
       }
 

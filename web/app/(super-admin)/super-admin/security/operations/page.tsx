@@ -5,36 +5,24 @@ import {
   Activity,
   ShieldCheck,
   ShieldAlert,
-  AlertTriangle,
   Database,
   Key,
   Users,
   HardDrive,
   Cpu,
   FileCheck2,
-  RefreshCw,
   Search,
-  Eye,
-  CheckCircle2,
   X,
   Lock,
-  Unlock,
   KeyRound,
   Ban,
-  Radio,
   ChevronLeft,
   ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Sparkles,
   ArrowUpRight,
   Flame,
   Clock,
-  Layers,
-  Check,
-  AlertCircle,
   Shield,
-  HelpCircle,
 } from "lucide-react";
 import {
   fetchSecOpsSummary,
@@ -51,7 +39,6 @@ import {
   emergencyLockUser,
   emergencyUnlockUser,
   emergencyLockTenant,
-  emergencyUnlockTenant,
   emergencyRevokeUser,
   forcePasswordResetUser,
   SecOpsSummaryReport,
@@ -115,7 +102,7 @@ export default function SecurityOperationsPage() {
   const [healthRows, setHealthRows] = useState<PlatformHealthRow[]>(DEFAULT_HEALTH_ROWS);
   const [alerts, setAlerts] = useState<SecurityAlertItem[]>([]);
   const [incidents, setIncidents] = useState<SecurityIncidentItem[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [, setLoading] = useState(true);
   const [detecting, setDetecting] = useState(false);
 
   // Active Main Tab
@@ -153,11 +140,11 @@ export default function SecurityOperationsPage() {
 
   // Pagination for Alerts
   const [alertPage, setAlertPage] = useState(1);
-  const [alertRowsPerPage, setAlertRowsPerPage] = useState(10);
+  const [alertRowsPerPage] = useState(10);
 
   // Pagination for Incidents
   const [incidentPage, setIncidentPage] = useState(1);
-  const [incidentRowsPerPage, setIncidentRowsPerPage] = useState(10);
+  const [incidentRowsPerPage] = useState(10);
 
   const loadData = async (isSilent = false) => {
     try {
@@ -177,7 +164,7 @@ export default function SecurityOperationsPage() {
       }
       setAlerts(alertsRes.alerts || []);
       setIncidents(incidentsRes.incidents || []);
-    } catch (err: any) {
+    } catch {
       // Keep existing data gracefully
     } finally {
       setLoading(false);
@@ -207,7 +194,7 @@ export default function SecurityOperationsPage() {
         toast.success("Threat detection scan complete: No anomalous security events detected.");
       }
       loadData(true);
-    } catch (err: any) {
+    } catch {
       toast.error("Threat detection scan failed.");
     } finally {
       setDetecting(false);
@@ -220,7 +207,7 @@ export default function SecurityOperationsPage() {
       toast.success("Security alert acknowledged.");
       loadData(true);
       if (selectedAlert?.id === alertId) setSelectedAlert(null);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to acknowledge security alert.");
     }
   };
@@ -234,7 +221,7 @@ export default function SecurityOperationsPage() {
       setSelectedAlert(null);
       setAlertResolveNotes("");
       loadData(true);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to resolve security alert.");
     } finally {
       setResolvingAlert(false);
@@ -248,7 +235,7 @@ export default function SecurityOperationsPage() {
       loadData(true);
       if (selectedAlert?.id === alertId) setSelectedAlert(null);
       setActiveTab("incidents");
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to escalate alert to incident.");
     }
   };
@@ -259,7 +246,7 @@ export default function SecurityOperationsPage() {
       toast.success("Security incident acknowledged & investigation initiated.");
       loadData(true);
       if (selectedIncident?.id === incidentId) setSelectedIncident(null);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to acknowledge incident.");
     }
   };

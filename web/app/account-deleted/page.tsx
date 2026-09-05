@@ -21,12 +21,12 @@ export default function AccountDeletedPage() {
         sessionStorage.clear();
         document.body.style.removeProperty("pointer-events");
         document.body.style.removeProperty("overflow");
-      } catch (_) {}
+      } catch {}
 
       try {
         const supabase = createClient();
         supabase.auth.signOut().catch(() => {});
-      } catch (_) {}
+      } catch {}
     }
   }, []);
 

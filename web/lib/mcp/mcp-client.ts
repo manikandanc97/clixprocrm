@@ -197,7 +197,7 @@ export function getMcpTools(context: McpUserContext) {
             },
           };
         }
-        const { confirmed, ...payload } = args;
+        const { confirmed: _confirmed, ...payload } = args;
         const data = await callCrmApi(context, '/crm/leads', 'POST', payload);
         return data;
       },
@@ -230,7 +230,7 @@ export function getMcpTools(context: McpUserContext) {
             leadId: args.id,
           };
         }
-        const { id, confirmed, ...payload } = args;
+        const { id, confirmed: _confirmed, ...payload } = args;
         const data = await callCrmApi(context, `/crm/leads/${encodeURIComponent(id)}`, 'PUT', payload);
         return data;
       },
@@ -294,7 +294,7 @@ export function getMcpTools(context: McpUserContext) {
             },
           };
         }
-        const { confirmed, ...payload } = args;
+        const { confirmed: _confirmed, ...payload } = args;
         const data = await callCrmApi(context, '/crm/customers', 'POST', payload);
         return data;
       },
@@ -323,7 +323,7 @@ export function getMcpTools(context: McpUserContext) {
             customerId: args.id,
           };
         }
-        const { id, confirmed, ...payload } = args;
+        const { id, confirmed: _confirmed, ...payload } = args;
         const data = await callCrmApi(context, `/crm/customers/${encodeURIComponent(id)}`, 'PUT', payload);
         return data;
       },

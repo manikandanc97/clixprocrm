@@ -1,7 +1,7 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import { DefaultChatTransport } from 'ai';
 import { useAuth } from '@/features/auth/components/auth-provider';
 import { usePathname, useSearchParams } from 'next/navigation';
@@ -104,9 +104,6 @@ export function useAIWorkspace() {
   const [aiEnabled, setAiEnabled] = useState<boolean>(true);
   const [globalAiEnabled, setGlobalAiEnabled] = useState<boolean>(true);
 
-  const selectedModelRef = useRef(selectedModel);
-  const activeContextRef = useRef(activeContext);
-
   const isSuperAdmin = useMemo(() => {
     const norm = (auth?.user?.role || '').toUpperCase().trim().replace(/[\s_]+/g, '');
     return (
@@ -115,20 +112,6 @@ export function useAIWorkspace() {
       (pathname ? pathname.startsWith('/super-admin') : false)
     );
   }, [auth?.user, pathname]);
-
-  const isSuperAdminRef = useRef(isSuperAdmin);
-
-  useEffect(() => {
-    selectedModelRef.current = selectedModel;
-  }, [selectedModel]);
-
-  useEffect(() => {
-    activeContextRef.current = activeContext;
-  }, [activeContext]);
-
-  useEffect(() => {
-    isSuperAdminRef.current = isSuperAdmin;
-  }, [isSuperAdmin]);
 
   // Load URL query context on initial mount
   useEffect(() => {
@@ -241,72 +224,75 @@ export function useAIWorkspace() {
     loadModels();
   }, [isSuperAdmin]);
 
+  // Setup transport fetch handler
+  const customFetch = useCallback(async (url: any, options: any) => {
+    try {
+      const fullUrl = url.startsWith('http')
+        ? url
+        : typeof window !== 'undefined'
+        ? `${window.location.origin}${url.startsWith('/') ? url : `/${url}`}`
+        : url;
+
+      const headers = new Headers(options.headers || {});
+
+      if (typeof window !== 'undefined') {
+        const currency = localStorage.getItem('orbit_currency') || 'INR';
+        headers.set('X-Currency', currency);
+
+        const { createClient } = await import('@/lib/supabase/client');
+        const supabase = createClient();
+        const {
+          data: { session },
+        } = await supabase.auth.getSession();
+
+        if (session?.access_token) {
+          headers.set('Authorization', `Bearer ${session.access_token}`);
+        }
+      }
+
+      // Inject selected model and CRM context if present
+      let payload = options.body;
+      if (options.body) {
+        try {
+          const parsed = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
+          
+          // If context exists, prepend a brief context statement to user message payload if needed
+          const currentCtx = activeContext;
+          payload = JSON.stringify({
+            ...parsed,
+            model: selectedModel,
+            isSuperAdmin: isSuperAdmin,
+            context: currentCtx ? { name: currentCtx.name, type: currentCtx.type, id: currentCtx.id } : undefined,
+          });
+        } catch {}
+      }
+
+      const response = await fetch(fullUrl, {
+        method: options.method,
+        body: payload,
+        headers: headers,
+      });
+
+      if (!response.ok) {
+        const clonedRes = response.clone();
+        const text = await clonedRes.text().catch(() => '');
+        console.error('[ClixPro AI] Request failed:', response.status, text);
+      }
+
+      return response;
+    } catch (err: any) {
+      console.error('[ClixPro AI] Connection error:', err);
+      throw err;
+    }
+  }, [activeContext, selectedModel, isSuperAdmin]);
+
   // Setup transport
   const transport = useMemo(() => {
     return new DefaultChatTransport({
       api: '/api/ai/chat',
-      fetch: async (url: any, options: any) => {
-        try {
-          const fullUrl = url.startsWith('http')
-            ? url
-            : typeof window !== 'undefined'
-            ? `${window.location.origin}${url.startsWith('/') ? url : `/${url}`}`
-            : url;
-
-          const headers = new Headers(options.headers || {});
-
-          if (typeof window !== 'undefined') {
-            const currency = localStorage.getItem('orbit_currency') || 'INR';
-            headers.set('X-Currency', currency);
-
-            const { createClient } = await import('@/lib/supabase/client');
-            const supabase = createClient();
-            const {
-              data: { session },
-            } = await supabase.auth.getSession();
-
-            if (session?.access_token) {
-              headers.set('Authorization', `Bearer ${session.access_token}`);
-            }
-          }
-
-          // Inject selected model and CRM context if present
-          let payload = options.body;
-          if (options.body) {
-            try {
-              const parsed = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
-              
-              // If context exists, prepend a brief context statement to user message payload if needed
-              const currentCtx = activeContextRef.current;
-              payload = JSON.stringify({
-                ...parsed,
-                model: selectedModelRef.current,
-                isSuperAdmin: isSuperAdminRef.current,
-                context: currentCtx ? { name: currentCtx.name, type: currentCtx.type, id: currentCtx.id } : undefined,
-              });
-            } catch {}
-          }
-
-          const response = await fetch(fullUrl, {
-            method: options.method,
-            body: payload,
-            headers: headers,
-          });
-
-          if (!response.ok) {
-            const clonedRes = response.clone();
-            const text = await clonedRes.text().catch(() => '');
-            console.error('[ClixPro AI] Request failed:', response.status, text);
-          }
-
-          return response;
-        } catch (err: any) {
-          console.error('[ClixPro AI] Connection error:', err);
-          throw err;
-        }
-      },
+      fetch: customFetch,
     });
-  }, []);
+  }, [customFetch]);
 
   const {
     messages,
@@ -468,6 +454,8 @@ export function useAIWorkspace() {
     toast.success('All conversation history cleared');
   }, [isLoading, stop, saveSessionsToStorage, setMessages, clearError]);
 
+  const [mountTime] = useState(() => Date.now());
+
   // Grouped sessions for sidebar
   const groupedSessions = useMemo(() => {
     const query = historySearchQuery.trim().toLowerCase();
@@ -480,7 +468,7 @@ export function useAIWorkspace() {
       return titleMatch || messagesMatch;
     });
 
-    const now = Date.now();
+    const now = mountTime;
     const oneDay = 24 * 60 * 60 * 1000;
     const sevenDays = 7 * oneDay;
 
@@ -525,7 +513,7 @@ export function useAIWorkspace() {
       totalCount: sessions.length,
       filteredCount: filtered.length,
     };
-  }, [sessions, historySearchQuery]);
+  }, [sessions, historySearchQuery, mountTime]);
 
   const handleSendMessage = useCallback((text: string) => {
     if (!text.trim() || isLoading) return;

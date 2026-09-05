@@ -255,7 +255,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
 
       let hasSessionLocal = typeof window !== "undefined" ? localStorage.getItem("has_session") : null;
       const isRemembered = typeof window !== "undefined" && localStorage.getItem("clixpro_remember_me") === "1";
-      const isSessionActive = typeof window !== "undefined" && sessionStorage.getItem("clixpro_session_active") === "1";
       
       // Check if Supabase has a valid session
       const { data: { session } } = await createClient().auth.getSession();

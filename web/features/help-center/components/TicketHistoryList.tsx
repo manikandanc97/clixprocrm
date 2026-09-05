@@ -563,6 +563,46 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
     setCurrentPage(1);
   };
 
+  // Filtered & Sorted ticket results
+  const filteredTickets = useMemo(() => {
+    const filtered = tickets.filter((t) => {
+      const q = searchTerm.toLowerCase().trim();
+      const matchesSearch =
+        !q ||
+        (t.ticketId && t.ticketId.toLowerCase().includes(q)) ||
+        (t.subject && t.subject.toLowerCase().includes(q)) ||
+        (t.description && t.description.toLowerCase().includes(q)) ||
+        (t.userName && t.userName.toLowerCase().includes(q)) ||
+        (t.userEmail && t.userEmail.toLowerCase().includes(q)) ||
+        (t.category && t.category.toLowerCase().includes(q));
+
+      const matchesStatus = statusFilter === "ALL" || t.status === statusFilter;
+      const matchesPriority = priorityFilter === "ALL" || t.priority === priorityFilter;
+      const matchesCategory = categoryFilter === "ALL" || t.category === categoryFilter;
+
+      return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
+    });
+
+    if (!sortConfig) return filtered;
+
+    return [...filtered].sort((a: any, b: any) => {
+      let aVal = a[sortConfig.key];
+      let bVal = b[sortConfig.key];
+
+      if (sortConfig.key === "createdAt") {
+        aVal = new Date(a.createdAt || 0).getTime();
+        bVal = new Date(b.createdAt || 0).getTime();
+      } else {
+        aVal = (aVal ?? "").toString().toLowerCase();
+        bVal = (bVal ?? "").toString().toLowerCase();
+      }
+
+      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [tickets, searchTerm, statusFilter, priorityFilter, categoryFilter, sortConfig]);
+
   const exportCSV = () => {
     if (tickets.length === 0) {
       toast.error("No support tickets available to export.");
@@ -605,46 +645,6 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
     document.body.removeChild(link);
     toast.success("Support tickets exported successfully.");
   };
-
-  // Filtered & Sorted ticket results
-  const filteredTickets = useMemo(() => {
-    const filtered = tickets.filter((t) => {
-      const q = searchTerm.toLowerCase().trim();
-      const matchesSearch =
-        !q ||
-        (t.ticketId && t.ticketId.toLowerCase().includes(q)) ||
-        (t.subject && t.subject.toLowerCase().includes(q)) ||
-        (t.description && t.description.toLowerCase().includes(q)) ||
-        (t.userName && t.userName.toLowerCase().includes(q)) ||
-        (t.userEmail && t.userEmail.toLowerCase().includes(q)) ||
-        (t.category && t.category.toLowerCase().includes(q));
-
-      const matchesStatus = statusFilter === "ALL" || t.status === statusFilter;
-      const matchesPriority = priorityFilter === "ALL" || t.priority === priorityFilter;
-      const matchesCategory = categoryFilter === "ALL" || t.category === categoryFilter;
-
-      return matchesSearch && matchesStatus && matchesPriority && matchesCategory;
-    });
-
-    if (!sortConfig) return filtered;
-
-    return [...filtered].sort((a: any, b: any) => {
-      let aVal = a[sortConfig.key];
-      let bVal = b[sortConfig.key];
-
-      if (sortConfig.key === "createdAt") {
-        aVal = new Date(a.createdAt || 0).getTime();
-        bVal = new Date(b.createdAt || 0).getTime();
-      } else {
-        aVal = (aVal ?? "").toString().toLowerCase();
-        bVal = (bVal ?? "").toString().toLowerCase();
-      }
-
-      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [tickets, searchTerm, statusFilter, priorityFilter, categoryFilter, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(filteredTickets.length / rowsPerPage));
   const paginatedTickets = filteredTickets.slice(

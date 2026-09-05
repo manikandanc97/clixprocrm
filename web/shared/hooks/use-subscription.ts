@@ -135,16 +135,18 @@ export function useSubscription() {
 
   const activePlanId = normalizePlanId(query.data?.planId || "free");
   const currentPlan = query.data?.plan || getPlanDefinition(activePlanId);
+  const entitledFeatures = query.data?.entitledFeatures;
+  const usage = query.data?.usage;
 
   const hasFeature = useCallback(
     (featureKey: string): boolean => {
       if (isSuperAdmin) return true;
-      if (query.data?.entitledFeatures) {
-        return query.data.entitledFeatures.includes(featureKey);
+      if (entitledFeatures) {
+        return entitledFeatures.includes(featureKey);
       }
       return hasPlanFeature(activePlanId, featureKey);
     },
-    [isSuperAdmin, query.data?.entitledFeatures, activePlanId]
+    [isSuperAdmin, entitledFeatures, activePlanId]
   );
 
   const canAccess = hasFeature;
@@ -174,12 +176,12 @@ export function useSubscription() {
         ? "automations"
         : null;
 
-      if (usageKey && query.data?.usage?.[usageKey]) {
-        return !query.data.usage[usageKey].isLimitReached;
+      if (usageKey && usage?.[usageKey]) {
+        return !usage[usageKey].isLimitReached;
       }
       return true;
     },
-    [isSuperAdmin, currentPlan, query.data?.usage]
+    [isSuperAdmin, currentPlan, usage]
   );
 
   const isLimitReached = useCallback(
@@ -225,7 +227,7 @@ export function useSubscription() {
       const res = await api.post("/crm/subscription/verify-payment", payload);
       return res.data?.data;
     },
-    onSuccess: (data) => {
+    onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["workspace", "subscription"] });
       queryClient.invalidateQueries({ queryKey: ["workspace", "subscription", "invoices"] });
       toast.success("Payment verified and plan activated successfully!");

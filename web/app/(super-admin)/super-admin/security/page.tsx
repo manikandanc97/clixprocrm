@@ -20,12 +20,9 @@ import { cn } from "@/shared/lib/utils";
 import {
   fetchSecurityCenterStatus,
   fetchSecurityIncidents,
-  createSecurityIncident,
   resolveSecurityIncident,
   emergencyLockUser,
-  emergencyUnlockUser,
   emergencyLockTenant,
-  emergencyUnlockTenant,
   generateBreakGlassCode,
   enablePlatformEmergency,
   disablePlatformEmergency,
@@ -37,7 +34,6 @@ import { Input } from "@/shared/ui/input";
 import { toast } from "sonner";
 import {
   CRMPageContainer,
-  CRMPageHeader,
   EmptyState,
 } from "@/shared/components/crm";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
@@ -75,7 +71,7 @@ export default function SecurityCenterPage() {
       ]);
       if (statusRes) setStatus(statusRes);
       setIncidents(incidentsRes.incidents || []);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to load security center data.");
     } finally {
       setLoading(false);
@@ -106,7 +102,7 @@ export default function SecurityCenterPage() {
       setSelectedIncident(null);
       setResolutionNotes("");
       loadData();
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to resolve incident.");
     } finally {
       setResolving(false);
@@ -162,7 +158,7 @@ export default function SecurityCenterPage() {
       const code = await generateBreakGlassCode();
       setBreakGlassCode(code);
       toast.success("Break-glass confirmation code generated.");
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to generate break-glass code.");
     }
   };
