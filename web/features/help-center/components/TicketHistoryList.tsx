@@ -1687,7 +1687,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                       isStaff={
                         user?.role === "ADMIN" ||
                         user?.role === "SUPERADMIN" ||
-                        (user as any)?.isSuperAdmin
+                        Boolean((user as { isSuperAdmin?: boolean } | undefined)?.isSuperAdmin)
                       }
                       size="xs"
                     />
