@@ -17,7 +17,7 @@ import { useSuperAdminNavigation } from "@/shared/hooks/use-super-admin-navigati
 export function SuperAdminSidebar() {
   const { user, logout } = useAuth();
   const [collapsed, setCollapsed] = useState(false);
-  const { groups: navGroups, isLoading } = useSuperAdminNavigation();
+  const { groups: navGroups } = useSuperAdminNavigation();
 
   const toggleSidebar = () => setCollapsed((prev) => !prev);
 

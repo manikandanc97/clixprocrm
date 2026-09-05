@@ -27,12 +27,6 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -41,7 +35,7 @@ import {
 } from "@/shared/ui/dialog";
 import { toast } from "sonner";
 import { cn, formatBytes } from "@/shared/lib/utils";
-import { Loader2, ArrowLeft, MoreHorizontal, Check, RefreshCw } from "lucide-react";
+import { Loader2, ArrowLeft, MoreHorizontal } from "lucide-react";
 
 // Status configuration map
 const STATUS_CONFIG: Record<

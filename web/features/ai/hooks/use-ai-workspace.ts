@@ -106,10 +106,7 @@ export function useAIWorkspace() {
   const [globalAiEnabled, setGlobalAiEnabled] = useState<boolean>(true);
 
   const selectedModelRef = useRef(selectedModel);
-  selectedModelRef.current = selectedModel;
-
   const activeContextRef = useRef(activeContext);
-  activeContextRef.current = activeContext;
 
   const isSuperAdmin = useMemo(() => {
     const norm = (auth?.user?.role || '').toUpperCase().trim().replace(/[\s_]+/g, '');
@@ -121,7 +118,18 @@ export function useAIWorkspace() {
   }, [auth?.user, pathname]);
 
   const isSuperAdminRef = useRef(isSuperAdmin);
-  isSuperAdminRef.current = isSuperAdmin;
+
+  useEffect(() => {
+    selectedModelRef.current = selectedModel;
+  }, [selectedModel]);
+
+  useEffect(() => {
+    activeContextRef.current = activeContext;
+  }, [activeContext]);
+
+  useEffect(() => {
+    isSuperAdminRef.current = isSuperAdmin;
+  }, [isSuperAdmin]);
 
   // Load URL query context on initial mount
   useEffect(() => {

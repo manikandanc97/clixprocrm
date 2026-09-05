@@ -2,7 +2,6 @@
 
 import React, { useMemo } from "react";
 import { 
-  IndianRupee,
   Users, 
   Target, 
   TrendingUp, 
@@ -147,18 +146,19 @@ export default function DashboardKPIs() {
   // RBAC & KPI Layout Protection:
   // Admin bypasses widget permission checks entirely.
   // All other roles must have the widget ID in their dashboardWidgets list.
+  const isSuperAdmin = (user as any)?.isSuperAdmin;
   const accessibleKpis = useMemo(() => {
     return kpiConfigs
       .filter(kpi => TOP_KPI_IDS.includes(kpi.id))
       .filter(kpi =>
         user?.role === CRM_ROLES.SUPER_ADMIN ||
         user?.role === CRM_ROLES.ADMIN ||
-        (user as any)?.isSuperAdmin === true ||
+        isSuperAdmin === true ||
         access.roleName === "Super Admin" ||
         access.roleName === "Admin" ||
         access.dashboardWidgets.includes(kpi.id)
       );
-  }, [kpiConfigs, access.roleName, access.dashboardWidgets, user?.role, (user as any)?.isSuperAdmin]);
+  }, [kpiConfigs, access.roleName, access.dashboardWidgets, user?.role, isSuperAdmin]);
 
   // ─── Employee role: render personal dashboard cards instead ──────────────
   // This prevents the org-wide KPI cards from showing for Employee users

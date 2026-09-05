@@ -5,20 +5,14 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   UploadCloud,
-  X,
   File,
   Image as ImageIcon,
   Video,
   FileText,
-  CheckCircle2,
   Paperclip,
   Archive,
   Code2,
-  Eye,
-  Play,
-  Sparkles,
   Film,
-  ZoomIn,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { cn, formatBytes } from "@/shared/lib/utils";

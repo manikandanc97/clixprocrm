@@ -13,7 +13,6 @@ import {
   ShieldAlert,
   Save,
   Check,
-  Play,
   Send,
   Receipt,
   Calendar,
@@ -71,7 +70,7 @@ const DEFAULT_PREFS: NotificationConfig = {
 };
 
 export default function NotificationsSettings() {
-  const { data: serverSettings, isLoading } = useNotificationSettings();
+  const { data: serverSettings } = useNotificationSettings();
   const updateSettingsMutation = useUpdateNotificationSettings();
   const testNotificationMutation = useCreateTestNotification();
 

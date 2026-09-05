@@ -3,7 +3,6 @@
 import React, { useState, useMemo, useEffect } from "react";
 import {
   History,
-  RefreshCw,
   Search,
   X,
   Download,
@@ -27,7 +26,6 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { cn } from "@/shared/lib/utils";
 import {
   fetchSecurityActivity,
   SecurityActivityDto,

@@ -205,7 +205,6 @@ export interface CRMMetricCardProps {
 
 export const CRMMetricCard = ({
   title,
-  label,
   value,
   change,
   trend = "neutral",
@@ -220,7 +219,6 @@ export const CRMMetricCard = ({
   className,
   hideBottomSkeletons = false,
 }: CRMMetricCardProps) => {
-  const displayTitle = title ?? label ?? "";
   const tone = directTone ?? COLOR_TO_SEMANTIC[color] ?? "primary";
   const semantic = SEMANTIC_TOKENS[tone];
   const isUp = trend === "up";

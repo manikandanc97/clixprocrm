@@ -129,7 +129,7 @@ export function RoleList({ onCreateRoleTrigger }: { onCreateRoleTrigger?: () => 
     },
   });
 
-  const { data: statsData, isLoading: isStatsLoading } = useQuery<{
+  const { data: statsData } = useQuery<{
     success: boolean;
     data: any;
   }>({

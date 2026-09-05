@@ -5,7 +5,6 @@ import Link from "next/link";
 import {
   Building2,
   Users,
-  ShieldCheck,
   ShieldAlert,
   TrendingUp,
   ArrowUpRight,
@@ -22,27 +21,17 @@ import {
   Activity,
   CheckCircle2,
   Server,
-  Database,
-  Mail,
-  HardDrive,
-  Cpu,
-  Bot,
-  ExternalLink,
-  HelpCircle,
-  BarChart3,
   IndianRupee,
   ChevronRight,
-  Info,
 } from "lucide-react";
 import {
   fetchPlatformOverview,
   PlatformOverviewData,
   AttentionRequiredItem,
-  EnrichedRecentOrg,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import {
   CRMPageContainer,

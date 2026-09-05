@@ -1,15 +1,8 @@
 "use client";
 
 import React from "react";
-import { Users, MoreVertical, User, Edit2, Trash2, Shield } from "lucide-react";
-import { Button } from "@/shared/ui/button";
+import { Users, User, Edit2, Trash2, Shield } from "lucide-react";
 import { Badge } from "@/shared/ui/badge";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
 import {
   Tooltip,
   TooltipContent,

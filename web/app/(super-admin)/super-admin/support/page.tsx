@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useMemo } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   Ticket,
   Search,
@@ -14,13 +14,10 @@ import {
   Loader2,
   Trash2,
   AlertTriangle,
-  Users,
   Eye,
   RotateCcw,
   Copy,
   Check,
-  Building2,
-  Clock,
   UserCheck,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
@@ -49,7 +46,6 @@ import {
 import { SuperAdminTicketModal } from "./SuperAdminTicketModal";
 import {
   CRMPageContainer,
-  TruncatedText,
   formatTicketCode,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";

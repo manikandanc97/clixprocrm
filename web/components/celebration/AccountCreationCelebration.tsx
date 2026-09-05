@@ -178,7 +178,6 @@ export function AccountCreationCelebration({
               {SETUP_STEPS.map((step) => {
                 const isCompleted = completedSteps.includes(step.id);
                 const isActive = activeStep === step.id && !isCompleted;
-                const isPending = !isCompleted && !isActive;
 
                 return (
                   <motion.div

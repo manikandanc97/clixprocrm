@@ -29,8 +29,6 @@ import {
 } from "@/shared/ui/alert-dialog";
 import { 
   useSettings, 
-  AccentColor, 
-  FontFamily, 
   ACCENT_PRESETS, 
   ALL_GOOGLE_FONTS, 
   isFontSelected 
@@ -39,7 +37,6 @@ import { toValidHex7 } from "@/shared/lib/utils/color-utils";
 
 import { useRouter, usePathname } from "next/navigation";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import { useCRMStore } from "@/shared/store/useCRMStore";
 import { getRoleBadge } from "@/shared/lib/auth/rbac";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { cn } from "@/shared/lib/utils";

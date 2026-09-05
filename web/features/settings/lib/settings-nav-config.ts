@@ -1,14 +1,8 @@
-import React from "react";
 import {
   User,
-  Palette,
   Bell,
   Building2,
-  Users,
-  ShieldCheck,
   CreditCard,
-  Receipt,
-  Sparkles,
   Boxes,
   ShieldAlert,
   Laptop,

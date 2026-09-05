@@ -22,7 +22,6 @@ import {
   Loader2,
   Shield,
   TrendingUp,
-  Zap,
   ChevronRight,
   Crown,
 } from "lucide-react";
@@ -42,7 +41,6 @@ import {
 } from "@/shared/lib/api/super-admin.api";
 import {
   CRMPageContainer,
-  CRMPageHeader,
 } from "@/shared/components/crm";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { compareFormValues } from "@/shared/hooks/use-dirty-form";

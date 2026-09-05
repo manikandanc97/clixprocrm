@@ -15,7 +15,7 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createEmployee, updateEmployee } from "@/shared/lib/api/crm";
 import client from "@/shared/lib/api/client";
 import { toast } from "sonner";
-import { Key, Building2 } from "lucide-react";
+import { Building2 } from "lucide-react";
 import { useWorkspace } from "@/shared/hooks/use-settings";
 import { useAuth } from "@/features/auth/components/auth-provider";
 

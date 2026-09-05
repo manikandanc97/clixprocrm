@@ -18,9 +18,7 @@ import {
   User,
   Edit2,
   Power,
-  Mail,
   Calendar,
-  Building2,
   Shield,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";

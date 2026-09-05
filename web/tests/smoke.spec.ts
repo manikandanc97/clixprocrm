@@ -11,7 +11,7 @@ test.describe('Final Runtime Smoke Tests', () => {
     console.log(JSON.stringify(results, null, 2));
   });
 
-  test('Module 1-21: Full Navigation and Error Capture', async ({ page, request }) => {
+  test('Module 1-21: Full Navigation and Error Capture', async ({ page }) => {
     test.setTimeout(180000); // 3 minutes for full smoke test
     
     const apiErrors: any[] = [];
@@ -55,7 +55,7 @@ test.describe('Final Runtime Smoke Tests', () => {
       await page.getByRole('button', { name: /sign up|register|create account/i }).click();
       await page.waitForURL(/.*(\/onboarding|\/dashboard|\/$)/, { timeout: 10000 });
       console.log('Registration succeeded, url:', page.url());
-    } catch (e) {
+    } catch {
       console.log('Registration failed/timed out, attempting to login with previous e2e admin instead');
       await page.goto('/login');
       await page.locator('input[type="email"]').fill('e2e_admin_1786276028193@gmail.com');
@@ -82,7 +82,7 @@ test.describe('Final Runtime Smoke Tests', () => {
 
     for (const mod of modulesToTest) {
       console.log(`Testing ${mod.name} at ${mod.url}`);
-      const response = await page.goto(mod.url, { waitUntil: 'networkidle', timeout: 15000 }).catch(e => null);
+      const response = await page.goto(mod.url, { waitUntil: 'networkidle', timeout: 15000 }).catch(() => null);
       
       const status = response ? response.status() : 500;
       let result = status < 400 ? 'PASS' : 'FAIL';

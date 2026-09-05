@@ -4,14 +4,7 @@ import React, { useState } from "react";
 import {
   Rocket,
   Search,
-  Sparkles,
-  ShieldCheck,
-  Zap,
-  CheckCircle2,
-  Tag,
   Calendar,
-  Layers,
-  ArrowUpRight,
 } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Badge } from "@/shared/ui/badge";

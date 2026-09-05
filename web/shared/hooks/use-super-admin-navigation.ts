@@ -2,7 +2,6 @@ import { useMemo } from "react";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import {
   fetchSuperAdminNavigation,
-  PlatformModule,
 } from "@/shared/lib/api/super-admin.api";
 import { getDynamicIcon } from "@/shared/lib/icons/dynamic-icon";
 import type { NavGroup, NavItem } from "@/shared/lib/auth/rbac";

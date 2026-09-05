@@ -8,7 +8,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { toast } from "sonner";
-import { Target, Plus, MoreVertical, Copy, Check, Trash2, Pencil, Calendar, Info } from "lucide-react";
+import { Target, Plus, Copy, Check, Trash2, Pencil, Calendar, Info } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import client from "@/shared/lib/api/client";
 import { useCurrency } from "@/shared/hooks/use-currency";

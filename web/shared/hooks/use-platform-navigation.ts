@@ -1,7 +1,7 @@
 import { useMemo } from "react";
 import { useQuery } from "@tanstack/react-query";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import { fetchPlatformNavigation, PlatformModule } from "@/shared/lib/api/super-admin.api";
+import { fetchPlatformNavigation } from "@/shared/lib/api/super-admin.api";
 import { getRoleMenu, NavGroup, NavItem } from "@/shared/lib/auth/rbac";
 import { getDynamicIcon } from "@/shared/lib/icons/dynamic-icon";
 

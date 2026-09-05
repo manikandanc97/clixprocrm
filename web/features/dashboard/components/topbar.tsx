@@ -2,7 +2,6 @@
 
 import { useState, useEffect, useRef } from "react";
 import { usePathname } from "next/navigation";
-import { Menu } from "lucide-react";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import ProfileMenu from "./ProfileMenu";
 import NotificationPanel from "./NotificationPanel";

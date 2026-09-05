@@ -6,7 +6,6 @@ import { Button } from "@/shared/ui/button";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { cn } from "@/shared/lib/utils";
 import { usePlatformNavigation } from "@/shared/hooks/use-platform-navigation";
-import { getDynamicIcon } from "@/shared/lib/icons/dynamic-icon";
 
 export const DEFAULT_PERMISSION_CATEGORIES = [
   {

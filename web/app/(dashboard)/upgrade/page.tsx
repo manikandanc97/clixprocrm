@@ -261,20 +261,6 @@ export default function UpgradePage() {
     return displayPlans.length > 1 ? displayPlans[1].id : null;
   }, [displayPlans]);
 
-  // Pre-select plan if passed in query param
-  useEffect(() => {
-    if (highlightParam && displayPlans.length > 0) {
-      const match = displayPlans.find((p) => p.id.toLowerCase() === highlightParam.toLowerCase());
-      if (match && match.id !== activePlanId) {
-        if (match.pricingMode === "CUSTOM") {
-          setEnterpriseModalOpen(true);
-        } else {
-          handleOpenUpgradeModal(match);
-        }
-      }
-    }
-  }, [highlightParam, activePlanId, displayPlans]);
-
   const handleOpenUpgradeModal = (planItem: PlanDefinition) => {
     if (!canManageBilling) {
       toast.error("Only workspace administrators can manage subscription plans.");
@@ -289,6 +275,20 @@ export default function UpgradePage() {
     loadRazorpayCheckoutScript();
   };
 
+  // Pre-select plan if passed in query param
+  useEffect(() => {
+    if (highlightParam && displayPlans.length > 0) {
+      const match = displayPlans.find((p) => p.id.toLowerCase() === highlightParam.toLowerCase());
+      if (match && match.id !== activePlanId) {
+        if (match.pricingMode === "CUSTOM") {
+          setEnterpriseModalOpen(true);
+        } else {
+          handleOpenUpgradeModal(match);
+        }
+      }
+    }
+  }, [highlightParam, activePlanId, displayPlans]);
+
   const handleSeatChange = (newSeats: number) => {
     const minSeats = Math.max(currentActiveUsers, 1);
     const validated = Math.max(newSeats, minSeats);
@@ -302,12 +302,10 @@ export default function UpgradePage() {
   const handleExecuteUpgrade = async () => {
     if (!targetPlan) return;
     setIsProcessingCheckout(true);
-    console.log(`[Checkout] Initiation requested for plan: '${targetPlan.id}' | seats: ${seats} | billingCycle: '${billingCycle}'`);
 
     try {
       // 1. If downgrading to free tier
       if (targetPlan.id === "free") {
-        console.log("[Checkout] Downgrading to Free plan directly...");
         await changePlan({
           planId: targetPlan.id,
           billingCycle,
@@ -318,7 +316,6 @@ export default function UpgradePage() {
       }
 
       // 2. Load official Razorpay Checkout SDK
-      console.log("[Checkout] Loading Razorpay Checkout SDK script...");
       const isLoaded = await loadRazorpayCheckoutScript();
       if (!isLoaded) {
         console.error("[Checkout] Failed to load Razorpay Checkout SDK.");
@@ -328,7 +325,6 @@ export default function UpgradePage() {
       }
 
       // 3. Create server-side checkout order with canonical price
-      console.log("[Checkout] Creating server-side Razorpay order via /crm/subscription/create-checkout-order...");
       const { order, quote: serverQuote } = await createCheckoutOrder({
         planId: targetPlan.id,
         seats,
@@ -342,14 +338,10 @@ export default function UpgradePage() {
         return;
       }
 
-      console.log(`[Checkout] Razorpay Order created successfully. Order ID: ${order.orderId} | Amount: ${order.amount} ${order.currency}`);
-
       // 4. Open Razorpay Checkout modal with authenticated user's credentials
       const prefName = user?.name || user?.displayName || order?.customer?.name || subscription?.tenantName || "Customer";
       const prefEmail = user?.email || order?.customer?.email || "";
       const prefContact = user?.phone || order?.customer?.contact || "";
-
-      console.log(`[Checkout] Prefill configured -> name: '${prefName}', email: '${prefEmail}', contact: ${prefContact ? `'${prefContact}'` : 'none'}`);
 
       const options: any = {
         key: order.keyId,
@@ -372,13 +364,11 @@ export default function UpgradePage() {
         theme: { color: "#32bd87" },
         modal: {
           ondismiss: () => {
-            console.log("[Checkout] Razorpay Checkout dismissed by user.");
             setIsProcessingCheckout(false);
             toast.info("Payment was cancelled. Your subscription plan remains unchanged.");
           },
         },
         handler: async (response: any) => {
-          console.log(`[Checkout] Payment completed on Razorpay gateway. Verifying on server with Payment ID: ${response.razorpay_payment_id}...`);
           try {
             toast.loading("Verifying payment with gateway...", { id: "payment-verify" });
             await verifyPayment({
@@ -390,7 +380,6 @@ export default function UpgradePage() {
               seats,
             });
             toast.dismiss("payment-verify");
-            console.log("[Checkout] Payment successfully verified server-side. Plan is now active.");
             setUpgradeSuccess(true);
           } catch (vErr: any) {
             toast.dismiss("payment-verify");
@@ -412,7 +401,6 @@ export default function UpgradePage() {
         toast.error(reason);
       });
 
-      console.log(`[Checkout] Opening Razorpay Checkout widget for order: ${order.orderId}...`);
       rzp.open();
     } catch (err: any) {
       const msg = err?.response?.data?.message || err?.message || "Failed to process payment checkout.";

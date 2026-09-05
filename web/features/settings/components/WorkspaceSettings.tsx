@@ -31,7 +31,6 @@ import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogHeader,
   DialogTitle,
 } from "@/shared/ui/dialog";
 import { CRMCard } from "@/shared/components/crm";

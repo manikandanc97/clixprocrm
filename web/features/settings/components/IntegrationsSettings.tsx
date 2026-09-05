@@ -3,15 +3,7 @@
 import React, { useState } from "react";
 import {
   Boxes,
-  CheckCircle2,
-  ExternalLink,
   KeyRound,
-  RefreshCw,
-  Sparkles,
-  Zap,
-  Globe,
-  Mail,
-  MessageSquare,
   Copy,
 } from "lucide-react";
 import { CRMCard } from "@/shared/components/crm";

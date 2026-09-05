@@ -10,7 +10,7 @@ import {
   CardSkeleton,
 } from "@/shared/components/skeletons";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/shared/ui/card";
+import { Card } from "@/shared/ui/card";
 import {
   Users,
   CreditCard,

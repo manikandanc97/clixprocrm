@@ -5,7 +5,6 @@ import {
   BarChart3, 
   Download, 
   Calendar, 
-  RefreshCcw, 
   Users, 
   Target, 
   TrendingUp, 
@@ -36,7 +35,6 @@ import {
 import { toast } from "sonner";
 import RevenueTargetSettings from "@/features/settings/components/RevenueTargetSettings";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import { cn } from "@/shared/lib/utils";
 
 const RevenueChart = dynamic(() => import("@/features/reports/components/RevenueChart"));
 const RevenueTarget = dynamic(() => import("@/features/reports/components/RevenueTarget"));

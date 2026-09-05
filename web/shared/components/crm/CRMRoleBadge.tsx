@@ -9,8 +9,6 @@ import {
   Headphones,
   User,
   Shield,
-  Briefcase,
-  Sparkles,
   Code,
   DollarSign,
   type LucideIcon,

@@ -12,12 +12,6 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
-import {
   Dialog,
   DialogContent,
   DialogDescription,
@@ -26,7 +20,7 @@ import {
 } from "@/shared/ui/dialog";
 import { toast } from "sonner";
 import { cn, formatBytes } from "@/shared/lib/utils";
-import { Loader2, ArrowLeft, MoreHorizontal, RefreshCw } from "lucide-react";
+import { Loader2, ArrowLeft, MoreHorizontal } from "lucide-react";
 
 interface TicketAttachment {
   id?: string;

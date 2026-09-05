@@ -29,7 +29,6 @@ import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateTask, useEmployees } from "@/shared/hooks/use-crm";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { AlertCircle } from "lucide-react";
-import { cn } from "@/shared/lib/utils";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
 import { TaskRelatedRecordPicker, RelatedRecord } from "./TaskRelatedRecordPicker";
 import { TaskChecklistTab } from "./TaskChecklistTab";

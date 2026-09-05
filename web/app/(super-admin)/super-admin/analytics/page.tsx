@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback, useId } from "react";
+import { useEffect, useState, useCallback } from "react";
 import {
   TrendingUp,
   Building2,
@@ -15,9 +15,7 @@ import {
   Clock,
   AlertCircle,
   ShieldAlert,
-  Users,
   Check,
-  Zap,
 } from "lucide-react";
 import {
   fetchPlatformAnalytics,
@@ -53,7 +51,6 @@ import {
   YAxis,
   CartesianGrid,
   Tooltip as RechartsTooltip,
-  Legend,
 } from "recharts";
 
 type DateRangeOption = "30d" | "3m" | "6m" | "12m" | "custom";

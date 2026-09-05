@@ -6,11 +6,16 @@ import { SidebarProvider } from "@/features/dashboard/components/SidebarContext"
 import DashboardShell from "@/features/dashboard/components/DashboardShell";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { GlobalModalManager } from "@/shared/components/GlobalModalManager";
-import { DashboardCelebration } from "@/components/celebration";
+import dynamic from "next/dynamic";
 import { MfaChallengeModal } from "@/features/auth/components/MfaChallengeModal";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRealtimeNotifications } from "@/shared/hooks/use-realtime-notifications";
+
+const DashboardCelebration = dynamic(
+  () => import("@/components/celebration").then((mod) => mod.DashboardCelebration),
+  { ssr: false }
+);
 
 export default function DashboardLayout({
   children,

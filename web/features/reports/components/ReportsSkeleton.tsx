@@ -2,7 +2,6 @@ import { CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
 import { 
   PageHeaderSkeleton, 
   MetricCardSkeleton, 
-  CardSkeleton,
   TableSkeleton
 } from "@/shared/components/skeletons";
 import { Skeleton } from "@/shared/ui/skeleton";

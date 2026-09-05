@@ -7,20 +7,14 @@ import {
   ArrowRight,
   Sparkles,
   Layers,
-  FileText,
   ShieldCheck,
   CreditCard,
   Zap,
-  HelpCircle,
   ThumbsUp,
   ThumbsDown,
   Copy,
   Check,
   Keyboard,
-  ExternalLink,
-  Bookmark,
-  CheckCircle2,
-  AlertTriangle,
 } from "lucide-react";
 import { Card, CardContent } from "@/shared/ui/card";
 import { Button } from "@/shared/ui/button";

@@ -35,7 +35,6 @@ export function loadRazorpayCheckoutScript(): Promise<boolean> {
     const onScriptLoaded = () => {
       clearTimeout(timeoutId);
       if ((window as any).Razorpay) {
-        console.log("[Razorpay Loader] Razorpay Checkout SDK loaded successfully.");
         resolve(true);
       } else {
         console.warn("[Razorpay Loader] Script loaded but window.Razorpay is undefined.");

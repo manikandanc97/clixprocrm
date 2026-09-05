@@ -273,6 +273,30 @@ export default function SuperAdminModulesPage() {
     };
   }, [loadAllModules]);
 
+  // Current active raw list based on tab
+  const rawCurrentList = useMemo(() => {
+    return activeScope === "tenant" ? tenantModules : platformModules;
+  }, [activeScope, tenantModules, platformModules]);
+
+  // Helper: Open Create Modal
+  const handleOpenCreate = () => {
+    setEditingModule(null);
+    setFormLabel("");
+    setFormKey("");
+    setFormRoute("");
+    setFormIcon("Layers");
+    setFormGroup(activeScope === "tenant" ? "Core" : "Platform");
+    setCustomGroup("");
+    setFormAccessPreset("ALL");
+    setFormPermission("");
+    setFormBadge("");
+    setFormOrder((rawCurrentList.length || 0) + 1);
+    setFormDescription("");
+    setFormIsEnabled(true);
+    setIconSearchQuery("");
+    setIsModalOpen(true);
+  };
+
   // Handle "+ Add" query param from deep link
   useEffect(() => {
     if (searchParams.get("add") === "true") {
@@ -284,11 +308,6 @@ export default function SuperAdminModulesPage() {
   useEffect(() => {
     setCurrentPage(1);
   }, [search, groupFilter, statusFilter, activeScope]);
-
-  // Current active raw list based on tab
-  const rawCurrentList = useMemo(() => {
-    return activeScope === "tenant" ? tenantModules : platformModules;
-  }, [activeScope, tenantModules, platformModules]);
 
   // Available groups for active tab
   const availableGroups = useMemo(() => {
@@ -357,25 +376,6 @@ export default function SuperAdminModulesPage() {
 
   const handleSort = (key: string, direction: SortDirection) => {
     setSortConfig({ key, direction });
-  };
-
-  // Helper: Open Create Modal
-  const handleOpenCreate = () => {
-    setEditingModule(null);
-    setFormLabel("");
-    setFormKey("");
-    setFormRoute("");
-    setFormIcon("Layers");
-    setFormGroup(activeScope === "tenant" ? "Core" : "Platform");
-    setCustomGroup("");
-    setFormAccessPreset("ALL");
-    setFormPermission("");
-    setFormBadge("");
-    setFormOrder((rawCurrentList.length || 0) + 1);
-    setFormDescription("");
-    setFormIsEnabled(true);
-    setIconSearchQuery("");
-    setIsModalOpen(true);
   };
 
   // Helper: Open Edit Modal

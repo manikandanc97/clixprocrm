@@ -9,7 +9,7 @@ import {
   Tooltip, 
   Cell
 } from "recharts";
-import { BarChart3, Download, RefreshCw } from "lucide-react";
+import { BarChart3, Download } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { ConversionChartPointType } from "@/shared/types/report";
 import { motion } from "framer-motion";

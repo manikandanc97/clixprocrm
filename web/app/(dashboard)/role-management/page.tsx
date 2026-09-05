@@ -3,7 +3,6 @@
 import React, { useState, useMemo } from "react";
 import {
   Shield,
-  ShieldCheck,
   Users,
   Plus,
   Search,

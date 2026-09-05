@@ -3,7 +3,7 @@
 import { CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
 import { MetricCardSkeleton } from "@/shared/components/skeletons";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { Card, CardContent, CardHeader } from "@/shared/ui/card";
+import { Card } from "@/shared/ui/card";
 
 export function SuperAdminDashboardSkeleton() {
   return (

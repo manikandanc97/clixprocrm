@@ -7,7 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
   DialogDescription,
-  DialogClose,
 } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
