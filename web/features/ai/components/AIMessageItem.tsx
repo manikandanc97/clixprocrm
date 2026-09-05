@@ -45,7 +45,6 @@ export function AIMessageItem({ message, onConfirmAction }: AIMessageItemProps) 
   const isUser = message.role === 'user';
 
   // Extract content
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const content =
     (message as any).content ||
     (message.parts?.find((p: any) => p.type === 'text') as any)?.text ||
@@ -53,7 +52,6 @@ export function AIMessageItem({ message, onConfirmAction }: AIMessageItemProps) 
   const isError = message.role === 'system' && content.includes('Error:');
 
   // Compatibility for tool invocations
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const toolInvocations =
     message.toolInvocations ||
     message.parts

@@ -8,8 +8,8 @@ import { DuplicateStrategy, slideVariants } from "./import-types";
 
 interface ImportValidationStepProps {
   validationResults: {
-    valid: any[];
-    invalid: any[];
+    valid: Record<string, unknown>[];
+    invalid: (Record<string, unknown> & { _errors?: string })[];
   };
   duplicateStrategy: DuplicateStrategy;
   setDuplicateStrategy: (strategy: DuplicateStrategy) => void;

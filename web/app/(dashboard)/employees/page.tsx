@@ -57,6 +57,7 @@ import { useEmployees, useToggleEmployeeStatus, useDeleteEmployee } from "@/shar
 import { FormModal } from "@/shared/components/crm/FormModal";
 import { EmployeeForm } from "@/features/forms/EmployeeForm";
 import { useAuth } from "@/features/auth/components/auth-provider";
+import { EmployeeType } from "@/shared/types/employee";
 
 export default function EmployeesPage() {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
@@ -74,8 +75,8 @@ export default function EmployeesPage() {
   };
 
   const { data: hrmData, isLoading: loading, isPending, refetch } = useEmployees();
-  const rawEmployees = useMemo(
-    () => (Array.isArray(hrmData?.employees) ? hrmData.employees : []),
+  const rawEmployees = useMemo<EmployeeType[]>(
+    () => (Array.isArray(hrmData?.employees) ? (hrmData.employees as unknown as EmployeeType[]) : []),
     [hrmData]
   );
 
@@ -86,10 +87,10 @@ export default function EmployeesPage() {
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isEditModalOpen, setIsEditModalOpen] = useState(false);
   const [isViewModalOpen, setIsViewModalOpen] = useState(false);
-  const [selectedEmployee, setSelectedEmployee] = useState<any | null>(null);
+  const [selectedEmployee, setSelectedEmployee] = useState<EmployeeType | null>(null);
 
   // Delete modal state
-  const [employeeToDelete, setEmployeeToDelete] = useState<any | null>(null);
+  const [employeeToDelete, setEmployeeToDelete] = useState<EmployeeType | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -132,7 +133,7 @@ export default function EmployeesPage() {
     setCurrentPage(1);
   };
 
-  const handleToggleStatus = (emp: any) => {
+  const handleToggleStatus = (emp: EmployeeType) => {
     const newStatus = emp.status === "ACTIVE" ? "INACTIVE" : "ACTIVE";
     toggleStatusMutation.mutate(
       { id: emp.id, status: newStatus },
@@ -183,7 +184,7 @@ export default function EmployeesPage() {
       return;
     }
     const headers = ["Employee ID", "Name", "Email", "Role", "Status", "Joined Date"];
-    const rows = rawEmployees.map((emp: any) => [
+    const rows = rawEmployees.map((emp: EmployeeType) => [
       emp.id || "",
       `"${getSafeStr(emp.name).replace(/"/g, '""')}"`,
       `"${getSafeStr(emp.email).replace(/"/g, '""')}"`,
@@ -206,7 +207,7 @@ export default function EmployeesPage() {
   // Available unique roles for filter dropdown
   const uniqueRoles = useMemo(() => {
     const rolesSet = new Set<string>();
-    rawEmployees.forEach((emp: any) => {
+    rawEmployees.forEach((emp: EmployeeType) => {
       const r = getSafeStr(emp.role).trim();
       if (r) rolesSet.add(r);
     });
@@ -215,7 +216,7 @@ export default function EmployeesPage() {
 
   // Filter and sort logic
   const filteredEmployees = useMemo(() => {
-    return rawEmployees.filter((emp: any) => {
+    return rawEmployees.filter((emp: EmployeeType) => {
       const name = getSafeStr(emp.name).toLowerCase();
       const email = getSafeStr(emp.email).toLowerCase();
       const role = getSafeStr(emp.role).toLowerCase();
@@ -230,7 +231,7 @@ export default function EmployeesPage() {
         statusFilter === "ALL" || (emp.status || "").toUpperCase() === statusFilter.toUpperCase();
 
       return matchSearch && matchRole && matchStatus;
-    }).sort((a: any, b: any) => {
+    }).sort((a: EmployeeType, b: EmployeeType) => {
       if (!sortConfig) return 0;
       const dir = sortConfig.direction === "asc" ? 1 : -1;
 
@@ -432,15 +433,15 @@ export default function EmployeesPage() {
                     type="checkbox"
                     checked={
                       paginatedEmployees.length > 0 &&
-                      paginatedEmployees.every((emp: any) => selectedEmployeeIds.includes(emp.id))
+                      paginatedEmployees.every((emp: EmployeeType) => selectedEmployeeIds.includes(emp.id))
                     }
                     onChange={(e) => {
                       if (e.target.checked) {
                         setSelectedEmployeeIds(
-                          Array.from(new Set([...selectedEmployeeIds, ...paginatedEmployees.map((emp: any) => emp.id)]))
+                          Array.from(new Set([...selectedEmployeeIds, ...paginatedEmployees.map((emp: EmployeeType) => emp.id)]))
                         );
                       } else {
-                        const pageIds = new Set(paginatedEmployees.map((emp: any) => emp.id));
+                        const pageIds = new Set(paginatedEmployees.map((emp: EmployeeType) => emp.id));
                         setSelectedEmployeeIds(selectedEmployeeIds.filter((id) => !pageIds.has(id)));
                       }
                     }}
@@ -555,7 +556,7 @@ export default function EmployeesPage() {
                   </tr>
                 ))
               ) : paginatedEmployees.length > 0 ? (
-                paginatedEmployees.map((emp: any) => {
+                paginatedEmployees.map((emp: EmployeeType) => {
                   const name = getSafeStr(emp.name);
                   const email = getSafeStr(emp.email);
                   const role = getSafeStr(emp.role);
@@ -878,7 +879,19 @@ export default function EmployeesPage() {
         size="md"
       >
         <EmployeeForm
-          initialData={selectedEmployee || undefined}
+          initialData={
+            selectedEmployee
+              ? {
+                  id: selectedEmployee.id,
+                  name: selectedEmployee.name,
+                  email: selectedEmployee.email,
+                  role: selectedEmployee.role,
+                  status: (["ACTIVE", "INACTIVE", "SUSPENDED"].includes(selectedEmployee.status)
+                    ? selectedEmployee.status
+                    : "ACTIVE") as "ACTIVE" | "INACTIVE" | "SUSPENDED",
+                }
+              : undefined
+          }
           onSuccess={() => {
             setIsEditModalOpen(false);
             setSelectedEmployee(null);

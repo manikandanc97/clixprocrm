@@ -7,7 +7,8 @@ import {
   DialogDescription,
   DialogTitle,
 } from "@/shared/ui/dialog";
-import { TaskType } from "@/shared/types/task";
+import { TaskType, TaskHistoryLog, TaskTimelineEvent } from "@/shared/types/task";
+import { EmployeeType } from "@/shared/types/employee";
 import { Badge } from "@/shared/ui/badge";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import {
@@ -102,7 +103,7 @@ const TaskDetailsModal = ({
   const activityItems = [];
   
   if (historyData && historyData.length > 0) {
-    historyData.forEach((log: any) => {
+    (historyData as TaskHistoryLog[]).forEach((log: TaskHistoryLog) => {
       if (log.action === "TASK_CREATED") {
         activityItems.push({
           id: log.id,
@@ -171,7 +172,7 @@ const TaskDetailsModal = ({
 
   // Include new timelineEvents from Task
   if (task.timelineEvents && task.timelineEvents.length > 0) {
-    task.timelineEvents.forEach((event: any) => {
+    task.timelineEvents.forEach((event: TaskTimelineEvent) => {
       let icon = MessageSquare;
       let title = "Update";
       let iconColor = "text-primary";
@@ -308,7 +309,7 @@ const TaskDetailsModal = ({
                   onClick={() => {
                     setIsAssigning(true);
                     updateTask(
-                      { id: task.id, data: { assignedToId: null } as any },
+                      { id: task.id, data: { assignedToId: null } },
                       { onSettled: () => setIsAssigning(false) }
                     );
                   }}
@@ -316,13 +317,13 @@ const TaskDetailsModal = ({
                 >
                   Unassign
                 </DropdownMenuItem>
-                {employeesData?.employees?.map((emp: any) => (
+                {employeesData?.employees?.map((emp: EmployeeType) => (
                   <DropdownMenuItem 
                     key={emp.id}
                     onClick={() => {
                       setIsAssigning(true);
                       updateTask(
-                        { id: task.id, data: { assignedToId: emp.id || emp.userId } as any },
+                        { id: task.id, data: { assignedToId: emp.id } },
                         { onSettled: () => setIsAssigning(false) }
                       );
                     }}

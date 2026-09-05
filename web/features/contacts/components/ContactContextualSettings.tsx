@@ -94,8 +94,8 @@ export function ContactContextualSettings({
 
       toast.success("Contact settings saved successfully");
       onOpenChange(false);
-    } catch (err: any) {
-      toast.error(err?.message || "Failed to save contact settings.");
+    } catch (err: unknown) {
+      toast.error((err as { message?: string })?.message || "Failed to save contact settings.");
     } finally {
       setIsSaving(false);
     }

@@ -1,7 +1,7 @@
 import { test } from '@playwright/test';
 
 test.describe('Final Runtime Smoke Tests', () => {
-  const results: any[] = [];
+  const results: { module: string; endpoint: string; status: number; result: string; error?: string }[] = [];
   const captureResult = (moduleName: string, endpoint: string, status: number, result: string, error?: string) => {
     results.push({ module: moduleName, endpoint, status, result, error });
   };
@@ -14,7 +14,7 @@ test.describe('Final Runtime Smoke Tests', () => {
   test('Module 1-21: Full Navigation and Error Capture', async ({ page }) => {
     test.setTimeout(180000); // 3 minutes for full smoke test
     
-    const apiErrors: any[] = [];
+    const apiErrors: { url: string; status: number }[] = [];
     const consoleErrors: string[] = [];
 
     // Capture console errors

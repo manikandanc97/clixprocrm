@@ -27,6 +27,7 @@ import {
   TruncatedText,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
+import { SortDirection } from "@/shared/components/DataTableColumnHeader";
 
 export default function SuperAdminAuditLogsPage() {
   const [logs, setLogs] = useState<PlatformAuditLog[]>([]);
@@ -57,7 +58,6 @@ export default function SuperAdminAuditLogsPage() {
     try {
       setVerifyingDr(true);
       const res = await triggerAuditDrVerify(recordId);
-      setDrResult(res);
       if (res.restorable) {
         toast.success("Disaster recovery dry run: 100% restorable from WORM S3 archive.");
       } else {

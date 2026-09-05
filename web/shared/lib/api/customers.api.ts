@@ -13,11 +13,14 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
       throw new Error(response.data?.message || "Invalid API response.");
     }
     return response.data.data;
-  } catch (error: any) {
-    const msg = error.response?.data?.message;
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { message?: unknown } } };
+    const msg = err?.response?.data?.message;
     if (msg) {
       if (typeof msg === 'string') throw new Error(msg);
-      else if (typeof msg === 'object') throw new Error(msg.message || JSON.stringify(msg));
+      else if (typeof msg === 'object' && msg !== null) {
+        throw new Error((msg as { message?: string }).message || JSON.stringify(msg));
+      }
     }
     throw error;
   }

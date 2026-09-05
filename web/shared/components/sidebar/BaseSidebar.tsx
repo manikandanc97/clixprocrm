@@ -38,10 +38,23 @@ export interface BaseSidebarProps {
   className?: string;
 }
 
+interface SidebarThemeClasses {
+  logoBox: string;
+  logoBoxHover: string;
+  collapsedLogoBox: string;
+  collapsedTag: string;
+  badge: string;
+  toggleBtn: string;
+  itemActiveText: string;
+  itemActiveBg: string;
+  itemActiveCollapsedBg: string;
+  activePill: string;
+}
+
 interface ItemComponentProps {
   item: NavItem;
   isActive: boolean;
-  themeClasses: any;
+  themeClasses: SidebarThemeClasses;
   activeLayoutIdPrefix: string;
 }
 
@@ -105,7 +118,7 @@ function MobileExpandableNavItem({
 }: {
   item: NavItem;
   isChildActive: (child: NavItem) => boolean;
-  themeClasses: any;
+  themeClasses: SidebarThemeClasses;
 }) {
   const isAnyChildActive = item.children?.some(isChildActive) ?? false;
   const [isOpen, setIsOpen] = useState(isAnyChildActive);
@@ -279,7 +292,7 @@ function DesktopCollapsedExpandableItem({
 }: {
   item: NavItem;
   isChildActive: (child: NavItem) => boolean;
-  themeClasses: any;
+  themeClasses: SidebarThemeClasses;
   activeLayoutIdPrefix: string;
 }) {
   const isAnyChildActive = item.children?.some(isChildActive) ?? false;
@@ -418,7 +431,7 @@ function DesktopExpandedExpandableItem({
 }: {
   item: NavItem;
   isChildActive: (child: NavItem) => boolean;
-  themeClasses: any;
+  themeClasses: SidebarThemeClasses;
 }) {
   const isAnyChildActive = item.children?.some(isChildActive) ?? false;
   const [isOpen, setIsOpen] = useState(isAnyChildActive);

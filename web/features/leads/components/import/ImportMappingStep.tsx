@@ -12,7 +12,7 @@ interface ImportMappingStepProps {
   fileHeaders: string[];
   mapping: Record<string, string>;
   setMapping: React.Dispatch<React.SetStateAction<Record<string, string>>>;
-  parsedData: any[];
+  parsedData: Record<string, unknown>[];
   showAdvancedMapping: boolean;
   setShowAdvancedMapping: React.Dispatch<React.SetStateAction<boolean>>;
   onBack: () => void;

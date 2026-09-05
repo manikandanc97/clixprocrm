@@ -37,13 +37,32 @@ export interface TaskRelationRef {
   amount?: number;
 }
 
+export interface TaskTimelineEvent {
+  id: string;
+  action: string;
+  description?: string;
+  createdAt: string;
+  user?: { name: string };
+  metadata?: Record<string, unknown>;
+}
+
+export interface TaskHistoryLog {
+  id: string;
+  action: string;
+  actor: string;
+  createdAt: string;
+  assignedTo?: string;
+  previousAssignee?: string;
+  details?: Record<string, unknown>;
+}
+
 export interface TaskType {
   id: string;
   tenantId: string;
   title: string;
   description?: string | null;
   status: "PENDING" | "IN_PROGRESS" | "COMPLETED" | "BLOCKED" | "CANCELLED" | "OVERDUE";
-  priority: "HIGH" | "MEDIUM" | "LOW";
+  priority: "HIGH" | "MEDIUM" | "LOW" | "URGENT";
   dueDate?: string | null;
   dueDateValue?: string | null;
   reminderDate?: string | null;
@@ -85,7 +104,7 @@ export interface TaskType {
   collaborators?: { id: string; name: string }[];
   aiPriorityScore?: number;
   aiSummary?: string;
-  timelineEvents?: any[];
+  timelineEvents?: TaskTimelineEvent[];
 }
 
 export interface TaskDashboardStats {

@@ -174,14 +174,19 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
       if (onTicketCreated) {
         onTicketCreated();
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Support ticket submission failed:", error);
+      const err = error as {
+        response?: { data?: { error?: { message?: string } | string; message?: string } };
+        message?: string;
+      };
       const errorMsg =
-        error?.response?.data?.error?.message ||
-        error?.response?.data?.error ||
-        error?.response?.data?.message ||
-        error?.message ||
-        "Failed to submit ticket. Please check your inputs.";
+        err?.response?.data?.error && typeof err.response.data.error === "object"
+          ? err.response.data.error.message
+          : (err?.response?.data?.error as string) ||
+            err?.response?.data?.message ||
+            err?.message ||
+            "Failed to submit ticket. Please check your inputs.";
       toast.error(typeof errorMsg === "string" ? errorMsg : JSON.stringify(errorMsg));
     } finally {
       setIsSubmitting(false);

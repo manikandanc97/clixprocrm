@@ -28,6 +28,7 @@ import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateTask, useEmployees } from "@/shared/hooks/use-crm";
 import { useAuth } from "@/features/auth/components/auth-provider";
+import { TaskType } from "@/shared/types/task";
 import { AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
 import { TaskRelatedRecordPicker, RelatedRecord } from "./TaskRelatedRecordPicker";
@@ -37,13 +38,11 @@ import { TaskChecklistTab } from "./TaskChecklistTab";
 
 const taskFormSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
-  description: z.string().optional().default(""),
+  description: z.string(),
   assignedToId: z.string().min(1, "Please assign this task"),
-  priority: z.enum(["URGENT", "HIGH", "MEDIUM", "LOW"]).default("MEDIUM"),
+  priority: z.enum(["URGENT", "HIGH", "MEDIUM", "LOW"]),
   dueDate: z.string().min(1, "Due date is required"),
-  checklist: z
-    .array(z.object({ id: z.string(), title: z.string().min(1), completed: z.boolean().default(false) }))
-    .default([]),
+  checklist: z.array(z.object({ id: z.string(), title: z.string().min(1), completed: z.boolean() })),
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -79,7 +78,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
   const defaultDueDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
 
   const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskFormSchema) as any,
+    resolver: zodResolver(taskFormSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -151,7 +150,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
 
   const onSubmit = async (values: TaskFormValues) => {
     try {
-      const payload: any = {
+      const payload: Partial<TaskType> & { leadId?: string; customerId?: string; quotationId?: string } = {
         title: values.title.trim(),
         description: values.description?.trim() || "",
         assignedToId: values.assignedToId,
@@ -296,8 +295,8 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {employees.map((emp: any) => (
-                                  <SelectItem key={emp.id} value={emp.id || emp.userId}>
+                                {employees.map((emp: { id?: string; userId?: string; name: string }) => (
+                                  <SelectItem key={emp.id} value={emp.id || emp.userId || ""}>
                                     {emp.name}
                                   </SelectItem>
                                 ))}
@@ -374,7 +373,7 @@ export const CreateTaskModal: React.FC<CreateTaskModalProps> = ({ isOpen, onClos
                     className="mt-0 focus-visible:outline-none"
                   >
                     <TaskChecklistTab
-                      checklistFields={checklistFields as any}
+                      checklistFields={checklistFields}
                       onAddChecklist={handleAddChecklist}
                       onRemoveChecklist={removeChecklist}
                       attachments={attachments}

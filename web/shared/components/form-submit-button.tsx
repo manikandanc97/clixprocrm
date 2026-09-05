@@ -1,7 +1,7 @@
 import React from 'react';
 import { useFormContext, useFormState } from 'react-hook-form';
 import { Button, ButtonProps } from '@/shared/ui/button';
-import { Loader2 } from 'lucide-react';
+import { Loader2, type LucideIcon } from 'lucide-react';
 import { AppIcon } from '@/shared/components/icons/icon-registry';
 import { cn } from '@/shared/lib/utils';
 import { motion, AnimatePresence } from 'framer-motion';
@@ -11,7 +11,7 @@ export interface FormSubmitButtonProps extends ButtonProps {
   isPending?: boolean;
   loadingText?: string;
   iconName?: string;
-  icon?: any;
+  icon?: LucideIcon | React.ComponentType<{ className?: string; size?: number }>;
   hideIcon?: boolean;
 }
 

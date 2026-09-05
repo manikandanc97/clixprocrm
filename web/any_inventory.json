@@ -1,0 +1,2397 @@
+{
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(auth)\\login\\page.tsx": [
+    {
+      "line": 104,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 153,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 157,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(auth)\\onboarding\\page.tsx": [
+    {
+      "line": 176,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(auth)\\register\\page.tsx": [
+    {
+      "line": 101,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\employees\\page.tsx": [
+    {
+      "line": 89,
+      "column": 60,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 92,
+      "column": 60,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 135,
+      "column": 36,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 186,
+      "column": 41,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 209,
+      "column": 32,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 218,
+      "column": 38,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 233,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 233,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 435,
+      "column": 54,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 440,
+      "column": 103,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 443,
+      "column": 78,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 558,
+      "column": 46,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\invoices\\page.tsx": [
+    {
+      "line": 56,
+      "column": 68,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 60,
+      "column": 58,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 109,
+      "column": 35,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\notifications\\page.tsx": [
+    {
+      "line": 120,
+      "column": 42,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleDeleteDialog.tsx": [
+    {
+      "line": 26,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 29,
+      "column": 30,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleDetailsDialog.tsx": [
+    {
+      "line": 19,
+      "column": 9,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 34,
+      "column": 9,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 74,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleEditorModal.tsx": [
+    {
+      "line": 34,
+      "column": 16,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleList.tsx": [
+    {
+      "line": 134,
+      "column": 11,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 223,
+      "column": 16,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 244,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 270,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleTableRows.tsx": [
+    {
+      "line": 23,
+      "column": 10,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 26,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 27,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 28,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 29,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 71,
+      "column": 33,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 73,
+      "column": 27,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\page.tsx": [
+    {
+      "line": 75,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 75,
+      "column": 47,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 139,
+      "column": 16,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 158,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 184,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 574,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 576,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\settings\\ai\\page.tsx": [
+    {
+      "line": 17,
+      "column": 54,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\settings\\page.tsx": [
+    {
+      "line": 33,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\support\\tickets\\[id]\\page.tsx": [
+    {
+      "line": 259,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 295,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 319,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 336,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 597,
+      "column": 36,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 656,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\upgrade\\page.tsx": [
+    {
+      "line": 342,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 367,
+      "column": 35,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 380,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 391,
+      "column": 34,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 393,
+      "column": 47,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 401,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\ai\\page.tsx": [
+    {
+      "line": 215,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\billing\\page.tsx": [
+    {
+      "line": 88,
+      "column": 48,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 144,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 184,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 216,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 230,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 351,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 352,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 392,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 393,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 549,
+      "column": 55,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 730,
+      "column": 44,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1049,
+      "column": 76,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1535,
+      "column": 80,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\copilot\\page.tsx": [
+    {
+      "line": 257,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 273,
+      "column": 30,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\modules\\page.tsx": [
+    {
+      "line": 212,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 505,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 539,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 578,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 596,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 821,
+      "column": 66,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1306,
+      "column": 74,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\organizations\\page.tsx": [
+    {
+      "line": 84,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 158,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 180,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 200,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 272,
+      "column": 35,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 272,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 273,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 274,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1025,
+      "column": 62,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\page.tsx": [
+    {
+      "line": 84,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\plans\\page.tsx": [
+    {
+      "line": 188,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 378,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 398,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 915,
+      "column": 57,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 990,
+      "column": 62,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\security\\operations\\page.tsx": [
+    {
+      "line": 272,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 319,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\security\\page.tsx": [
+    {
+      "line": 149,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\settings\\page.tsx": [
+    {
+      "line": 77,
+      "column": 52,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 184,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 185,
+      "column": 44,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 186,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 241,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 324,
+      "column": 46,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\support\\SuperAdminTicketModal.tsx": [
+    {
+      "line": 246,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 286,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 303,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 322,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 341,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 360,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 384,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 402,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\support\\[id]\\page.tsx": [
+    {
+      "line": 242,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 277,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 293,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 311,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 329,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 347,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 370,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 387,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 660,
+      "column": 36,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 722,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\support\\page.tsx": [
+    {
+      "line": 186,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 214,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 235,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\users\\page.tsx": [
+    {
+      "line": 106,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 130,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 153,
+      "column": 61,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 156,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 562,
+      "column": 56,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\api\\ai\\chat\\route.ts": [
+    {
+      "line": 24,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 24,
+      "column": 45,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 198,
+      "column": 32,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 205,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\app\\api\\ai\\models\\route.ts": [
+    {
+      "line": 102,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\components\\AIContextualSettings.tsx": [
+    {
+      "line": 68,
+      "column": 48,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\components\\AIMessageItem.tsx": [
+    {
+      "line": 19,
+      "column": 56,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 49,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 50,
+      "column": 30,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 50,
+      "column": 60,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 59,
+      "column": 13,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 64,
+      "column": 16,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 78,
+      "column": 47,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 85,
+      "column": 9,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\hooks\\use-ai-workspace.ts": [
+    {
+      "line": 63,
+      "column": 39,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 67,
+      "column": 39,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 111,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 119,
+      "column": 51,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 189,
+      "column": 30,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 228,
+      "column": 47,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 228,
+      "column": 61,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 283,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\types.ts": [
+    {
+      "line": 44,
+      "column": 32,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\MfaChallengeModal.tsx": [
+    {
+      "line": 74,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 98,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\SuperAdminMfaModal.tsx": [
+    {
+      "line": 76,
+      "column": 49,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 101,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 188,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\auth-loading-screen.tsx": [
+    {
+      "line": 132,
+      "column": 28,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 151,
+      "column": 23,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\auth-provider.tsx": [
+    {
+      "line": 124,
+      "column": 70,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\public-route.tsx": [
+    {
+      "line": 33,
+      "column": 18,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\super-admin-route.tsx": [
+    {
+      "line": 27,
+      "column": 16,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 42,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\companies\\components\\CompanyContextualSettings.tsx": [
+    {
+      "line": 191,
+      "column": 47,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 196,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 197,
+      "column": 44,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 197,
+      "column": 81,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 322,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 412,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 454,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 455,
+      "column": 34,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 458,
+      "column": 27,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 459,
+      "column": 34,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1049,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1146,
+      "column": 35,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1147,
+      "column": 32,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1172,
+      "column": 35,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1173,
+      "column": 32,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\contacts\\components\\ContactContextualSettings.tsx": [
+    {
+      "line": 97,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\contacts\\hooks\\use-contact-settings.ts": [
+    {
+      "line": 54,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 117,
+      "column": 67,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 119,
+      "column": 72,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\dashboard\\components\\DashboardKPIs.tsx": [
+    {
+      "line": 149,
+      "column": 33,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\help-center\\components\\FileUploader.tsx": [
+    {
+      "line": 176,
+      "column": 44,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\help-center\\components\\SupportTicketForm.tsx": [
+    {
+      "line": 177,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\help-center\\components\\TicketHistoryList.tsx": [
+    {
+      "line": 73,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 349,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 349,
+      "column": 47,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 357,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 362,
+      "column": 78,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 386,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 444,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 474,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 588,
+      "column": 35,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 588,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1687,
+      "column": 34,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1796,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\CreateInvoiceModal.tsx": [
+    {
+      "line": 117,
+      "column": 42,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 126,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 132,
+      "column": 32,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 173,
+      "column": 73,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 379,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 397,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 415,
+      "column": 41,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 433,
+      "column": 36,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\InvoiceContextualSettings.tsx": [
+    {
+      "line": 153,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\InvoiceDetailModal.tsx": [
+    {
+      "line": 245,
+      "column": 53,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 311,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 313,
+      "column": 74,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 362,
+      "column": 52,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 521,
+      "column": 53,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 573,
+      "column": 59,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\InvoicesDataTable.tsx": [
+    {
+      "line": 55,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 69,
+      "column": 28,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 71,
+      "column": 30,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 286,
+      "column": 41,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\hooks\\use-invoices-data.ts": [
+    {
+      "line": 30,
+      "column": 16,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 69,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 70,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 123,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 138,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 138,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 203,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 209,
+      "column": 59,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 213,
+      "column": 69,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 251,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\BulkImportModal.tsx": [
+    {
+      "line": 38,
+      "column": 48,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 46,
+      "column": 12,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 47,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 157,
+      "column": 18,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 158,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 161,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 229,
+      "column": 26,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 253,
+      "column": 23,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 255,
+      "column": 55,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 300,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\import\\ImportMappingStep.tsx": [
+    {
+      "line": 15,
+      "column": 15,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\import\\ImportValidationStep.tsx": [
+    {
+      "line": 11,
+      "column": 12,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 12,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\import\\import-types.ts": [
+    {
+      "line": 71,
+      "column": 29,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 83,
+      "column": 15,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\reports\\components\\AIInsights.tsx": [
+    {
+      "line": 130,
+      "column": 50,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\DeleteAccountModal.tsx": [
+    {
+      "line": 39,
+      "column": 51,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 99,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\InvoiceSettings.tsx": [
+    {
+      "line": 73,
+      "column": 47,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\ProfileSettings.tsx": [
+    {
+      "line": 95,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 162,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 177,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\SecuritySettings.tsx": [
+    {
+      "line": 108,
+      "column": 62,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 121,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 131,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 140,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 178,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 218,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 235,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 254,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 280,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\SessionsSettings.tsx": [
+    {
+      "line": 55,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 69,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\WorkspaceSettings.tsx": [
+    {
+      "line": 212,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 233,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 270,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\CreateTaskModal.tsx": [
+    {
+      "line": 82,
+      "column": 46,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 154,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 299,
+      "column": 54,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 377,
+      "column": 59,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\EditTaskModal.tsx": [
+    {
+      "line": 84,
+      "column": 46,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 102,
+      "column": 173,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 123,
+      "column": 36,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 133,
+      "column": 156,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 139,
+      "column": 35,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 197,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 348,
+      "column": 54,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 426,
+      "column": 59,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\TaskContextualSettings.tsx": [
+    {
+      "line": 157,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 157,
+      "column": 72,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\TaskDetailsModal.tsx": [
+    {
+      "line": 105,
+      "column": 31,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 174,
+      "column": 41,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 311,
+      "column": 70,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 319,
+      "column": 54,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 325,
+      "column": 88,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\TaskRelatedRecordPicker.tsx": [
+    {
+      "line": 50,
+      "column": 23,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 56,
+      "column": 27,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 62,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\lib\\mcp\\mcp-client.ts": [
+    {
+      "line": 37,
+      "column": 12,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 109,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 186,
+      "column": 29,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 225,
+      "column": 29,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 285,
+      "column": 29,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 318,
+      "column": 29,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\lib\\supabase\\client.ts": [
+    {
+      "line": 19,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\crm\\CRMDataTable.tsx": [
+    {
+      "line": 36,
+      "column": 40,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 71,
+      "column": 34,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\crm\\CRMToolbar.tsx": [
+    {
+      "line": 28,
+      "column": 24,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\crm\\PageFeedbackStates.tsx": [
+    {
+      "line": 44,
+      "column": 12,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\form-fields.tsx": [
+    {
+      "line": 63,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\form-submit-button.tsx": [
+    {
+      "line": 14,
+      "column": 10,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\icons\\icon-registry.tsx": [
+    {
+      "line": 203,
+      "column": 95,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 337,
+      "column": 79,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\sidebar\\BaseSidebar.tsx": [
+    {
+      "line": 44,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 108,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 282,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 421,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-crm.ts": [
+    {
+      "line": 674,
+      "column": 103,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-invoices.ts": [
+    {
+      "line": 88,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 106,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 121,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 139,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 156,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 167,
+      "column": 23,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 172,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 186,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-realtime-notifications.ts": [
+    {
+      "line": 17,
+      "column": 29,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-subscription.ts": [
+    {
+      "line": 104,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 113,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 114,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 211,
+      "column": 52,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 235,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 250,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 278,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 292,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\auth.ts": [
+    {
+      "line": 283,
+      "column": 15,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 297,
+      "column": 13,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\client.ts": [
+    {
+      "line": 71,
+      "column": 57,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 72,
+      "column": 30,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 73,
+      "column": 30,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 76,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 77,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 146,
+      "column": 53,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 149,
+      "column": 28,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 149,
+      "column": 59,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\companies.api.ts": [
+    {
+      "line": 15,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\customers.api.ts": [
+    {
+      "line": 16,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\dashboard.api.ts": [
+    {
+      "line": 22,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 98,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\deals.api.ts": [
+    {
+      "line": 16,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 50,
+      "column": 69,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 51,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\employees.api.ts": [
+    {
+      "line": 16,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 35,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 39,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 43,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\invoices.api.ts": [
+    {
+      "line": 33,
+      "column": 28,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 34,
+      "column": 23,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\leads.api.ts": [
+    {
+      "line": 16,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 55,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 58,
+      "column": 54,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 59,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 63,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 66,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 67,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 71,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 74,
+      "column": 60,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 75,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 90,
+      "column": 27,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 99,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 105,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 111,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 114,
+      "column": 57,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 115,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\mfa.api.ts": [
+    {
+      "line": 55,
+      "column": 27,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\privacy.api.ts": [
+    {
+      "line": 36,
+      "column": 43,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\quotations.api.ts": [
+    {
+      "line": 16,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 46,
+      "column": 59,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 48,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 51,
+      "column": 52,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 52,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 55,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 56,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 60,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\reports.api.ts": [
+    {
+      "line": 17,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 49,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\settings.api.ts": [
+    {
+      "line": 23,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 98,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 110,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 113,
+      "column": 69,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 115,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 118,
+      "column": 37,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 119,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\super-admin.api.ts": [
+    {
+      "line": 138,
+      "column": 14,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 284,
+      "column": 12,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 318,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 331,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 342,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 354,
+      "column": 65,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 362,
+      "column": 66,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 392,
+      "column": 65,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 400,
+      "column": 65,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 408,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 416,
+      "column": 66,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 623,
+      "column": 13,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 741,
+      "column": 82,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 820,
+      "column": 28,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 886,
+      "column": 72,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 887,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 894,
+      "column": 52,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 895,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 959,
+      "column": 53,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 960,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 977,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 983,
+      "column": 52,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 984,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1238,
+      "column": 38,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1462,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1538,
+      "column": 11,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1560,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1621,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1645,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1655,
+      "column": 64,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1663,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1669,
+      "column": 59,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1670,
+      "column": 63,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 1692,
+      "column": 17,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\tasks.api.ts": [
+    {
+      "line": 16,
+      "column": 19,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 26,
+      "column": 56,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 32,
+      "column": 34,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 32,
+      "column": 57,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 47,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 51,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 78,
+      "column": 110,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 79,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 83,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 87,
+      "column": 25,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\billing\\razorpay-loader.ts": [
+    {
+      "line": 13,
+      "column": 18,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 27,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 37,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 45,
+      "column": 34,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 54,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\notifications\\sound-chime.ts": [
+    {
+      "line": 11,
+      "column": 65,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\plans\\plan-definitions.ts": [
+    {
+      "line": 251,
+      "column": 21,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\ticket-utils.ts": [
+    {
+      "line": 18,
+      "column": 42,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\shared\\types\\task.ts": [
+    {
+      "line": 88,
+      "column": 20,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ],
+  "D:\\Projects\\project\\clixprocrm\\web\\tests\\smoke.spec.ts": [
+    {
+      "line": 4,
+      "column": 18,
+      "message": "Unexpected any. Specify a different type."
+    },
+    {
+      "line": 17,
+      "column": 22,
+      "message": "Unexpected any. Specify a different type."
+    }
+  ]
+}

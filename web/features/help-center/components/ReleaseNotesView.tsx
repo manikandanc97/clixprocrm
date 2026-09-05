@@ -117,7 +117,7 @@ export function ReleaseNotesView() {
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3">
             <div>
               <h2 className="text-base sm:text-lg font-bold text-foreground flex items-center gap-2">
-                <Rocket className="w-5 h-5 text-primary" /> ClixPro CRM Changelog & What's New
+                <Rocket className="w-5 h-5 text-primary" /> ClixPro CRM Changelog & What&apos;s New
               </h2>
               <p className="text-xs text-muted-foreground mt-0.5">
                 Explore feature enhancements, performance optimizations, and security patches.

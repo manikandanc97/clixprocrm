@@ -154,7 +154,7 @@ export function TaskContextualSettings({
   const { data: tasksData } = useTasks();
   const activeTasks: TaskType[] = useMemo(() => {
     if (!tasksData) return [];
-    if (Array.isArray((tasksData as any)?.tasks)) return (tasksData as any).tasks;
+    if (tasksData && "tasks" in tasksData && Array.isArray(tasksData.tasks)) return tasksData.tasks;
     if (Array.isArray(tasksData)) return tasksData as unknown as TaskType[];
     return [];
   }, [tasksData]);

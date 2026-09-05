@@ -182,19 +182,36 @@ const INITIAL_STANDARD_FIELDS: StandardFieldConfig[] = [
   },
 ];
 
+interface CompanyItem {
+  id: string;
+  name: string;
+  industry?: string;
+  website?: string;
+  phone?: string;
+  address?: string;
+  accountType?: string;
+  annualRevenue?: number | string;
+  employeeCount?: number | string;
+  _count?: {
+    customers?: number;
+    deals?: number;
+  };
+}
+
 export function CompanyContextualSettings({
   open,
   onOpenChange,
   defaultSection = "industries",
 }: CompanyContextualSettingsProps) {
   const { user } = useAuth();
-  const tenantId = user?.tenantId || (user as any)?.activeTenantId || "default";
+  const tenantId = user?.tenantId || (user as { activeTenantId?: string })?.activeTenantId || "default";
   const storageKey = `clixprocrm_company_settings_${tenantId}`;
 
   // Fetch active companies for reference counts and merge workflows
   const { data: companiesData, refetch: refetchCompanies } = useCompanies();
-  const companiesList: any[] = useMemo(() => {
-    return Array.isArray((companiesData as any)?.companies) ? (companiesData as any).companies : [];
+  const companiesList: CompanyItem[] = useMemo(() => {
+    const res = companiesData as { companies?: CompanyItem[] } | undefined;
+    return Array.isArray(res?.companies) ? res.companies : [];
   }, [companiesData]);
 
   // 1. Industries State
@@ -319,8 +336,8 @@ export function CompanyContextualSettings({
         `Reassigned companies from "${industryToDelete}" to "${reassignTargetIndustry}" and deleted "${industryToDelete}"`
       );
       setIndustryToDelete(null);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to reassign industry");
+    } catch (err: unknown) {
+      toast.error((err as { message?: string })?.message || "Failed to reassign industry");
     } finally {
       setIsReassigningIndustry(false);
     }
@@ -409,8 +426,8 @@ export function CompanyContextualSettings({
       setIsMergeModalOpen(false);
       setMergePrimaryId("");
       setMergeSecondaryId("");
-    } catch (err: any) {
-      toast.error(err.message || "Failed to merge companies");
+    } catch (err: unknown) {
+      toast.error((err as { message?: string })?.message || "Failed to merge companies");
     } finally {
       setIsMerging(false);
     }
@@ -451,12 +468,12 @@ export function CompanyContextualSettings({
   };
 
   // Get objects for merge modal comparison
-  const primaryCompany: any = useMemo(
-    () => companiesList.find((c: any) => c.id === mergePrimaryId),
+  const primaryCompany: CompanyItem | undefined = useMemo(
+    () => companiesList.find((c: CompanyItem) => c.id === mergePrimaryId),
     [companiesList, mergePrimaryId]
   );
-  const secondaryCompany: any = useMemo(
-    () => companiesList.find((c: any) => c.id === mergeSecondaryId),
+  const secondaryCompany: CompanyItem | undefined = useMemo(
+    () => companiesList.find((c: CompanyItem) => c.id === mergeSecondaryId),
     [companiesList, mergeSecondaryId]
   );
 
@@ -1046,7 +1063,7 @@ export function CompanyContextualSettings({
                 <Label className="text-xs font-semibold">Data Type</Label>
                 <Select
                   value={newCustomFieldType}
-                  onValueChange={(val: any) => setNewCustomFieldType(val)}
+                  onValueChange={(val: "text" | "number" | "url" | "currency" | "date" | "select") => setNewCustomFieldType(val)}
                 >
                   <SelectTrigger className="text-xs h-9">
                     <SelectValue />
@@ -1143,8 +1160,8 @@ export function CompanyContextualSettings({
                   </SelectTrigger>
                   <SelectContent className="max-h-48">
                     {companiesList
-                      .filter((c: any) => c.id !== mergeSecondaryId)
-                      .map((c: any) => (
+                      .filter((c: CompanyItem) => c.id !== mergeSecondaryId)
+                      .map((c: CompanyItem) => (
                         <SelectItem key={c.id} value={c.id} className="text-xs">
                           {c.name} ({c.industry || "No Industry"})
                         </SelectItem>
@@ -1169,8 +1186,8 @@ export function CompanyContextualSettings({
                   </SelectTrigger>
                   <SelectContent className="max-h-48">
                     {companiesList
-                      .filter((c: any) => c.id !== mergePrimaryId)
-                      .map((c: any) => (
+                      .filter((c: CompanyItem) => c.id !== mergePrimaryId)
+                      .map((c: CompanyItem) => (
                         <SelectItem key={c.id} value={c.id} className="text-xs">
                           {c.name} ({c.industry || "No Industry"})
                         </SelectItem>

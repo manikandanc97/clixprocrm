@@ -337,7 +337,7 @@ export function useAIWorkspace() {
           title: sessionTitle,
           createdAt: Date.now(),
           updatedAt: Date.now(),
-          context: activeContextRef.current?.name || null,
+          context: activeContext?.name || null,
           messages: messages,
         };
 
@@ -354,7 +354,7 @@ export function useAIWorkspace() {
             updatedAt: Date.now(),
             context:
               existing.context ||
-              (activeContextRef.current?.name ? activeContextRef.current.name : null),
+              (activeContext?.name ? activeContext.name : null),
             messages: messages,
           };
           updated = [
@@ -367,7 +367,7 @@ export function useAIWorkspace() {
             title: sessionTitle,
             createdAt: Date.now(),
             updatedAt: Date.now(),
-            context: activeContextRef.current?.name || null,
+            context: activeContext?.name || null,
             messages: messages,
           };
           updated = [newSession, ...prevSessions];
@@ -380,7 +380,7 @@ export function useAIWorkspace() {
 
       return updated;
     });
-  }, [messages, currentSessionId]);
+  }, [messages, currentSessionId, activeContext?.name]);
 
   const isLoading = status === 'submitted' || status === 'streaming';
 

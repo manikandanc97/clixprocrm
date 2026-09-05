@@ -1,0 +1,2817 @@
+[
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\super-admin.api.ts",
+    "count": 34,
+    "details": [
+      {
+        "line": 138,
+        "col": 14,
+        "code": "details: any;"
+      },
+      {
+        "line": 284,
+        "col": 12,
+        "code": "details: any;"
+      },
+      {
+        "line": 318,
+        "col": 63,
+        "code": "const response = await client.get<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 331,
+        "col": 64,
+        "code": "const response = await client.post<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 342,
+        "col": 63,
+        "code": "const response = await client.put<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 354,
+        "col": 65,
+        "code": "const response = await client.patch<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 362,
+        "col": 66,
+        "code": "const response = await client.delete<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 392,
+        "col": 65,
+        "code": "const response = await client.patch<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 400,
+        "col": 65,
+        "code": "const response = await client.patch<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 408,
+        "col": 64,
+        "code": "const response = await client.post<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 416,
+        "col": 66,
+        "code": "const response = await client.delete<{ success: boolean; data: any; message: string }>("
+      },
+      {
+        "line": 623,
+        "col": 13,
+        "code": "metadata: any;"
+      },
+      {
+        "line": 741,
+        "col": 82,
+        "code": "const response = await client.post<{ success: boolean; message: string; data?: any }>("
+      },
+      {
+        "line": 820,
+        "col": 28,
+        "code": "details?: Record<string, any>;"
+      },
+      {
+        "line": 886,
+        "col": 72,
+        "code": "export const fetchSecOpsTimeline = async (limit: number = 25): Promise<any[]> => {"
+      },
+      {
+        "line": 887,
+        "col": 63,
+        "code": "const response = await client.get<{ success: boolean; data: any[] }>("
+      },
+      {
+        "line": 894,
+        "col": 52,
+        "code": "export const fetchSecOpsConfig = async (): Promise<any> => {"
+      },
+      {
+        "line": 895,
+        "col": 63,
+        "code": "const response = await client.get<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 959,
+        "col": 53,
+        "code": "export const fetchGovernanceRls = async (): Promise<any> => {"
+      },
+      {
+        "line": 960,
+        "col": 63,
+        "code": "const response = await client.get<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 977,
+        "col": 63,
+        "code": "const response = await client.get<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 983,
+        "col": 52,
+        "code": "export const updatePlatformSettings = async (data: any) => {"
+      },
+      {
+        "line": 984,
+        "col": 64,
+        "code": "const response = await client.post<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 1238,
+        "col": 38,
+        "code": "const payload = (response?.data as any)?.data || response?.data || {};"
+      },
+      {
+        "line": 1462,
+        "col": 19,
+        "code": "defaultModel: any;"
+      },
+      {
+        "line": 1538,
+        "col": 11,
+        "code": "config: any;"
+      },
+      {
+        "line": 1560,
+        "col": 19,
+        "code": "latestInvoice?: any;"
+      },
+      {
+        "line": 1621,
+        "col": 64,
+        "code": "const response = await client.post<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 1645,
+        "col": 63,
+        "code": "const response = await client.get<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 1655,
+        "col": 64,
+        "code": "const response = await client.post<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 1663,
+        "col": 63,
+        "code": "const response = await client.get<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 1669,
+        "col": 59,
+        "code": "export const updatePlatformBillingSettings = async (data: any) => {"
+      },
+      {
+        "line": 1670,
+        "col": 63,
+        "code": "const response = await client.put<{ success: boolean; data: any }>("
+      },
+      {
+        "line": 1692,
+        "col": 17,
+        "code": "diagnostics?: any;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\leads.api.ts",
+    "count": 16,
+    "details": [
+      {
+        "line": 16,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 55,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.get(`/crm/leads/${leadId}/notes`));"
+      },
+      {
+        "line": 58,
+        "col": 54,
+        "code": "export function createLeadNote(leadId: string, data: any) {"
+      },
+      {
+        "line": 59,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(`/crm/leads/${leadId}/notes`, data));"
+      },
+      {
+        "line": 63,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.get(`/crm/leads/${leadId}/timeline`));"
+      },
+      {
+        "line": 66,
+        "col": 63,
+        "code": "export function createLeadTimelineEvent(leadId: string, data: any) {"
+      },
+      {
+        "line": 67,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(`/crm/leads/${leadId}/timeline`, data));"
+      },
+      {
+        "line": 71,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.get(`/crm/leads/${leadId}/attachments`));"
+      },
+      {
+        "line": 74,
+        "col": 60,
+        "code": "export function createLeadAttachment(leadId: string, data: any) {"
+      },
+      {
+        "line": 75,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(`/crm/leads/${leadId}/attachments`, data));"
+      },
+      {
+        "line": 90,
+        "col": 27,
+        "code": "return unwrapResponse<any>("
+      },
+      {
+        "line": 99,
+        "col": 25,
+        "code": "return unwrapResponse<any>("
+      },
+      {
+        "line": 105,
+        "col": 25,
+        "code": "return unwrapResponse<any>("
+      },
+      {
+        "line": 111,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.get(`/crm/leads/${leadId}/meetings`));"
+      },
+      {
+        "line": 114,
+        "col": 57,
+        "code": "export function createLeadMeeting(leadId: string, data: any) {"
+      },
+      {
+        "line": 115,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(`/crm/leads/${leadId}/meetings`, data));"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\companies\\components\\CompanyContextualSettings.tsx",
+    "count": 15,
+    "details": [
+      {
+        "line": 191,
+        "col": 47,
+        "code": "const tenantId = user?.tenantId || (user as any)?.activeTenantId || \"default\";"
+      },
+      {
+        "line": 196,
+        "col": 24,
+        "code": "const companiesList: any[] = useMemo(() => {"
+      },
+      {
+        "line": 197,
+        "col": 44,
+        "code": "return Array.isArray((companiesData as any)?.companies) ? (companiesData as any).companies : [];"
+      },
+      {
+        "line": 197,
+        "col": 81,
+        "code": "return Array.isArray((companiesData as any)?.companies) ? (companiesData as any).companies : [];"
+      },
+      {
+        "line": 322,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 412,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 454,
+        "col": 25,
+        "code": "const primaryCompany: any = useMemo("
+      },
+      {
+        "line": 455,
+        "col": 34,
+        "code": "() => companiesList.find((c: any) => c.id === mergePrimaryId),"
+      },
+      {
+        "line": 458,
+        "col": 27,
+        "code": "const secondaryCompany: any = useMemo("
+      },
+      {
+        "line": 459,
+        "col": 34,
+        "code": "() => companiesList.find((c: any) => c.id === mergeSecondaryId),"
+      },
+      {
+        "line": 1049,
+        "col": 40,
+        "code": "onValueChange={(val: any) => setNewCustomFieldType(val)}"
+      },
+      {
+        "line": 1146,
+        "col": 35,
+        "code": ".filter((c: any) => c.id !== mergeSecondaryId)"
+      },
+      {
+        "line": 1147,
+        "col": 32,
+        "code": ".map((c: any) => ("
+      },
+      {
+        "line": 1172,
+        "col": 35,
+        "code": ".filter((c: any) => c.id !== mergePrimaryId)"
+      },
+      {
+        "line": 1173,
+        "col": 32,
+        "code": ".map((c: any) => ("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\billing\\page.tsx",
+    "count": 13,
+    "details": [
+      {
+        "line": 88,
+        "col": 48,
+        "code": "const [configForm, setConfigForm] = useState<any>({});"
+      },
+      {
+        "line": 144,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 184,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 216,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 230,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 351,
+        "col": 26,
+        "code": "let valA = (a as any)[subSortConfig.key];"
+      },
+      {
+        "line": 352,
+        "col": 26,
+        "code": "let valB = (b as any)[subSortConfig.key];"
+      },
+      {
+        "line": 392,
+        "col": 26,
+        "code": "let valA = (a as any)[invSortConfig.key];"
+      },
+      {
+        "line": 393,
+        "col": 26,
+        "code": "let valB = (b as any)[invSortConfig.key];"
+      },
+      {
+        "line": 549,
+        "col": 55,
+        "code": "onClick={() => setActiveTab(tab.id as any)}"
+      },
+      {
+        "line": 730,
+        "col": 44,
+        "code": "formatter={(val: any) => [formatCurrency(Number(val)), \"Revenue\"]}"
+      },
+      {
+        "line": 1049,
+        "col": 76,
+        "code": "setSelectedBillingCycle((sub.billingCycle as any) || \"monthly\");"
+      },
+      {
+        "line": 1535,
+        "col": 80,
+        "code": "onChange={(e) => setSelectedBillingCycle(e.target.value as any)}"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\employees\\page.tsx",
+    "count": 12,
+    "details": [
+      {
+        "line": 89,
+        "col": 60,
+        "code": "const [selectedEmployee, setSelectedEmployee] = useState<any | null>(null);"
+      },
+      {
+        "line": 92,
+        "col": 60,
+        "code": "const [employeeToDelete, setEmployeeToDelete] = useState<any | null>(null);"
+      },
+      {
+        "line": 135,
+        "col": 36,
+        "code": "const handleToggleStatus = (emp: any) => {"
+      },
+      {
+        "line": 186,
+        "col": 41,
+        "code": "const rows = rawEmployees.map((emp: any) => ["
+      },
+      {
+        "line": 209,
+        "col": 32,
+        "code": "rawEmployees.forEach((emp: any) => {"
+      },
+      {
+        "line": 218,
+        "col": 38,
+        "code": "return rawEmployees.filter((emp: any) => {"
+      },
+      {
+        "line": 233,
+        "col": 17,
+        "code": "}).sort((a: any, b: any) => {"
+      },
+      {
+        "line": 233,
+        "col": 25,
+        "code": "}).sort((a: any, b: any) => {"
+      },
+      {
+        "line": 435,
+        "col": 54,
+        "code": "paginatedEmployees.every((emp: any) => selectedEmployeeIds.includes(emp.id))"
+      },
+      {
+        "line": 440,
+        "col": 103,
+        "code": "Array.from(new Set([...selectedEmployeeIds, ...paginatedEmployees.map((emp: any) => emp.id)]))"
+      },
+      {
+        "line": 443,
+        "col": 78,
+        "code": "const pageIds = new Set(paginatedEmployees.map((emp: any) => emp.id));"
+      },
+      {
+        "line": 558,
+        "col": 46,
+        "code": "paginatedEmployees.map((emp: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\help-center\\components\\TicketHistoryList.tsx",
+    "count": 12,
+    "details": [
+      {
+        "line": 73,
+        "col": 17,
+        "code": "diagnostics?: any;"
+      },
+      {
+        "line": 349,
+        "col": 24,
+        "code": ": (user?.role as any)?.name || (user as any)?.roleName || \"\";"
+      },
+      {
+        "line": 349,
+        "col": 47,
+        "code": ": (user?.role as any)?.name || (user as any)?.roleName || \"\";"
+      },
+      {
+        "line": 357,
+        "col": 22,
+        "code": "Boolean((user as any)?.isSuperAdmin);"
+      },
+      {
+        "line": 362,
+        "col": 78,
+        "code": "if (user?.id && (ticket.userId === user.id || ticket.userId === (user as any)?.sub)) return true;"
+      },
+      {
+        "line": 386,
+        "col": 21,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 444,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 474,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 588,
+        "col": 35,
+        "code": "return [...filtered].sort((a: any, b: any) => {"
+      },
+      {
+        "line": 588,
+        "col": 43,
+        "code": "return [...filtered].sort((a: any, b: any) => {"
+      },
+      {
+        "line": 1687,
+        "col": 34,
+        "code": "(user as any)?.isSuperAdmin"
+      },
+      {
+        "line": 1796,
+        "col": 40,
+        "code": "onValueChange={(val: any) => setEditPriority(val)}"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\support\\[id]\\page.tsx",
+    "count": 10,
+    "details": [
+      {
+        "line": 242,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 277,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 293,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 311,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 329,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 347,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 370,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 387,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 660,
+        "col": 36,
+        "code": "} as any);"
+      },
+      {
+        "line": 722,
+        "col": 40,
+        "code": "} as any);"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\hooks\\use-invoices-data.ts",
+    "count": 10,
+    "details": [
+      {
+        "line": 30,
+        "col": 16,
+        "code": "rawInvoices: any[];"
+      },
+      {
+        "line": 69,
+        "col": 21,
+        "code": "filteredInvoices: any[];"
+      },
+      {
+        "line": 70,
+        "col": 22,
+        "code": "paginatedInvoices: any[];"
+      },
+      {
+        "line": 123,
+        "col": 21,
+        "code": ".filter((inv: any) => {"
+      },
+      {
+        "line": 138,
+        "col": 17,
+        "code": ".sort((a: any, b: any) => {"
+      },
+      {
+        "line": 138,
+        "col": 25,
+        "code": ".sort((a: any, b: any) => {"
+      },
+      {
+        "line": 203,
+        "col": 37,
+        "code": "paginatedInvoices.every((inv: any) => selectedInvoiceIds.includes(inv.id))"
+      },
+      {
+        "line": 209,
+        "col": 59,
+        "code": "const pageIds = new Set(paginatedInvoices.map((inv: any) => inv.id));"
+      },
+      {
+        "line": 213,
+        "col": 69,
+        "code": "Array.from(new Set([...prev, ...paginatedInvoices.map((inv: any) => inv.id)]))"
+      },
+      {
+        "line": 251,
+        "col": 40,
+        "code": "const rows = rawInvoices.map((inv: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\BulkImportModal.tsx",
+    "count": 10,
+    "details": [
+      {
+        "line": 38,
+        "col": 48,
+        "code": "const [parsedData, setParsedData] = useState<any[]>([]);"
+      },
+      {
+        "line": 46,
+        "col": 12,
+        "code": "valid: any[];"
+      },
+      {
+        "line": 47,
+        "col": 14,
+        "code": "invalid: any[];"
+      },
+      {
+        "line": 157,
+        "col": 18,
+        "code": "const valid: any[] = [];"
+      },
+      {
+        "line": 158,
+        "col": 20,
+        "code": "const invalid: any[] = [];"
+      },
+      {
+        "line": 161,
+        "col": 24,
+        "code": "const mappedRow: any = {};"
+      },
+      {
+        "line": 229,
+        "col": 26,
+        "code": "let allFailedRows: any[] = [];"
+      },
+      {
+        "line": 253,
+        "col": 23,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 255,
+        "col": 55,
+        "code": "const chunkFailedRows = chunks[i].map((row: any) => ({"
+      },
+      {
+        "line": 300,
+        "col": 21,
+        "code": "} catch (error: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\tasks.api.ts",
+    "count": 10,
+    "details": [
+      {
+        "line": 16,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 26,
+        "col": 56,
+        "code": "export function fetchTasksData(params?: Record<string, any>) {"
+      },
+      {
+        "line": 32,
+        "col": 34,
+        "code": "return unwrapResponse<{ stats: any[]; dashboardStats: any }>("
+      },
+      {
+        "line": 32,
+        "col": 57,
+        "code": "return unwrapResponse<{ stats: any[]; dashboardStats: any }>("
+      },
+      {
+        "line": 47,
+        "col": 25,
+        "code": "return unwrapResponse<any[]>(client.get(`/crm/tasks/calendar${query}`));"
+      },
+      {
+        "line": 51,
+        "col": 25,
+        "code": "return unwrapResponse<any[]>(client.get(`/crm/tasks/${id}/history`));"
+      },
+      {
+        "line": 78,
+        "col": 110,
+        "code": "export function createTaskTimelineEvent(id: string, data: { action: string; description?: string; metadata?: any }) {"
+      },
+      {
+        "line": 79,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(`/crm/tasks/${id}/timeline`, data));"
+      },
+      {
+        "line": 83,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.patch(`/crm/tasks/${id}/progress`, { progress }));"
+      },
+      {
+        "line": 87,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(`/crm/tasks/${id}/blockers/resolve`));"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\organizations\\page.tsx",
+    "count": 9,
+    "details": [
+      {
+        "line": 84,
+        "col": 64,
+        "code": "const [selectedOrgDetails, setSelectedOrgDetails] = useState<any>(null);"
+      },
+      {
+        "line": 158,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 180,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 200,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 272,
+        "col": 35,
+        "code": "return [...filtered].sort((a: any, b: any) => {"
+      },
+      {
+        "line": 272,
+        "col": 43,
+        "code": "return [...filtered].sort((a: any, b: any) => {"
+      },
+      {
+        "line": 273,
+        "col": 26,
+        "code": "const aVal = (a as any)[sortConfig.key] ?? \"\";"
+      },
+      {
+        "line": 274,
+        "col": 26,
+        "code": "const bVal = (b as any)[sortConfig.key] ?? \"\";"
+      },
+      {
+        "line": 1025,
+        "col": 62,
+        "code": "selectedOrgDetails.members.map((m: any) => ("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\SecuritySettings.tsx",
+    "count": 9,
+    "details": [
+      {
+        "line": 108,
+        "col": 62,
+        "code": "const res = await client.get<{ success: boolean; data: any }>(\"/crm/settings/notifications\");"
+      },
+      {
+        "line": 121,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 131,
+        "col": 64,
+        "code": "const res = await client.patch<{ success: boolean; data: any }>(\"/crm/settings/notifications\", {"
+      },
+      {
+        "line": 140,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 178,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 218,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 235,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 254,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 280,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\support\\SuperAdminTicketModal.tsx",
+    "count": 8,
+    "details": [
+      {
+        "line": 246,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 286,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 303,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 322,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 341,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 360,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 384,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 402,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\components\\AIMessageItem.tsx",
+    "count": 8,
+    "details": [
+      {
+        "line": 19,
+        "col": 56,
+        "code": "message: UIMessage & { id: string; toolInvocations?: any[] };"
+      },
+      {
+        "line": 49,
+        "col": 17,
+        "code": "(message as any).content ||"
+      },
+      {
+        "line": 50,
+        "col": 30,
+        "code": "(message.parts?.find((p: any) => p.type === 'text') as any)?.text ||"
+      },
+      {
+        "line": 50,
+        "col": 60,
+        "code": "(message.parts?.find((p: any) => p.type === 'text') as any)?.text ||"
+      },
+      {
+        "line": 59,
+        "col": 13,
+        "code": "(p: any) =>"
+      },
+      {
+        "line": 64,
+        "col": 16,
+        "code": ".map((p: any) => ({"
+      },
+      {
+        "line": 78,
+        "col": 47,
+        "code": "const activeTool = toolInvocations.find((t: any) => !t.hasResult);"
+      },
+      {
+        "line": 85,
+        "col": 9,
+        "code": "(t: any) => t.result && t.result.confirmationRequired === true"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\hooks\\use-ai-workspace.ts",
+    "count": 8,
+    "details": [
+      {
+        "line": 63,
+        "col": 39,
+        "code": "export function extractMessageText(m: any): string {"
+      },
+      {
+        "line": 67,
+        "col": 39,
+        "code": "const textPart = m.parts.find((p: any) => p.type === 'text' && p.text);"
+      },
+      {
+        "line": 111,
+        "col": 22,
+        "code": "(auth?.user as any)?.isSuperAdmin === true ||"
+      },
+      {
+        "line": 119,
+        "col": 51,
+        "code": "const typeParam = searchParams.get('type') as any;"
+      },
+      {
+        "line": 189,
+        "col": 30,
+        "code": "const rawModels: any[] = Array.isArray(json.data.models) ? json.data.models : [];"
+      },
+      {
+        "line": 228,
+        "col": 47,
+        "code": "const customFetch = useCallback(async (url: any, options: any) => {"
+      },
+      {
+        "line": 228,
+        "col": 61,
+        "code": "const customFetch = useCallback(async (url: any, options: any) => {"
+      },
+      {
+        "line": 283,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\CreateInvoiceModal.tsx",
+    "count": 8,
+    "details": [
+      {
+        "line": 117,
+        "col": 42,
+        "code": "const found = safeCustomers.find((c: any) => c.id === cId);"
+      },
+      {
+        "line": 126,
+        "col": 43,
+        "code": "const found = safeQuotations.find((q: any) => q.id === qId);"
+      },
+      {
+        "line": 132,
+        "col": 32,
+        "code": "found.items.map((it: any, idx: number) => ({"
+      },
+      {
+        "line": 173,
+        "col": 73,
+        "code": "const updateItem = (index: number, field: keyof LineItemState, value: any) => {"
+      },
+      {
+        "line": 379,
+        "col": 40,
+        "code": "{safeCustomers.map((c: any) => ("
+      },
+      {
+        "line": 397,
+        "col": 43,
+        "code": "{safeCompanies.map((comp: any) => ("
+      },
+      {
+        "line": 415,
+        "col": 41,
+        "code": "{safeQuotations.map((q: any) => ("
+      },
+      {
+        "line": 433,
+        "col": 36,
+        "code": "{safeDeals.map((d: any) => ("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\EditTaskModal.tsx",
+    "count": 8,
+    "details": [
+      {
+        "line": 84,
+        "col": 46,
+        "code": "resolver: zodResolver(taskFormSchema) as any,"
+      },
+      {
+        "line": 102,
+        "col": 173,
+        "code": "if (task.relatedQuotation) return { type: \"quotation\", id: task.relatedQuotation.id, label: `#${task.relatedQuotation.quoteNumber}`, sub: (task.relatedQuotation as any).client };"
+      },
+      {
+        "line": 123,
+        "col": 36,
+        "code": "priority: task.priority as any,"
+      },
+      {
+        "line": 133,
+        "col": 156,
+        "code": "setRelatedRecord({ type: \"quotation\", id: task.relatedQuotation.id, label: `#${task.relatedQuotation.quoteNumber}`, sub: (task.relatedQuotation as any).client });"
+      },
+      {
+        "line": 139,
+        "col": 35,
+        "code": "task.attachments?.map((a: any) => ({"
+      },
+      {
+        "line": 197,
+        "col": 22,
+        "code": "const payload: any = {"
+      },
+      {
+        "line": 348,
+        "col": 54,
+        "code": "{employees.map((emp: any) => ("
+      },
+      {
+        "line": 426,
+        "col": 59,
+        "code": "checklistFields={checklistFields as any}"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-invoices.ts",
+    "count": 8,
+    "details": [
+      {
+        "line": 88,
+        "col": 22,
+        "code": "onError: (error: any) => {"
+      },
+      {
+        "line": 106,
+        "col": 22,
+        "code": "onError: (error: any) => {"
+      },
+      {
+        "line": 121,
+        "col": 22,
+        "code": "onError: (error: any) => {"
+      },
+      {
+        "line": 139,
+        "col": 22,
+        "code": "onError: (error: any) => {"
+      },
+      {
+        "line": 156,
+        "col": 22,
+        "code": "onError: (error: any) => {"
+      },
+      {
+        "line": 167,
+        "col": 23,
+        "code": "onSuccess: (data: any, { id }) => {"
+      },
+      {
+        "line": 172,
+        "col": 22,
+        "code": "onError: (error: any) => {"
+      },
+      {
+        "line": 186,
+        "col": 22,
+        "code": "onError: (error: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-subscription.ts",
+    "count": 8,
+    "details": [
+      {
+        "line": 104,
+        "col": 14,
+        "code": "(user as any)?.isSuperAdmin === true;"
+      },
+      {
+        "line": 113,
+        "col": 14,
+        "code": "(user as any)?.isOrgOwner === true ||"
+      },
+      {
+        "line": 114,
+        "col": 14,
+        "code": "(user as any)?.isOrgAdmin === true;"
+      },
+      {
+        "line": 211,
+        "col": 52,
+        "code": "}): Promise<{ quote: SubscriptionQuote; order: any }> => {"
+      },
+      {
+        "line": 235,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 250,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 278,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 292,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\client.ts",
+    "count": 8,
+    "details": [
+      {
+        "line": 71,
+        "col": 57,
+        "code": "if (config.headers && typeof (config.headers as any).delete === 'function') {"
+      },
+      {
+        "line": 72,
+        "col": 30,
+        "code": "(config.headers as any).delete('Content-Type');"
+      },
+      {
+        "line": 73,
+        "col": 30,
+        "code": "(config.headers as any).delete('content-type');"
+      },
+      {
+        "line": 76,
+        "col": 37,
+        "code": "delete (config.headers as any)['Content-Type'];"
+      },
+      {
+        "line": 77,
+        "col": 37,
+        "code": "delete (config.headers as any)['content-type'];"
+      },
+      {
+        "line": 146,
+        "col": 53,
+        "code": "const inFlightGetRequests = new Map<string, Promise<any>>();"
+      },
+      {
+        "line": 149,
+        "col": 28,
+        "code": "client.get = function <T = any, R = AxiosResponse<T>, D = any>("
+      },
+      {
+        "line": 149,
+        "col": 59,
+        "code": "client.get = function <T = any, R = AxiosResponse<T>, D = any>("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\quotations.api.ts",
+    "count": 8,
+    "details": [
+      {
+        "line": 16,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 46,
+        "col": 59,
+        "code": "export function fetchInvoicesData(params?: Record<string, any>) {"
+      },
+      {
+        "line": 48,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.get(`/crm/invoices${query}`));"
+      },
+      {
+        "line": 51,
+        "col": 52,
+        "code": "export function createInvoice(data: Record<string, any>) {"
+      },
+      {
+        "line": 52,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(\"/crm/invoices\", data));"
+      },
+      {
+        "line": 55,
+        "col": 64,
+        "code": "export function updateInvoice(id: string, data: Record<string, any>) {"
+      },
+      {
+        "line": 56,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.patch(`/crm/invoices/${id}`, data));"
+      },
+      {
+        "line": 60,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.patch(`/crm/invoices/${id}`, { status }));"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleTableRows.tsx",
+    "count": 7,
+    "details": [
+      {
+        "line": 23,
+        "col": 10,
+        "code": "roles: any[];"
+      },
+      {
+        "line": 26,
+        "col": 24,
+        "code": "getRoleColor: (role: any) => string;"
+      },
+      {
+        "line": 27,
+        "col": 22,
+        "code": "onViewRole: (role: any) => void;"
+      },
+      {
+        "line": 28,
+        "col": 22,
+        "code": "onEditRole: (role: any) => void;"
+      },
+      {
+        "line": 29,
+        "col": 24,
+        "code": "onDeleteRole: (role: any) => void;"
+      },
+      {
+        "line": 71,
+        "col": 33,
+        "code": ".filter((p: any) => p.hasAccess)"
+      },
+      {
+        "line": 73,
+        "col": 27,
+        "code": "(p: any) =>"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\page.tsx",
+    "count": 7,
+    "details": [
+      {
+        "line": 75,
+        "col": 24,
+        "code": ": (user?.role as any)?.name || (user as any)?.roleName || \"ADMIN\""
+      },
+      {
+        "line": 75,
+        "col": 47,
+        "code": ": (user?.role as any)?.name || (user as any)?.roleName || \"ADMIN\""
+      },
+      {
+        "line": 139,
+        "col": 16,
+        "code": "payload: any;"
+      },
+      {
+        "line": 158,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 184,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 574,
+        "col": 43,
+        "code": ".filter((p: any) => p.hasAccess)"
+      },
+      {
+        "line": 576,
+        "col": 37,
+        "code": "(p: any) =>"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\modules\\page.tsx",
+    "count": 7,
+    "details": [
+      {
+        "line": 212,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 505,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 539,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 578,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 596,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 821,
+        "col": 66,
+        "code": "onChange={(e) => setStatusFilter(e.target.value as any)}"
+      },
+      {
+        "line": 1306,
+        "col": 74,
+        "code": "onChange={(e) => setFormAccessPreset(e.target.value as any)}"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\settings.api.ts",
+    "count": 7,
+    "details": [
+      {
+        "line": 23,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 98,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.patch(`/crm/settings/integrations/${id}`, { connected }));"
+      },
+      {
+        "line": 110,
+        "col": 25,
+        "code": "return unwrapResponse<any[]>(client.get(\"/crm/settings/revenue-targets\"));"
+      },
+      {
+        "line": 113,
+        "col": 69,
+        "code": "export function fetchRevenueTargetAnalytics(filters: Record<string, any> = {}) {"
+      },
+      {
+        "line": 115,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.get(`/crm/analytics/revenue-target?${searchParams.toString()}`));"
+      },
+      {
+        "line": 118,
+        "col": 37,
+        "code": "export function createMeeting(data: any) {"
+      },
+      {
+        "line": 119,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(\"/crm/meetings\", data));"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\support\\tickets\\[id]\\page.tsx",
+    "count": 6,
+    "details": [
+      {
+        "line": 259,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 295,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 319,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 336,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 597,
+        "col": 36,
+        "code": "} as any);"
+      },
+      {
+        "line": 656,
+        "col": 40,
+        "code": "} as any);"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\upgrade\\page.tsx",
+    "count": 6,
+    "details": [
+      {
+        "line": 342,
+        "col": 22,
+        "code": "const options: any = {"
+      },
+      {
+        "line": 367,
+        "col": 35,
+        "code": "handler: async (response: any) => {"
+      },
+      {
+        "line": 380,
+        "col": 26,
+        "code": "} catch (vErr: any) {"
+      },
+      {
+        "line": 391,
+        "col": 34,
+        "code": "const rzp = new (window as any).Razorpay(options);"
+      },
+      {
+        "line": 393,
+        "col": 47,
+        "code": "rzp.on(\"payment.failed\", (failResponse: any) => {"
+      },
+      {
+        "line": 401,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\settings\\page.tsx",
+    "count": 6,
+    "details": [
+      {
+        "line": 77,
+        "col": 52,
+        "code": "const [settingsData, setSettingsData] = useState<any>(null);"
+      },
+      {
+        "line": 184,
+        "col": 37,
+        "code": "const payload: Record<string, any> = {};"
+      },
+      {
+        "line": 185,
+        "col": 44,
+        "code": "const generalPayload: Record<string, any> = {};"
+      },
+      {
+        "line": 186,
+        "col": 40,
+        "code": "const regPayload: Record<string, any> = {};"
+      },
+      {
+        "line": 241,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 324,
+        "col": 46,
+        "code": "{availablePlans.map((plan: any) => ("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\InvoiceDetailModal.tsx",
+    "count": 6,
+    "details": [
+      {
+        "line": 245,
+        "col": 53,
+        "code": "onValueChange={(v) => setActiveTab(v as any)}"
+      },
+      {
+        "line": 311,
+        "col": 63,
+        "code": "{(invoice.customerBillingAddress as any)?.gstin && ("
+      },
+      {
+        "line": 313,
+        "col": 74,
+        "code": "GSTIN: {(invoice.customerBillingAddress as any).gstin}"
+      },
+      {
+        "line": 362,
+        "col": 52,
+        "code": "{invoice.items?.map((it: any) => ("
+      },
+      {
+        "line": 521,
+        "col": 53,
+        "code": "{invoice.payments.map((p: any) => ("
+      },
+      {
+        "line": 573,
+        "col": 59,
+        "code": "{invoice.timelineEvents.map((evt: any) => ("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\lib\\mcp\\mcp-client.ts",
+    "count": 6,
+    "details": [
+      {
+        "line": 37,
+        "col": 12,
+        "code": "): Promise<any> {"
+      },
+      {
+        "line": 109,
+        "col": 17,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 186,
+        "col": 29,
+        "code": "execute: async (args: any) => {"
+      },
+      {
+        "line": 225,
+        "col": 29,
+        "code": "execute: async (args: any) => {"
+      },
+      {
+        "line": 285,
+        "col": 29,
+        "code": "execute: async (args: any) => {"
+      },
+      {
+        "line": 318,
+        "col": 29,
+        "code": "execute: async (args: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\plans\\page.tsx",
+    "count": 5,
+    "details": [
+      {
+        "line": 188,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 378,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 398,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 915,
+        "col": 57,
+        "code": "status: e.target.value as any,"
+      },
+      {
+        "line": 990,
+        "col": 62,
+        "code": "pricingMode: e.target.value as any,"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\users\\page.tsx",
+    "count": 5,
+    "details": [
+      {
+        "line": 106,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 130,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 153,
+        "col": 61,
+        "code": "await updatePlatformUserStatus(user.id, nextStatus as any);"
+      },
+      {
+        "line": 156,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 562,
+        "col": 56,
+        "code": "{u.organizations.map((org: any) => ("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\TaskDetailsModal.tsx",
+    "count": 5,
+    "details": [
+      {
+        "line": 105,
+        "col": 31,
+        "code": "historyData.forEach((log: any) => {"
+      },
+      {
+        "line": 174,
+        "col": 41,
+        "code": "task.timelineEvents.forEach((event: any) => {"
+      },
+      {
+        "line": 311,
+        "col": 70,
+        "code": "{ id: task.id, data: { assignedToId: null } as any },"
+      },
+      {
+        "line": 319,
+        "col": 54,
+        "code": "{employeesData?.employees?.map((emp: any) => ("
+      },
+      {
+        "line": 325,
+        "col": 88,
+        "code": "{ id: task.id, data: { assignedToId: emp.id || emp.userId } as any },"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\billing\\razorpay-loader.ts",
+    "count": 5,
+    "details": [
+      {
+        "line": 13,
+        "col": 18,
+        "code": "if ((window as any).Razorpay) {"
+      },
+      {
+        "line": 27,
+        "col": 22,
+        "code": "if ((window as any).Razorpay) {"
+      },
+      {
+        "line": 37,
+        "col": 22,
+        "code": "if ((window as any).Razorpay) {"
+      },
+      {
+        "line": 45,
+        "col": 34,
+        "code": "const onScriptError = (err?: any) => {"
+      },
+      {
+        "line": 54,
+        "col": 22,
+        "code": "if ((window as any).Razorpay) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleList.tsx",
+    "count": 4,
+    "details": [
+      {
+        "line": 134,
+        "col": 11,
+        "code": "data: any;"
+      },
+      {
+        "line": 223,
+        "col": 16,
+        "code": "payload: any;"
+      },
+      {
+        "line": 244,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 270,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\api\\ai\\chat\\route.ts",
+    "count": 4,
+    "details": [
+      {
+        "line": 24,
+        "col": 37,
+        "code": "function sanitizeMessages(messages: any[]): any[] {"
+      },
+      {
+        "line": 24,
+        "col": 45,
+        "code": "function sanitizeMessages(messages: any[]): any[] {"
+      },
+      {
+        "line": 198,
+        "col": 32,
+        "code": "onError: (streamError: any) => {"
+      },
+      {
+        "line": 205,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\InvoicesDataTable.tsx",
+    "count": 4,
+    "details": [
+      {
+        "line": 55,
+        "col": 22,
+        "code": "paginatedInvoices: any[];"
+      },
+      {
+        "line": 69,
+        "col": 28,
+        "code": "onOpenPayment: (invoice: any) => void;"
+      },
+      {
+        "line": 71,
+        "col": 30,
+        "code": "onDeleteInvoice: (invoice: any) => void;"
+      },
+      {
+        "line": 286,
+        "col": 41,
+        "code": "paginatedInvoices.map((inv: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\CreateTaskModal.tsx",
+    "count": 4,
+    "details": [
+      {
+        "line": 82,
+        "col": 46,
+        "code": "resolver: zodResolver(taskFormSchema) as any,"
+      },
+      {
+        "line": 154,
+        "col": 22,
+        "code": "const payload: any = {"
+      },
+      {
+        "line": 299,
+        "col": 54,
+        "code": "{employees.map((emp: any) => ("
+      },
+      {
+        "line": 377,
+        "col": 59,
+        "code": "checklistFields={checklistFields as any}"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\sidebar\\BaseSidebar.tsx",
+    "count": 4,
+    "details": [
+      {
+        "line": 44,
+        "col": 17,
+        "code": "themeClasses: any;"
+      },
+      {
+        "line": 108,
+        "col": 17,
+        "code": "themeClasses: any;"
+      },
+      {
+        "line": 282,
+        "col": 17,
+        "code": "themeClasses: any;"
+      },
+      {
+        "line": 421,
+        "col": 17,
+        "code": "themeClasses: any;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\employees.api.ts",
+    "count": 4,
+    "details": [
+      {
+        "line": 16,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 35,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.put(`/crm/employees/${id}`, data));"
+      },
+      {
+        "line": 39,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.patch(`/crm/employees/${id}`, { status }));"
+      },
+      {
+        "line": 43,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.delete(`/crm/employees/${id}`));"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(auth)\\login\\page.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 104,
+        "col": 24,
+        "code": "(user as any)?.isSuperAdmin === true;"
+      },
+      {
+        "line": 153,
+        "col": 24,
+        "code": "(loggedUser as any)?.isSuperAdmin === true;"
+      },
+      {
+        "line": 157,
+        "col": 21,
+        "code": "} catch (error: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\invoices\\page.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 56,
+        "col": 68,
+        "code": "const [paymentTargetInvoice, setPaymentTargetInvoice] = useState<any | null>(null);"
+      },
+      {
+        "line": 60,
+        "col": 58,
+        "code": "const [invoiceToDelete, setInvoiceToDelete] = useState<any | null>(null);"
+      },
+      {
+        "line": 109,
+        "col": 35,
+        "code": "const handleOpenPayment = (inv: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleDetailsDialog.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 19,
+        "col": 9,
+        "code": "role: any | null;"
+      },
+      {
+        "line": 34,
+        "col": 9,
+        "code": "(p: any) => p.hasAccess,"
+      },
+      {
+        "line": 74,
+        "col": 43,
+        "code": "activePermissions.map((p: any) => ("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\support\\page.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 186,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 214,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 235,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\SuperAdminMfaModal.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 76,
+        "col": 49,
+        "code": "const verifiedTotp = totpFactors.find((f: any) => f.status === \"verified\") || totpFactors[0];"
+      },
+      {
+        "line": 101,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 188,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\contacts\\hooks\\use-contact-settings.ts",
+    "count": 3,
+    "details": [
+      {
+        "line": 54,
+        "col": 43,
+        "code": "export function parseContactSettings(raw: any): ContactSettingsConfig {"
+      },
+      {
+        "line": 117,
+        "col": 67,
+        "code": "window.addEventListener(\"clixpro:contact-settings-updated\" as any, handleUpdate);"
+      },
+      {
+        "line": 119,
+        "col": 72,
+        "code": "window.removeEventListener(\"clixpro:contact-settings-updated\" as any, handleUpdate);"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\ProfileSettings.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 95,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 162,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 177,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\WorkspaceSettings.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 212,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 233,
+        "col": 24,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 270,
+        "col": 22,
+        "code": "onError: (err: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\TaskRelatedRecordPicker.tsx",
+    "count": 3,
+    "details": [
+      {
+        "line": 50,
+        "col": 23,
+        "code": "leads.forEach((l: any) => {"
+      },
+      {
+        "line": 56,
+        "col": 27,
+        "code": "customers.forEach((c: any) => {"
+      },
+      {
+        "line": 62,
+        "col": 25,
+        "code": "quotes.forEach((qu: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\deals.api.ts",
+    "count": 3,
+    "details": [
+      {
+        "line": 16,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 50,
+        "col": 69,
+        "code": "export function updatePipelineItem(id: string, data: Record<string, any>) {"
+      },
+      {
+        "line": 51,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.patch(`/crm/pipeline/${id}`, data));"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleDeleteDialog.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 26,
+        "col": 17,
+        "code": "deletingRole: any | null;"
+      },
+      {
+        "line": 29,
+        "col": 30,
+        "code": "availableReplacementRoles: any[];"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\copilot\\page.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 257,
+        "col": 37,
+        "code": "message={msg as any}"
+      },
+      {
+        "line": 273,
+        "col": 30,
+        "code": "} as any"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\security\\operations\\page.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 272,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 319,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\MfaChallengeModal.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 74,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      },
+      {
+        "line": 98,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\auth-loading-screen.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 132,
+        "col": 28,
+        "code": "const containerVariants: any = useMemo("
+      },
+      {
+        "line": 151,
+        "col": 23,
+        "code": "const itemVariants: any = useMemo("
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\super-admin-route.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 27,
+        "col": 16,
+        "code": "(user as any)?.isSuperAdmin === true;"
+      },
+      {
+        "line": 42,
+        "col": 14,
+        "code": "(user as any)?.isSuperAdmin === true;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\import\\ImportValidationStep.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 11,
+        "col": 12,
+        "code": "valid: any[];"
+      },
+      {
+        "line": 12,
+        "col": 14,
+        "code": "invalid: any[];"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\import\\import-types.ts",
+    "count": 2,
+    "details": [
+      {
+        "line": 71,
+        "col": 29,
+        "code": "export const slideVariants: any = {"
+      },
+      {
+        "line": 83,
+        "col": 15,
+        "code": "failedRows: any[];"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\DeleteAccountModal.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 39,
+        "col": 51,
+        "code": "const companyName = workspace?.name || (user as any)?.companyName || \"clixprocrm\";"
+      },
+      {
+        "line": 99,
+        "col": 21,
+        "code": "} catch (error: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\SessionsSettings.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 55,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      },
+      {
+        "line": 69,
+        "col": 20,
+        "code": "onError: (err: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\tasks\\components\\TaskContextualSettings.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 157,
+        "col": 37,
+        "code": "if (Array.isArray((tasksData as any)?.tasks)) return (tasksData as any).tasks;"
+      },
+      {
+        "line": 157,
+        "col": 72,
+        "code": "if (Array.isArray((tasksData as any)?.tasks)) return (tasksData as any).tasks;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\crm\\CRMDataTable.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 36,
+        "col": 40,
+        "code": "export interface CRMDataTableProps<T = any> {"
+      },
+      {
+        "line": 71,
+        "col": 34,
+        "code": "export function CRMDataTable<T = any>({"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\icons\\icon-registry.tsx",
+    "count": 2,
+    "details": [
+      {
+        "line": 203,
+        "col": 95,
+        "code": "icon?: LucideIcon | React.ComponentType<{ className?: string; size?: number; [key: string]: any }>;"
+      },
+      {
+        "line": 337,
+        "col": 79,
+        "code": "export function resolveIconName(name?: string, href?: string, IconComponent?: any): IconName {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\auth.ts",
+    "count": 2,
+    "details": [
+      {
+        "line": 283,
+        "col": 15,
+        "code": "user: any;"
+      },
+      {
+        "line": 297,
+        "col": 13,
+        "code": "user: any;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\dashboard.api.ts",
+    "count": 2,
+    "details": [
+      {
+        "line": 22,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 98,
+        "col": 25,
+        "code": "return unwrapResponse<any>(client.post(\"/crm/notifications/test\"));"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\invoices.api.ts",
+    "count": 2,
+    "details": [
+      {
+        "line": 33,
+        "col": 28,
+        "code": "customerBillingAddress?: any;"
+      },
+      {
+        "line": 34,
+        "col": 23,
+        "code": "orgBillingAddress?: any;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\reports.api.ts",
+    "count": 2,
+    "details": [
+      {
+        "line": 17,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      },
+      {
+        "line": 49,
+        "col": 64,
+        "code": "export async function fetchReportsData(params?: Record<string, any>) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\tests\\smoke.spec.ts",
+    "count": 2,
+    "details": [
+      {
+        "line": 4,
+        "col": 18,
+        "code": "const results: any[] = [];"
+      },
+      {
+        "line": 17,
+        "col": 22,
+        "code": "const apiErrors: any[] = [];"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(auth)\\onboarding\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 176,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(auth)\\register\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 101,
+        "col": 24,
+        "code": "(user as any)?.isSuperAdmin === true;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\notifications\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 120,
+        "col": 42,
+        "code": "const handleItemClick = (notification: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\role-management\\_components\\RoleEditorModal.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 34,
+        "col": 16,
+        "code": "editingRole: any | null;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\settings\\ai\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 17,
+        "col": 54,
+        "code": "const [initialConfig, setInitialConfig] = useState<any>(null);"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(dashboard)\\settings\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 33,
+        "col": 14,
+        "code": "(user as any)?.isSuperAdmin === true;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\ai\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 215,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 84,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\(super-admin)\\super-admin\\security\\page.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 149,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\app\\api\\ai\\models\\route.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 102,
+        "col": 17,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\components\\AIContextualSettings.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 68,
+        "col": 48,
+        "code": "const found = aiData.features.find((f: any) => f.id === id);"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\ai\\types.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 44,
+        "col": 32,
+        "code": "proposedData: Record<string, any>;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\auth-provider.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 124,
+        "col": 70,
+        "code": "const isSuperAdmin = roleKey === CRM_ROLES.SUPER_ADMIN || (user as any).isSuperAdmin === true;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\auth\\components\\public-route.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 33,
+        "col": 18,
+        "code": "(user as any)?.isSuperAdmin === true;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\contacts\\components\\ContactContextualSettings.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 97,
+        "col": 19,
+        "code": "} catch (err: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\dashboard\\components\\DashboardKPIs.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 149,
+        "col": 33,
+        "code": "const isSuperAdmin = (user as any)?.isSuperAdmin;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\help-center\\components\\FileUploader.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 176,
+        "col": 44,
+        "code": "const file = new (window.File as any)([blob], fileName, { type: blob.type }) as File;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\help-center\\components\\SupportTicketForm.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 177,
+        "col": 21,
+        "code": "} catch (error: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\invoices\\components\\InvoiceContextualSettings.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 153,
+        "col": 20,
+        "code": "const workspace: any = workspaceData || {};"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\leads\\components\\import\\ImportMappingStep.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 15,
+        "col": 15,
+        "code": "parsedData: any[];"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\reports\\components\\AIInsights.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 130,
+        "col": 50,
+        "code": "insights[activeTab].map((item: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\features\\settings\\components\\InvoiceSettings.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 73,
+        "col": 47,
+        "code": "const handleChange = (field: string, value: any) => {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\lib\\supabase\\client.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 19,
+        "col": 64,
+        "code": "function serializeCookie(name: string, value: string, options: any = {}): string {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\crm\\CRMToolbar.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 28,
+        "col": 24,
+        "code": "setViewMode?: (mode: any) => void;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\crm\\PageFeedbackStates.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 44,
+        "col": 12,
+        "code": "action?: any;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\form-fields.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 63,
+        "col": 43,
+        "code": "icon?: LucideIcon | React.ComponentType<any>;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\components\\form-submit-button.tsx",
+    "count": 1,
+    "details": [
+      {
+        "line": 14,
+        "col": 10,
+        "code": "icon?: any;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-crm.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 674,
+        "col": 103,
+        "code": "mutationFn: ({ id, data }: { id: string; data: { action: string; description?: string; metadata?: any } }) => createTaskTimelineEvent(id, data),"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\hooks\\use-realtime-notifications.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 17,
+        "col": 29,
+        "code": "const channelRef = useRef<any>(null);"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\companies.api.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 15,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\customers.api.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 16,
+        "col": 19,
+        "code": "} catch (error: any) {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\mfa.api.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 55,
+        "col": 27,
+        "code": "details: Record<string, any> = {}"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\api\\privacy.api.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 36,
+        "col": 43,
+        "code": "notificationPreferences: Record<string, any>;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\notifications\\sound-chime.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 11,
+        "col": 65,
+        "code": "const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\plans\\plan-definitions.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 251,
+        "col": 21,
+        "code": "[planId: string]: any;"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\lib\\ticket-utils.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 18,
+        "col": 42,
+        "code": "export function formatTicketCode(ticket: any): string {"
+      }
+    ]
+  },
+  {
+    "filePath": "D:\\Projects\\project\\clixprocrm\\web\\shared\\types\\task.ts",
+    "count": 1,
+    "details": [
+      {
+        "line": 88,
+        "col": 20,
+        "code": "timelineEvents?: any[];"
+      }
+    ]
+  }
+]

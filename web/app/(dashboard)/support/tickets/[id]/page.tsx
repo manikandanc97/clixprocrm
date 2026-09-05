@@ -256,7 +256,7 @@ export default function CustomerTicketDetailPage() {
       if (!data) throw new Error("Ticket not found");
       setTicket(data);
       setSubjectDraft(data.subject);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to load ticket:", err);
       toast.error("Could not find ticket or load ticket thread.");
       router.push("/support");
@@ -292,9 +292,10 @@ export default function CustomerTicketDetailPage() {
       setTicket(updated);
       setIsEditingSubject(false);
       toast.success("Subject updated successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update subject:", err);
-      toast.error(err.response?.data?.message || "Failed to update subject");
+      const errObj = err as { response?: { data?: { message?: string } } };
+      toast.error(errObj.response?.data?.message || "Failed to update subject");
     } finally {
       setSavingSubject(false);
     }
@@ -316,9 +317,10 @@ export default function CustomerTicketDetailPage() {
       }
       setReplyText("");
       toast.success("Reply sent to support team");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to send reply:", err);
-      toast.error(err.response?.data?.message || "Failed to send response");
+      const errObj = err as { response?: { data?: { message?: string } } };
+      toast.error(errObj.response?.data?.message || "Failed to send response");
     } finally {
       setSendingReply(false);
     }
@@ -333,9 +335,10 @@ export default function CustomerTicketDetailPage() {
       toast.success(`Ticket #${ticket.ticketNumber || ticket.ticketId} deleted successfully`);
       setIsDeleteDialogOpen(false);
       router.push("/support");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete ticket:", err);
-      toast.error(err.response?.data?.message || "Failed to delete ticket");
+      const errObj = err as { response?: { data?: { message?: string } } };
+      toast.error(errObj.response?.data?.message || "Failed to delete ticket");
       setDeletingTicket(false);
     }
   };
@@ -593,8 +596,8 @@ export default function CustomerTicketDetailPage() {
                                 size: att.fileSize,
                                 contentType: att.fileType,
                                 isImage: isImg,
-                                video: isVid,
-                              } as any);
+                                isVideo: isVid,
+                              });
                             } else {
                               window.open(att.fileUrl, "_blank", "noopener,noreferrer");
                             }
@@ -652,8 +655,8 @@ export default function CustomerTicketDetailPage() {
                                     size: att.fileSize,
                                     contentType: att.fileType,
                                     isImage: isImg,
-                                    video: isVid,
-                                  } as any);
+                                    isVideo: isVid,
+                                  });
                                 } else {
                                   window.open(att.fileUrl, "_blank");
                                 }

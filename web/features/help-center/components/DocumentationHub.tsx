@@ -254,7 +254,7 @@ export function DocumentationHub() {
         <Card className="border-dashed shadow-card rounded-2xl overflow-hidden">
           <CardContent className="py-16 text-center space-y-2">
             <p className="text-sm font-bold text-foreground">No guides match your search criteria</p>
-            <p className="text-xs text-muted-foreground">Try searching with different keywords or select "All Guides".</p>
+            <p className="text-xs text-muted-foreground">Try searching with different keywords or select &quot;All Guides&quot;.</p>
             <Button
               variant="outline"
               size="sm"

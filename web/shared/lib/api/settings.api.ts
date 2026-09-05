@@ -12,6 +12,7 @@ import {
   SecuritySettingsDataType,
   WorkspaceDataType,
 } from "@/shared/types/settings";
+import { MeetingType } from "@/shared/types/meeting";
 
 async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>) {
   try {
@@ -20,14 +21,30 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
       throw new Error(response.data?.message || "Invalid API response.");
     }
     return response.data.data;
-  } catch (error: any) {
-    const msg = error.response?.data?.message;
+  } catch (error: unknown) {
+    const err = error as { response?: { data?: { message?: unknown } } };
+    const msg = err?.response?.data?.message;
     if (msg) {
       if (typeof msg === 'string') throw new Error(msg);
-      else if (typeof msg === 'object') throw new Error(msg.message || JSON.stringify(msg));
+      else if (typeof msg === 'object' && msg !== null) {
+        throw new Error((msg as { message?: string }).message || JSON.stringify(msg));
+      }
     }
     throw error;
   }
+}
+
+export interface RevenueTargetType {
+  id: string;
+  name?: string;
+  periodType?: string;
+  goalType?: string;
+  startDate: string;
+  endDate: string;
+  currentRevenue?: number;
+  value?: number;
+  isActive?: boolean;
+  status?: string;
 }
 
 export function fetchWorkspaceData() {
@@ -95,7 +112,9 @@ export function updateSecuritySettings(data: Partial<SecuritySettingsDataType>) 
 }
 
 export function updateIntegrationSettings(id: string, connected: boolean) {
-  return unwrapResponse<any>(client.patch(`/crm/settings/integrations/${id}`, { connected }));
+  return unwrapResponse<{ success: boolean; id: string; connected: boolean }>(
+    client.patch(`/crm/settings/integrations/${id}`, { connected })
+  );
 }
 
 export function updateAiSettings(data: Partial<AiSettingsDataType>) {
@@ -107,15 +126,18 @@ export function updateNotificationSettings(data: Partial<NotificationSettingsDat
 }
 
 export function fetchRevenueTargets() {
-  return unwrapResponse<any[]>(client.get("/crm/settings/revenue-targets"));
+  return unwrapResponse<RevenueTargetType[]>(client.get("/crm/settings/revenue-targets"));
 }
 
-export function fetchRevenueTargetAnalytics(filters: Record<string, any> = {}) {
-  const searchParams = new URLSearchParams(filters);
-  return unwrapResponse<any>(client.get(`/crm/analytics/revenue-target?${searchParams.toString()}`));
+export function fetchRevenueTargetAnalytics(filters: Record<string, string | number | boolean> = {}) {
+  const searchParams = new URLSearchParams(
+    Object.entries(filters).map(([k, v]) => [k, String(v)])
+  );
+  return unwrapResponse<Record<string, unknown>>(
+    client.get(`/crm/analytics/revenue-target?${searchParams.toString()}`)
+  );
 }
 
-export function createMeeting(data: any) {
-  return unwrapResponse<any>(client.post("/crm/meetings", data));
+export function createMeeting(data: Partial<MeetingType>) {
+  return unwrapResponse<MeetingType>(client.post("/crm/meetings", data));
 }
-

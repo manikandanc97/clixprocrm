@@ -70,7 +70,7 @@ export interface TicketItem {
   priority: "Low" | "Medium" | "High" | "Critical";
   status: "OPEN" | "IN_PROGRESS" | "WAITING_FOR_USER" | "RESOLVED" | "CLOSED";
   description: string;
-  diagnostics?: any;
+  diagnostics?: Record<string, unknown> | null;
   attachments?: {
     id?: string;
     filename: string;
@@ -346,7 +346,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   const userRoleStr =
     typeof user?.role === "string"
       ? user.role
-      : (user?.role as any)?.name || (user as any)?.roleName || "";
+      : (user?.role as { name?: string } | undefined)?.name || (user as { roleName?: string } | undefined)?.roleName || "";
   const normalizedUserRole = userRoleStr.toUpperCase();
   const isAdminOrOwner =
     normalizedUserRole === "ADMIN" ||
@@ -354,12 +354,12 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
     normalizedUserRole === "SUPER_ADMIN" ||
     normalizedUserRole === "OWNER" ||
     normalizedUserRole === "ORG_OWNER" ||
-    Boolean((user as any)?.isSuperAdmin);
+    Boolean((user as { isSuperAdmin?: boolean } | undefined)?.isSuperAdmin);
 
   const canManageTicket = (ticket: TicketItem | null): boolean => {
     if (!ticket) return false;
     if (isAdminOrOwner) return true;
-    if (user?.id && (ticket.userId === user.id || ticket.userId === (user as any)?.sub)) return true;
+    if (user?.id && (ticket.userId === user.id || ticket.userId === (user as { sub?: string } | undefined)?.sub)) return true;
     if (user?.email && ticket.userEmail?.toLowerCase() === user.email?.toLowerCase()) return true;
     return false;
   };
@@ -383,9 +383,10 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       }
       setReplyText("");
       toast.success("Reply added to ticket thread.");
-    } catch (error: any) {
+    } catch (error: unknown) {
       console.error("Reply failed:", error);
-      toast.error(error?.response?.data?.error?.message || error?.response?.data?.message || "Failed to send reply.");
+      const errRes = error as { response?: { data?: { error?: { message?: string }; message?: string } } } | undefined;
+      toast.error(errRes?.response?.data?.error?.message || errRes?.response?.data?.message || "Failed to send reply.");
     } finally {
       setIsReplying(false);
     }
@@ -441,11 +442,12 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       setIsEditDialogOpen(false);
       setTargetTicket(null);
       toast.success("Ticket updated successfully!");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update ticket:", err);
+      const errRes = err as { response?: { data?: { error?: { message?: string }; message?: string } } } | undefined;
       toast.error(
-        err?.response?.data?.error?.message ||
-        err?.response?.data?.message ||
+        errRes?.response?.data?.error?.message ||
+        errRes?.response?.data?.message ||
         "Failed to update ticket details."
       );
     } finally {
@@ -471,11 +473,12 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       const deletedNumber = activeTarget.ticketId;
       setTargetTicket(null);
       toast.success(`Ticket #${deletedNumber} deleted successfully.`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete ticket:", err);
+      const errRes = err as { response?: { data?: { error?: { message?: string }; message?: string } } } | undefined;
       toast.error(
-        err?.response?.data?.error?.message ||
-        err?.response?.data?.message ||
+        errRes?.response?.data?.error?.message ||
+        errRes?.response?.data?.message ||
         "Failed to delete ticket."
       );
     } finally {
@@ -585,13 +588,13 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
 
     if (!sortConfig) return filtered;
 
-    return [...filtered].sort((a: any, b: any) => {
+    return [...filtered].sort((a: TicketItem, b: TicketItem) => {
       let aVal = a[sortConfig.key];
       let bVal = b[sortConfig.key];
 
       if (sortConfig.key === "createdAt") {
-        aVal = new Date(a.createdAt || 0).getTime();
-        bVal = new Date(b.createdAt || 0).getTime();
+        aVal = new Date(a.createdAt || 0).getTime() as unknown as string;
+        bVal = new Date(b.createdAt || 0).getTime() as unknown as string;
       } else {
         aVal = (aVal ?? "").toString().toLowerCase();
         bVal = (bVal ?? "").toString().toLowerCase();
@@ -1793,7 +1796,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
                 <Label className="text-xs font-bold text-foreground">Priority</Label>
                 <Select
                   value={editPriority}
-                  onValueChange={(val: any) => setEditPriority(val)}
+                  onValueChange={(val) => setEditPriority(val as TicketItem["priority"])}
                 >
                   <SelectTrigger className="h-9 text-xs">
                     <SelectValue placeholder="Select Priority" />

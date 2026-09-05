@@ -16,6 +16,15 @@ import { CRMCard } from "@/shared/components/crm/CRMCard";
 
 type TabType = "recommendations" | "alerts" | "trends";
 
+interface InsightItem {
+  id: string;
+  title: string;
+  description: string;
+  priority?: "HIGH" | "MEDIUM" | "LOW" | string;
+  bgColor?: string;
+  color?: string;
+}
+
 export default function AIInsights() {
   const [activeTab, setActiveTab] = useState<TabType>("recommendations");
   const { data } = useAiInsights();
@@ -58,59 +67,53 @@ export default function AIInsights() {
         animate={false}
         accentSeed="AI Insights"
         noPadding
-        className="relative flex flex-col overflow-hidden bg-card border-primary/20 shadow-2xl"
+        className="border border-border/80 bg-linear-to-b from-card/90 via-card to-card/95 backdrop-blur-xl shadow-xl overflow-hidden rounded-2xl relative transition-all"
       >
-        {/* Subtle Background Glow */}
-        <div className="absolute top-0 right-0 w-32 h-32 bg-primary/10 rounded-full blur-3xl pointer-events-none" />
-        <div className="absolute bottom-0 left-0 w-32 h-32 bg-primary/5 rounded-full blur-3xl pointer-events-none" />
-
-        <div className="relative z-10 p-5 flex flex-col">
+        <div className="p-6">
           {/* Header */}
           <div className="flex items-center justify-between mb-5">
             <div className="flex items-center gap-3">
-              <div className="p-2 bg-gradient-to-br from-primary to-primary/80 rounded-lg shadow-lg">
-                <Sparkles className="w-4 h-4 text-white" />
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
+                <Sparkles className="w-5 h-5" />
               </div>
               <div>
-                <h3 className="font-bold text-sm text-white tracking-tight">AI Insights</h3>
-                <p className="text-[9px] font-medium text-primary/80 uppercase tracking-wider">Neural Engine</p>
+                <h3 className="font-bold text-sm tracking-tight text-foreground flex items-center gap-2">
+                  Cognitive Recommendations & Alerts
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                    Live
+                  </span>
+                </h3>
+                <p className="text-xs text-muted-foreground">Actionable intelligence generated from your pipeline telemetry</p>
               </div>
             </div>
-            <div className="flex items-center gap-1.5 px-2.5 py-1 bg-white/5 rounded-full border border-white/10 backdrop-blur-md">
-              <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse" />
-              <span className="text-[10px] font-bold text-primary-foreground uppercase tracking-tight">Live</span>
-            </div>
+
+            <button 
+              onClick={handleHubClick}
+              className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group"
+            >
+              Intelligence Hub
+              <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
+            </button>
           </div>
 
-          {/* Tabs */}
-          <div className="flex gap-1 mb-5 p-1 bg-white/5 rounded-lg border border-white/5 backdrop-blur-xl overflow-hidden">
+          {/* Navigation Tabs */}
+          <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl mb-4 border border-border/40">
             {(["recommendations", "alerts", "trends"] as const).map((tab) => (
               <button
                 key={tab}
                 onClick={() => setActiveTab(tab)}
-                className={`flex-1 py-1.5 text-[10px] font-bold uppercase tracking-wider rounded-md relative outline-none focus:outline-none ${
+                className={`flex-1 py-1.5 px-3 rounded-lg text-xs font-semibold capitalize transition-all ${
                   activeTab === tab
-                    ? "text-white"
-                    : "text-white/40 hover:text-white/70"
+                    ? "bg-card text-foreground shadow-xs border border-border/60"
+                    : "text-muted-foreground hover:text-foreground"
                 }`}
               >
-                {activeTab === tab && (
-                  <motion.div
-                    layoutId="ai-tab-pill-restored"
-                    className="absolute inset-0 bg-gradient-to-r from-primary to-primary/80 rounded-md"
-                    transition={{ type: "spring", bounce: 0.2, duration: 0.6 }}
-                  />
+                {tab}
+                {insights[tab].length > 0 && (
+                  <span className="ml-1.5 text-[10px] px-1.5 py-0.2 rounded-full bg-primary/10 text-primary font-bold">
+                    {insights[tab].length}
+                  </span>
                 )}
-                <span className="relative z-10 flex items-center justify-center gap-1.5">
-                  {tab === "recommendations" ? "Recs" : tab}
-                  {insights[tab].length > 0 && (
-                    <span className={`px-1 rounded-sm text-[8px] ${
-                      activeTab === tab ? "bg-white/20" : "bg-white/10"
-                    }`}>
-                      {insights[tab].length}
-                    </span>
-                  )}
-                </span>
               </button>
             ))}
           </div>
@@ -127,7 +130,7 @@ export default function AIInsights() {
                 className="space-y-3 overflow-hidden"
               >
                 {insights[activeTab].length > 0 ? (
-                  insights[activeTab].map((item: any) => {
+                  (insights[activeTab] as unknown as InsightItem[]).map((item) => {
                     const Icon = getIcon(activeTab);
                     const priority = (item.priority || "MEDIUM").toUpperCase();
                     const pColors: Record<string, string> = {

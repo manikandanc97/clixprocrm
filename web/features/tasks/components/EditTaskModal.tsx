@@ -28,7 +28,7 @@ import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useUpdateTask, useEmployees } from "@/shared/hooks/use-crm";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import { TaskType } from "@/shared/types/task";
+import { TaskType, TaskAttachment } from "@/shared/types/task";
 import { AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
 import { TaskRelatedRecordPicker, RelatedRecord } from "./TaskRelatedRecordPicker";
@@ -38,13 +38,11 @@ import { TaskChecklistTab } from "./TaskChecklistTab";
 
 const taskFormSchema = z.object({
   title: z.string().min(2, "Title must be at least 2 characters"),
-  description: z.string().optional().default(""),
+  description: z.string(),
   assignedToId: z.string().min(1, "Please assign this task"),
-  priority: z.enum(["URGENT", "HIGH", "MEDIUM", "LOW"]).default("MEDIUM"),
+  priority: z.enum(["URGENT", "HIGH", "MEDIUM", "LOW"]),
   dueDate: z.string().min(1, "Due date is required"),
-  checklist: z
-    .array(z.object({ id: z.string(), title: z.string().min(1), completed: z.boolean().default(false) }))
-    .default([]),
+  checklist: z.array(z.object({ id: z.string(), title: z.string().min(1), completed: z.boolean() })),
 });
 
 type TaskFormValues = z.infer<typeof taskFormSchema>;
@@ -81,7 +79,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
   const defaultDueDate = new Date(Date.now() + 24 * 60 * 60 * 1000).toISOString().slice(0, 16);
 
   const form = useForm<TaskFormValues>({
-    resolver: zodResolver(taskFormSchema) as any,
+    resolver: zodResolver(taskFormSchema),
     defaultValues: {
       title: "",
       description: "",
@@ -99,7 +97,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
         if (!task) return null;
         if (task.relatedLead) return { type: "lead", id: task.relatedLead.id, label: task.relatedLead.name, sub: task.relatedLead.company || "" };
         if (task.relatedCustomer) return { type: "customer", id: task.relatedCustomer.id, label: task.relatedCustomer.name, sub: task.relatedCustomer.company || "" };
-        if (task.relatedQuotation) return { type: "quotation", id: task.relatedQuotation.id, label: `#${task.relatedQuotation.quoteNumber}`, sub: (task.relatedQuotation as any).client };
+        if (task.relatedQuotation) return { type: "quotation", id: task.relatedQuotation.id, label: `#${task.relatedQuotation.quoteNumber}`, sub: task.relatedQuotation.company || task.relatedQuotation.name || "" };
         return null;
       })(),
     },
@@ -120,7 +118,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
         title: task.title,
         description: task.description || "",
         assignedToId: task.assignedTo?.id || user?.id || "",
-        priority: task.priority as any,
+        priority: (task.priority || "MEDIUM") as TaskFormValues["priority"],
         dueDate: formattedDueDate,
         checklist: task.checklist || [],
       });
@@ -130,13 +128,13 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
       } else if (task.relatedCustomer) {
         setRelatedRecord({ type: "customer", id: task.relatedCustomer.id, label: task.relatedCustomer.name, sub: task.relatedCustomer.company || "" });
       } else if (task.relatedQuotation) {
-        setRelatedRecord({ type: "quotation", id: task.relatedQuotation.id, label: `#${task.relatedQuotation.quoteNumber}`, sub: (task.relatedQuotation as any).client });
+        setRelatedRecord({ type: "quotation", id: task.relatedQuotation.id, label: `#${task.relatedQuotation.quoteNumber}`, sub: task.relatedQuotation.company || task.relatedQuotation.name || "" });
       } else {
         setRelatedRecord(null);
       }
 
       setAttachments(
-        task.attachments?.map((a: any) => ({
+        task.attachments?.map((a: TaskAttachment) => ({
           id: a.id || String(Math.random()),
           fileName: a.fileName || "file",
           fileSize: a.fileSize || 0,
@@ -194,7 +192,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
   const onSubmit = async (values: TaskFormValues) => {
     if (!task) return;
     try {
-      const payload: any = {
+      const payload: Partial<TaskType> & { leadId?: string; customerId?: string; quotationId?: string } = {
         title: values.title.trim(),
         description: values.description?.trim() || "",
         assignedToId: values.assignedToId,
@@ -345,8 +343,8 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                                 </SelectTrigger>
                               </FormControl>
                               <SelectContent>
-                                {employees.map((emp: any) => (
-                                  <SelectItem key={emp.id} value={emp.id || emp.userId}>
+                                {employees.map((emp: { id?: string; userId?: string; name: string }) => (
+                                  <SelectItem key={emp.id} value={emp.id || emp.userId || ""}>
                                     {emp.name}
                                   </SelectItem>
                                 ))}
@@ -423,7 +421,7 @@ export const EditTaskModal: React.FC<EditTaskModalProps> = ({ task, isOpen, onCl
                     className="mt-0 focus-visible:outline-none"
                   >
                     <TaskChecklistTab
-                      checklistFields={checklistFields as any}
+                      checklistFields={checklistFields}
                       onAddChecklist={handleAddChecklist}
                       onRemoveChecklist={removeChecklist}
                       attachments={attachments}

@@ -25,7 +25,7 @@ export interface CRMToolbarProps {
   /** Right-side action buttons */
   actions?: React.ReactNode;
   viewMode?: string;
-  setViewMode?: (mode: any) => void;
+  setViewMode?: (mode: string) => void;
   viewOptions?: readonly ViewOption[] | ViewOption[];
   children?: React.ReactNode;
   className?: string;

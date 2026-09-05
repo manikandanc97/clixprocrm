@@ -6,6 +6,9 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { cn } from "@/shared/lib/utils";
 import { useLeads, useCustomers, useQuotations } from "@/shared/hooks/use-crm";
+import { LeadType } from "@/shared/types/lead";
+import { CustomerType } from "@/shared/types/customer";
+import { QuotationType } from "@/shared/types/quotation";
 
 export type RelationType = "lead" | "customer" | "quotation";
 
@@ -38,31 +41,32 @@ export function TaskRelatedRecordPicker({
   const { data: customersData } = useCustomers();
   const { data: quotesData } = useQuotations();
 
-  const leads = leadsData?.leads || (Array.isArray(leadsData) ? leadsData : []);
-  const customers = customersData?.customers || (Array.isArray(customersData) ? customersData : []);
-  const quotes = quotesData?.quotations || (Array.isArray(quotesData) ? quotesData : []);
+  const leads = (leadsData?.leads || (Array.isArray(leadsData) ? leadsData : [])) as LeadType[];
+  const customers = (customersData?.customers || (Array.isArray(customersData) ? customersData : [])) as CustomerType[];
+  const quotes = (quotesData?.quotations || (Array.isArray(quotesData) ? quotesData : [])) as QuotationType[];
 
   const recordResults = useMemo(() => {
     if (!recordSearch.trim()) return [];
     const q = recordSearch.toLowerCase();
     const results: RelatedRecord[] = [];
 
-    leads.forEach((l: any) => {
+    leads.forEach((l: LeadType) => {
       if (l.name?.toLowerCase().includes(q) || l.company?.toLowerCase().includes(q)) {
         results.push({ type: "lead", id: l.id, label: l.name, sub: l.company });
       }
     });
 
-    customers.forEach((c: any) => {
+    customers.forEach((c: CustomerType) => {
       if (c.name?.toLowerCase().includes(q) || c.company?.toLowerCase().includes(q)) {
         results.push({ type: "customer", id: c.id, label: c.name, sub: c.company });
       }
     });
 
-    quotes.forEach((qu: any) => {
-      const title = qu.title || qu.quoteNumber || "Quote";
-      if (title.toLowerCase().includes(q) || qu.customerName?.toLowerCase().includes(q)) {
-        results.push({ type: "quotation", id: qu.id, label: title, sub: qu.customerName });
+    quotes.forEach((qu: QuotationType) => {
+      const title = qu.quoteId ? `#${qu.quoteId}` : "Quote";
+      const clientName = qu.client || qu.leadName || qu.leadDetails?.name || "";
+      if (title.toLowerCase().includes(q) || clientName.toLowerCase().includes(q)) {
+        results.push({ type: "quotation", id: qu.id, label: title, sub: clientName });
       }
     });
 

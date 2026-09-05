@@ -417,7 +417,7 @@ export default function SuperAdminPlansPage() {
     if (!editingPlan) return;
     const currentAllowed = Array.isArray(editingPlan.allowedModelIds) ? editingPlan.allowedModelIds : [];
     const exists = currentAllowed.includes(modelId);
-    let updated = exists
+    const updated = exists
       ? currentAllowed.filter((id) => id !== modelId)
       : [...currentAllowed, modelId];
 
@@ -1039,7 +1039,7 @@ export default function SuperAdminPlansPage() {
                       </div>
                     ) : (
                       <div className="p-4 rounded-xl bg-amber-500/10 border border-amber-500/20 text-xs text-amber-700 dark:text-amber-400">
-                        Enterprise custom pricing will display as <strong>"Contact Sales"</strong> on customer pricing pages. Subscriptions will be provisioned manually or via sales contracts.
+                        Enterprise custom pricing will display as <strong>&quot;Contact Sales&quot;</strong> on customer pricing pages. Subscriptions will be provisioned manually or via sales contracts.
                       </div>
                     )}
 

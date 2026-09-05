@@ -5,7 +5,7 @@ import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
   UploadCloud,
-  File,
+  File as FileIcon,
   Image as ImageIcon,
   Video,
   FileText,
@@ -173,7 +173,7 @@ export function FileUploader({
           const prefix = isVideo ? "screen-recording" : "screenshot";
           const ext = isVideo ? "mp4" : "png";
           const fileName = `${prefix}-${new Date().toISOString().slice(0, 19).replace(/[:T]/g, "-")}.${ext}`;
-          const file = new (window.File as any)([blob], fileName, { type: blob.type }) as File;
+          const file = new File([blob], fileName, { type: blob.type });
           pastedFiles.push(file);
         }
       }
@@ -257,7 +257,7 @@ export function FileUploader({
       return <Archive className="w-5 h-5 text-amber-500" />;
     if (name.endsWith(".json") || name.endsWith(".log") || name.endsWith(".csv"))
       return <Code2 className="w-5 h-5 text-sky-500" />;
-    return <File className="w-5 h-5 text-slate-500" />;
+    return <FileIcon className="w-5 h-5 text-slate-500" />;
   };
 
   // Screen-wide enterprise drag overlay portal

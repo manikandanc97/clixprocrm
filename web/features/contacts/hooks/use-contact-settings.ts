@@ -51,32 +51,39 @@ export const CONTACT_SETTINGS_STORAGE_KEY = "clixpro_contacts_settings_v1";
 /**
  * Normalizes raw/legacy stored data into current ContactSettingsConfig
  */
-export function parseContactSettings(raw: any): ContactSettingsConfig {
+export function parseContactSettings(raw: unknown): ContactSettingsConfig {
   if (!raw || typeof raw !== "object") return { ...DEFAULT_CONTACT_SETTINGS };
+  const r = raw as Record<string, unknown>;
 
   return {
-    showJobTitle: typeof raw.showJobTitle === "boolean" ? raw.showJobTitle : DEFAULT_CONTACT_SETTINGS.showJobTitle,
-    showDepartment: typeof raw.showDepartment === "boolean" ? raw.showDepartment : DEFAULT_CONTACT_SETTINGS.showDepartment,
-    showPhone: typeof raw.showPhone === "boolean" ? raw.showPhone : (typeof raw.showPhoneDirectly === "boolean" ? raw.showPhoneDirectly : DEFAULT_CONTACT_SETTINGS.showPhone),
-    showSecondaryEmail: typeof raw.showSecondaryEmail === "boolean" ? raw.showSecondaryEmail : DEFAULT_CONTACT_SETTINGS.showSecondaryEmail,
-    showSocialProfiles: typeof raw.showSocialProfiles === "boolean" ? raw.showSocialProfiles : DEFAULT_CONTACT_SETTINGS.showSocialProfiles,
+    showJobTitle: typeof r.showJobTitle === "boolean" ? r.showJobTitle : DEFAULT_CONTACT_SETTINGS.showJobTitle,
+    showDepartment: typeof r.showDepartment === "boolean" ? r.showDepartment : DEFAULT_CONTACT_SETTINGS.showDepartment,
+    showPhone: typeof r.showPhone === "boolean" ? r.showPhone : (typeof r.showPhoneDirectly === "boolean" ? r.showPhoneDirectly : DEFAULT_CONTACT_SETTINGS.showPhone),
+    showSecondaryEmail: typeof r.showSecondaryEmail === "boolean" ? r.showSecondaryEmail : DEFAULT_CONTACT_SETTINGS.showSecondaryEmail,
+    showSocialProfiles: typeof r.showSocialProfiles === "boolean" ? r.showSocialProfiles : DEFAULT_CONTACT_SETTINGS.showSocialProfiles,
 
     requireEmail: true, // Always mandatory
-    requirePhone: typeof raw.requirePhone === "boolean" ? raw.requirePhone : DEFAULT_CONTACT_SETTINGS.requirePhone,
-    requireJobTitle: typeof raw.requireJobTitle === "boolean" ? raw.requireJobTitle : DEFAULT_CONTACT_SETTINGS.requireJobTitle,
+    requirePhone: typeof r.requirePhone === "boolean" ? r.requirePhone : DEFAULT_CONTACT_SETTINGS.requirePhone,
+    requireJobTitle: typeof r.requireJobTitle === "boolean" ? r.requireJobTitle : DEFAULT_CONTACT_SETTINGS.requireJobTitle,
 
-    matchEmail: typeof raw.matchEmail === "boolean" ? raw.matchEmail : (typeof raw.preventEmailDupes === "boolean" ? raw.preventEmailDupes : DEFAULT_CONTACT_SETTINGS.matchEmail),
-    matchPhone: typeof raw.matchPhone === "boolean" ? raw.matchPhone : (typeof raw.preventPhoneDupes === "boolean" ? raw.preventPhoneDupes : DEFAULT_CONTACT_SETTINGS.matchPhone),
-    normalizeEmail: typeof raw.normalizeEmail === "boolean" ? raw.normalizeEmail : (typeof raw.caseInsensitiveEmail === "boolean" ? raw.caseInsensitiveEmail : DEFAULT_CONTACT_SETTINGS.normalizeEmail),
-    duplicateResolution: ["warn", "block", "merge"].includes(raw.duplicateResolution || raw.duplicatePolicy)
-      ? (raw.duplicateResolution || raw.duplicatePolicy)
+    matchEmail: typeof r.matchEmail === "boolean" ? r.matchEmail : (typeof r.preventEmailDupes === "boolean" ? r.preventEmailDupes : DEFAULT_CONTACT_SETTINGS.matchEmail),
+    matchPhone: typeof r.matchPhone === "boolean" ? r.matchPhone : (typeof r.preventPhoneDupes === "boolean" ? r.preventPhoneDupes : DEFAULT_CONTACT_SETTINGS.matchPhone),
+    normalizeEmail: typeof r.normalizeEmail === "boolean" ? r.normalizeEmail : (typeof r.caseInsensitiveEmail === "boolean" ? r.caseInsensitiveEmail : DEFAULT_CONTACT_SETTINGS.normalizeEmail),
+    duplicateResolution: (["warn", "block", "merge"] as const).includes(
+      (r.duplicateResolution || r.duplicatePolicy) as "warn" | "block" | "merge"
+    )
+      ? ((r.duplicateResolution || r.duplicatePolicy) as "warn" | "block" | "merge")
       : DEFAULT_CONTACT_SETTINGS.duplicateResolution,
 
-    defaultContactType: ["Lead", "Customer", "Partner", "Vendor"].includes(raw.defaultContactType)
-      ? raw.defaultContactType
+    defaultContactType: (["Lead", "Customer", "Partner", "Vendor"] as const).includes(
+      r.defaultContactType as "Lead" | "Customer" | "Partner" | "Vendor"
+    )
+      ? (r.defaultContactType as "Lead" | "Customer" | "Partner" | "Vendor")
       : DEFAULT_CONTACT_SETTINGS.defaultContactType,
-    defaultLifecycleStage: ["NEW", "CONTACTED", "ACTIVE", "ONBOARDING", "PROSPECT"].includes(raw.defaultLifecycleStage)
-      ? raw.defaultLifecycleStage
+    defaultLifecycleStage: (["NEW", "CONTACTED", "ACTIVE", "ONBOARDING", "PROSPECT"] as const).includes(
+      r.defaultLifecycleStage as "NEW" | "CONTACTED" | "ACTIVE" | "ONBOARDING" | "PROSPECT"
+    )
+      ? (r.defaultLifecycleStage as "NEW" | "CONTACTED" | "ACTIVE" | "ONBOARDING" | "PROSPECT")
       : DEFAULT_CONTACT_SETTINGS.defaultLifecycleStage,
   };
 }
@@ -108,15 +115,16 @@ export function useContactSettings() {
     setSettings(getStoredContactSettings());
     setIsLoaded(true);
 
-    const handleUpdate = (e: CustomEvent<ContactSettingsConfig>) => {
-      if (e.detail) {
-        setSettings(e.detail);
+    const handleUpdate = (e: Event) => {
+      const customEvent = e as CustomEvent<ContactSettingsConfig>;
+      if (customEvent.detail) {
+        setSettings(customEvent.detail);
       }
     };
 
-    window.addEventListener("clixpro:contact-settings-updated" as any, handleUpdate);
+    window.addEventListener("clixpro:contact-settings-updated", handleUpdate);
     return () => {
-      window.removeEventListener("clixpro:contact-settings-updated" as any, handleUpdate);
+      window.removeEventListener("clixpro:contact-settings-updated", handleUpdate);
     };
   }, []);
 

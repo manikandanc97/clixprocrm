@@ -68,7 +68,9 @@ export const IMPORT_STEPS = [
   { num: 4, label: "Import" },
 ];
 
-export const slideVariants: any = {
+import type { Variants } from "framer-motion";
+
+export const slideVariants: Variants = {
   hidden: { opacity: 0, x: 10 },
   visible: { opacity: 1, x: 0, transition: { duration: 0.3, ease: "easeOut" } },
   exit: { opacity: 0, x: -10, transition: { duration: 0.2 } },
@@ -76,9 +78,14 @@ export const slideVariants: any = {
 
 export type DuplicateStrategy = "skip" | "update" | "create";
 
+export interface ImportFailedRow {
+  [key: string]: unknown;
+  ErrorReason?: string;
+}
+
 export interface ImportSummaryData {
   imported: number;
   skipped: number;
   failed: number;
-  failedRows: any[];
+  failedRows: ImportFailedRow[];
 }

@@ -80,7 +80,6 @@ export default function RegisterPage() {
     void startGoogleOAuth(popup);
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   const startGoogleOAuth = async (popup: Window) => {
     try {
       setGoogleLoading(true);

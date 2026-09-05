@@ -11,11 +11,19 @@ const LEGACY_TICKET_MAP: Record<string, string> = {
   "CP-SUP-2026-999999": "T-2",
 };
 
+export interface TicketLike {
+  ticketCode?: string;
+  displayNumber?: number;
+  ticketNumber?: string;
+  ticketId?: string;
+  id?: string;
+}
+
 /**
  * Format any ticket object or ticket reference string into a clean,
  * human-readable format like "T-1", "T-2", etc.
  */
-export function formatTicketCode(ticket: any): string {
+export function formatTicketCode(ticket: string | TicketLike | null | undefined): string {
   if (!ticket) return "T-1";
 
   // If already a string
@@ -65,7 +73,7 @@ export function formatTicketCode(ticket: any): string {
   }
 
   // If ticket has legacy format with 937799
-  if (rawRef.includes("937799")) {
+  if (typeof rawRef === "string" && rawRef.includes("937799")) {
     return "T-1";
   }
 

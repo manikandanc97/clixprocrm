@@ -60,7 +60,7 @@ interface BaseFieldProps {
   description?: string;
   className?: string;
   type?: string;
-  icon?: LucideIcon | React.ComponentType<any>;
+  icon?: LucideIcon | React.ComponentType<{ className?: string }>;
   iconName?: string;
   hideIcon?: boolean;
 }

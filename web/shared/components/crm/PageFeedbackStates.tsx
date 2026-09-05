@@ -5,7 +5,7 @@ import { AlertCircle, RefreshCw, Loader2, type LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
-import { EmptyState } from "@/shared/components/EmptyState";
+import { EmptyState, type EmptyStateAction } from "@/shared/components/EmptyState";
 import {
   PageHeaderSkeleton,
   MetricCardSkeleton,
@@ -41,7 +41,7 @@ export interface EmptyStateCardProps {
   title: string;
   message: string;
   icon?: LucideIcon;
-  action?: any;
+  action?: EmptyStateAction;
 }
 
 export function PageLoadingState({

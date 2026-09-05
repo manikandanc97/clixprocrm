@@ -8,7 +8,9 @@ export function playEnterpriseNotificationChime(volume = 0.25) {
   try {
     if (typeof window === "undefined") return;
 
-    const AudioContextClass = window.AudioContext || (window as any).webkitAudioContext;
+    const AudioContextClass =
+      window.AudioContext ||
+      (window as unknown as { webkitAudioContext?: typeof AudioContext }).webkitAudioContext;
     if (!AudioContextClass) return;
 
     if (!audioCtx || audioCtx.state === "closed") {

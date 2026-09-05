@@ -9,7 +9,7 @@ import { Label } from "@/shared/ui/label";
 interface ChecklistItem {
   id: string;
   title: string;
-  completed: boolean;
+  completed?: boolean;
 }
 
 interface AttachmentItem {
@@ -19,7 +19,7 @@ interface AttachmentItem {
 }
 
 interface TaskChecklistTabProps {
-  checklistFields: ChecklistItem[];
+  checklistFields: readonly ChecklistItem[];
   onAddChecklist: (title: string) => void;
   onRemoveChecklist: (index: number) => void;
   attachments: AttachmentItem[];

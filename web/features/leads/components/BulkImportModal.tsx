@@ -14,6 +14,7 @@ import {
   IMPORT_STEPS,
   DuplicateStrategy,
   ImportSummaryData,
+  ImportFailedRow,
 } from "./import/import-types";
 import { ImportUploadStep } from "./import/ImportUploadStep";
 import { ImportMappingStep } from "./import/ImportMappingStep";
@@ -35,7 +36,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
   const queryClient = useQueryClient();
   const [step, setStep] = useState(1);
   const [, setFile] = useState<File | null>(null);
-  const [parsedData, setParsedData] = useState<any[]>([]);
+  const [parsedData, setParsedData] = useState<Record<string, unknown>[]>([]);
   const [fileHeaders, setFileHeaders] = useState<string[]>([]);
   const [mapping, setMapping] = useState<Record<string, string>>({});
 
@@ -43,8 +44,8 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
   const [showAdvancedMapping, setShowAdvancedMapping] = useState(false);
 
   const [validationResults, setValidationResults] = useState<{
-    valid: any[];
-    invalid: any[];
+    valid: Record<string, unknown>[];
+    invalid: (Record<string, unknown> & { _errors?: string })[];
   }>({ valid: [], invalid: [] });
   const [duplicateStrategy, setDuplicateStrategy] =
     useState<DuplicateStrategy>("skip");
@@ -154,11 +155,11 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
   };
 
   const handleValidation = () => {
-    const valid: any[] = [];
-    const invalid: any[] = [];
+    const valid: Record<string, unknown>[] = [];
+    const invalid: (Record<string, unknown> & { _errors?: string })[] = [];
 
     parsedData.forEach((row) => {
-      const mappedRow: any = {};
+      const mappedRow: Record<string, unknown> = {};
       let hasError = false;
       const errors: string[] = [];
 
@@ -226,7 +227,7 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
       let totalImported = 0;
       let totalSkipped = 0;
       let totalFailed = 0;
-      let allFailedRows: any[] = [];
+      let allFailedRows: ImportFailedRow[] = [];
       let processedCount = 0;
 
       const chunks = [];
@@ -250,12 +251,13 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
           totalSkipped += data.skipped;
           totalFailed += data.failed;
           allFailedRows = [...allFailedRows, ...data.failedRows];
-        } catch (err: any) {
+        } catch (err: unknown) {
+          const errorObj = err as { response?: { data?: { message?: string } }; message?: string };
           totalFailed += chunks[i].length;
-          const chunkFailedRows = chunks[i].map((row: any) => ({
+          const chunkFailedRows = chunks[i].map((row: Record<string, unknown>) => ({
             ...row,
             ErrorReason:
-              err.response?.data?.message || err.message || "Batch API error",
+              errorObj.response?.data?.message || errorObj.message || "Batch API error",
           }));
           allFailedRows = [...allFailedRows, ...chunkFailedRows];
         }
@@ -297,8 +299,9 @@ export const BulkImportModal: React.FC<BulkImportModalProps> = ({
       queryClient.invalidateQueries({ queryKey: ["analytics"] });
 
       if (onSuccess) onSuccess();
-    } catch (error: any) {
-      toast.error(error.response?.data?.message || "Failed to import leads.");
+    } catch (error: unknown) {
+      const errObj = error as { response?: { data?: { message?: string } } };
+      toast.error(errObj.response?.data?.message || "Failed to import leads.");
       setImporting(false);
       setStep(3);
     }

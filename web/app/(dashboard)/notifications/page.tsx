@@ -30,10 +30,11 @@ import {
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { formatDistanceToNow, parseISO } from "date-fns";
-import { motion, AnimatePresence } from "framer-motion";
 import { playEnterpriseNotificationChime } from "@/shared/lib/notifications/sound-chime";
 import { toast } from "sonner";
+import { ApiNotification } from "@/shared/types/dashboard-widgets";
+import { motion, AnimatePresence } from "framer-motion";
+import { formatDistanceToNow, parseISO } from "date-fns";
 
 type FilterTab = "all" | "unread" | "lead" | "deal" | "task" | "invoice" | "ai" | "security";
 
@@ -117,7 +118,7 @@ export default function NotificationsPage() {
     });
   };
 
-  const handleItemClick = (notification: any) => {
+  const handleItemClick = (notification: ApiNotification) => {
     if (!notification.read) {
       markReadMutation.mutate(notification.id);
     }

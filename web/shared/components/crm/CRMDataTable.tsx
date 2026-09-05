@@ -33,7 +33,7 @@ export interface CRMDataTableColumn<T> {
 
 export type DataTableColumn<T> = CRMDataTableColumn<T>;
 
-export interface CRMDataTableProps<T = any> {
+export interface CRMDataTableProps<T = unknown> {
   /** Declarative data source */
   data?: T[];
   /** Declarative columns definition */
@@ -68,7 +68,7 @@ export const crmTableStyles = {
   headerCell: "h-11 px-4 py-3 text-left text-xs font-semibold text-muted-foreground border-r border-border/40 bg-muted/60 dark:bg-muted/40 whitespace-nowrap last:border-r-0 select-none",
 } as const;
 
-export function CRMDataTable<T = any>({
+export function CRMDataTable<T = unknown>({
   data,
   columns,
   children,
