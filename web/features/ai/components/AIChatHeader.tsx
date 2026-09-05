@@ -3,30 +3,16 @@
 import React, { useState } from 'react';
 import {
   Sparkles,
-  ChevronDown,
   PanelRight,
-  PanelLeft,
   Copy,
   Trash2,
-  MoreVertical,
   X,
-  Lock,
   ArrowRight,
   CheckCircle2,
-  Zap,
   Settings,
 } from 'lucide-react';
 import { ModelOption, CrmContextData } from '../types';
 import { CRMActionMenu } from '@/shared/components/crm';
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/shared/ui/dropdown-menu';
 import {
   Dialog,
   DialogContent,
@@ -47,9 +33,9 @@ interface AIChatHeaderProps {
   onOpenSettings?: () => void;
   activeContext: CrmContextData | null;
   onClearContext: () => void;
-  entitledModels: ModelOption[];
-  selectedModel: string;
-  onSelectModel: (modelKey: string) => void;
+  entitledModels?: ModelOption[];
+  selectedModel?: string;
+  onSelectModel?: (modelKey: string) => void;
   onCopyTranscript: () => void;
   onClearMessages: () => void;
   hasMessages: boolean;
@@ -59,40 +45,18 @@ interface AIChatHeaderProps {
 
 export function AIChatHeader({
   onToggleSidebar,
-  isSidebarOpen,
   onToggleContextPanel,
   isContextPanelOpen,
   onOpenContextTab,
   onOpenSettings,
   activeContext,
   onClearContext,
-  entitledModels,
-  selectedModel,
-  onSelectModel,
   onCopyTranscript,
   onClearMessages,
   hasMessages,
-  planName,
-  isSuperAdmin,
 }: AIChatHeaderProps) {
   const router = useRouter();
   const [isUpgradeModalOpen, setIsUpgradeModalOpen] = useState(false);
-  const [targetUpgradeModel, setTargetUpgradeModel] = useState<ModelOption | null>(null);
-
-  const currentModelOption =
-    entitledModels.find((m) => m.modelKey === selectedModel) ||
-    entitledModels[0];
-
-  const friendlyLabel = currentModelOption?.friendlyLabel || 'Auto';
-
-  const handleModelClick = (opt: ModelOption) => {
-    if (opt.isLocked) {
-      setTargetUpgradeModel(opt);
-      setIsUpgradeModalOpen(true);
-    } else {
-      onSelectModel(opt.modelKey);
-    }
-  };
 
   return (
     <>

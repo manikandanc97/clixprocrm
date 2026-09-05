@@ -7,46 +7,29 @@ import {
   TrendingUp,
   CreditCard,
   Building2,
-  Calendar,
   IndianRupee,
   CheckCircle2,
   Clock,
-  AlertCircle,
   RotateCcw,
   Settings,
-  Search,
   Plus,
-  ArrowUpRight,
   Shield,
   Layers,
   Sparkles,
-  ExternalLink,
   Users,
   Download,
   Save,
-  RefreshCw,
   Eye,
   EyeOff,
   FileText,
-  Percent,
-  Check,
-  AlertTriangle,
   Loader2,
-  DollarSign,
   Briefcase,
-  Zap,
-  Info,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Textarea } from "@/shared/ui/textarea";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+
 import {
   fetchPlatformBillingOverview,
   fetchPlatformSubscriptions,

@@ -88,7 +88,6 @@ export default function RoleManagementPage() {
   // Filter & Search states
   const [typeFilter, setTypeFilter] = useState("ALL");
   const [search, setSearch] = useState("");
-  const [selectedRoleIds, setSelectedRoleIds] = useState<string[]>([]);
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPage] = useState(10);
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);

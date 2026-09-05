@@ -443,7 +443,7 @@ export function CompanyContextualSettings({
       setHasChanges(false);
       toast.success("Company settings saved successfully");
       onOpenChange(false);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to save company settings");
     } finally {
       setIsSaving(false);

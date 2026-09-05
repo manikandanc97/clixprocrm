@@ -224,7 +224,6 @@ export function InvoiceContextualSettings({
   const [autoMarkOverdue, setAutoMarkOverdue] = useState(true);
   const [enableReminders, setEnableReminders] = useState(true);
   const [reminderDaysBefore, setReminderDaysBefore] = useState("3");
-  const [reminderOnDue, setReminderOnDue] = useState(true);
   const [reminderDaysAfter, setReminderDaysAfter] = useState("7");
   const [showAdvancedSettlement, setShowAdvancedSettlement] = useState(false);
   const [gracePeriodDays, setGracePeriodDays] = useState("3");

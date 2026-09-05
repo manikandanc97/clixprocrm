@@ -90,7 +90,7 @@ export default function SuperAdminAnalyticsPage() {
         }
         const res = await fetchPlatformAnalytics(params);
         setData(res);
-      } catch (err: any) {
+      } catch {
         toast.error("Failed to load platform analytics.");
       } finally {
         setLoading(false);
@@ -432,7 +432,6 @@ export default function SuperAdminAnalyticsPage() {
             ) : subscriptionMix.length > 0 ? (
               subscriptionMix.map((tier) => {
                 const planKey = (tier.planId || "").toLowerCase();
-                const isFree = planKey === "free";
                 const isStarter = planKey === "starter";
                 const isGrowth = planKey === "growth";
                 const isBusiness = planKey === "business";

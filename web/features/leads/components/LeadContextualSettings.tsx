@@ -25,7 +25,6 @@ import {
 import { toast } from "sonner";
 import {
   Layers,
-  Sparkles,
   ListOrdered,
   UserCheck,
   Flame,
@@ -34,7 +33,6 @@ import {
   Plus,
   Trash2,
   GripVertical,
-  CheckCircle2,
 } from "lucide-react";
 
 interface LeadSource {
@@ -113,7 +111,6 @@ export function LeadContextualSettings({
   // Default Values
   const [defaultCurrency, setDefaultCurrency] = useState("INR");
   const [defaultPriority, setDefaultPriority] = useState("MEDIUM");
-  const [defaultSourceId, setDefaultSourceId] = useState("1");
 
   const [isSaving, setIsSaving] = useState(false);
   const [hasChanges, setHasChanges] = useState(false);

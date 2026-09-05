@@ -2,10 +2,8 @@ import { describe, it } from 'node:test';
 import assert from 'node:assert/strict';
 import {
   AI_CAPABILITIES,
-  hasCapabilityAccess,
   getAuthorizedQuickActions,
   getCapabilityIcon,
-  MAX_QUICK_ACTIONS,
 } from './ai-capabilities';
 
 describe('CLIXPROCRM AI — Permission-Driven Dynamic Quick Actions (Max 5 Limit)', () => {

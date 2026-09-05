@@ -85,7 +85,7 @@ export function DeleteAccountModal({
 
           document.body.style.removeProperty("pointer-events");
           document.body.style.removeProperty("overflow");
-        } catch (_) {}
+        } catch {}
       }
 
       // 2. Clear cached state

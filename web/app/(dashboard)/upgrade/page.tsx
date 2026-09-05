@@ -5,8 +5,6 @@ import { useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
   Sparkles,
-  CreditCard,
-  Building2,
   Users,
   ShieldCheck,
   CheckCircle2,
@@ -24,7 +22,6 @@ import {
   Plus,
   Minus,
   Crown,
-  HelpCircle,
   Receipt,
   FileText,
   Download,
@@ -183,7 +180,6 @@ export default function UpgradePage() {
     invoices,
     isLoadingInvoices,
     canManageBilling,
-    calculateQuote,
     createCheckoutOrder,
     verifyPayment,
     isVerifyingPayment,
@@ -325,7 +321,7 @@ export default function UpgradePage() {
       }
 
       // 3. Create server-side checkout order with canonical price
-      const { order, quote: serverQuote } = await createCheckoutOrder({
+      const { order } = await createCheckoutOrder({
         planId: targetPlan.id,
         seats,
         billingCycle,

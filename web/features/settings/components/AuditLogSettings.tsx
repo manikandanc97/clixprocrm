@@ -48,7 +48,6 @@ export default function AuditLogSettings() {
   const {
     data: activityData,
     isLoading,
-    refetch,
   } = useQuery({
     queryKey: ["security-activity", currentPage, rowsPerPage],
     queryFn: () => fetchSecurityActivity(currentPage, 100),

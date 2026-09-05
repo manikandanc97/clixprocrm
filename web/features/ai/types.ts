@@ -1,5 +1,3 @@
-import { UIMessage } from '@ai-sdk/react';
-
 export interface ChatSession {
   id: string;
   title: string;

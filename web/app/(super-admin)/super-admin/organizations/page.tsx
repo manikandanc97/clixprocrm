@@ -35,24 +35,19 @@ import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
-  DropdownMenuLabel,
   DropdownMenuSeparator,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
 import {
   CRMPageContainer,
-  CRMToolbar,
-  CRMPagination,
   CRMRoleBadge,
-  TruncatedText,
-  CRMActionMenu,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { PlanBadge } from "@/shared/components/PlanBadge";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { Skeleton } from "@/shared/ui/skeleton";
 import { cn } from "@/shared/lib/utils";
-import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
+
 
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 
@@ -109,19 +104,6 @@ export default function OrganizationsPage() {
     return { date, time };
   };
 
-  const getPlanPrice = (plan?: string) => {
-    switch (plan?.toLowerCase()) {
-      case "starter":
-        return "$29.00";
-      case "pro":
-        return "$69.00";
-      case "enterprise":
-        return "$199.00";
-      case "free":
-      default:
-        return "$0.00";
-    }
-  };
 
   const loadOrganizations = async () => {
     try {
@@ -130,7 +112,7 @@ export default function OrganizationsPage() {
         limit: 1000,
       });
       setOrganizations(res.organizations || []);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to load organizations.");
     } finally {
       setLoading(false);
@@ -241,7 +223,7 @@ export default function OrganizationsPage() {
       setDetailsModalOpen(true);
       const details = await fetchPlatformOrganizationDetails(orgId);
       setSelectedOrgDetails(details);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to fetch organization details.");
       setDetailsModalOpen(false);
     } finally {
@@ -277,19 +259,6 @@ export default function OrganizationsPage() {
     toast.success("Organizations exported successfully.");
   };
 
-  const totalActive = useMemo(
-    () => organizations.filter((o) => o.status === "ACTIVE").length,
-    [organizations]
-  );
-  const totalPaid = useMemo(
-    () =>
-      organizations.filter(
-        (o) =>
-          o.plan &&
-          o.plan.toLowerCase() !== "free"
-      ).length,
-    [organizations]
-  );
 
   const filteredOrganizations = useMemo(() => {
     const filtered = organizations.filter((org) => {

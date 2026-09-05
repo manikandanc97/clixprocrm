@@ -121,11 +121,6 @@ const ReportsPage = () => {
     }
   };
 
-  const handleRefresh = () => {
-    refetch();
-    toast.success("Dashboard refreshed");
-  };
-
   const handleDownload = () => {
     if (!data || !data.performance || data.performance.length === 0) {
       toast.error("No data available to export");

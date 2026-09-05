@@ -7,11 +7,6 @@ import {
   Landmark,
   FileText,
   Save,
-  CheckCircle2,
-  Sparkles,
-  Percent,
-  QrCode,
-  Info,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -20,13 +15,12 @@ import { Textarea } from "@/shared/ui/textarea";
 import { useInvoiceSettings, useUpdateInvoiceSettings } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { InvoiceSettingsSkeleton } from "./SettingsSkeletons";
-import { toast } from "sonner";
 
 export function InvoiceSettings() {
   const { data: settingsData, isLoading } = useInvoiceSettings();
   const settings = settingsData?.data || {};
   const { mutateAsync: updateSettingsMutate, isPending } = useUpdateInvoiceSettings();
-  const { formatCurrency } = useCurrency();
+  useCurrency();
 
   const [form, setForm] = useState({
     invoicePrefix: "INV",

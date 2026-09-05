@@ -21,7 +21,6 @@ import {
   Calendar,
   Shield,
 } from "lucide-react";
-import { useSearchParams } from "next/navigation";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -61,7 +60,6 @@ import { useAuth } from "@/features/auth/components/auth-provider";
 
 export default function EmployeesPage() {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
-  const searchParams = useSearchParams();
 
   const [roleFilter, setRoleFilter] = useState("ALL");
   const [statusFilter, setStatusFilter] = useState("ALL");

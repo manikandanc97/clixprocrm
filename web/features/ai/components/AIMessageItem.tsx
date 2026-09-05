@@ -4,14 +4,11 @@ import React, { useState } from 'react';
 import ReactMarkdown from 'react-markdown';
 import remarkGfm from 'remark-gfm';
 import {
-  Bot,
-  User,
   AlertCircle,
   CheckCircle2,
   Copy,
   Check,
   ShieldAlert,
-  ArrowRight,
   Sparkles,
 } from 'lucide-react';
 import { UIMessage } from '@ai-sdk/react';

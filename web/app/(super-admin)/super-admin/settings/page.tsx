@@ -147,7 +147,7 @@ export default function SuperAdminSettingsPage() {
       setAllowWorkspaceSelfRegistration(loaded.allowWorkspaceSelfRegistration);
       setMaintenanceMode(loaded.maintenanceMode);
       setInitialFormState(loaded);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to load platform settings.");
     } finally {
       setLoading(false);

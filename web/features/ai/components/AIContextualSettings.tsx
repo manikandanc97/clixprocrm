@@ -7,11 +7,9 @@ import {
 } from "@/shared/components/crm/ContextualSettingsDrawer";
 import {
   SettingsSection,
-  SettingsRow,
   SettingsToggleRow,
   SettingsField,
 } from "@/shared/components/crm/ContextualSettingsComponents";
-import { Input } from "@/shared/ui/input";
 import { Textarea } from "@/shared/ui/textarea";
 import {
   Select,
@@ -25,11 +23,7 @@ import {
   Sparkles,
   Brain,
   Sliders,
-  Bot,
   MessageSquareCode,
-  ShieldCheck,
-  Zap,
-  Check,
 } from "lucide-react";
 import { useAiSettings, useUpdateAiSettings } from "@/shared/hooks/use-settings";
 

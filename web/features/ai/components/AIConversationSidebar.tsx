@@ -11,12 +11,10 @@ import {
   Archive,
   Trash2,
   Edit2,
-  MoreHorizontal,
   Check,
   Clock,
 } from 'lucide-react';
 import { ChatSession } from '../types';
-import { formatRelativeTime } from '../hooks/use-ai-workspace';
 import { CRMActionMenu } from '@/shared/components/crm';
 import {
   Dialog,

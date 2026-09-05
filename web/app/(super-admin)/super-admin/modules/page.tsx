@@ -21,7 +21,6 @@ import {
   Lock,
   Link as LinkIcon,
   AlertTriangle,
-  MoreHorizontal,
   Loader2,
   Users,
   X,
@@ -46,9 +45,6 @@ import {
 } from "@/shared/lib/api/super-admin.api";
 import {
   CRMPageContainer,
-  CRMPageHeader,
-  CRMToolbar,
-  CRMPagination,
   CRMActionMenu,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
@@ -66,14 +62,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/shared/ui/dialog";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+
 import {
   AVAILABLE_ICON_NAMES,
   getDynamicIcon,
@@ -241,7 +230,7 @@ export default function SuperAdminModulesPage() {
     try {
       const res = await fetchPlatformModules({ navigationScope: "SUPER_ADMIN" });
       setPlatformModules(res.modules || []);
-    } catch (err: any) {
+    } catch {
       // Silently handle error
     }
   }, []);

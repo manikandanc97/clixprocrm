@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback } from "react";
+import React, { useState, useEffect } from "react";
 import { useSearchParams, useRouter } from "next/navigation";
 import SettingsHeader from "@/features/settings/components/SettingsHeader";
 import ProfileSettings from "@/features/settings/components/ProfileSettings";
@@ -116,14 +116,6 @@ const SettingsPage = () => {
     };
     window.addEventListener("popstate", handlePopState);
     return () => window.removeEventListener("popstate", handlePopState);
-  }, []);
-
-  const handleSectionChange = useCallback((section: string) => {
-    const canonical = resolveCanonicalSectionId(section);
-    if (canonical.endsWith("_redirect")) return;
-    setActiveSection(canonical);
-    const newUrl = canonical === "profile" ? "/settings" : `/settings?section=${canonical}`;
-    window.history.pushState({ section: canonical }, "", newUrl);
   }, []);
 
   const renderSection = () => {

@@ -7,12 +7,10 @@ import {
 } from "@/shared/components/crm/ContextualSettingsDrawer";
 import {
   SettingsSection,
-  SettingsRow,
   SettingsToggleRow,
   SettingsField,
 } from "@/shared/components/crm/ContextualSettingsComponents";
 import { Input } from "@/shared/ui/input";
-import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Textarea } from "@/shared/ui/textarea";
 import {
@@ -31,15 +29,9 @@ import {
   FileCheck2,
   SlidersHorizontal,
   Check,
-  Building2,
-  ShieldCheck,
   AlertCircle,
   HelpCircle,
-  RotateCcw,
   Sparkles,
-  DollarSign,
-  Calendar,
-  Layers,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useCRMStore } from "@/shared/store/useCRMStore";

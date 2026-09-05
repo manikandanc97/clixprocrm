@@ -5,13 +5,10 @@ import {
   Users,
   Search,
   ShieldCheck,
-  Ban,
   Crown,
   RefreshCw,
-  MoreHorizontal,
   Building2,
   Download,
-  FileText,
   Trash2,
   AlertTriangle,
   X,
@@ -19,7 +16,6 @@ import {
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ChevronDown,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
@@ -31,25 +27,14 @@ import {
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+
 import {
   CRMPageContainer,
-  CRMPageHeader,
-  CRMToolbar,
-  CRMPagination,
   CRMRoleBadge,
-  TruncatedText,
   CRMActionMenu,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
-import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
+import { SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { getUserAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
@@ -80,7 +65,7 @@ export default function SuperAdminUsersPage() {
         limit: 1000,
       });
       setUsers(res.users || []);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to load platform users.");
     } finally {
       setLoading(false);
@@ -282,7 +267,7 @@ export default function SuperAdminUsersPage() {
       toast.success(`${selectedUserIds.length} user(s) deleted successfully.`);
       setSelectedUserIds([]);
       loadUsers();
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to delete selected users.");
     }
   };

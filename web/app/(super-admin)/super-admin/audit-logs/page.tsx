@@ -4,30 +4,21 @@ import { useEffect, useState } from "react";
 import {
   ScrollText,
   Search,
-  RefreshCw,
   RotateCcw,
-  Building2,
-  Clock,
-  Eye,
   X,
   Download,
   Shield,
-  Activity,
   ChevronLeft,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ChevronDown,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Input } from "@/shared/ui/input";
 import {
   fetchPlatformAuditLogs,
   PlatformAuditLog,
-  fetchAuditIntegrityStatus,
-  triggerAuditIntegrityVerify,
   triggerAuditDrVerify,
-  AuditIntegrityReport,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
@@ -36,14 +27,6 @@ import {
   TruncatedText,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
-import { cn } from "@/shared/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
 
 export default function SuperAdminAuditLogsPage() {
   const [logs, setLogs] = useState<PlatformAuditLog[]>([]);
@@ -52,10 +35,6 @@ export default function SuperAdminAuditLogsPage() {
   const [moduleFilter, setModuleFilter] = useState("");
   const [selectedLog, setSelectedLog] = useState<PlatformAuditLog | null>(null);
 
-  // Integrity Status State
-  const [integrityReport, setIntegrityReport] = useState<AuditIntegrityReport | null>(null);
-  const [verifyingIntegrity, setVerifyingIntegrity] = useState(false);
-  const [drResult, setDrResult] = useState<{ restorable: boolean; reason: string | null } | null>(null);
   const [verifyingDr, setVerifyingDr] = useState(false);
 
   // Pagination State
@@ -65,35 +44,12 @@ export default function SuperAdminAuditLogsPage() {
   const loadLogs = async () => {
     try {
       setLoading(true);
-      const [res, integrity] = await Promise.all([
-        fetchPlatformAuditLogs({ limit: 1000 }),
-        fetchAuditIntegrityStatus().catch(() => null),
-      ]);
+      const res = await fetchPlatformAuditLogs({ limit: 1000 });
       setLogs(res.logs || []);
-      if (integrity) setIntegrityReport(integrity);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to load audit logs.");
     } finally {
       setLoading(false);
-    }
-  };
-
-  const handleVerifyIntegrity = async () => {
-    try {
-      setVerifyingIntegrity(true);
-      const res = await triggerAuditIntegrityVerify();
-      setIntegrityReport(res);
-      if (res.status === "HEALTHY") {
-        toast.success(`Audit integrity verified: ${res.checkedRecords} records valid.`);
-      } else if (res.status === "WARNING") {
-        toast.warning(`Integrity check warning: ${res.reason || "Outbox or coverage notice"}`);
-      } else {
-        toast.error(`CRITICAL integrity failure: ${res.reason}`);
-      }
-    } catch (err: any) {
-      toast.error("Integrity verification request failed.");
-    } finally {
-      setVerifyingIntegrity(false);
     }
   };
 
@@ -107,7 +63,7 @@ export default function SuperAdminAuditLogsPage() {
       } else {
         toast.error(`DR dry run failure: ${res.reason}`);
       }
-    } catch (err: any) {
+    } catch {
       toast.error("DR dry run request failed.");
     } finally {
       setVerifyingDr(false);

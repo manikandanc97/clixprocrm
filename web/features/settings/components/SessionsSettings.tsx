@@ -6,11 +6,8 @@ import {
   Smartphone,
   Tablet,
   Globe,
-  Monitor,
   LogOut,
   Loader2,
-  RefreshCw,
-  CheckCircle2,
 } from "lucide-react";
 import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
 import { CRMCard } from "@/shared/components/crm";
@@ -29,7 +26,6 @@ import {
   fetchUserSessions,
   revokeUserSession,
   revokeAllOtherSessions,
-  UserSessionDto,
 } from "@/shared/lib/api/sessions.api";
 import { toast } from "sonner";
 
@@ -42,7 +38,6 @@ export default function SessionsSettings() {
     data: sessionsData,
     isLoading: sessionsLoading,
     isError: sessionsError,
-    refetch: refetchSessions,
   } = useQuery({
     queryKey: ["user-sessions"],
     queryFn: fetchUserSessions,

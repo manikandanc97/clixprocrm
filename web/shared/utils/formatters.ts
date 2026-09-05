@@ -41,15 +41,6 @@ export const TASK_STATUS_LABELS: Record<string, string> = {
 
 // ─── Currency ─────────────────────────────────────────────────────────────────
 
-const CURRENCY_FORMATS: Record<string, { locale: string; currency: string }> = {
-  INR: { locale: "en-IN", currency: "INR" },
-};
-
-function getSupportedCurrency(value?: string | null): string {
-  const currency = String(value || "INR").toUpperCase();
-  return CURRENCY_FORMATS[currency] ? currency : "INR";
-}
-
 export function toNumber(value: unknown): number {
   return Number(value || 0);
 }

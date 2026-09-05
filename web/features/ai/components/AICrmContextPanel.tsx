@@ -8,13 +8,10 @@ import {
   Briefcase,
   Calendar,
   FileText,
-  CheckCircle2,
-  Sparkles,
   ArrowRight,
   Database,
 } from 'lucide-react';
 import { CrmContextData } from '../types';
-import { Button } from '@/shared/ui/button';
 
 interface AICrmContextPanelProps {
   activeContext: CrmContextData | null;

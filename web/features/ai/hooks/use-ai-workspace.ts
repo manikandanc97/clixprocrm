@@ -1,10 +1,10 @@
 'use client';
 
 import { useChat } from '@ai-sdk/react';
-import React, { useState, useRef, useEffect, useMemo, useCallback } from 'react';
+import { useState, useRef, useEffect, useMemo, useCallback } from 'react';
 import { DefaultChatTransport } from 'ai';
 import { useAuth } from '@/features/auth/components/auth-provider';
-import { usePathname, useRouter, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from 'next/navigation';
 import { toast } from 'sonner';
 import { ChatSession, ModelOption, CrmContextData } from '../types';
 
@@ -89,7 +89,6 @@ export function formatRelativeTime(timestamp: number): string {
 export function useAIWorkspace() {
   const auth = useAuth();
   const pathname = usePathname();
-  const router = useRouter();
   const searchParams = useSearchParams();
 
   // Session state

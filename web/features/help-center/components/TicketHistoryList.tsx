@@ -1,7 +1,6 @@
 "use client";
 
 import React, { useState, useEffect, useCallback, useMemo } from "react";
-import { useRouter } from "next/navigation";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   Ticket,
@@ -28,7 +27,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
-import { Badge } from "@/shared/ui/badge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -53,7 +51,6 @@ import {
 import { Textarea } from "@/shared/ui/textarea";
 import { Label } from "@/shared/ui/label";
 import { toast } from "sonner";
-import { Skeleton } from "@/shared/ui/skeleton";
 import client from "@/shared/lib/api/client";
 import { formatBytes, cn } from "@/shared/lib/utils";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -234,7 +231,6 @@ interface TicketHistoryListProps {
 }
 
 export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) {
-  const router = useRouter();
   const { user } = useAuth();
 
   const [tickets, setTickets] = useState<TicketItem[]>([]);
@@ -321,7 +317,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
           prev.map((t) => (t.ticketId === res.data.data.ticketId ? res.data.data : t))
         );
       }
-    } catch (err) {
+    } catch {
       // Keep cached ticket state
     }
   };
@@ -505,7 +501,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
       toast.success(`${selectedTicketIds.length} ticket(s) deleted successfully.`);
       setSelectedTicketIds([]);
       setIsBulkDeleteDialogOpen(false);
-    } catch (err: any) {
+    } catch {
       toast.error("Failed to complete bulk ticket deletion.");
     } finally {
       setIsBulkDeleting(false);

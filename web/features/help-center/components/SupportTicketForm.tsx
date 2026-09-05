@@ -12,9 +12,6 @@ import { Label } from "@/shared/ui/label";
 import { FileUploader, FileWithPreview } from "./FileUploader";
 import { toast } from "sonner";
 import {
-  CheckCircle2,
-  Copy,
-  Plus,
   Loader2,
   Bug,
   Sparkles,
@@ -25,10 +22,7 @@ import {
   Zap,
   HelpCircle,
   Clock,
-  Check,
-  Eye,
   Send,
-  TriangleAlert,
   ClockAlert,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
@@ -103,10 +97,9 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
     register,
     handleSubmit,
     control,
-    formState: { errors, isValid },
+    formState: { errors },
     reset,
     watch,
-    setValue,
   } = useForm<TicketFormValues>({
     resolver: zodResolver(ticketSchema),
     mode: "onChange",

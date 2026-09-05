@@ -48,10 +48,8 @@ export default function SuperAdminAiPage() {
     entitledModels,
     selectedModel,
     setSelectedModel,
-    planName,
     aiEnabled,
     globalAiEnabled,
-    isSuperAdmin,
   } = useAIWorkspace();
 
   const messagesEndRef = useRef<HTMLDivElement>(null);

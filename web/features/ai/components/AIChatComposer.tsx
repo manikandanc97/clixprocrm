@@ -12,15 +12,11 @@ import {
   Sparkles,
   Lock,
   Zap,
-  Info,
-  Paperclip,
-  CheckCircle2,
 } from 'lucide-react';
 import { SlashCommand, ModelOption } from '../types';
 import {
   DropdownMenu,
   DropdownMenuContent,
-  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/shared/ui/dropdown-menu';
 import {
@@ -140,7 +136,6 @@ export function AIChatComposer({
   entitledModels,
   selectedModel = 'gemini-3.7-flash',
   onSelectModel,
-  planName,
 }: AIChatComposerProps) {
   const router = useRouter();
   const [input, setInput] = useState('');

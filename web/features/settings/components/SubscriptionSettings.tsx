@@ -1,23 +1,15 @@
 "use client";
 
-import React, { useState } from "react";
+import React from "react";
 import { useRouter } from "next/navigation";
 import {
   CreditCard,
   Check,
   Zap,
   Sparkles,
-  ShieldCheck,
-  Building2,
   Users,
-  HardDrive,
   Target,
   ArrowRight,
-  HelpCircle,
-  Clock,
-  Layers,
-  ChevronDown,
-  ChevronUp,
   FileText,
   Download,
   AlertCircle,
@@ -26,11 +18,8 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import {
-  CANONICAL_PLANS,
   formatPlanDisplayPrice,
-  getPlanDefinition,
   normalizePlanId,
-  PlanDefinition,
 } from "@/shared/lib/plans/plan-definitions";
 import { useSubscription } from "@/shared/hooks/use-subscription";
 import { PlanBadge } from "@/shared/components/PlanBadge";
@@ -40,7 +29,7 @@ import { toast } from "sonner";
 
 export default function SubscriptionSettings() {
   const router = useRouter();
-  const { user } = useAuth();
+  useAuth();
   const {
     subscription,
     plan: currentPlan,
@@ -53,10 +42,7 @@ export default function SubscriptionSettings() {
     refetch,
   } = useSubscription();
 
-  const [showComparison, setShowComparison] = useState(false);
-
   const activePlanId = normalizePlanId(subscription?.planId || "free");
-  const isEnterprise = activePlanId === "enterprise";
   const isFree = activePlanId === "free";
   const pricing = formatPlanDisplayPrice(currentPlan, subscription?.billingCycle || "monthly");
 

@@ -8,10 +8,6 @@ import {
   TrendingUp,
   Sparkles,
   Activity,
-  AlertTriangle,
-  RefreshCw,
-  Server,
-  Zap,
   ArrowUpRight,
 } from 'lucide-react';
 import {
@@ -29,11 +25,9 @@ export function SuperAdminTelemetryCard({ onTriggerAnalysis }: SuperAdminTelemet
   const [overview, setOverview] = useState<PlatformOverviewData | null>(null);
   const [analytics, setAnalytics] = useState<PlatformAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
-  const [refreshing, setRefreshing] = useState(false);
 
   const loadData = async () => {
     try {
-      setRefreshing(true);
       const [overviewData, analyticsData] = await Promise.all([
         fetchPlatformOverview().catch(() => null),
         fetchPlatformAnalytics().catch(() => null),
@@ -44,7 +38,6 @@ export function SuperAdminTelemetryCard({ onTriggerAnalysis }: SuperAdminTelemet
       // Graceful fallback
     } finally {
       setLoading(false);
-      setRefreshing(false);
     }
   };
 

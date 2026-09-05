@@ -310,7 +310,7 @@ export function CreateInvoiceModal({
       });
 
       onClose();
-    } catch (err: any) {
+    } catch {
       // Error handled by hook toast
     }
   };
