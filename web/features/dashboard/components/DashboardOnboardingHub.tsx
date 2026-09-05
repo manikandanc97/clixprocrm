@@ -9,10 +9,17 @@ import { Button } from "@/shared/ui/button";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useQueryClient } from "@tanstack/react-query";
 import { FormModal } from "@/shared/components/crm/FormModal";
-import { BulkImportModal } from "@/features/leads/components/BulkImportModal";
 import { EmptyState } from "@/shared/components/EmptyState";
 
 import { FormSkeleton } from "@/shared/components/skeletons";
+
+const BulkImportModal = dynamic(
+  () =>
+    import("@/features/leads/components/BulkImportModal").then((mod) => ({
+      default: mod.BulkImportModal,
+    })),
+  { ssr: false }
+);
 
 const LeadForm = dynamic(
   () => import("@/features/forms/LeadForm").then((mod) => ({ default: mod.LeadForm })),

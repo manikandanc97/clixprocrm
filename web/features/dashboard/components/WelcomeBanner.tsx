@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
 import { 
   ArrowUpRight, 
   Zap,
@@ -23,11 +22,8 @@ export default function WelcomeBanner() {
   const isPositiveGrowth = weeklyGrowth >= 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className="relative overflow-hidden rounded-xl bg-slate-950 p-5 sm:p-6 shadow-xl border border-white/5"
+    <div
+      className="relative overflow-hidden rounded-xl bg-slate-950 p-5 sm:p-6 shadow-xl border border-white/5 animate-in fade-in-0 slide-in-from-bottom-2.5 duration-400 ease-out motion-reduce:animate-none"
     >
       {/* Dynamic Theme Reactive Ambient Gradients */}
       <div 
@@ -112,6 +108,6 @@ export default function WelcomeBanner() {
       <div className="absolute top-6 right-1/4 opacity-20 animate-pulse pointer-events-none">
         <Sparkles className="w-5 h-5 text-white" />
       </div>
-    </motion.div>
+    </div>
   );
 }

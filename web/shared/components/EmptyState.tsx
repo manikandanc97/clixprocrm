@@ -23,7 +23,6 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export type CRMModuleType =
@@ -320,12 +319,9 @@ export function EmptyState({
   const hasActions = Boolean(resolvedPrimary || resolvedSecondary || children);
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 6 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, ease: "easeOut" }}
+    <div
       className={cn(
-        "relative w-full rounded-2xl border border-border/50 bg-card/50 dark:bg-card/25 backdrop-blur-md shadow-xs select-none overflow-hidden transition-all duration-300 flex flex-col items-center justify-center text-center",
+        "relative w-full rounded-2xl border border-border/50 bg-card/50 dark:bg-card/25 backdrop-blur-md shadow-xs select-none overflow-hidden transition-all duration-300 flex flex-col items-center justify-center text-center animate-in fade-in-0 slide-in-from-bottom-1.5 duration-250 ease-out motion-reduce:animate-none",
         isSmall
           ? "p-4 min-h-[140px]"
           : isLarge
@@ -405,6 +401,6 @@ export function EmptyState({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 }

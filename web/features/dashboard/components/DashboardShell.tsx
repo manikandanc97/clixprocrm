@@ -4,7 +4,6 @@ import React, { useEffect, useState } from "react";
 import Sidebar from "@/features/dashboard/components/sidebar";
 import Topbar from "@/features/dashboard/components/topbar";
 import { useSidebar } from "@/features/dashboard/components/SidebarContext";
-import { motion } from "framer-motion";
 import { MobileBottomNav } from "@/features/dashboard/components/MobileBottomNav";
 import { useMediaQuery } from "@/shared/hooks/use-media-query";
 
@@ -42,14 +41,11 @@ export default function DashboardShell({
 
         {/* Scrollable page content */}
         <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col kanban-board-scroll">
-          <motion.div
-            className="w-full flex-1 min-h-0 flex flex-col pb-20 md:pb-0"
-            initial={{ opacity: 0 }}
-            animate={{ opacity: 1 }}
-            transition={{ duration: 0.18, ease: [0.16, 1, 0.3, 1] }}
+          <div
+            className="w-full flex-1 min-h-0 flex flex-col pb-20 md:pb-0 animate-in fade-in-0 duration-200 ease-out motion-reduce:animate-none"
           >
             {children}
-          </motion.div>
+          </div>
         </main>
       </div>
 

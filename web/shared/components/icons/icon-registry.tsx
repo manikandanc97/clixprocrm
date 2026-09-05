@@ -1,7 +1,7 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback } from "react";
-import { motion, useReducedMotion } from "framer-motion";
+import React, { useRef, useEffect, useState, useCallback, type CSSProperties } from "react";
+import { motion, useReducedMotion, type TargetAndTransition, type Transition } from "framer-motion";
 import {
   LayoutDashboard,
   Users,
@@ -10,37 +10,28 @@ import {
   UserCheck,
   UserPlus,
   CalendarDays,
-  Calendar,
   CheckCheck,
   Check,
   CircleCheck,
-  CirclePlus,
   FileText,
   Receipt,
   Sparkles,
   ChartColumn,
-  ChartBar,
-  ChartLine,
-  ChartPie,
   Settings,
   Headset,
   ShieldCheck,
   CreditCard,
-  Package,
   Ticket,
   Layers,
   Activity,
-  History,
   FileClock,
   Bell,
-  BellDot,
   Mail,
   Search,
   Filter,
   SlidersHorizontal,
   Plus,
   Trash2,
-  Trash,
   RefreshCw,
   Download,
   Upload,
@@ -60,29 +51,16 @@ import {
   EyeOff,
   ExternalLink,
   Phone,
-  PhoneCall,
-  Globe,
   Lock,
   Key,
   Folder,
-  FolderOpen,
   File,
-  FilePlus,
   Tag,
   Bookmark,
-  Heart,
   Star,
-  Pin,
   Info,
   Clock,
-  ClockAlert,
   TriangleAlert,
-  HandCoins,
-  DollarSign,
-  BadgeDollarSign,
-  Store,
-  House,
-  Boxes,
   MessageCircle,
   MessageSquare,
   Paperclip,
@@ -95,8 +73,12 @@ import {
   ArrowLeftRight,
   Type,
   Laptop,
-} from "@animateicons/react/lucide";
-import { Building2, Handshake, BriefcaseBusiness, Palette, type LucideIcon } from "lucide-react";
+  Building2,
+  Handshake,
+  BriefcaseBusiness,
+  Palette,
+  type LucideIcon,
+} from "lucide-react";
 
 export type IconName =
   | "dashboard"
@@ -334,12 +316,21 @@ const CANONICAL_ICONS: Record<string, IconName> = {
   theme: "palette",
 };
 
-export function resolveIconName(name?: string, href?: string, IconComponent?: any): IconName {
+const CUBIC_EASE = [0.25, 1, 0.5, 1] as const;
+
+export function resolveIconName(
+  name?: string,
+  href?: string,
+  IconComponent?: unknown
+): IconName {
+  const comp = (typeof IconComponent === "object" || typeof IconComponent === "function")
+    ? (IconComponent as { displayName?: string; name?: string; render?: { displayName?: string; name?: string } } | null)
+    : null;
   const iconDisp = (
-    IconComponent?.displayName ||
-    IconComponent?.name ||
-    IconComponent?.render?.displayName ||
-    IconComponent?.render?.name ||
+    comp?.displayName ||
+    comp?.name ||
+    comp?.render?.displayName ||
+    comp?.render?.name ||
     ""
   ).toLowerCase();
   const nameText = (name || "").toLowerCase();
@@ -523,13 +514,8 @@ export function resolveIconName(name?: string, href?: string, IconComponent?: an
   return "default";
 }
 
-interface AnimateIconHandle {
-  startAnimation: () => void;
-  stopAnimation: () => void;
-}
-
 /**
- * Primary Centralized Animated Icon Component powered by @animateicons/react and Framer Motion.
+ * Primary Centralized Animated Icon Component powered by Lucide and Framer Motion.
  * Strictly animates ONCE per hover/interaction (no continuous loops).
  */
 export function AppIcon({
@@ -548,7 +534,6 @@ export function AppIcon({
   onClick,
 }: AppIconProps) {
   const iconName = resolveIconName(name, href, FallbackIcon);
-  const iconRef = useRef<AnimateIconHandle>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const reducedMotion = useReducedMotion();
   const [isAnimating, setIsAnimating] = useState(false);
@@ -561,7 +546,6 @@ export function AppIcon({
       clearTimeout(timerRef.current);
       timerRef.current = null;
     }
-    iconRef.current?.stopAnimation?.();
     setIsAnimating(false);
   }, []);
 
@@ -573,12 +557,10 @@ export function AppIcon({
       timerRef.current = null;
     }
 
-    iconRef.current?.startAnimation?.();
     setIsAnimating(true);
 
     // Auto-reset back to rest state cleanly after one complete cycle
     timerRef.current = setTimeout(() => {
-      iconRef.current?.stopAnimation?.();
       setIsAnimating(false);
       timerRef.current = null;
     }, Math.max(500, Math.round(duration * 1000)));
@@ -642,10 +624,6 @@ export function AppIcon({
     // 2. Explicit custom animate target (e.g. card with data-animate-target="true")
     const localTarget = el.closest('[data-animate-target="true"]');
 
-    // Determine the controlling interactive parent:
-    // - If standalone: only bind to localTarget if specified, otherwise direct icon hover (CASE 3)
-    // - Direct button/link ALWAYS takes priority so icons inside buttons only react to their own button!
-    // - If not inside a button, bind to localTarget card if present
     const parentInteractive = standalone
       ? localTarget
       : (directButton || localTarget);
@@ -664,8 +642,6 @@ export function AppIcon({
     el.addEventListener("trigger-icon-animation", handleCustomTrigger);
     el.addEventListener("stop-icon-animation", handleCustomStop);
 
-    // CASE 1: Icon is inside a button / link / interactive element.
-    // It must strictly respond ONLY to hover, focus, or clicks on that button itself.
     if (parentInteractive) {
       isFormFieldRef.current = false;
 
@@ -710,12 +686,9 @@ export function AppIcon({
       };
     }
 
-    // CASE 2: Icon is an adornment for an input field (NOT inside a button).
-    // Find the immediate sibling or enclosing control wrapper with an input/textarea/select.
     const findAssociatedInput = (): HTMLElement | null => {
       if (standalone) return null;
 
-      // 1. Direct relative wrapper for this input
       const relativeParent = el.closest('.relative, [data-slot="control"], .form-control');
       if (relativeParent) {
         const input = relativeParent.querySelector<HTMLElement>(
@@ -724,7 +697,6 @@ export function AppIcon({
         if (input) return input;
       }
 
-      // 2. Direct parent if it contains an input
       if (el.parentElement) {
         const input = el.parentElement.querySelector<HTMLElement>(
           'input:not([type="hidden"]):not([type="file"]), textarea, select, [role="combobox"], [role="textbox"]'
@@ -732,7 +704,6 @@ export function AppIcon({
         if (input) return input;
       }
 
-      // 3. Enclosing group / form item
       const groupParent = el.closest('.group, [data-slot="form-item"], .space-y-1\\.5, .space-y-2');
       if (groupParent) {
         const input = groupParent.querySelector<HTMLElement>(
@@ -757,7 +728,6 @@ export function AppIcon({
       targetInput.addEventListener("click", handleFieldFocusOrClick);
       targetInput.addEventListener("pointerdown", handleFieldFocusOrClick);
 
-      // Clicking directly on the icon inside the field focuses the input & animates
       const handleIconClick = () => {
         targetInput.focus();
         playOneShotAnimation();
@@ -774,8 +744,6 @@ export function AppIcon({
       };
     }
 
-    // CASE 3: Standalone icon or icon inside non-interactive badge/text.
-    // Hovering the icon directly triggers the animation.
     const onDirectEnter = () => {
       if (!disableHover) {
         if (!hasAnimatedForCurrentHoverRef.current) {
@@ -805,354 +773,217 @@ export function AppIcon({
       el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
       el.removeEventListener("stop-icon-animation", handleCustomStop);
     };
-  }, [playOneShotAnimation, stopCurrentAnimation, disableHover]);
+  }, [playOneShotAnimation, stopCurrentAnimation, disableHover, standalone]);
 
-  const props = {
-    ref: iconRef,
-    size,
-    duration,
-    isAnimated: false,
-    className: `shrink-0 select-none ${className}`,
+  const iconClasses = `shrink-0 select-none ${className}`;
+
+  // Helper to wrap icon in standard micro-interaction animation
+  const renderAnimated = (
+    IconComp: React.ComponentType<{ size?: number; className?: string }>,
+    customAnimate?: TargetAndTransition,
+    customTransition?: Transition,
+    customStyle?: CSSProperties
+  ) => {
+    const defaultAnimate = !reducedMotion && isAnimating
+      ? { scale: [1, 1.14, 0.96, 1], rotate: [0, -3, 3, 0], y: [0, -1, 0] }
+      : { scale: 1, rotate: 0, y: 0 };
+    const defaultTransition: Transition = { duration: 0.5, ease: CUBIC_EASE };
+
+    return (
+      <motion.div
+        animate={customAnimate || defaultAnimate}
+        transition={customTransition || defaultTransition}
+        style={customStyle}
+        className="shrink-0 select-none flex items-center justify-center pointer-events-none"
+      >
+        <IconComp size={size} className={iconClasses} />
+      </motion.div>
+    );
   };
 
   const renderIcon = () => {
     switch (iconName) {
       case "dashboard":
-        return <LayoutDashboard {...props} />;
+        return renderAnimated(LayoutDashboard);
       case "contacts":
       case "leads":
-        return <Users {...props} />;
+        return renderAnimated(Users);
       case "user":
-        return <User {...props} />;
+        return renderAnimated(User);
       case "platformUsers":
-        return <UserCog {...props} />;
+        return renderAnimated(UserCog);
       case "userPlus":
-        return <UserPlus {...props} />;
+        return renderAnimated(UserPlus, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1], y: [0, -1.5, 0] } : { scale: 1, y: 0 });
       case "tasks":
-        return <CheckCheck {...props} />;
+        return renderAnimated(CheckCheck, !reducedMotion && isAnimating ? { scale: [1, 1.2, 0.95, 1] } : { scale: 1 });
       case "calendar":
       case "attendance":
-        return <CalendarDays {...props} />;
+        return renderAnimated(CalendarDays);
       case "quotations":
-        return <FileText {...props} />;
+        return renderAnimated(FileText);
       case "invoices":
       case "billing":
-        return <Receipt {...props} />;
+        return renderAnimated(Receipt);
       case "ai":
-        return <Sparkles {...props} />;
+        return renderAnimated(Sparkles, !reducedMotion && isAnimating ? { scale: [1, 1.25, 0.92, 1.1, 1], rotate: [0, -8, 8, 0] } : { scale: 1, rotate: 0 });
       case "reports":
       case "analytics":
       case "performance":
-        return <ChartColumn {...props} />;
+        return renderAnimated(ChartColumn, !reducedMotion && isAnimating ? { scale: [1, 1.15, 0.96, 1], y: [0, -2, 0] } : { scale: 1, y: 0 });
       case "settings":
-        return <Settings {...props} />;
+        return renderAnimated(Settings, !reducedMotion && isAnimating ? { rotate: [0, 60, 0], scale: [1, 1.1, 1] } : { rotate: 0, scale: 1 }, { duration: 0.55, ease: CUBIC_EASE });
       case "support":
       case "help":
-        return <Headset {...props} />;
+        return renderAnimated(Headset);
       case "security":
       case "roleManagement":
       case "roles":
-        return <ShieldCheck {...props} />;
+        return renderAnimated(ShieldCheck, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 });
       case "employees":
-        return <UserCheck {...props} />;
+        return renderAnimated(UserCheck);
       case "plans":
       case "packages":
-        return <CreditCard {...props} />;
+        return renderAnimated(CreditCard);
       case "supportTickets":
-        return <Ticket {...props} />;
+        return renderAnimated(Ticket);
       case "modules":
-        return <Layers {...props} />;
+        return renderAnimated(Layers);
       case "telemetry":
-        return <Activity {...props} />;
+        return renderAnimated(Activity);
       case "auditLogs":
-        return <FileClock {...props} />;
+        return renderAnimated(FileClock);
       case "notifications":
-        return <Bell {...props} />;
+        return renderAnimated(Bell, !reducedMotion && isAnimating ? { rotate: [0, -15, 15, -10, 10, 0], scale: [1, 1.12, 1] } : { rotate: 0, scale: 1 }, { duration: 0.55, ease: "easeInOut" });
       case "mail":
-        return <Mail {...props} />;
+        return renderAnimated(Mail, !reducedMotion && isAnimating ? { x: [0, 2, 0], y: [0, -2, 0], scale: [1, 1.08, 1] } : { x: 0, y: 0, scale: 1 });
       case "phone":
-        return <Phone {...props} />;
+        return renderAnimated(Phone, !reducedMotion && isAnimating ? { rotate: [0, -12, 12, -8, 8, 0] } : { rotate: 0 });
       case "search":
-        return <Search {...props} />;
+        return renderAnimated(Search, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1], rotate: [0, -10, 10, 0] } : { scale: 1, rotate: 0 });
       case "filter":
-        return <SlidersHorizontal {...props} />;
+        return renderAnimated(
+          FallbackIcon === Filter ? Filter : SlidersHorizontal,
+          !reducedMotion && isAnimating ? { rotate: [0, -12, 12, -4, 0], scale: [1, 1.1, 0.95, 1] } : { rotate: 0, scale: 1 },
+          { duration: 0.5, ease: CUBIC_EASE }
+        );
       case "plus":
       case "add":
-        return <Plus {...props} />;
+        return renderAnimated(Plus, !reducedMotion && isAnimating ? { rotate: [0, 90, 0], scale: [1, 1.15, 1] } : { rotate: 0, scale: 1 });
       case "trash":
       case "delete":
-        return <Trash2 {...props} />;
+        return renderAnimated(Trash2, !reducedMotion && isAnimating ? { rotate: [0, -8, 8, -4, 0], y: [0, -2, 0] } : { rotate: 0, y: 0 });
       case "refresh":
       case "sync":
-        return <RefreshCw {...props} />;
+        return renderAnimated(RefreshCw, !reducedMotion && isAnimating ? { rotate: [0, 180, 360], scale: [1, 1.1, 1] } : { rotate: 0, scale: 1 }, { duration: 0.6, ease: "easeInOut" });
       case "download":
       case "export":
-        return <Download {...props} />;
+        return renderAnimated(Download, !reducedMotion && isAnimating ? { y: [0, 3, 0], scale: [1, 1.08, 1] } : { y: 0, scale: 1 });
       case "upload":
       case "import":
-        return <Upload {...props} />;
+        return renderAnimated(Upload, !reducedMotion && isAnimating ? { y: [0, -3, 0], scale: [1, 1.08, 1] } : { y: 0, scale: 1 });
       case "arrowRight":
       case "next":
-        return <ArrowRight {...props} />;
+        return renderAnimated(ArrowRight, !reducedMotion && isAnimating ? { x: [0, 3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
       case "arrowLeft":
       case "back":
-        return <ArrowLeft {...props} />;
+        return renderAnimated(ArrowLeft, !reducedMotion && isAnimating ? { x: [0, -3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
       case "chevronDown":
-        return <ChevronDown {...props} />;
+        return renderAnimated(ChevronDown, !reducedMotion && isAnimating ? { y: [0, 3, 0] } : { y: 0 }, { duration: 0.35, ease: CUBIC_EASE });
       case "chevronUp":
-        return <ChevronUp {...props} />;
+        return renderAnimated(ChevronUp, !reducedMotion && isAnimating ? { y: [0, -3, 0] } : { y: 0 }, { duration: 0.35, ease: CUBIC_EASE });
       case "edit":
       case "pencil":
-        return <Pencil {...props} />;
+        return renderAnimated(Pencil, !reducedMotion && isAnimating ? { rotate: [0, -12, 6, 0], y: [0, -1.5, 0] } : { rotate: 0, y: 0 });
       case "copy":
-        return <Copy {...props} />;
+        return renderAnimated(Copy, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 });
       case "send":
-        return <Send {...props} />;
+        return renderAnimated(Send, !reducedMotion && isAnimating ? { x: [0, 2.5, 0], y: [0, -2, 0], scale: [1, 1.08, 1] } : { x: 0, y: 0, scale: 1 });
       case "eye":
       case "view":
-        return <Eye {...props} />;
+        return renderAnimated(Eye, !reducedMotion && isAnimating ? { scale: [1, 1.15, 1] } : { scale: 1 });
       case "eyeOff":
-        return <EyeOff {...props} />;
+        return renderAnimated(EyeOff, !reducedMotion && isAnimating ? { scale: [1, 1.15, 1] } : { scale: 1 });
       case "check":
       case "save":
-        return <Check {...props} />;
+        return renderAnimated(Check, !reducedMotion && isAnimating ? { scale: [1, 1.22, 0.95, 1] } : { scale: 1 });
       case "circleCheck":
-        return <CircleCheck {...props} />;
+        return renderAnimated(CircleCheck, !reducedMotion && isAnimating ? { scale: [1, 1.22, 0.95, 1] } : { scale: 1 });
       case "externalLink":
-        return <ExternalLink {...props} />;
+        return renderAnimated(ExternalLink, !reducedMotion && isAnimating ? { x: [0, 2, 0], y: [0, -2, 0] } : { x: 0, y: 0 });
       case "lock":
-        return <Lock {...props} />;
+        return renderAnimated(Lock, !reducedMotion && isAnimating ? { scale: [1, 1.12, 1], y: [0, -1, 0] } : { scale: 1, y: 0 });
       case "key":
-        return <Key {...props} />;
+        return renderAnimated(Key, !reducedMotion && isAnimating ? { rotate: [0, -15, 15, 0] } : { rotate: 0 });
       case "folder":
-        return <Folder {...props} />;
+        return renderAnimated(Folder);
       case "file":
-        return <File {...props} />;
+        return renderAnimated(File);
       case "tag":
-        return <Tag {...props} />;
+        return renderAnimated(Tag, !reducedMotion && isAnimating ? { rotate: [0, -10, 10, 0] } : { rotate: 0 });
       case "bookmark":
-        return <Bookmark {...props} />;
+        return renderAnimated(Bookmark, !reducedMotion && isAnimating ? { y: [0, -2, 0] } : { y: 0 });
       case "star":
-        return <Star {...props} />;
+        return renderAnimated(Star, !reducedMotion && isAnimating ? { scale: [1, 1.25, 0.95, 1], rotate: [0, -12, 12, 0] } : { scale: 1, rotate: 0 });
       case "info":
-        return <Info {...props} />;
+        return renderAnimated(Info);
       case "alert":
-        return <TriangleAlert {...props} />;
+        return renderAnimated(TriangleAlert, !reducedMotion && isAnimating ? { scale: [1, 1.15, 1], y: [0, -2, 0] } : { scale: 1, y: 0 });
       case "close":
-        return <X {...props} />;
+        return renderAnimated(X, !reducedMotion && isAnimating ? { rotate: [0, 90, 0] } : { rotate: 0 });
       case "menu":
-        return <Menu {...props} />;
+        return renderAnimated(Menu);
       case "message":
-        return <MessageCircle {...props} />;
+        return renderAnimated(MessageCircle, !reducedMotion && isAnimating ? { scale: [1, 1.15, 0.95, 1] } : { scale: 1 });
       case "messageSquare":
-        return <MessageSquare {...props} />;
+        return renderAnimated(MessageSquare, !reducedMotion && isAnimating ? { scale: [1, 1.15, 0.95, 1] } : { scale: 1 });
       case "clock":
-        return <Clock {...props} />;
+        return renderAnimated(Clock, !reducedMotion && isAnimating ? { rotate: [0, 180, 360] } : { rotate: 0 }, { duration: 0.6, ease: "easeInOut" });
       case "paperclip":
-        return <Paperclip {...props} />;
+        return renderAnimated(Paperclip, !reducedMotion && isAnimating ? { rotate: [0, -15, 15, 0] } : { rotate: 0 });
       case "video":
-        return <Video {...props} />;
+        return renderAnimated(Video);
       case "image":
-        return <Image {...props} />;
+        return renderAnimated(Image);
       case "logout":
-        return <LogOut {...props} />;
+        return renderAnimated(LogOut, !reducedMotion && isAnimating ? { x: [0, 3, 0] } : { x: 0 });
       case "arrowLeftRight":
-        return <ArrowLeftRight {...props} />;
+        return renderAnimated(ArrowLeftRight, !reducedMotion && isAnimating ? { rotate: [0, 180], scale: [1, 1.1, 1] } : { rotate: 0, scale: 1 }, { duration: 0.45, ease: "easeInOut" });
       case "type":
-        return <Type {...props} />;
+        return renderAnimated(Type);
       case "play":
-        return <Play {...props} />;
+        return renderAnimated(Play, !reducedMotion && isAnimating ? { scale: [1, 1.2, 1] } : { scale: 1 });
 
-      // Animated Lucide Icons with smooth micro-interaction
       case "chevronRight":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { x: [0, 3, 0] }
-                : { x: 0 }
-            }
-            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <ChevronRight size={size} className={className} />
-          </motion.div>
-        );
-
+        return renderAnimated(ChevronRight, !reducedMotion && isAnimating ? { x: [0, 3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
       case "chevronLeft":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { x: [0, -3, 0] }
-                : { x: 0 }
-            }
-            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <ChevronLeft size={size} className={className} />
-          </motion.div>
-        );
-
+        return renderAnimated(ChevronLeft, !reducedMotion && isAnimating ? { x: [0, -3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
       case "chevronsRight":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { x: [0, 4, 0], scale: [1, 1.08, 1] }
-                : { x: 0, scale: 1 }
-            }
-            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <ChevronsRight size={size} className={className} />
-          </motion.div>
-        );
-
+        return renderAnimated(ChevronsRight, !reducedMotion && isAnimating ? { x: [0, 4, 0], scale: [1, 1.08, 1] } : { x: 0, scale: 1 }, { duration: 0.35, ease: CUBIC_EASE });
       case "chevronsLeft":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { x: [0, -4, 0], scale: [1, 1.08, 1] }
-                : { x: 0, scale: 1 }
-            }
-            transition={{ duration: 0.35, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <ChevronsLeft size={size} className={className} />
-          </motion.div>
-        );
-
+        return renderAnimated(ChevronsLeft, !reducedMotion && isAnimating ? { x: [0, -4, 0], scale: [1, 1.08, 1] } : { x: 0, scale: 1 }, { duration: 0.35, ease: CUBIC_EASE });
       case "arrowUpRight":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { x: [0, 2, 0], y: [0, -2, 0], scale: [1, 1.15, 1] }
-                : { x: 0, y: 0, scale: 1 }
-            }
-            transition={{ duration: 0.45, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <ArrowUpRight size={size} className={className} />
-          </motion.div>
-        );
-
-      case "filter":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { rotate: [0, -12, 12, -4, 0], scale: [1, 1.1, 0.95, 1] }
-                : { rotate: 0, scale: 1 }
-            }
-            transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            {FallbackIcon === Filter ? (
-              <Filter size={size} className={className} />
-            ) : (
-              <SlidersHorizontal size={size} className={className} />
-            )}
-          </motion.div>
-        );
+        return renderAnimated(ArrowUpRight, !reducedMotion && isAnimating ? { x: [0, 2, 0], y: [0, -2, 0], scale: [1, 1.15, 1] } : { x: 0, y: 0, scale: 1 }, { duration: 0.45, ease: CUBIC_EASE });
 
       case "companies":
       case "building":
       case "organizations":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { scale: [1, 1.18, 0.95, 1], y: [0, -3, 0], rotate: [0, -6, 5, 0] }
-                : { scale: 1, y: 0, rotate: 0 }
-            }
-            style={{ transformOrigin: "bottom center" }}
-            transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <Building2 size={size} className={className} />
-          </motion.div>
-        );
+        return renderAnimated(Building2, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1], y: [0, -3, 0], rotate: [0, -6, 5, 0] } : { scale: 1, y: 0, rotate: 0 }, { duration: 0.5, ease: CUBIC_EASE }, { transformOrigin: "bottom center" });
 
       case "deals":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { rotate: [0, -6, 4, -1, 0], scale: [1, 1.05, 0.98, 1] }
-                : { rotate: 0, scale: 1 }
-            }
-            style={{ transformOrigin: "center center" }}
-            transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <Handshake size={size} className={className} />
-          </motion.div>
-        );
+        return renderAnimated(Handshake, !reducedMotion && isAnimating ? { rotate: [0, -6, 4, -1, 0], scale: [1, 1.05, 0.98, 1] } : { rotate: 0, scale: 1 }, { duration: 0.55, ease: CUBIC_EASE }, { transformOrigin: "center center" });
 
       case "teamPerformance":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { y: [0, -2, 0.4, 0], scale: [1, 1.04, 0.98, 1] }
-                : { y: 0, scale: 1 }
-            }
-            transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <BriefcaseBusiness size={size} className={className} />
-          </motion.div>
-        );
+        return renderAnimated(BriefcaseBusiness, !reducedMotion && isAnimating ? { y: [0, -2, 0.4, 0], scale: [1, 1.04, 0.98, 1] } : { y: 0, scale: 1 }, { duration: 0.55, ease: CUBIC_EASE });
 
       case "palette":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { rotate: [0, -18, 16, -6, 0], scale: [1, 1.15, 0.95, 1] }
-                : { rotate: 0, scale: 1 }
-            }
-            style={{ transformOrigin: "center center" }}
-            transition={{ duration: 0.5, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <Palette size={size} className={className} />
-          </motion.div>
-        );
+        return renderAnimated(Palette, !reducedMotion && isAnimating ? { rotate: [0, -18, 16, -6, 0], scale: [1, 1.15, 0.95, 1] } : { rotate: 0, scale: 1 }, { duration: 0.5, ease: CUBIC_EASE }, { transformOrigin: "center center" });
 
       case "sessions":
-        return (
-          <motion.div
-            animate={
-              !reducedMotion && isAnimating
-                ? { scale: [1, 1.1, 0.96, 1], y: [0, -1.5, 0] }
-                : { scale: 1, y: 0 }
-            }
-            transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
-            className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-          >
-            <Laptop size={size} className={className} />
-          </motion.div>
-        );
+        return renderAnimated(Laptop, !reducedMotion && isAnimating ? { scale: [1, 1.1, 0.96, 1], y: [0, -1.5, 0] } : { scale: 1, y: 0 }, { duration: 0.55, ease: CUBIC_EASE });
 
       default:
         if (FallbackIcon) {
-          return (
-            <motion.div
-              animate={
-                !reducedMotion && isAnimating
-                  ? { scale: [1, 1.14, 0.96, 1], rotate: [0, -4, 4, 0], y: [0, -1, 0] }
-                  : { scale: 1, rotate: 0, y: 0 }
-              }
-              transition={{ duration: 0.55, ease: [0.25, 1, 0.5, 1] }}
-              className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-            >
-              <FallbackIcon size={size} className={className} />
-            </motion.div>
-          );
+          return renderAnimated(FallbackIcon, !reducedMotion && isAnimating ? { scale: [1, 1.14, 0.96, 1], rotate: [0, -4, 4, 0], y: [0, -1, 0] } : { scale: 1, rotate: 0, y: 0 }, { duration: 0.55, ease: CUBIC_EASE });
         }
         return null;
     }
