@@ -1,4 +1,4 @@
-import { Logger } from '@nestjs/common';
+import { Logger, Optional, Inject, forwardRef } from '@nestjs/common';
 import { Processor, WorkerHost } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import * as nodemailer from 'nodemailer';
@@ -11,16 +11,23 @@ import {
   InvoiceNotificationJobPayload,
   PaymentReceiptJobPayload,
   SupportTicketJobPayload,
+  SyncInboxJobPayload,
 } from '../interfaces/email-jobs';
 import { escapeHtml } from '../../common/services/email.service';
 import { formatCurrency, toNumber } from '../../common/utils/crm-formatters.util';
+import { InboundEmailService } from '../../email/services/inbound-email.service';
 
 @Processor(QUEUE_NAMES.EMAIL)
 export class EmailQueueProcessor extends WorkerHost {
   private readonly logger = new Logger(EmailQueueProcessor.name);
   private transporter: nodemailer.Transporter;
 
-  constructor(private readonly prisma: PrismaService) {
+  constructor(
+    private readonly prisma: PrismaService,
+    @Optional()
+    @Inject(forwardRef(() => InboundEmailService))
+    private readonly inboundEmailService?: InboundEmailService,
+  ) {
     super();
     this.transporter = nodemailer.createTransport({
       host: process.env.SMTP_HOST,
@@ -56,6 +63,11 @@ export class EmailQueueProcessor extends WorkerHost {
         case EMAIL_JOB_NAMES.SUPPORT_TICKET:
           return await this.handleSupportTicket(
             job.data as SupportTicketJobPayload,
+          );
+
+        case EMAIL_JOB_NAMES.SYNC_INBOX:
+          return await this.handleSyncInbox(
+            job.data as SyncInboxJobPayload,
           );
 
         default:
@@ -465,5 +477,19 @@ export class EmailQueueProcessor extends WorkerHost {
 
     this.logger.log(`[EMAIL WORKER] Support ticket email delivered for #${ticketId}`);
     return { success: true, messageId: info?.messageId };
+  }
+
+  /**
+   * Processes inbound email mailbox synchronization via InboundEmailService.
+   */
+  private async handleSyncInbox(payload: SyncInboxJobPayload) {
+    if (!this.inboundEmailService) {
+      this.logger.warn(
+        `[EMAIL WORKER] InboundEmailService not injected; cannot sync inbox for account ${payload.accountId}`,
+      );
+      return { skipped: true, reason: 'InboundEmailService not available' };
+    }
+
+    return await this.inboundEmailService.processSyncInboxJob(payload);
   }
 }

@@ -263,6 +263,40 @@ describe('EmailQueueProcessor Suite', () => {
     });
   });
 
+  describe('Sync Inbox Job Handler', () => {
+    it('should delegate sync-inbox job to InboundEmailService', async () => {
+      const mockInboundService = {
+        processSyncInboxJob: jest.fn().mockResolvedValue({
+          success: true,
+          messagesProcessed: 3,
+          messagesSkipped: 0,
+        }),
+      };
+
+      const processorWithInbound = new EmailQueueProcessor(
+        mockPrisma as any,
+        mockInboundService as any,
+      );
+
+      const mockJob = {
+        name: EMAIL_JOB_NAMES.SYNC_INBOX,
+        id: 'sync-inbox:tenant-test:acc-test',
+        data: {
+          tenantId: 'tenant-test',
+          accountId: 'acc-test',
+          folder: 'INBOX',
+          correlationId: 'corr-sync-1',
+          timestamp: new Date().toISOString(),
+        },
+      } as Job;
+
+      const result = await processorWithInbound.process(mockJob);
+      expect(result.success).toBe(true);
+      expect(result.messagesProcessed).toBe(3);
+      expect(mockInboundService.processSyncInboxJob).toHaveBeenCalledWith(mockJob.data);
+    });
+  });
+
   describe('Error Handling and Retries', () => {
     it('should rethrow errors during processing to trigger BullMQ retries', async () => {
       mockPrisma.withTenantContext.mockRejectedValue(

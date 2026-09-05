@@ -14,6 +14,7 @@ describe('EmailQueueProducer Suite', () => {
         data,
         opts,
       })),
+      getJob: jest.fn().mockResolvedValue(null),
     };
     producer = new EmailQueueProducer(mockQueue);
   });
@@ -165,6 +166,49 @@ describe('EmailQueueProducer Suite', () => {
           jobId: 'support-ticket-email:CP-SUP-2026-123456:corr-supp-123',
         }),
       );
+    });
+  });
+
+  describe('enqueueSyncInbox', () => {
+    it('should enqueue sync-inbox job with deterministic jobId sync-inbox:tenantId:accountId', async () => {
+      mockQueue.getJob.mockResolvedValueOnce(null);
+      mockQueue.add.mockResolvedValueOnce({ id: 'sync-inbox:tenant-123:acc-456' });
+
+      const result = await producer.enqueueSyncInbox({
+        tenantId: 'tenant-123',
+        accountId: 'acc-456',
+        folder: 'INBOX',
+      });
+
+      expect(result.enqueued).toBe(true);
+      expect(result.jobId).toBe('sync-inbox:tenant-123:acc-456');
+      expect(mockQueue.add).toHaveBeenCalledWith(
+        EMAIL_JOB_NAMES.SYNC_INBOX,
+        expect.objectContaining({
+          tenantId: 'tenant-123',
+          accountId: 'acc-456',
+          folder: 'INBOX',
+          jobId: 'sync-inbox:tenant-123:acc-456',
+        }),
+        expect.objectContaining({
+          jobId: 'sync-inbox:tenant-123:acc-456',
+        }),
+      );
+    });
+
+    it('should prevent overlapping sync if job is already active or waiting', async () => {
+      mockQueue.getJob.mockResolvedValueOnce({
+        getState: jest.fn().mockResolvedValue('active'),
+      });
+
+      const result = await producer.enqueueSyncInbox({
+        tenantId: 'tenant-123',
+        accountId: 'acc-456',
+      });
+
+      expect(result.enqueued).toBe(false);
+      expect(result.reason).toContain('active');
+      expect(mockQueue.add).not.toHaveBeenCalled();
     });
   });
 

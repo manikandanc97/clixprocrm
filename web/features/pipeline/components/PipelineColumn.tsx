@@ -8,8 +8,7 @@ import { SortableContext, verticalListSortingStrategy } from "@dnd-kit/sortable"
 import { useDroppable } from "@dnd-kit/core";
 import { cn } from "@/shared/lib/utils";
 import { useCurrency } from "@/shared/hooks/use-currency";
-import { PIPELINE_STAGE_LABELS } from "@/lib/crm-formatters";
-import { CRMActionMenu } from "@/shared/components/crm";
+import { PIPELINE_STAGE_LABELS } from "@/shared/utils/formatters";
 
 interface Props {
   title: string;
@@ -175,17 +174,6 @@ const PipelineColumn = ({ title, items, onSelectDeal, onAddDeal }: Props) => {
             >
               <Plus className="w-4 h-4" />
             </button>
-            <CRMActionMenu
-              triggerOrientation="horizontal"
-              triggerClassName="h-7 w-7 p-0"
-              items={[
-                {
-                  label: "Add Deal to Stage",
-                  icon: Plus,
-                  onClick: () => onAddDeal?.(title),
-                },
-              ]}
-            />
           </div>
         </div>
         
@@ -242,15 +230,3 @@ const PipelineColumn = ({ title, items, onSelectDeal, onAddDeal }: Props) => {
 };
 
 export default PipelineColumn;
-
-
-
-
-
-
-
-
-
-
-
-

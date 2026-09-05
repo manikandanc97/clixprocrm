@@ -24,6 +24,7 @@ import { SystemModule } from './system/system.module';
 import { SupportModule } from './support/support.module';
 import { AiModule } from './ai/ai.module';
 import { CustomersModule } from './customers/customers.module';
+import { EmailModule } from './email/email.module';
 
 @Module({
   imports: [
@@ -54,6 +55,7 @@ import { CustomersModule } from './customers/customers.module';
     SupportModule,
     AiModule,
     CustomersModule,
+    EmailModule,
   ],
   controllers: [AppController],
   providers: [AppService],

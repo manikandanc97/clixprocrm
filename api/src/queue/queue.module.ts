@@ -15,6 +15,7 @@ import { QueueMetricsService } from './services/queue-metrics.service';
 import { LeadsModule } from '../leads/leads.module';
 import { BillingModule } from '../common/billing/billing.module';
 import { WorkspaceModule } from '../workspace/workspace.module';
+import { EmailModule } from '../email/email.module';
 
 const logger = new Logger('QueueModule');
 
@@ -61,6 +62,7 @@ function parseRedisUrl(redisUrl: string) {
     forwardRef(() => LeadsModule),
     forwardRef(() => BillingModule),
     forwardRef(() => WorkspaceModule),
+    forwardRef(() => EmailModule),
     BullModule.forRootAsync({
       imports: [ConfigModule],
       inject: [ConfigService],

@@ -172,7 +172,7 @@ export function WonLostModal({ isOpen, onClose, type, deal, onSubmit, isLoading 
               Cancel
             </Button>
             <Button type="submit" size="sm" disabled={showLoading} variant={type === DealStage.WON ? "default" : "destructive"} className="w-full sm:w-auto h-9 text-xs font-semibold gap-1.5 cursor-pointer">
-              {showLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : type === DealStage.WON ? <Star className="w-3.5 h-3.5 fill-current" /> : <X className="w-3.5 h-3.5" />}
+              {showLoading ? <Loader2 className="w-3.5 h-3.5 animate-spin" /> : type === DealStage.WON ? <Star className="w-3.5 h-3.5 fill-current" /> : <XCircle className="w-3.5 h-3.5" />}
               {showLoading ? "Saving..." : "Save"}
             </Button>
           </DialogFooter>

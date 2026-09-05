@@ -12,6 +12,8 @@ import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateDeal, useUpdateDeal, useCompanies, useCustomers, useLeads } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
+import { DealStage } from "@/shared/types/pipeline";
+import { PIPELINE_STAGE_LABELS } from "@/shared/utils/formatters";
 
 const dealSchema = z.object({
   name: z.string().min(2, "Name must be at least 2 characters"),
@@ -19,7 +21,7 @@ const dealSchema = z.object({
   customerId: z.string().optional(),
   leadId: z.string().optional(),
   value: z.string().optional(),
-  stage: z.enum(["NEW", "QUALIFIED", "PROPOSAL", "NEGOTIATION", "WON", "LOST"]).optional(),
+  stage: z.enum([DealStage.NEW, DealStage.QUALIFIED, DealStage.PROPOSAL, DealStage.NEGOTIATION, DealStage.WON, DealStage.LOST]).optional(),
   probability: z.string().optional(),
   expectedCloseDate: z.string().optional(),
 });
@@ -52,7 +54,7 @@ export const DealForm = ({ initialData, initialStage, onSuccess, onCancel }: Dea
       customerId: initialData?.customerId || "none",
       leadId: initialData?.leadId || "none",
       value: initialData?.value?.toString() || "",
-      stage: initialData?.stage || initialStage || "NEW",
+      stage: initialData?.stage || initialStage || DealStage.NEW,
       probability: initialData?.probability?.toString() || "0",
       expectedCloseDate: initialData?.expectedCloseDate ? new Date(initialData.expectedCloseDate).toISOString().split('T')[0] : "",
     },
@@ -136,12 +138,12 @@ export const DealForm = ({ initialData, initialStage, onSuccess, onCancel }: Dea
             label="Stage" 
             placeholder="Select stage"
             options={[
-              { label: "New", value: "NEW" },
-              { label: "Qualified", value: "QUALIFIED" },
-              { label: "Proposal", value: "PROPOSAL" },
-              { label: "Negotiation", value: "NEGOTIATION" },
-              { label: "Won", value: "WON" },
-              { label: "Lost", value: "LOST" },
+              { label: PIPELINE_STAGE_LABELS[DealStage.NEW], value: DealStage.NEW },
+              { label: PIPELINE_STAGE_LABELS[DealStage.QUALIFIED], value: DealStage.QUALIFIED },
+              { label: PIPELINE_STAGE_LABELS[DealStage.PROPOSAL], value: DealStage.PROPOSAL },
+              { label: PIPELINE_STAGE_LABELS[DealStage.NEGOTIATION], value: DealStage.NEGOTIATION },
+              { label: PIPELINE_STAGE_LABELS[DealStage.WON], value: DealStage.WON },
+              { label: PIPELINE_STAGE_LABELS[DealStage.LOST], value: DealStage.LOST },
             ]} 
           />
           <FormInput name="probability" label="Probability (%)" placeholder="Enter win probability (%)" />

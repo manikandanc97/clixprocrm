@@ -8,6 +8,7 @@ export const EMAIL_JOB_NAMES = {
   INVOICE_NOTIFICATION: 'invoice-notification',
   PAYMENT_RECEIPT: 'payment-receipt',
   SUPPORT_TICKET: 'support-ticket',
+  SYNC_INBOX: 'sync-inbox',
 } as const;
 
 export type EmailJobName = (typeof EMAIL_JOB_NAMES)[keyof typeof EMAIL_JOB_NAMES];
@@ -63,10 +64,22 @@ export interface SupportTicketJobPayload extends BaseJobPayload {
 }
 
 /**
- * Union of all supported transactional email payloads in Phase 2.1.3.
+ * Payload for Inbound Mailbox Synchronization (IMAP sync).
+ * Credentials, raw MIME, HTML, and binary attachment buffers are strictly NEVER stored in Redis.
+ */
+export interface SyncInboxJobPayload extends BaseJobPayload {
+  accountId: string;
+  folder?: string;
+  limit?: number;
+  cursor?: string;
+}
+
+/**
+ * Union of all supported email payloads in ClixProCRM.
  */
 export type EmailJobPayload =
   | SecurityAlertJobPayload
   | InvoiceNotificationJobPayload
   | PaymentReceiptJobPayload
-  | SupportTicketJobPayload;
+  | SupportTicketJobPayload
+  | SyncInboxJobPayload;

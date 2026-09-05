@@ -9,6 +9,7 @@ import {
   InvoiceNotificationJobPayload,
   PaymentReceiptJobPayload,
   SupportTicketJobPayload,
+  SyncInboxJobPayload,
 } from '../interfaces/email-jobs';
 
 export const EMAIL_DEFAULT_JOB_OPTS = {
@@ -216,6 +217,66 @@ export class EmailQueueProducer {
 
     this.logger.log(
       `[EMAIL QUEUE] Enqueued support ticket email job ${job.id} for ticket ${payload.ticketId} (tenant: ${payload.tenantId})`,
+    );
+    return { enqueued: true, jobId: job.id };
+  }
+
+  /**
+   * Enqueues an inbound mailbox synchronization job (IMAP sync).
+   * Enforces deterministic Job ID `sync-inbox:${tenantId}:${accountId}` and prevents
+   * overlapping synchronization if a sync job is already active or queued.
+   */
+  async enqueueSyncInbox(
+    payload: Omit<SyncInboxJobPayload, 'correlationId' | 'timestamp'> & {
+      correlationId?: string;
+      timestamp?: string;
+    },
+  ): Promise<{ enqueued: boolean; jobId?: string; reason?: string }> {
+    const correlationId = payload.correlationId || randomUUID();
+    const timestamp = payload.timestamp || new Date().toISOString();
+    const jobId = payload.jobId || `sync-inbox:${payload.tenantId}:${payload.accountId}`;
+
+    const fullPayload: SyncInboxJobPayload = {
+      ...payload,
+      correlationId,
+      timestamp,
+      jobId,
+    };
+
+    if (!this.emailQueue) {
+      this.logger.warn(
+        `Email queue not initialized; cannot enqueue sync-inbox for account ${payload.accountId}`,
+      );
+      return { enqueued: false, reason: 'Queue not available' };
+    }
+
+    // Check if an active, waiting, or delayed job already exists for this account
+    try {
+      const existingJob = await this.emailQueue.getJob(jobId);
+      if (existingJob) {
+        const state = await existingJob.getState();
+        if (state === 'active' || state === 'waiting' || state === 'delayed') {
+          this.logger.warn(
+            `[EMAIL QUEUE] Sync job ${jobId} already in state "${state}"; skipping duplicate enqueue.`,
+          );
+          return { enqueued: false, jobId, reason: `Job already in state: ${state}` };
+        }
+      }
+    } catch (err: any) {
+      this.logger.warn(`Notice while checking existing sync job ${jobId}: ${err?.message || err}`);
+    }
+
+    const job = await this.emailQueue.add(
+      EMAIL_JOB_NAMES.SYNC_INBOX,
+      fullPayload,
+      {
+        ...EMAIL_DEFAULT_JOB_OPTS,
+        jobId,
+      },
+    );
+
+    this.logger.log(
+      `[EMAIL QUEUE] Enqueued sync-inbox job ${job.id} for account ${payload.accountId} (tenant: ${payload.tenantId})`,
     );
     return { enqueued: true, jobId: job.id };
   }

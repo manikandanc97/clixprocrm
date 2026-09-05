@@ -9,7 +9,6 @@ import {
   SettingsSection,
   SettingsRow,
   SettingsToggleRow,
-  SettingsField,
 } from "@/shared/components/crm/ContextualSettingsComponents";
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
@@ -41,7 +40,6 @@ import {
   GripVertical,
   ChevronUp,
   ChevronDown,
-  Check,
   AlertCircle,
   CalendarClock,
   Mail,
@@ -52,12 +50,10 @@ import {
   Lock,
   UserCheck,
   Layers,
-  HelpCircle,
   Tag,
   Sparkles,
   DollarSign,
   Briefcase,
-  AlertTriangle,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useCRMStore } from "@/shared/store/useCRMStore";
@@ -1104,7 +1100,7 @@ export function DealContextualSettings({
                   </div>
                   <div className="space-y-1">
                     <label className="text-[11px] font-semibold text-muted-foreground">Type</label>
-                    <Select value={newFieldType} onValueChange={(val: any) => setNewFieldType(val)}>
+                    <Select value={newFieldType} onValueChange={(val: string) => setNewFieldType(val as CustomDealField["type"])}>
                       <SelectTrigger className="h-8 text-xs">
                         <SelectValue />
                       </SelectTrigger>

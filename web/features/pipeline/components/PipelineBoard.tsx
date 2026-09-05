@@ -180,7 +180,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
   const handleStageChange = (deal: PipelineLeadType, targetStage: string, originalStage: string) => {
     // Prevent API call if dropped in the same column, but ensure visual state is correct
     if (targetStage === originalStage) {
-      movePipelineItem(deal.id as string, originalStage as ReturnType<typeof JSON.parse>);
+      movePipelineItem(deal.id as string, originalStage as PipelineLeadType["stage"]);
       return;
     }
 
@@ -188,8 +188,8 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
       setWonLostModal({
         isOpen: true,
         type: targetStage as DealStage.WON | DealStage.LOST,
-        deal: { ...deal, stage: targetStage as ReturnType<typeof JSON.parse> },
-        originalStage: originalStage as ReturnType<typeof JSON.parse>
+        deal: { ...deal, stage: targetStage as PipelineLeadType["stage"] },
+        originalStage: originalStage as PipelineLeadType["stage"]
       });
       return;
     }
@@ -197,7 +197,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
     // Regular stage change
     setConfirmMoveModal({
       isOpen: true,
-      deal: { ...deal, stage: originalStage as ReturnType<typeof JSON.parse> },
+      deal: { ...deal, stage: originalStage as PipelineLeadType["stage"] },
       targetStage,
       originalStage,
     });
@@ -212,9 +212,8 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
 
     const stage = targetStage;
 
-
     // Update local state to reflect the move visually before API if not already done
-    movePipelineItem(deal.id as string, targetStage as ReturnType<typeof JSON.parse>);
+    movePipelineItem(deal.id as string, targetStage as PipelineLeadType["stage"]);
     
     updatePipelineItem({ 
       id: deal.id as string, 
@@ -231,7 +230,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
         setConfirmMoveModal(prev => ({ ...prev, isOpen: false }));
       },
       onError: () => {
-        movePipelineItem(deal.id as string, originalStage as ReturnType<typeof JSON.parse>);
+        movePipelineItem(deal.id as string, originalStage as PipelineLeadType["stage"]);
         toast.error("Unable to update deal. No changes were saved.");
         setConfirmMoveModal(prev => ({ ...prev, isOpen: false }));
       }
@@ -240,7 +239,7 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
 
   const handleConfirmMoveCancel = () => {
     if (confirmMoveModal.deal && confirmMoveModal.originalStage) {
-      movePipelineItem(confirmMoveModal.deal.id as string, confirmMoveModal.originalStage as ReturnType<typeof JSON.parse>);
+      movePipelineItem(confirmMoveModal.deal.id as string, confirmMoveModal.originalStage as PipelineLeadType["stage"]);
     }
     setConfirmMoveModal(prev => ({ ...prev, isOpen: false }));
   };
@@ -253,7 +252,6 @@ const PipelineBoard = ({ items, onAddDeal }: PipelineBoardProps) => {
 
   const handleWonLostSubmit = (data: WonLostSubmitData) => {
     if (!wonLostModal.deal || !wonLostModal.type) return;
-    
     
     const stage = wonLostModal.type;
     

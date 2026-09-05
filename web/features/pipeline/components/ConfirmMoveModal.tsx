@@ -2,7 +2,7 @@ import { useState } from "react";
 import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogDescription } from "@/shared/ui/dialog";
 import { Button } from "@/shared/ui/button";
 import { PipelineLeadType } from "@/shared/types/pipeline";
-import { Loader2, X, Check, ArrowRight } from "lucide-react";
+import { Loader2, X, Check } from "lucide-react";
 import { PIPELINE_STAGE_LABELS } from "@/lib/crm-formatters";
 
 interface ConfirmMoveModalProps {

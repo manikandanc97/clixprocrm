@@ -20,7 +20,8 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { toast } from "sonner";
-import { PIPELINE_STAGE_LABELS } from "@/lib/crm-formatters";
+import { PIPELINE_STAGE_LABELS } from "@/shared/utils/formatters";
+import { cn } from "@/shared/lib/utils";
 
 interface DealDrawerProps {
   item: PipelineLeadType | null;
@@ -36,6 +37,30 @@ const stageToProbability: Record<string, number> = {
   [DealStage.NEGOTIATION]: 80,
   [DealStage.WON]: 100,
   [DealStage.LOST]: 0,
+};
+
+const getPriorityColor = (p?: string) => {
+  if (!p) return "bg-muted text-muted-foreground border-border";
+  switch (p.toUpperCase()) {
+    case "URGENT": return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/25";
+    case "HIGH": return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25";
+    case "MEDIUM": return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25";
+    case "LOW": return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/25";
+    default: return "bg-muted text-muted-foreground border-border";
+  }
+};
+
+const getStageColor = (stage?: string) => {
+  if (!stage) return "bg-muted text-muted-foreground border-border";
+  switch (stage.toUpperCase()) {
+    case "NEW": return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/25";
+    case "QUALIFIED": return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/25";
+    case "PROPOSAL": return "bg-orange-500/10 text-orange-700 dark:text-orange-400 border-orange-500/25";
+    case "NEGOTIATION": return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25";
+    case "WON": return "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border-emerald-500/25";
+    case "LOST": return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25";
+    default: return "bg-muted text-muted-foreground border-border";
+  }
 };
 
 export function DealDrawer({ item, isOpen, onClose, onStageChange }: DealDrawerProps) {
@@ -110,10 +135,10 @@ export function DealDrawer({ item, isOpen, onClose, onStageChange }: DealDrawerP
             View and manage opportunity details, stages, and activities.
           </DialogDescription>
           <div className="flex items-center gap-2 mt-3">
-            <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-0.5 bg-emerald-500/10 text-emerald-700 dark:text-emerald-400 border border-emerald-500/25">
+            <Badge variant="secondary" className={cn("text-xs font-semibold px-2.5 py-0.5 border", getStageColor(currentStage))}>
               {stageDisplay}
             </Badge>
-            <Badge variant="secondary" className="text-xs font-semibold px-2.5 py-0.5 bg-amber-500/10 text-amber-700 dark:text-amber-400 border border-amber-500/25">
+            <Badge variant="secondary" className={cn("text-xs font-semibold px-2.5 py-0.5 border", getPriorityColor(currentPriority))}>
               {currentPriority} Priority
             </Badge>
           </div>
