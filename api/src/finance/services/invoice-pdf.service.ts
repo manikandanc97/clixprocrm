@@ -1,5 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { formatCurrency, toNumber } from '../../common/utils/crm-formatters.util';
+import {
+  formatCurrency,
+  toNumber,
+} from '../../common/utils/crm-formatters.util';
 
 export interface InvoicePdfData {
   invoiceNumber: string;
@@ -95,18 +98,18 @@ export class InvoicePdfService {
     const statusBadgeColor = isPaid
       ? '#059669'
       : isOverdue
-      ? '#dc2626'
-      : isPartial
-      ? '#d97706'
-      : '#4f46e5';
+        ? '#dc2626'
+        : isPartial
+          ? '#d97706'
+          : '#4f46e5';
 
     const statusBgColor = isPaid
       ? '#ecfdf5'
       : isOverdue
-      ? '#fef2f2'
-      : isPartial
-      ? '#fffbeb'
-      : '#eef2ff';
+        ? '#fef2f2'
+        : isPartial
+          ? '#fffbeb'
+          : '#eef2ff';
 
     const itemsRows = data.items
       .map(

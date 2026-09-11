@@ -16,7 +16,12 @@ import {
   EmailAccountResponseDto,
   toEmailAccountResponse,
 } from '../dto/email-account-response.dto';
-import { EmailProviderType, EmailAuthType, EmailSyncStatus, Prisma } from '@prisma/client';
+import {
+  EmailProviderType,
+  EmailAuthType,
+  EmailSyncStatus,
+  Prisma,
+} from '@prisma/client';
 
 @Injectable()
 export class EmailAccountsService {
@@ -55,13 +60,17 @@ export class EmailAccountsService {
 
     if (isShared || (dto.userId === null && dto.isShared === true)) {
       if (!isTenantAdmin) {
-        throw new ForbiddenException('Only tenant administrators can configure shared organization mailboxes');
+        throw new ForbiddenException(
+          'Only tenant administrators can configure shared organization mailboxes',
+        );
       }
       isShared = true;
       targetUserId = null;
     } else if (dto.userId && dto.userId !== callerUserId) {
       if (!isTenantAdmin) {
-        throw new ForbiddenException('Only tenant administrators can assign email accounts to other users');
+        throw new ForbiddenException(
+          'Only tenant administrators can assign email accounts to other users',
+        );
       }
       targetUserId = dto.userId;
       isShared = false;
@@ -72,95 +81,117 @@ export class EmailAccountsService {
     }
 
     // Encrypt sensitive secrets in memory immediately using existing EncryptionService
-    const encryptedSmtpPass = dto.smtpPass ? this.enc.encrypt(dto.smtpPass) : null;
-    const encryptedImapPass = dto.imapPass ? this.enc.encrypt(dto.imapPass) : null;
-    const encryptedOauthRefresh = dto.oauthRefresh ? this.enc.encrypt(dto.oauthRefresh) : null;
-    const encryptedOauthAccess = dto.oauthAccess ? this.enc.encrypt(dto.oauthAccess) : null;
+    const encryptedSmtpPass = dto.smtpPass
+      ? this.enc.encrypt(dto.smtpPass)
+      : null;
+    const encryptedImapPass = dto.imapPass
+      ? this.enc.encrypt(dto.imapPass)
+      : null;
+    const encryptedOauthRefresh = dto.oauthRefresh
+      ? this.enc.encrypt(dto.oauthRefresh)
+      : null;
+    const encryptedOauthAccess = dto.oauthAccess
+      ? this.enc.encrypt(dto.oauthAccess)
+      : null;
 
-    return this.prisma.withTenantContext({ tenantId, userId: callerUserId }, async (tx) => {
-      // Check for active duplicate in this tenant
-      const existing = await tx.emailAccount.findFirst({
-        where: {
-          tenantId,
-          emailHash,
-        },
-      });
-
-      if (existing) {
-        if (!existing.deletedAt) {
-          throw new ConflictException('An email account with this address already exists in your organization');
-        }
-
-        // Reactivate soft-deleted mailbox with updated configuration
-        const updated = await tx.emailAccount.update({
-          where: { id: existing.id },
-          data: {
-            userId: targetUserId,
-            email: normalizedEmail,
-            displayName: dto.displayName?.trim() || null,
-            provider: dto.provider || EmailProviderType.CUSTOM_SMTP_IMAP,
-            authType: dto.authType || EmailAuthType.PASSWORD,
-            encryptedSmtpPass,
-            encryptedImapPass,
-            encryptedOauthRefresh,
-            encryptedOauthAccess,
-            oauthExpiresAt: dto.oauthExpiresAt ? new Date(dto.oauthExpiresAt) : null,
-            smtpHost: dto.smtpHost?.trim() || null,
-            smtpPort: dto.smtpPort ?? 587,
-            smtpSecure: dto.smtpSecure ?? false,
-            smtpUser: dto.smtpUser?.trim() || null,
-            imapHost: dto.imapHost?.trim() || null,
-            imapPort: dto.imapPort ?? 993,
-            imapSecure: dto.imapSecure ?? true,
-            imapUser: dto.imapUser?.trim() || null,
-            isShared,
-            isActive: true,
-            syncStatus: EmailSyncStatus.IDLE,
-            lastError: null,
-            deletedAt: null,
-          },
-        });
-
-        return toEmailAccountResponse(updated);
-      }
-
-      try {
-        const created = await tx.emailAccount.create({
-          data: {
+    return this.prisma.withTenantContext(
+      { tenantId, userId: callerUserId },
+      async (tx) => {
+        // Check for active duplicate in this tenant
+        const existing = await tx.emailAccount.findFirst({
+          where: {
             tenantId,
-            userId: targetUserId,
-            email: normalizedEmail,
             emailHash,
-            displayName: dto.displayName?.trim() || null,
-            provider: dto.provider || EmailProviderType.CUSTOM_SMTP_IMAP,
-            authType: dto.authType || EmailAuthType.PASSWORD,
-            encryptedSmtpPass,
-            encryptedImapPass,
-            encryptedOauthRefresh,
-            encryptedOauthAccess,
-            oauthExpiresAt: dto.oauthExpiresAt ? new Date(dto.oauthExpiresAt) : null,
-            smtpHost: dto.smtpHost?.trim() || null,
-            smtpPort: dto.smtpPort ?? 587,
-            smtpSecure: dto.smtpSecure ?? false,
-            smtpUser: dto.smtpUser?.trim() || null,
-            imapHost: dto.imapHost?.trim() || null,
-            imapPort: dto.imapPort ?? 993,
-            imapSecure: dto.imapSecure ?? true,
-            imapUser: dto.imapUser?.trim() || null,
-            isShared,
-            isActive: true,
-            syncStatus: EmailSyncStatus.IDLE,
           },
         });
 
-        return toEmailAccountResponse(created);
-      } catch (err: any) {
-        if (err instanceof Prisma.PrismaClientKnownRequestError && err.code === 'P2002') {
-          throw new ConflictException('An email account with this address already exists in your organization');
+        if (existing) {
+          if (!existing.deletedAt) {
+            throw new ConflictException(
+              'An email account with this address already exists in your organization',
+            );
+          }
+
+          // Reactivate soft-deleted mailbox with updated configuration
+          const updated = await tx.emailAccount.update({
+            where: { id: existing.id },
+            data: {
+              userId: targetUserId,
+              email: normalizedEmail,
+              displayName: dto.displayName?.trim() || null,
+              provider: dto.provider || EmailProviderType.CUSTOM_SMTP_IMAP,
+              authType: dto.authType || EmailAuthType.PASSWORD,
+              encryptedSmtpPass,
+              encryptedImapPass,
+              encryptedOauthRefresh,
+              encryptedOauthAccess,
+              oauthExpiresAt: dto.oauthExpiresAt
+                ? new Date(dto.oauthExpiresAt)
+                : null,
+              smtpHost: dto.smtpHost?.trim() || null,
+              smtpPort: dto.smtpPort ?? 587,
+              smtpSecure: dto.smtpSecure ?? false,
+              smtpUser: dto.smtpUser?.trim() || null,
+              imapHost: dto.imapHost?.trim() || null,
+              imapPort: dto.imapPort ?? 993,
+              imapSecure: dto.imapSecure ?? true,
+              imapUser: dto.imapUser?.trim() || null,
+              isShared,
+              isActive: true,
+              syncStatus: EmailSyncStatus.IDLE,
+              lastError: null,
+              deletedAt: null,
+            },
+          });
+
+          return toEmailAccountResponse(updated);
         }
-        throw err;
-      }
-    });
+
+        try {
+          const created = await tx.emailAccount.create({
+            data: {
+              tenantId,
+              userId: targetUserId,
+              email: normalizedEmail,
+              emailHash,
+              displayName: dto.displayName?.trim() || null,
+              provider: dto.provider || EmailProviderType.CUSTOM_SMTP_IMAP,
+              authType: dto.authType || EmailAuthType.PASSWORD,
+              encryptedSmtpPass,
+              encryptedImapPass,
+              encryptedOauthRefresh,
+              encryptedOauthAccess,
+              oauthExpiresAt: dto.oauthExpiresAt
+                ? new Date(dto.oauthExpiresAt)
+                : null,
+              smtpHost: dto.smtpHost?.trim() || null,
+              smtpPort: dto.smtpPort ?? 587,
+              smtpSecure: dto.smtpSecure ?? false,
+              smtpUser: dto.smtpUser?.trim() || null,
+              imapHost: dto.imapHost?.trim() || null,
+              imapPort: dto.imapPort ?? 993,
+              imapSecure: dto.imapSecure ?? true,
+              imapUser: dto.imapUser?.trim() || null,
+              isShared,
+              isActive: true,
+              syncStatus: EmailSyncStatus.IDLE,
+            },
+          });
+
+          return toEmailAccountResponse(created);
+        } catch (err: any) {
+          if (
+            err instanceof Prisma.PrismaClientKnownRequestError &&
+            err.code === 'P2002'
+          ) {
+            throw new ConflictException(
+              'An email account with this address already exists in your organization',
+            );
+          }
+          throw err;
+        }
+      },
+    );
   }
 
   /**
@@ -173,26 +204,26 @@ export class EmailAccountsService {
     callerUserId: string,
     isTenantAdmin: boolean,
   ): Promise<EmailAccountResponseDto[]> {
-    return this.prisma.withTenantContext({ tenantId, userId: callerUserId }, async (tx) => {
-      const where: Prisma.EmailAccountWhereInput = {
-        tenantId,
-        deletedAt: null,
-      };
+    return this.prisma.withTenantContext(
+      { tenantId, userId: callerUserId },
+      async (tx) => {
+        const where: Prisma.EmailAccountWhereInput = {
+          tenantId,
+          deletedAt: null,
+        };
 
-      if (!isTenantAdmin) {
-        where.OR = [
-          { userId: callerUserId },
-          { isShared: true },
-        ];
-      }
+        if (!isTenantAdmin) {
+          where.OR = [{ userId: callerUserId }, { isShared: true }];
+        }
 
-      const accounts = await tx.emailAccount.findMany({
-        where,
-        orderBy: [{ isShared: 'desc' }, { createdAt: 'desc' }],
-      });
+        const accounts = await tx.emailAccount.findMany({
+          where,
+          orderBy: [{ isShared: 'desc' }, { createdAt: 'desc' }],
+        });
 
-      return accounts.map((acc) => toEmailAccountResponse(acc));
-    });
+        return accounts.map((acc) => toEmailAccountResponse(acc));
+      },
+    );
   }
 
   /**
@@ -204,19 +235,22 @@ export class EmailAccountsService {
     isTenantAdmin: boolean,
     accountId: string,
   ): Promise<EmailAccountResponseDto> {
-    return this.prisma.withTenantContext({ tenantId, userId: callerUserId }, async (tx) => {
-      const account = await tx.emailAccount.findFirst({
-        where: { id: accountId, tenantId, deletedAt: null },
-      });
+    return this.prisma.withTenantContext(
+      { tenantId, userId: callerUserId },
+      async (tx) => {
+        const account = await tx.emailAccount.findFirst({
+          where: { id: accountId, tenantId, deletedAt: null },
+        });
 
-      if (!account) {
-        throw new NotFoundException('Email account not found');
-      }
+        if (!account) {
+          throw new NotFoundException('Email account not found');
+        }
 
-      this.assertAccountAccess(account, callerUserId, isTenantAdmin, 'view');
+        this.assertAccountAccess(account, callerUserId, isTenantAdmin, 'view');
 
-      return toEmailAccountResponse(account);
-    });
+        return toEmailAccountResponse(account);
+      },
+    );
   }
 
   /**
@@ -231,68 +265,95 @@ export class EmailAccountsService {
     accountId: string,
     dto: UpdateEmailAccountDto,
   ): Promise<EmailAccountResponseDto> {
-    return this.prisma.withTenantContext({ tenantId, userId: callerUserId }, async (tx) => {
-      const account = await tx.emailAccount.findFirst({
-        where: { id: accountId, tenantId, deletedAt: null },
-      });
+    return this.prisma.withTenantContext(
+      { tenantId, userId: callerUserId },
+      async (tx) => {
+        const account = await tx.emailAccount.findFirst({
+          where: { id: accountId, tenantId, deletedAt: null },
+        });
 
-      if (!account) {
-        throw new NotFoundException('Email account not found');
-      }
-
-      this.assertAccountAccess(account, callerUserId, isTenantAdmin, 'update');
-
-      const dataToUpdate: Prisma.EmailAccountUpdateInput = {};
-
-      if (dto.displayName !== undefined) dataToUpdate.displayName = dto.displayName?.trim() || null;
-      if (dto.provider !== undefined) dataToUpdate.provider = dto.provider;
-      if (dto.authType !== undefined) dataToUpdate.authType = dto.authType;
-      if (dto.isActive !== undefined) dataToUpdate.isActive = dto.isActive;
-
-      if (dto.isShared !== undefined) {
-        if (!isTenantAdmin) {
-          throw new ForbiddenException('Only tenant administrators can change mailbox sharing status');
+        if (!account) {
+          throw new NotFoundException('Email account not found');
         }
-        dataToUpdate.isShared = dto.isShared;
-        if (dto.isShared) {
-          dataToUpdate.user = { disconnect: true };
+
+        this.assertAccountAccess(
+          account,
+          callerUserId,
+          isTenantAdmin,
+          'update',
+        );
+
+        const dataToUpdate: Prisma.EmailAccountUpdateInput = {};
+
+        if (dto.displayName !== undefined)
+          dataToUpdate.displayName = dto.displayName?.trim() || null;
+        if (dto.provider !== undefined) dataToUpdate.provider = dto.provider;
+        if (dto.authType !== undefined) dataToUpdate.authType = dto.authType;
+        if (dto.isActive !== undefined) dataToUpdate.isActive = dto.isActive;
+
+        if (dto.isShared !== undefined) {
+          if (!isTenantAdmin) {
+            throw new ForbiddenException(
+              'Only tenant administrators can change mailbox sharing status',
+            );
+          }
+          dataToUpdate.isShared = dto.isShared;
+          if (dto.isShared) {
+            dataToUpdate.user = { disconnect: true };
+          }
         }
-      }
 
-      // Re-encrypt updated credentials
-      if (dto.smtpPass !== undefined) {
-        dataToUpdate.encryptedSmtpPass = dto.smtpPass ? this.enc.encrypt(dto.smtpPass) : null;
-      }
-      if (dto.imapPass !== undefined) {
-        dataToUpdate.encryptedImapPass = dto.imapPass ? this.enc.encrypt(dto.imapPass) : null;
-      }
-      if (dto.oauthRefresh !== undefined) {
-        dataToUpdate.encryptedOauthRefresh = dto.oauthRefresh ? this.enc.encrypt(dto.oauthRefresh) : null;
-      }
-      if (dto.oauthAccess !== undefined) {
-        dataToUpdate.encryptedOauthAccess = dto.oauthAccess ? this.enc.encrypt(dto.oauthAccess) : null;
-      }
-      if (dto.oauthExpiresAt !== undefined) {
-        dataToUpdate.oauthExpiresAt = dto.oauthExpiresAt ? new Date(dto.oauthExpiresAt) : null;
-      }
+        // Re-encrypt updated credentials
+        if (dto.smtpPass !== undefined) {
+          dataToUpdate.encryptedSmtpPass = dto.smtpPass
+            ? this.enc.encrypt(dto.smtpPass)
+            : null;
+        }
+        if (dto.imapPass !== undefined) {
+          dataToUpdate.encryptedImapPass = dto.imapPass
+            ? this.enc.encrypt(dto.imapPass)
+            : null;
+        }
+        if (dto.oauthRefresh !== undefined) {
+          dataToUpdate.encryptedOauthRefresh = dto.oauthRefresh
+            ? this.enc.encrypt(dto.oauthRefresh)
+            : null;
+        }
+        if (dto.oauthAccess !== undefined) {
+          dataToUpdate.encryptedOauthAccess = dto.oauthAccess
+            ? this.enc.encrypt(dto.oauthAccess)
+            : null;
+        }
+        if (dto.oauthExpiresAt !== undefined) {
+          dataToUpdate.oauthExpiresAt = dto.oauthExpiresAt
+            ? new Date(dto.oauthExpiresAt)
+            : null;
+        }
 
-      if (dto.smtpHost !== undefined) dataToUpdate.smtpHost = dto.smtpHost?.trim() || null;
-      if (dto.smtpPort !== undefined) dataToUpdate.smtpPort = dto.smtpPort;
-      if (dto.smtpSecure !== undefined) dataToUpdate.smtpSecure = dto.smtpSecure;
-      if (dto.smtpUser !== undefined) dataToUpdate.smtpUser = dto.smtpUser?.trim() || null;
+        if (dto.smtpHost !== undefined)
+          dataToUpdate.smtpHost = dto.smtpHost?.trim() || null;
+        if (dto.smtpPort !== undefined) dataToUpdate.smtpPort = dto.smtpPort;
+        if (dto.smtpSecure !== undefined)
+          dataToUpdate.smtpSecure = dto.smtpSecure;
+        if (dto.smtpUser !== undefined)
+          dataToUpdate.smtpUser = dto.smtpUser?.trim() || null;
 
-      if (dto.imapHost !== undefined) dataToUpdate.imapHost = dto.imapHost?.trim() || null;
-      if (dto.imapPort !== undefined) dataToUpdate.imapPort = dto.imapPort;
-      if (dto.imapSecure !== undefined) dataToUpdate.imapSecure = dto.imapSecure;
-      if (dto.imapUser !== undefined) dataToUpdate.imapUser = dto.imapUser?.trim() || null;
+        if (dto.imapHost !== undefined)
+          dataToUpdate.imapHost = dto.imapHost?.trim() || null;
+        if (dto.imapPort !== undefined) dataToUpdate.imapPort = dto.imapPort;
+        if (dto.imapSecure !== undefined)
+          dataToUpdate.imapSecure = dto.imapSecure;
+        if (dto.imapUser !== undefined)
+          dataToUpdate.imapUser = dto.imapUser?.trim() || null;
 
-      const updated = await tx.emailAccount.update({
-        where: { id: accountId },
-        data: dataToUpdate,
-      });
+        const updated = await tx.emailAccount.update({
+          where: { id: accountId },
+          data: dataToUpdate,
+        });
 
-      return toEmailAccountResponse(updated);
-    });
+        return toEmailAccountResponse(updated);
+      },
+    );
   }
 
   /**
@@ -306,27 +367,35 @@ export class EmailAccountsService {
     isTenantAdmin: boolean,
     accountId: string,
   ): Promise<{ success: boolean; id: string }> {
-    return this.prisma.withTenantContext({ tenantId, userId: callerUserId }, async (tx) => {
-      const account = await tx.emailAccount.findFirst({
-        where: { id: accountId, tenantId, deletedAt: null },
-      });
+    return this.prisma.withTenantContext(
+      { tenantId, userId: callerUserId },
+      async (tx) => {
+        const account = await tx.emailAccount.findFirst({
+          where: { id: accountId, tenantId, deletedAt: null },
+        });
 
-      if (!account) {
-        throw new NotFoundException('Email account not found');
-      }
+        if (!account) {
+          throw new NotFoundException('Email account not found');
+        }
 
-      this.assertAccountAccess(account, callerUserId, isTenantAdmin, 'delete');
+        this.assertAccountAccess(
+          account,
+          callerUserId,
+          isTenantAdmin,
+          'delete',
+        );
 
-      await tx.emailAccount.update({
-        where: { id: accountId },
-        data: {
-          deletedAt: new Date(),
-          isActive: false,
-        },
-      });
+        await tx.emailAccount.update({
+          where: { id: accountId },
+          data: {
+            deletedAt: new Date(),
+            isActive: false,
+          },
+        });
 
-      return { success: true, id: accountId };
-    });
+        return { success: true, id: accountId };
+      },
+    );
   }
 
   /**
@@ -343,22 +412,29 @@ export class EmailAccountsService {
     smtp?: { success: boolean; error?: string };
     imap?: { success: boolean; error?: string };
   }> {
-    const account = await this.prisma.withTenantContext({ tenantId, userId: callerUserId }, async (tx) => {
-      const acc = await tx.emailAccount.findFirst({
-        where: { id: accountId, tenantId, deletedAt: null },
-      });
+    const account = await this.prisma.withTenantContext(
+      { tenantId, userId: callerUserId },
+      async (tx) => {
+        const acc = await tx.emailAccount.findFirst({
+          where: { id: accountId, tenantId, deletedAt: null },
+        });
 
-      if (!acc) {
-        throw new NotFoundException('Email account not found');
-      }
+        if (!acc) {
+          throw new NotFoundException('Email account not found');
+        }
 
-      this.assertAccountAccess(acc, callerUserId, isTenantAdmin, 'verify');
-      return acc;
-    });
+        this.assertAccountAccess(acc, callerUserId, isTenantAdmin, 'verify');
+        return acc;
+      },
+    );
 
     // Decrypt credentials in memory immediately before testing
-    const smtpPass = account.encryptedSmtpPass ? this.enc.decrypt(account.encryptedSmtpPass) : undefined;
-    const imapPass = account.encryptedImapPass ? this.enc.decrypt(account.encryptedImapPass) : undefined;
+    const smtpPass = account.encryptedSmtpPass
+      ? this.enc.decrypt(account.encryptedSmtpPass)
+      : undefined;
+    const imapPass = account.encryptedImapPass
+      ? this.enc.decrypt(account.encryptedImapPass)
+      : undefined;
 
     let smtpResult: { success: boolean; error?: string } | undefined;
     let imapResult: { success: boolean; error?: string } | undefined;
@@ -384,7 +460,8 @@ export class EmailAccountsService {
     }
 
     const overallSuccess =
-      (!smtpResult || smtpResult.success) && (!imapResult || imapResult.success);
+      (!smtpResult || smtpResult.success) &&
+      (!imapResult || imapResult.success);
 
     const errorMessage =
       (!smtpResult?.success && smtpResult?.error) ||
@@ -392,15 +469,20 @@ export class EmailAccountsService {
       null;
 
     // Update account sync status
-    await this.prisma.withTenantContext({ tenantId, userId: callerUserId }, async (tx) => {
-      await tx.emailAccount.update({
-        where: { id: accountId },
-        data: {
-          syncStatus: overallSuccess ? EmailSyncStatus.SUCCESS : EmailSyncStatus.AUTH_FAILED,
-          lastError: errorMessage,
-        },
-      });
-    });
+    await this.prisma.withTenantContext(
+      { tenantId, userId: callerUserId },
+      async (tx) => {
+        await tx.emailAccount.update({
+          where: { id: accountId },
+          data: {
+            syncStatus: overallSuccess
+              ? EmailSyncStatus.SUCCESS
+              : EmailSyncStatus.AUTH_FAILED,
+            lastError: errorMessage,
+          },
+        });
+      },
+    );
 
     return {
       success: overallSuccess,
@@ -441,7 +523,8 @@ export class EmailAccountsService {
     }
 
     const overallSuccess =
-      (!smtpResult || smtpResult.success) && (!imapResult || imapResult.success);
+      (!smtpResult || smtpResult.success) &&
+      (!imapResult || imapResult.success);
 
     return {
       success: overallSuccess,
@@ -468,12 +551,16 @@ export class EmailAccountsService {
       if (action === 'view') {
         return; // Authenticated tenant members can view shared mailboxes
       }
-      throw new ForbiddenException('Only tenant administrators can modify, delete, or re-verify shared mailboxes');
+      throw new ForbiddenException(
+        'Only tenant administrators can modify, delete, or re-verify shared mailboxes',
+      );
     }
 
     // Personal mailbox
     if (account.userId !== callerUserId) {
-      throw new ForbiddenException('You do not have permission to access this email account');
+      throw new ForbiddenException(
+        'You do not have permission to access this email account',
+      );
     }
   }
 }

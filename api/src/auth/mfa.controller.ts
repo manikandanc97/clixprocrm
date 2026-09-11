@@ -70,7 +70,10 @@ export class MfaController {
     const userId = req.user.id || req.user.sub;
     const identifier = `auth:mfa:recovery:${ip}:${userId}`;
 
-    const rateLimit = await checkRateLimit(identifier, RATE_LIMITS.MFA_RECOVERY);
+    const rateLimit = await checkRateLimit(
+      identifier,
+      RATE_LIMITS.MFA_RECOVERY,
+    );
     if (!rateLimit.allowed) {
       const waitSec = Math.ceil(
         Math.max(0, rateLimit.resetTime - Date.now()) / 1000,
@@ -162,7 +165,9 @@ export class MfaController {
     const policy = body?.mfaPolicy;
 
     if (!policy || !['OPTIONAL', 'REQUIRED'].includes(policy)) {
-      throw new BadRequestException('Valid mfaPolicy ("OPTIONAL" or "REQUIRED") is required');
+      throw new BadRequestException(
+        'Valid mfaPolicy ("OPTIONAL" or "REQUIRED") is required',
+      );
     }
 
     const ip = getClientIp(req);

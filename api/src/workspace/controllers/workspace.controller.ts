@@ -52,7 +52,11 @@ export class WorkspaceController {
     }
 
     // 2. Check if multipart/form-data
-    if (!fileBuffer && typeof req.isMultipart === 'function' && req.isMultipart()) {
+    if (
+      !fileBuffer &&
+      typeof req.isMultipart === 'function' &&
+      req.isMultipart()
+    ) {
       try {
         const file = await req.file();
         if (file) {

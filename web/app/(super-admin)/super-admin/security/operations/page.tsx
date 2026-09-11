@@ -16,8 +16,6 @@ import {
   Lock,
   KeyRound,
   Ban,
-  ChevronLeft,
-  ChevronRight,
   Sparkles,
   ArrowUpRight,
   Flame,
@@ -51,6 +49,7 @@ import { Input } from "@/shared/ui/input";
 import { toast } from "sonner";
 import {
   CRMPageContainer,
+  CRMPagination,
   EmptyState,
 } from "@/shared/components/crm";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
@@ -140,11 +139,11 @@ export default function SecurityOperationsPage() {
 
   // Pagination for Alerts
   const [alertPage, setAlertPage] = useState(1);
-  const [alertRowsPerPage] = useState(10);
+  const [alertRowsPerPage, setAlertRowsPerPage] = useState(10);
 
   // Pagination for Incidents
   const [incidentPage, setIncidentPage] = useState(1);
-  const [incidentRowsPerPage] = useState(10);
+  const [incidentRowsPerPage, setIncidentRowsPerPage] = useState(10);
 
   const loadData = async (isSilent = false) => {
     try {
@@ -172,13 +171,16 @@ export default function SecurityOperationsPage() {
   };
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
 
     const handleAal2Verified = () => {
       loadData(true);
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, []);
@@ -844,37 +846,18 @@ export default function SecurityOperationsPage() {
           </div>
 
           {/* Alerts Pagination */}
-          {filteredAlerts.length > 0 && (
-            <div className="p-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground bg-muted/20">
-              <span>
-                Showing {(alertPage - 1) * alertRowsPerPage + 1}-
-                {Math.min(alertPage * alertRowsPerPage, filteredAlerts.length)} of {filteredAlerts.length} alerts
-              </span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={alertPage <= 1}
-                  onClick={() => setAlertPage((p) => Math.max(1, p - 1))}
-                  className="h-7 w-7"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </Button>
-                <span className="px-2 font-semibold text-foreground">
-                  Page {alertPage} of {alertTotalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={alertPage >= alertTotalPages}
-                  onClick={() => setAlertPage((p) => Math.min(alertTotalPages, p + 1))}
-                  className="h-7 w-7"
-                >
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <CRMPagination
+            currentPage={alertPage}
+            totalPages={alertTotalPages}
+            totalItems={filteredAlerts.length}
+            rowsPerPage={alertRowsPerPage}
+            onPageChange={setAlertPage}
+            onRowsPerPageChange={(rows) => {
+              setAlertRowsPerPage(rows);
+              setAlertPage(1);
+            }}
+            itemName="alerts"
+          />
         </div>
       )}
 
@@ -998,37 +981,18 @@ export default function SecurityOperationsPage() {
           </div>
 
           {/* Incidents Pagination */}
-          {filteredIncidents.length > 0 && (
-            <div className="p-3 border-t border-border/50 flex items-center justify-between text-xs text-muted-foreground bg-muted/20">
-              <span>
-                Showing {(incidentPage - 1) * incidentRowsPerPage + 1}-
-                {Math.min(incidentPage * incidentRowsPerPage, filteredIncidents.length)} of {filteredIncidents.length} incidents
-              </span>
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={incidentPage <= 1}
-                  onClick={() => setIncidentPage((p) => Math.max(1, p - 1))}
-                  className="h-7 w-7"
-                >
-                  <ChevronLeft className="h-3.5 w-3.5" />
-                </Button>
-                <span className="px-2 font-semibold text-foreground">
-                  Page {incidentPage} of {incidentTotalPages}
-                </span>
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={incidentPage >= incidentTotalPages}
-                  onClick={() => setIncidentPage((p) => Math.min(incidentTotalPages, p + 1))}
-                  className="h-7 w-7"
-                >
-                  <ChevronRight className="h-3.5 w-3.5" />
-                </Button>
-              </div>
-            </div>
-          )}
+          <CRMPagination
+            currentPage={incidentPage}
+            totalPages={incidentTotalPages}
+            totalItems={filteredIncidents.length}
+            rowsPerPage={incidentRowsPerPage}
+            onPageChange={setIncidentPage}
+            onRowsPerPageChange={(rows) => {
+              setIncidentRowsPerPage(rows);
+              setIncidentPage(1);
+            }}
+            itemName="incidents"
+          />
         </div>
       )}
 

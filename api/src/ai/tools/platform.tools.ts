@@ -100,16 +100,29 @@ export function buildPlatformTools(
             },
           );
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            type: 'platform_overview',
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              type: 'platform_overview',
+            },
+          );
 
           return overview;
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
-          return { error: 'Failed to fetch platform overview.', details: e.message };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
+          return {
+            error: 'Failed to fetch platform overview.',
+            details: e.message,
+          };
         }
       },
     } as any),
@@ -122,7 +135,11 @@ export function buildPlatformTools(
         const toolName = 'getPlatformAnalytics';
         try {
           const now = new Date();
-          const sixMonthsAgo = new Date(now.getFullYear(), now.getMonth() - 5, 1);
+          const sixMonthsAgo = new Date(
+            now.getFullYear(),
+            now.getMonth() - 5,
+            1,
+          );
 
           const analytics = await prisma.withTenantContext(
             { isSuperAdmin: true },
@@ -151,7 +168,11 @@ export function buildPlatformTools(
               const planBreakdown = planStats.map((p) => {
                 const count = p._count._all;
                 const planKey = (p.plan || 'free').toLowerCase();
-                const canonical = CANONICAL_PLANS[planKey] || (planKey === 'pro' ? CANONICAL_PLANS.growth : CANONICAL_PLANS.free);
+                const canonical =
+                  CANONICAL_PLANS[planKey] ||
+                  (planKey === 'pro'
+                    ? CANONICAL_PLANS.growth
+                    : CANONICAL_PLANS.free);
                 const price = canonical?.priceNum || 0;
                 const revenue = count * price;
                 estimatedMRR += revenue;
@@ -178,16 +199,29 @@ export function buildPlatformTools(
             },
           );
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            type: 'platform_analytics',
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              type: 'platform_analytics',
+            },
+          );
 
           return analytics;
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
-          return { error: 'Failed to fetch platform analytics.', details: e.message };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
+          return {
+            error: 'Failed to fetch platform analytics.',
+            details: e.message,
+          };
         }
       },
     } as any),
@@ -196,12 +230,30 @@ export function buildPlatformTools(
       description:
         'List tenant organizations across the platform with filtering by status, plan, search name, or limit.',
       parameters: z.object({
-        status: z.string().optional().describe('Filter by tenant status e.g. ACTIVE, SUSPENDED, TRIAL'),
-        plan: z.string().optional().describe('Filter by subscription plan e.g. free, starter, pro, enterprise'),
+        status: z
+          .string()
+          .optional()
+          .describe('Filter by tenant status e.g. ACTIVE, SUSPENDED, TRIAL'),
+        plan: z
+          .string()
+          .optional()
+          .describe(
+            'Filter by subscription plan e.g. free, starter, pro, enterprise',
+          ),
         search: z.string().optional().describe('Search tenant name or slug'),
-        limit: z.number().optional().describe('Maximum number of organizations to return (default 10, max 50)'),
+        limit: z
+          .number()
+          .optional()
+          .describe(
+            'Maximum number of organizations to return (default 10, max 50)',
+          ),
       }),
-      execute: async (args: { status?: string; plan?: string; search?: string; limit?: number }) => {
+      execute: async (args: {
+        status?: string;
+        plan?: string;
+        search?: string;
+        limit?: number;
+      }) => {
         const toolName = 'listPlatformOrganizations';
         try {
           const { status, plan, search, limit = 10 } = args;
@@ -238,9 +290,14 @@ export function buildPlatformTools(
               }),
           );
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            count: orgs.length,
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              count: orgs.length,
+            },
+          );
 
           return orgs.map((o) => ({
             id: o.id,
@@ -252,9 +309,14 @@ export function buildPlatformTools(
             createdAt: o.createdAt.toISOString(),
           }));
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
           return { error: 'Failed to list organizations.', details: e.message };
         }
       },
@@ -264,8 +326,18 @@ export function buildPlatformTools(
       description:
         'Get latest platform security audit logs and administrative events across the platform.',
       parameters: z.object({
-        limit: z.number().optional().describe('Maximum number of audit logs to retrieve (default 10, max 50)'),
-        module: z.string().optional().describe('Optional module filter e.g. AUTH, TENANT, USERS, SECURITY'),
+        limit: z
+          .number()
+          .optional()
+          .describe(
+            'Maximum number of audit logs to retrieve (default 10, max 50)',
+          ),
+        module: z
+          .string()
+          .optional()
+          .describe(
+            'Optional module filter e.g. AUTH, TENANT, USERS, SECURITY',
+          ),
       }),
       execute: async (args: { limit?: number; module?: string }) => {
         const toolName = 'getPlatformAuditLogs';
@@ -291,9 +363,14 @@ export function buildPlatformTools(
               }),
           );
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            count: logs.length,
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              count: logs.length,
+            },
+          );
 
           return logs.map((log) => ({
             id: log.id,
@@ -305,10 +382,18 @@ export function buildPlatformTools(
             createdAt: log.createdAt.toISOString(),
           }));
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
-          return { error: 'Failed to fetch platform audit logs.', details: e.message };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
+          return {
+            error: 'Failed to fetch platform audit logs.',
+            details: e.message,
+          };
         }
       },
     } as any),
@@ -325,30 +410,36 @@ export function buildPlatformTools(
           const { limit = 10 } = args;
           const safeLimit = Math.max(1, Math.min(limit, 50));
 
-          const [totalUsers, activeUsers, superAdmins] = await prisma.withTenantContext(
-            { isSuperAdmin: true },
-            async (tx) => {
-              return Promise.all([
-                tx.user.count(),
-                tx.user.count({ where: { status: 'ACTIVE' } }),
-                tx.user.findMany({
-                  where: { isSuperAdmin: true },
-                  take: safeLimit,
-                  select: {
-                    id: true,
-                    email: true,
-                    name: true,
-                    status: true,
-                    createdAt: true,
-                  },
-                }),
-              ]);
+          const [totalUsers, activeUsers, superAdmins] =
+            await prisma.withTenantContext(
+              { isSuperAdmin: true },
+              async (tx) => {
+                return Promise.all([
+                  tx.user.count(),
+                  tx.user.count({ where: { status: 'ACTIVE' } }),
+                  tx.user.findMany({
+                    where: { isSuperAdmin: true },
+                    take: safeLimit,
+                    select: {
+                      id: true,
+                      email: true,
+                      name: true,
+                      status: true,
+                      createdAt: true,
+                    },
+                  }),
+                ]);
+              },
+            );
+
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              totalUsers,
             },
           );
-
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            totalUsers,
-          });
 
           return {
             totalUsers,
@@ -363,10 +454,18 @@ export function buildPlatformTools(
             })),
           };
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
-          return { error: 'Failed to fetch platform users summary.', details: e.message };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
+          return {
+            error: 'Failed to fetch platform users summary.',
+            details: e.message,
+          };
         }
       },
     } as any),
@@ -383,7 +482,9 @@ export function buildPlatformTools(
             async (tx) =>
               tx.auditLog.count({
                 where: {
-                  createdAt: { gte: new Date(Date.now() - 24 * 60 * 60 * 1000) },
+                  createdAt: {
+                    gte: new Date(Date.now() - 24 * 60 * 60 * 1000),
+                  },
                 },
               }),
           );
@@ -398,16 +499,29 @@ export function buildPlatformTools(
             timestamp: new Date().toISOString(),
           };
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            status: securitySummary.overallStatus,
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              status: securitySummary.overallStatus,
+            },
+          );
 
           return securitySummary;
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
-          return { error: 'Failed to fetch platform security status.', details: e.message };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
+          return {
+            error: 'Failed to fetch platform security status.',
+            details: e.message,
+          };
         }
       },
     } as any),
@@ -437,16 +551,29 @@ export function buildPlatformTools(
             })),
           };
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            modelCount: models.length,
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              modelCount: models.length,
+            },
+          );
 
           return summary;
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
-          return { error: 'Failed to fetch platform AI metrics.', details: e.message };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
+          return {
+            error: 'Failed to fetch platform AI metrics.',
+            details: e.message,
+          };
         }
       },
     } as any),
@@ -496,11 +623,18 @@ export function buildPlatformTools(
           let totalMRR = 0;
           tenantsByPlan.forEach((p) => {
             const planKey = (p.plan || 'free').toLowerCase();
-            const canonical = CANONICAL_PLANS[planKey] || (planKey === 'pro' ? CANONICAL_PLANS.growth : CANONICAL_PLANS.free);
+            const canonical =
+              CANONICAL_PLANS[planKey] ||
+              (planKey === 'pro'
+                ? CANONICAL_PLANS.growth
+                : CANONICAL_PLANS.free);
             totalMRR += p._count._all * (canonical?.priceNum || 0);
           });
 
-          const healthScore = suspendedTenants === 0 ? 98 : Math.max(70, 98 - suspendedTenants * 5);
+          const healthScore =
+            suspendedTenants === 0
+              ? 98
+              : Math.max(70, 98 - suspendedTenants * 5);
 
           const deepReport = {
             timestamp: new Date().toISOString(),
@@ -510,7 +644,10 @@ export function buildPlatformTools(
               totalTenants,
               activeTenants,
               suspendedTenants,
-              activeRatio: totalTenants > 0 ? `${((activeTenants / totalTenants) * 100).toFixed(1)}%` : '100%',
+              activeRatio:
+                totalTenants > 0
+                  ? `${((activeTenants / totalTenants) * 100).toFixed(1)}%`
+                  : '100%',
             },
             revenueForensics: {
               estimatedMRR_INR: totalMRR,
@@ -522,7 +659,8 @@ export function buildPlatformTools(
             },
             userBase: {
               totalUsers,
-              avgUsersPerTenant: totalTenants > 0 ? (totalUsers / totalTenants).toFixed(1) : '0',
+              avgUsersPerTenant:
+                totalTenants > 0 ? (totalUsers / totalTenants).toFixed(1) : '0',
             },
             securityTelemetry: {
               auditLogsIntegrity: 'VERIFIED',
@@ -542,16 +680,29 @@ export function buildPlatformTools(
             })),
           };
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', {
-            healthScore,
-          });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            {
+              healthScore,
+            },
+          );
 
           return deepReport;
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', {
-            error: e.message,
-          });
-          return { error: 'Failed to perform deep platform diagnosis.', details: e.message };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            {
+              error: e.message,
+            },
+          );
+          return {
+            error: 'Failed to perform deep platform diagnosis.',
+            details: e.message,
+          };
         }
       },
     } as any),

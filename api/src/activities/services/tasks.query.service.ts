@@ -61,9 +61,16 @@ export class TasksQueryService {
 
       // Role-based visibility scoping
       if (options.role && options.userId) {
-        const rawRole = typeof options.role === 'object' ? (options.role as any)?.name || '' : String(options.role || '');
+        const rawRole =
+          typeof options.role === 'object'
+            ? (options.role as any)?.name || ''
+            : String(options.role || '');
         const userRole = rawRole.toUpperCase().replace(/[\s_]+/g, '');
-        if (userRole !== 'ADMIN' && userRole !== 'SUPERADMIN' && userRole !== 'OWNER') {
+        if (
+          userRole !== 'ADMIN' &&
+          userRole !== 'SUPERADMIN' &&
+          userRole !== 'OWNER'
+        ) {
           const tenantUser = await tx.tenantUser.findFirst({
             where: { tenantId, userId: options.userId },
             select: { id: true, departmentId: true },
@@ -100,7 +107,9 @@ export class TasksQueryService {
             );
           }
 
-          whereConditions.push(Prisma.sql`(${Prisma.join(rbacOrConditions, ' OR ')})`);
+          whereConditions.push(
+            Prisma.sql`(${Prisma.join(rbacOrConditions, ' OR ')})`,
+          );
         }
       }
 
@@ -128,31 +137,45 @@ export class TasksQueryService {
         if (options.assignedToId === 'unassigned') {
           whereConditions.push(Prisma.sql`t."assignedToId" IS NULL`);
         } else {
-          whereConditions.push(Prisma.sql`t."assignedToId" = ${options.assignedToId}`);
+          whereConditions.push(
+            Prisma.sql`t."assignedToId" = ${options.assignedToId}`,
+          );
         }
       }
 
       if (options.createdById) {
-        whereConditions.push(Prisma.sql`t."createdById" = ${options.createdById}`);
+        whereConditions.push(
+          Prisma.sql`t."createdById" = ${options.createdById}`,
+        );
       }
 
       if (options.relatedLeadId) {
-        whereConditions.push(Prisma.sql`t."relatedLeadId" = ${options.relatedLeadId}`);
+        whereConditions.push(
+          Prisma.sql`t."relatedLeadId" = ${options.relatedLeadId}`,
+        );
       }
 
       if (options.relatedCustomerId) {
-        whereConditions.push(Prisma.sql`t."relatedCustomerId" = ${options.relatedCustomerId}`);
+        whereConditions.push(
+          Prisma.sql`t."relatedCustomerId" = ${options.relatedCustomerId}`,
+        );
       }
 
       if (options.tags && options.tags.length > 0) {
-        whereConditions.push(Prisma.sql`t."tags" && ARRAY[${Prisma.join(options.tags)}]::text[]`);
+        whereConditions.push(
+          Prisma.sql`t."tags" && ARRAY[${Prisma.join(options.tags)}]::text[]`,
+        );
       }
 
       if (options.startDate) {
-        whereConditions.push(Prisma.sql`t."dueDate" >= ${new Date(options.startDate)}`);
+        whereConditions.push(
+          Prisma.sql`t."dueDate" >= ${new Date(options.startDate)}`,
+        );
       }
       if (options.endDate) {
-        whereConditions.push(Prisma.sql`t."dueDate" <= ${new Date(options.endDate)}`);
+        whereConditions.push(
+          Prisma.sql`t."dueDate" <= ${new Date(options.endDate)}`,
+        );
       }
 
       const whereSql = Prisma.join(whereConditions, ' AND ');
@@ -161,16 +184,24 @@ export class TasksQueryService {
       const isDesc = options.sortOrder === 'desc';
       switch (options.sortBy) {
         case 'createdAt':
-          orderSql = isDesc ? Prisma.sql`t."createdAt" DESC` : Prisma.sql`t."createdAt" ASC`;
+          orderSql = isDesc
+            ? Prisma.sql`t."createdAt" DESC`
+            : Prisma.sql`t."createdAt" ASC`;
           break;
         case 'title':
-          orderSql = isDesc ? Prisma.sql`t."title" DESC, t."createdAt" DESC` : Prisma.sql`t."title" ASC, t."createdAt" DESC`;
+          orderSql = isDesc
+            ? Prisma.sql`t."title" DESC, t."createdAt" DESC`
+            : Prisma.sql`t."title" ASC, t."createdAt" DESC`;
           break;
         case 'priority':
-          orderSql = isDesc ? Prisma.sql`t."priority" DESC, t."createdAt" DESC` : Prisma.sql`t."priority" ASC, t."createdAt" DESC`;
+          orderSql = isDesc
+            ? Prisma.sql`t."priority" DESC, t."createdAt" DESC`
+            : Prisma.sql`t."priority" ASC, t."createdAt" DESC`;
           break;
         case 'status':
-          orderSql = isDesc ? Prisma.sql`t."status" DESC, t."createdAt" DESC` : Prisma.sql`t."status" ASC, t."createdAt" DESC`;
+          orderSql = isDesc
+            ? Prisma.sql`t."status" DESC, t."createdAt" DESC`
+            : Prisma.sql`t."status" ASC, t."createdAt" DESC`;
           break;
         default:
           orderSql = isDesc
@@ -179,17 +210,19 @@ export class TasksQueryService {
           break;
       }
 
-      const rawResult = await tx.$queryRaw<Array<{
-        tasks_json: any;
-        filtered_count: number;
-        total_count: number;
-        pending_count: number;
-        in_progress_count: number;
-        completed_count: number;
-        blocked_count: number;
-        overdue_count: number;
-        due_today_count: number;
-      }>>`
+      const rawResult = await tx.$queryRaw<
+        Array<{
+          tasks_json: any;
+          filtered_count: number;
+          total_count: number;
+          pending_count: number;
+          in_progress_count: number;
+          completed_count: number;
+          blocked_count: number;
+          overdue_count: number;
+          due_today_count: number;
+        }>
+      >`
         WITH filtered_tasks AS (
           SELECT
             t."id",
@@ -280,23 +313,62 @@ export class TasksQueryService {
       const dueTodayCount = Number(row.due_today_count || 0);
 
       const taskStats = [
-        { label: 'Total Tasks', value: totalCount, change: '+0%', changeType: 'neutral', icon: 'CheckSquare', color: 'primary' },
-        { label: 'Pending', value: pendingCount, change: '+0%', changeType: 'neutral', icon: 'Clock', color: 'warning' },
-        { label: 'In Progress', value: inProgressCount, change: '+0%', changeType: 'neutral', icon: 'PlayCircle', color: 'info' },
-        { label: 'Completed', value: completedCount, change: '+0%', changeType: 'positive', icon: 'CheckCircle2', color: 'success' },
-        { label: 'Overdue', value: overdueCount, change: '+0%', changeType: overdueCount > 0 ? 'negative' : 'neutral', icon: 'AlertTriangle', color: 'destructive' },
+        {
+          label: 'Total Tasks',
+          value: totalCount,
+          change: '+0%',
+          changeType: 'neutral',
+          icon: 'CheckSquare',
+          color: 'primary',
+        },
+        {
+          label: 'Pending',
+          value: pendingCount,
+          change: '+0%',
+          changeType: 'neutral',
+          icon: 'Clock',
+          color: 'warning',
+        },
+        {
+          label: 'In Progress',
+          value: inProgressCount,
+          change: '+0%',
+          changeType: 'neutral',
+          icon: 'PlayCircle',
+          color: 'info',
+        },
+        {
+          label: 'Completed',
+          value: completedCount,
+          change: '+0%',
+          changeType: 'positive',
+          icon: 'CheckCircle2',
+          color: 'success',
+        },
+        {
+          label: 'Overdue',
+          value: overdueCount,
+          change: '+0%',
+          changeType: overdueCount > 0 ? 'negative' : 'neutral',
+          icon: 'AlertTriangle',
+          color: 'destructive',
+        },
       ];
 
       const formattedTasks = tasksList.map((task: any) => {
-        const checklistArray = Array.isArray(task.checklist) ? (task.checklist as any[]) : [];
+        const checklistArray = Array.isArray(task.checklist)
+          ? (task.checklist as any[])
+          : [];
         const totalChecklist = checklistArray.length;
-        const completedChecklist = checklistArray.filter((c: any) => c.completed).length;
+        const completedChecklist = checklistArray.filter(
+          (c: any) => c.completed,
+        ).length;
         const progressPercent =
           totalChecklist > 0
             ? Math.round((completedChecklist / totalChecklist) * 100)
             : task.status === 'COMPLETED'
               ? 100
-              : (task.progress || 0);
+              : task.progress || 0;
         const dueDateObj = task.dueDate ? new Date(task.dueDate) : null;
         const isTaskOverdue = Boolean(
           dueDateObj &&
@@ -317,9 +389,13 @@ export class TasksQueryService {
               ? ('OVERDUE' as TaskStatus)
               : task.status,
           priority: task.priority,
-          dueDate: formatRelativeDate(task.dueDate, { fallback: 'No due date' }),
+          dueDate: formatRelativeDate(task.dueDate, {
+            fallback: 'No due date',
+          }),
           dueDateValue: dueDateObj ? dueDateObj.toISOString() : null,
-          reminderDate: task.reminderDate ? new Date(task.reminderDate).toISOString() : null,
+          reminderDate: task.reminderDate
+            ? new Date(task.reminderDate).toISOString()
+            : null,
           assignedToId: task.assignedToId,
           createdById: task.createdById,
           relatedLeadId: task.relatedLeadId,
@@ -328,20 +404,66 @@ export class TasksQueryService {
           relatedQuotationId: task.relatedQuotationId,
           tags: task.tags || [],
           checklist: checklistArray,
-          attachments: Array.isArray(task.attachments) ? (task.attachments as any[]) : [],
-          completedAt: task.completedAt ? new Date(task.completedAt).toISOString() : null,
-          deletedAt: task.deletedAt ? new Date(task.deletedAt).toISOString() : null,
+          attachments: Array.isArray(task.attachments)
+            ? (task.attachments as any[])
+            : [],
+          completedAt: task.completedAt
+            ? new Date(task.completedAt).toISOString()
+            : null,
+          deletedAt: task.deletedAt
+            ? new Date(task.deletedAt).toISOString()
+            : null,
           createdAt: new Date(task.createdAt).toISOString(),
           updatedAt: new Date(task.updatedAt).toISOString(),
-          assignedTo: task.assignedTo ? { id: task.assignedTo.id, name: task.assignedTo.name, email: task.assignedTo.email } : null,
-          createdBy: task.createdById ? { id: task.createdById, name: 'Owner', email: '' } : null,
-          relatedLead: task.relatedLead ? { id: task.relatedLead.id, name: task.relatedLead.name, company: task.relatedLead.company, email: task.relatedLead.email } : null,
-          relatedCustomer: task.relatedCustomer ? { id: task.relatedCustomer.id, name: task.relatedCustomer.name, company: task.relatedCustomer.company, email: task.relatedCustomer.email } : null,
-          relatedMeeting: task.relatedMeeting ? { id: task.relatedMeeting.id, name: task.relatedMeeting.title || task.relatedMeeting.name } : null,
-          relatedQuotation: task.relatedQuotation ? { id: task.relatedQuotation.id, name: task.relatedQuotation.quoteNumber || task.relatedQuotation.name, company: task.relatedQuotation.client || task.relatedQuotation.company, amount: Number(task.relatedQuotation.amount) } : null,
+          assignedTo: task.assignedTo
+            ? {
+                id: task.assignedTo.id,
+                name: task.assignedTo.name,
+                email: task.assignedTo.email,
+              }
+            : null,
+          createdBy: task.createdById
+            ? { id: task.createdById, name: 'Owner', email: '' }
+            : null,
+          relatedLead: task.relatedLead
+            ? {
+                id: task.relatedLead.id,
+                name: task.relatedLead.name,
+                company: task.relatedLead.company,
+                email: task.relatedLead.email,
+              }
+            : null,
+          relatedCustomer: task.relatedCustomer
+            ? {
+                id: task.relatedCustomer.id,
+                name: task.relatedCustomer.name,
+                company: task.relatedCustomer.company,
+                email: task.relatedCustomer.email,
+              }
+            : null,
+          relatedMeeting: task.relatedMeeting
+            ? {
+                id: task.relatedMeeting.id,
+                name: task.relatedMeeting.title || task.relatedMeeting.name,
+              }
+            : null,
+          relatedQuotation: task.relatedQuotation
+            ? {
+                id: task.relatedQuotation.id,
+                name:
+                  task.relatedQuotation.quoteNumber ||
+                  task.relatedQuotation.name,
+                company:
+                  task.relatedQuotation.client || task.relatedQuotation.company,
+                amount: Number(task.relatedQuotation.amount),
+              }
+            : null,
           isOverdue: isTaskOverdue,
           progress: progressPercent,
-          subtaskCount: { total: totalChecklist, completed: completedChecklist },
+          subtaskCount: {
+            total: totalChecklist,
+            completed: completedChecklist,
+          },
         };
       });
 
@@ -355,7 +477,10 @@ export class TasksQueryService {
           overdue: overdueCount,
           blocked: blockedCount,
           dueToday: dueTodayCount,
-          completionRate: totalCount > 0 ? Math.round((completedCount / totalCount) * 100) : 0,
+          completionRate:
+            totalCount > 0
+              ? Math.round((completedCount / totalCount) * 100)
+              : 0,
         },
         tasks: formattedTasks,
         pagination: {
@@ -372,14 +497,25 @@ export class TasksQueryService {
     return this.tasksExportService.exportTasks(tenantId, userId, query);
   }
 
-  async getTaskById(tenantId: string, id: string, options?: { userId: string; role: string }) {
+  async getTaskById(
+    tenantId: string,
+    id: string,
+    options?: { userId: string; role: string },
+  ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const where: Prisma.TaskWhereInput = { id, tenantId, deletedAt: null };
 
       if (options?.role && options?.userId) {
-        const rawRole = typeof options.role === 'object' ? (options.role as any)?.name || '' : String(options.role || '');
+        const rawRole =
+          typeof options.role === 'object'
+            ? (options.role as any)?.name || ''
+            : String(options.role || '');
         const userRole = rawRole.toUpperCase().replace(/[\s_]+/g, '');
-        if (userRole !== 'ADMIN' && userRole !== 'SUPERADMIN' && userRole !== 'OWNER') {
+        if (
+          userRole !== 'ADMIN' &&
+          userRole !== 'SUPERADMIN' &&
+          userRole !== 'OWNER'
+        ) {
           const tenantUser = await tx.tenantUser.findFirst({
             where: { tenantId, userId: options.userId },
           });
@@ -464,7 +600,9 @@ export class TasksQueryService {
         description: task.description || '',
         dueDateValue: task.dueDate ? task.dueDate.toISOString() : null,
         dueDate: formatRelativeDate(task.dueDate, { fallback: 'No due date' }),
-        reminderDate: task.reminderDate ? task.reminderDate.toISOString() : null,
+        reminderDate: task.reminderDate
+          ? task.reminderDate.toISOString()
+          : null,
         completedAt: task.completedAt ? task.completedAt.toISOString() : null,
         checklist: checklistArray,
         attachments: Array.isArray(task.attachments)

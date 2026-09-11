@@ -56,7 +56,6 @@ export const SECURITY_ACTIONS_ALLOWLIST = [
   'SESSION_EXPIRED_ABSOLUTE',
 ];
 
-
 @Injectable()
 export class SessionsService {
   private readonly logger = new Logger(SessionsService.name);
@@ -80,7 +79,9 @@ export class SessionsService {
       ipAddress: session.ipAddress,
       createdAt: session.createdAt,
       lastActiveAt: session.lastActiveAt,
-      isCurrent: Boolean(currentSessionId && session.sessionId === currentSessionId),
+      isCurrent: Boolean(
+        currentSessionId && session.sessionId === currentSessionId,
+      ),
       isRevoked: Boolean(session.revokedAt),
       revokedAt: session.revokedAt,
       rememberMe: Boolean((session as any).rememberMe),
@@ -103,7 +104,9 @@ export class SessionsService {
     });
 
     if (!session) {
-      throw new NotFoundException('Session not found or not owned by the current user');
+      throw new NotFoundException(
+        'Session not found or not owned by the current user',
+      );
     }
 
     if (session.revokedAt) {
@@ -122,7 +125,9 @@ export class SessionsService {
     // Invalidate guard memory cache for this session
     invalidateSessionCache(session.sessionId, userId);
 
-    const isCurrent = Boolean(currentSessionId && session.sessionId === currentSessionId);
+    const isCurrent = Boolean(
+      currentSessionId && session.sessionId === currentSessionId,
+    );
     const action = isCurrent ? 'SESSION_REVOKED' : 'SESSION_REVOKED_REMOTE';
 
     try {
@@ -143,12 +148,16 @@ export class SessionsService {
         },
       });
     } catch (auditErr: any) {
-      this.logger.warn(`Failed to write session revocation audit log: ${auditErr?.message || auditErr}`);
+      this.logger.warn(
+        `Failed to write session revocation audit log: ${auditErr?.message || auditErr}`,
+      );
     }
 
     return {
       success: true,
-      message: isCurrent ? 'Current session revoked' : 'Remote session revoked successfully',
+      message: isCurrent
+        ? 'Current session revoked'
+        : 'Remote session revoked successfully',
       sessionId: updated.id,
       isCurrent,
     };
@@ -229,7 +238,9 @@ export class SessionsService {
         },
       });
     } catch (auditErr: any) {
-      this.logger.warn(`Failed to write all other sessions revoked audit log: ${auditErr?.message || auditErr}`);
+      this.logger.warn(
+        `Failed to write all other sessions revoked audit log: ${auditErr?.message || auditErr}`,
+      );
     }
 
     return {
@@ -244,7 +255,12 @@ export class SessionsService {
     currentSessionId?: string,
     page = 1,
     limit = 20,
-  ): Promise<{ activity: SecurityActivityDto[]; total: number; page: number; limit: number }> {
+  ): Promise<{
+    activity: SecurityActivityDto[];
+    total: number;
+    page: number;
+    limit: number;
+  }> {
     const pageNum = Math.max(1, Number(page) || 1);
     const limitNum = Math.min(50, Math.max(1, Number(limit) || 20));
     const skip = (pageNum - 1) * limitNum;
@@ -286,9 +302,14 @@ export class SessionsService {
       },
     });
 
-    const sessionMap = new Map<string, { isCurrent: boolean; isRevoked: boolean; id: string }>();
+    const sessionMap = new Map<
+      string,
+      { isCurrent: boolean; isRevoked: boolean; id: string }
+    >();
     for (const s of userSessions) {
-      const isCurrent = Boolean(currentSessionId && s.sessionId === currentSessionId);
+      const isCurrent = Boolean(
+        currentSessionId && s.sessionId === currentSessionId,
+      );
       const isRevoked = Boolean(s.revokedAt);
       sessionMap.set(s.id, { isCurrent, isRevoked, id: s.id });
       sessionMap.set(s.sessionId, { isCurrent, isRevoked, id: s.id });
@@ -297,7 +318,9 @@ export class SessionsService {
     // 3. Map to strictly sanitized DTO (zero sensitive fields)
     const activity: SecurityActivityDto[] = logs.map((log) => {
       const details: any =
-        typeof log.details === 'object' && log.details !== null ? log.details : {};
+        typeof log.details === 'object' && log.details !== null
+          ? log.details
+          : {};
       const refSessionId = details.sessionId || details.sessionRecordId || null;
       const sessionInfo = refSessionId ? sessionMap.get(refSessionId) : null;
 
@@ -325,4 +348,3 @@ export class SessionsService {
     };
   }
 }
-

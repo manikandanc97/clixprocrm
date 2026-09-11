@@ -25,11 +25,14 @@ describe('AuthService Avatar Upload Suite', () => {
         mimeType: 'image/png',
         format: 'png',
       }),
-      getPublicAvatarUrl: jest.fn().mockReturnValue(
-        'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=999',
-      ),
+      getPublicAvatarUrl: jest
+        .fn()
+        .mockReturnValue(
+          'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=999',
+        ),
       processAndUploadAvatar: jest.fn().mockResolvedValue({
-        storageUrl: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
+        storageUrl:
+          'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
         storagePath: 'workspace-logos/avatars/usr-123/avatar.webp',
       }),
     };
@@ -72,7 +75,9 @@ describe('AuthService Avatar Upload Suite', () => {
         rawBuffer,
         'profile.png',
       );
-      expect(mockBrandingService.getPublicAvatarUrl).toHaveBeenCalledWith('usr-123');
+      expect(mockBrandingService.getPublicAvatarUrl).toHaveBeenCalledWith(
+        'usr-123',
+      );
       expect(mockMediaQueueProducer.enqueueAvatarMedia).toHaveBeenCalledWith(
         expect.objectContaining({
           tenantId: 'tenant-xyz',
@@ -89,10 +94,12 @@ describe('AuthService Avatar Upload Suite', () => {
       expect(mockPrisma.user.update).not.toHaveBeenCalled();
       expect(result).toEqual({
         success: true,
-        avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=999',
+        avatar:
+          'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=999',
         user: {
           id: 'usr-123',
-          avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=999',
+          avatar:
+            'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=999',
         },
         jobId: 'avatar-media:usr-123:staging_raw:PROCESS_USER_AVATAR',
         queued: true,
@@ -119,17 +126,20 @@ describe('AuthService Avatar Upload Suite', () => {
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: 'usr-123' },
         data: {
-          avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
+          avatar:
+            'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
         },
       });
       expect(result).toEqual({
         success: true,
-        avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
+        avatar:
+          'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
         user: {
           id: 'usr-123',
           name: 'Test User',
           email: 'test@example.com',
-          avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
+          avatar:
+            'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
         },
       });
     });
@@ -156,7 +166,8 @@ describe('AuthService Avatar Upload Suite', () => {
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: 'usr-456' },
         data: {
-          avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
+          avatar:
+            'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=sync',
         },
       });
       expect(result.success).toBe(true);

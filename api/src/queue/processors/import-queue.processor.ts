@@ -28,9 +28,7 @@ export class ImportQueueProcessor extends WorkerHost {
     try {
       switch (job.name) {
         case IMPORT_JOB_NAMES.LEADS_BULK_IMPORT:
-          return await this.handleLeadsBulkImport(
-            job.data as LeadsBulkImportJobPayload,
-          );
+          return await this.handleLeadsBulkImport(job.data);
 
         default:
           this.logger.warn(

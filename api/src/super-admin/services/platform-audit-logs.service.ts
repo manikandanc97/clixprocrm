@@ -55,7 +55,9 @@ export class PlatformAuditLogsService {
     ]);
 
     // Fetch tenant names for logs that have a tenantId
-    const tenantIds = Array.from(new Set(logs.map((l) => l.tenantId).filter(Boolean))) as string[];
+    const tenantIds = Array.from(
+      new Set(logs.map((l) => l.tenantId).filter(Boolean)),
+    ) as string[];
     const tenants = await this.prisma.tenant.findMany({
       where: { id: { in: tenantIds } },
       select: { id: true, name: true, slug: true },
@@ -68,10 +70,14 @@ export class PlatformAuditLogsService {
         action: l.action,
         module: l.module || 'System',
         tenantId: l.tenantId,
-        organizationName: l.tenantId ? tenantMap.get(l.tenantId)?.name || 'Unknown Org' : 'Platform',
+        organizationName: l.tenantId
+          ? tenantMap.get(l.tenantId)?.name || 'Unknown Org'
+          : 'Platform',
         actor: l.user ? l.user.name || l.user.email : 'System',
         actorEmail: l.user?.email || null,
-        targetUser: l.targetUser ? l.targetUser.name || l.targetUser.email : null,
+        targetUser: l.targetUser
+          ? l.targetUser.name || l.targetUser.email
+          : null,
         details: l.details,
         ipAddress: l.ipAddress,
         userAgent: l.userAgent,

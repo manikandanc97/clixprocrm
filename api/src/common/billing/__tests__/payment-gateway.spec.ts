@@ -143,7 +143,10 @@ describe('Razorpay Payment Gateway Adapter Unit Tests', () => {
     });
 
     it('should reject webhook with invalid signature', async () => {
-      const rawPayload = JSON.stringify({ id: 'evt_rzp_forged', event: 'payment.captured' });
+      const rawPayload = JSON.stringify({
+        id: 'evt_rzp_forged',
+        event: 'payment.captured',
+      });
 
       const result = await adapter.verifyAndParseWebhook({
         rawBody: rawPayload,

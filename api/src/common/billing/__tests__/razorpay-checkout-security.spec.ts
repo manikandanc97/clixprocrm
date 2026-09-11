@@ -43,7 +43,11 @@ describe('Razorpay Checkout Security & Tampering Resistance Suite', () => {
       },
       platformInvoice: {
         count: jest.fn().mockResolvedValue(5),
-        create: jest.fn().mockResolvedValue({ id: 'inv-1', invoiceNumber: 'CP-INV-2026-000006', status: 'PAID' }),
+        create: jest.fn().mockResolvedValue({
+          id: 'inv-1',
+          invoiceNumber: 'CP-INV-2026-000006',
+          status: 'PAID',
+        }),
       },
       platformPayment: {
         count: jest.fn().mockResolvedValue(5),
@@ -69,7 +73,9 @@ describe('Razorpay Checkout Security & Tampering Resistance Suite', () => {
       ],
     }).compile();
 
-    service = module.get<SubscriptionEntitlementService>(SubscriptionEntitlementService);
+    service = module.get<SubscriptionEntitlementService>(
+      SubscriptionEntitlementService,
+    );
   });
 
   describe('TEST A: End-to-End Verified Payment Activation', () => {
@@ -179,17 +185,24 @@ describe('Razorpay Checkout Security & Tampering Resistance Suite', () => {
         currency: 'INR',
       });
 
-      billingGatewayMock.createCheckoutOrder.mockImplementation(async (params) => {
-        return {
-          provider: 'RAZORPAY',
-          orderId: 'order_test_server_price',
-          amount: params.amountInMinorUnits,
-          currency: params.currency,
-          keyId: 'rzp_test_key',
-        };
-      });
+      billingGatewayMock.createCheckoutOrder.mockImplementation(
+        async (params) => {
+          return {
+            provider: 'RAZORPAY',
+            orderId: 'order_test_server_price',
+            amount: params.amountInMinorUnits,
+            currency: params.currency,
+            keyId: 'rzp_test_key',
+          };
+        },
+      );
 
-      const { quote, order } = await service.createCheckoutOrder('tenant-123', 'growth', 5, 'monthly');
+      const { quote, order } = await service.createCheckoutOrder(
+        'tenant-123',
+        'growth',
+        5,
+        'monthly',
+      );
 
       // Growth is ₹999/mo per seat (or canonical DB price), 5 seats = ₹4995 subtotal + 18% GST (₹899) = ₹5894 -> 589400 paise
       expect(quote.planId).toBe('growth');

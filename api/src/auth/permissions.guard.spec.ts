@@ -11,8 +11,13 @@ describe('PermissionsGuard Security Validation', () => {
     guard = new PermissionsGuard(reflector);
   });
 
-  function createMockContext(userRole: any, requiredPermissions?: string[]): ExecutionContext {
-    jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(requiredPermissions);
+  function createMockContext(
+    userRole: any,
+    requiredPermissions?: string[],
+  ): ExecutionContext {
+    jest
+      .spyOn(reflector, 'getAllAndOverride')
+      .mockReturnValue(requiredPermissions);
     const request = { userRole };
     return {
       switchToHttp: () => ({
@@ -25,22 +30,32 @@ describe('PermissionsGuard Security Validation', () => {
 
   describe('1. Platform & Admin Role Bypasses', () => {
     it('allows SUPERADMIN unconditionally', () => {
-      const ctx = createMockContext({ name: 'SUPER_ADMIN', permissions: [] }, ['Roles:Manage']);
+      const ctx = createMockContext({ name: 'SUPER_ADMIN', permissions: [] }, [
+        'Roles:Manage',
+      ]);
       expect(guard.canActivate(ctx)).toBe(true);
     });
 
     it('allows ADMIN unconditionally', () => {
-      const ctx = createMockContext({ name: 'ADMIN', permissions: [] }, ['Roles:Manage', 'Employees:Manage']);
+      const ctx = createMockContext({ name: 'ADMIN', permissions: [] }, [
+        'Roles:Manage',
+        'Employees:Manage',
+      ]);
       expect(guard.canActivate(ctx)).toBe(true);
     });
 
     it('allows OWNER unconditionally', () => {
-      const ctx = createMockContext({ name: 'OWNER', permissions: [] }, ['Roles:Manage']);
+      const ctx = createMockContext({ name: 'OWNER', permissions: [] }, [
+        'Roles:Manage',
+      ]);
       expect(guard.canActivate(ctx)).toBe(true);
     });
 
     it('rejects deactivated roles regardless of name', () => {
-      const ctx = createMockContext({ name: 'ADMIN', isActive: false, permissions: [] }, ['Roles:Manage']);
+      const ctx = createMockContext(
+        { name: 'ADMIN', isActive: false, permissions: [] },
+        ['Roles:Manage'],
+      );
       expect(() => guard.canActivate(ctx)).toThrow(ForbiddenException);
     });
   });

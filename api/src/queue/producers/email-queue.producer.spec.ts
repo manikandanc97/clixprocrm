@@ -1,4 +1,7 @@
-import { EmailQueueProducer, EMAIL_DEFAULT_JOB_OPTS } from './email-queue.producer';
+import {
+  EmailQueueProducer,
+  EMAIL_DEFAULT_JOB_OPTS,
+} from './email-queue.producer';
 import { EMAIL_JOB_NAMES } from '../interfaces/email-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 
@@ -172,7 +175,9 @@ describe('EmailQueueProducer Suite', () => {
   describe('enqueueSyncInbox', () => {
     it('should enqueue sync-inbox job with deterministic jobId sync-inbox:tenantId:accountId', async () => {
       mockQueue.getJob.mockResolvedValueOnce(null);
-      mockQueue.add.mockResolvedValueOnce({ id: 'sync-inbox:tenant-123:acc-456' });
+      mockQueue.add.mockResolvedValueOnce({
+        id: 'sync-inbox:tenant-123:acc-456',
+      });
 
       const result = await producer.enqueueSyncInbox({
         tenantId: 'tenant-123',

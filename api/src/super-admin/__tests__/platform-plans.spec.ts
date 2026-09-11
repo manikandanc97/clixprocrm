@@ -16,7 +16,11 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
         count: jest.fn().mockResolvedValue(0),
         findMany: jest.fn(),
         findUnique: jest.fn(),
-        create: jest.fn().mockImplementation((args) => Promise.resolve({ id: args.data.id, ...args.data })),
+        create: jest
+          .fn()
+          .mockImplementation((args) =>
+            Promise.resolve({ id: args.data.id, ...args.data }),
+          ),
         update: jest.fn(),
         upsert: jest.fn().mockResolvedValue({ id: 'plan-1' }),
         updateMany: jest.fn(),
@@ -64,7 +68,9 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
 
       await service.seedCanonicalPlansIfEmpty();
 
-      expect(prismaMock.plan.create).toHaveBeenCalledTimes(Object.values(CANONICAL_PLANS).length);
+      expect(prismaMock.plan.create).toHaveBeenCalledTimes(
+        Object.values(CANONICAL_PLANS).length,
+      );
     });
 
     it('should NOT create or modify plans when database already has plans', async () => {
@@ -141,7 +147,11 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
         aiEntitlements: [],
       });
 
-      await service.updatePlan('starter', { highlight: true }, 'super-admin-user');
+      await service.updatePlan(
+        'starter',
+        { highlight: true },
+        'super-admin-user',
+      );
 
       expect(prismaMock.plan.updateMany).toHaveBeenCalledWith({
         where: { id: { not: 'starter' } },
@@ -194,7 +204,11 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
       ).rejects.toThrow(BadRequestException);
 
       await expect(
-        service.updatePlan('pro', { status: 'INVALID_STATUS' as any }, 'actor-1'),
+        service.updatePlan(
+          'pro',
+          { status: 'INVALID_STATUS' as any },
+          'actor-1',
+        ),
       ).rejects.toThrow(BadRequestException);
     });
   });
@@ -231,7 +245,9 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
       });
       prismaMock.tenant.count = jest.fn().mockResolvedValue(3);
       prismaMock.tenant.updateMany = jest.fn().mockResolvedValue({ count: 3 });
-      prismaMock.planAiEntitlement.deleteMany = jest.fn().mockResolvedValue({ count: 2 });
+      prismaMock.planAiEntitlement.deleteMany = jest
+        .fn()
+        .mockResolvedValue({ count: 2 });
       prismaMock.plan.delete = jest.fn().mockResolvedValue({ id: 'pro' });
 
       const result = await service.deletePlan('pro', 'super-admin-user');
@@ -256,8 +272,12 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
         name: 'Old Custom',
       });
       prismaMock.tenant.count = jest.fn().mockResolvedValue(0);
-      prismaMock.planAiEntitlement.deleteMany = jest.fn().mockResolvedValue({ count: 1 });
-      prismaMock.plan.delete = jest.fn().mockResolvedValue({ id: 'old-custom' });
+      prismaMock.planAiEntitlement.deleteMany = jest
+        .fn()
+        .mockResolvedValue({ count: 1 });
+      prismaMock.plan.delete = jest
+        .fn()
+        .mockResolvedValue({ id: 'old-custom' });
 
       const result = await service.deletePlan('old-custom', 'super-admin-user');
 
@@ -269,4 +289,3 @@ describe('PlatformPlansService SaaS Pricing Suite', () => {
     });
   });
 });
-

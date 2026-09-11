@@ -26,7 +26,9 @@ export class BrandingService {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new BadRequestException('Supabase storage configuration is missing');
+      throw new BadRequestException(
+        'Supabase storage configuration is missing',
+      );
     }
 
     this.supabaseClient = createClient(supabaseUrl, supabaseKey, {
@@ -47,14 +49,23 @@ export class BrandingService {
           await supabase.storage.createBucket(BUCKET_NAME, {
             public: true,
             fileSizeLimit: '10MB',
-            allowedMimeTypes: ['image/webp', 'image/png', 'image/jpeg', 'image/svg+xml'],
+            allowedMimeTypes: [
+              'image/webp',
+              'image/png',
+              'image/jpeg',
+              'image/svg+xml',
+            ],
           });
-          this.logger.log(`Created public Supabase storage bucket: ${BUCKET_NAME}`);
+          this.logger.log(
+            `Created public Supabase storage bucket: ${BUCKET_NAME}`,
+          );
         }
       }
       this.bucketChecked = true;
     } catch (err: any) {
-      this.logger.warn(`Storage bucket initialization notice: ${err?.message || err}`);
+      this.logger.warn(
+        `Storage bucket initialization notice: ${err?.message || err}`,
+      );
       this.bucketChecked = true; // Avoid repeated retries
     }
   }
@@ -62,7 +73,10 @@ export class BrandingService {
   /**
    * Validate file buffer header magic numbers to prevent malicious uploads.
    */
-  validateImageBuffer(buffer: Buffer, originalFilename?: string): { mimeType: string; format: string } {
+  validateImageBuffer(
+    buffer: Buffer,
+    originalFilename?: string,
+  ): { mimeType: string; format: string } {
     if (!buffer || buffer.length === 0) {
       throw new BadRequestException('Image file buffer is empty');
     }
@@ -102,7 +116,10 @@ export class BrandingService {
     }
 
     // Check SVG / XML format
-    const head = buffer.subarray(0, Math.min(buffer.length, 512)).toString('utf8').trim();
+    const head = buffer
+      .subarray(0, Math.min(buffer.length, 512))
+      .toString('utf8')
+      .trim();
     if (
       head.includes('<svg') ||
       (head.includes('<?xml') && head.includes('<svg'))
@@ -155,7 +172,10 @@ export class BrandingService {
         .toBuffer({ resolveWithObject: true });
 
       const pixelCount = info.width * info.height;
-      const clusters: Map<string, { count: number; r: number; g: number; b: number; score: number }> = new Map();
+      const clusters: Map<
+        string,
+        { count: number; r: number; g: number; b: number; score: number }
+      > = new Map();
 
       for (let i = 0; i < data.length; i += 4) {
         const r = data[i];
@@ -182,7 +202,8 @@ export class BrandingService {
         if (delta < 24) continue;
 
         // Calculate Saturation
-        const saturation = lightness > 0.5 ? delta / (510 - max - min) : delta / (max + min);
+        const saturation =
+          lightness > 0.5 ? delta / (510 - max - min) : delta / (max + min);
         if (saturation < 0.18) continue; // Skip washed-out grays
 
         // Calculate Hue [0, 360)
@@ -203,7 +224,8 @@ export class BrandingService {
         const clusterKey = `${hueBin}_${satBin}`;
 
         // Vibrancy weight: higher saturation and balanced lightness gets higher score
-        const vibrancyWeight = (saturation * 2.0) * (1 - Math.abs(lightness - 0.5) * 0.8);
+        const vibrancyWeight =
+          saturation * 2.0 * (1 - Math.abs(lightness - 0.5) * 0.8);
 
         const existing = clusters.get(clusterKey);
         if (existing) {
@@ -224,12 +246,20 @@ export class BrandingService {
       }
 
       if (clusters.size === 0) {
-        this.logger.log('No distinct chromatic brand color found; using default ClixProCRM primary');
+        this.logger.log(
+          'No distinct chromatic brand color found; using default ClixProCRM primary',
+        );
         return DEFAULT_PRIMARY_COLOR;
       }
 
       // Pick the winning cluster with highest weighted vibrancy & frequency
-      let bestCluster: { count: number; r: number; g: number; b: number; score: number } | null = null;
+      let bestCluster: {
+        count: number;
+        r: number;
+        g: number;
+        b: number;
+        score: number;
+      } | null = null;
       for (const cluster of clusters.values()) {
         if (!bestCluster || cluster.score > bestCluster.score) {
           bestCluster = cluster;
@@ -248,7 +278,9 @@ export class BrandingService {
       this.logger.log(`Extracted dominant brand color: ${hex}`);
       return hex;
     } catch (err: any) {
-      this.logger.warn(`Dominant color extraction fallback: ${err?.message || err}`);
+      this.logger.warn(
+        `Dominant color extraction fallback: ${err?.message || err}`,
+      );
       return DEFAULT_PRIMARY_COLOR;
     }
   }
@@ -264,10 +296,15 @@ export class BrandingService {
     originalFilename?: string,
   ): Promise<{ storagePath: string; mimeType: string; format: string }> {
     if (!tenantId) {
-      throw new BadRequestException('Tenant ID is required for branding upload');
+      throw new BadRequestException(
+        'Tenant ID is required for branding upload',
+      );
     }
 
-    const { mimeType, format } = this.validateImageBuffer(rawBuffer, originalFilename);
+    const { mimeType, format } = this.validateImageBuffer(
+      rawBuffer,
+      originalFilename,
+    );
 
     await this.ensureBucketExists();
 
@@ -283,7 +320,9 @@ export class BrandingService {
       });
 
     if (uploadError) {
-      this.logger.error(`Supabase storage raw upload error: ${uploadError.message}`);
+      this.logger.error(
+        `Supabase storage raw upload error: ${uploadError.message}`,
+      );
       throw new BadRequestException(
         `Failed to store raw logo in Supabase Storage: ${uploadError.message}`,
       );
@@ -311,7 +350,9 @@ export class BrandingService {
     originalFilename?: string,
   ): Promise<ProcessedLogoResult> {
     if (!tenantId) {
-      throw new BadRequestException('Tenant ID is required for branding upload');
+      throw new BadRequestException(
+        'Tenant ID is required for branding upload',
+      );
     }
 
     const supabase = this.getSupabase();
@@ -322,7 +363,9 @@ export class BrandingService {
       .download(rawStoragePath);
 
     if (downloadError || !rawBlob) {
-      this.logger.error(`Supabase storage download error: ${downloadError?.message}`);
+      this.logger.error(
+        `Supabase storage download error: ${downloadError?.message}`,
+      );
       throw new BadRequestException(
         `Failed to retrieve raw branding media from Supabase Storage: ${downloadError?.message || 'Empty file'}`,
       );
@@ -353,7 +396,9 @@ export class BrandingService {
       });
 
     if (uploadError) {
-      this.logger.error(`Supabase storage upload error: ${uploadError.message}`);
+      this.logger.error(
+        `Supabase storage upload error: ${uploadError.message}`,
+      );
       throw new BadRequestException(
         `Failed to store processed logo in Supabase Storage: ${uploadError.message}`,
       );
@@ -363,7 +408,9 @@ export class BrandingService {
     try {
       await supabase.storage.from(BUCKET_NAME).remove([rawStoragePath]);
     } catch (cleanupErr: any) {
-      this.logger.warn(`Staging raw media cleanup notice: ${cleanupErr?.message || cleanupErr}`);
+      this.logger.warn(
+        `Staging raw media cleanup notice: ${cleanupErr?.message || cleanupErr}`,
+      );
     }
 
     // 8. Generate public URL
@@ -403,7 +450,9 @@ export class BrandingService {
     originalFilename?: string,
   ): Promise<ProcessedLogoResult> {
     if (!tenantId) {
-      throw new BadRequestException('Tenant ID is required for branding upload');
+      throw new BadRequestException(
+        'Tenant ID is required for branding upload',
+      );
     }
 
     // 1. Validate file
@@ -431,7 +480,9 @@ export class BrandingService {
       });
 
     if (uploadError) {
-      this.logger.error(`Supabase storage upload error: ${uploadError.message}`);
+      this.logger.error(
+        `Supabase storage upload error: ${uploadError.message}`,
+      );
       throw new BadRequestException(
         `Failed to store logo in Supabase Storage: ${uploadError.message}`,
       );
@@ -488,7 +539,9 @@ export class BrandingService {
       });
 
     if (uploadError) {
-      this.logger.error(`Supabase storage avatar upload error: ${uploadError.message}`);
+      this.logger.error(
+        `Supabase storage avatar upload error: ${uploadError.message}`,
+      );
       throw new BadRequestException(
         `Failed to store avatar in Supabase Storage: ${uploadError.message}`,
       );
@@ -534,7 +587,10 @@ export class BrandingService {
       throw new BadRequestException('User ID is required for avatar upload');
     }
 
-    const { mimeType, format } = this.validateImageBuffer(rawBuffer, originalFilename);
+    const { mimeType, format } = this.validateImageBuffer(
+      rawBuffer,
+      originalFilename,
+    );
 
     await this.ensureBucketExists();
 
@@ -550,7 +606,9 @@ export class BrandingService {
       });
 
     if (uploadError) {
-      this.logger.error(`Supabase storage raw avatar upload error: ${uploadError.message}`);
+      this.logger.error(
+        `Supabase storage raw avatar upload error: ${uploadError.message}`,
+      );
       throw new BadRequestException(
         `Failed to store raw avatar in Supabase Storage: ${uploadError.message}`,
       );
@@ -577,7 +635,9 @@ export class BrandingService {
     originalFilename?: string,
   ): Promise<{ storageUrl: string; storagePath: string }> {
     if (!userId) {
-      throw new BadRequestException('User ID is required for avatar processing');
+      throw new BadRequestException(
+        'User ID is required for avatar processing',
+      );
     }
 
     const supabase = this.getSupabase();
@@ -588,7 +648,9 @@ export class BrandingService {
       .download(rawStoragePath);
 
     if (downloadError || !rawBlob) {
-      this.logger.error(`Supabase storage download error: ${downloadError?.message}`);
+      this.logger.error(
+        `Supabase storage download error: ${downloadError?.message}`,
+      );
       throw new BadRequestException(
         `Failed to retrieve raw avatar from Supabase Storage: ${downloadError?.message || 'Empty file'}`,
       );
@@ -616,7 +678,9 @@ export class BrandingService {
       });
 
     if (uploadError) {
-      this.logger.error(`Supabase storage avatar upload error: ${uploadError.message}`);
+      this.logger.error(
+        `Supabase storage avatar upload error: ${uploadError.message}`,
+      );
       throw new BadRequestException(
         `Failed to store processed avatar in Supabase Storage: ${uploadError.message}`,
       );
@@ -626,7 +690,9 @@ export class BrandingService {
     try {
       await supabase.storage.from(BUCKET_NAME).remove([rawStoragePath]);
     } catch (cleanupErr: any) {
-      this.logger.warn(`Staging raw avatar cleanup notice: ${cleanupErr?.message || cleanupErr}`);
+      this.logger.warn(
+        `Staging raw avatar cleanup notice: ${cleanupErr?.message || cleanupErr}`,
+      );
     }
 
     // 7. Generate public URL
@@ -643,4 +709,3 @@ export class BrandingService {
     };
   }
 }
-

@@ -2,7 +2,10 @@ import * as fs from 'fs';
 import * as path from 'path';
 import { AuditLoggerService } from '../common/audit/audit-logger.service';
 import { AuditArchiveService } from '../common/audit/archive/audit-archive.service';
-import { S3ObjectLockProvider, buildAuditObjectKey } from '../common/audit/archive/s3-object-lock.provider';
+import {
+  S3ObjectLockProvider,
+  buildAuditObjectKey,
+} from '../common/audit/archive/s3-object-lock.provider';
 import { CanonicalAuditArchiveRecord } from '../common/audit/archive/audit-archive.interface';
 
 describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
@@ -46,12 +49,17 @@ describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
       },
       auditArchiveOutbox: {
         create: jest.fn().mockImplementation(({ data }) => {
-          const record = { id: `outbox-${storedOutbox.length + 1}`, attempts: 0, createdAt: new Date(), ...data };
+          const record = {
+            id: `outbox-${storedOutbox.length + 1}`,
+            attempts: 0,
+            createdAt: new Date(),
+            ...data,
+          };
           storedOutbox.push(record);
           return Promise.resolve(record);
         }),
         findMany: jest.fn().mockImplementation(({ where }) => {
-          let items = storedOutbox.filter((o) => {
+          const items = storedOutbox.filter((o) => {
             if (where?.status && o.status !== where.status) return false;
             return true;
           });
@@ -73,8 +81,8 @@ describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
       },
     };
 
-    auditLogger = new AuditLoggerService(mockPrisma as any);
-    archiveService = new AuditArchiveService(mockPrisma as any);
+    auditLogger = new AuditLoggerService(mockPrisma);
+    archiveService = new AuditArchiveService(mockPrisma);
   });
 
   describe('1. Transactional Outbox Atomicity', () => {
@@ -142,7 +150,9 @@ describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
 
       // Mock provider to throw network errors
       const failingProvider = {
-        putObject: jest.fn().mockRejectedValue(new Error('AWS S3 Network Timeout')),
+        putObject: jest
+          .fn()
+          .mockRejectedValue(new Error('AWS S3 Network Timeout')),
         getObject: jest.fn().mockResolvedValue(null),
         headObject: jest.fn().mockResolvedValue({ exists: false }),
       };
@@ -210,7 +220,7 @@ describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
           },
         }),
       };
-      archiveService.setProvider(tamperedProvider as any);
+      archiveService.setProvider(tamperedProvider);
 
       const verification = await archiveService.verifyArchivedRecord(log.id);
       expect(verification.valid).toBe(false);
@@ -229,7 +239,7 @@ describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
         headObject: jest.fn().mockResolvedValue({ exists: false }),
         getObject: jest.fn().mockResolvedValue(null),
       };
-      archiveService.setProvider(missingProvider as any);
+      archiveService.setProvider(missingProvider);
 
       const verification = await archiveService.verifyArchivedRecord(log.id);
       expect(verification.valid).toBe(false);
@@ -257,9 +267,15 @@ describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
       expect(fs.existsSync(migrationPath)).toBe(true);
 
       const migrationSql = fs.readFileSync(migrationPath, 'utf8');
-      expect(migrationSql).toContain('CREATE TABLE IF NOT EXISTS "AuditArchiveOutbox"');
-      expect(migrationSql).toContain('CREATE UNIQUE INDEX IF NOT EXISTS "AuditArchiveOutbox_auditLogId_key"');
-      expect(migrationSql).toContain('CREATE INDEX IF NOT EXISTS "AuditArchiveOutbox_status_nextAttemptAt_idx"');
+      expect(migrationSql).toContain(
+        'CREATE TABLE IF NOT EXISTS "AuditArchiveOutbox"',
+      );
+      expect(migrationSql).toContain(
+        'CREATE UNIQUE INDEX IF NOT EXISTS "AuditArchiveOutbox_auditLogId_key"',
+      );
+      expect(migrationSql).toContain(
+        'CREATE INDEX IF NOT EXISTS "AuditArchiveOutbox_status_nextAttemptAt_idx"',
+      );
     });
   });
 });

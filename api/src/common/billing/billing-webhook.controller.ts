@@ -146,18 +146,18 @@ export class BillingWebhookController {
       const isoTimestamp = eventTimestamp
         ? typeof eventTimestamp === 'string'
           ? eventTimestamp
-          : (eventTimestamp as Date).toISOString()
+          : eventTimestamp.toISOString()
         : new Date().toISOString();
 
       const enqueueResult =
         await this.webhookQueueProducer.enqueueBillingWebhook({
           providerEventId: eventId,
-          provider: provider as 'RAZORPAY' | 'STRIPE' | 'MANUAL',
+          provider: provider,
           eventType,
-          status: status as any,
+          status: status,
           tenantId: tenantId || 'system',
           planId,
-          billingCycle: billingCycle as any,
+          billingCycle: billingCycle,
           seats,
           orderId: parsedEvent.orderId,
           paymentId: parsedEvent.paymentId,

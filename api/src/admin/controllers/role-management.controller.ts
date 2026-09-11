@@ -17,7 +17,9 @@ export class RoleManagementController {
   @Get()
   @Permissions('Roles:View')
   async getRoleManagementStats(@Req() req: any) {
-    const data = await this.roleStatsService.getRoleManagementStats(req.tenantId);
+    const data = await this.roleStatsService.getRoleManagementStats(
+      req.tenantId,
+    );
     return { success: true, data };
   }
 }

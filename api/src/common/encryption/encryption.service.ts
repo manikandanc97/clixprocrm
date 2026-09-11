@@ -1,4 +1,8 @@
-import { Injectable, InternalServerErrorException, OnModuleInit } from '@nestjs/common';
+import {
+  Injectable,
+  InternalServerErrorException,
+  OnModuleInit,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 
@@ -38,8 +42,8 @@ export class EncryptionService implements OnModuleInit {
     if (!raw) {
       throw new InternalServerErrorException(
         '[EncryptionService] FIELD_ENCRYPTION_KEY environment variable is not set. ' +
-        'Application cannot start without an encryption key. ' +
-        'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"',
+          'Application cannot start without an encryption key. ' +
+          "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
       );
     }
 
@@ -48,16 +52,28 @@ export class EncryptionService implements OnModuleInit {
     if (masterKey.length !== 32) {
       throw new InternalServerErrorException(
         '[EncryptionService] FIELD_ENCRYPTION_KEY must be exactly 64 hex characters (32 bytes). ' +
-        'Generate one with: node -e "console.log(require(\'crypto\').randomBytes(32).toString(\'hex\'))"',
+          "Generate one with: node -e \"console.log(require('crypto').randomBytes(32).toString('hex'))\"",
       );
     }
 
     // hkdfSync returns ArrayBuffer — wrap in Buffer for use with crypto APIs
     this.encKey = Buffer.from(
-      crypto.hkdfSync('sha256', masterKey, 'clixprocrm-enc', 'field-encryption-v1', 32)
+      crypto.hkdfSync(
+        'sha256',
+        masterKey,
+        'clixprocrm-enc',
+        'field-encryption-v1',
+        32,
+      ),
     );
     this.hmacKey = Buffer.from(
-      crypto.hkdfSync('sha256', masterKey, 'clixprocrm-enc', 'field-hmac-v1', 32)
+      crypto.hkdfSync(
+        'sha256',
+        masterKey,
+        'clixprocrm-enc',
+        'field-hmac-v1',
+        32,
+      ),
     );
   }
 
@@ -155,13 +171,10 @@ export class EncryptionService implements OnModuleInit {
    * Returns the same object reference (mutates).
    * Safe to call with a partial field list.
    */
-  decryptFields<T extends Record<string, any>>(
-    obj: T,
-    fields: (keyof T)[],
-  ): T {
+  decryptFields<T extends Record<string, any>>(obj: T, fields: (keyof T)[]): T {
     for (const field of fields) {
       if (obj[field] !== undefined) {
-        (obj as any)[field] = this.decrypt(obj[field] as string | null);
+        (obj as any)[field] = this.decrypt(obj[field]);
       }
     }
     return obj;

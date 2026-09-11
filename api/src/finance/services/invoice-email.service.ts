@@ -1,7 +1,10 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService, escapeHtml } from '../../common/services/email.service';
-import { formatCurrency, toNumber } from '../../common/utils/crm-formatters.util';
+import {
+  formatCurrency,
+  toNumber,
+} from '../../common/utils/crm-formatters.util';
 import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 
 @Injectable()
@@ -22,16 +25,22 @@ export class InvoiceEmailService {
     tenantId: string,
     invoiceId: string,
     userId: string,
-    options?: { recipientEmail?: string; subject?: string; message?: string; cc?: string[] },
+    options?: {
+      recipientEmail?: string;
+      subject?: string;
+      message?: string;
+      cc?: string[];
+    },
   ): Promise<{ success: boolean; message: string; messageId?: string }> {
     if (this.emailQueueProducer && this.emailQueueProducer.isQueueAvailable()) {
       try {
-        const queueResult = await this.emailQueueProducer.enqueueInvoiceNotification({
-          tenantId,
-          userId,
-          invoiceId,
-          options,
-        });
+        const queueResult =
+          await this.emailQueueProducer.enqueueInvoiceNotification({
+            tenantId,
+            userId,
+            invoiceId,
+            options,
+          });
 
         if (queueResult.enqueued) {
           return {
@@ -57,7 +66,12 @@ export class InvoiceEmailService {
     tenantId: string,
     invoiceId: string,
     userId: string,
-    options?: { recipientEmail?: string; subject?: string; message?: string; cc?: string[] },
+    options?: {
+      recipientEmail?: string;
+      subject?: string;
+      message?: string;
+      cc?: string[];
+    },
   ): Promise<{ success: boolean; message: string; messageId?: string }> {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const invoice = await tx.invoice.findFirst({
@@ -76,18 +90,29 @@ export class InvoiceEmailService {
 
       const toEmail = options?.recipientEmail || invoice.customer?.email;
       if (!toEmail) {
-        return { success: false, message: 'Customer has no valid email address' };
+        return {
+          success: false,
+          message: 'Customer has no valid email address',
+        };
       }
 
       const companyName = invoice.tenant.name || 'Our Company';
       const currency = invoice.currency || 'INR';
       const invNumber = invoice.invoiceNumber || invoice.id.slice(0, 8);
-      const totalFormatted = formatCurrency(toNumber(invoice.totalAmount || invoice.amount), currency);
+      const totalFormatted = formatCurrency(
+        toNumber(invoice.totalAmount || invoice.amount),
+        currency,
+      );
       const dueFormatted = invoice.dueDate
-        ? new Date(invoice.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        ? new Date(invoice.dueDate).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
         : 'Due upon receipt';
 
-      const subject = options?.subject || `Invoice ${invNumber} from ${companyName}`;
+      const subject =
+        options?.subject || `Invoice ${invNumber} from ${companyName}`;
       const customMsg = options?.message
         ? `<p style="font-size: 14px; line-height: 1.6; color: #334155; margin-bottom: 20px;">${escapeHtml(options.message)}</p>`
         : '';
@@ -160,15 +185,23 @@ export class InvoiceEmailService {
           });
         }
 
-        this.logger.log(`Invoice email simulated/dispatched to ${toEmail} for invoice ${invNumber}`);
+        this.logger.log(
+          `Invoice email simulated/dispatched to ${toEmail} for invoice ${invNumber}`,
+        );
         return {
           success: true,
           message: `Invoice successfully sent to ${toEmail}`,
           messageId: `msg_${Date.now()}`,
         };
       } catch (err: any) {
-        this.logger.error(`Error sending invoice email: ${err.message}`, err.stack);
-        return { success: false, message: `Failed to send email: ${err.message}` };
+        this.logger.error(
+          `Error sending invoice email: ${err.message}`,
+          err.stack,
+        );
+        return {
+          success: false,
+          message: `Failed to send email: ${err.message}`,
+        };
       }
     });
   }
@@ -184,14 +217,19 @@ export class InvoiceEmailService {
   ): Promise<{ success: boolean; message: string }> {
     if (this.emailQueueProducer && this.emailQueueProducer.isQueueAvailable()) {
       try {
-        const queueResult = await this.emailQueueProducer.enqueuePaymentReceipt({
-          tenantId,
-          userId,
-          paymentId,
-        });
+        const queueResult = await this.emailQueueProducer.enqueuePaymentReceipt(
+          {
+            tenantId,
+            userId,
+            paymentId,
+          },
+        );
 
         if (queueResult.enqueued) {
-          return { success: true, message: `Payment receipt email queued for processing` };
+          return {
+            success: true,
+            message: `Payment receipt email queued for processing`,
+          };
         }
       } catch (queueErr: any) {
         this.logger.warn(
@@ -232,8 +270,12 @@ export class InvoiceEmailService {
 
       const companyName = payment.invoice.tenant.name || 'Our Company';
       const currency = payment.currency || 'INR';
-      const amountFormatted = formatCurrency(toNumber(payment.amount), currency);
-      const invNumber = payment.invoice.invoiceNumber || payment.invoice.id.slice(0, 8);
+      const amountFormatted = formatCurrency(
+        toNumber(payment.amount),
+        currency,
+      );
+      const invNumber =
+        payment.invoice.invoiceNumber || payment.invoice.id.slice(0, 8);
 
       await tx.timelineEvent.create({
         data: {
@@ -245,13 +287,21 @@ export class InvoiceEmailService {
           customerId: payment.invoice.customerId,
           companyId: payment.invoice.companyId,
           dealId: payment.invoice.dealId,
-          metadata: { paymentNumber: payment.paymentNumber, amountFormatted, toEmail },
+          metadata: {
+            paymentNumber: payment.paymentNumber,
+            amountFormatted,
+            toEmail,
+          },
         },
       });
 
-      this.logger.log(`Payment receipt email logged for payment ${payment.paymentNumber}`);
-      return { success: true, message: `Payment receipt successfully sent to ${toEmail}` };
+      this.logger.log(
+        `Payment receipt email logged for payment ${payment.paymentNumber}`,
+      );
+      return {
+        success: true,
+        message: `Payment receipt successfully sent to ${toEmail}`,
+      };
     });
   }
 }
-

@@ -67,17 +67,19 @@ export default function AiInsightsPage() {
   const { data: insightsData, isLoading: loading } = useAiInsights();
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
 
+  const hasAiData = useMemo(() => {
+    if (!insightsData) return false;
+    const hasRecs = (insightsData.recommendations?.length ?? 0) > 0;
+    const hasTimeline = (insightsData.timeline?.length ?? 0) > 0;
+    const hasMeaningfulStats = insightsData.stats?.some(
+      (s) => s.value && s.value !== "0" && s.value !== "0%" && s.value !== "0.0%"
+    ) ?? false;
+    return Boolean(hasRecs || hasTimeline || hasMeaningfulStats);
+  }, [insightsData]);
+
   const recommendations = insightsData?.recommendations || [];
   const aiStats = insightsData?.stats || [];
   const aiTimeline = insightsData?.timeline || [];
-
-  const hasAiData = useMemo(() => {
-    if (!insightsData) return false;
-    const hasRecs = recommendations.length > 0;
-    const hasTimeline = aiTimeline.length > 0;
-    const hasMeaningfulStats = aiStats.some(s => s.value && s.value !== "0" && s.value !== "0%" && s.value !== "0.0%");
-    return Boolean(hasRecs || hasTimeline || hasMeaningfulStats);
-  }, [insightsData, recommendations, aiTimeline, aiStats]);
 
   const handleAskAI = () => {
     toast.success("AI Assistant", {

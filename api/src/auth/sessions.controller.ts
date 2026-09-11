@@ -29,9 +29,14 @@ export class SessionsController {
     const ip = getClientIp(req);
     const identifier = `auth:sessions:list:${userId}:${ip}`;
 
-    const rateLimit = await checkRateLimit(identifier, RATE_LIMITS.SESSIONS_LIST);
+    const rateLimit = await checkRateLimit(
+      identifier,
+      RATE_LIMITS.SESSIONS_LIST,
+    );
     if (!rateLimit.allowed) {
-      const waitSec = Math.ceil(Math.max(0, rateLimit.resetTime - Date.now()) / 1000);
+      const waitSec = Math.ceil(
+        Math.max(0, rateLimit.resetTime - Date.now()) / 1000,
+      );
       throw new HttpException(
         {
           success: false,
@@ -66,9 +71,14 @@ export class SessionsController {
     const userAgent = req.headers['user-agent'];
     const identifier = `auth:sessions:revoke:${userId}:${ip}`;
 
-    const rateLimit = await checkRateLimit(identifier, RATE_LIMITS.SESSION_REVOKE);
+    const rateLimit = await checkRateLimit(
+      identifier,
+      RATE_LIMITS.SESSION_REVOKE,
+    );
     if (!rateLimit.allowed) {
-      const waitSec = Math.ceil(Math.max(0, rateLimit.resetTime - Date.now()) / 1000);
+      const waitSec = Math.ceil(
+        Math.max(0, rateLimit.resetTime - Date.now()) / 1000,
+      );
       throw new HttpException(
         {
           success: false,
@@ -103,9 +113,14 @@ export class SessionsController {
     const userAgent = req.headers['user-agent'];
     const identifier = `auth:sessions:revoke-all:${userId}:${ip}`;
 
-    const rateLimit = await checkRateLimit(identifier, RATE_LIMITS.SESSION_REVOKE_ALL);
+    const rateLimit = await checkRateLimit(
+      identifier,
+      RATE_LIMITS.SESSION_REVOKE_ALL,
+    );
     if (!rateLimit.allowed) {
-      const waitSec = Math.ceil(Math.max(0, rateLimit.resetTime - Date.now()) / 1000);
+      const waitSec = Math.ceil(
+        Math.max(0, rateLimit.resetTime - Date.now()) / 1000,
+      );
       throw new HttpException(
         {
           success: false,

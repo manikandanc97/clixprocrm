@@ -62,7 +62,8 @@ export class MediaQueueProducer {
     );
     const operation = payload.operation || 'PROCESS_WORKSPACE_LOGO';
     const jobId =
-      payload.jobId || `branding-media:${tenantId}:${safeMediaRef}:${operation}`;
+      payload.jobId ||
+      `branding-media:${tenantId}:${safeMediaRef}:${operation}`;
 
     const fullPayload: BrandingMediaJobPayload = {
       ...payload,
@@ -156,4 +157,3 @@ export class MediaQueueProducer {
     return { enqueued: true, jobId: job.id };
   }
 }
-

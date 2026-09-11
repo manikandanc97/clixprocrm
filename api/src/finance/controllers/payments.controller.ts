@@ -32,7 +32,13 @@ export class PaymentsController {
   ) {
     const p = page ? parseInt(page, 10) : 1;
     const l = limit ? parseInt(limit, 10) : 20;
-    const data = await this.paymentsService.getPayments(req.tenantId, p, l, invoiceId, status);
+    const data = await this.paymentsService.getPayments(
+      req.tenantId,
+      p,
+      l,
+      invoiceId,
+      status,
+    );
     return { success: true, ...data };
   }
 

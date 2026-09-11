@@ -22,10 +22,7 @@ import type {
   ListIncidentsDto,
 } from '../services/security-incidents.service';
 
-@Controller([
-  'super-admin/security',
-  'super_admin/security',
-])
+@Controller(['super-admin/security', 'super_admin/security'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard, AalGuard)
 @RequireAal('aal2')
 export class PlatformSecurityCenterController {
@@ -195,7 +192,8 @@ export class PlatformSecurityCenterController {
   @Post('emergency/platform-lockdown')
   @HttpCode(HttpStatus.OK)
   async enablePlatformEmergency(
-    @Body() body: { reason: string; confirmation: string; confirmationCode: string },
+    @Body()
+    body: { reason: string; confirmation: string; confirmationCode: string },
     @Req() req: any,
   ) {
     const actorId = req.user?.id || 'SUPER_ADMIN';

@@ -18,8 +18,12 @@ describe('EmailAttachmentStorageService Suite', () => {
   });
 
   it('1. should process valid PNG and PDF attachments and generate correct storage keys', async () => {
-    const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00]);
-    const pdfBuffer = Buffer.from([0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x35]);
+    const pngBuffer = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a, 0x00, 0x00,
+    ]);
+    const pdfBuffer = Buffer.from([
+      0x25, 0x50, 0x44, 0x46, 0x2d, 0x31, 0x2e, 0x35,
+    ]);
 
     const attachments: ParsedEmailAttachment[] = [
       {
@@ -38,19 +42,31 @@ describe('EmailAttachmentStorageService Suite', () => {
       },
     ];
 
-    const results = await service.processAndStoreAttachments(TENANT_A, MESSAGE_ID, attachments);
+    const results = await service.processAndStoreAttachments(
+      TENANT_A,
+      MESSAGE_ID,
+      attachments,
+    );
 
     expect(results).toHaveLength(2);
 
     expect(results[0].fileName).toBe('screenshot.png');
     expect(results[0].contentType).toBe('image/png');
     expect(results[0].isQuarantined).toBe(false);
-    expect(results[0].storageKey).toMatch(new RegExp(`^tenants/${TENANT_A}/emails/${MESSAGE_ID}/[a-f0-9-]+_screenshot\\.png$`));
+    expect(results[0].storageKey).toMatch(
+      new RegExp(
+        `^tenants/${TENANT_A}/emails/${MESSAGE_ID}/[a-f0-9-]+_screenshot\\.png$`,
+      ),
+    );
 
     expect(results[1].fileName).toBe('invoice.pdf');
     expect(results[1].contentType).toBe('application/pdf');
     expect(results[1].isQuarantined).toBe(false);
-    expect(results[1].storageKey).toMatch(new RegExp(`^tenants/${TENANT_A}/emails/${MESSAGE_ID}/[a-f0-9-]+_invoice\\.pdf$`));
+    expect(results[1].storageKey).toMatch(
+      new RegExp(
+        `^tenants/${TENANT_A}/emails/${MESSAGE_ID}/[a-f0-9-]+_invoice\\.pdf$`,
+      ),
+    );
   });
 
   it('2. should quarantine dangerous executable files (.exe, .bat, .sh)', async () => {
@@ -72,7 +88,11 @@ describe('EmailAttachmentStorageService Suite', () => {
       },
     ];
 
-    const results = await service.processAndStoreAttachments(TENANT_A, MESSAGE_ID, attachments);
+    const results = await service.processAndStoreAttachments(
+      TENANT_A,
+      MESSAGE_ID,
+      attachments,
+    );
 
     expect(results[0].isQuarantined).toBe(true);
     expect(results[1].isQuarantined).toBe(true);
@@ -90,7 +110,11 @@ describe('EmailAttachmentStorageService Suite', () => {
       },
     ];
 
-    const results = await service.processAndStoreAttachments(TENANT_A, MESSAGE_ID, attachments);
+    const results = await service.processAndStoreAttachments(
+      TENANT_A,
+      MESSAGE_ID,
+      attachments,
+    );
 
     expect(results[0].isQuarantined).toBe(true);
   });
@@ -113,14 +137,20 @@ describe('EmailAttachmentStorageService Suite', () => {
       },
     ];
 
-    const results = await service.processAndStoreAttachments(TENANT_A, MESSAGE_ID, attachments);
+    const results = await service.processAndStoreAttachments(
+      TENANT_A,
+      MESSAGE_ID,
+      attachments,
+    );
 
     expect(results[0].isQuarantined).toBe(true);
     expect(results[1].isQuarantined).toBe(true);
   });
 
   it('5. should preserve inline CID attributes for embedded email images', async () => {
-    const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+    const pngBuffer = Buffer.from([
+      0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+    ]);
     const attachments: ParsedEmailAttachment[] = [
       {
         fileName: 'logo.png',
@@ -132,7 +162,11 @@ describe('EmailAttachmentStorageService Suite', () => {
       },
     ];
 
-    const results = await service.processAndStoreAttachments(TENANT_A, MESSAGE_ID, attachments);
+    const results = await service.processAndStoreAttachments(
+      TENANT_A,
+      MESSAGE_ID,
+      attachments,
+    );
 
     expect(results[0].isInline).toBe(true);
     expect(results[0].contentId).toBe('logo_image_cid');

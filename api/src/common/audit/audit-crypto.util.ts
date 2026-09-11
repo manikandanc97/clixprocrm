@@ -14,7 +14,8 @@ export interface AuditLogSealInput {
   previousHash: string | null;
 }
 
-const DEV_FALLBACK_SECRET = 'clixpro_dev_test_audit_hmac_secret_2026_deterministic';
+const DEV_FALLBACK_SECRET =
+  'clixpro_dev_test_audit_hmac_secret_2026_deterministic';
 
 /**
  * Retrieves the cryptographic secret for AuditLog HMAC signing.

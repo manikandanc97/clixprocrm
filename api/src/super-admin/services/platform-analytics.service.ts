@@ -1,6 +1,9 @@
 import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import { normalizePlanId, CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
+import {
+  normalizePlanId,
+  CANONICAL_PLANS,
+} from '../../common/plans/plan-definitions.constant';
 import { toNumber } from '../../common/utils/crm-formatters.util';
 
 export interface AnalyticsQueryDto {
@@ -130,7 +133,11 @@ export class PlatformAnalyticsService {
       const normPlan = normalizePlanId(rawPlan);
       const isPaidTier = normPlan !== 'free';
 
-      const status = (sub?.status || tenant.subscriptionStatus || 'ACTIVE').toUpperCase();
+      const status = (
+        sub?.status ||
+        tenant.subscriptionStatus ||
+        'ACTIVE'
+      ).toUpperCase();
       const isBillableStatus = status === 'ACTIVE' || status === 'TRIALING';
 
       if (isPaidTier && isBillableStatus) {
@@ -142,7 +149,8 @@ export class PlatformAnalyticsService {
           recAmt = canonicalDef ? canonicalDef.priceNum : 0;
         }
 
-        const monthlyVal = sub?.billingCycle === 'annual' ? recAmt / 12 : recAmt;
+        const monthlyVal =
+          sub?.billingCycle === 'annual' ? recAmt / 12 : recAmt;
         currentMRR += monthlyVal;
 
         // Check if this subscription existed prior to startDate for comparison
@@ -182,18 +190,34 @@ export class PlatformAnalyticsService {
       return t.updatedAt >= startDate && t.updatedAt <= endDate;
     });
 
-    const churnCount = Math.max(churnedSubsInPeriod.length, suspendedTenantsInPeriod.length);
+    const churnCount = Math.max(
+      churnedSubsInPeriod.length,
+      suspendedTenantsInPeriod.length,
+    );
     const denominator = activeTenantsCount + churnCount;
     const churnRate = denominator > 0 ? (churnCount / denominator) * 100 : 0;
 
     // ── 5. AVERAGE REVENUE PER WORKSPACE (ARPU) ──────────────────────────────
     // Strictly calculated across paid workspaces only; Free workspaces excluded
-    const arpu = paidActiveWorkspacesCount > 0 ? currentMRR / paidActiveWorkspacesCount : 0;
+    const arpu =
+      paidActiveWorkspacesCount > 0
+        ? currentMRR / paidActiveWorkspacesCount
+        : 0;
 
     // ── 6. WORKSPACE GROWTH (Monthly/Bucket Trends) ───────────────────────────
     const monthNames = [
-      'Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun',
-      'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec',
+      'Jan',
+      'Feb',
+      'Mar',
+      'Apr',
+      'May',
+      'Jun',
+      'Jul',
+      'Aug',
+      'Sep',
+      'Oct',
+      'Nov',
+      'Dec',
     ];
 
     interface TrendBucket {
@@ -237,7 +261,15 @@ export class PlatformAnalyticsService {
 
       for (let i = monthCount - 1; i >= 0; i--) {
         const d = new Date(endDate.getFullYear(), endDate.getMonth() - i, 1);
-        const bEnd = new Date(d.getFullYear(), d.getMonth() + 1, 0, 23, 59, 59, 999);
+        const bEnd = new Date(
+          d.getFullYear(),
+          d.getMonth() + 1,
+          0,
+          23,
+          59,
+          59,
+          999,
+        );
         const label = `${monthNames[d.getMonth()]} ${d.getFullYear()}`;
         growthTrends.push({
           month: label,
@@ -325,10 +357,18 @@ export class PlatformAnalyticsService {
 
     for (const tenant of allTenants) {
       const sub = subByTenantMap.get(tenant.id);
-      const subStatus = (sub?.status || tenant.subscriptionStatus || 'ACTIVE').toUpperCase();
+      const subStatus = (
+        sub?.status ||
+        tenant.subscriptionStatus ||
+        'ACTIVE'
+      ).toUpperCase();
       const tenantStatus = tenant.status.toUpperCase();
 
-      if (tenantStatus === 'SUSPENDED' || subStatus === 'SUSPENDED' || subStatus === 'CANCELLED') {
+      if (
+        tenantStatus === 'SUSPENDED' ||
+        subStatus === 'SUSPENDED' ||
+        subStatus === 'CANCELLED'
+      ) {
         healthSuspended += 1;
       } else if (subStatus === 'PAST_DUE') {
         healthPastDue += 1;
@@ -343,19 +383,27 @@ export class PlatformAnalyticsService {
     const workspaceHealth = {
       active: {
         count: healthActive,
-        percentage: Number(((healthActive / totalHealthCount) * 100).toFixed(1)),
+        percentage: Number(
+          ((healthActive / totalHealthCount) * 100).toFixed(1),
+        ),
       },
       trialing: {
         count: healthTrialing,
-        percentage: Number(((healthTrialing / totalHealthCount) * 100).toFixed(1)),
+        percentage: Number(
+          ((healthTrialing / totalHealthCount) * 100).toFixed(1),
+        ),
       },
       pastDue: {
         count: healthPastDue,
-        percentage: Number(((healthPastDue / totalHealthCount) * 100).toFixed(1)),
+        percentage: Number(
+          ((healthPastDue / totalHealthCount) * 100).toFixed(1),
+        ),
       },
       suspended: {
         count: healthSuspended,
-        percentage: Number(((healthSuspended / totalHealthCount) * 100).toFixed(1)),
+        percentage: Number(
+          ((healthSuspended / totalHealthCount) * 100).toFixed(1),
+        ),
       },
       total: totalTenantsCount,
     };
@@ -376,8 +424,8 @@ export class PlatformAnalyticsService {
             prevPeriodMRR > 0
               ? `${mrrGrowthPercent >= 0 ? '+' : ''}${mrrGrowthPercent.toFixed(1)}% vs prev period`
               : currentMRR > 0
-              ? '+100% vs prev period'
-              : 'vs previous period',
+                ? '+100% vs prev period'
+                : 'vs previous period',
         },
         activeWorkspaces: {
           count: activeTenantsCount,
@@ -414,8 +462,8 @@ export class PlatformAnalyticsService {
             newInPrevPeriod > 0
               ? `${growthVsPrev >= 0 ? '+' : ''}${growthVsPrev.toFixed(1)}% vs prev period`
               : newInPeriod > 0
-              ? '+100% new signups'
-              : 'No signups in period',
+                ? '+100% new signups'
+                : 'No signups in period',
         },
         paidWorkspaces: {
           count: paidActiveWorkspacesCount,

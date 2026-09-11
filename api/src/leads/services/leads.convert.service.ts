@@ -87,7 +87,8 @@ export class LeadsConvertService {
             const decName = this.enc.decrypt(c.name) || '';
             const decCompany = this.enc.decrypt(c.company) || '';
             if (
-              decName.toLowerCase() === (data.customerName || '').toLowerCase() &&
+              decName.toLowerCase() ===
+                (data.customerName || '').toLowerCase() &&
               decCompany.toLowerCase() === matchCompanyName.toLowerCase()
             ) {
               finalCustomerId = c.id;
@@ -97,9 +98,15 @@ export class LeadsConvertService {
         }
 
         if (!finalCustomerId) {
-          const encEmail = this.enc.encrypt(data.customerEmail || this.enc.decrypt(lead.email) || '');
-          const emailHash = this.enc.hash(data.customerEmail || this.enc.decrypt(lead.email) || '');
-          const encCompany = this.enc.encrypt(data.companyName || this.enc.decrypt(lead.company) || '');
+          const encEmail = this.enc.encrypt(
+            data.customerEmail || this.enc.decrypt(lead.email) || '',
+          );
+          const emailHash = this.enc.hash(
+            data.customerEmail || this.enc.decrypt(lead.email) || '',
+          );
+          const encCompany = this.enc.encrypt(
+            data.companyName || this.enc.decrypt(lead.company) || '',
+          );
           const newCustomer = await tx.customer.create({
             data: {
               tenantId,
@@ -174,4 +181,3 @@ export class LeadsConvertService {
     });
   }
 }
-

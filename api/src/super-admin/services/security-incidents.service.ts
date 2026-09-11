@@ -50,7 +50,9 @@ export class SecurityIncidentsService {
       throw new BadRequestException('Title must be at least 5 characters');
     }
     if (!dto.description || dto.description.trim().length < 10) {
-      throw new BadRequestException('Description must be at least 10 characters');
+      throw new BadRequestException(
+        'Description must be at least 10 characters',
+      );
     }
 
     const incidentNumber = this.generateIncidentNumber();
@@ -223,7 +225,9 @@ export class SecurityIncidentsService {
       tenantId: existing.tenantId,
       userId: actorId,
       targetUserId: existing.affectedUserId,
-      action: isResolving ? 'SECURITY_INCIDENT_RESOLVED' : 'SECURITY_INCIDENT_STATUS_CHANGED',
+      action: isResolving
+        ? 'SECURITY_INCIDENT_RESOLVED'
+        : 'SECURITY_INCIDENT_STATUS_CHANGED',
       module: 'Security',
       details: {
         incidentId: id,
@@ -242,10 +246,17 @@ export class SecurityIncidentsService {
    */
   async resolveIncident(id: string, resolutionNotes: string, actorId: string) {
     if (!resolutionNotes || resolutionNotes.trim().length < 5) {
-      throw new BadRequestException('Resolution notes of at least 5 characters are required');
+      throw new BadRequestException(
+        'Resolution notes of at least 5 characters are required',
+      );
     }
 
-    return this.updateIncidentStatus(id, 'RESOLVED', resolutionNotes.trim(), actorId);
+    return this.updateIncidentStatus(
+      id,
+      'RESOLVED',
+      resolutionNotes.trim(),
+      actorId,
+    );
   }
 
   /**

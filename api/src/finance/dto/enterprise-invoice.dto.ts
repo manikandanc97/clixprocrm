@@ -145,7 +145,8 @@ export class RecordPaymentDto {
   currency?: string;
 
   @IsString()
-  paymentMethod: 'CASH' | 'BANK_TRANSFER' | 'UPI' | 'CARD' | 'CHEQUE' | 'OTHER' | string;
+  paymentMethod:
+    'CASH' | 'BANK_TRANSFER' | 'UPI' | 'CARD' | 'CHEQUE' | 'OTHER' | string;
 
   @IsOptional()
   @IsString()

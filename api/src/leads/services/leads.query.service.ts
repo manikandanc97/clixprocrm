@@ -124,14 +124,22 @@ export class LeadsQueryService {
             createdAt: lead.createdAt,
             updatedAt: lead.updatedAt,
             customerId,
-            isConverted: !!customerId || lead.isConverted || lead.stage === 'WON',
+            isConverted:
+              !!customerId || lead.isConverted || lead.stage === 'WON',
             notesCount: lead._count?.notes || 0,
             meetingsCount: lead._count?.meetings || 0,
             upcomingMeeting:
-              lead.meetings && lead.meetings.length > 0 ? lead.meetings[0] : null,
+              lead.meetings && lead.meetings.length > 0
+                ? lead.meetings[0]
+                : null,
           };
         }),
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -157,4 +165,3 @@ export class LeadsQueryService {
     });
   }
 }
-

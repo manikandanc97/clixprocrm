@@ -32,7 +32,9 @@ export class BillingGatewayService {
         config?.webhookSecret || process.env.RAZORPAY_WEBHOOK_SECRET,
       );
     } catch (err: any) {
-      this.logger.warn(`Could not load gateway config from DB, using environment fallback: ${err.message}`);
+      this.logger.warn(
+        `Could not load gateway config from DB, using environment fallback: ${err.message}`,
+      );
     }
 
     return new RazorpayAdapter(
@@ -42,12 +44,16 @@ export class BillingGatewayService {
     );
   }
 
-  async createCheckoutOrder(params: CreateOrderParams): Promise<PaymentOrderResult> {
+  async createCheckoutOrder(
+    params: CreateOrderParams,
+  ): Promise<PaymentOrderResult> {
     const adapter = await this.getActiveAdapter();
     return adapter.createOrder(params);
   }
 
-  async verifyPaymentSignature(params: VerifySignatureParams): Promise<boolean> {
+  async verifyPaymentSignature(
+    params: VerifySignatureParams,
+  ): Promise<boolean> {
     const adapter = await this.getActiveAdapter();
     return adapter.verifyPaymentSignature(params);
   }

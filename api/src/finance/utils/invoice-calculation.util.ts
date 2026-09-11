@@ -99,7 +99,10 @@ export function calculateInvoiceTotals(
     const item = rawItems[i];
     const qty = Math.max(0, toSafeNumber(item.quantity, 1));
     const rate = Math.max(0, toSafeNumber(item.unitPrice, 0));
-    const discType = item.discountType === 'PERCENTAGE' || item.discountType === 'FIXED' ? item.discountType : null;
+    const discType =
+      item.discountType === 'PERCENTAGE' || item.discountType === 'FIXED'
+        ? item.discountType
+        : null;
     const discVal = Math.max(0, toSafeNumber(item.discountValue, 0));
     const taxRate = Math.max(0, toSafeNumber(item.taxRate, 0));
 
@@ -139,16 +142,24 @@ export function calculateInvoiceTotals(
   }
 
   // Invoice-level discount (applied on items taxable subtotal if provided)
-  const invDiscType = input.invoiceDiscountType === 'PERCENTAGE' || input.invoiceDiscountType === 'FIXED' ? input.invoiceDiscountType : null;
+  const invDiscType =
+    input.invoiceDiscountType === 'PERCENTAGE' ||
+    input.invoiceDiscountType === 'FIXED'
+      ? input.invoiceDiscountType
+      : null;
   const invDiscVal = Math.max(0, toSafeNumber(input.invoiceDiscountValue, 0));
   let invDiscAmt = 0;
   if (invDiscType === 'PERCENTAGE') {
-    invDiscAmt = roundTo2(itemsTaxableSubtotal * (Math.min(100, invDiscVal) / 100));
+    invDiscAmt = roundTo2(
+      itemsTaxableSubtotal * (Math.min(100, invDiscVal) / 100),
+    );
   } else if (invDiscType === 'FIXED') {
     invDiscAmt = roundTo2(Math.min(itemsTaxableSubtotal, invDiscVal));
   }
 
-  const finalTaxableAmount = roundTo2(Math.max(0, itemsTaxableSubtotal - invDiscAmt));
+  const finalTaxableAmount = roundTo2(
+    Math.max(0, itemsTaxableSubtotal - invDiscAmt),
+  );
 
   // Determine CGST + SGST vs IGST
   let cgst = 0;
@@ -167,7 +178,9 @@ export function calculateInvoiceTotals(
   }
 
   const otherTax = 0;
-  const rawGrandTotal = roundTo2(finalTaxableAmount + cgst + sgst + igst + otherTax);
+  const rawGrandTotal = roundTo2(
+    finalTaxableAmount + cgst + sgst + igst + otherTax,
+  );
   const roundedGrandTotal = Math.round(rawGrandTotal);
   const roundOff = roundTo2(roundedGrandTotal - rawGrandTotal);
 

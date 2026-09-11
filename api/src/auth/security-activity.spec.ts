@@ -1,4 +1,7 @@
-import { SessionsService, SECURITY_ACTIONS_ALLOWLIST } from './sessions.service';
+import {
+  SessionsService,
+  SECURITY_ACTIONS_ALLOWLIST,
+} from './sessions.service';
 import { AuthController } from './auth.controller';
 import { HttpException, HttpStatus } from '@nestjs/common';
 
@@ -101,9 +104,10 @@ describe('Security Activity Tests (Phase P3)', () => {
     mockPrisma = {
       auditLog: {
         findMany: jest.fn(async ({ where, skip = 0, take = 20, orderBy }) => {
-          let items = mockAuditLogs.filter((l) => {
+          const items = mockAuditLogs.filter((l) => {
             if (where.userId && l.userId !== where.userId) return false;
-            if (where.action?.in && !where.action.in.includes(l.action)) return false;
+            if (where.action?.in && !where.action.in.includes(l.action))
+              return false;
             return true;
           });
 
@@ -116,7 +120,8 @@ describe('Security Activity Tests (Phase P3)', () => {
         count: jest.fn(async ({ where }) => {
           return mockAuditLogs.filter((l) => {
             if (where.userId && l.userId !== where.userId) return false;
-            if (where.action?.in && !where.action.in.includes(l.action)) return false;
+            if (where.action?.in && !where.action.in.includes(l.action))
+              return false;
             return true;
           }).length;
         }),
@@ -139,15 +144,21 @@ describe('Security Activity Tests (Phase P3)', () => {
 
   describe('1. User Isolation & Security Boundaries', () => {
     it('returns ONLY records belonging to the requesting user (Alice)', async () => {
-      const result = await sessionsService.getSecurityActivity('usr-alice', 'token-sig-current');
+      const result = await sessionsService.getSecurityActivity(
+        'usr-alice',
+        'token-sig-current',
+      );
 
       expect(result.total).toBe(3); // audit-1, audit-2, audit-3 (excluding LEAD_CREATED and Bob's log)
       expect(result.activity.every((a) => a.id !== 'audit-bob-1')).toBe(true);
-      expect(result.activity.every((a) => a.action !== 'LEAD_CREATED')).toBe(true);
+      expect(result.activity.every((a) => a.action !== 'LEAD_CREATED')).toBe(
+        true,
+      );
     });
 
     it('User B receives strictly their own isolated logs', async () => {
-      const result = await sessionsService.getSecurityActivity('usr-bob-isolated');
+      const result =
+        await sessionsService.getSecurityActivity('usr-bob-isolated');
 
       expect(result.total).toBe(1);
       expect(result.activity[0].id).toBe('audit-bob-1');
@@ -170,7 +181,10 @@ describe('Security Activity Tests (Phase P3)', () => {
 
   describe('2. Safe Response DTO & Zero Secret Leakage', () => {
     it('whitelists safe fields and strips tokens, passwords, raw details, and secrets', async () => {
-      const result = await sessionsService.getSecurityActivity('usr-alice', 'token-sig-current');
+      const result = await sessionsService.getSecurityActivity(
+        'usr-alice',
+        'token-sig-current',
+      );
 
       for (const item of result.activity) {
         // Safe allowed fields
@@ -200,7 +214,10 @@ describe('Security Activity Tests (Phase P3)', () => {
 
   describe('3. Session State Correlation', () => {
     it('accurately identifies current device vs revoked remote device', async () => {
-      const result = await sessionsService.getSecurityActivity('usr-alice', 'token-sig-current');
+      const result = await sessionsService.getSecurityActivity(
+        'usr-alice',
+        'token-sig-current',
+      );
 
       const currentActivity = result.activity.find((a) => a.id === 'audit-1');
       expect(currentActivity).toBeDefined();
@@ -216,12 +233,22 @@ describe('Security Activity Tests (Phase P3)', () => {
 
   describe('4. Pagination & Ordering', () => {
     it('paginates correctly with page and limit caps', async () => {
-      const page1 = await sessionsService.getSecurityActivity('usr-alice', undefined, 1, 2);
+      const page1 = await sessionsService.getSecurityActivity(
+        'usr-alice',
+        undefined,
+        1,
+        2,
+      );
       expect(page1.activity.length).toBe(2);
       expect(page1.page).toBe(1);
       expect(page1.limit).toBe(2);
 
-      const page2 = await sessionsService.getSecurityActivity('usr-alice', undefined, 2, 2);
+      const page2 = await sessionsService.getSecurityActivity(
+        'usr-alice',
+        undefined,
+        2,
+        2,
+      );
       expect(page2.activity.length).toBe(1);
       expect(page2.page).toBe(2);
     });
@@ -230,7 +257,12 @@ describe('Security Activity Tests (Phase P3)', () => {
       const defaultRes = await sessionsService.getSecurityActivity('usr-alice');
       expect(defaultRes.limit).toBe(20);
 
-      const cappedRes = await sessionsService.getSecurityActivity('usr-alice', undefined, 1, 9999);
+      const cappedRes = await sessionsService.getSecurityActivity(
+        'usr-alice',
+        undefined,
+        1,
+        9999,
+      );
       expect(cappedRes.limit).toBe(50);
     });
   });

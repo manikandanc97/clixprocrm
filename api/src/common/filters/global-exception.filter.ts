@@ -34,13 +34,15 @@ export class GlobalExceptionFilter implements ExceptionFilter {
         const r = res as any;
         message = Array.isArray(r.message)
           ? r.message.join(', ')
-          : r.message || (typeof r.error === 'string' ? r.error : JSON.stringify(r));
+          : r.message ||
+            (typeof r.error === 'string' ? r.error : JSON.stringify(r));
         errorName = typeof r.error === 'string' ? r.error : undefined;
       }
     }
 
     if (status >= 500) {
-      const rawError = exception instanceof Error ? exception.message : String(exception);
+      const rawError =
+        exception instanceof Error ? exception.message : String(exception);
       const stack = exception instanceof Error ? exception.stack : '';
       this.logger.error(
         `HTTP Status: ${status} | Path: ${request.url} | Internal Error: ${rawError}`,

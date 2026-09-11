@@ -121,11 +121,21 @@ export class PrivacyController {
         mfaStatus,
         recentTimelineEvents,
       ] = await Promise.all([
-        this.prisma.task.count({ where: { tenantId, createdById: userId, deletedAt: null } }),
-        this.prisma.task.count({ where: { tenantId, assignedToId: userId, deletedAt: null } }),
-        this.prisma.lead.count({ where: { tenantId, createdById: userId, deletedAt: null } }),
-        this.prisma.note.count({ where: { tenantId, userId, deletedAt: null } }),
-        this.prisma.meeting.count({ where: { tenantId, assignedToId: userId } }),
+        this.prisma.task.count({
+          where: { tenantId, createdById: userId, deletedAt: null },
+        }),
+        this.prisma.task.count({
+          where: { tenantId, assignedToId: userId, deletedAt: null },
+        }),
+        this.prisma.lead.count({
+          where: { tenantId, createdById: userId, deletedAt: null },
+        }),
+        this.prisma.note.count({
+          where: { tenantId, userId, deletedAt: null },
+        }),
+        this.prisma.meeting.count({
+          where: { tenantId, assignedToId: userId },
+        }),
         this.mfaService.getMfaStatus(userId, tenantId),
         this.prisma.timelineEvent.findMany({
           where: { tenantId, userId },
@@ -209,7 +219,9 @@ export class PrivacyController {
       };
     } catch (err: any) {
       if (err instanceof HttpException) throw err;
-      this.logger.error(`Failed to export privacy data for user ${userId}: ${err?.message || err}`);
+      this.logger.error(
+        `Failed to export privacy data for user ${userId}: ${err?.message || err}`,
+      );
       throw new HttpException(
         'Failed to generate privacy data export. Please try again later.',
         HttpStatus.INTERNAL_SERVER_ERROR,

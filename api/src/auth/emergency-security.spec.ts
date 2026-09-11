@@ -10,12 +10,25 @@ describe('P4 Emergency Security Controls Suite', () => {
   let storedTenants: any[] = [];
   let storedSessions: any[] = [];
   let storedLogs: any[] = [];
-  let platformState: any = { id: 'global', emergencyMode: false, confirmationCode: null };
+  let platformState: any = {
+    id: 'global',
+    emergencyMode: false,
+    confirmationCode: null,
+  };
 
   beforeEach(() => {
     storedUsers = [
-      { id: 'usr-1', email: 'compromised@example.com', securityStatus: 'ACTIVE' },
-      { id: 'admin-1', email: 'superadmin@example.com', securityStatus: 'ACTIVE', isSuperAdmin: true },
+      {
+        id: 'usr-1',
+        email: 'compromised@example.com',
+        securityStatus: 'ACTIVE',
+      },
+      {
+        id: 'admin-1',
+        email: 'superadmin@example.com',
+        securityStatus: 'ACTIVE',
+        isSuperAdmin: true,
+      },
     ];
     storedTenants = [
       { id: 'tenant-1', name: 'Acme Corp', securityStatus: 'ACTIVE' },
@@ -25,7 +38,11 @@ describe('P4 Emergency Security Controls Suite', () => {
       { id: 'sess-2', userId: 'usr-1', isRevoked: false },
     ];
     storedLogs = [];
-    platformState = { id: 'global', emergencyMode: false, confirmationCode: null };
+    platformState = {
+      id: 'global',
+      emergencyMode: false,
+      confirmationCode: null,
+    };
 
     mockPrisma = {
       $executeRawUnsafe: jest.fn().mockResolvedValue(1),
@@ -43,7 +60,9 @@ describe('P4 Emergency Security Controls Suite', () => {
       },
       user: {
         findUnique: jest.fn().mockImplementation(({ where }) => {
-          return Promise.resolve(storedUsers.find((u) => u.id === where.id) || null);
+          return Promise.resolve(
+            storedUsers.find((u) => u.id === where.id) || null,
+          );
         }),
         update: jest.fn().mockImplementation(({ where, data }) => {
           const idx = storedUsers.findIndex((u) => u.id === where.id);
@@ -56,7 +75,9 @@ describe('P4 Emergency Security Controls Suite', () => {
       },
       tenant: {
         findUnique: jest.fn().mockImplementation(({ where }) => {
-          return Promise.resolve(storedTenants.find((t) => t.id === where.id) || null);
+          return Promise.resolve(
+            storedTenants.find((t) => t.id === where.id) || null,
+          );
         }),
         update: jest.fn().mockImplementation(({ where, data }) => {
           const idx = storedTenants.findIndex((t) => t.id === where.id);
@@ -79,7 +100,10 @@ describe('P4 Emergency Security Controls Suite', () => {
         updateMany: jest.fn().mockImplementation(({ where, data }) => {
           let count = 0;
           storedSessions.forEach((s) => {
-            if (s.userId === where.userId || (where.userId?.in && where.userId.in.includes(s.userId))) {
+            if (
+              s.userId === where.userId ||
+              (where.userId?.in && where.userId.in.includes(s.userId))
+            ) {
               s.isRevoked = true;
               count++;
             }
@@ -88,7 +112,9 @@ describe('P4 Emergency Security Controls Suite', () => {
         }),
       },
       platformSecurityState: {
-        findUnique: jest.fn().mockImplementation(() => Promise.resolve(platformState)),
+        findUnique: jest
+          .fn()
+          .mockImplementation(() => Promise.resolve(platformState)),
         create: jest.fn().mockImplementation(({ data }) => {
           platformState = { ...data };
           return Promise.resolve(platformState);
@@ -104,8 +130,8 @@ describe('P4 Emergency Security Controls Suite', () => {
       },
     };
 
-    auditLogger = new AuditLoggerService(mockPrisma as any);
-    emergencyService = new EmergencySecurityService(mockPrisma as any, auditLogger);
+    auditLogger = new AuditLoggerService(mockPrisma);
+    emergencyService = new EmergencySecurityService(mockPrisma, auditLogger);
   });
 
   describe('1. User Kill-Switch & Account Lock', () => {
@@ -122,7 +148,9 @@ describe('P4 Emergency Security Controls Suite', () => {
 
       expect(storedLogs).toEqual(
         expect.arrayContaining([
-          expect.objectContaining({ action: 'USER_SESSIONS_EMERGENCY_REVOKED' }),
+          expect.objectContaining({
+            action: 'USER_SESSIONS_EMERGENCY_REVOKED',
+          }),
         ]),
       );
     });

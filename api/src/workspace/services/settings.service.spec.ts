@@ -14,12 +14,18 @@ describe('SettingsService - Tenant-Scoped AI Configuration & BYOK Encryption', (
         findUnique: jest.fn(),
         upsert: jest.fn(),
       },
-      withTenantContext: jest.fn().mockImplementation((ctx, cb) => cb(prismaMock)),
+      withTenantContext: jest
+        .fn()
+        .mockImplementation((ctx, cb) => cb(prismaMock)),
     };
 
     encryptionMock = {
       encrypt: jest.fn((val) => (val ? `aes256gcm_encrypted_${val}` : null)),
-      decrypt: jest.fn((val) => (val && val.startsWith('aes256gcm_encrypted_') ? val.replace('aes256gcm_encrypted_', '') : val)),
+      decrypt: jest.fn((val) =>
+        val && val.startsWith('aes256gcm_encrypted_')
+          ? val.replace('aes256gcm_encrypted_', '')
+          : val,
+      ),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -74,7 +80,9 @@ describe('SettingsService - Tenant-Scoped AI Configuration & BYOK Encryption', (
       isAiEnabled: true,
     });
 
-    expect(encryptionMock.encrypt).toHaveBeenCalledWith('AIzaSySecretApiKey12345');
+    expect(encryptionMock.encrypt).toHaveBeenCalledWith(
+      'AIzaSySecretApiKey12345',
+    );
     expect(prismaMock.tenantAiConfig.upsert).toHaveBeenCalledWith(
       expect.objectContaining({
         where: { tenantId: 'tenant-abc' },

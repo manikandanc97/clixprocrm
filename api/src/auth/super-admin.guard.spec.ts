@@ -1,4 +1,8 @@
-import { ExecutionContext, ForbiddenException, UnauthorizedException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  UnauthorizedException,
+} from '@nestjs/common';
 import { SuperAdminGuard } from './super-admin.guard';
 import { TenantContextService } from '../common/context/tenant-context.service';
 
@@ -60,7 +64,11 @@ describe('SuperAdminGuard Comprehensive Security Suite', () => {
 
   describe('2. User Database Existence & Status Verification', () => {
     it('should throw ForbiddenException if user is not found in database', async () => {
-      const user = { id: 'usr-missing', email: 'ghost@platform.com', aal: 'aal2' };
+      const user = {
+        id: 'usr-missing',
+        email: 'ghost@platform.com',
+        aal: 'aal2',
+      };
       const context = createMockContext(user);
       mockPrisma.user.findUnique.mockResolvedValue(null);
 
@@ -70,7 +78,11 @@ describe('SuperAdminGuard Comprehensive Security Suite', () => {
     });
 
     it('should throw ForbiddenException if user status is SUSPENDED or INACTIVE', async () => {
-      const user = { id: 'usr-suspended', email: 'suspended@platform.com', aal: 'aal2' };
+      const user = {
+        id: 'usr-suspended',
+        email: 'suspended@platform.com',
+        aal: 'aal2',
+      };
       const context = createMockContext(user);
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'usr-suspended',
@@ -95,12 +107,18 @@ describe('SuperAdminGuard Comprehensive Security Suite', () => {
       });
 
       await expect(superAdminGuard.canActivate(context)).rejects.toThrow(
-        new ForbiddenException('Access denied: Super Admin platform privileges required'),
+        new ForbiddenException(
+          'Access denied: Super Admin platform privileges required',
+        ),
       );
     });
 
     it('should REJECT tenant admin (isSuperAdmin = false) with 403', async () => {
-      const user = { id: 'tenant-admin-1', email: 'admin@acme.com', aal: 'aal2' };
+      const user = {
+        id: 'tenant-admin-1',
+        email: 'admin@acme.com',
+        aal: 'aal2',
+      };
       const context = createMockContext(user);
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'tenant-admin-1',
@@ -109,14 +127,20 @@ describe('SuperAdminGuard Comprehensive Security Suite', () => {
       });
 
       await expect(superAdminGuard.canActivate(context)).rejects.toThrow(
-        new ForbiddenException('Access denied: Super Admin platform privileges required'),
+        new ForbiddenException(
+          'Access denied: Super Admin platform privileges required',
+        ),
       );
     });
   });
 
   describe('4. Strict AAL2 MFA Session Assurance', () => {
     it('should REJECT Super Admin with AAL1 session and record AAL2_REQUIRED_DENIED audit log', async () => {
-      const user = { id: 'super-admin-1', email: 'root@clixpro.com', aal: 'aal1' };
+      const user = {
+        id: 'super-admin-1',
+        email: 'root@clixpro.com',
+        aal: 'aal1',
+      };
       const context = createMockContext(user);
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'super-admin-1',
@@ -153,7 +177,11 @@ describe('SuperAdminGuard Comprehensive Security Suite', () => {
     });
 
     it('should ALLOW Super Admin with AAL2 verified session and set platform context', async () => {
-      const user = { id: 'super-admin-1', email: 'root@clixpro.com', aal: 'aal2' };
+      const user = {
+        id: 'super-admin-1',
+        email: 'root@clixpro.com',
+        aal: 'aal2',
+      };
       const context = createMockContext(user);
       mockPrisma.user.findUnique.mockResolvedValue({
         id: 'super-admin-1',

@@ -85,19 +85,38 @@ RESPONSE & TOKEN RULES:
    * Composes all authorized tools for the user from domain-specific tool builders.
    * Each builder enforces its own permission checks via AiSecurityService.
    */
-  public getAuthorizedTools(userContext: UserSecurityContext): Record<string, any> {
+  public getAuthorizedTools(
+    userContext: UserSecurityContext,
+  ): Record<string, any> {
     const isSuperAdmin =
       userContext.roleName === 'SUPER_ADMIN' ||
       userContext.roleName.replace(/[\s_]+/g, '') === 'SUPERADMIN' ||
       userContext.isSystemAdmin;
 
     return {
-      ...(isSuperAdmin ? buildPlatformTools(this.prisma, this.aiSecurityService, userContext) : {}),
+      ...(isSuperAdmin
+        ? buildPlatformTools(this.prisma, this.aiSecurityService, userContext)
+        : {}),
       ...buildDealsTools(this.prisma, this.aiSecurityService, userContext),
-      ...buildLeadsTools(this.prisma, this.aiSecurityService, userContext, this.enc),
-      ...buildCustomersTools(this.prisma, this.aiSecurityService, userContext, this.enc),
+      ...buildLeadsTools(
+        this.prisma,
+        this.aiSecurityService,
+        userContext,
+        this.enc,
+      ),
+      ...buildCustomersTools(
+        this.prisma,
+        this.aiSecurityService,
+        userContext,
+        this.enc,
+      ),
       ...buildTasksTools(this.prisma, this.aiSecurityService, userContext),
-      ...buildQuotationsTools(this.prisma, this.aiSecurityService, userContext, this.enc),
+      ...buildQuotationsTools(
+        this.prisma,
+        this.aiSecurityService,
+        userContext,
+        this.enc,
+      ),
     };
   }
 
@@ -129,12 +148,20 @@ RESPONSE & TOKEN RULES:
         return m;
       }
       if (typeof m.content === 'string') {
-        return { ...m, role: m.role || 'user', parts: [{ type: 'text', text: m.content }] };
+        return {
+          ...m,
+          role: m.role || 'user',
+          parts: [{ type: 'text', text: m.content }],
+        };
       }
       if (Array.isArray(m.content)) {
         return { ...m, role: m.role || 'user', parts: m.content };
       }
-      return { ...m, role: m.role || 'user', parts: [{ type: 'text', text: '' }] };
+      return {
+        ...m,
+        role: m.role || 'user',
+        parts: [{ type: 'text', text: '' }],
+      };
     });
   }
 
@@ -154,7 +181,9 @@ RESPONSE & TOKEN RULES:
       );
       if (config) {
         if (config.isAiEnabled === false) {
-          throw new InternalServerErrorException('AI assistant is currently disabled for this workspace.');
+          throw new InternalServerErrorException(
+            'AI assistant is currently disabled for this workspace.',
+          );
         }
         if (config.apiKey) {
           const decryptedKey = this.enc.decrypt(config.apiKey);
@@ -184,7 +213,9 @@ RESPONSE & TOKEN RULES:
     try {
       const tools = this.getAuthorizedTools(userContext);
       const sanitizedMessages = this.sanitizeMessages(messages);
-      const coreMessages = await convertToModelMessages(sanitizedMessages, { tools });
+      const coreMessages = await convertToModelMessages(sanitizedMessages, {
+        tools,
+      });
 
       const result = await streamText({
         model: aiClient(activeModel),
@@ -223,7 +254,9 @@ RESPONSE & TOKEN RULES:
     try {
       const tools = this.getAuthorizedTools(userContext);
       const sanitizedMessages = this.sanitizeMessages(messages);
-      const coreMessages = await convertToModelMessages(sanitizedMessages, { tools });
+      const coreMessages = await convertToModelMessages(sanitizedMessages, {
+        tools,
+      });
 
       const result = await generateText({
         model: aiClient(activeModel),
@@ -244,4 +277,3 @@ RESPONSE & TOKEN RULES:
     }
   }
 }
-

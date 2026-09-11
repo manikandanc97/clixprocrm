@@ -1,11 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AuditArchiveService } from '../archive/audit-archive.service';
-import { buildAuditObjectKey, S3ObjectLockProvider } from '../archive/s3-object-lock.provider';
 import {
-  verifyRecordHash,
-  AuditLogSealInput,
-} from '../audit-crypto.util';
+  buildAuditObjectKey,
+  S3ObjectLockProvider,
+} from '../archive/s3-object-lock.provider';
+import { verifyRecordHash, AuditLogSealInput } from '../audit-crypto.util';
 import { AuditArchiveProvider } from '../archive/audit-archive.interface';
 
 export interface DisasterRecoveryVerificationResult {
@@ -36,7 +36,9 @@ export class AuditDisasterRecoveryService {
    * Safe, zero-write disaster recovery verification dry run.
    * Confirms that an external WORM audit object can be retrieved, parsed, and cryptographically verified.
    */
-  async verifyAuditArchiveRestore(recordId: string): Promise<DisasterRecoveryVerificationResult> {
+  async verifyAuditArchiveRestore(
+    recordId: string,
+  ): Promise<DisasterRecoveryVerificationResult> {
     const dbRecord = await this.prisma.auditLog.findUnique({
       where: { id: recordId },
     });
@@ -60,7 +62,8 @@ export class AuditDisasterRecoveryService {
     );
 
     // Retrieve archived JSON from WORM storage
-    const provider: any = this.customProvider || (this.archiveService as any).provider;
+    const provider: any =
+      this.customProvider || (this.archiveService as any).provider;
     const archived = await provider.getObject(objectKey);
 
     if (!archived) {
@@ -84,7 +87,8 @@ export class AuditDisasterRecoveryService {
         hashValid: false,
         chainLinkValid: false,
         recordId,
-        reason: 'Archived JSON structure is malformed or missing mandatory fields',
+        reason:
+          'Archived JSON structure is malformed or missing mandatory fields',
       };
     }
 
@@ -112,7 +116,8 @@ export class AuditDisasterRecoveryService {
         hashValid: false,
         chainLinkValid: false,
         recordId,
-        reason: 'Archived record HMAC-SHA256 signature is invalid or payload was modified',
+        reason:
+          'Archived record HMAC-SHA256 signature is invalid or payload was modified',
       };
     }
 

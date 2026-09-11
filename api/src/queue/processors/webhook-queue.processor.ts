@@ -28,9 +28,7 @@ export class WebhookQueueProcessor extends WorkerHost {
     try {
       switch (job.name) {
         case WEBHOOK_JOB_NAMES.BILLING_WEBHOOK:
-          return await this.handleBillingWebhook(
-            job.data as BillingWebhookJobPayload,
-          );
+          return await this.handleBillingWebhook(job.data);
 
         default:
           this.logger.warn(

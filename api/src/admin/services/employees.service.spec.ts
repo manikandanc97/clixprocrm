@@ -29,7 +29,9 @@ describe('EmployeesService Security - Account Takeover Prevention', () => {
     prismaMock = {
       role: {
         findFirst: jest.fn().mockResolvedValue({ id: 'role-1', name: 'SALES' }),
-        findUnique: jest.fn().mockResolvedValue({ id: 'role-1', name: 'SALES' }),
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ id: 'role-1', name: 'SALES' }),
       },
       tenantUser: {
         findMany: jest.fn(),
@@ -60,7 +62,9 @@ describe('EmployeesService Security - Account Takeover Prevention', () => {
       department: {
         findFirst: jest.fn(),
       },
-      withTenantContext: jest.fn().mockImplementation((ctx, cb) => cb(prismaMock)),
+      withTenantContext: jest
+        .fn()
+        .mockImplementation((ctx, cb) => cb(prismaMock)),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -72,7 +76,8 @@ describe('EmployeesService Security - Account Takeover Prevention', () => {
           useValue: {
             get: jest.fn((key: string) => {
               if (key === 'SUPABASE_URL') return 'https://mock.supabase.co';
-              if (key === 'SUPABASE_SERVICE_ROLE_KEY') return 'mock-service-role-key';
+              if (key === 'SUPABASE_SERVICE_ROLE_KEY')
+                return 'mock-service-role-key';
               return null;
             }),
           },
@@ -88,12 +93,17 @@ describe('EmployeesService Security - Account Takeover Prevention', () => {
     // Simulate Supabase returning user already registered (422)
     mockSupabaseAdmin.createUser.mockResolvedValue({
       data: null,
-      error: { message: 'A user with this email address has already been registered', status: 422 },
+      error: {
+        message: 'A user with this email address has already been registered',
+        status: 422,
+      },
     });
 
     mockSupabaseAdmin.listUsers.mockResolvedValue({
       data: {
-        users: [{ id: 'existing-supabase-uuid', email: 'existing-user@example.com' }],
+        users: [
+          { id: 'existing-supabase-uuid', email: 'existing-user@example.com' },
+        ],
       },
     });
 
@@ -121,7 +131,9 @@ describe('EmployeesService Security - Account Takeover Prevention', () => {
 
   it('CRITICAL: Never leaks temporaryPassword in response for new user creations', async () => {
     mockSupabaseAdmin.createUser.mockResolvedValue({
-      data: { user: { id: 'new-supabase-uuid', email: 'new-hire@example.com' } },
+      data: {
+        user: { id: 'new-supabase-uuid', email: 'new-hire@example.com' },
+      },
       error: null,
     });
 
@@ -155,7 +167,9 @@ describe('EmployeesService Security - Account Takeover Prevention', () => {
 
   it('P2: Stores SHA-256 hash of invitation token in database', async () => {
     mockSupabaseAdmin.createUser.mockResolvedValue({
-      data: { user: { id: 'hashed-test-uuid', email: 'hash-test@example.com' } },
+      data: {
+        user: { id: 'hashed-test-uuid', email: 'hash-test@example.com' },
+      },
       error: null,
     });
 

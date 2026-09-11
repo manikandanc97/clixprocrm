@@ -62,8 +62,7 @@ export function calculateTrend(currentValue: number, previousValue: number) {
     return { change: '+100.0%', positive: true, trend: 'up' as const };
   }
 
-  const delta =
-    ((current - previous) / Math.abs(previous)) * 100;
+  const delta = ((current - previous) / Math.abs(previous)) * 100;
   const rounded = Number(delta.toFixed(1));
 
   if (rounded === 0) {

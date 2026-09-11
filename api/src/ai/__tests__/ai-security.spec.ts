@@ -1,7 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
 
 jest.mock('@ai-sdk/google', () => ({
-  createGoogleGenerativeAI: jest.fn().mockReturnValue((model: string) => ({ model })),
+  createGoogleGenerativeAI: jest
+    .fn()
+    .mockReturnValue((model: string) => ({ model })),
 }));
 
 jest.mock('ai', () => ({
@@ -57,12 +59,18 @@ describe('AI Chatbot Enterprise RBAC & Data Access Security Audit Suite', () => 
       auditLog: {
         create: jest.fn().mockResolvedValue({ id: 'audit-1' }),
       },
-      withTenantContext: jest.fn(async (opts: any, cb: (tx: any) => Promise<any>) => cb(prismaMock)),
+      withTenantContext: jest.fn(
+        async (opts: any, cb: (tx: any) => Promise<any>) => cb(prismaMock),
+      ),
     };
 
     const encryptionMock = {
       encrypt: jest.fn((v) => (v ? `enc_${v}` : null)),
-      decrypt: jest.fn((v) => (v && typeof v === 'string' && v.startsWith('enc_') ? v.replace('enc_', '') : v)),
+      decrypt: jest.fn((v) =>
+        v && typeof v === 'string' && v.startsWith('enc_')
+          ? v.replace('enc_', '')
+          : v,
+      ),
       decryptFields: jest.fn((obj, fields) => obj),
       decryptMany: jest.fn((arr, fields) => arr),
     };
@@ -99,7 +107,10 @@ describe('AI Chatbot Enterprise RBAC & Data Access Security Audit Suite', () => 
         },
       });
 
-      const ctx = await securityService.buildSecurityContext('admin-1', 'tenant-a');
+      const ctx = await securityService.buildSecurityContext(
+        'admin-1',
+        'tenant-a',
+      );
       expect(ctx.isSystemAdmin).toBe(true);
       expect(ctx.roleName).toBe('ADMIN');
       expect(ctx.tenantId).toBe('tenant-a');
@@ -123,9 +134,16 @@ describe('AI Chatbot Enterprise RBAC & Data Access Security Audit Suite', () => 
 
       prismaMock.tenantUser.findMany
         .mockResolvedValueOnce([{ userId: 'emp-1' }, { userId: 'emp-2' }]) // subordinates
-        .mockResolvedValueOnce([{ userId: 'mgr-1' }, { userId: 'emp-1' }, { userId: 'emp-2' }]); // team members
+        .mockResolvedValueOnce([
+          { userId: 'mgr-1' },
+          { userId: 'emp-1' },
+          { userId: 'emp-2' },
+        ]); // team members
 
-      const ctx = await securityService.buildSecurityContext('mgr-1', 'tenant-a');
+      const ctx = await securityService.buildSecurityContext(
+        'mgr-1',
+        'tenant-a',
+      );
       expect(ctx.isSystemAdmin).toBe(false);
       expect(ctx.roleName).toBe('MANAGER');
       expect(ctx.subordinateUserIds).toEqual(['emp-1', 'emp-2']);
@@ -150,14 +168,39 @@ describe('AI Chatbot Enterprise RBAC & Data Access Security Audit Suite', () => 
     };
 
     it('should allow granted modules', () => {
-      expect(securityService.hasModulePermission(employeeContext, PERMISSION_MODULES.TASKS)).toBe(true);
-      expect(securityService.hasModulePermission(employeeContext, PERMISSION_MODULES.CALENDAR)).toBe(true);
+      expect(
+        securityService.hasModulePermission(
+          employeeContext,
+          PERMISSION_MODULES.TASKS,
+        ),
+      ).toBe(true);
+      expect(
+        securityService.hasModulePermission(
+          employeeContext,
+          PERMISSION_MODULES.CALENDAR,
+        ),
+      ).toBe(true);
     });
 
     it('should reject ungranted or false modules', () => {
-      expect(securityService.hasModulePermission(employeeContext, PERMISSION_MODULES.LEADS)).toBe(false);
-      expect(securityService.hasModulePermission(employeeContext, PERMISSION_MODULES.DEALS)).toBe(false);
-      expect(securityService.hasModulePermission(employeeContext, PERMISSION_MODULES.REPORTS)).toBe(false);
+      expect(
+        securityService.hasModulePermission(
+          employeeContext,
+          PERMISSION_MODULES.LEADS,
+        ),
+      ).toBe(false);
+      expect(
+        securityService.hasModulePermission(
+          employeeContext,
+          PERMISSION_MODULES.DEALS,
+        ),
+      ).toBe(false);
+      expect(
+        securityService.hasModulePermission(
+          employeeContext,
+          PERMISSION_MODULES.REPORTS,
+        ),
+      ).toBe(false);
     });
 
     it('should always allow System Admins even without explicit permission records', () => {
@@ -171,8 +214,18 @@ describe('AI Chatbot Enterprise RBAC & Data Access Security Audit Suite', () => 
         subordinateUserIds: [],
         teamUserIds: [],
       };
-      expect(securityService.hasModulePermission(adminContext, PERMISSION_MODULES.REPORTS)).toBe(true);
-      expect(securityService.hasModulePermission(adminContext, PERMISSION_MODULES.DEALS)).toBe(true);
+      expect(
+        securityService.hasModulePermission(
+          adminContext,
+          PERMISSION_MODULES.REPORTS,
+        ),
+      ).toBe(true);
+      expect(
+        securityService.hasModulePermission(
+          adminContext,
+          PERMISSION_MODULES.DEALS,
+        ),
+      ).toBe(true);
     });
   });
 

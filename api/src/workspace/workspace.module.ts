@@ -12,7 +12,11 @@ import { SubscriptionEntitlementService } from '../common/plans/subscription-ent
 
 @Module({
   imports: [PrismaModule, forwardRef(() => QueueModule)],
-  controllers: [WorkspaceController, SettingsController, SubscriptionController],
+  controllers: [
+    WorkspaceController,
+    SettingsController,
+    SubscriptionController,
+  ],
   providers: [
     WorkspaceService,
     SettingsService,
@@ -27,4 +31,3 @@ import { SubscriptionEntitlementService } from '../common/plans/subscription-ent
   ],
 })
 export class WorkspaceModule {}
-

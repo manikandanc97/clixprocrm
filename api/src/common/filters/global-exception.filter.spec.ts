@@ -1,5 +1,11 @@
 import { GlobalExceptionFilter } from './global-exception.filter';
-import { ArgumentsHost, BadRequestException, HttpException, HttpStatus, InternalServerErrorException } from '@nestjs/common';
+import {
+  ArgumentsHost,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+  InternalServerErrorException,
+} from '@nestjs/common';
 
 describe('GlobalExceptionFilter Security - Production Error Masking', () => {
   let filter: GlobalExceptionFilter;
@@ -25,11 +31,15 @@ describe('GlobalExceptionFilter Security - Production Error Masking', () => {
   });
 
   it('P2: Masks 500 internal server errors, SQL queries, and stack details in responses', () => {
-    const rawSqlError = new Error('Raw SQL ERROR: SELECT * FROM users WHERE password_hash = "secret"');
+    const rawSqlError = new Error(
+      'Raw SQL ERROR: SELECT * FROM users WHERE password_hash = "secret"',
+    );
 
     filter.catch(rawSqlError, mockHost);
 
-    expect(mockResponse.status).toHaveBeenCalledWith(HttpStatus.INTERNAL_SERVER_ERROR);
+    expect(mockResponse.status).toHaveBeenCalledWith(
+      HttpStatus.INTERNAL_SERVER_ERROR,
+    );
     expect(mockResponse.send).toHaveBeenCalledWith(
       expect.objectContaining({
         statusCode: 500,
@@ -45,7 +55,10 @@ describe('GlobalExceptionFilter Security - Production Error Masking', () => {
   });
 
   it('P2: Preserves safe 400 validation error messages from ValidationPipe', () => {
-    const validationError = new BadRequestException(['email must be an email', 'name should not be empty']);
+    const validationError = new BadRequestException([
+      'email must be an email',
+      'name should not be empty',
+    ]);
 
     filter.catch(validationError, mockHost);
 

@@ -104,7 +104,9 @@ export function deriveSessionId(token: string, claimsOrUser?: any): string {
   try {
     const parts = token.split('.');
     if (parts.length >= 2) {
-      const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+      const payload = JSON.parse(
+        Buffer.from(parts[1], 'base64').toString('utf-8'),
+      );
       if (payload.session_id) {
         return payload.session_id;
       }
@@ -115,7 +117,10 @@ export function deriveSessionId(token: string, claimsOrUser?: any): string {
 
   const userId = claimsOrUser?.id || claimsOrUser?.sub || 'anonymous';
   const tokenSig = token.split('.')[2] || token;
-  return crypto.createHash('sha256').update(`${userId}:${tokenSig}`).digest('hex');
+  return crypto
+    .createHash('sha256')
+    .update(`${userId}:${tokenSig}`)
+    .digest('hex');
 }
 
 @Injectable()
@@ -160,21 +165,29 @@ export class SupabaseAuthGuard implements CanActivate {
     }
 
     const now = Date.now();
-    const { idleTimeoutMs, absoluteTimeoutMs, persistentTimeoutMs, lastActiveThrottleMs } = getSessionTimeoutConfig();
+    const {
+      idleTimeoutMs,
+      absoluteTimeoutMs,
+      persistentTimeoutMs,
+      lastActiveThrottleMs,
+    } = getSessionTimeoutConfig();
     const cached = tokenUserCache.get(token);
 
     if (cached && cached.expiresAt > now) {
       // Check in-memory revoked set
       if (revokedSessionsSet.has(cached.sessionId)) {
         tokenUserCache.delete(token);
-        throw new UnauthorizedException('Session has been revoked. Please sign in again.');
+        throw new UnauthorizedException(
+          'Session has been revoked. Please sign in again.',
+        );
       }
 
       // Check timeout on fast cache hit
       const isPersistent = Boolean(cached.rememberMe);
       const isExpired = isPersistent
         ? now > cached.createdAt + persistentTimeoutMs
-        : now > cached.createdAt + absoluteTimeoutMs || now > cached.lastActiveAt + idleTimeoutMs;
+        : now > cached.createdAt + absoluteTimeoutMs ||
+          now > cached.lastActiveAt + idleTimeoutMs;
 
       if (isExpired) {
         tokenUserCache.delete(token);
@@ -230,7 +243,9 @@ export class SupabaseAuthGuard implements CanActivate {
       try {
         const tokenParts = token.split('.');
         if (tokenParts.length >= 2) {
-          const payloadJson = Buffer.from(tokenParts[1], 'base64').toString('utf-8');
+          const payloadJson = Buffer.from(tokenParts[1], 'base64').toString(
+            'utf-8',
+          );
           const payload = JSON.parse(payloadJson);
           if (payload.aal) aal = payload.aal;
           if (Array.isArray(payload.amr)) amr = payload.amr;
@@ -262,12 +277,14 @@ export class SupabaseAuthGuard implements CanActivate {
     // Check fast revoked set
     if (revokedSessionsSet.has(sessionId)) {
       tokenUserCache.delete(token);
-      throw new UnauthorizedException('Session has been revoked. Please sign in again.');
+      throw new UnauthorizedException(
+        'Session has been revoked. Please sign in again.',
+      );
     }
 
     let sessionCreatedAt = now;
     let sessionLastActiveAt = now;
-    let isSessionRemembered =
+    const isSessionRemembered =
       request.headers['x-remember-me'] === 'true' ||
       request.headers['x-remember-me'] === '1';
 
@@ -315,7 +332,11 @@ export class SupabaseAuthGuard implements CanActivate {
         const dbUser = await (this.prisma as any).user
           ?.findUnique({
             where: { id: user.id },
-            select: { securityStatus: true, mustResetPassword: true, isSuperAdmin: true },
+            select: {
+              securityStatus: true,
+              mustResetPassword: true,
+              isSuperAdmin: true,
+            },
           })
           .catch(() => null);
 
@@ -404,16 +425,23 @@ export class SupabaseAuthGuard implements CanActivate {
           if (sessionRecord.revokedAt) {
             revokedSessionsSet.add(sessionId);
             tokenUserCache.delete(token);
-            throw new UnauthorizedException('Session has been revoked. Please sign in again.');
+            throw new UnauthorizedException(
+              'Session has been revoked. Please sign in again.',
+            );
           }
 
           // 2. Check absolute / persistent timeout expiry
-          const maxSessionLifetime = isSessionRemembered ? persistentTimeoutMs : absoluteTimeoutMs;
+          const maxSessionLifetime = isSessionRemembered
+            ? persistentTimeoutMs
+            : absoluteTimeoutMs;
           const effectiveExpiresAt = sessionRecord.expiresAt
             ? sessionRecord.expiresAt.getTime()
             : sessionCreatedAt + maxSessionLifetime;
 
-          if (now > sessionCreatedAt + maxSessionLifetime || now > effectiveExpiresAt) {
+          if (
+            now > sessionCreatedAt + maxSessionLifetime ||
+            now > effectiveExpiresAt
+          ) {
             revokedSessionsSet.add(sessionId);
             tokenUserCache.delete(token);
             await this.prisma.userSession
@@ -432,7 +460,9 @@ export class SupabaseAuthGuard implements CanActivate {
                   details: {
                     sessionId: sessionRecord.id,
                     rememberMe: isSessionRemembered,
-                    sessionLifetimeHours: Math.round((now - sessionCreatedAt) / 3600000),
+                    sessionLifetimeHours: Math.round(
+                      (now - sessionCreatedAt) / 3600000,
+                    ),
                   },
                   ipAddress: typeof ip === 'string' ? ip : null,
                   userAgent: ua || null,
@@ -466,7 +496,9 @@ export class SupabaseAuthGuard implements CanActivate {
                     module: 'Security',
                     details: {
                       sessionId: sessionRecord.id,
-                      idleMinutes: Math.round((now - sessionLastActiveAt) / 60000),
+                      idleMinutes: Math.round(
+                        (now - sessionLastActiveAt) / 60000,
+                      ),
                     },
                     ipAddress: typeof ip === 'string' ? ip : null,
                     userAgent: ua || null,
@@ -708,7 +740,10 @@ export class SupabaseAuthGuard implements CanActivate {
           }
         }
       } catch (dbErr: any) {
-        if (dbErr instanceof UnauthorizedException || dbErr instanceof ForbiddenException) {
+        if (
+          dbErr instanceof UnauthorizedException ||
+          dbErr instanceof ForbiddenException
+        ) {
           throw dbErr;
         }
         // Suppress other non-fatal session registry DB errors

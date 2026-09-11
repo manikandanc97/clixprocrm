@@ -16,37 +16,142 @@ export interface FeatureCatalogItem {
 
 export const FEATURE_CATALOG: FeatureCatalogItem[] = [
   // Core CRM
-  { key: 'lead_management', name: 'Lead Management', category: 'Core CRM', description: 'Capture, qualify, and track sales leads' },
-  { key: 'contact_management', name: 'Contact Management', category: 'Core CRM', description: 'Centralized customer and contact profiles' },
-  { key: 'deal_pipeline', name: 'Deal Pipeline', category: 'Core CRM', description: 'Visual pipeline stages and opportunity tracking' },
-  { key: 'quotations', name: 'Quotations & Proposals', category: 'Core CRM', description: 'Create and send branded sales quotations' },
-  { key: 'invoicing', name: 'Invoicing & Payments', category: 'Core CRM', description: 'Generate invoices and record revenue' },
-  
+  {
+    key: 'lead_management',
+    name: 'Lead Management',
+    category: 'Core CRM',
+    description: 'Capture, qualify, and track sales leads',
+  },
+  {
+    key: 'contact_management',
+    name: 'Contact Management',
+    category: 'Core CRM',
+    description: 'Centralized customer and contact profiles',
+  },
+  {
+    key: 'deal_pipeline',
+    name: 'Deal Pipeline',
+    category: 'Core CRM',
+    description: 'Visual pipeline stages and opportunity tracking',
+  },
+  {
+    key: 'quotations',
+    name: 'Quotations & Proposals',
+    category: 'Core CRM',
+    description: 'Create and send branded sales quotations',
+  },
+  {
+    key: 'invoicing',
+    name: 'Invoicing & Payments',
+    category: 'Core CRM',
+    description: 'Generate invoices and record revenue',
+  },
+
   // Collaboration & Tasks
-  { key: 'tasks', name: 'Tasks & Reminders', category: 'Collaboration', description: 'Task assignments, checklists, and calendar deadlines' },
-  { key: 'meetings', name: 'Meetings & Scheduling', category: 'Collaboration', description: 'Schedule client meetings and video calls' },
-  { key: 'document_management', name: 'Document Management', category: 'Collaboration', description: 'Secure attachment storage and workspace documents' },
+  {
+    key: 'tasks',
+    name: 'Tasks & Reminders',
+    category: 'Collaboration',
+    description: 'Task assignments, checklists, and calendar deadlines',
+  },
+  {
+    key: 'meetings',
+    name: 'Meetings & Scheduling',
+    category: 'Collaboration',
+    description: 'Schedule client meetings and video calls',
+  },
+  {
+    key: 'document_management',
+    name: 'Document Management',
+    category: 'Collaboration',
+    description: 'Secure attachment storage and workspace documents',
+  },
 
   // Communication & Automation
-  { key: 'email_integration', name: 'Email Integration', category: 'Automation & Comms', description: 'Direct email communication and logging' },
-  { key: 'whatsapp_integration', name: 'WhatsApp Integration', category: 'Automation & Comms', description: 'Instant messaging and customer chat' },
-  { key: 'automation', name: 'Automation Workflows', category: 'Automation & Comms', description: 'Automated stage triggers and reminder notifications' },
+  {
+    key: 'email_integration',
+    name: 'Email Integration',
+    category: 'Automation & Comms',
+    description: 'Direct email communication and logging',
+  },
+  {
+    key: 'whatsapp_integration',
+    name: 'WhatsApp Integration',
+    category: 'Automation & Comms',
+    description: 'Instant messaging and customer chat',
+  },
+  {
+    key: 'automation',
+    name: 'Automation Workflows',
+    category: 'Automation & Comms',
+    description: 'Automated stage triggers and reminder notifications',
+  },
 
   // Insights & Roles
-  { key: 'reports', name: 'Standard Reports', category: 'Insights & Roles', description: 'Exportable CRM activity and sales reports' },
-  { key: 'advanced_analytics', name: 'Advanced Analytics', category: 'Insights & Roles', description: 'Conversion funnels, revenue trends, and performance metrics' },
-  { key: 'custom_roles', name: 'Custom Roles & Permissions', category: 'Insights & Roles', description: 'Granular RBAC role definitions and data scoping' },
+  {
+    key: 'reports',
+    name: 'Standard Reports',
+    category: 'Insights & Roles',
+    description: 'Exportable CRM activity and sales reports',
+  },
+  {
+    key: 'advanced_analytics',
+    name: 'Advanced Analytics',
+    category: 'Insights & Roles',
+    description: 'Conversion funnels, revenue trends, and performance metrics',
+  },
+  {
+    key: 'custom_roles',
+    name: 'Custom Roles & Permissions',
+    category: 'Insights & Roles',
+    description: 'Granular RBAC role definitions and data scoping',
+  },
 
   // AI & Copilot
-  { key: 'ai_assistant', name: 'AI Copilot & Assistant', category: 'AI & Intelligence', description: 'Smart assistant for summarization and CRM actions' },
-  { key: 'document_rag', name: 'Document RAG & Embeddings', category: 'AI & Intelligence', description: 'Semantic retrieval across customer documents' },
-  { key: 'lead_scoring', name: 'AI Lead Scoring', category: 'AI & Intelligence', description: 'Predictive lead scoring and opportunity prioritization' },
+  {
+    key: 'ai_assistant',
+    name: 'AI Copilot & Assistant',
+    category: 'AI & Intelligence',
+    description: 'Smart assistant for summarization and CRM actions',
+  },
+  {
+    key: 'document_rag',
+    name: 'Document RAG & Embeddings',
+    category: 'AI & Intelligence',
+    description: 'Semantic retrieval across customer documents',
+  },
+  {
+    key: 'lead_scoring',
+    name: 'AI Lead Scoring',
+    category: 'AI & Intelligence',
+    description: 'Predictive lead scoring and opportunity prioritization',
+  },
 
   // Enterprise & Security
-  { key: 'api_access', name: 'REST API & Webhooks', category: 'Enterprise & Security', description: 'Programmatic API access and webhook subscriptions' },
-  { key: 'audit_logs', name: 'Audit Logs & Immutability', category: 'Enterprise & Security', description: 'Cryptographic hash-chained audit trails' },
-  { key: 'advanced_security', name: 'Advanced Security & SSO', category: 'Enterprise & Security', description: 'Enforced MFA, session management, and enterprise security' },
-  { key: 'enterprise_support', name: 'Enterprise Priority Support', category: 'Enterprise & Security', description: 'Dedicated account manager and 24/7 SLA' },
+  {
+    key: 'api_access',
+    name: 'REST API & Webhooks',
+    category: 'Enterprise & Security',
+    description: 'Programmatic API access and webhook subscriptions',
+  },
+  {
+    key: 'audit_logs',
+    name: 'Audit Logs & Immutability',
+    category: 'Enterprise & Security',
+    description: 'Cryptographic hash-chained audit trails',
+  },
+  {
+    key: 'advanced_security',
+    name: 'Advanced Security & SSO',
+    category: 'Enterprise & Security',
+    description: 'Enforced MFA, session management, and enterprise security',
+  },
+  {
+    key: 'enterprise_support',
+    name: 'Enterprise Priority Support',
+    category: 'Enterprise & Security',
+    description: 'Dedicated account manager and 24/7 SLA',
+  },
 ];
 
 export class CreatePlatformPlanDto {
@@ -72,7 +177,7 @@ export class CreatePlatformPlanDto {
   isActive?: boolean;
   status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   sortOrder?: number;
-  
+
   // AI Entitlement Configuration
   aiEnabled?: boolean;
   aiLevel?: string;
@@ -103,7 +208,7 @@ export class UpdatePlatformPlanDto {
   isActive?: boolean;
   status?: 'ACTIVE' | 'INACTIVE' | 'ARCHIVED';
   sortOrder?: number;
-  
+
   // AI Entitlement Configuration
   aiEnabled?: boolean;
   aiLevel?: string;
@@ -148,7 +253,8 @@ export class PlatformPlansService {
       maxLeads: p.limits.maxLeads === -1 ? 1000000 : p.limits.maxLeads,
       maxContacts: p.limits.maxContacts === -1 ? 1000000 : p.limits.maxContacts,
       storageGb: p.limits.storageGb === -1 ? 1000 : p.limits.storageGb,
-      maxApiRequests: p.limits.maxApiRequests === -1 ? 1000000 : p.limits.maxApiRequests,
+      maxApiRequests:
+        p.limits.maxApiRequests === -1 ? 1000000 : p.limits.maxApiRequests,
       trialDays: p.id === 'free' ? 0 : 14,
       billingCycleMonthly: true,
       billingCycleAnnual: true,
@@ -224,108 +330,110 @@ export class PlatformPlansService {
           .catch(() => []),
       ]);
 
-    const distribution: Record<string, number> = {};
-    let totalOrganizations = 0;
+      const distribution: Record<string, number> = {};
+      let totalOrganizations = 0;
 
-    for (const item of tenantDistributionRaw) {
-      if (item.plan) {
-        const key = item.plan.toLowerCase();
-        distribution[key] = item._count._all;
-        totalOrganizations += item._count._all;
+      for (const item of tenantDistributionRaw) {
+        if (item.plan) {
+          const key = item.plan.toLowerCase();
+          distribution[key] = item._count._all;
+          totalOrganizations += item._count._all;
+        }
       }
-    }
 
-    // Compute real MRR from active tenant distribution
-    let calculatedMRR = 0;
-    for (const plan of plans) {
-      const count = distribution[plan.id.toLowerCase()] || 0;
-      if (plan.pricingMode !== 'CUSTOM' && plan.status === 'ACTIVE') {
-        calculatedMRR += count * Number(plan.priceNum || 0);
+      // Compute real MRR from active tenant distribution
+      let calculatedMRR = 0;
+      for (const plan of plans) {
+        const count = distribution[plan.id.toLowerCase()] || 0;
+        if (plan.pricingMode !== 'CUSTOM' && plan.status === 'ACTIVE') {
+          calculatedMRR += count * Number(plan.priceNum || 0);
+        }
       }
-    }
 
-    const calculatedARR = calculatedMRR * 12;
-    const activePlansCount = plans.filter((p: any) => p.status === 'ACTIVE').length;
+      const calculatedARR = calculatedMRR * 12;
+      const activePlansCount = plans.filter(
+        (p: any) => p.status === 'ACTIVE',
+      ).length;
 
-    const formattedPlans = plans.map((p: any) => {
-      const tenantCount = distribution[p.id.toLowerCase()] || 0;
-      const allowedModels = (p.aiEntitlements || [])
-        .filter((e: any) => e.isEnabled && e.model)
-        .map((e: any) => ({
-          id: e.model.id,
-          modelKey: e.model.modelKey,
-          displayName: e.model.displayName,
-          provider: e.model.provider,
-          status: e.model.status,
-        }));
+      const formattedPlans = plans.map((p: any) => {
+        const tenantCount = distribution[p.id.toLowerCase()] || 0;
+        const allowedModels = (p.aiEntitlements || [])
+          .filter((e: any) => e.isEnabled && e.model)
+          .map((e: any) => ({
+            id: e.model.id,
+            modelKey: e.model.modelKey,
+            displayName: e.model.displayName,
+            provider: e.model.provider,
+            status: e.model.status,
+          }));
 
-      const allowedModelIds = (p.aiEntitlements || [])
-        .filter((e: any) => e.isEnabled && e.model)
-        .map((e: any) => e.model.id);
+        const allowedModelIds = (p.aiEntitlements || [])
+          .filter((e: any) => e.isEnabled && e.model)
+          .map((e: any) => e.model.id);
+
+        return {
+          id: p.id,
+          name: p.name,
+          description: p.description || '',
+          price: p.price,
+          priceNum: Number(p.priceNum),
+          annualPriceNum: Number(p.annualPriceNum || 0),
+          currency: p.currency || 'INR',
+          billing: p.billing || 'per month',
+          pricingMode: p.pricingMode || 'FIXED',
+          features: Array.isArray(p.features) ? p.features : [],
+          maxUsers: p.maxUsers >= 1000000 ? -1 : p.maxUsers,
+          maxLeads: p.maxLeads >= 1000000 ? -1 : p.maxLeads,
+          maxContacts: p.maxContacts >= 1000000 ? -1 : p.maxContacts,
+          storageGb: p.storageGb,
+          maxApiRequests: p.maxApiRequests >= 1000000 ? -1 : p.maxApiRequests,
+          trialDays: p.trialDays || 0,
+          billingCycleMonthly: p.billingCycleMonthly !== false,
+          billingCycleAnnual: p.billingCycleAnnual !== false,
+          highlight: p.highlight || false,
+          isActive: p.isActive !== false,
+          status: p.status || (p.isActive ? 'ACTIVE' : 'INACTIVE'),
+          sortOrder: p.sortOrder || 0,
+
+          // AI Configuration
+          aiEnabled: p.aiEnabled !== false,
+          aiLevel: p.aiLevel || 'Standard AI',
+          dailyTokenLimit: p.dailyTokenLimit || 50000,
+          defaultModelId: p.defaultModelId || p.defaultModel?.id || null,
+          defaultModel: p.defaultModel
+            ? {
+                id: p.defaultModel.id,
+                modelKey: p.defaultModel.modelKey,
+                displayName: p.defaultModel.displayName,
+                provider: p.defaultModel.provider,
+              }
+            : null,
+          allowedModelIds,
+          allowedModels,
+
+          tenantCount,
+        };
+      });
 
       return {
-        id: p.id,
-        name: p.name,
-        description: p.description || '',
-        price: p.price,
-        priceNum: Number(p.priceNum),
-        annualPriceNum: Number(p.annualPriceNum || 0),
-        currency: p.currency || 'INR',
-        billing: p.billing || 'per month',
-        pricingMode: p.pricingMode || 'FIXED',
-        features: Array.isArray(p.features) ? p.features : [],
-        maxUsers: p.maxUsers >= 1000000 ? -1 : p.maxUsers,
-        maxLeads: p.maxLeads >= 1000000 ? -1 : p.maxLeads,
-        maxContacts: p.maxContacts >= 1000000 ? -1 : p.maxContacts,
-        storageGb: p.storageGb,
-        maxApiRequests: p.maxApiRequests >= 1000000 ? -1 : p.maxApiRequests,
-        trialDays: p.trialDays || 0,
-        billingCycleMonthly: p.billingCycleMonthly !== false,
-        billingCycleAnnual: p.billingCycleAnnual !== false,
-        highlight: p.highlight || false,
-        isActive: p.isActive !== false,
-        status: p.status || (p.isActive ? 'ACTIVE' : 'INACTIVE'),
-        sortOrder: p.sortOrder || 0,
-        
-        // AI Configuration
-        aiEnabled: p.aiEnabled !== false,
-        aiLevel: p.aiLevel || 'Standard AI',
-        dailyTokenLimit: p.dailyTokenLimit || 50000,
-        defaultModelId: p.defaultModelId || p.defaultModel?.id || null,
-        defaultModel: p.defaultModel
-          ? {
-              id: p.defaultModel.id,
-              modelKey: p.defaultModel.modelKey,
-              displayName: p.defaultModel.displayName,
-              provider: p.defaultModel.provider,
-            }
-          : null,
-        allowedModelIds,
-        allowedModels,
-        
-        tenantCount,
+        plans: formattedPlans,
+        distribution,
+        featureCatalog: FEATURE_CATALOG,
+        aiModels: aiModels.map((m: any) => ({
+          id: m.id,
+          modelKey: m.modelKey,
+          displayName: m.displayName,
+          provider: m.provider,
+          contextWindow: m.contextWindow,
+        })),
+        metrics: {
+          activePlans: activePlansCount,
+          totalOrganizations,
+          monthlyMRR: calculatedMRR,
+          projectedARR: calculatedARR,
+          hasBillingData: totalOrganizations > 0,
+        },
       };
-    });
-
-    return {
-      plans: formattedPlans,
-      distribution,
-      featureCatalog: FEATURE_CATALOG,
-      aiModels: aiModels.map((m: any) => ({
-        id: m.id,
-        modelKey: m.modelKey,
-        displayName: m.displayName,
-        provider: m.provider,
-        contextWindow: m.contextWindow,
-      })),
-      metrics: {
-        activePlans: activePlansCount,
-        totalOrganizations,
-        monthlyMRR: calculatedMRR,
-        projectedARR: calculatedARR,
-        hasBillingData: totalOrganizations > 0,
-      },
-    };
     } catch (err: any) {
       this.logger.error(`getPlans database error: ${err.message}`);
       const fallbackPlans = Object.values(CANONICAL_PLANS).map((p) => ({
@@ -380,7 +488,11 @@ export class PlatformPlansService {
   /**
    * Updates a canonical plan across Basic, Pricing, Limits, AI, and Features.
    */
-  async updatePlan(planId: string, dto: UpdatePlatformPlanDto, actorUserId: string) {
+  async updatePlan(
+    planId: string,
+    dto: UpdatePlatformPlanDto,
+    actorUserId: string,
+  ) {
     const existing = await (this.prisma as any).plan.findUnique({
       where: { id: planId },
       include: {
@@ -406,15 +518,28 @@ export class PlatformPlansService {
     if (dto.trialDays !== undefined && dto.trialDays < 0) {
       throw new BadRequestException('Trial days cannot be negative.');
     }
-    if (dto.status && !['ACTIVE', 'INACTIVE', 'ARCHIVED'].includes(dto.status)) {
+    if (
+      dto.status &&
+      !['ACTIVE', 'INACTIVE', 'ARCHIVED'].includes(dto.status)
+    ) {
       throw new BadRequestException(`Invalid plan status: ${dto.status}`);
     }
 
     // Format display price string if priceNum is provided
     let priceDisplay = dto.price;
     if (dto.priceNum !== undefined && !priceDisplay) {
-      const currSymbol = dto.currency === 'USD' ? '$' : dto.currency === 'EUR' ? '€' : dto.currency === 'GBP' ? '£' : '₹';
-      priceDisplay = dto.pricingMode === 'CUSTOM' ? 'Custom' : `${currSymbol}${dto.priceNum.toLocaleString()}`;
+      const currSymbol =
+        dto.currency === 'USD'
+          ? '$'
+          : dto.currency === 'EUR'
+            ? '€'
+            : dto.currency === 'GBP'
+              ? '£'
+              : '₹';
+      priceDisplay =
+        dto.pricingMode === 'CUSTOM'
+          ? 'Custom'
+          : `${currSymbol}${dto.priceNum.toLocaleString()}`;
     }
 
     // Handle single "Most Popular" plan invariant in a transaction
@@ -433,7 +558,9 @@ export class PlatformPlansService {
           where: { id: dto.defaultModelId },
         });
         if (!model || model.status !== 'ENABLED') {
-          throw new BadRequestException('Selected default AI model is invalid or disabled.');
+          throw new BadRequestException(
+            'Selected default AI model is invalid or disabled.',
+          );
         }
       }
 
@@ -447,30 +574,50 @@ export class PlatformPlansService {
         where: { id: planId },
         data: {
           ...(dto.name && { name: dto.name.trim() }),
-          ...(dto.description !== undefined && { description: dto.description }),
+          ...(dto.description !== undefined && {
+            description: dto.description,
+          }),
           ...(priceDisplay && { price: priceDisplay }),
           ...(dto.priceNum !== undefined && { priceNum: dto.priceNum }),
-          ...(dto.annualPriceNum !== undefined && { annualPriceNum: dto.annualPriceNum }),
+          ...(dto.annualPriceNum !== undefined && {
+            annualPriceNum: dto.annualPriceNum,
+          }),
           ...(dto.currency && { currency: dto.currency }),
           ...(dto.billing && { billing: dto.billing }),
           ...(dto.pricingMode && { pricingMode: dto.pricingMode }),
           ...(dto.features && { features: dto.features }),
-          ...(dto.maxUsers !== undefined && { maxUsers: parseLimit(dto.maxUsers) }),
-          ...(dto.maxLeads !== undefined && { maxLeads: parseLimit(dto.maxLeads) }),
-          ...(dto.maxContacts !== undefined && { maxContacts: parseLimit(dto.maxContacts) }),
+          ...(dto.maxUsers !== undefined && {
+            maxUsers: parseLimit(dto.maxUsers),
+          }),
+          ...(dto.maxLeads !== undefined && {
+            maxLeads: parseLimit(dto.maxLeads),
+          }),
+          ...(dto.maxContacts !== undefined && {
+            maxContacts: parseLimit(dto.maxContacts),
+          }),
           ...(dto.storageGb !== undefined && { storageGb: dto.storageGb }),
-          ...(dto.maxApiRequests !== undefined && { maxApiRequests: parseLimit(dto.maxApiRequests) }),
+          ...(dto.maxApiRequests !== undefined && {
+            maxApiRequests: parseLimit(dto.maxApiRequests),
+          }),
           ...(dto.trialDays !== undefined && { trialDays: dto.trialDays }),
-          ...(dto.billingCycleMonthly !== undefined && { billingCycleMonthly: dto.billingCycleMonthly }),
-          ...(dto.billingCycleAnnual !== undefined && { billingCycleAnnual: dto.billingCycleAnnual }),
+          ...(dto.billingCycleMonthly !== undefined && {
+            billingCycleMonthly: dto.billingCycleMonthly,
+          }),
+          ...(dto.billingCycleAnnual !== undefined && {
+            billingCycleAnnual: dto.billingCycleAnnual,
+          }),
           ...(dto.highlight !== undefined && { highlight: dto.highlight }),
           ...(dto.isActive !== undefined && { isActive: dto.isActive }),
           ...(dto.status && { status: dto.status }),
           ...(dto.sortOrder !== undefined && { sortOrder: dto.sortOrder }),
           ...(dto.aiEnabled !== undefined && { aiEnabled: dto.aiEnabled }),
           ...(dto.aiLevel && { aiLevel: dto.aiLevel }),
-          ...(dto.dailyTokenLimit !== undefined && { dailyTokenLimit: dto.dailyTokenLimit }),
-          ...(dto.defaultModelId !== undefined && { defaultModelId: dto.defaultModelId }),
+          ...(dto.dailyTokenLimit !== undefined && {
+            dailyTokenLimit: dto.dailyTokenLimit,
+          }),
+          ...(dto.defaultModelId !== undefined && {
+            defaultModelId: dto.defaultModelId,
+          }),
         },
       });
 
@@ -503,14 +650,16 @@ export class PlatformPlansService {
             },
             update: {
               isEnabled: true,
-              maxTokensPerDay: dto.dailyTokenLimit || existing.dailyTokenLimit || 50000,
+              maxTokensPerDay:
+                dto.dailyTokenLimit || existing.dailyTokenLimit || 50000,
             },
             create: {
               planId,
               modelId: mId,
               capability: '*',
               isEnabled: true,
-              maxTokensPerDay: dto.dailyTokenLimit || existing.dailyTokenLimit || 50000,
+              maxTokensPerDay:
+                dto.dailyTokenLimit || existing.dailyTokenLimit || 50000,
             },
           });
         }
@@ -618,18 +767,31 @@ export class PlatformPlansService {
       where: { id: planId },
     });
     if (existing) {
-      throw new BadRequestException(`A plan with ID '${planId}' already exists.`);
+      throw new BadRequestException(
+        `A plan with ID '${planId}' already exists.`,
+      );
     }
 
     const currency = dto.currency || 'INR';
     const priceNum = dto.priceNum !== undefined ? dto.priceNum : 0;
-    const annualPriceNum = dto.annualPriceNum !== undefined ? dto.annualPriceNum : 0;
+    const annualPriceNum =
+      dto.annualPriceNum !== undefined ? dto.annualPriceNum : 0;
     const pricingMode = dto.pricingMode || 'FIXED';
 
     let priceDisplay = dto.price;
     if (!priceDisplay) {
-      const currSymbol = currency === 'USD' ? '$' : currency === 'EUR' ? '€' : currency === 'GBP' ? '£' : '₹';
-      priceDisplay = pricingMode === 'CUSTOM' ? 'Custom' : `${currSymbol}${priceNum.toLocaleString()}`;
+      const currSymbol =
+        currency === 'USD'
+          ? '$'
+          : currency === 'EUR'
+            ? '€'
+            : currency === 'GBP'
+              ? '£'
+              : '₹';
+      priceDisplay =
+        pricingMode === 'CUSTOM'
+          ? 'Custom'
+          : `${currSymbol}${priceNum.toLocaleString()}`;
     }
 
     const parseLimit = (val?: number, defaultVal: number = 1000) => {
@@ -685,9 +847,12 @@ export class PlatformPlansService {
       });
 
       // AI entitlements
-      const allowedModelIds = dto.allowedModelIds && dto.allowedModelIds.length > 0
-        ? dto.allowedModelIds
-        : defaultModelId ? [defaultModelId] : [];
+      const allowedModelIds =
+        dto.allowedModelIds && dto.allowedModelIds.length > 0
+          ? dto.allowedModelIds
+          : defaultModelId
+            ? [defaultModelId]
+            : [];
 
       for (const mId of allowedModelIds) {
         await (tx as any).planAiEntitlement.upsert({
@@ -801,4 +966,3 @@ export class PlatformPlansService {
     };
   }
 }
-

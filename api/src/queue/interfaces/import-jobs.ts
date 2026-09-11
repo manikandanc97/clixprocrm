@@ -7,7 +7,8 @@ export const IMPORT_JOB_NAMES = {
   LEADS_BULK_IMPORT: 'leads-bulk-import',
 } as const;
 
-export type ImportJobName = (typeof IMPORT_JOB_NAMES)[keyof typeof IMPORT_JOB_NAMES];
+export type ImportJobName =
+  (typeof IMPORT_JOB_NAMES)[keyof typeof IMPORT_JOB_NAMES];
 
 /**
  * Represents a single normalized lead row in a bulk import payload.

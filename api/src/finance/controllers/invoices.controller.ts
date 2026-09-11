@@ -84,7 +84,10 @@ export class InvoicesController {
     @Param('id') id: string,
     @Res() res: FastifyReply,
   ) {
-    const html = await this.invoicesService.generateInvoicePdf(req.tenantId, id);
+    const html = await this.invoicesService.generateInvoicePdf(
+      req.tenantId,
+      id,
+    );
     res.header('Content-Type', 'text/html');
     return res.send(html);
   }

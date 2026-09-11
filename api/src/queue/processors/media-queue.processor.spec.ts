@@ -1,5 +1,8 @@
 import { MediaQueueProcessor } from './media-queue.processor';
-import { MEDIA_JOB_NAMES, BrandingMediaJobPayload } from '../interfaces/media-jobs';
+import {
+  MEDIA_JOB_NAMES,
+  BrandingMediaJobPayload,
+} from '../interfaces/media-jobs';
 
 describe('MediaQueueProcessor Suite', () => {
   let processor: MediaQueueProcessor;
@@ -9,12 +12,14 @@ describe('MediaQueueProcessor Suite', () => {
   beforeEach(() => {
     mockBrandingService = {
       processPersistedLogo: jest.fn().mockResolvedValue({
-        storageUrl: 'https://example.com/storage/workspace-logos/tenant-test/logo.webp?v=12345',
+        storageUrl:
+          'https://example.com/storage/workspace-logos/tenant-test/logo.webp?v=12345',
         storagePath: 'workspace-logos/tenant-test/logo.webp',
         dominantColor: '#2563eb',
       }),
       processPersistedAvatar: jest.fn().mockResolvedValue({
-        storageUrl: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
+        storageUrl:
+          'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
         storagePath: 'workspace-logos/avatars/usr-123/avatar.webp',
       }),
     };
@@ -23,27 +28,31 @@ describe('MediaQueueProcessor Suite', () => {
       user: {
         update: jest.fn().mockResolvedValue({
           id: 'usr-123',
-          avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
+          avatar:
+            'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
         }),
       },
-      withTenantContext: jest.fn().mockImplementation(async (options, callback) => {
-        const tx = {
-          tenant: {
-            update: jest.fn().mockResolvedValue({
-              id: options.tenantId,
-              logo: 'https://example.com/storage/workspace-logos/tenant-test/logo.webp?v=12345',
-              brandPrimaryColor: '#2563eb',
-            }),
-          },
-          user: {
-            update: jest.fn().mockResolvedValue({
-              id: options.userId,
-              avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
-            }),
-          },
-        };
-        return callback(tx);
-      }),
+      withTenantContext: jest
+        .fn()
+        .mockImplementation(async (options, callback) => {
+          const tx = {
+            tenant: {
+              update: jest.fn().mockResolvedValue({
+                id: options.tenantId,
+                logo: 'https://example.com/storage/workspace-logos/tenant-test/logo.webp?v=12345',
+                brandPrimaryColor: '#2563eb',
+              }),
+            },
+            user: {
+              update: jest.fn().mockResolvedValue({
+                id: options.userId,
+                avatar:
+                  'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
+              }),
+            },
+          };
+          return callback(tx);
+        }),
     };
 
     processor = new MediaQueueProcessor(mockBrandingService, mockPrisma);
@@ -208,7 +217,8 @@ describe('MediaQueueProcessor Suite', () => {
         success: true,
         userId: 'usr-123',
         tenantId: 'tenant-test',
-        avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
+        avatar:
+          'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
         storagePath: 'workspace-logos/avatars/usr-123/avatar.webp',
       });
     });
@@ -230,7 +240,8 @@ describe('MediaQueueProcessor Suite', () => {
       expect(mockPrisma.user.update).toHaveBeenCalledWith({
         where: { id: 'usr-super' },
         data: {
-          avatar: 'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
+          avatar:
+            'https://example.com/storage/workspace-logos/avatars/usr-123/avatar.webp?v=12345',
         },
       });
       expect(result.success).toBe(true);

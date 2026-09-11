@@ -16,4 +16,3 @@ export const RequirePlanLimit = (
     | 'maxDeals'
     | 'maxAutomations',
 ) => SetMetadata(REQUIRE_PLAN_LIMIT_KEY, limitKey);
-

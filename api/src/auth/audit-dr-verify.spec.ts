@@ -45,7 +45,12 @@ describe('P3 Disaster Recovery Verification Dry Run Suite', () => {
       },
       auditArchiveOutbox: {
         create: jest.fn().mockImplementation(({ data }) => {
-          const record = { id: `outbox-${storedOutbox.length + 1}`, attempts: 0, createdAt: new Date(), ...data };
+          const record = {
+            id: `outbox-${storedOutbox.length + 1}`,
+            attempts: 0,
+            createdAt: new Date(),
+            ...data,
+          };
           storedOutbox.push(record);
           return Promise.resolve(record);
         }),
@@ -68,9 +73,9 @@ describe('P3 Disaster Recovery Verification Dry Run Suite', () => {
       },
     };
 
-    auditLogger = new AuditLoggerService(mockPrisma as any);
-    archiveService = new AuditArchiveService(mockPrisma as any);
-    drService = new AuditDisasterRecoveryService(mockPrisma as any, archiveService);
+    auditLogger = new AuditLoggerService(mockPrisma);
+    archiveService = new AuditArchiveService(mockPrisma);
+    drService = new AuditDisasterRecoveryService(mockPrisma, archiveService);
   });
 
   describe('1. DR Restore Dry Run', () => {
@@ -124,13 +129,15 @@ describe('P3 Disaster Recovery Verification Dry Run Suite', () => {
           },
         }),
       };
-      drService.setProvider(tamperedProvider as any);
+      drService.setProvider(tamperedProvider);
 
       const result = await drService.verifyAuditArchiveRestore(log.id);
 
       expect(result.restorable).toBe(false);
       expect(result.hashValid).toBe(false);
-      expect(result.reason).toContain('signature is invalid or payload was modified');
+      expect(result.reason).toContain(
+        'signature is invalid or payload was modified',
+      );
     });
 
     it('performs zero database or S3 write operations', async () => {

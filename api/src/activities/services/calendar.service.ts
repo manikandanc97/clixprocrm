@@ -15,7 +15,10 @@ export class CalendarService {
       const start = new Date(startParam);
       const end = new Date(endParam);
       const userId = user.sub || user.id;
-      const rawRole = typeof user.role === 'object' ? user.role?.name || '' : String(user.role || '');
+      const rawRole =
+        typeof user.role === 'object'
+          ? user.role?.name || ''
+          : String(user.role || '');
       const userRole = rawRole.toUpperCase().replace(/[\s_]+/g, '');
 
       const meetingWhere: any = {
@@ -23,18 +26,22 @@ export class CalendarService {
         startTime: { gte: start },
         endTime: { lte: end },
       };
-      
+
       const taskWhere: any = {
         tenantId,
         dueDate: { gte: start, lte: end },
       };
-      
+
       const leadWhere: any = {
         tenantId,
         expectedCloseDate: { gte: start, lte: end },
       };
 
-      if (userRole !== 'ADMIN' && userRole !== 'SUPERADMIN' && userRole !== 'OWNER') {
+      if (
+        userRole !== 'ADMIN' &&
+        userRole !== 'SUPERADMIN' &&
+        userRole !== 'OWNER'
+      ) {
         const tenantUser = await tx.tenantUser.findFirst({
           where: { tenantId, userId },
         });
@@ -187,4 +194,3 @@ export class CalendarService {
     });
   }
 }
-

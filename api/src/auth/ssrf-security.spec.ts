@@ -70,7 +70,9 @@ describe('P5 SSRF & Safe URL Validation Suite', () => {
     });
 
     it('blocks cloud metadata URLs', async () => {
-      const res = await validateSafeUrlForFetch('http://169.254.169.254/latest/meta-data/');
+      const res = await validateSafeUrlForFetch(
+        'http://169.254.169.254/latest/meta-data/',
+      );
       expect(res.safe).toBe(false);
       expect(res.reason).toContain('Blocked private or reserved IPv4 address');
     });

@@ -17,7 +17,11 @@ export function parseUserAgent(ua?: string | null): ParsedDeviceInfo {
 
   // 1. Device Type
   let deviceType: 'desktop' | 'mobile' | 'tablet' | 'unknown' = 'desktop';
-  if (uaLower.includes('tablet') || uaLower.includes('ipad') || (uaLower.includes('android') && !uaLower.includes('mobile'))) {
+  if (
+    uaLower.includes('tablet') ||
+    uaLower.includes('ipad') ||
+    (uaLower.includes('android') && !uaLower.includes('mobile'))
+  ) {
     deviceType = 'tablet';
   } else if (
     uaLower.includes('mobile') ||
@@ -32,11 +36,19 @@ export function parseUserAgent(ua?: string | null): ParsedDeviceInfo {
 
   // 2. Operating System
   let operatingSystem = 'Unknown OS';
-  if (uaLower.includes('windows nt 10.0') || uaLower.includes('windows 10') || uaLower.includes('windows 11')) {
+  if (
+    uaLower.includes('windows nt 10.0') ||
+    uaLower.includes('windows 10') ||
+    uaLower.includes('windows 11')
+  ) {
     operatingSystem = 'Windows';
   } else if (uaLower.includes('windows nt')) {
     operatingSystem = 'Windows';
-  } else if (uaLower.includes('iphone') || uaLower.includes('ipad') || uaLower.includes('ipod')) {
+  } else if (
+    uaLower.includes('iphone') ||
+    uaLower.includes('ipad') ||
+    uaLower.includes('ipod')
+  ) {
     operatingSystem = 'iOS';
   } else if (uaLower.includes('mac os x') || uaLower.includes('macintosh')) {
     operatingSystem = 'macOS';

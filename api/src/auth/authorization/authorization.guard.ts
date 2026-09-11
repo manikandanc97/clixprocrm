@@ -27,10 +27,11 @@ export class AuthorizationGuard implements CanActivate {
       [context.getHandler(), context.getClass()],
     );
 
-    const permRequirement = this.reflector.getAllAndOverride<PermissionRequirementMetadata>(
-      PERMISSION_REQUIREMENT_KEY,
-      [context.getHandler(), context.getClass()],
-    );
+    const permRequirement =
+      this.reflector.getAllAndOverride<PermissionRequirementMetadata>(
+        PERMISSION_REQUIREMENT_KEY,
+        [context.getHandler(), context.getClass()],
+      );
 
     if (!isOwnerRequired && !permRequirement) {
       return true;

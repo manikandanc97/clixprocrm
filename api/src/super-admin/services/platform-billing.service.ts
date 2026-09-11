@@ -6,8 +6,15 @@ import {
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { toNumber, formatCurrency } from '../../common/utils/crm-formatters.util';
-import { getPlanDefinition, normalizePlanId, CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
+import {
+  toNumber,
+  formatCurrency,
+} from '../../common/utils/crm-formatters.util';
+import {
+  getPlanDefinition,
+  normalizePlanId,
+  CANONICAL_PLANS,
+} from '../../common/plans/plan-definitions.constant';
 import { roundTo2 } from '../../finance/utils/invoice-calculation.util';
 
 export class UpdatePlatformBillingConfigDto {
@@ -65,7 +72,9 @@ export class PlatformBillingService {
 
   constructor(private readonly prisma: PrismaService) {}
 
-  private async allocatePlatformInvoiceNumber(tx: Prisma.TransactionClient): Promise<string> {
+  private async allocatePlatformInvoiceNumber(
+    tx: Prisma.TransactionClient,
+  ): Promise<string> {
     const config = await tx.platformBillingConfig.findFirst();
     const prefix = config?.invoicePrefix?.trim() || 'CP-INV';
     const year = new Date().getFullYear();
@@ -74,14 +83,18 @@ export class PlatformBillingService {
     return `${prefix}-${year}-${String(seq).padStart(6, '0')}`;
   }
 
-  private async allocatePlatformPaymentNumber(tx: Prisma.TransactionClient): Promise<string> {
+  private async allocatePlatformPaymentNumber(
+    tx: Prisma.TransactionClient,
+  ): Promise<string> {
     const year = new Date().getFullYear();
     const count = await tx.platformPayment.count();
     const seq = count + 1;
     return `CP-PAY-${year}-${String(seq).padStart(6, '0')}`;
   }
 
-  private async allocatePlatformRefundNumber(tx: Prisma.TransactionClient): Promise<string> {
+  private async allocatePlatformRefundNumber(
+    tx: Prisma.TransactionClient,
+  ): Promise<string> {
     const year = new Date().getFullYear();
     const count = await tx.platformRefund.count();
     const seq = count + 1;
@@ -109,15 +122,28 @@ export class PlatformBillingService {
         try {
           const normPlan = normalizePlanId(tenant.plan || 'free');
           const planDef = getPlanDefinition(normPlan);
-          const billingCycle = (tenant.billingCycle as 'monthly' | 'annual') || 'monthly';
-          const seats = normPlan === 'enterprise' ? 10 : normPlan === 'pro' ? 5 : normPlan === 'starter' ? 3 : 1;
-          const unitPrice = billingCycle === 'annual' ? planDef.annualPriceNum : planDef.priceNum;
+          const billingCycle =
+            (tenant.billingCycle as 'monthly' | 'annual') || 'monthly';
+          const seats =
+            normPlan === 'enterprise'
+              ? 10
+              : normPlan === 'pro'
+                ? 5
+                : normPlan === 'starter'
+                  ? 3
+                  : 1;
+          const unitPrice =
+            billingCycle === 'annual'
+              ? planDef.annualPriceNum
+              : planDef.priceNum;
           const subtotal = roundTo2(unitPrice * seats);
           const taxAmount = roundTo2(subtotal * (taxRate / 100));
           const totalAmount = roundTo2(subtotal + taxAmount);
 
           const now = new Date();
-          const periodEnd = tenant.currentPeriodEnd || new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
+          const periodEnd =
+            tenant.currentPeriodEnd ||
+            new Date(now.getTime() + 30 * 24 * 60 * 60 * 1000);
 
           const sub = await this.prisma.platformSubscription.create({
             data: {
@@ -175,7 +201,9 @@ export class PlatformBillingService {
             });
           }
         } catch (subErr) {
-          this.logger.warn(`Failed to auto-sync subscription for tenant ${tenant.id}: ${subErr}`);
+          this.logger.warn(
+            `Failed to auto-sync subscription for tenant ${tenant.id}: ${subErr}`,
+          );
         }
       }
     } catch (err) {
@@ -221,17 +249,29 @@ export class PlatformBillingService {
         select: { amount: true },
       }),
       this.prisma.tenant.findMany({
-        select: { id: true, name: true, slug: true, plan: true, status: true, subscriptionStatus: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          plan: true,
+          status: true,
+          subscriptionStatus: true,
+        },
       }),
       this.getBillingConfig(),
-      this.prisma.plan.findMany({
-        where: { status: 'ACTIVE', isActive: true },
-        orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
-      }).catch(() => []),
+      this.prisma.plan
+        .findMany({
+          where: { status: 'ACTIVE', isActive: true },
+          orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
+        })
+        .catch(() => []),
     ]);
 
     const customerTenants = allTenants.filter(
-      (t) => t.slug !== 'clixpro-platform' && (t as any).isPlatformTenant !== true && (t as any).type !== 'PLATFORM',
+      (t) =>
+        t.slug !== 'clixpro-platform' &&
+        (t as any).isPlatformTenant !== true &&
+        (t as any).type !== 'PLATFORM',
     );
 
     const currency = config.currency || 'INR';
@@ -239,22 +279,39 @@ export class PlatformBillingService {
 
     // 1. Calculate MRR & ARR from active paid subscriptions
     let monthlyMRR = 0;
-    
-    // Resolve active canonical or dynamic database plans
-    const activePlanDefs = dbPlans.length > 0
-      ? dbPlans.map((p) => ({ id: p.id.toLowerCase(), name: p.name }))
-      : Object.values(CANONICAL_PLANS).map((p) => ({ id: p.id.toLowerCase(), name: p.name }));
 
-    const planDistMap: Record<string, { count: number; name: string; revenue: number; percentage: number }> = {};
+    // Resolve active canonical or dynamic database plans
+    const activePlanDefs =
+      dbPlans.length > 0
+        ? dbPlans.map((p) => ({ id: p.id.toLowerCase(), name: p.name }))
+        : Object.values(CANONICAL_PLANS).map((p) => ({
+            id: p.id.toLowerCase(),
+            name: p.name,
+          }));
+
+    const planDistMap: Record<
+      string,
+      { count: number; name: string; revenue: number; percentage: number }
+    > = {};
     for (const pDef of activePlanDefs) {
-      planDistMap[pDef.id] = { count: 0, name: pDef.name, revenue: 0, percentage: 0 };
+      planDistMap[pDef.id] = {
+        count: 0,
+        name: pDef.name,
+        revenue: 0,
+        percentage: 0,
+      };
     }
     if (!planDistMap['free']) {
-      planDistMap['free'] = { count: 0, name: 'Free', revenue: 0, percentage: 0 };
+      planDistMap['free'] = {
+        count: 0,
+        name: 'Free',
+        revenue: 0,
+        percentage: 0,
+      };
     }
 
     // Map subscriptions by tenantId
-    const subByTenantMap = new Map<string, typeof subscriptions[0]>();
+    const subByTenantMap = new Map<string, (typeof subscriptions)[0]>();
     for (const sub of subscriptions) {
       if (!subByTenantMap.has(sub.tenantId)) {
         subByTenantMap.set(sub.tenantId, sub);
@@ -268,26 +325,46 @@ export class PlatformBillingService {
       const pId = normalizePlanId(rawPlan);
       const recAmt = toNumber(sub?.recurringAmount);
       const isPaidTier = pId !== 'free';
-      const isSubActive = (sub?.status || tenant.subscriptionStatus || 'ACTIVE').toUpperCase() === 'ACTIVE' || (sub?.status || '').toUpperCase() === 'TRIALING';
+      const isSubActive =
+        (sub?.status || tenant.subscriptionStatus || 'ACTIVE').toUpperCase() ===
+          'ACTIVE' || (sub?.status || '').toUpperCase() === 'TRIALING';
 
-      if (isSubActive && isPaidTier && (recAmt > 0 || CANONICAL_PLANS[pId]?.priceNum > 0)) {
-        const canonicalPrice = recAmt > 0 ? recAmt : (CANONICAL_PLANS[pId]?.priceNum || 0);
-        const mVal = sub?.billingCycle === 'annual' ? canonicalPrice / 12 : canonicalPrice;
+      if (
+        isSubActive &&
+        isPaidTier &&
+        (recAmt > 0 || CANONICAL_PLANS[pId]?.priceNum > 0)
+      ) {
+        const canonicalPrice =
+          recAmt > 0 ? recAmt : CANONICAL_PLANS[pId]?.priceNum || 0;
+        const mVal =
+          sub?.billingCycle === 'annual' ? canonicalPrice / 12 : canonicalPrice;
         monthlyMRR += mVal;
         paidSubscriptionsCount += 1;
       }
 
       if (!planDistMap[pId]) {
-        const pName = pId === 'enterprise' ? 'Enterprise' : pId === 'business' ? 'Business' : (CANONICAL_PLANS[pId]?.name || pId.charAt(0).toUpperCase() + pId.slice(1));
+        const pName =
+          pId === 'enterprise'
+            ? 'Enterprise'
+            : pId === 'business'
+              ? 'Business'
+              : CANONICAL_PLANS[pId]?.name ||
+                pId.charAt(0).toUpperCase() + pId.slice(1);
         planDistMap[pId] = { count: 0, name: pName, revenue: 0, percentage: 0 };
       }
       planDistMap[pId].count += 1;
-      planDistMap[pId].revenue += isPaidTier ? (recAmt > 0 ? recAmt : (CANONICAL_PLANS[pId]?.priceNum || 0)) : 0;
+      planDistMap[pId].revenue += isPaidTier
+        ? recAmt > 0
+          ? recAmt
+          : CANONICAL_PLANS[pId]?.priceNum || 0
+        : 0;
     }
 
     const totalWorkspaceBase = tenantsCount || 1;
     for (const key of Object.keys(planDistMap)) {
-      planDistMap[key].percentage = Math.round((planDistMap[key].count / totalWorkspaceBase) * 100);
+      planDistMap[key].percentage = Math.round(
+        (planDistMap[key].count / totalWorkspaceBase) * 100,
+      );
     }
 
     const projectedARR = monthlyMRR * 12;
@@ -310,12 +387,22 @@ export class PlatformBillingService {
       totalRevenue += tot;
       paidRevenue += pd;
 
-      const isOverdue = inv.dueDate && new Date(inv.dueDate) < now && bal > 0 && inv.status !== 'PAID' && inv.status !== 'CANCELLED' && inv.status !== 'VOID';
+      const isOverdue =
+        inv.dueDate &&
+        new Date(inv.dueDate) < now &&
+        bal > 0 &&
+        inv.status !== 'PAID' &&
+        inv.status !== 'CANCELLED' &&
+        inv.status !== 'VOID';
 
       if (isOverdue) {
         overdueRevenue += bal;
         pendingInvoicesCount += 1;
-      } else if (bal > 0 && inv.status !== 'CANCELLED' && inv.status !== 'VOID') {
+      } else if (
+        bal > 0 &&
+        inv.status !== 'CANCELLED' &&
+        inv.status !== 'VOID'
+      ) {
         pendingRevenue += bal;
         pendingInvoicesCount += 1;
       }
@@ -324,7 +411,12 @@ export class PlatformBillingService {
     const totalRefunds = refunds.reduce((s, r) => s + toNumber(r.amount), 0);
 
     // 3. Last 6 Months Revenue Trend
-    const monthlyTrend: Array<{ month: string; revenue: number; projected: number; invoicesCount: number }> = [];
+    const monthlyTrend: Array<{
+      month: string;
+      revenue: number;
+      projected: number;
+      invoicesCount: number;
+    }> = [];
     for (let i = 5; i >= 0; i--) {
       const d = new Date();
       d.setMonth(d.getMonth() - i);
@@ -337,7 +429,15 @@ export class PlatformBillingService {
         return idate.getFullYear() === yr && idate.getMonth() === mo;
       });
 
-      const mRev = mInvoices.reduce((s, inv) => s + toNumber(inv.paidAmount || (inv.paymentStatus === 'PAID' ? inv.totalAmount : 0)), 0);
+      const mRev = mInvoices.reduce(
+        (s, inv) =>
+          s +
+          toNumber(
+            inv.paidAmount ||
+              (inv.paymentStatus === 'PAID' ? inv.totalAmount : 0),
+          ),
+        0,
+      );
       monthlyTrend.push({
         month: mLabel,
         revenue: roundTo2(mRev),
@@ -357,10 +457,16 @@ export class PlatformBillingService {
         paidRevenue: roundTo2(paidRevenue),
         paidRevenueFormatted: formatCurrency(roundTo2(paidRevenue), currency),
         pendingRevenue: roundTo2(pendingRevenue + overdueRevenue),
-        pendingRevenueFormatted: formatCurrency(roundTo2(pendingRevenue + overdueRevenue), currency),
+        pendingRevenueFormatted: formatCurrency(
+          roundTo2(pendingRevenue + overdueRevenue),
+          currency,
+        ),
         pendingInvoicesCount,
         overdueRevenue: roundTo2(overdueRevenue),
-        overdueRevenueFormatted: formatCurrency(roundTo2(overdueRevenue), currency),
+        overdueRevenueFormatted: formatCurrency(
+          roundTo2(overdueRevenue),
+          currency,
+        ),
         totalRefunds: roundTo2(totalRefunds),
         totalRefundsFormatted: formatCurrency(roundTo2(totalRefunds), currency),
         paidSubscriptions: paidSubscriptionsCount,
@@ -389,7 +495,10 @@ export class PlatformBillingService {
 
     const where: Prisma.PlatformSubscriptionWhereInput = {
       ...(options?.planId && { planId: options.planId }),
-      ...(options?.status && options.status.toUpperCase() !== 'ALL' && { status: options.status.toUpperCase() }),
+      ...(options?.status &&
+        options.status.toUpperCase() !== 'ALL' && {
+          status: options.status.toUpperCase(),
+        }),
       ...(options?.search && {
         tenant: {
           name: { contains: options.search.trim(), mode: 'insensitive' },
@@ -404,11 +513,24 @@ export class PlatformBillingService {
         skip,
         take: limit,
         include: {
-          tenant: { select: { id: true, name: true, plan: true, currency: true, logo: true } },
+          tenant: {
+            select: {
+              id: true,
+              name: true,
+              plan: true,
+              currency: true,
+              logo: true,
+            },
+          },
           invoices: {
             take: 1,
             orderBy: { createdAt: 'desc' },
-            select: { id: true, invoiceNumber: true, status: true, totalAmount: true },
+            select: {
+              id: true,
+              invoiceNumber: true,
+              status: true,
+              totalAmount: true,
+            },
           },
         },
       }),
@@ -468,7 +590,8 @@ export class PlatformBillingService {
     const billingCycle = dto.billingCycle || 'monthly';
     const seats = Math.max(1, dto.seats || 1);
 
-    const unitPrice = billingCycle === 'annual' ? planDef.annualPriceNum : planDef.priceNum;
+    const unitPrice =
+      billingCycle === 'annual' ? planDef.annualPriceNum : planDef.priceNum;
     const subtotal = roundTo2(unitPrice * seats);
 
     const config = await this.getBillingConfig();
@@ -608,13 +731,30 @@ export class PlatformBillingService {
 
     const where: Prisma.PlatformInvoiceWhereInput = {
       ...(options?.tenantId && { tenantId: options.tenantId }),
-      ...(options?.status && options.status.toUpperCase() !== 'ALL' && { status: options.status.toUpperCase() }),
-      ...(options?.paymentStatus && options.paymentStatus.toUpperCase() !== 'ALL' && { paymentStatus: options.paymentStatus.toUpperCase() }),
+      ...(options?.status &&
+        options.status.toUpperCase() !== 'ALL' && {
+          status: options.status.toUpperCase(),
+        }),
+      ...(options?.paymentStatus &&
+        options.paymentStatus.toUpperCase() !== 'ALL' && {
+          paymentStatus: options.paymentStatus.toUpperCase(),
+        }),
       ...(options?.search && {
         OR: [
-          { invoiceNumber: { contains: options.search.trim(), mode: 'insensitive' } },
-          { tenant: { name: { contains: options.search.trim(), mode: 'insensitive' } } },
-          { planName: { contains: options.search.trim(), mode: 'insensitive' } },
+          {
+            invoiceNumber: {
+              contains: options.search.trim(),
+              mode: 'insensitive',
+            },
+          },
+          {
+            tenant: {
+              name: { contains: options.search.trim(), mode: 'insensitive' },
+            },
+          },
+          {
+            planName: { contains: options.search.trim(), mode: 'insensitive' },
+          },
         ],
       }),
     };
@@ -697,9 +837,15 @@ export class PlatformBillingService {
       taxRate: toNumber(invoice.taxRate),
       taxAmount: toNumber(invoice.taxAmount),
       totalAmount: toNumber(invoice.totalAmount),
-      totalAmountFormatted: formatCurrency(toNumber(invoice.totalAmount), currency),
+      totalAmountFormatted: formatCurrency(
+        toNumber(invoice.totalAmount),
+        currency,
+      ),
       paidAmount: toNumber(invoice.paidAmount),
-      paidAmountFormatted: formatCurrency(toNumber(invoice.paidAmount), currency),
+      paidAmountFormatted: formatCurrency(
+        toNumber(invoice.paidAmount),
+        currency,
+      ),
       items: invoice.items.map((it) => ({
         ...it,
         unitPrice: toNumber(it.unitPrice),
@@ -709,12 +855,18 @@ export class PlatformBillingService {
       payments: invoice.payments.map((p) => ({
         ...p,
         amount: toNumber(p.amount),
-        amountFormatted: formatCurrency(toNumber(p.amount), p.currency || currency),
+        amountFormatted: formatCurrency(
+          toNumber(p.amount),
+          p.currency || currency,
+        ),
       })),
       refunds: invoice.refunds.map((r) => ({
         ...r,
         amount: toNumber(r.amount),
-        amountFormatted: formatCurrency(toNumber(r.amount), r.currency || currency),
+        amountFormatted: formatCurrency(
+          toNumber(r.amount),
+          r.currency || currency,
+        ),
       })),
     };
   }
@@ -742,7 +894,9 @@ export class PlatformBillingService {
         throw new BadRequestException('Refund amount must be greater than 0.');
       }
       if (refundAmt > paidAmt) {
-        throw new BadRequestException(`Refund amount (${refundAmt}) cannot exceed paid amount (${paidAmt}).`);
+        throw new BadRequestException(
+          `Refund amount (${refundAmt}) cannot exceed paid amount (${paidAmt}).`,
+        );
       }
 
       const refundNumber = await this.allocatePlatformRefundNumber(tx);
@@ -825,34 +979,63 @@ export class PlatformBillingService {
   /**
    * Update platform billing configuration.
    */
-  async updateBillingConfig(userId: string, dto: UpdatePlatformBillingConfigDto) {
+  async updateBillingConfig(
+    userId: string,
+    dto: UpdatePlatformBillingConfigDto,
+  ) {
     const config = await this.getBillingConfig();
     const updated = await this.prisma.platformBillingConfig.update({
       where: { id: config.id },
       data: {
-        ...(dto.companyLegalName !== undefined && { companyLegalName: dto.companyLegalName }),
-        ...(dto.billingAddress !== undefined && { billingAddress: dto.billingAddress }),
+        ...(dto.companyLegalName !== undefined && {
+          companyLegalName: dto.companyLegalName,
+        }),
+        ...(dto.billingAddress !== undefined && {
+          billingAddress: dto.billingAddress,
+        }),
         ...(dto.city !== undefined && { city: dto.city }),
         ...(dto.state !== undefined && { state: dto.state }),
         ...(dto.postalCode !== undefined && { postalCode: dto.postalCode }),
         ...(dto.country !== undefined && { country: dto.country }),
         ...(dto.gstin !== undefined && { gstin: dto.gstin?.toUpperCase() }),
         ...(dto.pan !== undefined && { pan: dto.pan?.toUpperCase() }),
-        ...(dto.invoicePrefix !== undefined && { invoicePrefix: dto.invoicePrefix?.toUpperCase() }),
+        ...(dto.invoicePrefix !== undefined && {
+          invoicePrefix: dto.invoicePrefix?.toUpperCase(),
+        }),
         ...(dto.currency !== undefined && { currency: dto.currency }),
         ...(dto.taxRate !== undefined && { taxRate: dto.taxRate }),
-        ...(dto.paymentTermsDays !== undefined && { paymentTermsDays: dto.paymentTermsDays }),
+        ...(dto.paymentTermsDays !== undefined && {
+          paymentTermsDays: dto.paymentTermsDays,
+        }),
         ...(dto.bankName !== undefined && { bankName: dto.bankName }),
-        ...(dto.accountNumber !== undefined && { accountNumber: dto.accountNumber }),
-        ...(dto.ifscCode !== undefined && { ifscCode: dto.ifscCode?.toUpperCase() }),
-        ...(dto.accountHolder !== undefined && { accountHolder: dto.accountHolder }),
+        ...(dto.accountNumber !== undefined && {
+          accountNumber: dto.accountNumber,
+        }),
+        ...(dto.ifscCode !== undefined && {
+          ifscCode: dto.ifscCode?.toUpperCase(),
+        }),
+        ...(dto.accountHolder !== undefined && {
+          accountHolder: dto.accountHolder,
+        }),
         ...(dto.upiId !== undefined && { upiId: dto.upiId }),
-        ...(dto.paymentGateway !== undefined && { paymentGateway: dto.paymentGateway }),
-        ...(dto.webhookSecret !== undefined && { webhookSecret: dto.webhookSecret }),
-        ...(dto.razorpayKeyId !== undefined && { razorpayKeyId: dto.razorpayKeyId }),
-        ...(dto.razorpayKeySecret !== undefined && { razorpayKeySecret: dto.razorpayKeySecret }),
-        ...(dto.stripePublishableKey !== undefined && { stripePublishableKey: dto.stripePublishableKey }),
-        ...(dto.stripeSecretKey !== undefined && { stripeSecretKey: dto.stripeSecretKey }),
+        ...(dto.paymentGateway !== undefined && {
+          paymentGateway: dto.paymentGateway,
+        }),
+        ...(dto.webhookSecret !== undefined && {
+          webhookSecret: dto.webhookSecret,
+        }),
+        ...(dto.razorpayKeyId !== undefined && {
+          razorpayKeyId: dto.razorpayKeyId,
+        }),
+        ...(dto.razorpayKeySecret !== undefined && {
+          razorpayKeySecret: dto.razorpayKeySecret,
+        }),
+        ...(dto.stripePublishableKey !== undefined && {
+          stripePublishableKey: dto.stripePublishableKey,
+        }),
+        ...(dto.stripeSecretKey !== undefined && {
+          stripeSecretKey: dto.stripeSecretKey,
+        }),
         updatedBy: userId,
       },
     });

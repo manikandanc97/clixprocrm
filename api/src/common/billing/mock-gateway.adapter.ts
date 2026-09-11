@@ -40,7 +40,10 @@ export class MockGatewayAdapter implements IPaymentGatewayAdapter {
     params: WebhookVerificationParams,
   ): Promise<NormalizedWebhookEvent | null> {
     try {
-      const body = typeof params.rawBody === 'string' ? JSON.parse(params.rawBody) : JSON.parse(params.rawBody.toString('utf8'));
+      const body =
+        typeof params.rawBody === 'string'
+          ? JSON.parse(params.rawBody)
+          : JSON.parse(params.rawBody.toString('utf8'));
       const eventId = body.eventId || `evt_mock_${Date.now()}`;
       return {
         provider: 'MANUAL',

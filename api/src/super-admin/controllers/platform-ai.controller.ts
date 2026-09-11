@@ -127,8 +127,8 @@ export class PlatformAiController {
   @Get('usage')
   async getAiUsageTelemetry(@Query('limit') limit?: string) {
     const parsedLimit = limit ? parseInt(limit, 10) : 50;
-    const telemetry = await this.platformAiService.getAiUsageTelemetry(parsedLimit);
+    const telemetry =
+      await this.platformAiService.getAiUsageTelemetry(parsedLimit);
     return { success: true, ...telemetry };
   }
 }
-

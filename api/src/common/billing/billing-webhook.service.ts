@@ -79,7 +79,12 @@ export class BillingWebhookService {
             ...(paymentId ? [{ providerSubscriptionId: paymentId }] : []),
           ],
         },
-        select: { tenantId: true, planId: true, billingCycle: true, seats: true },
+        select: {
+          tenantId: true,
+          planId: true,
+          billingCycle: true,
+          seats: true,
+        },
       });
 
       if (matchingSub) {
@@ -159,7 +164,7 @@ export class BillingWebhookService {
           const planDef = getPlanDefinition(normPlan);
           const cycle =
             (billingCycle as 'monthly' | 'annual') ||
-            (tenant.billingCycle as any) ||
+            tenant.billingCycle ||
             'monthly';
           const seatCount = seats || 1;
 

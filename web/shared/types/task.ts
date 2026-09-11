@@ -5,7 +5,7 @@ import { MetricCardType } from "./common";
 export interface ChecklistItem {
   id: string;
   title: string;
-  completed: boolean;
+  completed?: boolean;
   completedAt?: string | null;
 }
 

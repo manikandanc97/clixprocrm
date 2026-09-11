@@ -17,7 +17,11 @@ describe('P0 AuditLog Immutability & Tamper-Resistance Security Suite', () => {
   beforeEach(() => {
     mockPrisma = {
       auditLog: {
-        create: jest.fn().mockImplementation((args) => Promise.resolve({ id: 'audit-1', ...args.data })),
+        create: jest
+          .fn()
+          .mockImplementation((args) =>
+            Promise.resolve({ id: 'audit-1', ...args.data }),
+          ),
         findMany: jest.fn().mockResolvedValue([]),
         count: jest.fn().mockResolvedValue(0),
         // Destructive methods should not be called in services
@@ -105,21 +109,23 @@ describe('P0 AuditLog Immutability & Tamper-Resistance Security Suite', () => {
       quotation: { deleteMany: jest.fn() },
       invoice: { deleteMany: jest.fn() },
       invoiceCounter: { deleteMany: jest.fn() },
-      withTenantContext: jest.fn().mockImplementation((ctx, cb) => cb(mockPrisma)),
+      withTenantContext: jest
+        .fn()
+        .mockImplementation((ctx, cb) => cb(mockPrisma)),
       $executeRawUnsafe: jest.fn().mockResolvedValue(1),
     };
 
-    mfaService = new MfaService(mockPrisma as any);
-    sessionsService = new SessionsService(mockPrisma as any);
+    mfaService = new MfaService(mockPrisma);
+    sessionsService = new SessionsService(mockPrisma);
     authService = new AuthService(
-      mockPrisma as any,
+      mockPrisma,
       {} as any,
       {} as any,
       {} as any,
       {} as any,
       {} as any,
     );
-    platformOrgsService = new PlatformOrganizationsService(mockPrisma as any);
+    platformOrgsService = new PlatformOrganizationsService(mockPrisma);
   });
 
   describe('1. Database Migration & Immutability Trigger Validation', () => {
@@ -133,17 +139,27 @@ describe('P0 AuditLog Immutability & Tamper-Resistance Security Suite', () => {
       const migrationSql = fs.readFileSync(migrationPath, 'utf8');
 
       // Must drop foreign key constraints to prevent cascade on user deletion
-      expect(migrationSql).toContain('ALTER TABLE "AuditLog" DROP CONSTRAINT IF EXISTS "AuditLog_userId_fkey";');
-      expect(migrationSql).toContain('ALTER TABLE "AuditLog" DROP CONSTRAINT IF EXISTS "AuditLog_targetUserId_fkey";');
+      expect(migrationSql).toContain(
+        'ALTER TABLE "AuditLog" DROP CONSTRAINT IF EXISTS "AuditLog_userId_fkey";',
+      );
+      expect(migrationSql).toContain(
+        'ALTER TABLE "AuditLog" DROP CONSTRAINT IF EXISTS "AuditLog_targetUserId_fkey";',
+      );
 
       // Must define PostgreSQL immutability trigger function
-      expect(migrationSql).toContain('CREATE OR REPLACE FUNCTION prevent_audit_log_mutation()');
-      expect(migrationSql).toContain("RAISE EXCEPTION 'AuditLog entries are immutable and cannot be updated or deleted.';");
+      expect(migrationSql).toContain(
+        'CREATE OR REPLACE FUNCTION prevent_audit_log_mutation()',
+      );
+      expect(migrationSql).toContain(
+        "RAISE EXCEPTION 'AuditLog entries are immutable and cannot be updated or deleted.';",
+      );
 
       // Must attach trigger BEFORE UPDATE OR DELETE
       expect(migrationSql).toContain('CREATE TRIGGER trg_audit_log_immutable');
       expect(migrationSql).toContain('BEFORE UPDATE OR DELETE ON "AuditLog"');
-      expect(migrationSql).toContain('FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_mutation();');
+      expect(migrationSql).toContain(
+        'FOR EACH ROW EXECUTE FUNCTION prevent_audit_log_mutation();',
+      );
     });
 
     it('ensures Prisma schema defines AuditLog relations as onDelete: NoAction', () => {
@@ -204,7 +220,10 @@ describe('P0 AuditLog Immutability & Tamper-Resistance Security Suite', () => {
         slug: 'target-org',
       });
 
-      await platformOrgsService.deleteOrganization('tenant-org-1', 'super-admin-usr');
+      await platformOrgsService.deleteOrganization(
+        'tenant-org-1',
+        'super-admin-usr',
+      );
 
       // AuditLog.deleteMany MUST NEVER be called
       expect(mockPrisma.auditLog.deleteMany).not.toHaveBeenCalled();

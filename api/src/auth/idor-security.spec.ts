@@ -6,8 +6,18 @@ describe('P5 IDOR & Tenant Boundary Protection Suite', () => {
   beforeEach(() => {
     mockDatabase = {
       leads: [
-        { id: 'lead-t1-1', tenantId: 'tenant-1', title: 'Lead 1', assignedTo: 'usr-1' },
-        { id: 'lead-t2-1', tenantId: 'tenant-2', title: 'Lead 2', assignedTo: 'usr-2' },
+        {
+          id: 'lead-t1-1',
+          tenantId: 'tenant-1',
+          title: 'Lead 1',
+          assignedTo: 'usr-1',
+        },
+        {
+          id: 'lead-t2-1',
+          tenantId: 'tenant-2',
+          title: 'Lead 2',
+          assignedTo: 'usr-2',
+        },
       ],
       customers: [
         { id: 'cust-t1-1', tenantId: 'tenant-1', name: 'Acme Client' },
@@ -20,12 +30,18 @@ describe('P5 IDOR & Tenant Boundary Protection Suite', () => {
     const lead = mockDatabase.leads.find((l: any) => l.id === id);
     if (!lead) throw new NotFoundException('Lead not found');
     if (lead.tenantId !== requesterTenantId) {
-      throw new ForbiddenException('Access denied: cross-tenant access forbidden');
+      throw new ForbiddenException(
+        'Access denied: cross-tenant access forbidden',
+      );
     }
     return lead;
   };
 
-  const updateLeadScoped = (id: string, data: any, requesterTenantId: string) => {
+  const updateLeadScoped = (
+    id: string,
+    data: any,
+    requesterTenantId: string,
+  ) => {
     const lead = getLeadByIdScoped(id, requesterTenantId);
     return { ...lead, ...data };
   };

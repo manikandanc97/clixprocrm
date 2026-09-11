@@ -14,7 +14,11 @@ import {
 } from '@nestjs/common';
 import { AuthService, invalidateGetMeCache } from './auth.service';
 import { SessionsService } from './sessions.service';
-import { SupabaseAuthGuard, invalidateTokenUserCache, invalidateSessionCache } from './supabase.guard';
+import {
+  SupabaseAuthGuard,
+  invalidateTokenUserCache,
+  invalidateSessionCache,
+} from './supabase.guard';
 import { TenantGuard, invalidateUserTenantCache } from './tenant.guard';
 import { AalGuard } from './aal.guard';
 import {
@@ -111,7 +115,11 @@ export class AuthController {
     }
 
     // 2. Check if multipart/form-data
-    if (!fileBuffer && typeof req.isMultipart === 'function' && req.isMultipart()) {
+    if (
+      !fileBuffer &&
+      typeof req.isMultipart === 'function' &&
+      req.isMultipart()
+    ) {
       try {
         const file = await req.file();
         if (file) {

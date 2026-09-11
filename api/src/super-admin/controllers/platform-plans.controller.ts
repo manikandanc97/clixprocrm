@@ -30,10 +30,7 @@ export class PlatformPlansController {
   }
 
   @Post()
-  async createPlan(
-    @Body() body: CreatePlatformPlanDto,
-    @Req() req: any,
-  ) {
+  async createPlan(@Body() body: CreatePlatformPlanDto, @Req() req: any) {
     const actorId = req.user?.id || req.user?.sub;
     const plan = await this.platformPlansService.createPlan(body, actorId);
     return { success: true, plan, message: 'Plan created successfully.' };
@@ -51,27 +48,31 @@ export class PlatformPlansController {
       body,
       actorId,
     );
-    return { success: true, plan: updated, message: 'Plan updated successfully.' };
+    return {
+      success: true,
+      plan: updated,
+      message: 'Plan updated successfully.',
+    };
   }
 
   @Patch(':id/archive')
-  async archivePlan(
-    @Param('id') planId: string,
-    @Req() req: any,
-  ) {
+  async archivePlan(@Param('id') planId: string, @Req() req: any) {
     const actorId = req.user?.id || req.user?.sub;
-    const updated = await this.platformPlansService.archivePlan(planId, actorId);
-    return { success: true, plan: updated, message: 'Plan archived successfully.' };
+    const updated = await this.platformPlansService.archivePlan(
+      planId,
+      actorId,
+    );
+    return {
+      success: true,
+      plan: updated,
+      message: 'Plan archived successfully.',
+    };
   }
 
   @Delete(':id')
-  async deletePlan(
-    @Param('id') planId: string,
-    @Req() req: any,
-  ) {
+  async deletePlan(@Param('id') planId: string, @Req() req: any) {
     const actorId = req.user?.id || req.user?.sub;
     const result = await this.platformPlansService.deletePlan(planId, actorId);
     return { success: true, ...result, message: 'Plan deleted successfully.' };
   }
 }
-

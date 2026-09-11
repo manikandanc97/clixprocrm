@@ -6,7 +6,8 @@ import { SecurityAlertsService } from './security-alerts.service';
 import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
 import type { AggregateQueueMetrics } from '../../queue/interfaces/queue-metrics.interface';
 
-export type HealthStatus = 'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'NOT_CONFIGURED' | 'UNKNOWN';
+export type HealthStatus =
+  'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'NOT_CONFIGURED' | 'UNKNOWN';
 
 export interface ComponentHealth {
   status: HealthStatus;
@@ -88,7 +89,11 @@ export class SecurityOperationsService {
 
     // 2. Authentication Engine Check (Supabase Auth & JWT Guards)
     try {
-      const hasSupabaseUrl = Boolean(process.env.SUPABASE_URL && (process.env.SUPABASE_ANON_KEY || process.env.SUPABASE_SERVICE_ROLE_KEY));
+      const hasSupabaseUrl = Boolean(
+        process.env.SUPABASE_URL &&
+        (process.env.SUPABASE_ANON_KEY ||
+          process.env.SUPABASE_SERVICE_ROLE_KEY),
+      );
       if (hasSupabaseUrl) {
         rows.push({
           service: 'Authentication',
@@ -101,7 +106,8 @@ export class SecurityOperationsService {
           service: 'Authentication',
           status: 'Warning',
           lastChecked: nowStr,
-          detail: 'Supabase auth credentials operating with fallback configuration',
+          detail:
+            'Supabase auth credentials operating with fallback configuration',
         });
       }
     } catch (authErr: any) {
@@ -136,9 +142,11 @@ export class SecurityOperationsService {
     // 4. Storage Subsystem Check
     try {
       const isS3Configured = Boolean(
-        (process.env.AWS_S3_AUDIT_BUCKET || process.env.AUDIT_ARCHIVE_BUCKET || process.env.AWS_BUCKET) &&
+        (process.env.AWS_S3_AUDIT_BUCKET ||
+          process.env.AUDIT_ARCHIVE_BUCKET ||
+          process.env.AWS_BUCKET) &&
         process.env.AWS_ACCESS_KEY_ID &&
-        process.env.AWS_SECRET_ACCESS_KEY
+        process.env.AWS_SECRET_ACCESS_KEY,
       );
 
       rows.push({
@@ -160,30 +168,43 @@ export class SecurityOperationsService {
 
     // 5. Background Jobs Subsystem Check (BullMQ Queues + Database Outbox)
     try {
-      const outboxPending = await (this.prisma as any).auditArchiveOutbox?.count({
-        where: { status: 'PENDING' },
-      }).catch(() => 0);
+      const outboxPending = await (this.prisma as any).auditArchiveOutbox
+        ?.count({
+          where: { status: 'PENDING' },
+        })
+        .catch(() => 0);
 
-      const outboxFailed = await (this.prisma as any).auditArchiveOutbox?.count({
-        where: { status: 'FAILED' },
-      }).catch(() => 0);
+      const outboxFailed = await (this.prisma as any).auditArchiveOutbox
+        ?.count({
+          where: { status: 'FAILED' },
+        })
+        .catch(() => 0);
 
       let queueMetrics: AggregateQueueMetrics | null = null;
       if (this.queueMetricsService) {
-        queueMetrics = await this.queueMetricsService.getAggregateMetrics().catch(() => null);
+        queueMetrics = await this.queueMetricsService
+          .getAggregateMetrics()
+          .catch(() => null);
       }
 
-      const totalFailed = (outboxFailed || 0) + (queueMetrics?.totalFailed || 0);
-      const totalPending = (outboxPending || 0) + (queueMetrics?.totalWaiting || 0) + (queueMetrics?.totalActive || 0);
+      const totalFailed =
+        (outboxFailed || 0) + (queueMetrics?.totalFailed || 0);
+      const totalPending =
+        (outboxPending || 0) +
+        (queueMetrics?.totalWaiting || 0) +
+        (queueMetrics?.totalActive || 0);
 
-      const isCritical = queueMetrics?.status === 'CRITICAL' || totalFailed > 30;
-      const isWarning = isCritical || queueMetrics?.status === 'WARNING' || totalFailed > 10;
+      const isCritical =
+        queueMetrics?.status === 'CRITICAL' || totalFailed > 30;
+      const isWarning =
+        isCritical || queueMetrics?.status === 'WARNING' || totalFailed > 10;
 
       let detail = '';
       if (queueMetrics && queueMetrics.queues.length > 0) {
-        detail = totalFailed > 0
-          ? `${queueMetrics.queues.length} queues operational (${totalFailed} failed/dead-letter, ${totalPending} pending/active)`
-          : `${queueMetrics.queues.length} queues healthy (${queueMetrics.totalCompleted} completed, ${totalPending} pending/active)`;
+        detail =
+          totalFailed > 0
+            ? `${queueMetrics.queues.length} queues operational (${totalFailed} failed/dead-letter, ${totalPending} pending/active)`
+            : `${queueMetrics.queues.length} queues healthy (${queueMetrics.totalCompleted} completed, ${totalPending} pending/active)`;
       } else {
         detail = isWarning
           ? `${outboxFailed} failed background job(s) requiring inspection`
@@ -208,9 +229,13 @@ export class SecurityOperationsService {
     // 6. Audit Logging Subsystem Check
     try {
       const auditCount = await this.prisma.auditLog.count();
-      const integrityStatus = await this.integrityMonitor.getSystemStatus().catch(() => null);
+      const integrityStatus = await this.integrityMonitor
+        .getSystemStatus()
+        .catch(() => null);
 
-      const hasBroken = (integrityStatus?.brokenLinks || 0) > 0 || (integrityStatus?.hashMismatches || 0) > 0;
+      const hasBroken =
+        (integrityStatus?.brokenLinks || 0) > 0 ||
+        (integrityStatus?.hashMismatches || 0) > 0;
       rows.push({
         service: 'Audit Logging',
         status: hasBroken ? 'Warning' : 'Healthy',
@@ -237,18 +262,20 @@ export class SecurityOperationsService {
   async getSecOpsSummary(): Promise<SecOpsSummaryReport> {
     const servicesHealth = await this.getPlatformSecurityHealth();
 
-    const [unresolvedAlertsCount, unresolvedIncidentsCount] = await Promise.all([
-      (this.prisma as any).securityAlert?.count
-        ? (this.prisma as any).securityAlert.count({
-            where: { status: { in: ['OPEN', 'ACKNOWLEDGED'] } },
-          })
-        : Promise.resolve(0),
-      (this.prisma as any).securityIncident?.count
-        ? (this.prisma as any).securityIncident.count({
-            where: { status: { in: ['OPEN', 'INVESTIGATING', 'CONTAINED'] } },
-          })
-        : Promise.resolve(0),
-    ]);
+    const [unresolvedAlertsCount, unresolvedIncidentsCount] = await Promise.all(
+      [
+        (this.prisma as any).securityAlert?.count
+          ? (this.prisma as any).securityAlert.count({
+              where: { status: { in: ['OPEN', 'ACKNOWLEDGED'] } },
+            })
+          : Promise.resolve(0),
+        (this.prisma as any).securityIncident?.count
+          ? (this.prisma as any).securityIncident.count({
+              where: { status: { in: ['OPEN', 'INVESTIGATING', 'CONTAINED'] } },
+            })
+          : Promise.resolve(0),
+      ],
+    );
 
     const totalServicesCount = servicesHealth.length;
     const operationalServicesCount = servicesHealth.filter(
@@ -258,12 +285,18 @@ export class SecurityOperationsService {
     const hasUnavailableCritical = servicesHealth.some(
       (s) => s.service === 'Database' && s.status === 'Unavailable',
     );
-    const hasManyWarnings = servicesHealth.filter((s) => s.status === 'Warning').length >= 3;
+    const hasManyWarnings =
+      servicesHealth.filter((s) => s.status === 'Warning').length >= 3;
     const hasCriticalIncidents = unresolvedIncidentsCount > 5;
 
-    const isDegraded = hasUnavailableCritical || hasManyWarnings || hasCriticalIncidents;
-    const overallStatus: 'HEALTHY' | 'DEGRADED' = isDegraded ? 'DEGRADED' : 'HEALTHY';
-    const overallStatusBadge = isDegraded ? 'Attention Required' : 'System Healthy';
+    const isDegraded =
+      hasUnavailableCritical || hasManyWarnings || hasCriticalIncidents;
+    const overallStatus: 'HEALTHY' | 'DEGRADED' = isDegraded
+      ? 'DEGRADED'
+      : 'HEALTHY';
+    const overallStatusBadge = isDegraded
+      ? 'Attention Required'
+      : 'System Healthy';
 
     return {
       overallStatus,
@@ -288,8 +321,17 @@ export class SecurityOperationsService {
     const summary = await this.getSecOpsSummary();
     return {
       overallStatus: summary.overallStatus,
-      database: { status: summary.servicesHealth.find(s => s.service === 'Database')?.status === 'Healthy' ? 'HEALTHY' : 'DEGRADED' },
-      redis: { status: 'NOT_CONFIGURED', message: 'Operating with memory fallback' },
+      database: {
+        status:
+          summary.servicesHealth.find((s) => s.service === 'Database')
+            ?.status === 'Healthy'
+            ? 'HEALTHY'
+            : 'DEGRADED',
+      },
+      redis: {
+        status: 'NOT_CONFIGURED',
+        message: 'Operating with memory fallback',
+      },
       auditIntegrity: { status: 'HEALTHY' },
       wormArchive: { status: 'NOT_CONFIGURED' },
       incidentSystem: { status: 'HEALTHY' },

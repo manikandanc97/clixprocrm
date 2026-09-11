@@ -166,8 +166,15 @@ export class SubscriptionController {
   @Post('verify-payment')
   @Roles('ADMIN')
   async verifyPayment(@Req() req: any, @Body() body: VerifyPaymentDto) {
-    if (!body?.orderId || !body?.paymentId || !body?.signature || !body?.planId) {
-      throw new BadRequestException('orderId, paymentId, signature, and planId are required.');
+    if (
+      !body?.orderId ||
+      !body?.paymentId ||
+      !body?.signature ||
+      !body?.planId
+    ) {
+      throw new BadRequestException(
+        'orderId, paymentId, signature, and planId are required.',
+      );
     }
     const userId = req.user?.id || req.user?.sub;
     const result = await this.entitlementService.verifyAndActivatePayment(

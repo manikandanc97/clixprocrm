@@ -22,6 +22,7 @@ import { DealForm } from "@/features/forms/DealForm";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { DealContextualSettings } from "@/features/deals/components/DealContextualSettings";
 import { useAuth } from "@/features/auth/components/auth-provider";
+import { PipelineLeadType, DealStage } from "@/shared/types/pipeline";
 
 const DealsPage = () => {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
@@ -30,22 +31,23 @@ const DealsPage = () => {
   const { data: pipelineData, isLoading: pipelineLoading, isPending: pipelinePending, error: pipelineError, refetch: refetchPipeline } = usePipeline();
 
   const { pipelineItems, setPipelineItems } = useCRMStore();
-  const safePipelineItems = Array.isArray(pipelineItems) ? pipelineItems : [];
 
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
   const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>();
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [selectedDeal, setSelectedDeal] = useState<any | null>(null);
+  const [selectedDeal, setSelectedDeal] = useState<PipelineLeadType | null>(null);
   const [preselectedStage, setPreselectedStage] = useState<string | undefined>();
 
   useEffect(() => {
     const cust = searchParams.get("customize");
     if (cust) {
-      if (cust !== "true") {
-        setCustomizeDefaultSection(cust);
-      }
-      setIsCustomizeOpen(true);
+      const timer = setTimeout(() => {
+        if (cust !== "true") {
+          setCustomizeDefaultSection(cust);
+        }
+        setIsCustomizeOpen(true);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [searchParams]);
 
@@ -74,10 +76,11 @@ const DealsPage = () => {
   const isInitialLoading = !pipelineData && (pipelineLoading || pipelinePending || !isHydrated || !isAuthenticated || isInitializing);
 
   const sortedPipelineItems = useMemo(() => {
-    return [...safePipelineItems].sort(
+    const items = Array.isArray(pipelineItems) ? pipelineItems : [];
+    return [...items].sort(
       (a, b) => new Date(b.createdAt || 0).getTime() - new Date(a.createdAt || 0).getTime()
     );
-  }, [safePipelineItems]);
+  }, [pipelineItems]);
 
   if (isInitialLoading) {
     return <DealsSkeleton />;
@@ -114,7 +117,7 @@ const DealsPage = () => {
         }}
       />
 
-      {safePipelineItems.length === 0 ? (
+      {sortedPipelineItems.length === 0 ? (
         <div className="flex-1 min-h-0 flex flex-col mt-4">
           <EmptyState
             module="deals"
@@ -156,8 +159,7 @@ const DealsPage = () => {
       >
         <DealForm 
           initialData={selectedDeal || undefined}
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          initialStage={preselectedStage as any}
+          initialStage={preselectedStage as DealStage | undefined}
           onSuccess={() => { setIsAddModalOpen(false); setSelectedDeal(null); refetchPipeline(); }} 
           onCancel={() => { setIsAddModalOpen(false); setSelectedDeal(null); }} 
         />

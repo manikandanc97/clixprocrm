@@ -10,7 +10,9 @@ export class PrismaSeedService implements OnModuleInit {
   onModuleInit() {
     // Run canonical sync in background after ensuring DB connection is ready
     this.runCanonicalSeed().catch((err) => {
-      this.logger.error(`Error during canonical data initialization: ${err?.message || err}`);
+      this.logger.error(
+        `Error during canonical data initialization: ${err?.message || err}`,
+      );
     });
   }
 
@@ -23,9 +25,13 @@ export class PrismaSeedService implements OnModuleInit {
       await this.seedCanonicalAiModels();
       await this.seedCanonicalEntitlements();
       await this.seedPlatformConfig();
-      this.logger.log('Canonical Plans, AI Models, and Entitlements synchronized successfully.');
+      this.logger.log(
+        'Canonical Plans, AI Models, and Entitlements synchronized successfully.',
+      );
     } catch (err: any) {
-      this.logger.warn(`Canonical seed encountered non-fatal error: ${err?.message || err}`);
+      this.logger.warn(
+        `Canonical seed encountered non-fatal error: ${err?.message || err}`,
+      );
     }
   }
 
@@ -166,7 +172,8 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'gemini-2.5-flash',
         displayName: 'Gemini 2.5 Flash',
         provider: 'google',
-        description: 'Ultra-fast, economical intelligence for daily conversational CRM tasks.',
+        description:
+          'Ultra-fast, economical intelligence for daily conversational CRM tasks.',
         contextWindow: 1048576,
         inputCostPer1k: 0.000075,
         outputCostPer1k: 0.0003,
@@ -182,11 +189,21 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'gemini-2.5-pro',
         displayName: 'Gemini 2.5 Pro',
         provider: 'google',
-        description: 'Deep reasoning, complex document understanding, and multi-step CRM action execution.',
+        description:
+          'Deep reasoning, complex document understanding, and multi-step CRM action execution.',
         contextWindow: 2097152,
         inputCostPer1k: 0.00125,
         outputCostPer1k: 0.005,
-        capabilities: ['chat', 'summarization', 'lead_scoring', 'email_generation', 'document_analysis', 'rag', 'function_calling', 'advanced_reasoning'],
+        capabilities: [
+          'chat',
+          'summarization',
+          'lead_scoring',
+          'email_generation',
+          'document_analysis',
+          'rag',
+          'function_calling',
+          'advanced_reasoning',
+        ],
         status: 'ENABLED',
         isChatModel: true,
         isAvailable: true,
@@ -215,11 +232,18 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'gpt-4o',
         displayName: 'GPT-4o (Omni)',
         provider: 'openai',
-        description: 'Flagship high-intelligence multimodal model for advanced sales intelligence and customer communications.',
+        description:
+          'Flagship high-intelligence multimodal model for advanced sales intelligence and customer communications.',
         contextWindow: 128000,
         inputCostPer1k: 0.0025,
         outputCostPer1k: 0.01,
-        capabilities: ['chat', 'summarization', 'lead_scoring', 'email_generation', 'function_calling'],
+        capabilities: [
+          'chat',
+          'summarization',
+          'lead_scoring',
+          'email_generation',
+          'function_calling',
+        ],
         status: 'ENABLED',
         isChatModel: true,
         isAvailable: true,
@@ -230,7 +254,8 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'gpt-4o-mini',
         displayName: 'GPT-4o Mini',
         provider: 'openai',
-        description: 'Lightweight, cost-efficient model for fast standard sales responses.',
+        description:
+          'Lightweight, cost-efficient model for fast standard sales responses.',
         contextWindow: 128000,
         inputCostPer1k: 0.00015,
         outputCostPer1k: 0.0006,
@@ -245,11 +270,17 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'gpt-5',
         displayName: 'GPT-5 (Next-Gen Preview)',
         provider: 'openai',
-        description: 'Next-generation frontier model for deep enterprise analytics.',
+        description:
+          'Next-generation frontier model for deep enterprise analytics.',
         contextWindow: 200000,
         inputCostPer1k: 0.005,
         outputCostPer1k: 0.015,
-        capabilities: ['chat', 'summarization', 'lead_scoring', 'advanced_reasoning'],
+        capabilities: [
+          'chat',
+          'summarization',
+          'lead_scoring',
+          'advanced_reasoning',
+        ],
         status: 'ENABLED',
         isChatModel: true,
         isAvailable: true,
@@ -261,11 +292,18 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'claude-3-7-sonnet',
         displayName: 'Claude 3.7 Sonnet',
         provider: 'anthropic',
-        description: 'Hybrid reasoning and state-of-the-art coding and business workflow assistant.',
+        description:
+          'Hybrid reasoning and state-of-the-art coding and business workflow assistant.',
         contextWindow: 200000,
         inputCostPer1k: 0.003,
         outputCostPer1k: 0.015,
-        capabilities: ['chat', 'summarization', 'document_analysis', 'advanced_reasoning', 'function_calling'],
+        capabilities: [
+          'chat',
+          'summarization',
+          'document_analysis',
+          'advanced_reasoning',
+          'function_calling',
+        ],
         status: 'ENABLED',
         isChatModel: true,
         isAvailable: true,
@@ -276,7 +314,8 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'claude-3-5-haiku',
         displayName: 'Claude 3.5 Haiku',
         provider: 'anthropic',
-        description: 'Ultra-fast, responsive Anthropic model for instant customer query resolution.',
+        description:
+          'Ultra-fast, responsive Anthropic model for instant customer query resolution.',
         contextWindow: 200000,
         inputCostPer1k: 0.0008,
         outputCostPer1k: 0.004,
@@ -292,7 +331,8 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'grok-2',
         displayName: 'Grok 2',
         provider: 'xai',
-        description: 'Frontier reasoning model with deep web and real-time comprehension.',
+        description:
+          'Frontier reasoning model with deep web and real-time comprehension.',
         contextWindow: 128000,
         inputCostPer1k: 0.002,
         outputCostPer1k: 0.01,
@@ -307,7 +347,8 @@ export class PrismaSeedService implements OnModuleInit {
         modelKey: 'mistral-large',
         displayName: 'Mistral Large',
         provider: 'mistral',
-        description: 'Top-tier multilingual reasoning and concise CRM assistant.',
+        description:
+          'Top-tier multilingual reasoning and concise CRM assistant.',
         contextWindow: 128000,
         inputCostPer1k: 0.002,
         outputCostPer1k: 0.006,
@@ -350,7 +391,9 @@ export class PrismaSeedService implements OnModuleInit {
 
   async seedCanonicalEntitlements() {
     const modelRecords = await (this.prisma as any).aiModel.findMany();
-    const modelMap = new Map<string, any>(modelRecords.map((m: any) => [m.modelKey, m]));
+    const modelMap = new Map<string, any>(
+      modelRecords.map((m: any) => [m.modelKey, m]),
+    );
 
     // Canonical Entitlement definitions
     const planEntitlements: Record<
@@ -370,32 +413,92 @@ export class PrismaSeedService implements OnModuleInit {
       },
       starter: {
         defaultModelKey: 'gemini-2.5-flash',
-        allowedModelKeys: ['gemini-2.5-flash', 'gemini-1.5-flash', 'gpt-4o-mini'],
+        allowedModelKeys: [
+          'gemini-2.5-flash',
+          'gemini-1.5-flash',
+          'gpt-4o-mini',
+        ],
         capabilities: ['chat', 'summarization'],
         maxTokensPerDay: 25000,
       },
       growth: {
         defaultModelKey: 'gemini-2.5-flash',
-        allowedModelKeys: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gpt-4o', 'gpt-4o-mini', 'claude-3-5-haiku'],
-        capabilities: ['chat', 'summarization', 'lead_scoring', 'email_generation', 'function_calling', 'advanced_reasoning'],
+        allowedModelKeys: [
+          'gemini-2.5-flash',
+          'gemini-2.5-pro',
+          'gpt-4o',
+          'gpt-4o-mini',
+          'claude-3-5-haiku',
+        ],
+        capabilities: [
+          'chat',
+          'summarization',
+          'lead_scoring',
+          'email_generation',
+          'function_calling',
+          'advanced_reasoning',
+        ],
         maxTokensPerDay: 75000,
       },
       pro: {
         defaultModelKey: 'gemini-2.5-flash',
-        allowedModelKeys: ['gemini-2.5-flash', 'gemini-2.5-pro', 'gpt-4o', 'gpt-4o-mini', 'claude-3-5-haiku'],
-        capabilities: ['chat', 'summarization', 'lead_scoring', 'email_generation', 'function_calling', 'advanced_reasoning'],
+        allowedModelKeys: [
+          'gemini-2.5-flash',
+          'gemini-2.5-pro',
+          'gpt-4o',
+          'gpt-4o-mini',
+          'claude-3-5-haiku',
+        ],
+        capabilities: [
+          'chat',
+          'summarization',
+          'lead_scoring',
+          'email_generation',
+          'function_calling',
+          'advanced_reasoning',
+        ],
         maxTokensPerDay: 75000,
       },
       business: {
         defaultModelKey: 'claude-3-7-sonnet',
-        allowedModelKeys: ['claude-3-7-sonnet', 'claude-3-5-haiku', 'gpt-4o', 'gemini-2.5-pro', 'gemini-2.5-flash'],
-        capabilities: ['chat', 'summarization', 'lead_scoring', 'email_generation', 'document_analysis', 'rag', 'function_calling', 'advanced_reasoning'],
+        allowedModelKeys: [
+          'claude-3-7-sonnet',
+          'claude-3-5-haiku',
+          'gpt-4o',
+          'gemini-2.5-pro',
+          'gemini-2.5-flash',
+        ],
+        capabilities: [
+          'chat',
+          'summarization',
+          'lead_scoring',
+          'email_generation',
+          'document_analysis',
+          'rag',
+          'function_calling',
+          'advanced_reasoning',
+        ],
         maxTokensPerDay: 200000,
       },
       pro_plus: {
         defaultModelKey: 'claude-3-7-sonnet',
-        allowedModelKeys: ['claude-3-7-sonnet', 'claude-3-5-haiku', 'gpt-4o', 'gemini-2.5-pro', 'gemini-2.5-flash'],
-        capabilities: ['chat', 'summarization', 'lead_scoring', 'email_generation', 'document_analysis', 'rag', 'function_calling', 'advanced_reasoning'],
+        allowedModelKeys: [
+          'claude-3-7-sonnet',
+          'claude-3-5-haiku',
+          'gpt-4o',
+          'gemini-2.5-pro',
+          'gemini-2.5-flash',
+        ],
+        capabilities: [
+          'chat',
+          'summarization',
+          'lead_scoring',
+          'email_generation',
+          'document_analysis',
+          'rag',
+          'function_calling',
+          'advanced_reasoning',
+        ],
         maxTokensPerDay: 200000,
       },
       enterprise: {
@@ -418,8 +521,14 @@ export class PrismaSeedService implements OnModuleInit {
 
     try {
       // Fetch all existing entitlements in 1 query
-      const existingList = await (this.prisma as any).planAiEntitlement.findMany();
-      const existingKeys = new Set(existingList.map((e: any) => `${e.planId}_${e.modelId}_${e.capability}`));
+      const existingList = await (
+        this.prisma as any
+      ).planAiEntitlement.findMany();
+      const existingKeys = new Set(
+        existingList.map(
+          (e: any) => `${e.planId}_${e.modelId}_${e.capability}`,
+        ),
+      );
 
       const toCreate: any[] = [];
       const defaultModelUpdates: { planId: string; modelId: string }[] = [];
@@ -454,7 +563,9 @@ export class PrismaSeedService implements OnModuleInit {
 
         // If plan has no defaultModelId assigned yet, set the canonical initial default
         if (!plan.defaultModelId) {
-          const defaultModel = modelMap.get(config.defaultModelKey) || modelMap.get('gemini-2.5-flash');
+          const defaultModel =
+            modelMap.get(config.defaultModelKey) ||
+            modelMap.get('gemini-2.5-flash');
           if (defaultModel) {
             defaultModelUpdates.push({ planId, modelId: defaultModel.id });
           }
@@ -498,4 +609,3 @@ export class PrismaSeedService implements OnModuleInit {
     });
   }
 }
-

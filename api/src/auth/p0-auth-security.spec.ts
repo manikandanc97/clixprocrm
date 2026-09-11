@@ -1,9 +1,18 @@
-import { ExecutionContext, UnauthorizedException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { TenantGuard, invalidateUserTenantCache } from './tenant.guard';
 import { SupabaseAuthGuard, invalidateTokenUserCache } from './supabase.guard';
 import { AuthController } from './auth.controller';
 import { AuthService, invalidateGetMeCache } from './auth.service';
-import { checkRateLimit, resetRateLimit, RATE_LIMITS } from '../common/utils/rate-limit.util';
+import {
+  checkRateLimit,
+  resetRateLimit,
+  RATE_LIMITS,
+} from '../common/utils/rate-limit.util';
 
 describe('P0 Authentication & Session Security Tests', () => {
   let tenantGuard: TenantGuard;
@@ -56,7 +65,10 @@ describe('P0 Authentication & Session Security Tests', () => {
   });
 
   describe('1. TenantGuard Inactive / Suspended User Blocking (P0 Critical)', () => {
-    function createMockContext(user: any, headers: Record<string, string> = {}): ExecutionContext {
+    function createMockContext(
+      user: any,
+      headers: Record<string, string> = {},
+    ): ExecutionContext {
       const request: any = {
         user,
         headers,
@@ -83,8 +95,15 @@ describe('P0 Authentication & Session Security Tests', () => {
                 {
                   tenantId: 'tenant-1',
                   status: 'ACTIVE',
-                  role: { name: 'EMPLOYEE', permissions: [{ module: 'DEALS', hasAccess: true }] },
-                  tenant: { id: 'tenant-1', name: 'Acme Corp', status: 'ACTIVE' },
+                  role: {
+                    name: 'EMPLOYEE',
+                    permissions: [{ module: 'DEALS', hasAccess: true }],
+                  },
+                  tenant: {
+                    id: 'tenant-1',
+                    name: 'Acme Corp',
+                    status: 'ACTIVE',
+                  },
                 },
               ],
             }),
@@ -254,7 +273,8 @@ describe('P0 Authentication & Session Security Tests', () => {
         ip: '192.168.1.30',
       };
       const body = { email: 'forgot@example.com' };
-      const testIdentifier = 'auth:forgot-password:192.168.1.30:forgot@example.com';
+      const testIdentifier =
+        'auth:forgot-password:192.168.1.30:forgot@example.com';
       resetRateLimit(testIdentifier);
 
       for (let i = 0; i < 3; i++) {
@@ -282,9 +302,9 @@ describe('P0 Authentication & Session Security Tests', () => {
         expect(res.success).toBe(true);
       }
 
-      await expect(authController.resetPasswordRateLimit(req, {})).rejects.toThrow(
-        HttpException,
-      );
+      await expect(
+        authController.resetPasswordRateLimit(req, {}),
+      ).rejects.toThrow(HttpException);
 
       resetRateLimit(testIdentifier);
     });

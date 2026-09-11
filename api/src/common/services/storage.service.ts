@@ -27,7 +27,9 @@ export class StorageService {
       process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
     if (!supabaseUrl || !supabaseKey) {
-      throw new BadRequestException('Supabase storage configuration is missing');
+      throw new BadRequestException(
+        'Supabase storage configuration is missing',
+      );
     }
 
     this.supabaseClient = createClient(supabaseUrl, supabaseKey, {
@@ -49,12 +51,16 @@ export class StorageService {
             public: true,
             fileSizeLimit: '25MB',
           });
-          this.logger.log(`Created Supabase storage bucket: ${ATTACHMENTS_BUCKET}`);
+          this.logger.log(
+            `Created Supabase storage bucket: ${ATTACHMENTS_BUCKET}`,
+          );
         }
       }
       this.bucketChecked = true;
     } catch (err: any) {
-      this.logger.warn(`Storage attachments bucket initialization notice: ${err?.message || err}`);
+      this.logger.warn(
+        `Storage attachments bucket initialization notice: ${err?.message || err}`,
+      );
       this.bucketChecked = true;
     }
   }
@@ -99,7 +105,9 @@ export class StorageService {
       });
 
     if (uploadError) {
-      this.logger.error(`Supabase attachment upload error: ${uploadError.message}`);
+      this.logger.error(
+        `Supabase attachment upload error: ${uploadError.message}`,
+      );
       throw new BadRequestException(
         `Failed to store attachment in Supabase Storage: ${uploadError.message}`,
       );
@@ -134,7 +142,9 @@ export class StorageService {
       const supabase = this.getSupabase();
       await supabase.storage.from(ATTACHMENTS_BUCKET).remove([cleanPath]);
     } catch (err: any) {
-      this.logger.warn(`Failed to delete storage file ${storagePath}: ${err?.message || err}`);
+      this.logger.warn(
+        `Failed to delete storage file ${storagePath}: ${err?.message || err}`,
+      );
     }
   }
 }

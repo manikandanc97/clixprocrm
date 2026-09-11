@@ -2,10 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AuditArchiveService } from '../archive/audit-archive.service';
 import { AuditIntegrityAlertService } from './audit-integrity-alert.service';
-import {
-  verifyRecordHash,
-  AuditLogSealInput,
-} from '../audit-crypto.util';
+import { verifyRecordHash, AuditLogSealInput } from '../audit-crypto.util';
 
 export interface IntegrityReport {
   status: 'HEALTHY' | 'WARNING' | 'CRITICAL';
@@ -49,7 +46,10 @@ export class AuditIntegrityMonitorService {
   /**
    * Verifies the cryptographic chain and external WORM archive for recent records (Level 1).
    */
-  async verifyRecent(hours = 24, tenantId?: string | null): Promise<IntegrityReport> {
+  async verifyRecent(
+    hours = 24,
+    tenantId?: string | null,
+  ): Promise<IntegrityReport> {
     const since = new Date(Date.now() - hours * 60 * 60 * 1000);
     return this.runIntegrityVerification({ since, tenantId });
   }
@@ -112,7 +112,10 @@ export class AuditIntegrityMonitorService {
         });
       }
 
-      if (previousTimestamp && createdAtMs < previousTimestamp.getTime() - futureToleranceMs) {
+      if (
+        previousTimestamp &&
+        createdAtMs < previousTimestamp.getTime() - futureToleranceMs
+      ) {
         timestampAnomalies++;
         await this.alertService.dispatchAlert({
           type: 'AUDIT_TIMESTAMP_ANOMALY',
@@ -173,18 +176,21 @@ export class AuditIntegrityMonitorService {
             scope,
             recordId: record.id,
             severity: 'CRITICAL',
-            details: firstReason || `Cryptographic signature mismatch at ${record.id}`,
+            details:
+              firstReason || `Cryptographic signature mismatch at ${record.id}`,
           });
         }
       }
 
       // 3. External WORM Archive Verification
-      const archiveVerification = await this.archiveService.verifyArchivedRecord(record.id);
+      const archiveVerification =
+        await this.archiveService.verifyArchivedRecord(record.id);
       if (!archiveVerification.valid) {
         missingArchives++;
         if (!firstFailureId) {
           firstFailureId = record.id;
-          firstReason = archiveVerification.reason || 'Archive verification failed';
+          firstReason =
+            archiveVerification.reason || 'Archive verification failed';
         }
         if (archiveVerification.reason?.includes('mismatch')) {
           await this.alertService.dispatchAlert({
@@ -201,8 +207,12 @@ export class AuditIntegrityMonitorService {
     }
 
     // 4. Outbox Health Check
-    const staleThreshold = new Date(Date.now() - this.staleThresholdMinutes * 60 * 1000);
-    const staleOutboxItems = await (this.prisma as any).auditArchiveOutbox.findMany({
+    const staleThreshold = new Date(
+      Date.now() - this.staleThresholdMinutes * 60 * 1000,
+    );
+    const staleOutboxItems = await (
+      this.prisma as any
+    ).auditArchiveOutbox.findMany({
       where: {
         status: { in: ['PENDING', 'PROCESSING'] },
         createdAt: { lte: staleThreshold },
@@ -211,7 +221,9 @@ export class AuditIntegrityMonitorService {
     });
     const staleOutboxRecords = staleOutboxItems.length;
 
-    const failedOutboxItems = await (this.prisma as any).auditArchiveOutbox.findMany({
+    const failedOutboxItems = await (
+      this.prisma as any
+    ).auditArchiveOutbox.findMany({
       where: { status: 'FAILED' },
       take: 50,
     });
@@ -239,13 +251,20 @@ export class AuditIntegrityMonitorService {
     let status: 'HEALTHY' | 'WARNING' | 'CRITICAL' = 'HEALTHY';
     if (brokenLinks > 0 || hashMismatches > 0) {
       status = 'CRITICAL';
-    } else if (missingArchives > 0 || staleOutboxRecords > 0 || failedArchives > 0 || timestampAnomalies > 0) {
+    } else if (
+      missingArchives > 0 ||
+      staleOutboxRecords > 0 ||
+      failedArchives > 0 ||
+      timestampAnomalies > 0
+    ) {
       status = 'WARNING';
     }
 
     const archiveCoveragePercent =
       records.length > 0
-        ? Math.round(((records.length - missingArchives) / records.length) * 100)
+        ? Math.round(
+            ((records.length - missingArchives) / records.length) * 100,
+          )
         : 100;
 
     const report: IntegrityReport = {

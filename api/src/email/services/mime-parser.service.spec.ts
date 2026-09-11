@@ -48,7 +48,10 @@ describe('MimeParserService Suite', () => {
 
     expect(result.internetMessageId).toBe('<reply-67890@example.com>');
     expect(result.inReplyTo).toBe('<parent-11111@example.com>');
-    expect(result.references).toEqual(['<root-00000@example.com>', '<parent-11111@example.com>']);
+    expect(result.references).toEqual([
+      '<root-00000@example.com>',
+      '<parent-11111@example.com>',
+    ]);
     expect(result.toRecipients).toEqual(['bob@example.com']);
     expect(result.ccRecipients).toEqual(['charlie@example.com']);
     expect(result.bodyHtml).toContain('<p>Thank you for the update!</p>');
@@ -80,7 +83,9 @@ describe('MimeParserService Suite', () => {
     expect(result.headers['dkim-signature']).toContain('v=1');
     expect(result.headers['return-path']).toContain('bounce@provider.com');
     expect(result.headers['auto-submitted']).toBe('auto-replied');
-    expect(result.headers['list-unsubscribe']).toContain('unsubscribe@provider.com');
+    expect(result.headers['list-unsubscribe']).toContain(
+      'unsubscribe@provider.com',
+    );
 
     // Sensitive / unapproved headers MUST NOT exist
     expect(result.headers['x-internal-secret']).toBeUndefined();
@@ -112,7 +117,9 @@ describe('MimeParserService Suite', () => {
       'Content-Disposition: inline; filename="logo.png"',
       'Content-Transfer-Encoding: base64',
       '',
-      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).toString('base64'),
+      Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]).toString(
+        'base64',
+      ),
       `--${boundary}--`,
     ].join('\r\n');
 
@@ -123,7 +130,9 @@ describe('MimeParserService Suite', () => {
     const txtAtt = result.attachments.find((a) => a.fileName === 'report.txt');
     expect(txtAtt).toBeDefined();
     expect(txtAtt?.contentType).toBe('text/plain');
-    expect(txtAtt?.content.toString('utf8').trim()).toBe('This is the attached report content.');
+    expect(txtAtt?.content.toString('utf8').trim()).toBe(
+      'This is the attached report content.',
+    );
     expect(txtAtt?.isInline).toBe(false);
 
     const inlineAtt = result.attachments.find((a) => a.fileName === 'logo.png');
@@ -134,7 +143,8 @@ describe('MimeParserService Suite', () => {
   });
 
   it('5. should handle malformed or empty headers safely without crashing', async () => {
-    const rawMime = '\r\n\r\nJust a raw text body without any RFC headers at all.';
+    const rawMime =
+      '\r\n\r\nJust a raw text body without any RFC headers at all.';
     const result = await parser.parseMime(rawMime);
 
     expect(result.internetMessageId).toBeNull();

@@ -59,13 +59,56 @@ function buildModelMocks() {
   return {
     $executeRaw: jest.fn().mockResolvedValue(undefined),
     $queryRaw: jest.fn().mockResolvedValue([]),
-    task: { updateMany: jest.fn().mockResolvedValue({}), findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn().mockResolvedValue(null), count: jest.fn().mockResolvedValue(0), create: jest.fn().mockResolvedValue({ id: 'task-1', title: 'Test', priority: 'MEDIUM', status: 'PENDING', visibility: 'PRIVATE', dueDate: null }), update: jest.fn().mockResolvedValue({ id: 'task-1', title: 'Test', status: 'COMPLETED', updatedAt: new Date() }), groupBy: jest.fn().mockResolvedValue([]) },
-    lead: { findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn().mockResolvedValue(null), count: jest.fn().mockResolvedValue(0), groupBy: jest.fn().mockResolvedValue([]) },
-    customer: { findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn().mockResolvedValue(null), count: jest.fn().mockResolvedValue(0) },
-    deal: { findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn().mockResolvedValue(null), count: jest.fn().mockResolvedValue(0), groupBy: jest.fn().mockResolvedValue([]) },
-    meeting: { findMany: jest.fn().mockResolvedValue([]), count: jest.fn().mockResolvedValue(0) },
-    quotation: { findMany: jest.fn().mockResolvedValue([]), findFirst: jest.fn().mockResolvedValue(null) },
-    tenantUser: { findFirst: jest.fn().mockResolvedValue(null), findMany: jest.fn().mockResolvedValue([]) },
+    task: {
+      updateMany: jest.fn().mockResolvedValue({}),
+      findMany: jest.fn().mockResolvedValue([]),
+      findFirst: jest.fn().mockResolvedValue(null),
+      count: jest.fn().mockResolvedValue(0),
+      create: jest.fn().mockResolvedValue({
+        id: 'task-1',
+        title: 'Test',
+        priority: 'MEDIUM',
+        status: 'PENDING',
+        visibility: 'PRIVATE',
+        dueDate: null,
+      }),
+      update: jest.fn().mockResolvedValue({
+        id: 'task-1',
+        title: 'Test',
+        status: 'COMPLETED',
+        updatedAt: new Date(),
+      }),
+      groupBy: jest.fn().mockResolvedValue([]),
+    },
+    lead: {
+      findMany: jest.fn().mockResolvedValue([]),
+      findFirst: jest.fn().mockResolvedValue(null),
+      count: jest.fn().mockResolvedValue(0),
+      groupBy: jest.fn().mockResolvedValue([]),
+    },
+    customer: {
+      findMany: jest.fn().mockResolvedValue([]),
+      findFirst: jest.fn().mockResolvedValue(null),
+      count: jest.fn().mockResolvedValue(0),
+    },
+    deal: {
+      findMany: jest.fn().mockResolvedValue([]),
+      findFirst: jest.fn().mockResolvedValue(null),
+      count: jest.fn().mockResolvedValue(0),
+      groupBy: jest.fn().mockResolvedValue([]),
+    },
+    meeting: {
+      findMany: jest.fn().mockResolvedValue([]),
+      count: jest.fn().mockResolvedValue(0),
+    },
+    quotation: {
+      findMany: jest.fn().mockResolvedValue([]),
+      findFirst: jest.fn().mockResolvedValue(null),
+    },
+    tenantUser: {
+      findFirst: jest.fn().mockResolvedValue(null),
+      findMany: jest.fn().mockResolvedValue([]),
+    },
     revenueTarget: { findFirst: jest.fn().mockResolvedValue(null) },
     auditLog: { create: jest.fn().mockResolvedValue({}) },
     timelineEvent: { findMany: jest.fn().mockResolvedValue([]) },
@@ -77,18 +120,26 @@ function buildModelMocks() {
 
 /** Records (tenantId, isSuperAdmin) tuples each time withTenantContext is called */
 function buildPrismaMock() {
-  const executedContexts: Array<{ tenantId?: string; isSuperAdmin?: boolean }> = [];
+  const executedContexts: Array<{ tenantId?: string; isSuperAdmin?: boolean }> =
+    [];
   // tx and prisma MUST have separate jest.fn() instances for isolation assertions
   const txMock: any = buildModelMocks();
   const prismaMockModels: any = buildModelMocks();
 
   const prismaMock: any = {
     ...prismaMockModels,
-    withTenantContext: jest.fn().mockImplementation(async (opts: any, fn: any) => {
-      executedContexts.push({ tenantId: opts.tenantId, isSuperAdmin: opts.isSuperAdmin ?? false });
-      return fn(txMock);
-    }),
-    withCurrentTenantContext: jest.fn().mockImplementation(async (fn: any) => fn(txMock)),
+    withTenantContext: jest
+      .fn()
+      .mockImplementation(async (opts: any, fn: any) => {
+        executedContexts.push({
+          tenantId: opts.tenantId,
+          isSuperAdmin: opts.isSuperAdmin ?? false,
+        });
+        return fn(txMock);
+      }),
+    withCurrentTenantContext: jest
+      .fn()
+      .mockImplementation(async (fn: any) => fn(txMock)),
     $transaction: jest.fn().mockImplementation(async (fn: any) => fn(txMock)),
     $connect: jest.fn(),
     $disconnect: jest.fn(),
@@ -96,7 +147,6 @@ function buildPrismaMock() {
 
   return { prismaMock, executedContexts, txMock };
 }
-
 
 // ─── TasksQueryService ────────────────────────────────────────────────────────
 
@@ -110,7 +160,9 @@ describe('TasksQueryService Phase 3', () => {
     ({ prismaMock, executedContexts, txMock } = buildPrismaMock());
 
     const exportMock = { exportTasks: jest.fn().mockResolvedValue([]) } as any;
-    const historyMock = { getTaskHistory: jest.fn().mockResolvedValue([]) } as any;
+    const historyMock = {
+      getTaskHistory: jest.fn().mockResolvedValue([]),
+    } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -142,9 +194,24 @@ describe('TasksQueryService Phase 3', () => {
 
   it('getTasks: calls withTenantContext with correct tenantId', async () => {
     txMock.$queryRaw.mockResolvedValue([
-      { tasks_json: [], filtered_count: 0, total_count: 0, pending_count: 0, in_progress_count: 0, completed_count: 0, blocked_count: 0, overdue_count: 0, due_today_count: 0 },
+      {
+        tasks_json: [],
+        filtered_count: 0,
+        total_count: 0,
+        pending_count: 0,
+        in_progress_count: 0,
+        completed_count: 0,
+        blocked_count: 0,
+        overdue_count: 0,
+        due_today_count: 0,
+      },
     ]);
-    await service.getTasks('tenant-C', { userId: 'user-1', role: 'ADMIN', page: 1, limit: 10 } as any);
+    await service.getTasks('tenant-C', {
+      userId: 'user-1',
+      role: 'ADMIN',
+      page: 1,
+      limit: 10,
+    });
     expect(prismaMock.withTenantContext).toHaveBeenCalledWith(
       expect.objectContaining({ tenantId: 'tenant-C' }),
       expect.any(Function),
@@ -154,18 +221,48 @@ describe('TasksQueryService Phase 3', () => {
 
   it('getTasks: uses tx.$queryRaw, not prisma.$queryRaw', async () => {
     txMock.$queryRaw.mockResolvedValue([
-      { tasks_json: [], filtered_count: 0, total_count: 0, pending_count: 0, in_progress_count: 0, completed_count: 0, blocked_count: 0, overdue_count: 0, due_today_count: 0 },
+      {
+        tasks_json: [],
+        filtered_count: 0,
+        total_count: 0,
+        pending_count: 0,
+        in_progress_count: 0,
+        completed_count: 0,
+        blocked_count: 0,
+        overdue_count: 0,
+        due_today_count: 0,
+      },
     ]);
-    await service.getTasks('tenant-D', { userId: 'user-1', role: 'ADMIN', page: 1, limit: 5 } as any);
+    await service.getTasks('tenant-D', {
+      userId: 'user-1',
+      role: 'ADMIN',
+      page: 1,
+      limit: 5,
+    });
     expect(txMock.$queryRaw).toHaveBeenCalled();
     expect(prismaMock.$queryRaw).not.toHaveBeenCalled();
   });
 
   it('getTasks: RBAC queries use tx.tenantUser, not prisma.tenantUser', async () => {
     txMock.$queryRaw.mockResolvedValue([
-      { tasks_json: [], filtered_count: 0, total_count: 0, pending_count: 0, in_progress_count: 0, completed_count: 0, blocked_count: 0, overdue_count: 0, due_today_count: 0 },
+      {
+        tasks_json: [],
+        filtered_count: 0,
+        total_count: 0,
+        pending_count: 0,
+        in_progress_count: 0,
+        completed_count: 0,
+        blocked_count: 0,
+        overdue_count: 0,
+        due_today_count: 0,
+      },
     ]);
-    await service.getTasks('tenant-E', { userId: 'user-1', role: 'EMPLOYEE', page: 1, limit: 5 } as any);
+    await service.getTasks('tenant-E', {
+      userId: 'user-1',
+      role: 'EMPLOYEE',
+      page: 1,
+      limit: 5,
+    });
     expect(txMock.tenantUser.findFirst).toHaveBeenCalled();
     expect(prismaMock.tenantUser.findFirst).not.toHaveBeenCalled();
   });
@@ -187,7 +284,17 @@ describe('TasksQueryService Phase 3', () => {
 
   it('cross-tenant isolation: separate calls use separate contexts', async () => {
     txMock.$queryRaw.mockResolvedValue([
-      { tasks_json: [], filtered_count: 0, total_count: 0, pending_count: 0, in_progress_count: 0, completed_count: 0, blocked_count: 0, overdue_count: 0, due_today_count: 0 },
+      {
+        tasks_json: [],
+        filtered_count: 0,
+        total_count: 0,
+        pending_count: 0,
+        in_progress_count: 0,
+        completed_count: 0,
+        blocked_count: 0,
+        overdue_count: 0,
+        due_today_count: 0,
+      },
     ]);
     await service.syncOverdueTasks('tenant-X');
     await service.syncOverdueTasks('tenant-Y');
@@ -207,15 +314,27 @@ describe('DashboardService Phase 3', () => {
   beforeEach(async () => {
     ({ prismaMock, executedContexts, txMock } = buildPrismaMock());
     // getCachedTenantCurrency hits prisma.tenant.findUnique directly (global table)
-    prismaMock.tenant = { findUnique: jest.fn().mockResolvedValue({ currency: 'INR' }) };
+    prismaMock.tenant = {
+      findUnique: jest.fn().mockResolvedValue({ currency: 'INR' }),
+    };
 
     txMock.$queryRaw.mockResolvedValue([
       {
-        total_deals: 0, current_period_deals: 0, prev_period_deals: 0,
-        current_period_revenue: 0, prev_period_revenue: 0,
-        current_period_customers: 0, prev_period_customers: 0,
-        pending_tasks_total: 0, current_period_pending_tasks: 0, prev_period_pending_tasks: 0,
-        month_index: 0, total: 0, day_date: new Date(), deal_count: 0, revenue: 0,
+        total_deals: 0,
+        current_period_deals: 0,
+        prev_period_deals: 0,
+        current_period_revenue: 0,
+        prev_period_revenue: 0,
+        current_period_customers: 0,
+        prev_period_customers: 0,
+        pending_tasks_total: 0,
+        current_period_pending_tasks: 0,
+        prev_period_pending_tasks: 0,
+        month_index: 0,
+        total: 0,
+        day_date: new Date(),
+        deal_count: 0,
+        revenue: 0,
       },
     ]);
 
@@ -279,11 +398,22 @@ describe('AnalyticsService Phase 3', () => {
     ({ prismaMock, executedContexts, txMock } = buildPrismaMock());
 
     txMock.$queryRaw.mockResolvedValue([
-      { leads_count: 0, prev_leads_count: 0, tasks_count: 0, prev_tasks_count: 0, customers_count: 0, prev_customers_count: 0 },
+      {
+        leads_count: 0,
+        prev_leads_count: 0,
+        tasks_count: 0,
+        prev_tasks_count: 0,
+        customers_count: 0,
+        prev_customers_count: 0,
+      },
     ]);
 
-    const revGrowthMock = { getRevenueGrowth: jest.fn().mockResolvedValue({}) } as any;
-    const insightsMock = { getAiInsights: jest.fn().mockResolvedValue([]) } as any;
+    const revGrowthMock = {
+      getRevenueGrowth: jest.fn().mockResolvedValue({}),
+    } as any;
+    const insightsMock = {
+      getAiInsights: jest.fn().mockResolvedValue([]),
+    } as any;
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -337,7 +467,9 @@ describe('AnalyticsRevenueGrowthService Phase 3', () => {
       ],
     }).compile();
 
-    service = module.get<AnalyticsRevenueGrowthService>(AnalyticsRevenueGrowthService);
+    service = module.get<AnalyticsRevenueGrowthService>(
+      AnalyticsRevenueGrowthService,
+    );
   });
 
   it('getRevenueGrowth: calls withTenantContext', async () => {
@@ -393,8 +525,13 @@ describe('AiSecurityService Phase 3', () => {
 
   it('logToolExecution: calls withTenantContext for auditLog', async () => {
     const ctx = {
-      userId: 'user-3', tenantId: 'tenant-ai-C', roleName: 'ADMIN',
-      isSystemAdmin: true, permissions: [], subordinateUserIds: [], teamUserIds: [],
+      userId: 'user-3',
+      tenantId: 'tenant-ai-C',
+      roleName: 'ADMIN',
+      isSystemAdmin: true,
+      permissions: [],
+      subordinateUserIds: [],
+      teamUserIds: [],
     };
     await service.logToolExecution(ctx, 'testTool', 'ALLOWED');
     expect(prismaMock.withTenantContext).toHaveBeenCalledWith(
@@ -422,8 +559,13 @@ describe('AI Tools Phase 3', () => {
   let aiSecurityMock: any;
   let encMock: any;
   const userContext: any = {
-    userId: 'user-ai', tenantId: 'tenant-tools', roleName: 'ADMIN',
-    isSystemAdmin: true, permissions: [], subordinateUserIds: [], teamUserIds: [],
+    userId: 'user-ai',
+    tenantId: 'tenant-tools',
+    roleName: 'ADMIN',
+    isSystemAdmin: true,
+    permissions: [],
+    subordinateUserIds: [],
+    teamUserIds: [],
   };
 
   beforeEach(() => {
@@ -431,18 +573,35 @@ describe('AI Tools Phase 3', () => {
     aiSecurityMock = {
       hasModulePermission: jest.fn().mockReturnValue(true),
       logToolExecution: jest.fn().mockResolvedValue(undefined),
-      getLeadsVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
-      getCustomersVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
-      getDealsVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
-      getTasksVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
-      getMeetingsVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-tools' }),
-      getQuotationsVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
+      getLeadsVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
+      getCustomersVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
+      getDealsVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
+      getTasksVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
+      getMeetingsVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-tools' }),
+      getQuotationsVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-tools', deletedAt: null }),
     };
     encMock = { decrypt: jest.fn().mockImplementation((v) => v || '') };
   });
 
   it('leads tool getLeads: calls withTenantContext', async () => {
-    const tools = buildLeadsTools(prismaMock, aiSecurityMock, userContext, encMock);
+    const tools = buildLeadsTools(
+      prismaMock,
+      aiSecurityMock,
+      userContext,
+      encMock,
+    );
     await (tools.getLeads as any).execute({ limit: 5 });
     expect(prismaMock.withTenantContext).toHaveBeenCalledWith(
       expect.objectContaining({ tenantId: 'tenant-tools' }),
@@ -453,7 +612,12 @@ describe('AI Tools Phase 3', () => {
   });
 
   it('customers tool getCustomers: calls withTenantContext', async () => {
-    const tools = buildCustomersTools(prismaMock, aiSecurityMock, userContext, encMock);
+    const tools = buildCustomersTools(
+      prismaMock,
+      aiSecurityMock,
+      userContext,
+      encMock,
+    );
     await (tools.getCustomers as any).execute({ limit: 5 });
     expect(prismaMock.withTenantContext).toHaveBeenCalledWith(
       expect.objectContaining({ tenantId: 'tenant-tools' }),
@@ -504,9 +668,15 @@ describe('AI Tools Phase 3', () => {
   });
 
   it('tasks tool updateTaskStatus: findFirst + update in single context', async () => {
-    txMock.task.findFirst.mockResolvedValue({ id: 'task-1', status: 'PENDING' });
+    txMock.task.findFirst.mockResolvedValue({
+      id: 'task-1',
+      status: 'PENDING',
+    });
     const tools = buildTasksTools(prismaMock, aiSecurityMock, userContext);
-    await (tools.updateTaskStatus as any).execute({ taskId: 'task-1', status: 'COMPLETED' });
+    await (tools.updateTaskStatus as any).execute({
+      taskId: 'task-1',
+      status: 'COMPLETED',
+    });
     expect(prismaMock.withTenantContext).toHaveBeenCalledTimes(1);
     expect(txMock.task.findFirst).toHaveBeenCalled();
     expect(txMock.task.update).toHaveBeenCalled();
@@ -524,7 +694,12 @@ describe('AI Tools Phase 3', () => {
   });
 
   it('quotations tool getQuotations: calls withTenantContext', async () => {
-    const tools = buildQuotationsTools(prismaMock, aiSecurityMock, userContext, encMock);
+    const tools = buildQuotationsTools(
+      prismaMock,
+      aiSecurityMock,
+      userContext,
+      encMock,
+    );
     await (tools.getQuotations as any).execute({ limit: 5 });
     expect(prismaMock.withTenantContext).toHaveBeenCalledWith(
       expect.objectContaining({ tenantId: 'tenant-tools' }),
@@ -537,8 +712,18 @@ describe('AI Tools Phase 3', () => {
   it('cross-tenant isolation: tool called with different tenantId uses correct context', async () => {
     const contextA = { ...userContext, tenantId: 'tenant-A' };
     const contextB = { ...userContext, tenantId: 'tenant-B' };
-    const secA = { ...aiSecurityMock, getLeadsVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-A', deletedAt: null }) };
-    const secB = { ...aiSecurityMock, getLeadsVisibilityFilter: jest.fn().mockReturnValue({ tenantId: 'tenant-B', deletedAt: null }) };
+    const secA = {
+      ...aiSecurityMock,
+      getLeadsVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-A', deletedAt: null }),
+    };
+    const secB = {
+      ...aiSecurityMock,
+      getLeadsVisibilityFilter: jest
+        .fn()
+        .mockReturnValue({ tenantId: 'tenant-B', deletedAt: null }),
+    };
     const toolsA = buildLeadsTools(prismaMock, secA, contextA, encMock);
     const toolsB = buildLeadsTools(prismaMock, secB, contextB, encMock);
     await (toolsA.getLeads as any).execute({ limit: 5 });

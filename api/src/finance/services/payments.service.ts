@@ -7,7 +7,10 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { RecordPaymentDto } from '../dto/enterprise-invoice.dto';
 import { Prisma } from '@prisma/client';
-import { formatCurrency, toNumber } from '../../common/utils/crm-formatters.util';
+import {
+  formatCurrency,
+  toNumber,
+} from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { roundTo2 } from '../utils/invoice-calculation.util';
 import { InvoiceEmailService } from './invoice-email.service';
@@ -81,7 +84,10 @@ export class PaymentsService {
           invoiceId: p.invoiceId,
           paymentNumber: p.paymentNumber,
           amount: toNumber(p.amount),
-          amountFormatted: formatCurrency(toNumber(p.amount), p.currency || currency),
+          amountFormatted: formatCurrency(
+            toNumber(p.amount),
+            p.currency || currency,
+          ),
           currency: p.currency || currency,
           paymentMethod: p.paymentMethod,
           paymentDate: p.paymentDate.toISOString(),
@@ -101,7 +107,12 @@ export class PaymentsService {
           createdBy: p.createdBy,
           createdAt: p.createdAt.toISOString(),
         })),
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -123,7 +134,9 @@ export class PaymentsService {
       }
 
       if (invoice.status === 'CANCELLED' || invoice.status === 'VOID') {
-        throw new BadRequestException(`Cannot record payment on a ${invoice.status} invoice.`);
+        throw new BadRequestException(
+          `Cannot record payment on a ${invoice.status} invoice.`,
+        );
       }
 
       const paymentAmt = roundTo2(data.amount);
@@ -133,7 +146,8 @@ export class PaymentsService {
 
       const invTotal = toNumber(invoice.totalAmount || invoice.amount);
       const currentPaid = toNumber(invoice.paidAmount);
-      const currentBalance = toNumber(invoice.balanceAmount) || (invTotal - currentPaid);
+      const currentBalance =
+        toNumber(invoice.balanceAmount) || invTotal - currentPaid;
 
       if (paymentAmt > currentBalance + 0.01) {
         throw new BadRequestException(
@@ -153,7 +167,9 @@ export class PaymentsService {
           amount: paymentAmt,
           currency: data.currency || invoice.currency || 'INR',
           paymentMethod: data.paymentMethod || 'BANK_TRANSFER',
-          paymentDate: data.paymentDate ? new Date(data.paymentDate) : new Date(),
+          paymentDate: data.paymentDate
+            ? new Date(data.paymentDate)
+            : new Date(),
           referenceNumber: data.referenceNumber || null,
           notes: data.notes || null,
           status: data.status || 'SUCCESS',
@@ -232,7 +248,9 @@ export class PaymentsService {
       if (data.sendReceiptEmail) {
         this.invoiceEmailService
           .sendPaymentReceiptEmail(tenantId, payment.id, userId)
-          .catch((err) => this.logger.warn(`Failed to send receipt email: ${err.message}`));
+          .catch((err) =>
+            this.logger.warn(`Failed to send receipt email: ${err.message}`),
+          );
       }
 
       return {
@@ -275,7 +293,10 @@ export class PaymentsService {
       });
 
       const invTotal = toNumber(invoice.totalAmount || invoice.amount);
-      const totalPaid = remainingPayments.reduce((s, p) => s + toNumber(p.amount), 0);
+      const totalPaid = remainingPayments.reduce(
+        (s, p) => s + toNumber(p.amount),
+        0,
+      );
       const newBalance = roundTo2(Math.max(0, invTotal - totalPaid));
       let newStatus = 'SENT';
       if (totalPaid >= invTotal && invTotal > 0) {

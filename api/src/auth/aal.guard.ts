@@ -71,7 +71,8 @@ export class AalGuard implements CanActivate {
         statusCode: 403,
         error: 'Forbidden',
         code: 'AAL2_REQUIRED',
-        message: 'MFA verification required: AAL2 session assurance is required for this operation',
+        message:
+          'MFA verification required: AAL2 session assurance is required for this operation',
       });
     }
 

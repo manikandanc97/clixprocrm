@@ -1,10 +1,5 @@
 export type DataScope =
-  | 'OWN'
-  | 'TEAM'
-  | 'SUBORDINATES'
-  | 'BRANCH'
-  | 'ORGANIZATION'
-  | 'SHARED';
+  'OWN' | 'TEAM' | 'SUBORDINATES' | 'BRANCH' | 'ORGANIZATION' | 'SHARED';
 
 export const DATA_SCOPE_HIERARCHY: Record<DataScope, number> = {
   OWN: 1,

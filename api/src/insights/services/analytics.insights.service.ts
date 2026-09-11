@@ -21,87 +21,92 @@ export class AnalyticsInsightsService {
       previousTasksCount,
       closingDeals,
       weeklyWonDealsRaw,
-    ] = await this.prisma.withTenantContext(
-      { tenantId },
-      async (tx) => {
-        return Promise.all([
-          // Recent new leads
-          tx.lead.findMany({
-            where: { tenantId, stage: 'NEW', deletedAt: null },
-            take: 5,
-            orderBy: { createdAt: 'desc' },
-            select: { id: true, company: true, name: true, createdAt: true },
-          }),
-          // Previous period new leads count for real trend calculation
-          tx.lead.count({
-            where: {
-              tenantId,
-              stage: 'NEW',
-              deletedAt: null,
-              createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+    ] = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      return Promise.all([
+        // Recent new leads
+        tx.lead.findMany({
+          where: { tenantId, stage: 'NEW', deletedAt: null },
+          take: 5,
+          orderBy: { createdAt: 'desc' },
+          select: { id: true, company: true, name: true, createdAt: true },
+        }),
+        // Previous period new leads count for real trend calculation
+        tx.lead.count({
+          where: {
+            tenantId,
+            stage: 'NEW',
+            deletedAt: null,
+            createdAt: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+          },
+        }),
+        // Overdue tasks
+        tx.task.findMany({
+          where: {
+            tenantId,
+            status: 'PENDING',
+            dueDate: { lt: now },
+            deletedAt: null,
+          },
+          take: 5,
+          orderBy: { dueDate: 'asc' },
+          select: { id: true, title: true, dueDate: true },
+        }),
+        // Overdue tasks in previous period
+        tx.task.count({
+          where: {
+            tenantId,
+            status: 'PENDING',
+            dueDate: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
+            deletedAt: null,
+          },
+        }),
+        // Deals expected to close soon
+        tx.deal.findMany({
+          where: {
+            tenantId,
+            status: 'OPEN',
+            deletedAt: null,
+            expectedCloseDate: {
+              lte: new Date(now.getTime() + 14 * 24 * 3600000),
             },
-          }),
-          // Overdue tasks
-          tx.task.findMany({
-            where: {
-              tenantId,
-              status: 'PENDING',
-              dueDate: { lt: now },
-              deletedAt: null,
-            },
-            take: 5,
-            orderBy: { dueDate: 'asc' },
-            select: { id: true, title: true, dueDate: true },
-          }),
-          // Overdue tasks in previous period
-          tx.task.count({
-            where: {
-              tenantId,
-              status: 'PENDING',
-              dueDate: { gte: fourteenDaysAgo, lt: sevenDaysAgo },
-              deletedAt: null,
-            },
-          }),
-          // Deals expected to close soon
-          tx.deal.findMany({
-            where: {
-              tenantId,
-              status: 'OPEN',
-              deletedAt: null,
-              expectedCloseDate: { lte: new Date(now.getTime() + 14 * 24 * 3600000) },
-            },
-            take: 3,
-            select: { id: true, name: true, value: true, stage: true },
-          }),
-          // Weekly revenue trend (last 6 weeks)
-          tx.deal.findMany({
-            where: {
-              tenantId,
-              stage: 'WON',
-              deletedAt: null,
-              updatedAt: { gte: new Date(now.getTime() - 42 * 24 * 3600000) },
-            },
-            select: { value: true, updatedAt: true },
-          }),
-        ]);
-      },
-    );
+          },
+          take: 3,
+          select: { id: true, name: true, value: true, stage: true },
+        }),
+        // Weekly revenue trend (last 6 weeks)
+        tx.deal.findMany({
+          where: {
+            tenantId,
+            stage: 'WON',
+            deletedAt: null,
+            updatedAt: { gte: new Date(now.getTime() - 42 * 24 * 3600000) },
+          },
+          select: { value: true, updatedAt: true },
+        }),
+      ]);
+    });
 
     // Calculate real percent changes
     const currentLeadsCount = recentLeads.length;
     const leadsChange =
       previousLeadsCount === 0
-        ? currentLeadsCount > 0 ? '+100%' : '0%'
+        ? currentLeadsCount > 0
+          ? '+100%'
+          : '0%'
         : `${currentLeadsCount >= previousLeadsCount ? '+' : ''}${Math.round(
-            ((currentLeadsCount - previousLeadsCount) / previousLeadsCount) * 100,
+            ((currentLeadsCount - previousLeadsCount) / previousLeadsCount) *
+              100,
           )}%`;
 
     const currentTasksCount = overdueTasks.length;
     const tasksChange =
       previousTasksCount === 0
-        ? currentTasksCount > 0 ? '+100%' : '0%'
+        ? currentTasksCount > 0
+          ? '+100%'
+          : '0%'
         : `${currentTasksCount >= previousTasksCount ? '+' : ''}${Math.round(
-            ((currentTasksCount - previousTasksCount) / previousTasksCount) * 100,
+            ((currentTasksCount - previousTasksCount) / previousTasksCount) *
+              100,
           )}%`;
 
     const recommendations = [
@@ -180,4 +185,3 @@ export class AnalyticsInsightsService {
     };
   }
 }
-

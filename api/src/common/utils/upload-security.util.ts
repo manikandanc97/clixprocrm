@@ -113,7 +113,10 @@ export function sanitizeUploadedFilename(rawFilename: string): string {
 /**
  * Validates file buffer against known magic byte signatures.
  */
-export function validateFileMagicBytes(buffer: Buffer, declaredMime: string): { valid: boolean; detectedMime?: string } {
+export function validateFileMagicBytes(
+  buffer: Buffer,
+  declaredMime: string,
+): { valid: boolean; detectedMime?: string } {
   if (!buffer || buffer.length < 4) {
     return { valid: false };
   }
@@ -130,7 +133,10 @@ export function validateFileMagicBytes(buffer: Buffer, declaredMime: string): { 
 
   // JPEG: FF D8 FF
   if (buffer[0] === 0xff && buffer[1] === 0xd8 && buffer[2] === 0xff) {
-    return { valid: declaredMime === 'image/jpeg' || declaredMime === 'image/jpg', detectedMime: 'image/jpeg' };
+    return {
+      valid: declaredMime === 'image/jpeg' || declaredMime === 'image/jpg',
+      detectedMime: 'image/jpeg',
+    };
   }
 
   // GIF: GIF87a or GIF89a (47 49 46 38)
@@ -165,7 +171,10 @@ export function validateFileMagicBytes(buffer: Buffer, declaredMime: string): { 
     buffer[2] === 0x44 &&
     buffer[3] === 0x46
   ) {
-    return { valid: declaredMime === 'application/pdf', detectedMime: 'application/pdf' };
+    return {
+      valid: declaredMime === 'application/pdf',
+      detectedMime: 'application/pdf',
+    };
   }
 
   // ZIP / Office Documents: PK.. (50 4B 03 04 or 50 4B 05 06 or 50 4B 07 08)
@@ -180,12 +189,19 @@ export function validateFileMagicBytes(buffer: Buffer, declaredMime: string): { 
   }
 
   // Text/CSV: Check if printable ASCII/UTF-8
-  if (declaredMime === 'text/plain' || declaredMime === 'text/csv' || declaredMime === 'application/json') {
+  if (
+    declaredMime === 'text/plain' ||
+    declaredMime === 'text/csv' ||
+    declaredMime === 'application/json'
+  ) {
     let isText = true;
     const checkLength = Math.min(buffer.length, 512);
     for (let i = 0; i < checkLength; i++) {
       const byte = buffer[i];
-      if (byte === 0 || (byte < 7 && byte !== 9 && byte !== 10 && byte !== 13)) {
+      if (
+        byte === 0 ||
+        (byte < 7 && byte !== 9 && byte !== 10 && byte !== 13)
+      ) {
         isText = false;
         break;
       }
@@ -244,7 +260,10 @@ export function validateUploadedFile(params: {
     };
   }
 
-  if (params.mimeType && !ALLOWED_MIME_TYPES.has(params.mimeType.toLowerCase())) {
+  if (
+    params.mimeType &&
+    !ALLOWED_MIME_TYPES.has(params.mimeType.toLowerCase())
+  ) {
     return {
       safe: false,
       sanitizedFilename,

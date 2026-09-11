@@ -32,4 +32,3 @@ import { AiInsightsController } from './controllers/ai-insights.controller';
   ],
 })
 export class InsightsModule {}
-

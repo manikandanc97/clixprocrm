@@ -52,7 +52,10 @@ const SAFE_EXEMPTION_KEYS = new Set([
  * - Recursively processes nested objects
  * - Limits string lengths and total payload size to prevent flooding
  */
-export function sanitizeAuditDetails(details: any, maxSizeBytes = 2048): Record<string, any> {
+export function sanitizeAuditDetails(
+  details: any,
+  maxSizeBytes = 2048,
+): Record<string, any> {
   if (!details || typeof details !== 'object' || Array.isArray(details)) {
     return {};
   }
@@ -78,13 +81,15 @@ export function sanitizeAuditDetails(details: any, maxSizeBytes = 2048): Record<
     } else if (typeof value === 'object' && !Array.isArray(value)) {
       sanitized[key] = sanitizeAuditDetails(value, maxSizeBytes);
     } else if (Array.isArray(value)) {
-      sanitized[key] = value.slice(0, 50).map((item) =>
-        typeof item === 'object' && item !== null
-          ? sanitizeAuditDetails(item, maxSizeBytes)
-          : typeof item === 'string'
-            ? item.slice(0, 200)
-            : item,
-      );
+      sanitized[key] = value
+        .slice(0, 50)
+        .map((item) =>
+          typeof item === 'object' && item !== null
+            ? sanitizeAuditDetails(item, maxSizeBytes)
+            : typeof item === 'string'
+              ? item.slice(0, 200)
+              : item,
+        );
     } else if (typeof value === 'string') {
       sanitized[key] = value.length > 500 ? value.slice(0, 500) : value;
     } else if (

@@ -116,18 +116,22 @@ describe('EmailQueueProcessor Suite', () => {
         customer: { name: 'Jane Doe', email: 'jane@client.com' },
       };
 
-      mockPrisma.withTenantContext.mockImplementation(async (ctx: any, cb: any) => {
-        expect(ctx.tenantId).toBe('tenant-inv-1');
-        return cb({
-          invoice: {
-            findFirst: jest.fn().mockResolvedValue(mockInvoice),
-            update: jest.fn().mockResolvedValue({ ...mockInvoice, status: 'SENT' }),
-          },
-          timelineEvent: {
-            create: jest.fn().mockResolvedValue({ id: 'tl-1' }),
-          },
-        });
-      });
+      mockPrisma.withTenantContext.mockImplementation(
+        async (ctx: any, cb: any) => {
+          expect(ctx.tenantId).toBe('tenant-inv-1');
+          return cb({
+            invoice: {
+              findFirst: jest.fn().mockResolvedValue(mockInvoice),
+              update: jest
+                .fn()
+                .mockResolvedValue({ ...mockInvoice, status: 'SENT' }),
+            },
+            timelineEvent: {
+              create: jest.fn().mockResolvedValue({ id: 'tl-1' }),
+            },
+          });
+        },
+      );
 
       const mockJob = {
         name: EMAIL_JOB_NAMES.INVOICE_NOTIFICATION,
@@ -156,13 +160,15 @@ describe('EmailQueueProcessor Suite', () => {
     });
 
     it('should handle non-existent invoice gracefully', async () => {
-      mockPrisma.withTenantContext.mockImplementation(async (ctx: any, cb: any) => {
-        return cb({
-          invoice: {
-            findFirst: jest.fn().mockResolvedValue(null),
-          },
-        });
-      });
+      mockPrisma.withTenantContext.mockImplementation(
+        async (ctx: any, cb: any) => {
+          return cb({
+            invoice: {
+              findFirst: jest.fn().mockResolvedValue(null),
+            },
+          });
+        },
+      );
 
       const mockJob = {
         name: EMAIL_JOB_NAMES.INVOICE_NOTIFICATION,
@@ -197,17 +203,19 @@ describe('EmailQueueProcessor Suite', () => {
         },
       };
 
-      mockPrisma.withTenantContext.mockImplementation(async (ctx: any, cb: any) => {
-        expect(ctx.tenantId).toBe('tenant-pay-1');
-        return cb({
-          payment: {
-            findFirst: jest.fn().mockResolvedValue(mockPayment),
-          },
-          timelineEvent: {
-            create: jest.fn().mockResolvedValue({ id: 'tl-pay-1' }),
-          },
-        });
-      });
+      mockPrisma.withTenantContext.mockImplementation(
+        async (ctx: any, cb: any) => {
+          expect(ctx.tenantId).toBe('tenant-pay-1');
+          return cb({
+            payment: {
+              findFirst: jest.fn().mockResolvedValue(mockPayment),
+            },
+            timelineEvent: {
+              create: jest.fn().mockResolvedValue({ id: 'tl-pay-1' }),
+            },
+          });
+        },
+      );
 
       const mockJob = {
         name: EMAIL_JOB_NAMES.PAYMENT_RECEIPT,
@@ -274,7 +282,7 @@ describe('EmailQueueProcessor Suite', () => {
       };
 
       const processorWithInbound = new EmailQueueProcessor(
-        mockPrisma as any,
+        mockPrisma,
         mockInboundService as any,
       );
 
@@ -293,7 +301,9 @@ describe('EmailQueueProcessor Suite', () => {
       const result = await processorWithInbound.process(mockJob);
       expect(result.success).toBe(true);
       expect(result.messagesProcessed).toBe(3);
-      expect(mockInboundService.processSyncInboxJob).toHaveBeenCalledWith(mockJob.data);
+      expect(mockInboundService.processSyncInboxJob).toHaveBeenCalledWith(
+        mockJob.data,
+      );
     });
   });
 

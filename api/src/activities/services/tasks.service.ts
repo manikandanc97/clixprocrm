@@ -108,10 +108,16 @@ export class TasksService {
     data: UpdateTaskDto,
   ) {
     const userId = user.id || user.sub;
-    const rawRole = typeof user.role === 'object' ? user.role?.name || '' : String(user.role || '');
+    const rawRole =
+      typeof user.role === 'object'
+        ? user.role?.name || ''
+        : String(user.role || '');
     const roleName = rawRole.toUpperCase().replace(/[\s_]+/g, '');
     const isSuperAdminOrAdmin =
-      roleName === 'SUPERADMIN' || roleName === 'ADMIN' || roleName === 'OWNER' || user.role?.isSystem;
+      roleName === 'SUPERADMIN' ||
+      roleName === 'ADMIN' ||
+      roleName === 'OWNER' ||
+      user.role?.isSystem;
 
     // Evaluate if user has explicit update permission
     const hasFullEditAccess = isSuperAdminOrAdmin || roleName === 'MANAGER';
@@ -355,10 +361,16 @@ export class TasksService {
 
   async deleteTask(tenantId: string, user: any, id: string) {
     const userId = user.id || user.sub;
-    const rawRole = typeof user.role === 'object' ? user.role?.name || '' : String(user.role || '');
+    const rawRole =
+      typeof user.role === 'object'
+        ? user.role?.name || ''
+        : String(user.role || '');
     const roleName = rawRole.toUpperCase().replace(/[\s_]+/g, '');
     const isSuperAdminOrAdmin =
-      roleName === 'SUPERADMIN' || roleName === 'ADMIN' || roleName === 'OWNER' || user.role?.isSystem;
+      roleName === 'SUPERADMIN' ||
+      roleName === 'ADMIN' ||
+      roleName === 'OWNER' ||
+      user.role?.isSystem;
 
     // Only Admin and Manager can delete tasks
     const hasDeleteAccess = isSuperAdminOrAdmin || roleName === 'MANAGER';
@@ -573,4 +585,3 @@ export class TasksService {
     });
   }
 }
-

@@ -1,4 +1,7 @@
-import { sanitizeXss, sanitizeObjectXss } from '../common/utils/xss-sanitizer.util';
+import {
+  sanitizeXss,
+  sanitizeObjectXss,
+} from '../common/utils/xss-sanitizer.util';
 import { sanitizeRedirectUrl } from '../common/utils/redirect-security.util';
 import { SecurityConfigValidator } from '../common/utils/security-config.validator';
 
@@ -10,7 +13,8 @@ describe('P5 Security Hardening & Sanitization Suite', () => {
     });
 
     it('strips inline event handlers (onerror, onload, onclick)', () => {
-      const dirty = '<img src="x" onerror="alert(1)"> <a href="javascript:alert(2)">Click</a>';
+      const dirty =
+        '<img src="x" onerror="alert(1)"> <a href="javascript:alert(2)">Click</a>';
       const clean = sanitizeXss(dirty);
       expect(clean).not.toContain('onerror');
       expect(clean).not.toContain('javascript:');
@@ -40,7 +44,9 @@ describe('P5 Security Hardening & Sanitization Suite', () => {
   describe('2. Open Redirect Sanitization', () => {
     it('allows safe relative paths', () => {
       expect(sanitizeRedirectUrl('/dashboard')).toBe('/dashboard');
-      expect(sanitizeRedirectUrl('/super-admin/security')).toBe('/super-admin/security');
+      expect(sanitizeRedirectUrl('/super-admin/security')).toBe(
+        '/super-admin/security',
+      );
       expect(sanitizeRedirectUrl('/leads?page=2')).toBe('/leads?page=2');
     });
 
@@ -54,12 +60,16 @@ describe('P5 Security Hardening & Sanitization Suite', () => {
     });
 
     it('blocks external untrusted domains', () => {
-      expect(sanitizeRedirectUrl('https://evil-hacker.com/login')).toBe('/dashboard');
+      expect(sanitizeRedirectUrl('https://evil-hacker.com/login')).toBe(
+        '/dashboard',
+      );
       expect(sanitizeRedirectUrl('javascript:alert(1)')).toBe('/dashboard');
     });
 
     it('allows configured frontend origins', () => {
-      expect(sanitizeRedirectUrl('http://localhost:3000/settings')).toBe('http://localhost:3000/settings');
+      expect(sanitizeRedirectUrl('http://localhost:3000/settings')).toBe(
+        'http://localhost:3000/settings',
+      );
     });
   });
 

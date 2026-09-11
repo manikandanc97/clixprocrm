@@ -30,7 +30,8 @@ describe('SupportService Security - HTML Injection Prevention', () => {
       subject: '<script>alert("XSS")</script>Urgent Help',
       category: '<img src=x onerror=alert(1)>',
       priority: 'High',
-      description: '<iframe src="https://evil.com"></iframe>Please help with login',
+      description:
+        '<iframe src="https://evil.com"></iframe>Please help with login',
       diagnostics: {
         currentUserName: '<b onmouseover="alert(1)">Admin</b>',
         email: 'user@example.com<script>',
@@ -52,9 +53,13 @@ describe('SupportService Security - HTML Injection Prevention', () => {
 
     // Ensure raw HTML tags are escaped
     expect(mailOptions.html).not.toContain('<script>alert("XSS")</script>');
-    expect(mailOptions.html).toContain('&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;');
+    expect(mailOptions.html).toContain(
+      '&lt;script&gt;alert(&quot;XSS&quot;)&lt;/script&gt;',
+    );
     expect(mailOptions.html).not.toContain('<iframe src="https://evil.com">');
-    expect(mailOptions.html).toContain('&lt;iframe src=&quot;https://evil.com&quot;&gt;');
+    expect(mailOptions.html).toContain(
+      '&lt;iframe src=&quot;https://evil.com&quot;&gt;',
+    );
     expect(mailOptions.to).toBe('security-team@clixprocrm.com');
   });
 });

@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuthorizationService } from './authorization.service';
 import { AuthorizationCacheService } from './authorization-cache.service';
 import { PrismaService } from '../../prisma/prisma.service';
-import { ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { UserAuthContext, RecordAccessContext } from './authorization-types';
 
 describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarchy)', () => {
@@ -11,7 +15,9 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
   let prismaService: any;
 
   const mockPrismaService = {
-    withTenantContext: jest.fn(async ({ tenantId }, fn) => fn(mockPrismaService)),
+    withTenantContext: jest.fn(async ({ tenantId }, fn) =>
+      fn(mockPrismaService),
+    ),
     createSealedAuditLog: jest.fn().mockResolvedValue({ id: 'audit-log-uuid' }),
     tenantUser: {
       findFirst: jest.fn(),
@@ -46,7 +52,9 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
     }).compile();
 
     authService = module.get<AuthorizationService>(AuthorizationService);
-    cacheService = module.get<AuthorizationCacheService>(AuthorizationCacheService);
+    cacheService = module.get<AuthorizationCacheService>(
+      AuthorizationCacheService,
+    );
     prismaService = module.get<PrismaService>(PrismaService);
   });
 
@@ -63,7 +71,11 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         tenantId: 'tenant-a',
       };
 
-      const allowed = await authService.can(userContext, 'crm:leads:view', record);
+      const allowed = await authService.can(
+        userContext,
+        'crm:leads:view',
+        record,
+      );
       expect(allowed).toBe(true);
     });
 
@@ -79,7 +91,11 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         tenantId: 'tenant-b', // Different organization
       };
 
-      const allowed = await authService.can(userContext, 'crm:leads:view', crossTenantRecord);
+      const allowed = await authService.can(
+        userContext,
+        'crm:leads:view',
+        crossTenantRecord,
+      );
       expect(allowed).toBe(false);
     });
 
@@ -94,7 +110,11 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         tenantId: 'tenant-any',
       };
 
-      const allowed = await authService.can(superAdminContext, 'crm:leads:view', record);
+      const allowed = await authService.can(
+        superAdminContext,
+        'crm:leads:view',
+        record,
+      );
       expect(allowed).toBe(true);
     });
   });
@@ -134,8 +154,12 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         assignedToId: 'rep-2',
       };
 
-      expect(await authService.can(salesRepContext, 'crm:leads:view', ownRecord)).toBe(true);
-      expect(await authService.can(salesRepContext, 'crm:leads:view', otherRecord)).toBe(false);
+      expect(
+        await authService.can(salesRepContext, 'crm:leads:view', ownRecord),
+      ).toBe(true);
+      expect(
+        await authService.can(salesRepContext, 'crm:leads:view', otherRecord),
+      ).toBe(false);
     });
 
     it('TEAM scope: ALLOWS access to records in user team and DENIES unrelated team records', async () => {
@@ -159,7 +183,9 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         },
       });
 
-      mockPrismaService.teamMember.findMany.mockResolvedValue([{ teamId: 'team-alpha' }]);
+      mockPrismaService.teamMember.findMany.mockResolvedValue([
+        { teamId: 'team-alpha' },
+      ]);
       mockPrismaService.team.findMany.mockResolvedValue([]);
 
       const teamRecord: RecordAccessContext = {
@@ -176,8 +202,16 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         assignedToId: 'rep-3',
       };
 
-      expect(await authService.can(userContext, 'crm:leads:view', teamRecord)).toBe(true);
-      expect(await authService.can(userContext, 'crm:leads:view', unrelatedTeamRecord)).toBe(false);
+      expect(
+        await authService.can(userContext, 'crm:leads:view', teamRecord),
+      ).toBe(true);
+      expect(
+        await authService.can(
+          userContext,
+          'crm:leads:view',
+          unrelatedTeamRecord,
+        ),
+      ).toBe(false);
     });
 
     it('SUBORDINATES scope: ALLOWS manager to access subordinate records and DENIES peer records', async () => {
@@ -196,7 +230,11 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
           name: 'Sales Manager',
           isActive: true,
           permissions: [
-            { module: 'crm:deals:edit', scope: 'SUBORDINATES', hasAccess: true },
+            {
+              module: 'crm:deals:edit',
+              scope: 'SUBORDINATES',
+              hasAccess: true,
+            },
           ],
         },
       });
@@ -220,8 +258,12 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         ownerId: 'peer-1',
       };
 
-      expect(await authService.can(managerContext, 'crm:deals:edit', subRecord)).toBe(true);
-      expect(await authService.can(managerContext, 'crm:deals:edit', peerRecord)).toBe(false);
+      expect(
+        await authService.can(managerContext, 'crm:deals:edit', subRecord),
+      ).toBe(true);
+      expect(
+        await authService.can(managerContext, 'crm:deals:edit', peerRecord),
+      ).toBe(false);
     });
 
     it('ORGANIZATION scope: ALLOWS access across entire organization', async () => {
@@ -237,7 +279,13 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         assignedToId: 'random-user',
       };
 
-      expect(await authService.can(adminContext, 'crm:leads:edit', anyRecordInTenant)).toBe(true);
+      expect(
+        await authService.can(
+          adminContext,
+          'crm:leads:edit',
+          anyRecordInTenant,
+        ),
+      ).toBe(true);
     });
 
     it('SHARED scope: ALLOWS access when explicit valid record share exists', async () => {
@@ -274,7 +322,9 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
         ownerId: 'rep-2',
       };
 
-      expect(await authService.can(userContext, 'crm:deals:view', sharedRecord)).toBe(true);
+      expect(
+        await authService.can(userContext, 'crm:deals:view', sharedRecord),
+      ).toBe(true);
     });
   });
 
@@ -345,7 +395,11 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
       ).rejects.toThrow(ForbiddenException);
 
       await expect(
-        authService.validateOwnerSafeguards('tenant-a', 'owner-1', 'deactivate'),
+        authService.validateOwnerSafeguards(
+          'tenant-a',
+          'owner-1',
+          'deactivate',
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 

@@ -16,13 +16,39 @@ describe('PlatformSettingsService', () => {
       },
       plan: {
         findMany: jest.fn().mockResolvedValue([
-          { id: 'free', name: 'Free', price: '₹0', priceNum: 0, status: 'ACTIVE', isActive: true, sortOrder: 1 },
-          { id: 'starter', name: 'Starter', price: '₹999', priceNum: 999, status: 'ACTIVE', isActive: true, sortOrder: 2 },
-          { id: 'pro', name: 'Professional', price: '₹2,499', priceNum: 2499, status: 'ACTIVE', isActive: true, sortOrder: 3 },
+          {
+            id: 'free',
+            name: 'Free',
+            price: '₹0',
+            priceNum: 0,
+            status: 'ACTIVE',
+            isActive: true,
+            sortOrder: 1,
+          },
+          {
+            id: 'starter',
+            name: 'Starter',
+            price: '₹999',
+            priceNum: 999,
+            status: 'ACTIVE',
+            isActive: true,
+            sortOrder: 2,
+          },
+          {
+            id: 'pro',
+            name: 'Professional',
+            price: '₹2,499',
+            priceNum: 2499,
+            status: 'ACTIVE',
+            isActive: true,
+            sortOrder: 3,
+          },
         ]),
         findUnique: jest.fn(),
       },
-      createSealedAuditLog: jest.fn().mockResolvedValue({ id: 'audit-log-uuid' }),
+      createSealedAuditLog: jest
+        .fn()
+        .mockResolvedValue({ id: 'audit-log-uuid' }),
     };
 
     const module: TestingModule = await Test.createTestingModule({
@@ -94,7 +120,10 @@ describe('PlatformSettingsService', () => {
         maintenanceMode: false,
       });
 
-      prismaMock.plan.findUnique.mockResolvedValue({ id: 'pro', name: 'Professional' });
+      prismaMock.plan.findUnique.mockResolvedValue({
+        id: 'pro',
+        name: 'Professional',
+      });
 
       prismaMock.platformConfig.upsert.mockResolvedValue({
         id: 'global',
@@ -123,7 +152,10 @@ describe('PlatformSettingsService', () => {
         },
       };
 
-      const result = await service.updatePlatformSettings(updateDto, 'admin-user-123');
+      const result = await service.updatePlatformSettings(
+        updateDto,
+        'admin-user-123',
+      );
 
       expect(result.success).toBe(true);
       expect(result.data.general.name).toBe('Acme SaaS CRM');

@@ -47,13 +47,16 @@ describe('WorkspaceService Suite', () => {
         format: 'png',
       }),
       processAndUploadLogo: jest.fn().mockResolvedValue({
-        storageUrl: 'https://example.com/storage/workspace-logos/tenant-w1/logo.webp?v=999',
+        storageUrl:
+          'https://example.com/storage/workspace-logos/tenant-w1/logo.webp?v=999',
         storagePath: 'workspace-logos/tenant-w1/logo.webp',
         dominantColor: '#2563eb',
       }),
-      getPublicLogoUrl: jest.fn().mockReturnValue(
-        'https://example.com/storage/workspace-logos/tenant-w1/logo.webp?v=12345',
-      ),
+      getPublicLogoUrl: jest
+        .fn()
+        .mockReturnValue(
+          'https://example.com/storage/workspace-logos/tenant-w1/logo.webp?v=12345',
+        ),
     };
 
     mockMediaQueueProducer = {
@@ -126,7 +129,9 @@ describe('WorkspaceService Suite', () => {
       );
 
       expect(mockBrandingService.persistRawMedia).not.toHaveBeenCalled();
-      expect(mockMediaQueueProducer.enqueueBrandingMedia).not.toHaveBeenCalled();
+      expect(
+        mockMediaQueueProducer.enqueueBrandingMedia,
+      ).not.toHaveBeenCalled();
       expect(mockBrandingService.processAndUploadLogo).toHaveBeenCalledWith(
         'tenant-w1',
         dummyBuffer,

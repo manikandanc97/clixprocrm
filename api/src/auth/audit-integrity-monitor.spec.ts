@@ -36,7 +36,9 @@ describe('P3 Audit Integrity Monitor Suite', () => {
             tenantId !== undefined ? l.tenantId === tenantId : true,
           );
           if (where?.createdAt?.gte) {
-            matching = matching.filter((l) => l.createdAt >= where.createdAt.gte);
+            matching = matching.filter(
+              (l) => l.createdAt >= where.createdAt.gte,
+            );
           }
           return Promise.resolve([...matching]);
         }),
@@ -52,14 +54,25 @@ describe('P3 Audit Integrity Monitor Suite', () => {
       },
       auditArchiveOutbox: {
         create: jest.fn().mockImplementation(({ data }) => {
-          const record = { id: `outbox-${storedOutbox.length + 1}`, attempts: 0, createdAt: new Date(), ...data };
+          const record = {
+            id: `outbox-${storedOutbox.length + 1}`,
+            attempts: 0,
+            createdAt: new Date(),
+            ...data,
+          };
           storedOutbox.push(record);
           return Promise.resolve(record);
         }),
         findMany: jest.fn().mockImplementation(({ where }) => {
-          let items = storedOutbox.filter((o) => {
-            if (where?.status?.in && !where.status.in.includes(o.status)) return false;
-            if (where?.status && typeof where.status === 'string' && o.status !== where.status) return false;
+          const items = storedOutbox.filter((o) => {
+            if (where?.status?.in && !where.status.in.includes(o.status))
+              return false;
+            if (
+              where?.status &&
+              typeof where.status === 'string' &&
+              o.status !== where.status
+            )
+              return false;
             return true;
           });
           return Promise.resolve(
@@ -86,10 +99,10 @@ describe('P3 Audit Integrity Monitor Suite', () => {
       return Promise.resolve(true);
     });
 
-    auditLogger = new AuditLoggerService(mockPrisma as any);
-    archiveService = new AuditArchiveService(mockPrisma as any);
+    auditLogger = new AuditLoggerService(mockPrisma);
+    archiveService = new AuditArchiveService(mockPrisma);
     monitorService = new AuditIntegrityMonitorService(
-      mockPrisma as any,
+      mockPrisma,
       archiveService,
       alertService,
     );
@@ -103,7 +116,9 @@ describe('P3 Audit Integrity Monitor Suite', () => {
       // Archive outbox items
       await archiveService.processPendingOutbox(10);
 
-      const report = await monitorService.runIntegrityVerification({ tenantId: 'tenant-1' });
+      const report = await monitorService.runIntegrityVerification({
+        tenantId: 'tenant-1',
+      });
 
       expect(report.status).toBe('HEALTHY');
       expect(report.checkedRecords).toBe(2);
@@ -124,7 +139,9 @@ describe('P3 Audit Integrity Monitor Suite', () => {
       // Tamper with previousHash in record 2
       storedLogs[1].previousHash = 'forged_previous_hash_anomaly';
 
-      const report = await monitorService.runIntegrityVerification({ tenantId: 'tenant-crit' });
+      const report = await monitorService.runIntegrityVerification({
+        tenantId: 'tenant-crit',
+      });
 
       expect(report.status).toBe('CRITICAL');
       expect(report.brokenLinks).toBe(1);
@@ -152,7 +169,9 @@ describe('P3 Audit Integrity Monitor Suite', () => {
       // Attacker modifies details directly in DB
       storedLogs[0].details = { role: 'SuperAdmin' };
 
-      const report = await monitorService.runIntegrityVerification({ tenantId: 'tenant-hash-tamper' });
+      const report = await monitorService.runIntegrityVerification({
+        tenantId: 'tenant-hash-tamper',
+      });
 
       expect(report.status).toBe('CRITICAL');
       expect(report.hashMismatches).toBe(1);
@@ -176,7 +195,9 @@ describe('P3 Audit Integrity Monitor Suite', () => {
       storedOutbox[0].createdAt = new Date(Date.now() - 45 * 60 * 1000);
       storedOutbox[0].status = 'PENDING';
 
-      const report = await monitorService.runIntegrityVerification({ tenantId: 'tenant-stale' });
+      const report = await monitorService.runIntegrityVerification({
+        tenantId: 'tenant-stale',
+      });
 
       expect(report.status).toBe('WARNING');
       expect(report.staleOutboxRecords).toBe(1);
@@ -194,12 +215,17 @@ describe('P3 Audit Integrity Monitor Suite', () => {
 
   describe('4. Timestamp Anomaly Detection', () => {
     it('detects future timestamps and emits AUDIT_TIMESTAMP_ANOMALY', async () => {
-      await auditLogger.log({ tenantId: 'tenant-future', action: 'EVENT_PAST' });
+      await auditLogger.log({
+        tenantId: 'tenant-future',
+        action: 'EVENT_PAST',
+      });
 
       // Simulate a compromised system clock setting future date (+ 2 hours)
       storedLogs[0].createdAt = new Date(Date.now() + 2 * 60 * 60 * 1000);
 
-      const report = await monitorService.runIntegrityVerification({ tenantId: 'tenant-future' });
+      const report = await monitorService.runIntegrityVerification({
+        tenantId: 'tenant-future',
+      });
 
       expect(report.timestampAnomalies).toBe(1);
       expect(emittedAlerts).toEqual(

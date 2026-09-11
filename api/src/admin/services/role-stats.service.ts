@@ -39,8 +39,19 @@ export class RoleStatsService {
       ]);
 
       return {
-        users: { total: totalUsers, active: activeUsers, disabled: disabledUsers, pendingInvites },
-        roles: { total: totalRoles, system: systemRoles, custom: customRoles, active: activeRoles, permissions: totalPermissions },
+        users: {
+          total: totalUsers,
+          active: activeUsers,
+          disabled: disabledUsers,
+          pendingInvites,
+        },
+        roles: {
+          total: totalRoles,
+          system: systemRoles,
+          custom: customRoles,
+          active: activeRoles,
+          permissions: totalPermissions,
+        },
         departments: { total: totalDepartments },
         audit: { events: auditEvents },
       };

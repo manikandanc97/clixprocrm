@@ -34,7 +34,7 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
   }
 }
 
-export interface RevenueTargetType {
+export interface RevenueTargetSetting {
   id: string;
   name?: string;
   periodType?: string;
@@ -46,6 +46,9 @@ export interface RevenueTargetType {
   isActive?: boolean;
   status?: string;
 }
+
+/** @deprecated Use RevenueTargetSetting instead to avoid collision with report RevenueTargetType */
+export type RevenueTargetType = RevenueTargetSetting;
 
 export function fetchWorkspaceData() {
   return unwrapResponse<WorkspaceDataType>(client.get("/crm/workspace"));
@@ -126,7 +129,7 @@ export function updateNotificationSettings(data: Partial<NotificationSettingsDat
 }
 
 export function fetchRevenueTargets() {
-  return unwrapResponse<RevenueTargetType[]>(client.get("/crm/settings/revenue-targets"));
+  return unwrapResponse<RevenueTargetSetting[]>(client.get("/crm/settings/revenue-targets"));
 }
 
 export function fetchRevenueTargetAnalytics(filters: Record<string, string | number | boolean> = {}) {

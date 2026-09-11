@@ -41,14 +41,14 @@ export function TaskRelatedRecordPicker({
   const { data: customersData } = useCustomers();
   const { data: quotesData } = useQuotations();
 
-  const leads = (leadsData?.leads || (Array.isArray(leadsData) ? leadsData : [])) as LeadType[];
-  const customers = (customersData?.customers || (Array.isArray(customersData) ? customersData : [])) as CustomerType[];
-  const quotes = (quotesData?.quotations || (Array.isArray(quotesData) ? quotesData : [])) as QuotationType[];
-
   const recordResults = useMemo(() => {
     if (!recordSearch.trim()) return [];
     const q = recordSearch.toLowerCase();
     const results: RelatedRecord[] = [];
+
+    const leads = (leadsData?.leads || (Array.isArray(leadsData) ? leadsData : [])) as LeadType[];
+    const customers = (customersData?.customers || (Array.isArray(customersData) ? customersData : [])) as CustomerType[];
+    const quotes = (quotesData?.quotations || (Array.isArray(quotesData) ? quotesData : [])) as QuotationType[];
 
     leads.forEach((l: LeadType) => {
       if (l.name?.toLowerCase().includes(q) || l.company?.toLowerCase().includes(q)) {
@@ -71,7 +71,7 @@ export function TaskRelatedRecordPicker({
     });
 
     return results.slice(0, 10);
-  }, [recordSearch, leads, customers, quotes]);
+  }, [recordSearch, leadsData, customersData, quotesData]);
 
   return (
     <div className="space-y-1.5">

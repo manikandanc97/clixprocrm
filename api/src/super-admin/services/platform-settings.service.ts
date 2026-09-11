@@ -75,8 +75,8 @@ export class PlatformSettingsService {
         process.env.NODE_ENV === 'production'
           ? 'Production'
           : process.env.NODE_ENV === 'staging'
-          ? 'Staging'
-          : 'Development';
+            ? 'Staging'
+            : 'Development';
 
       return {
         general: {
@@ -86,9 +86,12 @@ export class PlatformSettingsService {
           defaultTimezone: platformConfig.defaultTimezone || 'Asia/Kolkata',
         },
         workspaceRegistration: {
-          allowPublicRegistrations: platformConfig.allowPublicRegistrations ?? true,
-          requireEmailVerification: platformConfig.requireEmailVerification ?? false,
-          allowWorkspaceSelfRegistration: platformConfig.allowWorkspaceSelfRegistration ?? true,
+          allowPublicRegistrations:
+            platformConfig.allowPublicRegistrations ?? true,
+          requireEmailVerification:
+            platformConfig.requireEmailVerification ?? false,
+          allowWorkspaceSelfRegistration:
+            platformConfig.allowWorkspaceSelfRegistration ?? true,
           maintenanceMode: platformConfig.maintenanceMode ?? false,
         },
         systemInfo: {
@@ -98,21 +101,27 @@ export class PlatformSettingsService {
           databaseStatus: dbStatus,
           environment,
         },
-        availablePlans: activePlans.length > 0 ? activePlans : [
-          { id: 'free', name: 'Free', price: '₹0' },
-          { id: 'starter', name: 'Starter', price: '₹999' },
-          { id: 'pro', name: 'Professional', price: '₹2,499' },
-          { id: 'enterprise', name: 'Enterprise', price: 'Custom' },
-        ],
+        availablePlans:
+          activePlans.length > 0
+            ? activePlans
+            : [
+                { id: 'free', name: 'Free', price: '₹0' },
+                { id: 'starter', name: 'Starter', price: '₹999' },
+                { id: 'pro', name: 'Professional', price: '₹2,499' },
+                { id: 'enterprise', name: 'Enterprise', price: 'Custom' },
+              ],
         // Legacy backward compatibility format
         platform: {
           name: platformConfig.name || 'ClixProCRM',
           defaultTenantPlan: platformConfig.defaultTenantPlan || 'free',
           defaultCurrency: platformConfig.defaultCurrency || 'INR',
           defaultTimezone: platformConfig.defaultTimezone || 'Asia/Kolkata',
-          allowPublicRegistrations: platformConfig.allowPublicRegistrations ?? true,
-          requireEmailVerification: platformConfig.requireEmailVerification ?? false,
-          allowWorkspaceSelfRegistration: platformConfig.allowWorkspaceSelfRegistration ?? true,
+          allowPublicRegistrations:
+            platformConfig.allowPublicRegistrations ?? true,
+          requireEmailVerification:
+            platformConfig.requireEmailVerification ?? false,
+          allowWorkspaceSelfRegistration:
+            platformConfig.allowWorkspaceSelfRegistration ?? true,
           maintenanceMode: platformConfig.maintenanceMode ?? false,
           version: '2.4.0',
           apiVersion: '2.4.0',
@@ -127,17 +136,25 @@ export class PlatformSettingsService {
     }
   }
 
-  async updatePlatformSettings(data: UpdatePlatformSettingsDto, adminActorId: string) {
+  async updatePlatformSettings(
+    data: UpdatePlatformSettingsDto,
+    adminActorId: string,
+  ) {
     try {
       // Normalize incoming payload
-      const name =
-        data.general?.name ?? data.platform?.name ?? data.name;
+      const name = data.general?.name ?? data.platform?.name ?? data.name;
       const defaultTenantPlan =
-        data.general?.defaultTenantPlan ?? data.platform?.defaultTenantPlan ?? data.defaultTenantPlan;
+        data.general?.defaultTenantPlan ??
+        data.platform?.defaultTenantPlan ??
+        data.defaultTenantPlan;
       const defaultCurrency =
-        data.general?.defaultCurrency ?? data.platform?.defaultCurrency ?? data.defaultCurrency;
+        data.general?.defaultCurrency ??
+        data.platform?.defaultCurrency ??
+        data.defaultCurrency;
       const defaultTimezone =
-        data.general?.defaultTimezone ?? data.platform?.defaultTimezone ?? data.defaultTimezone;
+        data.general?.defaultTimezone ??
+        data.platform?.defaultTimezone ??
+        data.defaultTimezone;
 
       const allowPublicRegistrations =
         data.workspaceRegistration?.allowPublicRegistrations ??
@@ -172,7 +189,9 @@ export class PlatformSettingsService {
       }
 
       // Fetch current settings to detect changed fields
-      const existingConfig = await (this.prisma as any).platformConfig.findUnique({
+      const existingConfig = await (
+        this.prisma as any
+      ).platformConfig.findUnique({
         where: { id: 'global' },
       });
 
@@ -200,13 +219,41 @@ export class PlatformSettingsService {
       };
 
       checkField('name', name, previousState.name);
-      checkField('defaultTenantPlan', defaultTenantPlan, previousState.defaultTenantPlan);
-      checkField('defaultCurrency', defaultCurrency, previousState.defaultCurrency);
-      checkField('defaultTimezone', defaultTimezone, previousState.defaultTimezone);
-      checkField('allowPublicRegistrations', allowPublicRegistrations, previousState.allowPublicRegistrations);
-      checkField('requireEmailVerification', requireEmailVerification, previousState.requireEmailVerification);
-      checkField('allowWorkspaceSelfRegistration', allowWorkspaceSelfRegistration, previousState.allowWorkspaceSelfRegistration);
-      checkField('maintenanceMode', maintenanceMode, previousState.maintenanceMode);
+      checkField(
+        'defaultTenantPlan',
+        defaultTenantPlan,
+        previousState.defaultTenantPlan,
+      );
+      checkField(
+        'defaultCurrency',
+        defaultCurrency,
+        previousState.defaultCurrency,
+      );
+      checkField(
+        'defaultTimezone',
+        defaultTimezone,
+        previousState.defaultTimezone,
+      );
+      checkField(
+        'allowPublicRegistrations',
+        allowPublicRegistrations,
+        previousState.allowPublicRegistrations,
+      );
+      checkField(
+        'requireEmailVerification',
+        requireEmailVerification,
+        previousState.requireEmailVerification,
+      );
+      checkField(
+        'allowWorkspaceSelfRegistration',
+        allowWorkspaceSelfRegistration,
+        previousState.allowWorkspaceSelfRegistration,
+      );
+      checkField(
+        'maintenanceMode',
+        maintenanceMode,
+        previousState.maintenanceMode,
+      );
 
       // Perform atomic upsert
       const updated = await (this.prisma as any).platformConfig.upsert({
@@ -216,9 +263,15 @@ export class PlatformSettingsService {
           ...(defaultTenantPlan !== undefined && { defaultTenantPlan }),
           ...(defaultCurrency !== undefined && { defaultCurrency }),
           ...(defaultTimezone !== undefined && { defaultTimezone }),
-          ...(allowPublicRegistrations !== undefined && { allowPublicRegistrations }),
-          ...(requireEmailVerification !== undefined && { requireEmailVerification }),
-          ...(allowWorkspaceSelfRegistration !== undefined && { allowWorkspaceSelfRegistration }),
+          ...(allowPublicRegistrations !== undefined && {
+            allowPublicRegistrations,
+          }),
+          ...(requireEmailVerification !== undefined && {
+            requireEmailVerification,
+          }),
+          ...(allowWorkspaceSelfRegistration !== undefined && {
+            allowWorkspaceSelfRegistration,
+          }),
           ...(maintenanceMode !== undefined && { maintenanceMode }),
           updatedBy: adminActorId,
         },
@@ -230,7 +283,8 @@ export class PlatformSettingsService {
           defaultTimezone: defaultTimezone || 'Asia/Kolkata',
           allowPublicRegistrations: allowPublicRegistrations ?? true,
           requireEmailVerification: requireEmailVerification ?? false,
-          allowWorkspaceSelfRegistration: allowWorkspaceSelfRegistration ?? true,
+          allowWorkspaceSelfRegistration:
+            allowWorkspaceSelfRegistration ?? true,
           maintenanceMode: maintenanceMode || false,
           updatedBy: adminActorId,
         },
@@ -253,10 +307,15 @@ export class PlatformSettingsService {
         });
 
         // If maintenance mode specifically changed, log explicit security event
-        if (maintenanceMode !== undefined && maintenanceMode !== previousState.maintenanceMode) {
+        if (
+          maintenanceMode !== undefined &&
+          maintenanceMode !== previousState.maintenanceMode
+        ) {
           await this.prisma.createSealedAuditLog({
             userId: adminActorId,
-            action: maintenanceMode ? 'PLATFORM_MAINTENANCE_ENABLED' : 'PLATFORM_MAINTENANCE_DISABLED',
+            action: maintenanceMode
+              ? 'PLATFORM_MAINTENANCE_ENABLED'
+              : 'PLATFORM_MAINTENANCE_DISABLED',
             module: 'PlatformSettings',
             details: {
               actor: adminActorId,
@@ -281,7 +340,8 @@ export class PlatformSettingsService {
           workspaceRegistration: {
             allowPublicRegistrations: updated.allowPublicRegistrations,
             requireEmailVerification: updated.requireEmailVerification,
-            allowWorkspaceSelfRegistration: updated.allowWorkspaceSelfRegistration,
+            allowWorkspaceSelfRegistration:
+              updated.allowWorkspaceSelfRegistration,
             maintenanceMode: updated.maintenanceMode,
           },
           platform: {
@@ -291,7 +351,8 @@ export class PlatformSettingsService {
             defaultTimezone: updated.defaultTimezone,
             allowPublicRegistrations: updated.allowPublicRegistrations,
             requireEmailVerification: updated.requireEmailVerification,
-            allowWorkspaceSelfRegistration: updated.allowWorkspaceSelfRegistration,
+            allowWorkspaceSelfRegistration:
+              updated.allowWorkspaceSelfRegistration,
             maintenanceMode: updated.maintenanceMode,
           },
         },

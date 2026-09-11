@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, ForbiddenException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as path from 'path';
 import { randomUUID } from 'crypto';
@@ -59,18 +64,27 @@ export class EmailAttachmentStorageService {
 
       const { data: buckets, error } = await supabase.storage.listBuckets();
       if (!error && buckets) {
-        const exists = buckets.some((b) => b.name === PRIVATE_EMAIL_ATTACHMENTS_BUCKET);
+        const exists = buckets.some(
+          (b) => b.name === PRIVATE_EMAIL_ATTACHMENTS_BUCKET,
+        );
         if (!exists) {
-          await supabase.storage.createBucket(PRIVATE_EMAIL_ATTACHMENTS_BUCKET, {
-            public: false, // Strict private bucket — signed URLs only
-            fileSizeLimit: '25MB',
-          });
-          this.logger.log(`Created private email attachments bucket: ${PRIVATE_EMAIL_ATTACHMENTS_BUCKET}`);
+          await supabase.storage.createBucket(
+            PRIVATE_EMAIL_ATTACHMENTS_BUCKET,
+            {
+              public: false, // Strict private bucket — signed URLs only
+              fileSizeLimit: '25MB',
+            },
+          );
+          this.logger.log(
+            `Created private email attachments bucket: ${PRIVATE_EMAIL_ATTACHMENTS_BUCKET}`,
+          );
         }
       }
       this.bucketChecked = true;
     } catch (err: any) {
-      this.logger.warn(`Notice during private email bucket check: ${err?.message || err}`);
+      this.logger.warn(
+        `Notice during private email bucket check: ${err?.message || err}`,
+      );
       this.bucketChecked = true;
     }
   }
@@ -87,10 +101,14 @@ export class EmailAttachmentStorageService {
     attachments: ParsedEmailAttachment[],
   ): Promise<StoredAttachmentResult[]> {
     if (!tenantId) {
-      throw new BadRequestException('Tenant ID is mandatory for attachment persistence');
+      throw new BadRequestException(
+        'Tenant ID is mandatory for attachment persistence',
+      );
     }
     if (!messageId) {
-      throw new BadRequestException('Message ID is mandatory for attachment persistence');
+      throw new BadRequestException(
+        'Message ID is mandatory for attachment persistence',
+      );
     }
 
     if (!attachments || attachments.length === 0) {
@@ -98,8 +116,12 @@ export class EmailAttachmentStorageService {
     }
 
     // 1. Validate aggregate size limit across all attachments of this email
-    const totalAggregateBytes = attachments.reduce((sum, att) => sum + (att.size || att.content.length), 0);
-    const exceedsAggregateLimit = totalAggregateBytes > MAX_AGGREGATE_ATTACHMENTS_BYTES;
+    const totalAggregateBytes = attachments.reduce(
+      (sum, att) => sum + (att.size || att.content.length),
+      0,
+    );
+    const exceedsAggregateLimit =
+      totalAggregateBytes > MAX_AGGREGATE_ATTACHMENTS_BYTES;
 
     await this.ensurePrivateBucket();
 
@@ -107,7 +129,9 @@ export class EmailAttachmentStorageService {
 
     for (const att of attachments) {
       const attachmentId = randomUUID();
-      const sanitizedName = sanitizeUploadedFilename(att.fileName || 'attachment');
+      const sanitizedName = sanitizeUploadedFilename(
+        att.fileName || 'attachment',
+      );
       const ext = path.extname(sanitizedName).toLowerCase();
       const fileSize = att.size || att.content.length;
 
@@ -124,7 +148,9 @@ export class EmailAttachmentStorageService {
       // Check dangerous extensions
       if (DISALLOWED_EXTENSIONS.has(ext)) {
         isQuarantined = true;
-        this.logger.warn(`Attachment "${sanitizedName}" quarantined: disallowed extension "${ext}"`);
+        this.logger.warn(
+          `Attachment "${sanitizedName}" quarantined: disallowed extension "${ext}"`,
+        );
       }
 
       // Check magic byte signature if buffer present
@@ -132,7 +158,9 @@ export class EmailAttachmentStorageService {
         const magic = validateFileMagicBytes(att.content, att.contentType);
         if (!magic.valid) {
           isQuarantined = true;
-          this.logger.warn(`Attachment "${sanitizedName}" quarantined: magic byte validation failed`);
+          this.logger.warn(
+            `Attachment "${sanitizedName}" quarantined: magic byte validation failed`,
+          );
         }
       }
 
@@ -151,10 +179,14 @@ export class EmailAttachmentStorageService {
             });
 
           if (uploadError) {
-            this.logger.error(`Storage upload failed for ${storageKey}: ${uploadError.message}`);
+            this.logger.error(
+              `Storage upload failed for ${storageKey}: ${uploadError.message}`,
+            );
           }
         } catch (uploadErr: any) {
-          this.logger.error(`Storage upload error for ${storageKey}: ${uploadErr?.message || uploadErr}`);
+          this.logger.error(
+            `Storage upload error for ${storageKey}: ${uploadErr?.message || uploadErr}`,
+          );
         }
       }
 
@@ -183,7 +215,9 @@ export class EmailAttachmentStorageService {
     expiresInSeconds = 900,
   ): Promise<string> {
     if (!storageKey || !storageKey.startsWith(`tenants/${tenantId}/`)) {
-      throw new ForbiddenException('Access denied: cross-tenant attachment access is forbidden');
+      throw new ForbiddenException(
+        'Access denied: cross-tenant attachment access is forbidden',
+      );
     }
 
     const supabase = this.getSupabase();
@@ -196,7 +230,9 @@ export class EmailAttachmentStorageService {
       .createSignedUrl(storageKey, expiresInSeconds);
 
     if (error || !data?.signedUrl) {
-      throw new BadRequestException(`Failed to generate signed download URL: ${error?.message}`);
+      throw new BadRequestException(
+        `Failed to generate signed download URL: ${error?.message}`,
+      );
     }
 
     return data.signedUrl;

@@ -56,13 +56,19 @@ describe('Billing Webhook Architecture & Queue Migration Suite', () => {
 
   beforeEach(async () => {
     jest.clearAllMocks();
-    mockPrisma.platformSubscription.create.mockResolvedValue({ id: 'sub-created-1' });
-    mockPrisma.platformSubscription.update.mockResolvedValue({ id: 'sub-updated-1' });
+    mockPrisma.platformSubscription.create.mockResolvedValue({
+      id: 'sub-created-1',
+    });
+    mockPrisma.platformSubscription.update.mockResolvedValue({
+      id: 'sub-updated-1',
+    });
     mockPrisma.platformInvoice.create.mockResolvedValue({
       id: 'inv-created-1',
       invoiceNumber: 'CP-INV-2026-000001',
     });
-    mockPrisma.platformPayment.create.mockResolvedValue({ id: 'pay-created-1' });
+    mockPrisma.platformPayment.create.mockResolvedValue({
+      id: 'pay-created-1',
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       controllers: [BillingWebhookController],
@@ -78,7 +84,8 @@ describe('Billing Webhook Architecture & Queue Migration Suite', () => {
     service = module.get<BillingWebhookService>(BillingWebhookService);
     prisma = module.get<PrismaService>(PrismaService);
     billingGateway = module.get<BillingGatewayService>(BillingGatewayService);
-    webhookQueueProducer = module.get<WebhookQueueProducer>(WebhookQueueProducer);
+    webhookQueueProducer =
+      module.get<WebhookQueueProducer>(WebhookQueueProducer);
   });
 
   describe('BillingWebhookController (Fast HTTP ACK & Enqueueing)', () => {
@@ -103,7 +110,9 @@ describe('Billing Webhook Architecture & Queue Migration Suite', () => {
           message: 'Webhook signature verification failed.',
         }),
       );
-      expect(mockWebhookQueueProducer.enqueueBillingWebhook).not.toHaveBeenCalled();
+      expect(
+        mockWebhookQueueProducer.enqueueBillingWebhook,
+      ).not.toHaveBeenCalled();
     });
 
     it('should acknowledge fast with HTTP 200 without enqueueing if event already PROCESSED', async () => {
@@ -140,7 +149,9 @@ describe('Billing Webhook Architecture & Queue Migration Suite', () => {
         'valid_sig',
       );
 
-      expect(mockWebhookQueueProducer.enqueueBillingWebhook).not.toHaveBeenCalled();
+      expect(
+        mockWebhookQueueProducer.enqueueBillingWebhook,
+      ).not.toHaveBeenCalled();
       expect(mockPrisma.$transaction).not.toHaveBeenCalled();
       expect(mockRes.status).toHaveBeenCalledWith(HttpStatus.OK);
       expect(mockRes.json).toHaveBeenCalledWith(
@@ -185,7 +196,9 @@ describe('Billing Webhook Architecture & Queue Migration Suite', () => {
       // Verify controller did NOT execute database transaction synchronously
       expect(mockPrisma.$transaction).not.toHaveBeenCalled();
       // Verify job enqueued to BullMQ producer
-      expect(mockWebhookQueueProducer.enqueueBillingWebhook).toHaveBeenCalledWith(
+      expect(
+        mockWebhookQueueProducer.enqueueBillingWebhook,
+      ).toHaveBeenCalledWith(
         expect.objectContaining({
           providerEventId: 'evt_new_123',
           provider: 'RAZORPAY',
@@ -235,7 +248,9 @@ describe('Billing Webhook Architecture & Queue Migration Suite', () => {
         'valid_sig',
       );
 
-      expect(mockRes.status).toHaveBeenCalledWith(HttpStatus.SERVICE_UNAVAILABLE);
+      expect(mockRes.status).toHaveBeenCalledWith(
+        HttpStatus.SERVICE_UNAVAILABLE,
+      );
       expect(mockRes.json).toHaveBeenCalledWith(
         expect.objectContaining({
           success: false,

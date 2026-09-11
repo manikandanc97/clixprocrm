@@ -122,7 +122,10 @@ export class PlatformModulesController {
     @Req() req: any,
     @Body() body: { items: Array<{ id: string; sortOrder: number }> },
   ) {
-    const result = await this.modulesService.reorderModules(body.items, req.user.id);
+    const result = await this.modulesService.reorderModules(
+      body.items,
+      req.user.id,
+    );
     return result;
   }
 
@@ -148,7 +151,11 @@ export class PlatformModulesController {
     @Param('id') id: string,
     @Body() body: { isEnabled?: boolean; isVisible?: boolean },
   ) {
-    const data = await this.modulesService.toggleModuleStatus(id, body, req.user.id);
+    const data = await this.modulesService.toggleModuleStatus(
+      id,
+      body,
+      req.user.id,
+    );
     return {
       success: true,
       data,

@@ -9,7 +9,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'view',
     label: 'View Leads',
     description: 'View and search lead records',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -29,7 +36,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'edit',
     label: 'Edit Leads',
     description: 'Modify existing lead records',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -81,7 +95,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'view',
     label: 'View Deals',
     description: 'View pipeline and deals',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -101,7 +122,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'edit',
     label: 'Edit Deals',
     description: 'Update deal stage, value, and metadata',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -143,7 +171,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'view',
     label: 'View Contacts',
     description: 'View contact directory',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -163,7 +198,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'edit',
     label: 'Edit Contacts',
     description: 'Modify contact records',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -185,7 +227,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'view',
     label: 'View Companies',
     description: 'View company accounts',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -205,7 +254,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'edit',
     label: 'Edit Companies',
     description: 'Modify company records',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -227,7 +283,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'view',
     label: 'View Customers',
     description: 'View customer records and history',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -247,7 +310,14 @@ export const PERMISSION_REGISTRY: PermissionDefinition[] = [
     action: 'edit',
     label: 'Edit Customers',
     description: 'Modify customer records',
-    supportedScopes: ['OWN', 'TEAM', 'SUBORDINATES', 'BRANCH', 'ORGANIZATION', 'SHARED'],
+    supportedScopes: [
+      'OWN',
+      'TEAM',
+      'SUBORDINATES',
+      'BRANCH',
+      'ORGANIZATION',
+      'SHARED',
+    ],
     defaultScope: 'ORGANIZATION',
   },
   {
@@ -672,7 +742,10 @@ export function normalizePermissionKey(input: string): string {
 /**
  * Checks if a granted permission pattern satisfies the required permission
  */
-export function matchesPermissionPattern(grantedPattern: string, requiredPermission: string): boolean {
+export function matchesPermissionPattern(
+  grantedPattern: string,
+  requiredPermission: string,
+): boolean {
   if (!grantedPattern || !requiredPermission) return false;
   const granted = grantedPattern.toLowerCase().trim();
   const required = requiredPermission.toLowerCase().trim();

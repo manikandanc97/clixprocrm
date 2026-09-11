@@ -26,7 +26,12 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
     estimatedResponseTime: '< 4 Hours',
     createdAt: new Date(),
     updatedAt: new Date(),
-    createdBy: { id: 'user-charlie', name: 'Charlie', email: 'charlie@alpha.com', avatar: null },
+    createdBy: {
+      id: 'user-charlie',
+      name: 'Charlie',
+      email: 'charlie@alpha.com',
+      avatar: null,
+    },
     assignedTo: null,
     attachments: [],
     messages: [
@@ -38,7 +43,11 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
         isStaff: false,
         isInternal: false,
         createdAt: new Date(),
-        sender: { id: 'user-charlie', name: 'Charlie', email: 'charlie@alpha.com' },
+        sender: {
+          id: 'user-charlie',
+          name: 'Charlie',
+          email: 'charlie@alpha.com',
+        },
       },
       {
         id: 'msg-internal',
@@ -48,7 +57,11 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
         isStaff: true,
         isInternal: true, // Should be omitted from user view
         createdAt: new Date(),
-        sender: { id: 'admin-super', name: 'Super Admin', email: 'sa@clixpro.com' },
+        sender: {
+          id: 'admin-super',
+          name: 'Super Admin',
+          email: 'sa@clixpro.com',
+        },
       },
     ],
   };
@@ -62,15 +75,21 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
             findMany: jest.fn().mockResolvedValue([sampleTicket]),
             findFirst: jest.fn().mockImplementation((query) => {
               if (
-                (!query.where.tenantId || query.where.tenantId === 'tenant-alpha') &&
-                (!query.where.createdById || query.where.createdById === 'user-charlie')
+                (!query.where.tenantId ||
+                  query.where.tenantId === 'tenant-alpha') &&
+                (!query.where.createdById ||
+                  query.where.createdById === 'user-charlie')
               ) {
                 return Promise.resolve(sampleTicket);
               }
               return Promise.resolve(null);
             }),
             update: jest.fn().mockImplementation((args) =>
-              Promise.resolve({ ...sampleTicket, ...args.data, status: args.data.status || 'IN_PROGRESS' }),
+              Promise.resolve({
+                ...sampleTicket,
+                ...args.data,
+                status: args.data.status || 'IN_PROGRESS',
+              }),
             ),
             delete: jest.fn().mockResolvedValue(sampleTicket),
           },
@@ -83,7 +102,9 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
             deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
           },
           user: {
-            findMany: jest.fn().mockResolvedValue([{ id: 'sa-1' }, { id: 'sa-2' }]),
+            findMany: jest
+              .fn()
+              .mockResolvedValue([{ id: 'sa-1' }, { id: 'sa-2' }]),
           },
         };
         return cb(tx);
@@ -127,7 +148,13 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
       'High',
       'Export button is failing with 500 error',
       {},
-      [{ filename: 'screenshot.png', content: Buffer.from('fake-data'), contentType: 'image/png' }],
+      [
+        {
+          filename: 'screenshot.png',
+          content: Buffer.from('fake-data'),
+          contentType: 'image/png',
+        },
+      ],
       {
         userId: 'user-charlie',
         tenantId: 'tenant-alpha',
@@ -157,7 +184,10 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
   });
 
   it('2. Regular user ticket query enforces tenant and user isolation', async () => {
-    const tickets = await service.getUserTickets('user-charlie', 'tenant-alpha');
+    const tickets = await service.getUserTickets(
+      'user-charlie',
+      'tenant-alpha',
+    );
     expect(tickets).toHaveLength(1);
     expect(tickets[0].ticketId).toBe('CP-SUP-2026-123456');
 
@@ -166,7 +196,11 @@ describe('Support Ticket Flow & Tenant Isolation', () => {
   });
 
   it('3. Rejects user access to cross-tenant or other user tickets', async () => {
-    const crossTicket = await service.getTicketById('ticket-uuid-1', 'attacker-user', 'other-tenant');
+    const crossTicket = await service.getTicketById(
+      'ticket-uuid-1',
+      'attacker-user',
+      'other-tenant',
+    );
     expect(crossTicket).toBeNull();
   });
 

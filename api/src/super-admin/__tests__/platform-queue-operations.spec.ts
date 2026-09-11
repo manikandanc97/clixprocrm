@@ -29,28 +29,60 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
             queueName: QUEUE_NAMES.EMAIL,
             status: 'HEALTHY',
             available: true,
-            counts: { active: 1, waiting: 0, completed: 20, failed: 0, delayed: 0, paused: 0, total: 21 },
+            counts: {
+              active: 1,
+              waiting: 0,
+              completed: 20,
+              failed: 0,
+              delayed: 0,
+              paused: 0,
+              total: 21,
+            },
             isPaused: false,
           },
           {
             queueName: QUEUE_NAMES.IMPORT,
             status: 'HEALTHY',
             available: true,
-            counts: { active: 1, waiting: 1, completed: 10, failed: 0, delayed: 0, paused: 0, total: 12 },
+            counts: {
+              active: 1,
+              waiting: 1,
+              completed: 10,
+              failed: 0,
+              delayed: 0,
+              paused: 0,
+              total: 12,
+            },
             isPaused: false,
           },
           {
             queueName: QUEUE_NAMES.WEBHOOK,
             status: 'HEALTHY',
             available: true,
-            counts: { active: 0, waiting: 0, completed: 15, failed: 0, delayed: 0, paused: 0, total: 15 },
+            counts: {
+              active: 0,
+              waiting: 0,
+              completed: 15,
+              failed: 0,
+              delayed: 0,
+              paused: 0,
+              total: 15,
+            },
             isPaused: false,
           },
           {
             queueName: QUEUE_NAMES.MEDIA,
             status: 'HEALTHY',
             available: true,
-            counts: { active: 0, waiting: 0, completed: 5, failed: 0, delayed: 0, paused: 0, total: 5 },
+            counts: {
+              active: 0,
+              waiting: 0,
+              completed: 5,
+              failed: 0,
+              delayed: 0,
+              paused: 0,
+              total: 5,
+            },
             isPaused: false,
           },
         ],
@@ -60,7 +92,15 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
         queueName: QUEUE_NAMES.EMAIL,
         status: 'HEALTHY',
         available: true,
-        counts: { active: 1, waiting: 0, completed: 20, failed: 0, delayed: 0, paused: 0, total: 21 },
+        counts: {
+          active: 1,
+          waiting: 0,
+          completed: 20,
+          failed: 0,
+          delayed: 0,
+          paused: 0,
+          total: 21,
+        },
         isPaused: false,
       }),
       getDeadLetterJobs: jest.fn().mockResolvedValue([
@@ -88,7 +128,10 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
       $queryRaw: jest.fn().mockResolvedValue([{ 1: 1 }]),
       user: { count: jest.fn().mockResolvedValue(10) },
       session: { count: jest.fn().mockResolvedValue(5) },
-      auditLog: { count: jest.fn().mockResolvedValue(100), findMany: jest.fn().mockResolvedValue([]) },
+      auditLog: {
+        count: jest.fn().mockResolvedValue(100),
+        findMany: jest.fn().mockResolvedValue([]),
+      },
       auditArchiveOutbox: { count: jest.fn().mockResolvedValue(0) },
     };
 
@@ -102,11 +145,19 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
         },
         {
           provide: AuditIntegrityMonitorService,
-          useValue: { getSystemStatus: jest.fn().mockResolvedValue({ brokenLinks: 0, hashMismatches: 0 }) },
+          useValue: {
+            getSystemStatus: jest
+              .fn()
+              .mockResolvedValue({ brokenLinks: 0, hashMismatches: 0 }),
+          },
         },
         {
           provide: SecurityIncidentsService,
-          useValue: { getSecurityCenterStatus: jest.fn().mockResolvedValue({ openIncidents: 0 }) },
+          useValue: {
+            getSecurityCenterStatus: jest
+              .fn()
+              .mockResolvedValue({ openIncidents: 0 }),
+          },
         },
         {
           provide: SecurityAlertsService,
@@ -146,14 +197,18 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
     it('returns single queue metrics when valid queueName query parameter is supplied', async () => {
       const res = await controller.getQueueMetrics(QUEUE_NAMES.EMAIL);
       expect(res.success).toBe(true);
-      expect(mockQueueMetricsService.getSingleQueueMetrics).toHaveBeenCalledWith(
-        QUEUE_NAMES.EMAIL,
-      );
+      expect(
+        mockQueueMetricsService.getSingleQueueMetrics,
+      ).toHaveBeenCalledWith(QUEUE_NAMES.EMAIL);
       expect(res.data.queueName).toBe(QUEUE_NAMES.EMAIL);
     });
 
     it('retrieves dead-letter jobs across all queues or for a specific queue', async () => {
-      const res = await controller.getDeadLetterJobs(QUEUE_NAMES.EMAIL, '10', '0');
+      const res = await controller.getDeadLetterJobs(
+        QUEUE_NAMES.EMAIL,
+        '10',
+        '0',
+      );
       expect(res.success).toBe(true);
       expect(mockQueueMetricsService.getDeadLetterJobs).toHaveBeenCalledWith(
         QUEUE_NAMES.EMAIL,
@@ -164,7 +219,10 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
     });
 
     it('retries a dead-letter job via POST endpoint', async () => {
-      const res = await controller.retryDeadLetterJob(QUEUE_NAMES.EMAIL, 'dead-1');
+      const res = await controller.retryDeadLetterJob(
+        QUEUE_NAMES.EMAIL,
+        'dead-1',
+      );
       expect(res.success).toBe(true);
       expect(mockQueueMetricsService.retryDeadLetterJob).toHaveBeenCalledWith(
         QUEUE_NAMES.EMAIL,
@@ -174,7 +232,11 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
     });
 
     it('cleans dead-letter jobs via DELETE endpoint', async () => {
-      const res = await controller.cleanDeadLetterJobs(QUEUE_NAMES.EMAIL, '3600000', '50');
+      const res = await controller.cleanDeadLetterJobs(
+        QUEUE_NAMES.EMAIL,
+        '3600000',
+        '50',
+      );
       expect(res.success).toBe(true);
       expect(mockQueueMetricsService.cleanDeadLetterJobs).toHaveBeenCalledWith(
         QUEUE_NAMES.EMAIL,

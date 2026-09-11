@@ -292,7 +292,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setStatus("authenticated");
       setInitStage("ready");
      
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       if (error.message === "NEEDS_ONBOARDING") {
         if (typeof window !== "undefined" && window.location.pathname !== "/onboarding") {
@@ -379,7 +378,6 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear cache to ensure fresh data for the new user
       await queryClient.clear();
       return response.data.user;
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } catch (error: any) {
       // If login fails, reset hasFetched so a retry can proceed cleanly
       hasFetched.current = false;
@@ -421,7 +419,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
         return hasModuleAccess(permission, access.permissions, user.role);
       },
     };
-  }, [status, user, login, logout, refreshUser, retryInit, loading, isHydrated, initStage, initError, cleanupAuthState]);
+  }, [status, user, login, logout, refreshUser, retryInit, loading, isHydrated, initStage, initError]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
 }

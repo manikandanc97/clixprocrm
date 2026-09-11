@@ -1,5 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EmailAccountsController, isUserTenantAdmin } from './email-accounts.controller';
+import {
+  EmailAccountsController,
+  isUserTenantAdmin,
+} from './email-accounts.controller';
 import { EmailAccountsService } from '../services/email-accounts.service';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
@@ -11,9 +14,15 @@ describe('EmailAccountsController', () => {
 
   const mockService = {
     getAccounts: jest.fn().mockResolvedValue([]),
-    createAccount: jest.fn().mockResolvedValue({ id: 'acc-1', email: 'test@example.com' }),
-    getAccountById: jest.fn().mockResolvedValue({ id: 'acc-1', email: 'test@example.com' }),
-    updateAccount: jest.fn().mockResolvedValue({ id: 'acc-1', displayName: 'Updated' }),
+    createAccount: jest
+      .fn()
+      .mockResolvedValue({ id: 'acc-1', email: 'test@example.com' }),
+    getAccountById: jest
+      .fn()
+      .mockResolvedValue({ id: 'acc-1', email: 'test@example.com' }),
+    updateAccount: jest
+      .fn()
+      .mockResolvedValue({ id: 'acc-1', displayName: 'Updated' }),
     deleteAccount: jest.fn().mockResolvedValue({ success: true, id: 'acc-1' }),
     verifyAccount: jest.fn().mockResolvedValue({ success: true }),
     verifyDirect: jest.fn().mockResolvedValue({ success: true }),
@@ -74,44 +83,74 @@ describe('EmailAccountsController', () => {
     it('getAccounts should delegate with tenantId and userId', async () => {
       const res = await controller.getAccounts(mockReq);
       expect(res.success).toBe(true);
-      expect(mockService.getAccounts).toHaveBeenCalledWith('tenant-123', 'user-456', false);
+      expect(mockService.getAccounts).toHaveBeenCalledWith(
+        'tenant-123',
+        'user-456',
+        false,
+      );
     });
 
     it('createAccount should delegate payload', async () => {
       const dto = { email: 'new@example.com' };
-      const res = await controller.createAccount(mockReq, dto as any);
+      const res = await controller.createAccount(mockReq, dto);
       expect(res.success).toBe(true);
-      expect(mockService.createAccount).toHaveBeenCalledWith('tenant-123', 'user-456', false, dto);
+      expect(mockService.createAccount).toHaveBeenCalledWith(
+        'tenant-123',
+        'user-456',
+        false,
+        dto,
+      );
     });
 
     it('getAccountById should delegate', async () => {
       const res = await controller.getAccountById(mockReq, 'acc-1');
       expect(res.success).toBe(true);
-      expect(mockService.getAccountById).toHaveBeenCalledWith('tenant-123', 'user-456', false, 'acc-1');
+      expect(mockService.getAccountById).toHaveBeenCalledWith(
+        'tenant-123',
+        'user-456',
+        false,
+        'acc-1',
+      );
     });
 
     it('updateAccount should delegate', async () => {
       const dto = { displayName: 'Updated' };
       const res = await controller.updateAccount(mockReq, 'acc-1', dto);
       expect(res.success).toBe(true);
-      expect(mockService.updateAccount).toHaveBeenCalledWith('tenant-123', 'user-456', false, 'acc-1', dto);
+      expect(mockService.updateAccount).toHaveBeenCalledWith(
+        'tenant-123',
+        'user-456',
+        false,
+        'acc-1',
+        dto,
+      );
     });
 
     it('deleteAccount should delegate', async () => {
       const res = await controller.deleteAccount(mockReq, 'acc-1');
       expect(res.success).toBe(true);
-      expect(mockService.deleteAccount).toHaveBeenCalledWith('tenant-123', 'user-456', false, 'acc-1');
+      expect(mockService.deleteAccount).toHaveBeenCalledWith(
+        'tenant-123',
+        'user-456',
+        false,
+        'acc-1',
+      );
     });
 
     it('verifyAccount should delegate', async () => {
       const res = await controller.verifyAccount(mockReq, 'acc-1');
       expect(res.success).toBe(true);
-      expect(mockService.verifyAccount).toHaveBeenCalledWith('tenant-123', 'user-456', false, 'acc-1');
+      expect(mockService.verifyAccount).toHaveBeenCalledWith(
+        'tenant-123',
+        'user-456',
+        false,
+        'acc-1',
+      );
     });
 
     it('verifyDirect should delegate without tenant/user context', async () => {
       const dto = { smtpHost: 'smtp.example.com', smtpPort: 587 };
-      const res = await controller.verifyDirect(dto as any);
+      const res = await controller.verifyDirect(dto);
       expect(res.success).toBe(true);
       expect(mockService.verifyDirect).toHaveBeenCalledWith(dto);
     });

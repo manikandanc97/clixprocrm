@@ -101,18 +101,15 @@ export class MediaQueueProcessor extends WorkerHost {
       );
 
     // 2. Persist updated logo URL and brand primary color within tenant context
-    await this.prisma.withTenantContext(
-      { tenantId, userId },
-      async (tx) => {
-        return tx.tenant.update({
-          where: { id: tenantId },
-          data: {
-            logo: storageUrl,
-            brandPrimaryColor: dominantColor,
-          },
-        });
-      },
-    );
+    await this.prisma.withTenantContext({ tenantId, userId }, async (tx) => {
+      return tx.tenant.update({
+        where: { id: tenantId },
+        data: {
+          logo: storageUrl,
+          brandPrimaryColor: dominantColor,
+        },
+      });
+    });
 
     // 3. Invalidate auth profile cache
     invalidateGetMeCache();
@@ -174,17 +171,14 @@ export class MediaQueueProcessor extends WorkerHost {
 
     // 2. Persist updated avatar URL within tenant/user context
     if (tenantId && tenantId !== 'system') {
-      await this.prisma.withTenantContext(
-        { tenantId, userId },
-        async (tx) => {
-          return tx.user.update({
-            where: { id: userId },
-            data: {
-              avatar: storageUrl,
-            },
-          });
-        },
-      );
+      await this.prisma.withTenantContext({ tenantId, userId }, async (tx) => {
+        return tx.user.update({
+          where: { id: userId },
+          data: {
+            avatar: storageUrl,
+          },
+        });
+      });
     } else {
       await this.prisma.user.update({
         where: { id: userId },

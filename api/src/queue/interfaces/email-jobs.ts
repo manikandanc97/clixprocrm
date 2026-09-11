@@ -11,7 +11,8 @@ export const EMAIL_JOB_NAMES = {
   SYNC_INBOX: 'sync-inbox',
 } as const;
 
-export type EmailJobName = (typeof EMAIL_JOB_NAMES)[keyof typeof EMAIL_JOB_NAMES];
+export type EmailJobName =
+  (typeof EMAIL_JOB_NAMES)[keyof typeof EMAIL_JOB_NAMES];
 
 /**
  * Payload for Security / New-Device Alert emails.

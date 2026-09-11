@@ -1,5 +1,9 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { ExecutionContext, UnauthorizedException, ForbiddenException } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  ForbiddenException,
+} from '@nestjs/common';
 import { TenantContextService } from './tenant-context.service';
 import { TenantGuard } from '../../auth/tenant.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
@@ -19,7 +23,9 @@ describe('TenantContext & Guard Security Specifications', () => {
     tenant: {
       findFirst: jest.fn(),
     },
-    withTenantContext: jest.fn(async (opts: any, cb: (tx: any) => Promise<any>) => cb(mockPrismaService)),
+    withTenantContext: jest.fn(
+      async (opts: any, cb: (tx: any) => Promise<any>) => cb(mockPrismaService),
+    ),
     $transaction: jest.fn(),
     $executeRaw: jest.fn(),
   };
@@ -36,7 +42,8 @@ describe('TenantContext & Guard Security Specifications', () => {
       ],
     }).compile();
 
-    tenantContextService = module.get<TenantContextService>(TenantContextService);
+    tenantContextService =
+      module.get<TenantContextService>(TenantContextService);
     prismaService = module.get<PrismaService>(PrismaService);
     tenantGuard = module.get<TenantGuard>(TenantGuard);
     superAdminGuard = module.get<SuperAdminGuard>(SuperAdminGuard);
@@ -51,8 +58,8 @@ describe('TenantContext & Guard Security Specifications', () => {
         getNext: () => ({}),
       }),
       getType: () => 'http',
-      getClass: () => ({} as any),
-      getHandler: () => ({} as any),
+      getClass: () => ({}) as any,
+      getHandler: () => ({}) as any,
       getArgs: () => [] as any,
       getArgByIndex: () => ({}) as any,
       switchToRpc: () => ({}) as any,
@@ -171,7 +178,9 @@ describe('TenantContext & Guard Security Specifications', () => {
         throw new Error('Simulated database deadlock / constraint violation');
       });
 
-    await expect(failingOperation()).rejects.toThrow('Simulated database deadlock / constraint violation');
+    await expect(failingOperation()).rejects.toThrow(
+      'Simulated database deadlock / constraint violation',
+    );
 
     // Context must be undefined outside the scope
     expect(tenantContextService.getContext()).toBeUndefined();
@@ -188,7 +197,11 @@ describe('TenantContext & Guard Security Specifications', () => {
     });
 
     const req = {
-      user: { id: 'superadmin-uuid', email: 'admin@clixprocrm.com', aal: 'aal2' },
+      user: {
+        id: 'superadmin-uuid',
+        email: 'admin@clixprocrm.com',
+        aal: 'aal2',
+      },
       headers: {},
     };
 
@@ -212,7 +225,9 @@ describe('TenantContext & Guard Security Specifications', () => {
     };
 
     const execCtx = createMockExecutionContext(req);
-    await expect(tenantGuard.canActivate(execCtx)).rejects.toThrow(UnauthorizedException);
+    await expect(tenantGuard.canActivate(execCtx)).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   it('should reject unauthenticated request in SuperAdminGuard with UnauthorizedException', async () => {
@@ -222,7 +237,9 @@ describe('TenantContext & Guard Security Specifications', () => {
     };
 
     const execCtx = createMockExecutionContext(req);
-    await expect(superAdminGuard.canActivate(execCtx)).rejects.toThrow(UnauthorizedException);
+    await expect(superAdminGuard.canActivate(execCtx)).rejects.toThrow(
+      UnauthorizedException,
+    );
   });
 
   // ─── 7. Frontend Tenant ID Tampering Rejection ─────────────────────────────────
@@ -258,7 +275,9 @@ describe('TenantContext & Guard Security Specifications', () => {
       // TenantGuard must NOT use the forged header; it falls back to verified membership or rejects
       expect(tenantContextService.getTenantId()).toBe('tenant-legit');
       expect(req['tenantId']).toBe('tenant-legit');
-      expect(tenantContextService.getTenantId()).not.toBe('tenant-victim-tampered');
+      expect(tenantContextService.getTenantId()).not.toBe(
+        'tenant-victim-tampered',
+      );
     });
   });
 
@@ -280,7 +299,9 @@ describe('TenantContext & Guard Security Specifications', () => {
 
     await tenantContextService.run({ isSuperAdmin: false }, async () => {
       const execCtx = createMockExecutionContext(req);
-      await expect(superAdminGuard.canActivate(execCtx)).rejects.toThrow(ForbiddenException);
+      await expect(superAdminGuard.canActivate(execCtx)).rejects.toThrow(
+        ForbiddenException,
+      );
 
       // Context must remain non-super-admin
       expect(tenantContextService.isSuperAdmin()).toBe(false);

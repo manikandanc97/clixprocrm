@@ -60,7 +60,11 @@ export class QuotationsService {
           tax: data.tax || 0,
         },
       });
-      return { ...quotation, client: this.enc.decrypt(quotation.client), notes: this.enc.decrypt(quotation.notes) };
+      return {
+        ...quotation,
+        client: this.enc.decrypt(quotation.client),
+        notes: this.enc.decrypt(quotation.notes),
+      };
     });
   }
 
@@ -78,7 +82,9 @@ export class QuotationsService {
       return tx.quotation.update({
         where: { id },
         data: {
-          ...(data.client && { client: this.enc.encrypt(data.client) ?? data.client }),
+          ...(data.client && {
+            client: this.enc.encrypt(data.client) ?? data.client,
+          }),
           ...(data.leadId && { lead: { connect: { id: data.leadId } } }),
           ...(data.amount !== undefined && { amount: data.amount }),
           ...(data.status && { status: data.status }),
@@ -87,7 +93,9 @@ export class QuotationsService {
           }),
           ...(data.quoteNumber && { quoteNumber: data.quoteNumber }),
           ...(data.items !== undefined && { items: data.items }),
-          ...(data.notes !== undefined && { notes: this.enc.encrypt(data.notes) }),
+          ...(data.notes !== undefined && {
+            notes: this.enc.encrypt(data.notes),
+          }),
           ...(data.discount !== undefined && { discount: data.discount }),
           ...(data.tax !== undefined && { tax: data.tax }),
         },
@@ -197,7 +205,8 @@ export class QuotationsService {
         (s, r) => s + toNumber(r._sum.amount),
         0,
       );
-      const sentCount = allStats.find((r) => r.status === 'SENT')?._count.id ?? 0;
+      const sentCount =
+        allStats.find((r) => r.status === 'SENT')?._count.id ?? 0;
       const acceptedCount =
         allStats.find((r) => r.status === 'APPROVED')?._count.id ?? 0;
 
@@ -217,7 +226,9 @@ export class QuotationsService {
           quoteId: q.quoteNumber,
           client: this.enc.decrypt(q.client),
           leadId: q.leadId,
-          leadName: q.lead?.name ? this.enc.decrypt(q.lead.name) : this.enc.decrypt(q.client),
+          leadName: q.lead?.name
+            ? this.enc.decrypt(q.lead.name)
+            : this.enc.decrypt(q.client),
           leadDetails: q.lead
             ? {
                 name: this.enc.decrypt(q.lead.name),
@@ -238,9 +249,13 @@ export class QuotationsService {
           discount: toNumber(q.discount),
           tax: toNumber(q.tax),
         })),
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
-
 }

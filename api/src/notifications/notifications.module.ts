@@ -8,4 +8,3 @@ import { NotificationsService } from './services/notifications.service';
   exports: [NotificationsService],
 })
 export class NotificationsModule {}
-

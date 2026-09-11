@@ -47,10 +47,10 @@ describe('P6 Security Component Health Suite', () => {
     process.env.AWS_SECRET_ACCESS_KEY = 'test-secret';
 
     secOpsService = new SecurityOperationsService(
-      mockPrisma as any,
-      mockIntegrityMonitor as any,
-      mockArchiveService as any,
-      mockIncidentsService as any,
+      mockPrisma,
+      mockIntegrityMonitor,
+      mockArchiveService,
+      mockIncidentsService,
     );
 
     (secOpsService as any).redisClient = {
@@ -70,7 +70,9 @@ describe('P6 Security Component Health Suite', () => {
     });
 
     it('transitions to CRITICAL if database connection fails', async () => {
-      mockPrisma.$queryRaw = jest.fn().mockRejectedValue(new Error('Connection terminated'));
+      mockPrisma.$queryRaw = jest
+        .fn()
+        .mockRejectedValue(new Error('Connection terminated'));
       const health = await secOpsService.getSecurityHealth();
       expect(health.database.status).toBe('CRITICAL');
       expect(health.overallStatus).toBe('CRITICAL');

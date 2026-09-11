@@ -20,7 +20,9 @@ describe('P6 Security Alerting & Redis Deduplication Suite', () => {
       });
 
       expect(loggerSpy).toHaveBeenCalledWith(
-        expect.stringContaining('[AUDIT INTEGRITY CRITICAL] [AUDIT_HASH_MISMATCH] Scope: tenant-123'),
+        expect.stringContaining(
+          '[AUDIT INTEGRITY CRITICAL] [AUDIT_HASH_MISMATCH] Scope: tenant-123',
+        ),
       );
     });
   });

@@ -40,8 +40,8 @@ describe('P3 Audit Integrity Dashboard & Controller Security Suite', () => {
     };
 
     controller = new PlatformAuditIntegrityController(
-      mockMonitorService as any,
-      mockDrService as any,
+      mockMonitorService,
+      mockDrService,
     );
   });
 

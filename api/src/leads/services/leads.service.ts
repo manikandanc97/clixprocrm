@@ -106,8 +106,9 @@ export class LeadsService {
         companyId = company.id;
       }
 
-      const { encrypted: encEmail, hash: emailHash } =
-        this.enc.encryptWithHash(data.email);
+      const { encrypted: encEmail, hash: emailHash } = this.enc.encryptWithHash(
+        data.email,
+      );
 
       const lead = await tx.lead.create({
         data: {
@@ -207,10 +208,7 @@ export class LeadsService {
       // Decrypt existing for comparison
       const existingCompanyPlain = this.enc.decrypt(existingLead.company);
 
-      if (
-        data.company !== undefined &&
-        data.company !== existingCompanyPlain
-      ) {
+      if (data.company !== undefined && data.company !== existingCompanyPlain) {
         finalCompanyName = data.company.trim();
         if (finalCompanyName) {
           const companyNameHash = this.enc.hash(finalCompanyName);
@@ -490,7 +488,11 @@ export class LeadsService {
     });
   }
 
-  async deleteLeadAttachment(tenantId: string, leadId: string, attachmentId: string) {
+  async deleteLeadAttachment(
+    tenantId: string,
+    leadId: string,
+    attachmentId: string,
+  ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const attachment = await tx.attachment.findUnique({
         where: { id: attachmentId, tenantId, leadId },
@@ -632,7 +634,6 @@ export class LeadsService {
       return leads;
     });
   }
-
 
   // ─── Private Helpers ─────────────────────────────────────────────────────────
 

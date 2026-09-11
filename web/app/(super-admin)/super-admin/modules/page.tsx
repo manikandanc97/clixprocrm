@@ -24,10 +24,6 @@ import {
   Loader2,
   Users,
   X,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from "lucide-react";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
@@ -46,6 +42,7 @@ import {
 import {
   CRMPageContainer,
   CRMActionMenu,
+  CRMPagination,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader, SortDirection } from "@/shared/components/DataTableColumnHeader";
 import { Button } from "@/shared/ui/button";
@@ -248,7 +245,9 @@ export default function SuperAdminModulesPage() {
   }, [loadTenantModules, loadPlatformModules]);
 
   useEffect(() => {
-    loadAllModules();
+    const timer = setTimeout(() => {
+      loadAllModules();
+    }, 0);
 
     const handleAal2Verified = () => {
       setAal2Required(false);
@@ -258,6 +257,7 @@ export default function SuperAdminModulesPage() {
 
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, [loadAllModules]);
@@ -268,7 +268,7 @@ export default function SuperAdminModulesPage() {
   }, [activeScope, tenantModules, platformModules]);
 
   // Helper: Open Create Modal
-  const handleOpenCreate = () => {
+  const handleOpenCreate = useCallback(() => {
     setEditingModule(null);
     setFormLabel("");
     setFormKey("");
@@ -284,18 +284,24 @@ export default function SuperAdminModulesPage() {
     setFormIsEnabled(true);
     setIconSearchQuery("");
     setIsModalOpen(true);
-  };
+  }, [activeScope, rawCurrentList.length]);
 
   // Handle "+ Add" query param from deep link
   useEffect(() => {
     if (searchParams.get("add") === "true") {
-      handleOpenCreate();
+      const timer = setTimeout(() => {
+        handleOpenCreate();
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [searchParams]);
+  }, [searchParams, handleOpenCreate]);
 
   // Reset pagination on filter, search, or tab change
   useEffect(() => {
-    setCurrentPage(1);
+    const timer = setTimeout(() => {
+      setCurrentPage(1);
+    }, 0);
+    return () => clearTimeout(timer);
   }, [search, groupFilter, statusFilter, activeScope]);
 
   // Available groups for active tab
@@ -1102,95 +1108,18 @@ export default function SuperAdminModulesPage() {
         </div>
 
         {/* 6. Bottom Pagination */}
-        <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
-          <div>
-            Showing{" "}
-            <span className="font-semibold text-foreground">
-              {sortedModules.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
-            </span>
-            -
-            <span className="font-semibold text-foreground">
-              {Math.min(currentPage * rowsPerPage, sortedModules.length)}
-            </span>{" "}
-            of <span className="font-semibold text-foreground">{sortedModules.length}</span> Menus
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span>Rows per page:</span>
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-              >
-                <option value={10}>10</option>
-                <option value={20}>20</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span>
-                Page <strong className="text-foreground">{currentPage}</strong> of{" "}
-                <strong className="text-foreground">{totalPages}</strong>
-              </span>
-
-              <div className="flex items-center gap-1">
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage(1)}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="First page"
-                  aria-label="First page"
-                >
-                  <ChevronsLeft className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="Previous page"
-                  aria-label="Previous page"
-                >
-                  <ChevronLeft className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="Next page"
-                  aria-label="Next page"
-                >
-                  <ChevronRight className="h-4 w-4" />
-                </Button>
-
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(totalPages)}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="Last page"
-                  aria-label="Last page"
-                >
-                  <ChevronsRight className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CRMPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={sortedModules.length}
+          rowsPerPage={rowsPerPage}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={(rows) => {
+            setRowsPerPage(rows);
+            setCurrentPage(1);
+          }}
+          itemName="Menus"
+        />
       </div>
 
       {/* 7. Add / Edit Modal */}

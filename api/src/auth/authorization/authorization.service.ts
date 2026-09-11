@@ -66,13 +66,23 @@ export class AuthorizationService {
     }
 
     // Admin role shortcut if assigned
-    const roleName = (userContext.roleName || '').toUpperCase().trim().replace(/[\s_]+/g, '');
-    if (roleName === 'SUPERADMIN' || roleName === 'ADMIN' || roleName === 'OWNER') {
+    const roleName = (userContext.roleName || '')
+      .toUpperCase()
+      .trim()
+      .replace(/[\s_]+/g, '');
+    if (
+      roleName === 'SUPERADMIN' ||
+      roleName === 'ADMIN' ||
+      roleName === 'OWNER'
+    ) {
       return true;
     }
 
     // Resolve user's effective permissions and scopes
-    const effectivePerms = await this.getEffectivePermissions(tenantId, userContext.userId);
+    const effectivePerms = await this.getEffectivePermissions(
+      tenantId,
+      userContext.userId,
+    );
 
     // Check if user has permission
     let highestScope: DataScope | null = null;
@@ -148,9 +158,17 @@ export class AuthorizationService {
       const isSuperAdmin = false;
 
       const role = tenantUser.role;
-      const roleName = (role.name || '').toUpperCase().trim().replace(/[\s_]+/g, '');
+      const roleName = (role.name || '')
+        .toUpperCase()
+        .trim()
+        .replace(/[\s_]+/g, '');
 
-      if (roleName === 'ADMIN' || roleName === 'SUPERADMIN' || roleName === 'OWNER' || isOrgOwner) {
+      if (
+        roleName === 'ADMIN' ||
+        roleName === 'SUPERADMIN' ||
+        roleName === 'OWNER' ||
+        isOrgOwner
+      ) {
         permMap.set('all', 'ORGANIZATION');
       } else if (role.permissions && Array.isArray(role.permissions)) {
         for (const p of role.permissions) {
@@ -168,7 +186,13 @@ export class AuthorizationService {
         }
       }
 
-      this.cache.setPermissions(tenantId, userId, permMap, isOrgOwner, isSuperAdmin);
+      this.cache.setPermissions(
+        tenantId,
+        userId,
+        permMap,
+        isOrgOwner,
+        isSuperAdmin,
+      );
       return permMap;
     });
   }
@@ -210,7 +234,8 @@ export class AuthorizationService {
       case 'SUBORDINATES': {
         if (this.evaluateOwn(userId, record)) return true;
         const subordinates = await this.getUserSubordinateIds(tenantId, userId);
-        const recordOwner = record.ownerId || record.assignedToId || record.createdById;
+        const recordOwner =
+          record.ownerId || record.assignedToId || record.createdById;
         if (recordOwner && subordinates.includes(recordOwner)) {
           return true;
         }
@@ -304,7 +329,10 @@ export class AuthorizationService {
   /**
    * Resolves recursive subordinates in reporting manager hierarchy
    */
-  async getUserSubordinateIds(tenantId: string, userId: string): Promise<string[]> {
+  async getUserSubordinateIds(
+    tenantId: string,
+    userId: string,
+  ): Promise<string[]> {
     const cached = this.cache.getHierarchy(tenantId, userId);
     if (cached) return cached;
 
@@ -321,7 +349,9 @@ export class AuthorizationService {
       }
 
       // Find currentUser membership ID
-      const userMembership = allMemberships.find((m: any) => m.userId === userId);
+      const userMembership = allMemberships.find(
+        (m: any) => m.userId === userId,
+      );
       if (!userMembership) {
         return [];
       }
@@ -363,12 +393,22 @@ export class AuthorizationService {
       return { tenantId, deletedAt: null };
     }
 
-    const roleName = (userContext.roleName || '').toUpperCase().trim().replace(/[\s_]+/g, '');
-    if (roleName === 'ADMIN' || roleName === 'SUPERADMIN' || roleName === 'OWNER') {
+    const roleName = (userContext.roleName || '')
+      .toUpperCase()
+      .trim()
+      .replace(/[\s_]+/g, '');
+    if (
+      roleName === 'ADMIN' ||
+      roleName === 'SUPERADMIN' ||
+      roleName === 'OWNER'
+    ) {
       return { tenantId, deletedAt: null };
     }
 
-    const effectivePerms = await this.getEffectivePermissions(tenantId, userContext.userId);
+    const effectivePerms = await this.getEffectivePermissions(
+      tenantId,
+      userContext.userId,
+    );
     const normalizedReq = normalizePermissionKey(permission);
 
     let highestScope: DataScope | null = null;
@@ -482,10 +522,16 @@ export class AuthorizationService {
     tenantId: string,
     currentOwnerUserId: string,
     newOwnerUserId: string,
-    actorContext: { ipAddress?: string; userAgent?: string; actorUserId: string },
+    actorContext: {
+      ipAddress?: string;
+      userAgent?: string;
+      actorUserId: string;
+    },
   ): Promise<{ success: boolean; newOwnerId: string }> {
     if (currentOwnerUserId === newOwnerUserId) {
-      throw new BadRequestException('Target user is already the organization owner.');
+      throw new BadRequestException(
+        'Target user is already the organization owner.',
+      );
     }
 
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
@@ -507,7 +553,10 @@ export class AuthorizationService {
       });
       if (!adminRole) {
         adminRole = await (tx as any).role.findFirst({
-          where: { tenantId, name: { in: ['Admin', 'ADMIN', 'Owner', 'OWNER'] } },
+          where: {
+            tenantId,
+            name: { in: ['Admin', 'ADMIN', 'Owner', 'OWNER'] },
+          },
         });
       }
 
@@ -589,7 +638,10 @@ export class AuthorizationService {
         },
       });
 
-      if (activeAdminCount <= 1 && (action === 'delete' || action === 'deactivate')) {
+      if (
+        activeAdminCount <= 1 &&
+        (action === 'delete' || action === 'deactivate')
+      ) {
         throw new ForbiddenException(
           'Cannot remove the last active Administrator in the organization.',
         );

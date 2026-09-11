@@ -34,7 +34,6 @@ jest.mock('bullmq', () => {
 });
 
 describe('QueueModule Infrastructure', () => {
-
   it('should export all defined QUEUE_NAMES constants', () => {
     expect(QUEUE_NAMES.EMAIL).toBe('crm-email-queue');
     expect(QUEUE_NAMES.IMPORT).toBe('crm-import-queue');
@@ -88,7 +87,6 @@ describe('QueueModule Infrastructure', () => {
     await moduleRef.close();
   });
 
-
   it('should support rediss:// TLS connection strings without error', async () => {
     const moduleRef: TestingModule = await Test.createTestingModule({
       imports: [
@@ -113,4 +111,3 @@ describe('QueueModule Infrastructure', () => {
     await moduleRef.close();
   });
 });
-

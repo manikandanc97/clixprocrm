@@ -101,4 +101,3 @@ export class CompaniesController {
     return { success: true, data };
   }
 }
-

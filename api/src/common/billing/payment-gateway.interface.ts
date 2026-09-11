@@ -1,6 +1,6 @@
 /**
  * ClixProCRM Payment Provider Abstraction Interface
- * 
+ *
  * Provides a normalized gateway contract decoupling business logic
  * from Razorpay, Stripe, and built-in simulation/test engines.
  */
@@ -12,7 +12,7 @@ export interface CreateOrderParams {
   billingCycle: 'monthly' | 'annual';
   seats: number;
   amountInMinorUnits: number; // Integer minor units: e.g. 49900 paise for ₹499
-  currency: string;           // "INR" | "USD"
+  currency: string; // "INR" | "USD"
   customerEmail?: string;
   customerName?: string;
   notes?: Record<string, string>;
@@ -21,10 +21,10 @@ export interface CreateOrderParams {
 export interface PaymentOrderResult {
   provider: 'RAZORPAY' | 'STRIPE' | 'MANUAL';
   orderId: string;
-  amount: number;             // Minor units
+  amount: number; // Minor units
   currency: string;
-  keyId?: string;             // Public key for frontend checkout widget
-  checkoutUrl?: string;       // Hosted checkout session URL (for Stripe)
+  keyId?: string; // Public key for frontend checkout widget
+  checkoutUrl?: string; // Hosted checkout session URL (for Stripe)
   metadata?: Record<string, any>;
 }
 
@@ -44,14 +44,14 @@ export interface WebhookVerificationParams {
 export interface NormalizedWebhookEvent {
   provider: 'RAZORPAY' | 'STRIPE' | 'MANUAL';
   eventId: string;
-  eventType: string;          // e.g. "payment.captured", "order.paid", "subscription.cancelled"
+  eventType: string; // e.g. "payment.captured", "order.paid", "subscription.cancelled"
   tenantId?: string;
   planId?: string;
   billingCycle?: 'monthly' | 'annual';
   seats?: number;
   orderId?: string;
   paymentId?: string;
-  amount: number;             // Minor units
+  amount: number; // Minor units
   currency: string;
   status: 'SUCCESS' | 'FAILED' | 'PENDING' | 'REFUNDED';
   rawPayload: any;
@@ -81,7 +81,9 @@ export interface IPaymentGatewayAdapter {
 
   verifyPaymentSignature(params: VerifySignatureParams): boolean;
 
-  verifyAndParseWebhook(params: WebhookVerificationParams): Promise<NormalizedWebhookEvent | null>;
+  verifyAndParseWebhook(
+    params: WebhookVerificationParams,
+  ): Promise<NormalizedWebhookEvent | null>;
 
   processRefund(params: ProcessRefundParams): Promise<RefundResult>;
 }

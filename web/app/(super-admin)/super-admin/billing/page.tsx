@@ -62,6 +62,7 @@ import { PlanBadge } from "@/shared/components/PlanBadge";
 import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
+import { useIsClient } from "@/shared/hooks/use-is-client";
 import {
   ResponsiveContainer,
   AreaChart,
@@ -72,13 +73,13 @@ import {
   CartesianGrid,
 } from "recharts";
 
-export default function SuperAdminBillingPage() {
+export default function PlatformBillingAdminPage() {
   const router = useRouter();
   const { formatCurrency } = useCurrency();
 
   const [activeTab, setActiveTab] = useState<"overview" | "subscriptions" | "invoices" | "settings">("overview");
   const [loading, setLoading] = useState(true);
-  const [isClient, setIsClient] = useState(false);
+  const isClient = useIsClient();
 
   // Data States
   const [overview, setOverview] = useState<PlatformBillingOverviewData | null>(null);
@@ -121,10 +122,6 @@ export default function SuperAdminBillingPage() {
   const [viewInvoiceModalOpen, setViewInvoiceModalOpen] = useState(false);
   const [selectedInvoice, setSelectedInvoice] = useState<PlatformInvoiceItemData | null>(null);
 
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
-
   const loadData = async () => {
     try {
       setLoading(true);
@@ -149,13 +146,16 @@ export default function SuperAdminBillingPage() {
   };
 
   useEffect(() => {
-    loadData();
+    const timer = setTimeout(() => {
+      loadData();
+    }, 0);
 
     const handleAal2Verified = () => {
       loadData();
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      clearTimeout(timer);
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, []);

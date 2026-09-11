@@ -41,8 +41,10 @@ export class AiEntitlementService {
   private redisClient: Redis | null = null;
 
   constructor(private readonly prisma: PrismaService) {
-    const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL;
-    const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_TOKEN;
+    const redisUrl =
+      process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL;
+    const redisToken =
+      process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_TOKEN;
 
     if (redisUrl && redisToken) {
       try {
@@ -51,7 +53,9 @@ export class AiEntitlementService {
           token: redisToken,
         });
       } catch (err: any) {
-        this.logger.warn(`Redis init error in AiEntitlementService: ${err?.message || err}`);
+        this.logger.warn(
+          `Redis init error in AiEntitlementService: ${err?.message || err}`,
+        );
       }
     }
   }
@@ -82,7 +86,9 @@ export class AiEntitlementService {
   /**
    * Resolves effective AI entitlements for a tenant organization based on their subscription plan.
    */
-  async getEffectiveEntitlements(tenantId?: string): Promise<EffectiveAiEntitlements> {
+  async getEffectiveEntitlements(
+    tenantId?: string,
+  ): Promise<EffectiveAiEntitlements> {
     const isGlobalActive = await this.isGlobalAiEnabled();
 
     // 1. If super-admin or no tenant provided, resolve full platform-level models
@@ -96,7 +102,8 @@ export class AiEntitlementService {
         orderBy: { sortOrder: 'asc' },
       });
 
-      const defaultModel = allActiveModels.find((m: any) => m.isDefault) || allActiveModels[0];
+      const defaultModel =
+        allActiveModels.find((m: any) => m.isDefault) || allActiveModels[0];
 
       return {
         planId: 'enterprise',
@@ -118,7 +125,8 @@ export class AiEntitlementService {
           maxTokensPerDay: 10000000,
         })),
         defaultModelKey: defaultModel?.modelKey || 'gemini-2.5-flash',
-        defaultModelDisplayName: defaultModel?.displayName || 'Gemini 2.5 Flash',
+        defaultModelDisplayName:
+          defaultModel?.displayName || 'Gemini 2.5 Flash',
         allowedCapabilities: ['*'],
       };
     }
@@ -127,14 +135,17 @@ export class AiEntitlementService {
     const cacheKey = this.getCacheKey(tenantId);
     if (this.redisClient) {
       try {
-        const cached = await this.redisClient.get<EffectiveAiEntitlements>(cacheKey);
+        const cached =
+          await this.redisClient.get<EffectiveAiEntitlements>(cacheKey);
         if (cached && cached.models) {
           // Re-attach live global status
           cached.isGloballyEnabled = isGlobalActive;
           return cached;
         }
       } catch (cacheErr: any) {
-        this.logger.debug(`Redis cache read bypass: ${cacheErr?.message || cacheErr}`);
+        this.logger.debug(
+          `Redis cache read bypass: ${cacheErr?.message || cacheErr}`,
+        );
       }
     }
 
@@ -175,7 +186,11 @@ export class AiEntitlementService {
     const capabilitiesSet = new Set<string>();
 
     let defaultModelRecord = plan?.defaultModel;
-    if (defaultModelRecord && (defaultModelRecord.status !== 'ENABLED' || !defaultModelRecord.isAvailable)) {
+    if (
+      defaultModelRecord &&
+      (defaultModelRecord.status !== 'ENABLED' ||
+        !defaultModelRecord.isAvailable)
+    ) {
       defaultModelRecord = null;
     }
 
@@ -245,7 +260,8 @@ export class AiEntitlementService {
     }
 
     const defaultModelKey = defaultModel?.modelKey || 'gemini-2.5-flash';
-    const defaultModelDisplayName = defaultModel?.displayName || 'Gemini 2.5 Flash';
+    const defaultModelDisplayName =
+      defaultModel?.displayName || 'Gemini 2.5 Flash';
 
     const result: EffectiveAiEntitlements = {
       planId: plan?.id || planId,
@@ -265,7 +281,9 @@ export class AiEntitlementService {
       try {
         await this.redisClient.set(cacheKey, result, { ex: 600 });
       } catch (cacheErr: any) {
-        this.logger.debug(`Redis cache write notice: ${cacheErr?.message || cacheErr}`);
+        this.logger.debug(
+          `Redis cache write notice: ${cacheErr?.message || cacheErr}`,
+        );
       }
     }
 
@@ -300,7 +318,9 @@ export class AiEntitlementService {
     }
 
     // 3. Resolve Target Model
-    const targetKey = (requestedModelKey || entitlements.defaultModelKey).trim();
+    const targetKey = (
+      requestedModelKey || entitlements.defaultModelKey
+    ).trim();
     const normalizedKey = this.normalizeModelKey(targetKey);
 
     const entitled = entitlements.models.find(
@@ -327,7 +347,11 @@ export class AiEntitlementService {
 
     // 5. Usage Quota Check (Rolling 24h)
     if (tenantId) {
-      await this.enforceUsageLimit(tenantId, entitlements.dailyTokenLimit, entitlements.planName);
+      await this.enforceUsageLimit(
+        tenantId,
+        entitlements.dailyTokenLimit,
+        entitlements.planName,
+      );
     }
 
     return entitled;
@@ -336,7 +360,11 @@ export class AiEntitlementService {
   /**
    * Enforces server-side rolling daily token limit.
    */
-  private async enforceUsageLimit(tenantId: string, dailyTokenLimit: number, planName: string) {
+  private async enforceUsageLimit(
+    tenantId: string,
+    dailyTokenLimit: number,
+    planName: string,
+  ) {
     if (!dailyTokenLimit || dailyTokenLimit <= 0) return;
 
     const oneDayAgo = new Date(Date.now() - 24 * 60 * 60 * 1000);
@@ -429,7 +457,9 @@ export class AiEntitlementService {
       try {
         await this.redisClient.del(this.getCacheKey(tenantId));
       } catch (err: any) {
-        this.logger.debug(`Redis cache invalidation notice: ${err?.message || err}`);
+        this.logger.debug(
+          `Redis cache invalidation notice: ${err?.message || err}`,
+        );
       }
     }
   }
@@ -447,7 +477,9 @@ export class AiEntitlementService {
           await Promise.all(keys.map((k: string) => this.redisClient?.del(k)));
         }
       } catch (err: any) {
-        this.logger.debug(`Redis global cache clear notice: ${err?.message || err}`);
+        this.logger.debug(
+          `Redis global cache clear notice: ${err?.message || err}`,
+        );
       }
     }
   }

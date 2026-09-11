@@ -38,7 +38,8 @@ type RateLimitRecord = {
 const store = new Map<string, RateLimitRecord>();
 
 const redisUrl = process.env.UPSTASH_REDIS_REST_URL || process.env.REDIS_URL;
-const redisToken = process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_TOKEN;
+const redisToken =
+  process.env.UPSTASH_REDIS_REST_TOKEN || process.env.REDIS_TOKEN;
 let redisClient =
   redisUrl && redisToken
     ? new Redis({ url: redisUrl, token: redisToken })
@@ -54,7 +55,6 @@ export function getSharedRedisClient(): Redis | null {
   }
   return null;
 }
-
 
 const ratelimiters = new Map<string, Ratelimit>();
 

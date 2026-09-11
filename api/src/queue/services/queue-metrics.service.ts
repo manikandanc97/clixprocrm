@@ -71,7 +71,9 @@ export class QueueMetricsService {
   /**
    * Retrieves real-time metrics and health status for a single queue.
    */
-  public async getSingleQueueMetrics(queueName: QueueName): Promise<SingleQueueMetrics> {
+  public async getSingleQueueMetrics(
+    queueName: QueueName,
+  ): Promise<SingleQueueMetrics> {
     const queue = this.getQueueInstance(queueName);
 
     if (!queue) {
@@ -101,7 +103,8 @@ export class QueueMetricsService {
         'waiting',
       );
 
-      const isPaused = typeof queue.isPaused === 'function' ? await queue.isPaused() : false;
+      const isPaused =
+        typeof queue.isPaused === 'function' ? await queue.isPaused() : false;
 
       const counts: QueueJobCounts = {
         active: countsRaw.active || 0,
@@ -231,7 +234,10 @@ export class QueueMetricsService {
     const limit = Math.min(100, Math.max(1, options?.limit || 20));
 
     try {
-      const failedJobs: Job[] = await queue.getFailed(offset, offset + limit - 1);
+      const failedJobs: Job[] = await queue.getFailed(
+        offset,
+        offset + limit - 1,
+      );
 
       return failedJobs.map((job) => ({
         id: String(job.id),
@@ -265,7 +271,10 @@ export class QueueMetricsService {
   ): Promise<{ success: boolean; message: string }> {
     const queue = this.getQueueInstance(queueName);
     if (!queue) {
-      return { success: false, message: `Queue "${queueName}" is not available` };
+      return {
+        success: false,
+        message: `Queue "${queueName}" is not available`,
+      };
     }
 
     try {
@@ -311,7 +320,9 @@ export class QueueMetricsService {
 
     try {
       const cleaned = await queue.clean(gracePeriodMs, limit, 'failed');
-      const count = Array.isArray(cleaned) ? cleaned.length : Number(cleaned) || 0;
+      const count = Array.isArray(cleaned)
+        ? cleaned.length
+        : Number(cleaned) || 0;
       this.logger.log(
         `[DEAD-LETTER] Cleaned ${count} failed jobs from queue "${queueName}"`,
       );
@@ -344,7 +355,8 @@ export class QueueMetricsService {
       } else if (Buffer.isBuffer(val)) {
         sanitized[key] = '[BINARY_BUFFER]';
       } else if (typeof val === 'string' && val.length > 2048) {
-        sanitized[key] = `${val.slice(0, 128)}... [TRUNCATED ${val.length} BYTES]`;
+        sanitized[key] =
+          `${val.slice(0, 128)}... [TRUNCATED ${val.length} BYTES]`;
       } else if (val && typeof val === 'object' && !Array.isArray(val)) {
         sanitized[key] = this.sanitizePayload(val);
       } else {

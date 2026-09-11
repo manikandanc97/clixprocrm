@@ -48,7 +48,8 @@ export class PermissionsGuard implements CanActivate {
 
     const matchesPermission = (required: string, userMod: string) => {
       if (!required || !userMod) return false;
-      if (userMod === 'ALL' || userMod === 'all' || userMod === '*') return true;
+      if (userMod === 'ALL' || userMod === 'all' || userMod === '*')
+        return true;
       if (required === userMod) return true;
 
       const normalize = (s: string) => s.toLowerCase().trim();
@@ -71,7 +72,12 @@ export class PermissionsGuard implements CanActivate {
       }
 
       // Full module grant (e.g., 'Employees' or 'Employees:Manage' or 'Employees:*') satisfies sub-actions
-      if (!userAction || userAction === '*' || userAction === 'manage' || userAction === 'admin') {
+      if (
+        !userAction ||
+        userAction === '*' ||
+        userAction === 'manage' ||
+        userAction === 'admin'
+      ) {
         return true;
       }
 
@@ -86,7 +92,9 @@ export class PermissionsGuard implements CanActivate {
     const hasPermission = userRole.permissions?.some(
       (p: any) =>
         p.hasAccess &&
-        requiredPermissions.some((reqPerm) => matchesPermission(reqPerm, p.module)),
+        requiredPermissions.some((reqPerm) =>
+          matchesPermission(reqPerm, p.module),
+        ),
     );
 
     if (!hasPermission) {
@@ -96,4 +104,3 @@ export class PermissionsGuard implements CanActivate {
     return true;
   }
 }
-

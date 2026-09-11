@@ -61,7 +61,8 @@ export class DashboardService {
     const currentYear = new Date().getFullYear();
     const startOfCurrentYear = new Date(currentYear, 0, 1);
 
-    const qTimings: Record<string, number> = {};    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const qTimings: Record<string, number> = {};
+    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const [
         totalDeals,
         currentPeriodDeals,
@@ -91,45 +92,147 @@ export class DashboardService {
         revenueTargetData,
       ] = await Promise.all([
         tx.deal.count({ where: { tenantId, deletedAt: null } }),
-        tx.deal.count({ where: { tenantId, deletedAt: null, createdAt: { gte: currentStart, lt: nextStart } } }),
-        tx.deal.count({ where: { tenantId, deletedAt: null, createdAt: { gte: previousStart, lt: currentStart } } }),
-        tx.deal.count({ where: { tenantId, deletedAt: null, stage: { notIn: ['WON', 'LOST'] } } }),
-        tx.deal.count({ where: { tenantId, deletedAt: null, stage: { notIn: ['WON', 'LOST'] }, createdAt: { lt: currentStart } } }),
+        tx.deal.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: currentStart, lt: nextStart },
+          },
+        }),
+        tx.deal.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: previousStart, lt: currentStart },
+          },
+        }),
+        tx.deal.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            stage: { notIn: ['WON', 'LOST'] },
+          },
+        }),
+        tx.deal.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            stage: { notIn: ['WON', 'LOST'] },
+            createdAt: { lt: currentStart },
+          },
+        }),
         tx.deal.count({ where: { tenantId, deletedAt: null, stage: 'WON' } }),
         tx.deal.count({ where: { tenantId, deletedAt: null, stage: 'LOST' } }),
-        tx.deal.aggregate({ where: { tenantId, deletedAt: null, stage: 'WON' }, _sum: { value: true } }),
-        tx.deal.aggregate({ where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: currentStart, lt: nextStart } }, _sum: { value: true } }),
-        tx.deal.aggregate({ where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: previousStart, lt: currentStart } }, _sum: { value: true } }),
+        tx.deal.aggregate({
+          where: { tenantId, deletedAt: null, stage: 'WON' },
+          _sum: { value: true },
+        }),
+        tx.deal.aggregate({
+          where: {
+            tenantId,
+            deletedAt: null,
+            stage: 'WON',
+            updatedAt: { gte: currentStart, lt: nextStart },
+          },
+          _sum: { value: true },
+        }),
+        tx.deal.aggregate({
+          where: {
+            tenantId,
+            deletedAt: null,
+            stage: 'WON',
+            updatedAt: { gte: previousStart, lt: currentStart },
+          },
+          _sum: { value: true },
+        }),
         tx.lead.count({ where: { tenantId, deletedAt: null } }),
-        tx.lead.count({ where: { tenantId, deletedAt: null, createdAt: { gte: currentStart, lt: nextStart } } }),
-        tx.lead.count({ where: { tenantId, deletedAt: null, createdAt: { gte: previousStart, lt: currentStart } } }),
-        tx.customer.count({ where: { tenantId, deletedAt: null, createdAt: { gte: currentStart, lt: nextStart } } }),
-        tx.customer.count({ where: { tenantId, deletedAt: null, createdAt: { gte: previousStart, lt: currentStart } } }),
-        tx.task.count({ where: { tenantId, deletedAt: null, status: { not: 'COMPLETED' } } }),
-        tx.task.count({ where: { tenantId, deletedAt: null, status: { not: 'COMPLETED' }, createdAt: { gte: currentStart, lt: nextStart } } }),
-        tx.task.count({ where: { tenantId, deletedAt: null, status: { not: 'COMPLETED' }, createdAt: { gte: previousStart, lt: currentStart } } }),
+        tx.lead.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: currentStart, lt: nextStart },
+          },
+        }),
+        tx.lead.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: previousStart, lt: currentStart },
+          },
+        }),
+        tx.customer.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: currentStart, lt: nextStart },
+          },
+        }),
+        tx.customer.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: previousStart, lt: currentStart },
+          },
+        }),
+        tx.task.count({
+          where: { tenantId, deletedAt: null, status: { not: 'COMPLETED' } },
+        }),
+        tx.task.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            status: { not: 'COMPLETED' },
+            createdAt: { gte: currentStart, lt: nextStart },
+          },
+        }),
+        tx.task.count({
+          where: {
+            tenantId,
+            deletedAt: null,
+            status: { not: 'COMPLETED' },
+            createdAt: { gte: previousStart, lt: currentStart },
+          },
+        }),
 
         // Monthly Won Deals Sales Chart
         tx.deal.findMany({
-          where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: startOfCurrentYear } },
+          where: {
+            tenantId,
+            deletedAt: null,
+            stage: 'WON',
+            updatedAt: { gte: startOfCurrentYear },
+          },
           select: { value: true, updatedAt: true },
         }),
 
         // 7-day deals for sparkline
         tx.deal.findMany({
-          where: { tenantId, deletedAt: null, createdAt: { gte: sevenDaysAgo } },
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: sevenDaysAgo },
+          },
           select: { createdAt: true },
         }),
 
         // 7-day won revenue for sparkline
         tx.deal.findMany({
-          where: { tenantId, deletedAt: null, stage: 'WON', updatedAt: { gte: sevenDaysAgo } },
+          where: {
+            tenantId,
+            deletedAt: null,
+            stage: 'WON',
+            updatedAt: { gte: sevenDaysAgo },
+          },
           select: { value: true, updatedAt: true },
         }),
 
         // 7-day leads for sparkline
         tx.lead.findMany({
-          where: { tenantId, deletedAt: null, createdAt: { gte: sevenDaysAgo } },
+          where: {
+            tenantId,
+            deletedAt: null,
+            createdAt: { gte: sevenDaysAgo },
+          },
           select: { createdAt: true },
         }),
 
@@ -172,7 +275,12 @@ export class DashboardService {
       const wonCount = wonDealsTotal;
       const lostCount = lostDealsTotal;
       const totalQualified = wonCount + lostCount;
-      const winRate = totalQualified > 0 ? (wonCount / totalQualified) * 100 : totalDeals > 0 ? (wonCount / totalDeals) * 100 : 0;
+      const winRate =
+        totalQualified > 0
+          ? (wonCount / totalQualified) * 100
+          : totalDeals > 0
+            ? (wonCount / totalDeals) * 100
+            : 0;
 
       // Build 7-day sparklines from findMany records
       const dealsDayMap = new Map<string, number>();
@@ -184,7 +292,10 @@ export class DashboardService {
       const revenueDayMap = new Map<string, number>();
       for (const r of sparklineRevenueRaw) {
         const dStr = new Date(r.updatedAt).toISOString().split('T')[0];
-        revenueDayMap.set(dStr, (revenueDayMap.get(dStr) || 0) + Number(r.value || 0));
+        revenueDayMap.set(
+          dStr,
+          (revenueDayMap.get(dStr) || 0) + Number(r.value || 0),
+        );
       }
 
       const leadsDayMap = new Map<string, number>();
@@ -206,7 +317,8 @@ export class DashboardService {
         sparklineLeads.push({ value: leadsDayMap.get(dStr) || 0 });
       }
 
-      const revenueDisplayValue = totalRevenue > 0 ? totalRevenue : currentRevenue;
+      const revenueDisplayValue =
+        totalRevenue > 0 ? totalRevenue : currentRevenue;
 
       const dashboardStats = [
         {

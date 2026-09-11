@@ -11,7 +11,8 @@ export const NAVIGATION_SCOPE = {
   SUPER_ADMIN: 'SUPER_ADMIN',
 } as const;
 
-export type NavigationScope = (typeof NAVIGATION_SCOPE)[keyof typeof NAVIGATION_SCOPE];
+export type NavigationScope =
+  (typeof NAVIGATION_SCOPE)[keyof typeof NAVIGATION_SCOPE];
 
 export class CreatePlatformModuleDto {
   key?: string;
@@ -138,7 +139,8 @@ const DEFAULT_TENANT_CRM_MODULES: CreatePlatformModuleDto[] = [
     sortOrder: 8,
     isSystem: true,
     permission: null,
-    description: 'Enterprise AI Workspace for CRM analysis and action execution',
+    description:
+      'Enterprise AI Workspace for CRM analysis and action execution',
   },
   {
     key: 'reports',
@@ -255,7 +257,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Overview',
     sortOrder: 1,
     isSystem: true,
-    description: 'Multi-tenant health metrics, live platform activity stream, and tenant summary',
+    description:
+      'Multi-tenant health metrics, live platform activity stream, and tenant summary',
   },
   {
     key: 'sa_copilot',
@@ -265,7 +268,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Platform',
     sortOrder: 2,
     isSystem: true,
-    description: 'Intelligent platform operations copilot and interactive root administrative assistant',
+    description:
+      'Intelligent platform operations copilot and interactive root administrative assistant',
   },
   {
     key: 'sa_organizations',
@@ -275,7 +279,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Platform',
     sortOrder: 3,
     isSystem: true,
-    description: 'Manage multi-tenant workspaces, subscription plans, tenant quotas, and lifecycle',
+    description:
+      'Manage multi-tenant workspaces, subscription plans, tenant quotas, and lifecycle',
   },
   {
     key: 'sa_users',
@@ -285,7 +290,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Platform',
     sortOrder: 4,
     isSystem: true,
-    description: 'Global user directory, administrative privilege control, and cross-org access',
+    description:
+      'Global user directory, administrative privilege control, and cross-org access',
   },
   {
     key: 'sa_modules',
@@ -295,7 +301,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Platform',
     sortOrder: 5,
     isSystem: true,
-    description: 'Configure global modules, menu hierarchy, icon customization, and navigation visibility',
+    description:
+      'Configure global modules, menu hierarchy, icon customization, and navigation visibility',
   },
   {
     key: 'sa_support',
@@ -305,7 +312,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Platform',
     sortOrder: 6,
     isSystem: true,
-    description: 'Central platform support ticketing desk, tenant inquiries, SLA tracking, and resolution inbox',
+    description:
+      'Central platform support ticketing desk, tenant inquiries, SLA tracking, and resolution inbox',
   },
   {
     key: 'sa_plans',
@@ -315,7 +323,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Commerce',
     sortOrder: 7,
     isSystem: true,
-    description: 'Multi-tenant subscription tiers, pricing models, feature packaging, and MRR metrics',
+    description:
+      'Multi-tenant subscription tiers, pricing models, feature packaging, and MRR metrics',
   },
   {
     key: 'sa_billing',
@@ -325,7 +334,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Commerce',
     sortOrder: 8,
     isSystem: true,
-    description: 'Platform-wide invoice collections, payment processing, transaction logs, and MRR cashflow',
+    description:
+      'Platform-wide invoice collections, payment processing, transaction logs, and MRR cashflow',
   },
   {
     key: 'sa_ai',
@@ -335,7 +345,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'AI Platform',
     sortOrder: 9,
     isSystem: true,
-    description: 'Multi-tenant LLM provider routing, token quotas, tier allocations, and prompt controls',
+    description:
+      'Multi-tenant LLM provider routing, token quotas, tier allocations, and prompt controls',
   },
   {
     key: 'sa_analytics',
@@ -345,7 +356,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Insights',
     sortOrder: 10,
     isSystem: false,
-    description: 'Cross-tenant SaaS metrics, MRR projections, growth velocity, and system telemetry',
+    description:
+      'Cross-tenant SaaS metrics, MRR projections, growth velocity, and system telemetry',
   },
   {
     key: 'sa_security',
@@ -355,7 +367,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Security & Operations',
     sortOrder: 11,
     isSystem: true,
-    description: 'Root IAM policy enforcement, multi-factor authentication requirements, and IP firewall filters',
+    description:
+      'Root IAM policy enforcement, multi-factor authentication requirements, and IP firewall filters',
   },
   {
     key: 'sa_secops',
@@ -365,7 +378,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Security & Operations',
     sortOrder: 12,
     isSystem: true,
-    description: 'Live node health telemetry, cluster metrics, threat detection signals, and real-time alerts',
+    description:
+      'Live node health telemetry, cluster metrics, threat detection signals, and real-time alerts',
   },
   {
     key: 'sa_audit_logs',
@@ -375,7 +389,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Security & Operations',
     sortOrder: 13,
     isSystem: true,
-    description: 'Immutable cross-tenant audit trail, security events, and administrative mutations',
+    description:
+      'Immutable cross-tenant audit trail, security events, and administrative mutations',
   },
   {
     key: 'sa_settings',
@@ -385,7 +400,8 @@ const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
     group: 'Configuration',
     sortOrder: 14,
     isSystem: true,
-    description: 'Global application configuration, environment settings, and multi-tenant feature toggles',
+    description:
+      'Global application configuration, environment settings, and multi-tenant feature toggles',
   },
 ];
 
@@ -407,10 +423,14 @@ export class PlatformModulesService {
 
     try {
       // Backfill any records created before the navigationScope column existed
-      await this.prisma.platformModule.updateMany({
-        where: { navigationScope: '' as any },
-        data: { navigationScope: 'TENANT_CRM' },
-      }).catch(() => {/* ignore if column doesn't exist yet during migration */});
+      await this.prisma.platformModule
+        .updateMany({
+          where: { navigationScope: '' as any },
+          data: { navigationScope: 'TENANT_CRM' },
+        })
+        .catch(() => {
+          /* ignore if column doesn't exist yet during migration */
+        });
 
       const existingCount = await this.prisma.platformModule.count({
         where: { navigationScope: 'TENANT_CRM' },
@@ -427,7 +447,9 @@ export class PlatformModulesService {
       });
       const existingKeys = new Set(existingModules.map((m) => m.key));
 
-      const missing = DEFAULT_TENANT_CRM_MODULES.filter((m) => !existingKeys.has(m.key!));
+      const missing = DEFAULT_TENANT_CRM_MODULES.filter(
+        (m) => !existingKeys.has(m.key!),
+      );
       if (missing.length > 0) {
         await this.prisma.platformModule.createMany({
           data: missing.map((mod) => ({
@@ -477,7 +499,9 @@ export class PlatformModulesService {
       });
       const existingKeys = new Set(existingModules.map((m) => m.key));
 
-      const missing = DEFAULT_SUPER_ADMIN_NAV_MENUS.filter((m) => !existingKeys.has(m.key));
+      const missing = DEFAULT_SUPER_ADMIN_NAV_MENUS.filter(
+        (m) => !existingKeys.has(m.key),
+      );
       if (missing.length > 0) {
         await this.prisma.platformModule.createMany({
           data: missing.map((mod) => ({
@@ -546,21 +570,28 @@ export class PlatformModulesService {
 
     const scopeWhere = { navigationScope: scope };
 
-    const [modules, totalCount, enabledCount, disabledCount, systemCount] = await Promise.all([
-      this.prisma.platformModule.findMany({
-        where,
-        orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
-        include: {
-          children: {
-            orderBy: { sortOrder: 'asc' },
+    const [modules, totalCount, enabledCount, disabledCount, systemCount] =
+      await Promise.all([
+        this.prisma.platformModule.findMany({
+          where,
+          orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+          include: {
+            children: {
+              orderBy: { sortOrder: 'asc' },
+            },
           },
-        },
-      }),
-      this.prisma.platformModule.count({ where: scopeWhere }),
-      this.prisma.platformModule.count({ where: { ...scopeWhere, isEnabled: true } }),
-      this.prisma.platformModule.count({ where: { ...scopeWhere, isEnabled: false } }),
-      this.prisma.platformModule.count({ where: { ...scopeWhere, isSystem: true } }),
-    ]);
+        }),
+        this.prisma.platformModule.count({ where: scopeWhere }),
+        this.prisma.platformModule.count({
+          where: { ...scopeWhere, isEnabled: true },
+        }),
+        this.prisma.platformModule.count({
+          where: { ...scopeWhere, isEnabled: false },
+        }),
+        this.prisma.platformModule.count({
+          where: { ...scopeWhere, isSystem: true },
+        }),
+      ]);
 
     return {
       modules,
@@ -609,7 +640,9 @@ export class PlatformModulesService {
     }
 
     // 2. Check duplicates
-    const existingKey = await this.prisma.platformModule.findUnique({ where: { key } });
+    const existingKey = await this.prisma.platformModule.findUnique({
+      where: { key },
+    });
     if (existingKey) {
       throw new BadRequestException(`Module key '${key}' already exists`);
     }
@@ -618,7 +651,9 @@ export class PlatformModulesService {
       where: { route: dto.route.trim() },
     });
     if (existingRoute) {
-      throw new BadRequestException(`Route '${dto.route}' is already used by module '${existingRoute.label}'`);
+      throw new BadRequestException(
+        `Route '${dto.route}' is already used by module '${existingRoute.label}'`,
+      );
     }
 
     // 3. Determine max sort order within same scope
@@ -658,7 +693,12 @@ export class PlatformModulesService {
         userId: adminUserId,
         action: 'PLATFORM_MODULE_CREATED',
         module: 'SuperAdmin',
-        details: { moduleId: created.id, key: created.key, label: created.label, scope },
+        details: {
+          moduleId: created.id,
+          key: created.key,
+          label: created.label,
+          scope,
+        },
       },
     });
 
@@ -669,14 +709,20 @@ export class PlatformModulesService {
   // UPDATE
   // ============================================================
 
-  async updateModule(id: string, dto: UpdatePlatformModuleDto, adminUserId: string) {
+  async updateModule(
+    id: string,
+    dto: UpdatePlatformModuleDto,
+    adminUserId: string,
+  ) {
     const existing = await this.getModuleById(id);
 
     // If key is being updated, check uniqueness
     let key = existing.key;
     if (dto.key && dto.key !== existing.key) {
       if (existing.isSystem) {
-        throw new ForbiddenException('Key cannot be modified for core system modules');
+        throw new ForbiddenException(
+          'Key cannot be modified for core system modules',
+        );
       }
       key = dto.key
         .toLowerCase()
@@ -697,7 +743,9 @@ export class PlatformModulesService {
         where: { route: dto.route.trim(), NOT: { id } },
       });
       if (duplicateRoute) {
-        throw new BadRequestException(`Route '${dto.route}' is already in use by module '${duplicateRoute.label}'`);
+        throw new BadRequestException(
+          `Route '${dto.route}' is already in use by module '${duplicateRoute.label}'`,
+        );
       }
     }
 
@@ -706,7 +754,9 @@ export class PlatformModulesService {
       if (dto.parentId === id) {
         throw new BadRequestException('A module cannot be its own parent');
       }
-      const parentExists = await this.prisma.platformModule.findUnique({ where: { id: dto.parentId } });
+      const parentExists = await this.prisma.platformModule.findUnique({
+        where: { id: dto.parentId },
+      });
       if (!parentExists) {
         throw new BadRequestException('Specified parent module does not exist');
       }
@@ -721,12 +771,30 @@ export class PlatformModulesService {
         route: dto.route !== undefined ? dto.route.trim() : existing.route,
         group: dto.group !== undefined ? dto.group.trim() : existing.group,
         parentId: dto.parentId !== undefined ? dto.parentId : existing.parentId,
-        sortOrder: dto.sortOrder !== undefined ? dto.sortOrder : existing.sortOrder,
-        isEnabled: dto.isEnabled !== undefined ? dto.isEnabled : existing.isEnabled,
-        isVisible: dto.isVisible !== undefined ? dto.isVisible : existing.isVisible,
-        permission: dto.permission !== undefined ? (dto.permission ? dto.permission.trim() : null) : existing.permission,
-        badge: dto.badge !== undefined ? (dto.badge ? dto.badge.trim() : null) : existing.badge,
-        description: dto.description !== undefined ? (dto.description ? dto.description.trim() : null) : existing.description,
+        sortOrder:
+          dto.sortOrder !== undefined ? dto.sortOrder : existing.sortOrder,
+        isEnabled:
+          dto.isEnabled !== undefined ? dto.isEnabled : existing.isEnabled,
+        isVisible:
+          dto.isVisible !== undefined ? dto.isVisible : existing.isVisible,
+        permission:
+          dto.permission !== undefined
+            ? dto.permission
+              ? dto.permission.trim()
+              : null
+            : existing.permission,
+        badge:
+          dto.badge !== undefined
+            ? dto.badge
+              ? dto.badge.trim()
+              : null
+            : existing.badge,
+        description:
+          dto.description !== undefined
+            ? dto.description
+              ? dto.description.trim()
+              : null
+            : existing.description,
       },
     });
 
@@ -735,7 +803,11 @@ export class PlatformModulesService {
         userId: adminUserId,
         action: 'PLATFORM_MODULE_UPDATED',
         module: 'SuperAdmin',
-        details: { moduleId: id, scope: existing.navigationScope, changes: dto as any },
+        details: {
+          moduleId: id,
+          scope: existing.navigationScope,
+          changes: dto as any,
+        },
       },
     });
 
@@ -756,8 +828,14 @@ export class PlatformModulesService {
     const updated = await this.prisma.platformModule.update({
       where: { id },
       data: {
-        isEnabled: params.isEnabled !== undefined ? params.isEnabled : existing.isEnabled,
-        isVisible: params.isVisible !== undefined ? params.isVisible : existing.isVisible,
+        isEnabled:
+          params.isEnabled !== undefined
+            ? params.isEnabled
+            : existing.isEnabled,
+        isVisible:
+          params.isVisible !== undefined
+            ? params.isVisible
+            : existing.isVisible,
       },
     });
 
@@ -787,7 +865,9 @@ export class PlatformModulesService {
     adminUserId: string,
   ) {
     if (!items || !Array.isArray(items) || items.length === 0) {
-      throw new BadRequestException('Items array with id and sortOrder is required');
+      throw new BadRequestException(
+        'Items array with id and sortOrder is required',
+      );
     }
 
     const updates = items.map((item) =>
@@ -808,7 +888,10 @@ export class PlatformModulesService {
       },
     });
 
-    return { success: true, message: 'Platform modules reordered successfully' };
+    return {
+      success: true,
+      message: 'Platform modules reordered successfully',
+    };
   }
 
   // ============================================================
@@ -824,7 +907,9 @@ export class PlatformModulesService {
       );
     }
 
-    const childCount = await this.prisma.platformModule.count({ where: { parentId: id } });
+    const childCount = await this.prisma.platformModule.count({
+      where: { parentId: id },
+    });
     if (childCount > 0) {
       throw new BadRequestException(
         `Cannot delete module because it has ${childCount} child sub-module(s). Reassign or delete child items first.`,
@@ -838,7 +923,12 @@ export class PlatformModulesService {
         userId: adminUserId,
         action: 'PLATFORM_MODULE_DELETED',
         module: 'SuperAdmin',
-        details: { moduleId: id, key: existing.key, label: existing.label, scope: existing.navigationScope },
+        details: {
+          moduleId: id,
+          key: existing.key,
+          label: existing.label,
+          scope: existing.navigationScope,
+        },
       },
     });
 
@@ -890,7 +980,9 @@ export class PlatformModulesService {
         normalizedPerms.includes(permLower) ||
         normalizedPerms.includes(keyLower) ||
         normalizedPerms.includes(labelLower) ||
-        normalizedPerms.some((p) => p.startsWith(keyLower) || p.startsWith(permLower))
+        normalizedPerms.some(
+          (p) => p.startsWith(keyLower) || p.startsWith(permLower),
+        )
       );
     });
   }

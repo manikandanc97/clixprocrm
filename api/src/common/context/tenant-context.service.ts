@@ -5,7 +5,8 @@ import { RequestTenantContext } from './tenant-context.interface';
 @Injectable()
 export class TenantContextService {
   private readonly logger = new Logger(TenantContextService.name);
-  private readonly asyncLocalStorage = new AsyncLocalStorage<RequestTenantContext>();
+  private readonly asyncLocalStorage =
+    new AsyncLocalStorage<RequestTenantContext>();
 
   /**
    * Runs a given callback within an isolated RequestTenantContext.
@@ -30,8 +31,10 @@ export class TenantContextService {
     if (store) {
       if (updates.tenantId !== undefined) store.tenantId = updates.tenantId;
       if (updates.userId !== undefined) store.userId = updates.userId;
-      if (updates.isSuperAdmin !== undefined) store.isSuperAdmin = updates.isSuperAdmin;
-      if (updates.isOrgOwner !== undefined) store.isOrgOwner = updates.isOrgOwner;
+      if (updates.isSuperAdmin !== undefined)
+        store.isSuperAdmin = updates.isSuperAdmin;
+      if (updates.isOrgOwner !== undefined)
+        store.isOrgOwner = updates.isOrgOwner;
       if (updates.branchId !== undefined) store.branchId = updates.branchId;
       if (updates.userRole !== undefined) store.userRole = updates.userRole;
     }

@@ -6,9 +6,17 @@ import { ConnectionVerifierService } from './connection-verifier.service';
 import { MimeParserService } from './mime-parser.service';
 import { EmailHtmlSanitizerService } from './email-html-sanitizer.service';
 import { EmailAttachmentStorageService } from './email-attachment-storage.service';
-import { ImapClientFactory, IImapClient, FetchedImapMessage } from './imap-client.factory';
+import {
+  ImapClientFactory,
+  IImapClient,
+  FetchedImapMessage,
+} from './imap-client.factory';
 import { ConfigService } from '@nestjs/config';
-import { EmailSyncStatus, EmailDirection, EmailMessageStatus } from '@prisma/client';
+import {
+  EmailSyncStatus,
+  EmailDirection,
+  EmailMessageStatus,
+} from '@prisma/client';
 import { BadRequestException } from '@nestjs/common';
 
 describe('InboundEmailService Suite', () => {
@@ -23,7 +31,8 @@ describe('InboundEmailService Suite', () => {
   let dbAttachments: any[] = [];
   let dbTimelineEvents: any[] = [];
 
-  const TEST_KEY = 'a1b2c3d4e5f67890123456789abcdef0a1b2c3d4e5f67890123456789abcdef0';
+  const TEST_KEY =
+    'a1b2c3d4e5f67890123456789abcdef0a1b2c3d4e5f67890123456789abcdef0';
   const TENANT_1 = 'tenant-uuid-1111';
   const TENANT_2 = 'tenant-uuid-2222';
   const ACCOUNT_ID = 'acc-uuid-1234';
@@ -37,13 +46,20 @@ describe('InboundEmailService Suite', () => {
       const tx = {
         emailAccount: {
           findFirst: jest.fn(async ({ where }: any) => {
-            return dbAccounts.find((item) => {
-              for (const [key, val] of Object.entries(where)) {
-                if (key === 'deletedAt' && val === null && item.deletedAt !== null) return false;
-                if (item[key] !== val) return false;
-              }
-              return true;
-            }) || null;
+            return (
+              dbAccounts.find((item) => {
+                for (const [key, val] of Object.entries(where)) {
+                  if (
+                    key === 'deletedAt' &&
+                    val === null &&
+                    item.deletedAt !== null
+                  )
+                    return false;
+                  if (item[key] !== val) return false;
+                }
+                return true;
+              }) || null
+            );
           }),
           update: jest.fn(async ({ where, data }: any) => {
             const acc = dbAccounts.find((a) => a.id === where.id);
@@ -56,15 +72,22 @@ describe('InboundEmailService Suite', () => {
         },
         emailThread: {
           findFirst: jest.fn(async ({ where, orderBy }: any) => {
-            let matches = dbThreads.filter((item) => {
+            const matches = dbThreads.filter((item) => {
               for (const [key, val] of Object.entries(where)) {
-                if (key === 'deletedAt' && val === null && item.deletedAt !== null) return false;
+                if (
+                  key === 'deletedAt' &&
+                  val === null &&
+                  item.deletedAt !== null
+                )
+                  return false;
                 if (item[key] !== val) return false;
               }
               return true;
             });
             if (orderBy?.lastMessageAt === 'desc') {
-              matches.sort((a, b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime());
+              matches.sort(
+                (a, b) => b.lastMessageAt.getTime() - a.lastMessageAt.getTime(),
+              );
             }
             return matches[0] || null;
           }),
@@ -89,11 +112,13 @@ describe('InboundEmailService Suite', () => {
                 thread.unreadCount += data.unreadCount.increment;
               }
               if (data.hasAttachments !== undefined) {
-                thread.hasAttachments = thread.hasAttachments || data.hasAttachments;
+                thread.hasAttachments =
+                  thread.hasAttachments || data.hasAttachments;
               }
               if (data.lastMessageAt) thread.lastMessageAt = data.lastMessageAt;
               if (data.snippet) thread.snippet = data.snippet;
-              if (data.externalThreadId) thread.externalThreadId = data.externalThreadId;
+              if (data.externalThreadId)
+                thread.externalThreadId = data.externalThreadId;
               return thread;
             }
             throw new Error(`Thread not found: ${where.id}`);
@@ -101,9 +126,13 @@ describe('InboundEmailService Suite', () => {
         },
         emailMessage: {
           findFirst: jest.fn(async ({ where, orderBy }: any) => {
-            let matches = dbMessages.filter((item) => {
+            const matches = dbMessages.filter((item) => {
               for (const [key, val] of Object.entries(where)) {
-                if (key === 'internetMessageId' && typeof val === 'object' && val.in) {
+                if (
+                  key === 'internetMessageId' &&
+                  typeof val === 'object' &&
+                  val.in
+                ) {
                   if (!val.in.includes(item.internetMessageId)) return false;
                   continue;
                 }
@@ -112,7 +141,9 @@ describe('InboundEmailService Suite', () => {
               return true;
             });
             if (orderBy?.createdAt === 'desc') {
-              matches.sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+              matches.sort(
+                (a, b) => b.createdAt.getTime() - a.createdAt.getTime(),
+              );
             }
             return matches[0] || null;
           }),
@@ -161,7 +192,9 @@ describe('InboundEmailService Suite', () => {
       connect: jest.fn().mockResolvedValue(undefined),
       logout: jest.fn().mockResolvedValue(undefined),
       close: jest.fn().mockResolvedValue(undefined),
-      fetchMessages: jest.fn().mockImplementation(async () => mockFetchedMessages),
+      fetchMessages: jest
+        .fn()
+        .mockImplementation(async () => mockFetchedMessages),
     };
 
     const mockImapFactory = {
@@ -198,7 +231,9 @@ describe('InboundEmailService Suite', () => {
 
     service = module.get<InboundEmailService>(InboundEmailService);
     encService = module.get<EncryptionService>(EncryptionService);
-    verifierService = module.get<ConnectionVerifierService>(ConnectionVerifierService);
+    verifierService = module.get<ConnectionVerifierService>(
+      ConnectionVerifierService,
+    );
     encService.onModuleInit();
 
     // Seed default verified test account
@@ -382,7 +417,9 @@ describe('InboundEmailService Suite', () => {
 
     // Message must attach to existing thread
     expect(dbMessages).toHaveLength(2);
-    const replyMsg = dbMessages.find((m) => m.internetMessageId === '<reply-contract-2@corp.com>');
+    const replyMsg = dbMessages.find(
+      (m) => m.internetMessageId === '<reply-contract-2@corp.com>',
+    );
     expect(replyMsg?.threadId).toBe('thread-existing-1');
 
     // Thread counters incremented
@@ -439,7 +476,9 @@ describe('InboundEmailService Suite', () => {
       accountId: ACCOUNT_ID,
     });
 
-    const followUpMsg = dbMessages.find((m) => m.internetMessageId === '<feature-followup-789@corp.com>');
+    const followUpMsg = dbMessages.find(
+      (m) => m.internetMessageId === '<feature-followup-789@corp.com>',
+    );
     expect(followUpMsg?.threadId).toBe('thread-ref-1');
   });
 
@@ -482,7 +521,9 @@ describe('InboundEmailService Suite', () => {
       accountId: ACCOUNT_ID,
     });
 
-    const matchedMsg = dbMessages.find((m) => m.internetMessageId === '<subject-match-111@client.com>');
+    const matchedMsg = dbMessages.find(
+      (m) => m.internetMessageId === '<subject-match-111@client.com>',
+    );
     expect(matchedMsg?.threadId).toBe('thread-subj-1');
   });
 
@@ -512,7 +553,9 @@ describe('InboundEmailService Suite', () => {
       accountId: ACCOUNT_ID,
     });
 
-    const msg = dbMessages.find((m) => m.internetMessageId === '<xss-injection-123@evil.com>');
+    const msg = dbMessages.find(
+      (m) => m.internetMessageId === '<xss-injection-123@evil.com>',
+    );
     expect(msg).toBeDefined();
     expect(msg.bodyHtml).not.toContain('<script');
     expect(msg.bodyHtml).not.toContain('onerror=');
@@ -556,7 +599,9 @@ describe('InboundEmailService Suite', () => {
     jest.spyOn(verifierService, 'assertSafeHost').mockResolvedValue(undefined);
 
     mockImapClient.connect.mockRejectedValueOnce(
-      new Error('AUTHENTICATIONFAILED Invalid login credentials for password=SuperSecretP@ss123'),
+      new Error(
+        'AUTHENTICATIONFAILED Invalid login credentials for password=SuperSecretP@ss123',
+      ),
     );
 
     await expect(

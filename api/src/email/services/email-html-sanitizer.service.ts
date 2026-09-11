@@ -15,18 +15,40 @@ export class EmailHtmlSanitizerService {
     let cleaned = rawHtml;
 
     // 1. Remove dangerous paired tags and all their inner contents
-    const dangerousPairedTags = ['script', 'iframe', 'object', 'embed', 'applet', 'form', 'textarea', 'select', 'button'];
+    const dangerousPairedTags = [
+      'script',
+      'iframe',
+      'object',
+      'embed',
+      'applet',
+      'form',
+      'textarea',
+      'select',
+      'button',
+    ];
     for (const tag of dangerousPairedTags) {
-      const regex = new RegExp(`<${tag}\\b[^<]*(?:(?!<\\/${tag}>)<[^<]*)*<\\/${tag}>`, 'gi');
+      const regex = new RegExp(
+        `<${tag}\\b[^<]*(?:(?!<\\/${tag}>)<[^<]*)*<\\/${tag}>`,
+        'gi',
+      );
       cleaned = cleaned.replace(regex, '');
     }
 
     // 2. Remove dangerous self-closing / single tags
-    cleaned = cleaned.replace(/<(meta|base|link|input|frame|frameset|head|title)\b[^>]*\/?>/gi, '');
-    cleaned = cleaned.replace(/<\/(meta|base|link|input|frame|frameset|head|title)>/gi, '');
+    cleaned = cleaned.replace(
+      /<(meta|base|link|input|frame|frameset|head|title)\b[^>]*\/?>/gi,
+      '',
+    );
+    cleaned = cleaned.replace(
+      /<\/(meta|base|link|input|frame|frameset|head|title)>/gi,
+      '',
+    );
 
     // 3. Remove inline event handlers (onload, onerror, onclick, onmouseover, onfocus, etc.)
-    cleaned = cleaned.replace(/\s+on[a-zA-Z]+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi, '');
+    cleaned = cleaned.replace(
+      /\s+on[a-zA-Z]+\s*=\s*(?:'[^']*'|"[^"]*"|[^\s>]+)/gi,
+      '',
+    );
 
     // 4. Remove dangerous URI schemes in href, src, action, etc.
     cleaned = cleaned.replace(
@@ -39,14 +61,20 @@ export class EmailHtmlSanitizerService {
     );
 
     // 5. Clean CSS expressions and dangerous functions in style attributes
-    cleaned = cleaned.replace(/\bstyle\s*=\s*(["'])(.*?)\1/gi, (match, quote, styleContent) => {
-      let safeStyle = styleContent
-        .replace(/expression\s*\([^)]*\)/gi, '')
-        .replace(/url\s*\(\s*['"]?\s*(?:javascript|vbscript|data\s*:\s*text\/html):[^)]*\)/gi, '')
-        .replace(/-moz-binding/gi, '')
-        .replace(/@import/gi, '');
-      return `style=${quote}${safeStyle}${quote}`;
-    });
+    cleaned = cleaned.replace(
+      /\bstyle\s*=\s*(["'])(.*?)\1/gi,
+      (match, quote, styleContent) => {
+        const safeStyle = styleContent
+          .replace(/expression\s*\([^)]*\)/gi, '')
+          .replace(
+            /url\s*\(\s*['"]?\s*(?:javascript|vbscript|data\s*:\s*text\/html):[^)]*\)/gi,
+            '',
+          )
+          .replace(/-moz-binding/gi, '')
+          .replace(/@import/gi, '');
+        return `style=${quote}${safeStyle}${quote}`;
+      },
+    );
 
     // 6. Ensure links open in a new tab securely (target="_blank" rel="noopener noreferrer")
     cleaned = cleaned.replace(/<a\b([^>]*)>/gi, (match, attributes) => {
@@ -54,20 +82,29 @@ export class EmailHtmlSanitizerService {
       if (!/\btarget\s*=/i.test(attrs)) {
         attrs += ' target="_blank"';
       } else {
-        attrs = attrs.replace(/\btarget\s*=\s*(["'])?[^"'\s>]+(\1)?/i, 'target="_blank"');
+        attrs = attrs.replace(
+          /\btarget\s*=\s*(["'])?[^"'\s>]+(\1)?/i,
+          'target="_blank"',
+        );
       }
 
       if (!/\brel\s*=/i.test(attrs)) {
         attrs += ' rel="noopener noreferrer"';
       } else {
-        attrs = attrs.replace(/\brel\s*=\s*(["'])?[^"'\s>]+(\1)?/i, 'rel="noopener noreferrer"');
+        attrs = attrs.replace(
+          /\brel\s*=\s*(["'])?[^"'\s>]+(\1)?/i,
+          'rel="noopener noreferrer"',
+        );
       }
 
       return `<a${attrs}>`;
     });
 
     // 7. Neutralize any lingering protocol injection tokens
-    cleaned = cleaned.replace(/(javascript|vbscript|data\s*:\s*text\/html):/gi, 'blocked:');
+    cleaned = cleaned.replace(
+      /(javascript|vbscript|data\s*:\s*text\/html):/gi,
+      'blocked:',
+    );
 
     return cleaned;
   }
@@ -75,7 +112,11 @@ export class EmailHtmlSanitizerService {
   /**
    * Generates a plain-text snippet for email thread lists and previews (up to maxLength chars).
    */
-  generateSnippet(text: string | null | undefined, html: string | null | undefined, maxLength = 160): string {
+  generateSnippet(
+    text: string | null | undefined,
+    html: string | null | undefined,
+    maxLength = 160,
+  ): string {
     if (text && text.trim().length > 0) {
       return text.replace(/\s+/g, ' ').trim().slice(0, maxLength);
     }

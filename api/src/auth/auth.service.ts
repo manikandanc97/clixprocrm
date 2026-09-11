@@ -130,7 +130,8 @@ export class AuthService {
     }
 
     const membership = tenantId
-      ? user.memberships.find((m: any) => m.tenantId === tenantId) || user.memberships[0]
+      ? user.memberships.find((m: any) => m.tenantId === tenantId) ||
+        user.memberships[0]
       : user.memberships[0];
 
     if (!membership || !membership.role) {
@@ -161,7 +162,8 @@ export class AuthService {
         tenantId: membership.tenantId,
         companyName: membership.tenant?.name || 'My Workspace',
         companyLogo: membership.tenant?.logo || null,
-        brandPrimaryColor: (membership.tenant as any)?.brandPrimaryColor || null,
+        brandPrimaryColor:
+          (membership.tenant as any)?.brandPrimaryColor || null,
         role: roleName,
         isSuperAdmin: false,
         permissions,
@@ -351,102 +353,109 @@ export class AuthService {
       slug = `${slug}-${crypto.randomBytes(3).toString('hex')}`;
     }
 
-    return this.prisma.withTenantContext({ isSuperAdmin: true }, async (tx: any) => {
-      const tenant = await tx.tenant.create({
-        data: {
-          name: data.companyName,
-          slug,
-          plan: defaultPlan,
-          currency: defaultCurrency,
-          timezone: defaultTimezone,
-        },
-      });
-
-      // Handle optional logo upload during initial workspace creation
-      if (data.logoFile && data.logoFile.buffer && data.logoFile.buffer.length > 0) {
-        try {
-          const { storageUrl, dominantColor } =
-            await this.brandingService.processAndUploadLogo(
-              tenant.id,
-              data.logoFile.buffer,
-              data.logoFile.filename,
-            );
-
-          await tx.tenant.update({
-            where: { id: tenant.id },
-            data: {
-              logo: storageUrl,
-              brandPrimaryColor: dominantColor,
-            },
-          });
-          tenant.logo = storageUrl;
-          tenant.brandPrimaryColor = dominantColor;
-        } catch (logoErr: any) {
-          this.logger.warn(
-            `Initial branding processing notice during register: ${logoErr?.message || logoErr}`,
-          );
-        }
-      }
-
-      // Seed default ADMIN system role with full canonical permissions.
-      // Workspace admins can create, customize, and manage custom roles & permissions.
-      const adminRole = await tx.role.create({
-        data: {
-          name: 'ADMIN',
-          tenantId: tenant.id,
-          isSystem: true,
-          priority: 100,
-        },
-      });
-
-      const moduleList = SYSTEM_ROLE_PERMISSIONS['ADMIN'] || [];
-      if (moduleList.length > 0) {
-        await tx.rolePermission.createMany({
-          data: moduleList.map((module: string) => ({
-            roleId: adminRole.id,
-            module,
-            hasAccess: true,
-          })),
-        });
-      }
-
-      let user = await tx.user.findUnique({ where: { id: data.userId } });
-      if (!user) {
-        user = await tx.user.create({
+    return this.prisma.withTenantContext(
+      { isSuperAdmin: true },
+      async (tx: any) => {
+        const tenant = await tx.tenant.create({
           data: {
-            id: data.userId,
-            name: data.name,
-            email: data.email,
+            name: data.companyName,
+            slug,
+            plan: defaultPlan,
+            currency: defaultCurrency,
+            timezone: defaultTimezone,
           },
         });
-      } else if (!user.name && data.name) {
-        user = await tx.user.update({
-          where: { id: user.id },
-          data: { name: data.name },
+
+        // Handle optional logo upload during initial workspace creation
+        if (
+          data.logoFile &&
+          data.logoFile.buffer &&
+          data.logoFile.buffer.length > 0
+        ) {
+          try {
+            const { storageUrl, dominantColor } =
+              await this.brandingService.processAndUploadLogo(
+                tenant.id,
+                data.logoFile.buffer,
+                data.logoFile.filename,
+              );
+
+            await tx.tenant.update({
+              where: { id: tenant.id },
+              data: {
+                logo: storageUrl,
+                brandPrimaryColor: dominantColor,
+              },
+            });
+            tenant.logo = storageUrl;
+            tenant.brandPrimaryColor = dominantColor;
+          } catch (logoErr: any) {
+            this.logger.warn(
+              `Initial branding processing notice during register: ${logoErr?.message || logoErr}`,
+            );
+          }
+        }
+
+        // Seed default ADMIN system role with full canonical permissions.
+        // Workspace admins can create, customize, and manage custom roles & permissions.
+        const adminRole = await tx.role.create({
+          data: {
+            name: 'ADMIN',
+            tenantId: tenant.id,
+            isSystem: true,
+            priority: 100,
+          },
         });
-      }
 
-      await tx.tenantUser.create({
-        data: {
-          tenantId: tenant.id,
-          userId: user.id,
-          roleId: adminRole.id,
-        },
-      });
+        const moduleList = SYSTEM_ROLE_PERMISSIONS['ADMIN'] || [];
+        if (moduleList.length > 0) {
+          await tx.rolePermission.createMany({
+            data: moduleList.map((module: string) => ({
+              roleId: adminRole.id,
+              module,
+              hasAccess: true,
+            })),
+          });
+        }
 
-      await tx.auditLog.create({
-        data: {
-          userId: user.id,
-          tenantId: tenant.id,
-          action: 'REGISTER_SUCCESS',
-          module: 'Authentication',
-          ipAddress: reqInfo.ip || null,
-          userAgent: reqInfo.userAgent || null,
-        },
-      });
+        let user = await tx.user.findUnique({ where: { id: data.userId } });
+        if (!user) {
+          user = await tx.user.create({
+            data: {
+              id: data.userId,
+              name: data.name,
+              email: data.email,
+            },
+          });
+        } else if (!user.name && data.name) {
+          user = await tx.user.update({
+            where: { id: user.id },
+            data: { name: data.name },
+          });
+        }
 
-      return { user, tenant };
-    });
+        await tx.tenantUser.create({
+          data: {
+            tenantId: tenant.id,
+            userId: user.id,
+            roleId: adminRole.id,
+          },
+        });
+
+        await tx.auditLog.create({
+          data: {
+            userId: user.id,
+            tenantId: tenant.id,
+            action: 'REGISTER_SUCCESS',
+            module: 'Authentication',
+            ipAddress: reqInfo.ip || null,
+            userAgent: reqInfo.userAgent || null,
+          },
+        });
+
+        return { user, tenant };
+      },
+    );
   }
 
   async deleteAccount(
@@ -476,14 +485,21 @@ export class AuthService {
       throw new ForbiddenException('User is not a member of this workspace.');
     }
 
-    const expectedCompanyName = (membership.tenant?.name || '').trim().toLowerCase();
-    const providedConfirm1 = (confirmation?.confirm1 || '').trim().toLowerCase();
-    const providedConfirm2 = (confirmation?.confirm2 || '').trim().toLowerCase();
+    const expectedCompanyName = (membership.tenant?.name || '')
+      .trim()
+      .toLowerCase();
+    const providedConfirm1 = (confirmation?.confirm1 || '')
+      .trim()
+      .toLowerCase();
+    const providedConfirm2 = (confirmation?.confirm2 || '')
+      .trim()
+      .toLowerCase();
 
     const isCompanyMatch =
       providedConfirm1 === expectedCompanyName ||
       providedConfirm1 === 'clixprocrm' ||
-      (membership.tenant?.slug && providedConfirm1 === membership.tenant.slug.toLowerCase());
+      (membership.tenant?.slug &&
+        providedConfirm1 === membership.tenant.slug.toLowerCase());
 
     const isSecondMatch = providedConfirm2 === 'delete my account';
 
@@ -513,155 +529,155 @@ export class AuthService {
           { tenantId, isSuperAdmin: true, timeout: 30000 },
           async (tx: any) => {
             // 1. Break circular / self-referential / non-cascading FK references
-          await tx.$executeRawUnsafe(
-            `UPDATE "TenantUser" SET "reportingManagerId" = NULL, "departmentId" = NULL WHERE "tenantId" = $1`,
-            tenantId,
-          );
-          await tx.$executeRawUnsafe(
-            `UPDATE "Task" SET "relatedCustomerId" = NULL, "relatedLeadId" = NULL, "relatedMeetingId" = NULL, "relatedQuotationId" = NULL, "relatedDealId" = NULL WHERE "tenantId" = $1`,
-            tenantId,
-          );
-          await tx.$executeRawUnsafe(
-            `UPDATE "Meeting" SET "customerId" = NULL, "leadId" = NULL, "quotationId" = NULL, "dealId" = NULL WHERE "tenantId" = $1`,
-            tenantId,
-          );
-          await tx.$executeRawUnsafe(
-            `UPDATE "Quotation" SET "customerId" = NULL, "dealId" = NULL WHERE "tenantId" = $1`,
-            tenantId,
-          );
-          await tx.$executeRawUnsafe(
-            `UPDATE "Deal" SET "companyId" = NULL, "customerId" = NULL, "leadId" = NULL WHERE "tenantId" = $1`,
-            tenantId,
-          );
-          await tx.$executeRawUnsafe(
-            `UPDATE "Lead" SET "customerId" = NULL, "companyId" = NULL WHERE "tenantId" = $1`,
-            tenantId,
-          );
-          await tx.$executeRawUnsafe(
-            `UPDATE "Customer" SET "companyId" = NULL WHERE "tenantId" = $1`,
-            tenantId,
-          );
-
-          // 2. Delete child models of AI & RAG
-          const convs = await tx.aiConversation.findMany({
-            where: { tenantId },
-            select: { id: true },
-          });
-          if (convs.length > 0) {
-            const convIds = convs.map((c: any) => c.id);
-            await tx.aiMessage.deleteMany({
-              where: { conversationId: { in: convIds } },
-            });
-          }
-          await tx.aiConversation.deleteMany({ where: { tenantId } });
-
-          const docs = await tx.document.findMany({
-            where: { tenantId },
-            select: { id: true },
-          });
-          if (docs.length > 0) {
-            const docIds = docs.map((d: any) => d.id);
-            await tx.documentChunk.deleteMany({
-              where: { documentId: { in: docIds } },
-            });
-          }
-          await tx.document.deleteMany({ where: { tenantId } });
-          await tx.tenantAiConfig.deleteMany({ where: { tenantId } });
-
-          // 3. Delete tenant timeline events, attachments, notes, notifications
-          await tx.timelineEvent.deleteMany({ where: { tenantId } });
-          await tx.attachment.deleteMany({ where: { tenantId } });
-          await tx.note.deleteMany({ where: { tenantId } });
-          await tx.notification.deleteMany({ where: { tenantId } });
-
-          // 4. Delete financial & operational records
-          await tx.invoice.deleteMany({ where: { tenantId } });
-          await tx.invoiceCounter.deleteMany({ where: { tenantId } });
-          await tx.quotation.deleteMany({ where: { tenantId } });
-          await tx.task.deleteMany({ where: { tenantId } });
-          await tx.meeting.deleteMany({ where: { tenantId } });
-          await tx.deal.deleteMany({ where: { tenantId } });
-          await tx.lead.deleteMany({ where: { tenantId } });
-          await tx.customer.deleteMany({ where: { tenantId } });
-          await tx.company.deleteMany({ where: { tenantId } });
-          await tx.product.deleteMany({ where: { tenantId } });
-          await tx.revenueTarget.deleteMany({ where: { tenantId } });
-          await tx.invitation.deleteMany({ where: { tenantId } });
-
-          // 5. Gather all users who belong to this tenant
-          const tenantUsers = await tx.tenantUser.findMany({
-            where: { tenantId },
-            select: { userId: true },
-          });
-          const userIdsInTenant: string[] = tenantUsers.map(
-            (tu: any) => tu.userId,
-          );
-
-          // Delete tenant user memberships
-          await tx.tenantUser.deleteMany({ where: { tenantId } });
-
-          // 6. Delete roles, permissions, departments
-          const roles = await tx.role.findMany({
-            where: { tenantId },
-            select: { id: true },
-          });
-          if (roles.length > 0) {
-            const roleIds = roles.map((r: any) => r.id);
-            await tx.rolePermission.deleteMany({
-              where: { roleId: { in: roleIds } },
-            });
-          }
-          await tx.role.deleteMany({ where: { tenantId } });
-          await tx.department.deleteMany({ where: { tenantId } });
-
-          // 7. Record ORGANIZATION_DELETED audit log (preserved permanently)
-          await tx.auditLog.create({
-            data: {
+            await tx.$executeRawUnsafe(
+              `UPDATE "TenantUser" SET "reportingManagerId" = NULL, "departmentId" = NULL WHERE "tenantId" = $1`,
               tenantId,
-              userId,
-              action: 'ORGANIZATION_DELETED',
-              module: 'Organization',
-              details: {
-                deletedByUserId: userId,
-                reason: 'Tenant Owner deleted organization and account',
-              },
-            },
-          });
+            );
+            await tx.$executeRawUnsafe(
+              `UPDATE "Task" SET "relatedCustomerId" = NULL, "relatedLeadId" = NULL, "relatedMeetingId" = NULL, "relatedQuotationId" = NULL, "relatedDealId" = NULL WHERE "tenantId" = $1`,
+              tenantId,
+            );
+            await tx.$executeRawUnsafe(
+              `UPDATE "Meeting" SET "customerId" = NULL, "leadId" = NULL, "quotationId" = NULL, "dealId" = NULL WHERE "tenantId" = $1`,
+              tenantId,
+            );
+            await tx.$executeRawUnsafe(
+              `UPDATE "Quotation" SET "customerId" = NULL, "dealId" = NULL WHERE "tenantId" = $1`,
+              tenantId,
+            );
+            await tx.$executeRawUnsafe(
+              `UPDATE "Deal" SET "companyId" = NULL, "customerId" = NULL, "leadId" = NULL WHERE "tenantId" = $1`,
+              tenantId,
+            );
+            await tx.$executeRawUnsafe(
+              `UPDATE "Lead" SET "customerId" = NULL, "companyId" = NULL WHERE "tenantId" = $1`,
+              tenantId,
+            );
+            await tx.$executeRawUnsafe(
+              `UPDATE "Customer" SET "companyId" = NULL WHERE "tenantId" = $1`,
+              tenantId,
+            );
 
-          // 8. Delete Tenant (AuditLog rows with this tenantId remain preserved)
-          await tx.tenant.delete({ where: { id: tenantId } });
-
-          // 9. Clean up users who have no other tenant memberships (AuditLog rows preserved)
-          for (const uid of userIdsInTenant) {
-            const userObj = await tx.user.findUnique({
-              where: { id: uid },
-              select: { isSuperAdmin: true },
+            // 2. Delete child models of AI & RAG
+            const convs = await tx.aiConversation.findMany({
+              where: { tenantId },
+              select: { id: true },
             });
-            if (userObj?.isSuperAdmin) {
-              continue; // Never delete platform Super Admin
-            }
-
-            const otherMemberships = await tx.tenantUser.count({
-              where: { userId: uid },
-            });
-            if (otherMemberships === 0) {
-              await tx.auditLog.create({
-                data: {
-                  tenantId,
-                  userId: uid,
-                  action: 'USER_ACCOUNT_DELETED',
-                  module: 'Authentication',
-                  details: {
-                    deletedUserId: uid,
-                    cascadeFromTenantDeletion: true,
-                  },
-                },
+            if (convs.length > 0) {
+              const convIds = convs.map((c: any) => c.id);
+              await tx.aiMessage.deleteMany({
+                where: { conversationId: { in: convIds } },
               });
-              await tx.user.delete({ where: { id: uid } });
             }
-          }
-        },
-      );
+            await tx.aiConversation.deleteMany({ where: { tenantId } });
+
+            const docs = await tx.document.findMany({
+              where: { tenantId },
+              select: { id: true },
+            });
+            if (docs.length > 0) {
+              const docIds = docs.map((d: any) => d.id);
+              await tx.documentChunk.deleteMany({
+                where: { documentId: { in: docIds } },
+              });
+            }
+            await tx.document.deleteMany({ where: { tenantId } });
+            await tx.tenantAiConfig.deleteMany({ where: { tenantId } });
+
+            // 3. Delete tenant timeline events, attachments, notes, notifications
+            await tx.timelineEvent.deleteMany({ where: { tenantId } });
+            await tx.attachment.deleteMany({ where: { tenantId } });
+            await tx.note.deleteMany({ where: { tenantId } });
+            await tx.notification.deleteMany({ where: { tenantId } });
+
+            // 4. Delete financial & operational records
+            await tx.invoice.deleteMany({ where: { tenantId } });
+            await tx.invoiceCounter.deleteMany({ where: { tenantId } });
+            await tx.quotation.deleteMany({ where: { tenantId } });
+            await tx.task.deleteMany({ where: { tenantId } });
+            await tx.meeting.deleteMany({ where: { tenantId } });
+            await tx.deal.deleteMany({ where: { tenantId } });
+            await tx.lead.deleteMany({ where: { tenantId } });
+            await tx.customer.deleteMany({ where: { tenantId } });
+            await tx.company.deleteMany({ where: { tenantId } });
+            await tx.product.deleteMany({ where: { tenantId } });
+            await tx.revenueTarget.deleteMany({ where: { tenantId } });
+            await tx.invitation.deleteMany({ where: { tenantId } });
+
+            // 5. Gather all users who belong to this tenant
+            const tenantUsers = await tx.tenantUser.findMany({
+              where: { tenantId },
+              select: { userId: true },
+            });
+            const userIdsInTenant: string[] = tenantUsers.map(
+              (tu: any) => tu.userId,
+            );
+
+            // Delete tenant user memberships
+            await tx.tenantUser.deleteMany({ where: { tenantId } });
+
+            // 6. Delete roles, permissions, departments
+            const roles = await tx.role.findMany({
+              where: { tenantId },
+              select: { id: true },
+            });
+            if (roles.length > 0) {
+              const roleIds = roles.map((r: any) => r.id);
+              await tx.rolePermission.deleteMany({
+                where: { roleId: { in: roleIds } },
+              });
+            }
+            await tx.role.deleteMany({ where: { tenantId } });
+            await tx.department.deleteMany({ where: { tenantId } });
+
+            // 7. Record ORGANIZATION_DELETED audit log (preserved permanently)
+            await tx.auditLog.create({
+              data: {
+                tenantId,
+                userId,
+                action: 'ORGANIZATION_DELETED',
+                module: 'Organization',
+                details: {
+                  deletedByUserId: userId,
+                  reason: 'Tenant Owner deleted organization and account',
+                },
+              },
+            });
+
+            // 8. Delete Tenant (AuditLog rows with this tenantId remain preserved)
+            await tx.tenant.delete({ where: { id: tenantId } });
+
+            // 9. Clean up users who have no other tenant memberships (AuditLog rows preserved)
+            for (const uid of userIdsInTenant) {
+              const userObj = await tx.user.findUnique({
+                where: { id: uid },
+                select: { isSuperAdmin: true },
+              });
+              if (userObj?.isSuperAdmin) {
+                continue; // Never delete platform Super Admin
+              }
+
+              const otherMemberships = await tx.tenantUser.count({
+                where: { userId: uid },
+              });
+              if (otherMemberships === 0) {
+                await tx.auditLog.create({
+                  data: {
+                    tenantId,
+                    userId: uid,
+                    action: 'USER_ACCOUNT_DELETED',
+                    module: 'Authentication',
+                    details: {
+                      deletedUserId: uid,
+                      cascadeFromTenantDeletion: true,
+                    },
+                  },
+                });
+                await tx.user.delete({ where: { id: uid } });
+              }
+            }
+          },
+        );
       } else {
         // Normal non-admin user deletion: Remove user's membership and personal records only
         await this.prisma.withTenantContext(
@@ -857,10 +873,12 @@ export class AuthService {
     }
 
     // Clear mustResetPassword flag
-    await (this.prisma as any).user.update({
-      where: { id: userId },
-      data: { mustResetPassword: false },
-    }).catch(() => {});
+    await (this.prisma as any).user
+      .update({
+        where: { id: userId },
+        data: { mustResetPassword: false },
+      })
+      .catch(() => {});
 
     // Invalidate all identity & tenant caches for user
     invalidateGetMeCache(userId);
@@ -935,10 +953,12 @@ export class AuthService {
     }
 
     // Clear mustResetPassword flag
-    await (this.prisma as any).user.update({
-      where: { id: userId },
-      data: { mustResetPassword: false },
-    }).catch(() => {});
+    await (this.prisma as any).user
+      .update({
+        where: { id: userId },
+        data: { mustResetPassword: false },
+      })
+      .catch(() => {});
 
     // Invalidate all identity & token caches
     invalidateGetMeCache(userId);
@@ -976,4 +996,3 @@ export class AuthService {
     };
   }
 }
-

@@ -138,7 +138,11 @@ function buildModelMocks() {
     notification: {
       findUnique: jest.fn(),
       findMany: jest.fn().mockResolvedValue([]),
-      create: jest.fn().mockImplementation(({ data }) => Promise.resolve({ id: 'notif-1', ...data })),
+      create: jest
+        .fn()
+        .mockImplementation(({ data }) =>
+          Promise.resolve({ id: 'notif-1', ...data }),
+        ),
       update: jest.fn(),
       updateMany: jest.fn().mockResolvedValue({ count: 0 }),
       count: jest.fn().mockResolvedValue(0),
@@ -219,7 +223,9 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
 
     encService = {
       encrypt: jest.fn((v) => (v ? `enc_${v}` : v)),
-      decrypt: jest.fn((v) => (v && v.startsWith('enc_') ? v.replace('enc_', '') : v)),
+      decrypt: jest.fn((v) =>
+        v && v.startsWith('enc_') ? v.replace('enc_', '') : v,
+      ),
       hash: jest.fn((v) => (v ? `hash_${v}` : v)),
       encryptWithHash: jest.fn((v) => ({
         encrypted: v ? `enc_${v}` : null,
@@ -230,7 +236,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
 
   describe('1. TenantGuard & Normal User Discovery Bootstrap', () => {
     it('should query user memberships in userId-scoped tenant context (without superadmin flag)', async () => {
-      const guard = new TenantGuard(mockPrisma as any, new TenantContextService());
+      const guard = new TenantGuard(mockPrisma, new TenantContextService());
 
       const mockExecutionContext: any = {
         switchToHttp: () => ({
@@ -275,8 +281,11 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
 
     beforeEach(() => {
       authService = new AuthService(
-        mockPrisma as any,
-        { processAndUploadLogo: jest.fn(), processAndUploadAvatar: jest.fn() } as any,
+        mockPrisma,
+        {
+          processAndUploadLogo: jest.fn(),
+          processAndUploadAvatar: jest.fn(),
+        } as any,
         new TenantContextService(),
       );
     });
@@ -289,7 +298,10 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
         memberships: [
           {
             tenantId: 'tenant-123',
-            role: { name: 'ADMIN', permissions: [{ module: 'ALL', hasAccess: true }] },
+            role: {
+              name: 'ADMIN',
+              permissions: [{ module: 'ALL', hasAccess: true }],
+            },
             tenant: { name: 'Test Workspace', status: 'ACTIVE' },
           },
         ],
@@ -305,15 +317,27 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     });
 
     it('register wraps workspace creation in superadmin tenant context', async () => {
-      mockTx.tenant.create.mockResolvedValue({ id: 'tenant-new', name: 'Acme Corp', slug: 'acme-corp' });
+      mockTx.tenant.create.mockResolvedValue({
+        id: 'tenant-new',
+        name: 'Acme Corp',
+        slug: 'acme-corp',
+      });
       mockTx.role.create.mockResolvedValue({ id: 'role-admin' });
       mockTx.rolePermission.createMany.mockResolvedValue({ count: 1 });
-      mockTx.user.findUnique.mockResolvedValue({ id: 'user-reg-1', name: 'John Doe' });
+      mockTx.user.findUnique.mockResolvedValue({
+        id: 'user-reg-1',
+        name: 'John Doe',
+      });
       mockTx.tenantUser.create.mockResolvedValue({ id: 'tu-1' });
       mockTx.auditLog.create.mockResolvedValue({ id: 'al-1' });
 
       const res = await authService.register(
-        { userId: 'user-reg-1', name: 'John Doe', email: 'john@acme.com', companyName: 'Acme Corp' },
+        {
+          userId: 'user-reg-1',
+          name: 'John Doe',
+          email: 'john@acme.com',
+          companyName: 'Acme Corp',
+        },
         { ip: '127.0.0.1', userAgent: 'test' },
       );
 
@@ -330,7 +354,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     let service: CompaniesService;
 
     beforeEach(() => {
-      service = new CompaniesService(mockPrisma as any, encService);
+      service = new CompaniesService(mockPrisma, encService);
     });
 
     it('getCompanies executes within tenantId context', async () => {
@@ -350,7 +374,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
 
       await service.createCompany(
         'tenant-co-1',
-        { name: 'Stark Industries', industry: 'Tech' } as any,
+        { name: 'Stark Industries', industry: 'Tech' },
         'user-1',
       );
       expect(mockPrisma.withTenantContext).toHaveBeenCalledWith(
@@ -365,7 +389,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     let service: NotificationsService;
 
     beforeEach(() => {
-      service = new NotificationsService(mockPrisma as any);
+      service = new NotificationsService(mockPrisma);
     });
 
     it('getNotifications executes within tenantId context', async () => {
@@ -396,7 +420,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     let service: SearchService;
 
     beforeEach(() => {
-      service = new SearchService(mockPrisma as any);
+      service = new SearchService(mockPrisma);
     });
 
     it('globalSearch executes all entity lookups inside withTenantContext', async () => {
@@ -406,7 +430,12 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
       mockTx.deal.findMany.mockResolvedValue([]);
       mockTx.task.findMany.mockResolvedValue([]);
 
-      await service.globalSearch('tenant-srch-1', 'user-1', false, 'test query');
+      await service.globalSearch(
+        'tenant-srch-1',
+        'user-1',
+        false,
+        'test query',
+      );
       expect(mockPrisma.withTenantContext).toHaveBeenCalledWith(
         { tenantId: 'tenant-srch-1' },
         expect.any(Function),
@@ -420,7 +449,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     let service: LeadsImportService;
 
     beforeEach(() => {
-      service = new LeadsImportService(mockPrisma as any, encService);
+      service = new LeadsImportService(mockPrisma, encService);
     });
 
     it('bulkImportLeads executes within tenantId context', async () => {
@@ -446,7 +475,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     let service: TasksExportService;
 
     beforeEach(() => {
-      service = new TasksExportService(mockPrisma as any);
+      service = new TasksExportService(mockPrisma);
     });
 
     it('exportTasks executes within tenantId context', async () => {
@@ -463,7 +492,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
 
   describe('8. RoleStatsService & AnalyticsInsightsService', () => {
     it('getRoleManagementStats executes within tenant context', async () => {
-      const service = new RoleStatsService(mockPrisma as any);
+      const service = new RoleStatsService(mockPrisma);
       await service.getRoleManagementStats('tenant-stats-1');
 
       expect(mockPrisma.withTenantContext).toHaveBeenCalledWith(
@@ -474,7 +503,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     });
 
     it('getAiInsights executes within tenant context', async () => {
-      const service = new AnalyticsInsightsService(mockPrisma as any);
+      const service = new AnalyticsInsightsService(mockPrisma);
       mockTx.lead.findMany.mockResolvedValue([]);
       mockTx.task.findMany.mockResolvedValue([]);
 
@@ -489,7 +518,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
 
   describe('9. Super Admin Platform Services', () => {
     it('PlatformDashboardService executes in isSuperAdmin: true context', async () => {
-      const service = new PlatformDashboardService(mockPrisma as any);
+      const service = new PlatformDashboardService(mockPrisma);
       mockTx.tenant.findMany.mockResolvedValue([]);
       mockTx.auditLog.findMany.mockResolvedValue([]);
       mockTx.tenant.groupBy.mockResolvedValue([]);
@@ -503,7 +532,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     });
 
     it('PlatformAnalyticsService executes in isSuperAdmin: true context', async () => {
-      const service = new PlatformAnalyticsService(mockPrisma as any);
+      const service = new PlatformAnalyticsService(mockPrisma);
       mockTx.tenant.findMany.mockResolvedValue([]);
       mockTx.tenant.groupBy.mockResolvedValue([]);
 
@@ -516,9 +545,13 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     });
 
     it('PlatformOrganizationsService createOrganization executes in isSuperAdmin: true context', async () => {
-      const service = new PlatformOrganizationsService(mockPrisma as any);
+      const service = new PlatformOrganizationsService(mockPrisma);
       mockTx.tenant.findUnique.mockResolvedValue(null);
-      mockTx.tenant.create.mockResolvedValue({ id: 'ten-1', name: 'New Org', slug: 'new-org' });
+      mockTx.tenant.create.mockResolvedValue({
+        id: 'ten-1',
+        name: 'New Org',
+        slug: 'new-org',
+      });
       mockTx.role.create.mockResolvedValue({ id: 'role-1' });
 
       await service.createOrganization({ name: 'New Org' }, 'admin-1');

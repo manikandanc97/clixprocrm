@@ -47,12 +47,14 @@ export class MfaService {
     let hasVerifiedFactor = false;
 
     try {
-      const { data, error } =
-        await supabaseAdmin.auth.admin.mfa.listFactors({ userId });
+      const { data, error } = await supabaseAdmin.auth.admin.mfa.listFactors({
+        userId,
+      });
       if (!error && data?.factors) {
         factors = data.factors.map((f: any) => ({
           id: f.id,
-          friendlyName: f.friendly_name || f.friendlyName || 'TOTP Authenticator',
+          friendlyName:
+            f.friendly_name || f.friendlyName || 'TOTP Authenticator',
           factorType: f.factor_type || f.factorType || 'totp',
           status: f.status,
           createdAt: f.created_at || f.createdAt,
@@ -61,7 +63,9 @@ export class MfaService {
         hasVerifiedFactor = factors.some((f) => f.status === 'verified');
       }
     } catch (err: any) {
-      this.logger.warn(`Failed to list MFA factors for user ${userId}: ${err?.message || err}`);
+      this.logger.warn(
+        `Failed to list MFA factors for user ${userId}: ${err?.message || err}`,
+      );
     }
 
     let orgMfaPolicy = 'OPTIONAL';
@@ -89,9 +93,16 @@ export class MfaService {
     };
   }
 
-  async generateRecoveryCodes(userId: string, actorUserId: string, reqIp?: string, userAgent?: string) {
+  async generateRecoveryCodes(
+    userId: string,
+    actorUserId: string,
+    reqIp?: string,
+    userAgent?: string,
+  ) {
     if (userId !== actorUserId) {
-      throw new ForbiddenException('Cannot generate recovery codes for another user');
+      throw new ForbiddenException(
+        'Cannot generate recovery codes for another user',
+      );
     }
 
     const plaintextCodes: string[] = [];
@@ -132,7 +143,8 @@ export class MfaService {
     return {
       recoveryCodes: plaintextCodes,
       count: plaintextCodes.length,
-      warning: 'Store these recovery codes in a secure location. They will not be displayed again.',
+      warning:
+        'Store these recovery codes in a secure location. They will not be displayed again.',
     };
   }
 
@@ -222,7 +234,9 @@ export class MfaService {
           id: factorId,
         });
       } else {
-        const { data } = await supabaseAdmin.auth.admin.mfa.listFactors({ userId });
+        const { data } = await supabaseAdmin.auth.admin.mfa.listFactors({
+          userId,
+        });
         if (data?.factors && data.factors.length > 0) {
           for (const factor of data.factors) {
             await supabaseAdmin.auth.admin.mfa.deleteFactor({
@@ -233,8 +247,12 @@ export class MfaService {
         }
       }
     } catch (err: any) {
-      this.logger.error(`Error deleting MFA factors in Supabase Admin: ${err?.message || err}`);
-      throw new BadRequestException('Failed to disable MFA factors in authentication provider');
+      this.logger.error(
+        `Error deleting MFA factors in Supabase Admin: ${err?.message || err}`,
+      );
+      throw new BadRequestException(
+        'Failed to disable MFA factors in authentication provider',
+      );
     }
 
     // Remove recovery codes
@@ -276,7 +294,11 @@ export class MfaService {
     userAgent?: string,
     callerAal?: string,
   ) {
-    const allowedEvents = ['MFA_ENROLLED', 'MFA_VERIFIED', 'MFA_CHALLENGE_FAILED'];
+    const allowedEvents = [
+      'MFA_ENROLLED',
+      'MFA_VERIFIED',
+      'MFA_CHALLENGE_FAILED',
+    ];
     if (!allowedEvents.includes(event)) {
       throw new BadRequestException('Invalid MFA audit event type');
     }
@@ -293,8 +315,11 @@ export class MfaService {
       // Verify via Supabase Admin that user has a verified factor
       try {
         const supabaseAdmin = this.getSupabaseAdminClient();
-        const { data, error } = await supabaseAdmin.auth.admin.mfa.listFactors({ userId });
-        const hasVerifiedFactor = !error && data?.factors?.some((f: any) => f.status === 'verified');
+        const { data, error } = await supabaseAdmin.auth.admin.mfa.listFactors({
+          userId,
+        });
+        const hasVerifiedFactor =
+          !error && data?.factors?.some((f: any) => f.status === 'verified');
         if (!hasVerifiedFactor) {
           throw new BadRequestException(
             'Cannot record MFA_ENROLLED: No verified MFA factor found for user',
@@ -302,7 +327,9 @@ export class MfaService {
         }
       } catch (err: any) {
         if (err instanceof BadRequestException) throw err;
-        this.logger.warn(`Supabase factor check note during MFA_ENROLLED audit: ${err?.message || err}`);
+        this.logger.warn(
+          `Supabase factor check note during MFA_ENROLLED audit: ${err?.message || err}`,
+        );
       }
     }
 
@@ -337,7 +364,9 @@ export class MfaService {
     userAgent?: string,
   ) {
     if (!['OPTIONAL', 'REQUIRED'].includes(policy)) {
-      throw new BadRequestException('Invalid MFA policy. Allowed values: OPTIONAL, REQUIRED');
+      throw new BadRequestException(
+        'Invalid MFA policy. Allowed values: OPTIONAL, REQUIRED',
+      );
     }
 
     const updated = await this.prisma.tenant.update({

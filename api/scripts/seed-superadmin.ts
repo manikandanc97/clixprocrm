@@ -1,6 +1,5 @@
-import 'dotenv/config';
 import { PrismaClient } from '@prisma/client';
-import { createClient } from '@supabase/supabase-js';
+import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as dotenv from 'dotenv';
 import * as path from 'path';
 
@@ -11,7 +10,7 @@ dotenv.config({ path: path.resolve(__dirname, '../.env') });
 const prisma = new PrismaClient();
 
 async function seedAdminForEmail(
-  supabase: any,
+  supabase: SupabaseClient | null,
   email: string,
   name: string,
   password?: string,
@@ -138,7 +137,7 @@ async function main() {
   const supabaseUrl = process.env.SUPABASE_URL;
   const serviceRoleKey = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_ANON_KEY;
 
-  let supabase: any = null;
+  let supabase: SupabaseClient | null = null;
   if (supabaseUrl && serviceRoleKey) {
     try {
       supabase = createClient(supabaseUrl, serviceRoleKey);

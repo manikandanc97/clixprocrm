@@ -75,7 +75,11 @@ export class PlatformOrganizationsController {
     @Param('id') id: string,
     @Body() body: any,
   ) {
-    const data = await this.orgsService.updateOrganization(id, body, req.user.id);
+    const data = await this.orgsService.updateOrganization(
+      id,
+      body,
+      req.user.id,
+    );
     return {
       success: true,
       data,
@@ -91,7 +95,10 @@ export class PlatformOrganizationsController {
   ) {
     if (!body.status || !['ACTIVE', 'SUSPENDED'].includes(body.status)) {
       throw new HttpException(
-        { success: false, message: 'Valid status (ACTIVE or SUSPENDED) is required' },
+        {
+          success: false,
+          message: 'Valid status (ACTIVE or SUSPENDED) is required',
+        },
         HttpStatus.BAD_REQUEST,
       );
     }

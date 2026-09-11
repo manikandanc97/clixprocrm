@@ -19,16 +19,76 @@ import { PaymentOrderResult } from '../billing/payment-gateway.interface';
 import { toNumber } from '../utils/crm-formatters.util';
 
 export interface WorkspaceUsageStats {
-  users: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  contacts: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  leads: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  tasks: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  pipelines: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  customFields: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  deals: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  automations: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  storageGb: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
-  apiRequests: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
+  users: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  contacts: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  leads: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  tasks: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  pipelines: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  customFields: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  deals: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  automations: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  storageGb: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
+  apiRequests: {
+    current: number;
+    limit: number;
+    remaining: number;
+    percentage: number;
+    isLimitReached: boolean;
+  };
 }
 
 export interface WorkspaceSubscriptionDetails {
@@ -103,7 +163,9 @@ export class SubscriptionEntitlementService {
   /**
    * Dynamically resolves a plan definition from the database with graceful in-memory fallback.
    */
-  async resolvePlanDefinition(rawPlanId?: string | null): Promise<PlanDefinition> {
+  async resolvePlanDefinition(
+    rawPlanId?: string | null,
+  ): Promise<PlanDefinition> {
     const cleanId = (rawPlanId || 'free').toLowerCase().trim();
     try {
       const dbPlan = await (this.prisma as any).plan.findFirst({
@@ -116,36 +178,84 @@ export class SubscriptionEntitlementService {
       });
 
       if (dbPlan) {
-        const parseLimit = (val?: number) => (val === undefined || val >= 1000000 ? -1 : val);
-        const currSymbol = dbPlan.currency === 'USD' ? '$' : dbPlan.currency === 'EUR' ? '€' : dbPlan.currency === 'GBP' ? '£' : '₹';
-        const priceDisplay = dbPlan.pricingMode === 'CUSTOM' ? 'Custom' : `${currSymbol}${Number(dbPlan.priceNum || 0).toLocaleString()}`;
-        const rawFeatures = Array.isArray(dbPlan.features) ? dbPlan.features : [];
+        const parseLimit = (val?: number) =>
+          val === undefined || val >= 1000000 ? -1 : val;
+        const currSymbol =
+          dbPlan.currency === 'USD'
+            ? '$'
+            : dbPlan.currency === 'EUR'
+              ? '€'
+              : dbPlan.currency === 'GBP'
+                ? '£'
+                : '₹';
+        const priceDisplay =
+          dbPlan.pricingMode === 'CUSTOM'
+            ? 'Custom'
+            : `${currSymbol}${Number(dbPlan.priceNum || 0).toLocaleString()}`;
+        const rawFeatures = Array.isArray(dbPlan.features)
+          ? dbPlan.features
+          : [];
 
         return {
           id: dbPlan.id,
           name: dbPlan.name,
           price: dbPlan.price || priceDisplay,
           priceNum: Number(dbPlan.priceNum || 0),
-          annualPriceNum: Number(dbPlan.annualPriceNum || (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0)),
+          annualPriceNum: Number(
+            dbPlan.annualPriceNum ||
+              (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0),
+          ),
           currency: dbPlan.currency || 'INR',
           billingInterval: 'user/month',
-          pricingMode: (dbPlan.pricingMode as any) || (dbPlan.priceNum === 0 && dbPlan.id !== 'free' ? 'CUSTOM' : 'FIXED'),
+          pricingMode:
+            dbPlan.pricingMode ||
+            (dbPlan.priceNum === 0 && dbPlan.id !== 'free'
+              ? 'CUSTOM'
+              : 'FIXED'),
           target: dbPlan.description || '',
           description: dbPlan.description || '',
           recommended: Boolean(dbPlan.highlight),
           badge: dbPlan.highlight ? 'MOST POPULAR' : undefined,
           displayOrder: dbPlan.sortOrder || 0,
-          isActive: dbPlan.isActive !== false && dbPlan.status !== 'INACTIVE' && dbPlan.status !== 'ARCHIVED',
+          isActive:
+            dbPlan.isActive !== false &&
+            dbPlan.status !== 'INACTIVE' &&
+            dbPlan.status !== 'ARCHIVED',
           limits: {
             maxUsers: parseLimit(dbPlan.maxUsers),
             maxContacts: parseLimit(dbPlan.maxContacts),
             maxLeads: parseLimit(dbPlan.maxLeads),
-            maxPipelines: parseLimit(dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1)),
-            maxTasks: parseLimit(dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1)),
-            maxCustomFields: parseLimit(dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1)),
-            maxDeals: parseLimit(dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1)),
-            maxAutomations: parseLimit(dbPlan.maxAutomations ?? (dbPlan.id === 'free' ? 1 : dbPlan.id === 'starter' ? 10 : dbPlan.id === 'growth' ? 50 : -1)),
-            storageGb: dbPlan.storageGb || (dbPlan.id === 'free' ? 1 : dbPlan.id === 'starter' ? 10 : dbPlan.id === 'growth' ? 50 : 200),
+            maxPipelines: parseLimit(
+              dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1),
+            ),
+            maxTasks: parseLimit(
+              dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1),
+            ),
+            maxCustomFields: parseLimit(
+              dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1),
+            ),
+            maxDeals: parseLimit(
+              dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1),
+            ),
+            maxAutomations: parseLimit(
+              dbPlan.maxAutomations ??
+                (dbPlan.id === 'free'
+                  ? 1
+                  : dbPlan.id === 'starter'
+                    ? 10
+                    : dbPlan.id === 'growth'
+                      ? 50
+                      : -1),
+            ),
+            storageGb:
+              dbPlan.storageGb ||
+              (dbPlan.id === 'free'
+                ? 1
+                : dbPlan.id === 'starter'
+                  ? 10
+                  : dbPlan.id === 'growth'
+                    ? 50
+                    : 200),
             maxApiRequests: parseLimit(dbPlan.maxApiRequests),
             dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
           },
@@ -153,13 +263,15 @@ export class SubscriptionEntitlementService {
           featureDescriptions: rawFeatures,
           aiConfig: {
             enabled: dbPlan.aiEnabled !== false,
-            level: (dbPlan.aiLevel as any) || 'Standard AI',
+            level: dbPlan.aiLevel || 'Standard AI',
             dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
           },
         };
       }
     } catch (err: any) {
-      this.logger.debug(`Failed to fetch dynamic plan '${cleanId}' from database, using fallback: ${err.message}`);
+      this.logger.debug(
+        `Failed to fetch dynamic plan '${cleanId}' from database, using fallback: ${err.message}`,
+      );
     }
 
     return getPlanDefinition(cleanId);
@@ -180,20 +292,40 @@ export class SubscriptionEntitlementService {
 
       if (dbPlans && dbPlans.length > 0) {
         return dbPlans.map((dbPlan: any) => {
-          const parseLimit = (val?: number) => (val === undefined || val >= 1000000 ? -1 : val);
-          const currSymbol = dbPlan.currency === 'USD' ? '$' : dbPlan.currency === 'EUR' ? '€' : dbPlan.currency === 'GBP' ? '£' : '₹';
-          const priceDisplay = dbPlan.pricingMode === 'CUSTOM' ? 'Custom' : `${currSymbol}${Number(dbPlan.priceNum || 0).toLocaleString()}`;
-          const rawFeatures = Array.isArray(dbPlan.features) ? dbPlan.features : [];
+          const parseLimit = (val?: number) =>
+            val === undefined || val >= 1000000 ? -1 : val;
+          const currSymbol =
+            dbPlan.currency === 'USD'
+              ? '$'
+              : dbPlan.currency === 'EUR'
+                ? '€'
+                : dbPlan.currency === 'GBP'
+                  ? '£'
+                  : '₹';
+          const priceDisplay =
+            dbPlan.pricingMode === 'CUSTOM'
+              ? 'Custom'
+              : `${currSymbol}${Number(dbPlan.priceNum || 0).toLocaleString()}`;
+          const rawFeatures = Array.isArray(dbPlan.features)
+            ? dbPlan.features
+            : [];
 
           return {
             id: dbPlan.id,
             name: dbPlan.name,
             price: dbPlan.price || priceDisplay,
             priceNum: Number(dbPlan.priceNum || 0),
-            annualPriceNum: Number(dbPlan.annualPriceNum || (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0)),
+            annualPriceNum: Number(
+              dbPlan.annualPriceNum ||
+                (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0),
+            ),
             currency: dbPlan.currency || 'INR',
             billingInterval: 'user/month',
-            pricingMode: (dbPlan.pricingMode as any) || (dbPlan.priceNum === 0 && dbPlan.id !== 'free' ? 'CUSTOM' : 'FIXED'),
+            pricingMode:
+              dbPlan.pricingMode ||
+              (dbPlan.priceNum === 0 && dbPlan.id !== 'free'
+                ? 'CUSTOM'
+                : 'FIXED'),
             target: dbPlan.description || '',
             description: dbPlan.description || '',
             recommended: Boolean(dbPlan.highlight),
@@ -204,12 +336,37 @@ export class SubscriptionEntitlementService {
               maxUsers: parseLimit(dbPlan.maxUsers),
               maxContacts: parseLimit(dbPlan.maxContacts),
               maxLeads: parseLimit(dbPlan.maxLeads),
-              maxPipelines: parseLimit(dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1)),
-              maxTasks: parseLimit(dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1)),
-              maxCustomFields: parseLimit(dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1)),
-              maxDeals: parseLimit(dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1)),
-              maxAutomations: parseLimit(dbPlan.maxAutomations ?? (dbPlan.id === 'free' ? 1 : dbPlan.id === 'starter' ? 10 : dbPlan.id === 'growth' ? 50 : -1)),
-              storageGb: dbPlan.storageGb || (dbPlan.id === 'free' ? 1 : dbPlan.id === 'starter' ? 10 : dbPlan.id === 'growth' ? 50 : 200),
+              maxPipelines: parseLimit(
+                dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1),
+              ),
+              maxTasks: parseLimit(
+                dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1),
+              ),
+              maxCustomFields: parseLimit(
+                dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1),
+              ),
+              maxDeals: parseLimit(
+                dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1),
+              ),
+              maxAutomations: parseLimit(
+                dbPlan.maxAutomations ??
+                  (dbPlan.id === 'free'
+                    ? 1
+                    : dbPlan.id === 'starter'
+                      ? 10
+                      : dbPlan.id === 'growth'
+                        ? 50
+                        : -1),
+              ),
+              storageGb:
+                dbPlan.storageGb ||
+                (dbPlan.id === 'free'
+                  ? 1
+                  : dbPlan.id === 'starter'
+                    ? 10
+                    : dbPlan.id === 'growth'
+                      ? 50
+                      : 200),
               maxApiRequests: parseLimit(dbPlan.maxApiRequests),
               dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
             },
@@ -217,14 +374,16 @@ export class SubscriptionEntitlementService {
             featureDescriptions: rawFeatures,
             aiConfig: {
               enabled: dbPlan.aiEnabled !== false,
-              level: (dbPlan.aiLevel as any) || 'Standard AI',
+              level: dbPlan.aiLevel || 'Standard AI',
               dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
             },
           };
         });
       }
     } catch (err: any) {
-      this.logger.debug(`Failed to fetch available plans from DB, using fallback: ${err.message}`);
+      this.logger.debug(
+        `Failed to fetch available plans from DB, using fallback: ${err.message}`,
+      );
     }
 
     return Object.values(CANONICAL_PLANS);
@@ -234,9 +393,14 @@ export class SubscriptionEntitlementService {
    * Dynamically constructs the Feature Comparison Matrix from the live canonical plans.
    */
   getDynamicComparisonMatrix(plans: PlanDefinition[]): MatrixCategory[] {
-    const sortedPlans = [...plans].sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
+    const sortedPlans = [...plans].sort(
+      (a, b) => (a.displayOrder || 0) - (b.displayOrder || 0),
+    );
 
-    const checkPlanFeature = (p: PlanDefinition, keywords: string[]): boolean => {
+    const checkPlanFeature = (
+      p: PlanDefinition,
+      keywords: string[],
+    ): boolean => {
       const featStr = (p.features || []).join(' ').toLowerCase();
       return keywords.some((kw) => featStr.includes(kw.toLowerCase()));
     };
@@ -263,7 +427,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.limits.maxTasks === -1 ? 'Unlimited' : p.limits.maxTasks.toLocaleString(),
+                p.limits.maxTasks === -1
+                  ? 'Unlimited'
+                  : p.limits.maxTasks.toLocaleString(),
               ]),
             ),
           },
@@ -274,7 +440,11 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.limits.maxPipelines === -1 ? 'Unlimited' : p.limits.maxPipelines === 1 ? '1 Pipeline' : `${p.limits.maxPipelines} Pipelines`,
+                p.limits.maxPipelines === -1
+                  ? 'Unlimited'
+                  : p.limits.maxPipelines === 1
+                    ? '1 Pipeline'
+                    : `${p.limits.maxPipelines} Pipelines`,
               ]),
             ),
           },
@@ -285,7 +455,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.limits.maxCustomFields === -1 ? 'Unlimited' : `Up to ${p.limits.maxCustomFields}`,
+                p.limits.maxCustomFields === -1
+                  ? 'Unlimited'
+                  : `Up to ${p.limits.maxCustomFields}`,
               ]),
             ),
           },
@@ -300,11 +472,18 @@ export class SubscriptionEntitlementService {
             description: 'Trigger stage shifts and automated tasks',
             values: Object.fromEntries(
               sortedPlans.map((p) => {
-                if (p.limits.maxAutomations === -1) return [p.id, 'Unlimited Workflows'];
+                if (p.limits.maxAutomations === -1)
+                  return [p.id, 'Unlimited Workflows'];
                 if (p.limits.maxAutomations && p.limits.maxAutomations > 1) {
-                  return [p.id, `Advanced Automation (${p.limits.maxAutomations} workflows)`];
+                  return [
+                    p.id,
+                    `Advanced Automation (${p.limits.maxAutomations} workflows)`,
+                  ];
                 }
-                return [p.id, p.id === 'free' ? 'Limited Automation' : 'Basic Automation'];
+                return [
+                  p.id,
+                  p.id === 'free' ? 'Limited Automation' : 'Basic Automation',
+                ];
               }),
             ),
           },
@@ -315,7 +494,12 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id !== 'free' || checkPlanFeature(p, ['pipeline custom', 'custom pipeline', 'sales pipeline']),
+                p.id !== 'free' ||
+                  checkPlanFeature(p, [
+                    'pipeline custom',
+                    'custom pipeline',
+                    'sales pipeline',
+                  ]),
               ]),
             ),
           },
@@ -331,7 +515,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id === 'free' ? 'Limited Email' : 'Full Email Sync & Tracking',
+                p.id === 'free'
+                  ? 'Limited Email'
+                  : 'Full Email Sync & Tracking',
               ]),
             ),
           },
@@ -342,7 +528,8 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id !== 'free' || checkPlanFeature(p, ['saved views', 'saved view']),
+                p.id !== 'free' ||
+                  checkPlanFeature(p, ['saved views', 'saved view']),
               ]),
             ),
           },
@@ -358,7 +545,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id === 'free' ? 'Basic Dashboard' : 'Advanced Analytics & Reports',
+                p.id === 'free'
+                  ? 'Basic Dashboard'
+                  : 'Advanced Analytics & Reports',
               ]),
             ),
           },
@@ -369,7 +558,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id === 'free' ? 'Basic Timeline' : 'Advanced Activity Timeline',
+                p.id === 'free'
+                  ? 'Basic Timeline'
+                  : 'Advanced Activity Timeline',
               ]),
             ),
           },
@@ -385,24 +576,27 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.limits.maxUsers === -1 ? 'Unlimited' : `${p.limits.maxUsers} Users`,
+                p.limits.maxUsers === -1
+                  ? 'Unlimited'
+                  : `${p.limits.maxUsers} Users`,
               ]),
             ),
           },
           {
             key: 'rbac_roles',
             name: 'Permissions & Access Control',
-            description: 'Granular roles, team scopes, and department isolation',
+            description:
+              'Granular roles, team scopes, and department isolation',
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
                 p.id === 'free'
                   ? 'Basic permissions'
                   : p.id === 'starter'
-                  ? 'Team Permissions'
-                  : p.id === 'growth'
-                  ? 'Team Permissions & RBAC'
-                  : 'Advanced RBAC & Departments',
+                    ? 'Team Permissions'
+                    : p.id === 'growth'
+                      ? 'Team Permissions & RBAC'
+                      : 'Advanced RBAC & Departments',
               ]),
             ),
           },
@@ -413,7 +607,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id === 'business' || p.id === 'enterprise' || checkPlanFeature(p, ['custom modules', 'custom module']),
+                p.id === 'business' ||
+                  p.id === 'enterprise' ||
+                  checkPlanFeature(p, ['custom modules', 'custom module']),
               ]),
             ),
           },
@@ -429,7 +625,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id === 'business' || p.id === 'enterprise' || checkPlanFeature(p, ['audit log', 'audit trail']),
+                p.id === 'business' ||
+                  p.id === 'enterprise' ||
+                  checkPlanFeature(p, ['audit log', 'audit trail']),
               ]),
             ),
           },
@@ -440,7 +638,9 @@ export class SubscriptionEntitlementService {
             values: Object.fromEntries(
               sortedPlans.map((p) => [
                 p.id,
-                p.id === 'business' || p.id === 'enterprise' || checkPlanFeature(p, ['api access', 'webhooks']),
+                p.id === 'business' ||
+                  p.id === 'enterprise' ||
+                  checkPlanFeature(p, ['api access', 'webhooks']),
               ]),
             ),
           },
@@ -449,10 +649,7 @@ export class SubscriptionEntitlementService {
             name: 'Cloud Storage',
             description: 'Secure document and attachment storage',
             values: Object.fromEntries(
-              sortedPlans.map((p) => [
-                p.id,
-                `${p.limits.storageGb || 1} GB`,
-              ]),
+              sortedPlans.map((p) => [p.id, `${p.limits.storageGb || 1} GB`]),
             ),
           },
           {
@@ -475,7 +672,9 @@ export class SubscriptionEntitlementService {
    * Retrieves complete subscription details, plan limits, live usage, and active seats for a workspace tenant.
    * Internal platform tenants automatically receive full Enterprise entitlements without customer billing.
    */
-  async getWorkspaceSubscription(tenantId: string): Promise<WorkspaceSubscriptionDetails> {
+  async getWorkspaceSubscription(
+    tenantId: string,
+  ): Promise<WorkspaceSubscriptionDetails> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
       select: {
@@ -498,7 +697,8 @@ export class SubscriptionEntitlementService {
       throw new NotFoundException(`Workspace tenant '${tenantId}' not found.`);
     }
 
-    const isPlatformTenant = tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
+    const isPlatformTenant =
+      tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
 
     // Super Admin / Platform internal tenant always receives top Business/Enterprise plan
     const effectivePlanId = isPlatformTenant ? 'business' : tenant.plan;
@@ -511,7 +711,14 @@ export class SubscriptionEntitlementService {
     const comparisonMatrix = this.getDynamicComparisonMatrix(availablePlans);
 
     // Query live resource counts in parallel for accurate usage reporting
-    const [userCount, contactCount, leadCount, taskCount, dealCount, attachmentAgg] = await Promise.all([
+    const [
+      userCount,
+      contactCount,
+      leadCount,
+      taskCount,
+      dealCount,
+      attachmentAgg,
+    ] = await Promise.all([
       this.prisma.tenantUser.count({
         where: { tenantId, status: 'ACTIVE' },
       }),
@@ -534,7 +741,12 @@ export class SubscriptionEntitlementService {
     ]);
 
     const calculateLimit = (current: number, maxLimit: number) => {
-      if (isPlatformTenant || maxLimit === -1 || maxLimit === null || maxLimit === undefined) {
+      if (
+        isPlatformTenant ||
+        maxLimit === -1 ||
+        maxLimit === null ||
+        maxLimit === undefined
+      ) {
         return {
           current,
           limit: -1,
@@ -555,7 +767,9 @@ export class SubscriptionEntitlementService {
     };
 
     const totalBytes = attachmentAgg._sum.fileSize || 0;
-    const storageGbUsed = Number((totalBytes / (1024 * 1024 * 1024)).toFixed(3));
+    const storageGbUsed = Number(
+      (totalBytes / (1024 * 1024 * 1024)).toFixed(3),
+    );
 
     const usage: WorkspaceUsageStats = {
       users: calculateLimit(userCount, planDef.limits.maxUsers),
@@ -574,13 +788,23 @@ export class SubscriptionEntitlementService {
     if (tenant.trialEnd) {
       const now = Date.now();
       const end = new Date(tenant.trialEnd).getTime();
-      trialDaysRemaining = Math.max(0, Math.ceil((end - now) / (1000 * 60 * 60 * 24)));
+      trialDaysRemaining = Math.max(
+        0,
+        Math.ceil((end - now) / (1000 * 60 * 60 * 24)),
+      );
     }
 
-    const billingCycle = (tenant.billingCycle === 'annual' ? 'annual' : 'monthly') as 'monthly' | 'annual';
+    const billingCycle =
+      tenant.billingCycle === 'annual' ? 'annual' : 'monthly';
     const seats = Math.max(userCount, 1);
-    const unitPrice = billingCycle === 'annual' ? Math.round(planDef.annualPriceNum / 12) : planDef.priceNum;
-    const totalRecurringAmount = isPlatformTenant || planDef.pricingMode === 'CUSTOM' ? 0 : unitPrice * seats;
+    const unitPrice =
+      billingCycle === 'annual'
+        ? Math.round(planDef.annualPriceNum / 12)
+        : planDef.priceNum;
+    const totalRecurringAmount =
+      isPlatformTenant || planDef.pricingMode === 'CUSTOM'
+        ? 0
+        : unitPrice * seats;
 
     return {
       tenantId: tenant.id,
@@ -589,7 +813,9 @@ export class SubscriptionEntitlementService {
       isPlatformTenant,
       planId: planDef.id,
       planName: planDef.name,
-      status: isPlatformTenant ? 'ACTIVE' : tenant.subscriptionStatus || 'ACTIVE',
+      status: isPlatformTenant
+        ? 'ACTIVE'
+        : tenant.subscriptionStatus || 'ACTIVE',
       billingCycle,
       trialStart: tenant.trialStart?.toISOString() || null,
       trialEnd: tenant.trialEnd?.toISOString() || null,
@@ -599,7 +825,11 @@ export class SubscriptionEntitlementService {
       seats,
       activeUsers: userCount,
       monthlyPricePerUser: isPlatformTenant ? 0 : planDef.priceNum,
-      annualPricePerUser: isPlatformTenant ? 0 : planDef.annualPriceNum > 0 ? Math.round(planDef.annualPriceNum / 12) : planDef.priceNum,
+      annualPricePerUser: isPlatformTenant
+        ? 0
+        : planDef.annualPriceNum > 0
+          ? Math.round(planDef.annualPriceNum / 12)
+          : planDef.priceNum,
       totalRecurringAmount,
       plan: planDef,
       usage,
@@ -620,14 +850,20 @@ export class SubscriptionEntitlementService {
   ): Promise<SubscriptionQuote> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { plan: true, currency: true, type: true, isPlatformTenant: true },
+      select: {
+        plan: true,
+        currency: true,
+        type: true,
+        isPlatformTenant: true,
+      },
     });
 
     if (!tenant) {
       throw new NotFoundException(`Tenant '${tenantId}' not found.`);
     }
 
-    const isPlatformTenant = tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
+    const isPlatformTenant =
+      tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
 
     const [currentPlanDef, targetPlanDef] = await Promise.all([
       this.resolvePlanDefinition(tenant.plan),
@@ -641,13 +877,20 @@ export class SubscriptionEntitlementService {
     const minSeats = Math.max(activeUsersCount, 1);
     const seats = Math.max(requestedSeats || minSeats, minSeats);
 
-    if (targetPlanDef.limits.maxUsers !== -1 && seats > targetPlanDef.limits.maxUsers) {
+    if (
+      targetPlanDef.limits.maxUsers !== -1 &&
+      seats > targetPlanDef.limits.maxUsers
+    ) {
       throw new BadRequestException(
         `The ${targetPlanDef.name} plan supports a maximum of ${targetPlanDef.limits.maxUsers} seats. For larger teams, please choose Business.`,
       );
     }
 
-    if (isPlatformTenant || targetPlanDef.pricingMode === 'CUSTOM' || targetPlanDef.id === 'free') {
+    if (
+      isPlatformTenant ||
+      targetPlanDef.pricingMode === 'CUSTOM' ||
+      targetPlanDef.id === 'free'
+    ) {
       return {
         planId: targetPlanDef.id,
         planName: targetPlanDef.name,
@@ -663,7 +906,8 @@ export class SubscriptionEntitlementService {
         totalAmount: 0,
         totalAmountInMinorUnits: 0,
         recurringAmount: 0,
-        intervalDescription: targetPlanDef.id === 'free' ? 'free tier' : 'internal platform plan',
+        intervalDescription:
+          targetPlanDef.id === 'free' ? 'free tier' : 'internal platform plan',
         isUpgrade: true,
         isDowngrade: false,
         effectiveImmediately: true,
@@ -676,7 +920,10 @@ export class SubscriptionEntitlementService {
     const annualDiscountPercentage = billingCycle === 'annual' ? 17 : 0;
 
     if (billingCycle === 'annual') {
-      const baseYearly = targetPlanDef.annualPriceNum > 0 ? targetPlanDef.annualPriceNum : unitPriceMonthly * 10;
+      const baseYearly =
+        targetPlanDef.annualPriceNum > 0
+          ? targetPlanDef.annualPriceNum
+          : unitPriceMonthly * 10;
       subtotal = baseYearly * seats;
       const fullMonthlyYearly = unitPriceMonthly * 12 * seats;
       annualDiscountAmount = Math.max(0, fullMonthlyYearly - subtotal);
@@ -691,7 +938,8 @@ export class SubscriptionEntitlementService {
     const recurringAmount = billingCycle === 'annual' ? totalAmount : subtotal;
 
     const isUpgrade = targetPlanDef.displayOrder > currentPlanDef.displayOrder;
-    const isDowngrade = targetPlanDef.displayOrder < currentPlanDef.displayOrder;
+    const isDowngrade =
+      targetPlanDef.displayOrder < currentPlanDef.displayOrder;
 
     return {
       planId: targetPlanDef.id,
@@ -708,7 +956,8 @@ export class SubscriptionEntitlementService {
       totalAmount,
       totalAmountInMinorUnits,
       recurringAmount,
-      intervalDescription: billingCycle === 'annual' ? 'billed annually' : 'billed monthly',
+      intervalDescription:
+        billingCycle === 'annual' ? 'billed annually' : 'billed monthly',
       isUpgrade,
       isDowngrade,
       effectiveImmediately: true,
@@ -724,12 +973,22 @@ export class SubscriptionEntitlementService {
     seats?: number,
     billingCycle: 'monthly' | 'annual' = 'monthly',
     userId?: string,
-  ): Promise<{ quote: SubscriptionQuote; order: PaymentOrderResult & { customer?: { name?: string; email?: string; contact?: string } } }> {
+  ): Promise<{
+    quote: SubscriptionQuote;
+    order: PaymentOrderResult & {
+      customer?: { name?: string; email?: string; contact?: string };
+    };
+  }> {
     this.logger.log(
       `[CHECKOUT ORDER INITIATED] Tenant: ${tenantId} | Plan: ${targetPlanId} | Requested Seats: ${seats ?? 'default'} | Cycle: ${billingCycle} | User: ${userId || 'anonymous'}`,
     );
 
-    const quote = await this.calculateQuote(tenantId, targetPlanId, seats, billingCycle);
+    const quote = await this.calculateQuote(
+      tenantId,
+      targetPlanId,
+      seats,
+      billingCycle,
+    );
 
     this.logger.log(
       `[CHECKOUT QUOTE COMPUTED] Plan: ${quote.planName} (${quote.planId}) | Amount: ₹${quote.totalAmount} (${quote.totalAmountInMinorUnits} paise) | Seats: ${quote.seats} | Tax (18%): ₹${quote.taxAmount}`,
@@ -756,7 +1015,9 @@ export class SubscriptionEntitlementService {
           customerPhone = user.phone || undefined;
         }
       } catch (err: any) {
-        this.logger.debug(`Could not load user details for prefill: ${err.message}`);
+        this.logger.debug(
+          `Could not load user details for prefill: ${err.message}`,
+        );
       }
     }
 
@@ -803,8 +1064,15 @@ export class SubscriptionEntitlementService {
     },
     userId?: string,
   ) {
-    if (!params.orderId || !params.paymentId || !params.signature || !params.planId) {
-      throw new BadRequestException('orderId, paymentId, signature, and planId are strictly required.');
+    if (
+      !params.orderId ||
+      !params.paymentId ||
+      !params.signature ||
+      !params.planId
+    ) {
+      throw new BadRequestException(
+        'orderId, paymentId, signature, and planId are strictly required.',
+      );
     }
 
     this.logger.log(
@@ -831,7 +1099,12 @@ export class SubscriptionEntitlementService {
 
     // 2. Authoritative Price Resolution
     const billingCycle = params.billingCycle || 'monthly';
-    const quote = await this.calculateQuote(tenantId, params.planId, params.seats, billingCycle);
+    const quote = await this.calculateQuote(
+      tenantId,
+      params.planId,
+      params.seats,
+      billingCycle,
+    );
 
     const now = new Date();
     const periodEnd = new Date(now);
@@ -854,12 +1127,20 @@ export class SubscriptionEntitlementService {
 
       if (existingPayment) {
         if (existingPayment.tenantId !== tenantId) {
-          throw new ForbiddenException('Payment identifier does not belong to this tenant.');
+          throw new ForbiddenException(
+            'Payment identifier does not belong to this tenant.',
+          );
         }
         if (existingPayment.status === 'SUCCESS') {
-          this.logger.log(`[PAYMENT IDEMPOTENT] Payment '${params.paymentId}' already recorded as SUCCESS.`);
-          const currentSub = await tx.platformSubscription.findFirst({ where: { tenantId } });
-          const currentInv = await tx.platformInvoice.findFirst({ where: { id: existingPayment.platformInvoiceId } });
+          this.logger.log(
+            `[PAYMENT IDEMPOTENT] Payment '${params.paymentId}' already recorded as SUCCESS.`,
+          );
+          const currentSub = await tx.platformSubscription.findFirst({
+            where: { tenantId },
+          });
+          const currentInv = await tx.platformInvoice.findFirst({
+            where: { id: existingPayment.platformInvoiceId },
+          });
           return { subscription: currentSub, invoice: currentInv };
         }
       }
@@ -1006,7 +1287,8 @@ export class SubscriptionEntitlementService {
 
     if (!tenant) throw new NotFoundException('Tenant not found');
 
-    const isPlatformTenant = tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
+    const isPlatformTenant =
+      tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
 
     if (isPlatformTenant) {
       await this.prisma.tenant.update({
@@ -1047,7 +1329,8 @@ export class SubscriptionEntitlementService {
 
     if (!tenant) throw new NotFoundException('Tenant not found');
 
-    const isPlatformTenant = tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
+    const isPlatformTenant =
+      tenant.isPlatformTenant === true || tenant.type === 'PLATFORM';
     const normTarget = normalizePlanId(targetPlanId);
 
     // Platform tenants always operate on enterprise/business
@@ -1087,7 +1370,12 @@ export class SubscriptionEntitlementService {
   async hasFeature(tenantId: string, featureKey: string): Promise<boolean> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { plan: true, subscriptionStatus: true, type: true, isPlatformTenant: true },
+      select: {
+        plan: true,
+        subscriptionStatus: true,
+        type: true,
+        isPlatformTenant: true,
+      },
     });
 
     if (!tenant) return false;
@@ -1097,7 +1385,10 @@ export class SubscriptionEntitlementService {
       return true;
     }
 
-    if (tenant.subscriptionStatus === 'SUSPENDED' || tenant.subscriptionStatus === 'EXPIRED') {
+    if (
+      tenant.subscriptionStatus === 'SUSPENDED' ||
+      tenant.subscriptionStatus === 'EXPIRED'
+    ) {
       return false;
     }
 
@@ -1108,7 +1399,11 @@ export class SubscriptionEntitlementService {
   /**
    * Asserts that tenant plan has the required feature, or throws ForbiddenException with structured error.
    */
-  async assertFeature(tenantId: string, featureKey: string, customMessage?: string): Promise<void> {
+  async assertFeature(
+    tenantId: string,
+    featureKey: string,
+    customMessage?: string,
+  ): Promise<void> {
     const isEntitled = await this.hasFeature(tenantId, featureKey);
     if (!isEntitled) {
       const tenant = await this.prisma.tenant.findUnique({
@@ -1117,7 +1412,7 @@ export class SubscriptionEntitlementService {
       });
       const planDef = await this.resolvePlanDefinition(tenant?.plan);
       const availablePlans = await this.getAvailablePlans();
-      
+
       const recommendedPlan = availablePlans.find((p) =>
         p.features.includes(featureKey),
       );
@@ -1153,7 +1448,12 @@ export class SubscriptionEntitlementService {
   ): Promise<void> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { plan: true, subscriptionStatus: true, type: true, isPlatformTenant: true },
+      select: {
+        plan: true,
+        subscriptionStatus: true,
+        type: true,
+        isPlatformTenant: true,
+      },
     });
 
     if (!tenant) return;
@@ -1170,15 +1470,25 @@ export class SubscriptionEntitlementService {
 
     let currentCount = 0;
     if (limitKey === 'maxUsers') {
-      currentCount = await this.prisma.tenantUser.count({ where: { tenantId, status: 'ACTIVE' } });
+      currentCount = await this.prisma.tenantUser.count({
+        where: { tenantId, status: 'ACTIVE' },
+      });
     } else if (limitKey === 'maxContacts') {
-      currentCount = await this.prisma.customer.count({ where: { tenantId, deletedAt: null } });
+      currentCount = await this.prisma.customer.count({
+        where: { tenantId, deletedAt: null },
+      });
     } else if (limitKey === 'maxLeads') {
-      currentCount = await this.prisma.lead.count({ where: { tenantId, deletedAt: null } });
+      currentCount = await this.prisma.lead.count({
+        where: { tenantId, deletedAt: null },
+      });
     } else if (limitKey === 'maxTasks') {
-      currentCount = await this.prisma.task.count({ where: { tenantId, deletedAt: null } });
+      currentCount = await this.prisma.task.count({
+        where: { tenantId, deletedAt: null },
+      });
     } else if (limitKey === 'maxDeals') {
-      currentCount = await this.prisma.deal.count({ where: { tenantId, deletedAt: null } });
+      currentCount = await this.prisma.deal.count({
+        where: { tenantId, deletedAt: null },
+      });
     }
 
     if (currentCount + increment > maxLimit) {
@@ -1214,7 +1524,14 @@ export class SubscriptionEntitlementService {
   async getWorkspaceInvoices(tenantId: string): Promise<BillingInvoiceItem[]> {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
-      select: { plan: true, currency: true, createdAt: true, billingCycle: true, type: true, isPlatformTenant: true },
+      select: {
+        plan: true,
+        currency: true,
+        createdAt: true,
+        billingCycle: true,
+        type: true,
+        isPlatformTenant: true,
+      },
     });
 
     if (!tenant) return [];
@@ -1244,7 +1561,11 @@ export class SubscriptionEntitlementService {
         seats: inv.seats,
         amount: Number(inv.totalAmount || 0),
         currency: inv.currency,
-        status: (inv.paymentStatus === 'PAID' ? 'PAID' : inv.status === 'PAID' ? 'PAID' : 'PENDING') as any,
+        status: (inv.paymentStatus === 'PAID'
+          ? 'PAID'
+          : inv.status === 'PAID'
+            ? 'PAID'
+            : 'PENDING') as any,
         downloadUrl: inv.pdfUrl,
       }));
     }
@@ -1271,7 +1592,8 @@ export class SubscriptionEntitlementService {
 
     return {
       success: true,
-      message: 'Thank you! Our enterprise sales team will contact you within 24 business hours.',
+      message:
+        'Thank you! Our enterprise sales team will contact you within 24 business hours.',
     };
   }
 }

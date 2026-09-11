@@ -41,8 +41,12 @@ export class DealsService {
 
       const decryptedDeals = deals.map((d) => ({
         ...d,
-        company: d.company ? { ...d.company, name: this.enc.decrypt(d.company.name) } : null,
-        customer: d.customer ? { ...d.customer, name: this.enc.decrypt(d.customer.name) } : null,
+        company: d.company
+          ? { ...d.company, name: this.enc.decrypt(d.company.name) }
+          : null,
+        customer: d.customer
+          ? { ...d.customer, name: this.enc.decrypt(d.customer.name) }
+          : null,
       }));
 
       const filteredDeals = search
@@ -56,7 +60,12 @@ export class DealsService {
 
       return {
         deals: filteredDeals,
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -266,5 +275,4 @@ export class DealsService {
       });
     });
   }
-
 }

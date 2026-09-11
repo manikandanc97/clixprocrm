@@ -35,7 +35,11 @@ describe('ImportQueueProducer Suite', () => {
         tenantId: 'tenant-abc',
         userId: 'usr-123',
         leads: [
-          { name: 'Alice Smith', email: 'alice@example.com', company: 'Acme Corp' },
+          {
+            name: 'Alice Smith',
+            email: 'alice@example.com',
+            company: 'Acme Corp',
+          },
           { name: 'Bob Jones', email: 'bob@example.com', company: 'Beta LLC' },
         ],
         duplicateStrategy: 'skip',

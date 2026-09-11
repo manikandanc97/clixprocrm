@@ -96,12 +96,16 @@ export class ImapFlowClientWrapper implements IImapClient {
       // Query UIDs starting from fromUid
       // IMAP UID sequence: `${fromUid}:*`
       const range = `${fromUid}:*`;
-      const generator = this.client.fetch(range, {
-        uid: true,
-        source: true,
-        internalDate: true,
-        threadId: true,
-      }, { uid: true });
+      const generator = this.client.fetch(
+        range,
+        {
+          uid: true,
+          source: true,
+          internalDate: true,
+          threadId: true,
+        },
+        { uid: true },
+      );
 
       for await (const msg of generator) {
         if (msg.uid < fromUid) {
@@ -112,8 +116,12 @@ export class ImapFlowClientWrapper implements IImapClient {
           uid: msg.uid,
           seq: msg.seq,
           source: msg.source || Buffer.alloc(0),
-          internalDate: msg.internalDate ? new Date(msg.internalDate) : undefined,
-          externalThreadId: (msg as any).threadId ? String((msg as any).threadId) : null,
+          internalDate: msg.internalDate
+            ? new Date(msg.internalDate)
+            : undefined,
+          externalThreadId: (msg as any).threadId
+            ? String((msg as any).threadId)
+            : null,
         });
 
         if (messages.length >= limit) {

@@ -39,7 +39,8 @@ export interface PlanDefinition {
   featureDescriptions: string[]; // Key highlights
   aiConfig: {
     enabled: boolean;
-    level: 'Basic AI' | 'Standard AI' | 'Advanced AI' | 'Premium AI' | 'Full AI';
+    level:
+      'Basic AI' | 'Standard AI' | 'Advanced AI' | 'Premium AI' | 'Full AI';
     dailyTokenLimit: number;
   };
 }
@@ -66,7 +67,8 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
     currency: 'INR',
     billingInterval: 'user/month',
     pricingMode: 'FIXED',
-    description: 'Basic CRM tools, contacts, leads, and tasks for getting started',
+    description:
+      'Basic CRM tools, contacts, leads, and tasks for getting started',
     target: 'For individuals & early evaluation',
     recommended: false,
     displayOrder: 1,
@@ -112,7 +114,8 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
     currency: 'INR',
     billingInterval: 'user/month',
     pricingMode: 'FIXED',
-    description: 'Everything in Free plus custom fields, email integration, and basic automation for small teams',
+    description:
+      'Everything in Free plus custom fields, email integration, and basic automation for small teams',
     target: 'Best for scaling SMBs & active teams',
     recommended: true,
     badge: 'MOST POPULAR',
@@ -161,7 +164,8 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
     currency: 'INR',
     billingInterval: 'user/month',
     pricingMode: 'FIXED',
-    description: 'Everything in Starter plus advanced automations, custom analytics, team permissions, and AI copilot',
+    description:
+      'Everything in Starter plus advanced automations, custom analytics, team permissions, and AI copilot',
     target: 'Best for scaling SMBs & active teams',
     recommended: false,
     displayOrder: 3,
@@ -211,7 +215,8 @@ export const CANONICAL_PLANS: Record<string, PlanDefinition> = {
     currency: 'INR',
     billingInterval: 'user/month',
     pricingMode: 'FIXED',
-    description: 'Advanced RBAC, Departments, Custom Modules, Audit Logs, and API Access for established businesses',
+    description:
+      'Advanced RBAC, Departments, Custom Modules, Audit Logs, and API Access for established businesses',
     target: 'For established businesses',
     recommended: false,
     displayOrder: 4,
@@ -276,5 +281,3 @@ export function getPlanDefinition(planId?: string | null): PlanDefinition {
   const normalized = normalizePlanId(planId);
   return CANONICAL_PLANS[normalized] || CANONICAL_PLANS.free;
 }
-
-

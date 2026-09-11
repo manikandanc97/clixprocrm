@@ -15,7 +15,7 @@ describe('P7 Security Evidence Export & SHA-256 Sealing Suite', () => {
 
     governanceService = new SecurityGovernanceService(
       {} as any,
-      mockSecOps as any,
+      mockSecOps,
       {} as any,
       {} as any,
       {} as any,
@@ -45,7 +45,9 @@ describe('P7 Security Evidence Export & SHA-256 Sealing Suite', () => {
       const report = await governanceService.generateEvidenceReport('csv');
       expect(report.format).toBe('csv');
       expect(report.filename).toContain('.csv');
-      expect(report.content).toContain('Control ID,Category,Name,Status,Severity,Evidence');
+      expect(report.content).toContain(
+        'Control ID,Category,Name,Status,Severity,Evidence',
+      );
     });
   });
 });

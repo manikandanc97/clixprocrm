@@ -19,14 +19,25 @@ describe('P4 Security Center Controller & Server Guard Suite', () => {
         incidents: [],
         pagination: { page: 1, limit: 20, total: 0, totalPages: 0 },
       }),
-      getIncidentById: jest.fn().mockResolvedValue({ id: 'inc-1', title: 'Test' }),
-      createIncident: jest.fn().mockResolvedValue({ id: 'inc-1', incidentNumber: 'INC-20260820-0001' }),
-      updateIncidentStatus: jest.fn().mockResolvedValue({ id: 'inc-1', status: 'INVESTIGATING' }),
-      resolveIncident: jest.fn().mockResolvedValue({ id: 'inc-1', status: 'RESOLVED' }),
+      getIncidentById: jest
+        .fn()
+        .mockResolvedValue({ id: 'inc-1', title: 'Test' }),
+      createIncident: jest.fn().mockResolvedValue({
+        id: 'inc-1',
+        incidentNumber: 'INC-20260820-0001',
+      }),
+      updateIncidentStatus: jest
+        .fn()
+        .mockResolvedValue({ id: 'inc-1', status: 'INVESTIGATING' }),
+      resolveIncident: jest
+        .fn()
+        .mockResolvedValue({ id: 'inc-1', status: 'RESOLVED' }),
     };
 
     mockEmergencyService = {
-      revokeUserSessions: jest.fn().mockResolvedValue({ success: true, revokedCount: 3 }),
+      revokeUserSessions: jest
+        .fn()
+        .mockResolvedValue({ success: true, revokedCount: 3 }),
       lockUser: jest.fn().mockResolvedValue({ success: true }),
       unlockUser: jest.fn().mockResolvedValue({ success: true }),
       lockTenant: jest.fn().mockResolvedValue({ success: true }),
@@ -37,8 +48,8 @@ describe('P4 Security Center Controller & Server Guard Suite', () => {
     };
 
     controller = new PlatformSecurityCenterController(
-      mockIncidentsService as any,
-      mockEmergencyService as any,
+      mockIncidentsService,
+      mockEmergencyService,
     );
   });
 

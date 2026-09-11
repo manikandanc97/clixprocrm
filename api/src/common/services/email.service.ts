@@ -15,7 +15,10 @@ export function escapeHtml(str: any): string {
 
 export function normalizeKeyPart(str?: string | null): string {
   if (!str || typeof str !== 'string') return 'unknown';
-  return str.trim().toLowerCase().replace(/[^a-z0-9_-]/g, '_');
+  return str
+    .trim()
+    .toLowerCase()
+    .replace(/[^a-z0-9_-]/g, '_');
 }
 
 export function buildAlertDeduplicationKey(
@@ -72,7 +75,6 @@ export class EmailService {
     });
   }
 
-
   /**
    * P2 Distributed Redis Alert Deduplication
    *
@@ -124,7 +126,6 @@ export class EmailService {
     }
   }
 
-
   /**
    * Asynchronously send a transactional security alert when a new device / browser signs in.
    *
@@ -141,10 +142,13 @@ export class EmailService {
     payload: NewDeviceAlertPayload,
     context?: { tenantId?: string; userId?: string; correlationId?: string },
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const { to, deviceType, browser, operatingSystem, ipAddress, time } = payload;
+    const { to, deviceType, browser, operatingSystem, ipAddress, time } =
+      payload;
 
     if (!to || typeof to !== 'string' || !to.includes('@')) {
-      this.logger.warn('Skipping new device alert email: No valid recipient email address provided.');
+      this.logger.warn(
+        'Skipping new device alert email: No valid recipient email address provided.',
+      );
       return { success: false, error: 'Invalid recipient email' };
     }
 
@@ -183,7 +187,8 @@ export class EmailService {
   async executeDirectNewDeviceAlert(
     payload: NewDeviceAlertPayload,
   ): Promise<{ success: boolean; messageId?: string; error?: string }> {
-    const { to, deviceType, browser, operatingSystem, ipAddress, time } = payload;
+    const { to, deviceType, browser, operatingSystem, ipAddress, time } =
+      payload;
 
     if (!to || typeof to !== 'string' || !to.includes('@')) {
       return { success: false, error: 'Invalid recipient email' };
@@ -193,10 +198,13 @@ export class EmailService {
     const safeBrowser = escapeHtml(browser || 'Unknown Browser');
     const safeOS = escapeHtml(operatingSystem || 'Unknown OS');
     const safeIp = escapeHtml(ipAddress || 'Unknown IP');
-    const loginTime = time ? new Date(time).toUTCString() : new Date().toUTCString();
+    const loginTime = time
+      ? new Date(time).toUTCString()
+      : new Date().toUTCString();
     const safeTime = escapeHtml(loginTime);
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.clixprocrm.com';
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL || 'https://app.clixprocrm.com';
     const securitySettingsUrl = `${appUrl}/settings`;
 
     const htmlContent = `
@@ -255,18 +263,23 @@ export class EmailService {
 
     try {
       const info = await this.transporter.sendMail({
-        from: process.env.SMTP_FROM || '"ClixProCRM Security" <no-reply@clixprocrm.com>',
+        from:
+          process.env.SMTP_FROM ||
+          '"ClixProCRM Security" <no-reply@clixprocrm.com>',
         to,
         subject: 'New sign-in detected on your ClixProCRM account',
         html: htmlContent,
       });
 
-      this.logger.log(`New device security alert sent successfully (ID: ${info?.messageId || 'sent'})`);
+      this.logger.log(
+        `New device security alert sent successfully (ID: ${info?.messageId || 'sent'})`,
+      );
       return { success: true, messageId: info?.messageId };
     } catch (err: any) {
-      this.logger.warn(`Failed to deliver new device security alert email: ${err?.message || err}`);
+      this.logger.warn(
+        `Failed to deliver new device security alert email: ${err?.message || err}`,
+      );
       return { success: false, error: err?.message || 'SMTP delivery failure' };
     }
   }
 }
-

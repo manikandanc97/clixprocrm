@@ -12,18 +12,24 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
     prismaService = new PrismaService();
 
     // Mock $transaction and $executeRaw
-    jest.spyOn(prismaService, '$transaction').mockImplementation(async (callback: any) => {
-      const mockTx = {
-        $executeRaw: jest.fn().mockImplementation((strings: TemplateStringsArray, ...values: any[]) => {
-          executedSqlQueries.push({
-            sql: strings.join('?'),
-            values,
-          });
-          return Promise.resolve(1);
-        }),
-      };
-      return callback(mockTx);
-    });
+    jest
+      .spyOn(prismaService, '$transaction')
+      .mockImplementation(async (callback: any) => {
+        const mockTx = {
+          $executeRaw: jest
+            .fn()
+            .mockImplementation(
+              (strings: TemplateStringsArray, ...values: any[]) => {
+                executedSqlQueries.push({
+                  sql: strings.join('?'),
+                  values,
+                });
+                return Promise.resolve(1);
+              },
+            ),
+        };
+        return callback(mockTx);
+      });
   });
 
   describe('1. Transaction-Local Tenant Context Propagation', () => {
@@ -41,11 +47,15 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       expect(executedSqlQueries).toHaveLength(2);
 
       // Verify app.current_tenant_id is set with tenantA
-      expect(executedSqlQueries[0].sql).toContain("set_config('app.current_tenant_id'");
+      expect(executedSqlQueries[0].sql).toContain(
+        "set_config('app.current_tenant_id'",
+      );
       expect(executedSqlQueries[0].values).toContain(tenantA);
 
       // Verify is_super_admin is set to false
-      expect(executedSqlQueries[1].sql).toContain("set_config('app.is_super_admin'");
+      expect(executedSqlQueries[1].sql).toContain(
+        "set_config('app.is_super_admin'",
+      );
       expect(executedSqlQueries[1].values).toContain('false');
     });
 
@@ -72,18 +82,24 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       } as any;
 
       const prismaWithAls = new PrismaService(mockTenantContextService);
-      jest.spyOn(prismaWithAls, '$transaction').mockImplementation(async (callback: any) => {
-        const mockTx = {
-          $executeRaw: jest.fn().mockImplementation((strings: TemplateStringsArray, ...values: any[]) => {
-            executedSqlQueries.push({
-              sql: strings.join('?'),
-              values,
-            });
-            return Promise.resolve(1);
-          }),
-        };
-        return callback(mockTx);
-      });
+      jest
+        .spyOn(prismaWithAls, '$transaction')
+        .mockImplementation(async (callback: any) => {
+          const mockTx = {
+            $executeRaw: jest
+              .fn()
+              .mockImplementation(
+                (strings: TemplateStringsArray, ...values: any[]) => {
+                  executedSqlQueries.push({
+                    sql: strings.join('?'),
+                    values,
+                  });
+                  return Promise.resolve(1);
+                },
+              ),
+          };
+          return callback(mockTx);
+        });
 
       const res = await prismaWithAls.withCurrentTenantContext(async (tx) => {
         return 'ALS_QUERY_SUCCESS';
@@ -107,16 +123,21 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
     });
   });
 
-
   describe('2. Context Isolation Across Sequential & Concurrent Requests', () => {
     it('Tenant A request followed by Tenant B request receives distinct, isolated contexts', async () => {
       const tenantA = 'tenant-aaaa';
       const tenantB = 'tenant-bbbb';
 
-      await prismaService.withTenantContext({ tenantId: tenantA }, async () => 'A_DONE');
+      await prismaService.withTenantContext(
+        { tenantId: tenantA },
+        async () => 'A_DONE',
+      );
       const queriesAfterA = [...executedSqlQueries];
 
-      await prismaService.withTenantContext({ tenantId: tenantB }, async () => 'B_DONE');
+      await prismaService.withTenantContext(
+        { tenantId: tenantB },
+        async () => 'B_DONE',
+      );
       const queriesAfterB = [...executedSqlQueries];
 
       // Request A set tenantA
@@ -132,8 +153,14 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       const tenant2 = 'tenant-concurrent-2';
 
       const [res1, res2] = await Promise.all([
-        prismaService.withTenantContext({ tenantId: tenant1 }, async () => `RES_${tenant1}`),
-        prismaService.withTenantContext({ tenantId: tenant2 }, async () => `RES_${tenant2}`),
+        prismaService.withTenantContext(
+          { tenantId: tenant1 },
+          async () => `RES_${tenant1}`,
+        ),
+        prismaService.withTenantContext(
+          { tenantId: tenant2 },
+          async () => `RES_${tenant2}`,
+        ),
       ]);
 
       expect(res1).toBe('RES_tenant-concurrent-1');
@@ -152,8 +179,12 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       const migrationSql = fs.readFileSync(migrationPath, 'utf8');
 
       // Helper functions present
-      expect(migrationSql).toContain('CREATE OR REPLACE FUNCTION current_app_tenant()');
-      expect(migrationSql).toContain('CREATE OR REPLACE FUNCTION is_app_super_admin()');
+      expect(migrationSql).toContain(
+        'CREATE OR REPLACE FUNCTION current_app_tenant()',
+      );
+      expect(migrationSql).toContain(
+        'CREATE OR REPLACE FUNCTION is_app_super_admin()',
+      );
 
       // Direct tenant tables
       const expectedDirectTables = [
@@ -186,15 +217,29 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       }
 
       // Child relational tables
-      expect(migrationSql).toContain('ALTER TABLE "AiMessage" ENABLE ROW LEVEL SECURITY;');
-      expect(migrationSql).toContain('ALTER TABLE "DocumentChunk" ENABLE ROW LEVEL SECURITY;');
-      expect(migrationSql).toContain('ALTER TABLE "RolePermission" ENABLE ROW LEVEL SECURITY;');
+      expect(migrationSql).toContain(
+        'ALTER TABLE "AiMessage" ENABLE ROW LEVEL SECURITY;',
+      );
+      expect(migrationSql).toContain(
+        'ALTER TABLE "DocumentChunk" ENABLE ROW LEVEL SECURITY;',
+      );
+      expect(migrationSql).toContain(
+        'ALTER TABLE "RolePermission" ENABLE ROW LEVEL SECURITY;',
+      );
 
       // Global tables must NOT have direct RLS in this migration
-      expect(migrationSql).not.toContain('ALTER TABLE "Tenant" ENABLE ROW LEVEL SECURITY;');
-      expect(migrationSql).not.toContain('ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;');
-      expect(migrationSql).not.toContain('ALTER TABLE "PlatformModule" ENABLE ROW LEVEL SECURITY;');
-      expect(migrationSql).not.toContain('ALTER TABLE "AuditLog" ENABLE ROW LEVEL SECURITY;');
+      expect(migrationSql).not.toContain(
+        'ALTER TABLE "Tenant" ENABLE ROW LEVEL SECURITY;',
+      );
+      expect(migrationSql).not.toContain(
+        'ALTER TABLE "User" ENABLE ROW LEVEL SECURITY;',
+      );
+      expect(migrationSql).not.toContain(
+        'ALTER TABLE "PlatformModule" ENABLE ROW LEVEL SECURITY;',
+      );
+      expect(migrationSql).not.toContain(
+        'ALTER TABLE "AuditLog" ENABLE ROW LEVEL SECURITY;',
+      );
 
       // MUST NOT have FORCE ROW LEVEL SECURITY in Stage 1
       expect(migrationSql).not.toContain('FORCE ROW LEVEL SECURITY');
@@ -240,7 +285,9 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       ];
 
       for (const table of expectedForceTables) {
-        expect(migrationSql).toContain(`ALTER TABLE "${table}" FORCE ROW LEVEL SECURITY;`);
+        expect(migrationSql).toContain(
+          `ALTER TABLE "${table}" FORCE ROW LEVEL SECURITY;`,
+        );
       }
 
       // Ensure global tables do NOT have FORCE ROW LEVEL SECURITY
@@ -251,4 +298,3 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
     });
   });
 });
-

@@ -7,11 +7,7 @@ import { BillingModule } from '../billing/billing.module';
 @Global()
 @Module({
   imports: [PrismaModule, BillingModule],
-  providers: [
-    SubscriptionEntitlementService,
-    PlanFeatureGuard,
-    PlanLimitGuard,
-  ],
+  providers: [SubscriptionEntitlementService, PlanFeatureGuard, PlanLimitGuard],
   exports: [
     SubscriptionEntitlementService,
     PlanFeatureGuard,

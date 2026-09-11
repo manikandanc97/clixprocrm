@@ -23,11 +23,11 @@ describe('P7 Security Posture & Critical Override Suite', () => {
     };
 
     governanceService = new SecurityGovernanceService(
-      mockPrisma as any,
-      mockSecOps as any,
+      mockPrisma,
+      mockSecOps,
       {} as any,
       {} as any,
-      mockIncidents as any,
+      mockIncidents,
     );
   });
 
@@ -38,7 +38,8 @@ describe('P7 Security Posture & Critical Override Suite', () => {
         auditIntegrity: { status: 'CRITICAL' },
       });
 
-      const { overallStatus } = await governanceService.calculateReadinessScore();
+      const { overallStatus } =
+        await governanceService.calculateReadinessScore();
       expect(overallStatus).toBe('CRITICAL');
     });
   });

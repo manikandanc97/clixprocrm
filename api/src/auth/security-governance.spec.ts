@@ -34,11 +34,11 @@ describe('P7 Security Governance Service Suite', () => {
     };
 
     governanceService = new SecurityGovernanceService(
-      mockPrisma as any,
-      mockSecOps as any,
-      mockIntegrity as any,
-      mockArchive as any,
-      mockIncidents as any,
+      mockPrisma,
+      mockSecOps,
+      mockIntegrity,
+      mockArchive,
+      mockIncidents,
     );
   });
 

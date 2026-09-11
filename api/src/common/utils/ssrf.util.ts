@@ -49,7 +49,12 @@ export function isPrivateOrReservedIPv6(ip: string): boolean {
   if (normalized === '::' || normalized === '0:0:0:0:0:0:0:0') return true;
 
   // Link-local fe80::/10
-  if (normalized.startsWith('fe80:') || normalized.startsWith('fe90:') || normalized.startsWith('fea0:') || normalized.startsWith('feb0:')) {
+  if (
+    normalized.startsWith('fe80:') ||
+    normalized.startsWith('fe90:') ||
+    normalized.startsWith('fea0:') ||
+    normalized.startsWith('feb0:')
+  ) {
     return true;
   }
 
@@ -70,7 +75,9 @@ export function isPrivateOrReservedIPv6(ip: string): boolean {
 /**
  * Validates a target URL against SSRF vulnerabilities.
  */
-export async function validateSafeUrlForFetch(rawUrl: string): Promise<{ safe: boolean; reason?: string }> {
+export async function validateSafeUrlForFetch(
+  rawUrl: string,
+): Promise<{ safe: boolean; reason?: string }> {
   try {
     const parsed = new URL(rawUrl);
 
@@ -96,14 +103,20 @@ export async function validateSafeUrlForFetch(rawUrl: string): Promise<{ safe: b
     // If hostname is directly an IP
     if (net.isIPv4(hostname)) {
       if (isPrivateOrReservedIPv4(hostname)) {
-        return { safe: false, reason: `Blocked private or reserved IPv4 address: ${hostname}` };
+        return {
+          safe: false,
+          reason: `Blocked private or reserved IPv4 address: ${hostname}`,
+        };
       }
       return { safe: true };
     }
 
     if (net.isIPv6(hostname)) {
       if (isPrivateOrReservedIPv6(hostname)) {
-        return { safe: false, reason: `Blocked private or reserved IPv6 address: ${hostname}` };
+        return {
+          safe: false,
+          reason: `Blocked private or reserved IPv6 address: ${hostname}`,
+        };
       }
       return { safe: true };
     }
@@ -112,17 +125,26 @@ export async function validateSafeUrlForFetch(rawUrl: string): Promise<{ safe: b
     return new Promise((resolve) => {
       dns.lookup(hostname, { all: true }, (err, addresses) => {
         if (err || !addresses || addresses.length === 0) {
-          resolve({ safe: false, reason: `DNS resolution failed for hostname: ${hostname}` });
+          resolve({
+            safe: false,
+            reason: `DNS resolution failed for hostname: ${hostname}`,
+          });
           return;
         }
 
         for (const addr of addresses) {
           if (addr.family === 4 && isPrivateOrReservedIPv4(addr.address)) {
-            resolve({ safe: false, reason: `Hostname resolves to private IPv4 address: ${addr.address}` });
+            resolve({
+              safe: false,
+              reason: `Hostname resolves to private IPv4 address: ${addr.address}`,
+            });
             return;
           }
           if (addr.family === 6 && isPrivateOrReservedIPv6(addr.address)) {
-            resolve({ safe: false, reason: `Hostname resolves to private IPv6 address: ${addr.address}` });
+            resolve({
+              safe: false,
+              reason: `Hostname resolves to private IPv6 address: ${addr.address}`,
+            });
             return;
           }
         }

@@ -174,7 +174,8 @@ export class PlatformDashboardService {
     let inactiveCount = 0;
 
     const enrichedRecentOrgs = recentTenants.map((t) => {
-      const recordsCount = t._count.leads + t._count.customers + t._count.deals + t._count.tasks;
+      const recordsCount =
+        t._count.leads + t._count.customers + t._count.deals + t._count.tasks;
       let healthStatus: 'HEALTHY' | 'AT_RISK' | 'INACTIVE' = 'HEALTHY';
 
       if (t.status === 'SUSPENDED') {
@@ -206,7 +207,8 @@ export class PlatformDashboardService {
 
     // Account for remaining tenants not in top 8
     allTenants.slice(recentTenants.length).forEach((t) => {
-      const recs = t._count.leads + t._count.customers + t._count.deals + t._count.tasks;
+      const recs =
+        t._count.leads + t._count.customers + t._count.deals + t._count.tasks;
       if (t.status === 'SUSPENDED') inactiveCount++;
       else if (recs === 0 || t._count.users === 0) atRiskCount++;
       else healthyCount++;
@@ -261,10 +263,14 @@ export class PlatformDashboardService {
 
     // Check trials ending soon
     allTenants
-      .filter((t) => t.trialEnd && t.trialEnd > now && t.trialEnd < sevenDaysInFuture)
+      .filter(
+        (t) => t.trialEnd && t.trialEnd > now && t.trialEnd < sevenDaysInFuture,
+      )
       .slice(0, 2)
       .forEach((t) => {
-        const daysLeft = Math.ceil((t.trialEnd!.getTime() - now.getTime()) / (24 * 60 * 60 * 1000));
+        const daysLeft = Math.ceil(
+          (t.trialEnd!.getTime() - now.getTime()) / (24 * 60 * 60 * 1000),
+        );
         attentionRequired.push({
           id: `trial-${t.id}`,
           severity: 'WARNING',
@@ -283,7 +289,8 @@ export class PlatformDashboardService {
         id: 'sec-locked-users',
         severity: 'WARNING',
         title: `${lockedUsersCount} Account${lockedUsersCount > 1 ? 's' : ''} Locked by Security Policy`,
-        description: 'Multiple failed authentication or anomaly detection triggers detected.',
+        description:
+          'Multiple failed authentication or anomaly detection triggers detected.',
         entityType: 'Security',
         targetUrl: '/super-admin/users',
         createdAt: now.toISOString(),
@@ -318,14 +325,24 @@ export class PlatformDashboardService {
       const stepDays = Math.max(1, Math.floor(days / steps));
       const series = [];
       for (let i = steps - 1; i >= 0; i--) {
-        const dStart = new Date(now.getTime() - (i + 1) * stepDays * 24 * 60 * 60 * 1000);
-        const dEnd = new Date(now.getTime() - i * stepDays * 24 * 60 * 60 * 1000);
+        const dStart = new Date(
+          now.getTime() - (i + 1) * stepDays * 24 * 60 * 60 * 1000,
+        );
+        const dEnd = new Date(
+          now.getTime() - i * stepDays * 24 * 60 * 60 * 1000,
+        );
         const orgsInPeriod = allTenants.filter(
-          (t) => new Date(t.createdAt) >= dStart && new Date(t.createdAt) <= dEnd,
+          (t) =>
+            new Date(t.createdAt) >= dStart && new Date(t.createdAt) <= dEnd,
         ).length;
-        const totalUpTo = allTenants.filter((t) => new Date(t.createdAt) <= dEnd).length;
+        const totalUpTo = allTenants.filter(
+          (t) => new Date(t.createdAt) <= dEnd,
+        ).length;
         series.push({
-          label: dEnd.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
+          label: dEnd.toLocaleDateString('en-US', {
+            month: 'short',
+            day: 'numeric',
+          }),
           organizations: Math.max(orgsInPeriod, Math.round(totalUpTo * 0.2)),
           total: totalUpTo || 1,
           active: Math.round((totalUpTo || 1) * 0.9),
@@ -334,8 +351,15 @@ export class PlatformDashboardService {
       return series;
     };
 
-    const newOrgs30d = allTenants.filter((t) => new Date(t.createdAt) >= thirtyDaysAgo).length;
-    const orgGrowthPercent = totalOrganizations > 0 ? Math.round((newOrgs30d / Math.max(1, totalOrganizations - newOrgs30d)) * 100) || 8.2 : 8.2;
+    const newOrgs30d = allTenants.filter(
+      (t) => new Date(t.createdAt) >= thirtyDaysAgo,
+    ).length;
+    const orgGrowthPercent =
+      totalOrganizations > 0
+        ? Math.round(
+            (newOrgs30d / Math.max(1, totalOrganizations - newOrgs30d)) * 100,
+          ) || 8.2
+        : 8.2;
 
     const organizationGrowth = {
       newOrganizations: Math.max(newOrgs30d, 4),
@@ -355,13 +379,17 @@ export class PlatformDashboardService {
     const wau = Math.max(Math.round(activeUsers * 0.88), 45);
     const mau = Math.max(activeUsers, 68);
     const loginSuccessRate = 99.4;
-    const activeOrgRate = totalOrganizations > 0 ? Math.round((activeOrganizations / totalOrganizations) * 100) : 100;
+    const activeOrgRate =
+      totalOrganizations > 0
+        ? Math.round((activeOrganizations / totalOrganizations) * 100)
+        : 100;
 
     // 30-day user activity sparkline
     const usageDailyTrend = [];
     for (let i = 29; i >= 0; i--) {
       const d = new Date(now.getTime() - i * 24 * 60 * 60 * 1000);
-      const randomVariance = Math.sin(i / 2) * 5 + (i % 7 === 0 || i % 7 === 6 ? -8 : 6);
+      const randomVariance =
+        Math.sin(i / 2) * 5 + (i % 7 === 0 || i % 7 === 6 ? -8 : 6);
       const val = Math.max(12, Math.round(dau + randomVariance));
       usageDailyTrend.push({
         date: d.toLocaleDateString('en-US', { month: 'short', day: 'numeric' }),
@@ -381,14 +409,54 @@ export class PlatformDashboardService {
 
     // 6. Module Adoption Percentages
     const moduleAdoption = [
-      { module: 'CRM & Pipeline', key: 'crm', rate: 88, recordCount: totalLeads + totalDeals + totalCustomers },
-      { module: 'Leads Management', key: 'leads', rate: 76, recordCount: totalLeads },
-      { module: 'Contacts & Companies', key: 'contacts', rate: 82, recordCount: totalCustomers },
-      { module: 'Tasks & Activities', key: 'tasks', rate: 65, recordCount: totalTasks },
-      { module: 'Meetings & Calendar', key: 'calendar', rate: 46, recordCount: totalMeetings },
-      { module: 'Notes & Documents', key: 'notes', rate: 54, recordCount: totalNotes },
-      { module: 'AI Copilot & Models', key: 'ai', rate: 32, recordCount: totalAiConversations },
-      { module: 'WhatsApp / Channels', key: 'channels', rate: 28, recordCount: Math.round(totalLeads * 0.3) },
+      {
+        module: 'CRM & Pipeline',
+        key: 'crm',
+        rate: 88,
+        recordCount: totalLeads + totalDeals + totalCustomers,
+      },
+      {
+        module: 'Leads Management',
+        key: 'leads',
+        rate: 76,
+        recordCount: totalLeads,
+      },
+      {
+        module: 'Contacts & Companies',
+        key: 'contacts',
+        rate: 82,
+        recordCount: totalCustomers,
+      },
+      {
+        module: 'Tasks & Activities',
+        key: 'tasks',
+        rate: 65,
+        recordCount: totalTasks,
+      },
+      {
+        module: 'Meetings & Calendar',
+        key: 'calendar',
+        rate: 46,
+        recordCount: totalMeetings,
+      },
+      {
+        module: 'Notes & Documents',
+        key: 'notes',
+        rate: 54,
+        recordCount: totalNotes,
+      },
+      {
+        module: 'AI Copilot & Models',
+        key: 'ai',
+        rate: 32,
+        recordCount: totalAiConversations,
+      },
+      {
+        module: 'WhatsApp / Channels',
+        key: 'channels',
+        rate: 28,
+        recordCount: Math.round(totalLeads * 0.3),
+      },
     ];
 
     // 7. Platform Health Services
@@ -397,13 +465,48 @@ export class PlatformDashboardService {
       avgLatencyMs: 142,
       overallStatus: 'OPERATIONAL',
       services: [
-        { name: 'API Gateway', status: 'OPERATIONAL', latencyMs: 138, details: 'P99 210ms' },
-        { name: 'PostgreSQL Database', status: 'OPERATIONAL', latencyMs: 14, details: 'Active connections normal' },
-        { name: 'Authentication (AAL2 MFA)', status: 'OPERATIONAL', latencyMs: 42, details: 'Zero active lockouts' },
-        { name: 'Email & Notification Gateway', status: 'OPERATIONAL', latencyMs: 88, details: 'Delivery rate 99.8%' },
-        { name: 'Document & WORM Storage', status: 'OPERATIONAL', latencyMs: 28, details: 'Audit archive compliant' },
-        { name: 'Background Workers & Queues', status: 'OPERATIONAL', latencyMs: 18, details: '0 queued failed jobs' },
-        { name: 'Platform AI Gateway', status: 'OPERATIONAL', latencyMs: 240, details: 'Models operational' },
+        {
+          name: 'API Gateway',
+          status: 'OPERATIONAL',
+          latencyMs: 138,
+          details: 'P99 210ms',
+        },
+        {
+          name: 'PostgreSQL Database',
+          status: 'OPERATIONAL',
+          latencyMs: 14,
+          details: 'Active connections normal',
+        },
+        {
+          name: 'Authentication (AAL2 MFA)',
+          status: 'OPERATIONAL',
+          latencyMs: 42,
+          details: 'Zero active lockouts',
+        },
+        {
+          name: 'Email & Notification Gateway',
+          status: 'OPERATIONAL',
+          latencyMs: 88,
+          details: 'Delivery rate 99.8%',
+        },
+        {
+          name: 'Document & WORM Storage',
+          status: 'OPERATIONAL',
+          latencyMs: 28,
+          details: 'Audit archive compliant',
+        },
+        {
+          name: 'Background Workers & Queues',
+          status: 'OPERATIONAL',
+          latencyMs: 18,
+          details: '0 queued failed jobs',
+        },
+        {
+          name: 'Platform AI Gateway',
+          status: 'OPERATIONAL',
+          latencyMs: 240,
+          details: 'Models operational',
+        },
       ],
     };
 
@@ -416,8 +519,14 @@ export class PlatformDashboardService {
     const billingSnapshot = {
       mrr: calculatedMRR,
       arr: calculatedARR,
-      paidOrganizations: Math.max(subscriptions.filter((s) => s.status === 'ACTIVE').length, Math.round(activeOrganizations * 0.7)),
-      trialOrganizations: Math.max(allTenants.filter((t) => t.trialEnd && t.trialEnd > now).length, 2),
+      paidOrganizations: Math.max(
+        subscriptions.filter((s) => s.status === 'ACTIVE').length,
+        Math.round(activeOrganizations * 0.7),
+      ),
+      trialOrganizations: Math.max(
+        allTenants.filter((t) => t.trialEnd && t.trialEnd > now).length,
+        2,
+      ),
       pastDueCount: overdueInvoices.length,
       pastDueAmount,
       currency: 'INR',
@@ -425,10 +534,16 @@ export class PlatformDashboardService {
 
     // 9. Tenant Health Summary
     const tenantHealth = {
-      healthyCount: Math.max(healthyCount, activeOrganizations > 0 ? activeOrganizations - atRiskCount : 1),
+      healthyCount: Math.max(
+        healthyCount,
+        activeOrganizations > 0 ? activeOrganizations - atRiskCount : 1,
+      ),
       atRiskCount,
       inactiveCount: Math.max(inactiveCount, suspendedOrganizations),
-      healthyPercent: totalOrganizations > 0 ? Math.round((healthyCount / totalOrganizations) * 100) : 90,
+      healthyPercent:
+        totalOrganizations > 0
+          ? Math.round((healthyCount / totalOrganizations) * 100)
+          : 90,
     };
 
     // Format plan distribution
@@ -450,10 +565,13 @@ export class PlatformDashboardService {
         totalTasks,
         estimatedMRR: calculatedMRR,
         estimatedARR: calculatedARR,
-        activeAdoptionRate: totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 84,
+        activeAdoptionRate:
+          totalUsers > 0 ? Math.round((activeUsers / totalUsers) * 100) : 84,
         platformHealthPercent: 99.98,
         openIssuesCount: attentionRequired.length,
-        criticalIssuesCount: attentionRequired.filter((i) => i.severity === 'CRITICAL').length,
+        criticalIssuesCount: attentionRequired.filter(
+          (i) => i.severity === 'CRITICAL',
+        ).length,
         mrrGrowthPercent: 12.4,
         userGrowthPercent: 14.8,
         orgGrowthPercent,
@@ -480,4 +598,3 @@ export class PlatformDashboardService {
     };
   }
 }
-

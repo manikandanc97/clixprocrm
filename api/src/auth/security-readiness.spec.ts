@@ -14,7 +14,7 @@ describe('P7 Security Readiness Score Calculation Suite', () => {
 
     governanceService = new SecurityGovernanceService(
       {} as any,
-      mockSecOps as any,
+      mockSecOps,
       {} as any,
       {} as any,
       {} as any,

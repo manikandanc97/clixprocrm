@@ -43,7 +43,9 @@ export class AuditIntegrityAlertService {
           token: redisToken,
         });
       } catch (err: any) {
-        this.logger.warn(`Redis client initialization failed for alert deduplication: ${err?.message || err}`);
+        this.logger.warn(
+          `Redis client initialization failed for alert deduplication: ${err?.message || err}`,
+        );
       }
     }
   }
@@ -63,11 +65,15 @@ export class AuditIntegrityAlertService {
         });
 
         if (!isNew) {
-          this.logger.debug(`Suppressed duplicate audit integrity alert: ${dedupKey}`);
+          this.logger.debug(
+            `Suppressed duplicate audit integrity alert: ${dedupKey}`,
+          );
           return false; // Alert suppressed by deduplication
         }
       } catch (redisErr: any) {
-        this.logger.warn(`Alert deduplication check failed: ${redisErr?.message || redisErr}. Emitting alert directly.`);
+        this.logger.warn(
+          `Alert deduplication check failed: ${redisErr?.message || redisErr}. Emitting alert directly.`,
+        );
       }
     }
 

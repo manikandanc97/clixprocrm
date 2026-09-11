@@ -1,4 +1,8 @@
-import { EmailProviderType, EmailAuthType, EmailSyncStatus } from '@prisma/client';
+import {
+  EmailProviderType,
+  EmailAuthType,
+  EmailSyncStatus,
+} from '@prisma/client';
 
 export interface EmailAccountResponseDto {
   id: string;

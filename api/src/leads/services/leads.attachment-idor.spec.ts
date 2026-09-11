@@ -27,7 +27,9 @@ describe('LeadsService Security - Attachment IDOR & Cross-Tenant Access Preventi
       timelineEvent: {
         create: jest.fn(),
       },
-      withTenantContext: jest.fn().mockImplementation((ctx, cb) => cb(prismaMock)),
+      withTenantContext: jest
+        .fn()
+        .mockImplementation((ctx, cb) => cb(prismaMock)),
     };
 
     encryptionMock = {
@@ -54,12 +56,17 @@ describe('LeadsService Security - Attachment IDOR & Cross-Tenant Access Preventi
     prismaMock.lead.findUnique.mockResolvedValue(null);
 
     await expect(
-      service.createLeadAttachment('tenant-b', 'lead-owned-by-tenant-a', 'user-1', {
-        fileName: 'confidential.pdf',
-        fileUrl: 'https://cdn.example.com/confidential.pdf',
-        fileSize: 1024,
-        fileType: 'application/pdf',
-      }),
+      service.createLeadAttachment(
+        'tenant-b',
+        'lead-owned-by-tenant-a',
+        'user-1',
+        {
+          fileName: 'confidential.pdf',
+          fileUrl: 'https://cdn.example.com/confidential.pdf',
+          fileSize: 1024,
+          fileType: 'application/pdf',
+        },
+      ),
     ).rejects.toThrow(NotFoundException);
 
     // Verify ownership query strictly scoped by tenantId
@@ -86,12 +93,17 @@ describe('LeadsService Security - Attachment IDOR & Cross-Tenant Access Preventi
       fileType: 'application/pdf',
     });
 
-    const result = await service.createLeadAttachment('tenant-a', 'lead-1', 'user-1', {
-      fileName: 'invoice.pdf',
-      fileUrl: 'https://cdn.example.com/invoice.pdf',
-      fileSize: 2048,
-      fileType: 'application/pdf',
-    });
+    const result = await service.createLeadAttachment(
+      'tenant-a',
+      'lead-1',
+      'user-1',
+      {
+        fileName: 'invoice.pdf',
+        fileUrl: 'https://cdn.example.com/invoice.pdf',
+        fileSize: 2048,
+        fileType: 'application/pdf',
+      },
+    );
 
     expect(prismaMock.lead.findUnique).toHaveBeenCalledWith({
       where: { id: 'lead-1', tenantId: 'tenant-a', deletedAt: null },

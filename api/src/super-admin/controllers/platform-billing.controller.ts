@@ -39,7 +39,11 @@ export class PlatformBillingController {
   ) {
     const p = page ? parseInt(page, 10) : 1;
     const l = limit ? parseInt(limit, 10) : 20;
-    const data = await this.billingService.getSubscriptions(p, l, { search, planId, status });
+    const data = await this.billingService.getSubscriptions(p, l, {
+      search,
+      planId,
+      status,
+    });
     return { success: true, ...data };
   }
 
@@ -109,11 +113,7 @@ export class PlatformBillingController {
     @Body() body: UpdatePlatformBillingConfigDto,
   ) {
     const actorId = req.user?.id || req.user?.sub || 'SUPER_ADMIN';
-    const config = await this.billingService.updateBillingConfig(
-      actorId,
-      body,
-    );
+    const config = await this.billingService.updateBillingConfig(actorId, body);
     return { success: true, data: config };
   }
 }
-

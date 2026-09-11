@@ -1,4 +1,8 @@
-import { ForbiddenException, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  ForbiddenException,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PlatformUsersService } from '../super-admin/services/platform-users.service';
 import { EmployeesService } from '../admin/services/employees.service';
 import { AuthService } from './auth.service';
@@ -37,7 +41,9 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
       auditLog: {
         create: jest.fn().mockResolvedValue({ id: 'audit-1' }),
       },
-      createSealedAuditLog: jest.fn().mockResolvedValue({ id: 'sealed-audit-1' }),
+      createSealedAuditLog: jest
+        .fn()
+        .mockResolvedValue({ id: 'sealed-audit-1' }),
       withTenantContext: jest.fn().mockImplementation((opts, callback) => {
         return callback(mockPrisma);
       }),
@@ -57,9 +63,9 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
       processAndUploadLogo: jest.fn(),
     };
 
-    platformUsersService = new PlatformUsersService(mockPrisma as any);
-    employeesService = new EmployeesService(mockPrisma as any, mockConfigService as any);
-    authService = new AuthService(mockPrisma as any, mockBrandingService as any);
+    platformUsersService = new PlatformUsersService(mockPrisma);
+    employeesService = new EmployeesService(mockPrisma, mockConfigService);
+    authService = new AuthService(mockPrisma, mockBrandingService);
   });
 
   describe('1. Platform Super Admin Transfer of Ownership (Atomic Flow)', () => {
@@ -73,7 +79,9 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
       await expect(
         platformUsersService.transferSuperAdmin('target-1', 'user-regular'),
       ).rejects.toThrow(
-        new ForbiddenException('Only the current active Super Admin can transfer platform ownership.'),
+        new ForbiddenException(
+          'Only the current active Super Admin can transfer platform ownership.',
+        ),
       );
     });
 
@@ -85,31 +93,56 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
       });
 
       await expect(
-        platformUsersService.transferSuperAdmin('super-admin-1', 'super-admin-1'),
+        platformUsersService.transferSuperAdmin(
+          'super-admin-1',
+          'super-admin-1',
+        ),
       ).rejects.toThrow(
-        new BadRequestException('Target user is already the current Super Admin.'),
+        new BadRequestException(
+          'Target user is already the current Super Admin.',
+        ),
       );
     });
 
     it('should REJECT transfer if target user does not exist', async () => {
       mockPrisma.user.findUnique
-        .mockResolvedValueOnce({ id: 'super-admin-1', isSuperAdmin: true, status: 'ACTIVE' })
+        .mockResolvedValueOnce({
+          id: 'super-admin-1',
+          isSuperAdmin: true,
+          status: 'ACTIVE',
+        })
         .mockResolvedValueOnce(null);
 
       await expect(
-        platformUsersService.transferSuperAdmin('missing-target', 'super-admin-1'),
+        platformUsersService.transferSuperAdmin(
+          'missing-target',
+          'super-admin-1',
+        ),
       ).rejects.toThrow(new NotFoundException('Target user not found.'));
     });
 
     it('should REJECT transfer if target user is INACTIVE or SUSPENDED', async () => {
       mockPrisma.user.findUnique
-        .mockResolvedValueOnce({ id: 'super-admin-1', isSuperAdmin: true, status: 'ACTIVE' })
-        .mockResolvedValueOnce({ id: 'target-suspended', isSuperAdmin: false, status: 'SUSPENDED' });
+        .mockResolvedValueOnce({
+          id: 'super-admin-1',
+          isSuperAdmin: true,
+          status: 'ACTIVE',
+        })
+        .mockResolvedValueOnce({
+          id: 'target-suspended',
+          isSuperAdmin: false,
+          status: 'SUSPENDED',
+        });
 
       await expect(
-        platformUsersService.transferSuperAdmin('target-suspended', 'super-admin-1'),
+        platformUsersService.transferSuperAdmin(
+          'target-suspended',
+          'super-admin-1',
+        ),
       ).rejects.toThrow(
-        new BadRequestException('Target user account must be ACTIVE to receive Super Admin ownership.'),
+        new BadRequestException(
+          'Target user account must be ACTIVE to receive Super Admin ownership.',
+        ),
       );
     });
 
@@ -186,7 +219,11 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
       });
 
       await expect(
-        platformUsersService.updateUserStatus('super-admin-1', 'SUSPENDED', 'super-admin-1'),
+        platformUsersService.updateUserStatus(
+          'super-admin-1',
+          'SUSPENDED',
+          'super-admin-1',
+        ),
       ).rejects.toThrow(
         new ForbiddenException(
           'Cannot deactivate or suspend the sole active Super Admin. Transfer platform ownership first.',
@@ -196,7 +233,11 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
 
     it('should REJECT direct demotion of the Super Admin', async () => {
       await expect(
-        platformUsersService.toggleSuperAdmin('super-admin-1', false, 'super-admin-1'),
+        platformUsersService.toggleSuperAdmin(
+          'super-admin-1',
+          false,
+          'super-admin-1',
+        ),
       ).rejects.toThrow(
         new BadRequestException(
           'Direct demotion of the platform Super Admin is prohibited. The platform must always have exactly ONE active Super Admin. Transfer platform ownership to another active user instead.',
@@ -214,17 +255,23 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
         employeesService.deleteEmployee('tenant-1', 'super-admin-1', 'ADMIN'),
       ).rejects.toThrow(
         expect.objectContaining({
-          message: 'Cannot delete the Platform Super Admin from workspace employee management.',
+          message:
+            'Cannot delete the Platform Super Admin from workspace employee management.',
         }),
       );
     });
 
     it('should REJECT creating an employee with SUPER_ADMIN role inside an organization', async () => {
       await expect(
-        employeesService.inviteEmployee('tenant-1', 'user@test.com', 'SUPER_ADMIN'),
+        employeesService.inviteEmployee(
+          'tenant-1',
+          'user@test.com',
+          'SUPER_ADMIN',
+        ),
       ).rejects.toThrow(
         expect.objectContaining({
-          message: 'SUPER_ADMIN is a platform-level role and cannot be created inside an organization.',
+          message:
+            'SUPER_ADMIN is a platform-level role and cannot be created inside an organization.',
         }),
       );
     });
@@ -318,7 +365,10 @@ describe('Single Super Admin Architectural Invariant & Safeguards Suite', () => 
       mockPrisma.notification = { deleteMany: jest.fn() };
       mockPrisma.auditLog.updateMany = jest.fn();
 
-      const result = await platformUsersService.deleteUser('user-to-delete', 'super-admin-1');
+      const result = await platformUsersService.deleteUser(
+        'user-to-delete',
+        'super-admin-1',
+      );
 
       expect(result.success).toBe(true);
       expect(result.message).toContain('permanently deleted');

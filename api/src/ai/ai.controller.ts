@@ -1,4 +1,12 @@
-import { Controller, Get, Post, Body, Res, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Res,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { AiService } from './ai.service';
 import { AiSecurityService } from './ai-security.service';
@@ -22,7 +30,8 @@ export class AiController {
   async getEntitledModels(@Req() req: any) {
     const isSuperAdmin = req.isSuperAdmin || false;
     const tenantId = isSuperAdmin ? undefined : req.tenantId;
-    const entitlements = await this.aiEntitlementService.getEffectiveEntitlements(tenantId);
+    const entitlements =
+      await this.aiEntitlementService.getEffectiveEntitlements(tenantId);
     return {
       success: true,
       data: entitlements,
@@ -43,23 +52,23 @@ export class AiController {
       const messages = body.messages || [];
 
       // 1. Authoritative Backend Model Entitlement Validation
-      const validatedModel = await this.aiEntitlementService.validateModelAccess(
-        isSuperAdmin ? undefined : tenantId,
-        requestedModel,
-        capability,
-      );
+      const validatedModel =
+        await this.aiEntitlementService.validateModelAccess(
+          isSuperAdmin ? undefined : tenantId,
+          requestedModel,
+          capability,
+        );
 
       const activeModelKey = validatedModel.modelKey;
       const provider = validatedModel.provider || 'google';
 
       // 2. Build full RBAC and hierarchy security context
-      const securityContext =
-        await this.aiSecurityService.buildSecurityContext(
-          userId,
-          tenantId,
-          userRole,
-          isSuperAdmin,
-        );
+      const securityContext = await this.aiSecurityService.buildSecurityContext(
+        userId,
+        tenantId,
+        userRole,
+        isSuperAdmin,
+      );
 
       const streamResult = await this.aiService.generateStream(
         messages,
@@ -101,7 +110,13 @@ export class AiController {
       });
 
       console.error('[AI CHAT ERROR] Controller exception:', e.message || e);
-      let status = e.status || (e.name === 'ForbiddenException' ? 403 : e.name === 'ServiceUnavailableException' ? 503 : 500);
+      let status =
+        e.status ||
+        (e.name === 'ForbiddenException'
+          ? 403
+          : e.name === 'ServiceUnavailableException'
+            ? 503
+            : 500);
       let code = 'AI_PROVIDER_ERROR';
 
       if (e.message?.includes('AI_SERVICES_UNAVAILABLE')) {
@@ -125,5 +140,3 @@ export class AiController {
     }
   }
 }
-
-

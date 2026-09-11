@@ -30,7 +30,12 @@ import { AuthorizationGuard } from './authorization/authorization.guard';
     NotificationsModule,
     forwardRef(() => QueueModule),
   ],
-  controllers: [AuthController, MfaController, SessionsController, PrivacyController],
+  controllers: [
+    AuthController,
+    MfaController,
+    SessionsController,
+    PrivacyController,
+  ],
   providers: [
     AuthService,
     MfaService,
@@ -61,4 +66,3 @@ import { AuthorizationGuard } from './authorization/authorization.guard';
   ],
 })
 export class AuthModule {}
-

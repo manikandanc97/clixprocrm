@@ -7,10 +7,22 @@ export interface SessionTimeoutConfig {
 }
 
 export function getSessionTimeoutConfig(): SessionTimeoutConfig {
-  const idleMinutes = parseInt(process.env.IDLE_SESSION_TIMEOUT_MINUTES || '30', 10);
-  const absoluteHours = parseInt(process.env.ABSOLUTE_SESSION_TIMEOUT_HOURS || '24', 10);
-  const persistentDays = parseInt(process.env.PERSISTENT_SESSION_DAYS || '30', 10);
-  const throttleSeconds = parseInt(process.env.SESSION_ACTIVITY_THROTTLE_SECONDS || '60', 10);
+  const idleMinutes = parseInt(
+    process.env.IDLE_SESSION_TIMEOUT_MINUTES || '30',
+    10,
+  );
+  const absoluteHours = parseInt(
+    process.env.ABSOLUTE_SESSION_TIMEOUT_HOURS || '24',
+    10,
+  );
+  const persistentDays = parseInt(
+    process.env.PERSISTENT_SESSION_DAYS || '30',
+    10,
+  );
+  const throttleSeconds = parseInt(
+    process.env.SESSION_ACTIVITY_THROTTLE_SECONDS || '60',
+    10,
+  );
 
   // Validate configuration strictly — fallback to secure defaults if invalid/negative
   const idleTimeoutMs =
@@ -24,9 +36,7 @@ export function getSessionTimeoutConfig(): SessionTimeoutConfig {
       : 24 * 60 * 60 * 1000; // default 24 hours
 
   const persistentTimeoutDays =
-    Number.isFinite(persistentDays) && persistentDays > 0
-      ? persistentDays
-      : 30; // default 30 days
+    Number.isFinite(persistentDays) && persistentDays > 0 ? persistentDays : 30; // default 30 days
 
   const persistentTimeoutMs = persistentTimeoutDays * 24 * 60 * 60 * 1000;
 

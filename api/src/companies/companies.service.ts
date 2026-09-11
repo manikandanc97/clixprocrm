@@ -37,7 +37,10 @@ export class CompaniesService {
           take: limit,
           include: {
             _count: {
-              select: { customers: { where: { deletedAt: null } }, deals: true },
+              select: {
+                customers: { where: { deletedAt: null } },
+                deals: true,
+              },
             },
           },
         }),
@@ -65,7 +68,12 @@ export class CompaniesService {
 
       return {
         companies: filtered,
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -97,19 +105,28 @@ export class CompaniesService {
     });
   }
 
-  async updateCompany(tenantId: string, id: string, data: Partial<CreateCompanyDto>) {
+  async updateCompany(
+    tenantId: string,
+    id: string,
+    data: Partial<CreateCompanyDto>,
+  ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const updateData: any = {};
       if (data.name !== undefined) {
-        const { encrypted: encName, hash: nameHash } =
-          this.enc.encryptWithHash(data.name);
+        const { encrypted: encName, hash: nameHash } = this.enc.encryptWithHash(
+          data.name,
+        );
         updateData.name = encName;
         updateData.nameHash = nameHash;
       }
-      if (data.email !== undefined) updateData.email = this.enc.encrypt(data.email);
-      if (data.phone !== undefined) updateData.phone = this.enc.encrypt(data.phone);
-      if (data.address !== undefined) updateData.address = this.enc.encrypt(data.address);
-      if (data.notes !== undefined) updateData.notes = this.enc.encrypt(data.notes);
+      if (data.email !== undefined)
+        updateData.email = this.enc.encrypt(data.email);
+      if (data.phone !== undefined)
+        updateData.phone = this.enc.encrypt(data.phone);
+      if (data.address !== undefined)
+        updateData.address = this.enc.encrypt(data.address);
+      if (data.notes !== undefined)
+        updateData.notes = this.enc.encrypt(data.notes);
       if (data.industry !== undefined) updateData.industry = data.industry;
       if (data.website !== undefined) updateData.website = data.website;
       if (data.status !== undefined) updateData.status = data.status;
@@ -137,7 +154,11 @@ export class CompaniesService {
     });
   }
 
-  async reassignIndustry(tenantId: string, oldIndustry: string, newIndustry: string) {
+  async reassignIndustry(
+    tenantId: string,
+    oldIndustry: string,
+    newIndustry: string,
+  ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const result = await tx.company.updateMany({
         where: { tenantId, industry: oldIndustry, deletedAt: null },
@@ -154,8 +175,12 @@ export class CompaniesService {
   ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const [primary, secondary] = await Promise.all([
-        tx.company.findFirst({ where: { id: primaryId, tenantId, deletedAt: null } }),
-        tx.company.findFirst({ where: { id: secondaryId, tenantId, deletedAt: null } }),
+        tx.company.findFirst({
+          where: { id: primaryId, tenantId, deletedAt: null },
+        }),
+        tx.company.findFirst({
+          where: { id: secondaryId, tenantId, deletedAt: null },
+        }),
       ]);
 
       if (!primary || !secondary) {
@@ -190,11 +215,14 @@ export class CompaniesService {
 
       // Fill in any missing metadata
       const updates: any = {};
-      if (!primary.industry && secondary.industry) updates.industry = secondary.industry;
-      if (!primary.website && secondary.website) updates.website = secondary.website;
+      if (!primary.industry && secondary.industry)
+        updates.industry = secondary.industry;
+      if (!primary.website && secondary.website)
+        updates.website = secondary.website;
       if (!primary.phone && secondary.phone) updates.phone = secondary.phone;
       if (!primary.email && secondary.email) updates.email = secondary.email;
-      if (!primary.address && secondary.address) updates.address = secondary.address;
+      if (!primary.address && secondary.address)
+        updates.address = secondary.address;
       if (!primary.notes && secondary.notes) updates.notes = secondary.notes;
 
       if (Object.keys(updates).length > 0) {

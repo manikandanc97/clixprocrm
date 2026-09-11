@@ -96,12 +96,13 @@ export class S3ObjectLockProvider implements AuditArchiveProvider {
         }
 
         const etag = response.headers.get('etag') || undefined;
-        const versionId =
-          response.headers.get('x-amz-version-id') || undefined;
+        const versionId = response.headers.get('x-amz-version-id') || undefined;
 
         return { objectKey: key, versionId, etag };
       } catch (err: any) {
-        this.logger.error(`S3 Object Lock upload error for ${key}: ${err?.message || err}`);
+        this.logger.error(
+          `S3 Object Lock upload error for ${key}: ${err?.message || err}`,
+        );
         throw err;
       }
     }
@@ -141,7 +142,9 @@ export class S3ObjectLockProvider implements AuditArchiveProvider {
         }
         return await response.json();
       } catch (err: any) {
-        this.logger.error(`S3 getObject error for ${key}: ${err?.message || err}`);
+        this.logger.error(
+          `S3 getObject error for ${key}: ${err?.message || err}`,
+        );
         throw err;
       }
     }
@@ -171,7 +174,9 @@ export class S3ObjectLockProvider implements AuditArchiveProvider {
           response.headers.get('x-amz-meta-record-hash') || undefined;
         return { exists: true, recordHash };
       } catch (err: any) {
-        this.logger.error(`S3 headObject error for ${key}: ${err?.message || err}`);
+        this.logger.error(
+          `S3 headObject error for ${key}: ${err?.message || err}`,
+        );
         throw err;
       }
     }
@@ -220,10 +225,9 @@ export class S3ObjectLockProvider implements AuditArchiveProvider {
     };
 
     const sortedHeaderKeys = Object.keys(allHeaders).sort();
-    const canonicalHeaders =
-      sortedHeaderKeys
-        .map((k) => `${k.toLowerCase()}:${allHeaders[k].trim()}\n`)
-        .join('');
+    const canonicalHeaders = sortedHeaderKeys
+      .map((k) => `${k.toLowerCase()}:${allHeaders[k].trim()}\n`)
+      .join('');
     const signedHeaders = sortedHeaderKeys
       .map((k) => k.toLowerCase())
       .join(';');

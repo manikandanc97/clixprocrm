@@ -26,37 +26,43 @@ export class NotificationsService {
         const seedData = [
           {
             title: 'AI Daily Intelligence Briefing',
-            message: '3 High-intent accounts flagged with >85% win probability. Priority follow-up suggested for TechCorp.',
+            message:
+              '3 High-intent accounts flagged with >85% win probability. Priority follow-up suggested for TechCorp.',
             type: 'ai',
             isRead: false,
           },
           {
             title: 'New High-Value Lead Assigned',
-            message: 'Priya Sharma (Director, TechCorp India) assigned to your active queue.',
+            message:
+              'Priya Sharma (Director, TechCorp India) assigned to your active queue.',
             type: 'lead',
             isRead: false,
           },
           {
             title: 'Deal Advanced to Proposal Stage',
-            message: 'Enterprise Cloud Migration moved to Negotiation & Proposal (Value: ₹18,50,000).',
+            message:
+              'Enterprise Cloud Migration moved to Negotiation & Proposal (Value: ₹18,50,000).',
             type: 'deal',
             isRead: false,
           },
           {
             title: 'Invoice Payment Received',
-            message: 'Payment of ₹2,40,000 for Invoice INV-2026-004 confirmed via NEFT/RTGS.',
+            message:
+              'Payment of ₹2,40,000 for Invoice INV-2026-004 confirmed via NEFT/RTGS.',
             type: 'invoice',
             isRead: true,
           },
           {
             title: 'Task Reminder: Contract Review',
-            message: 'Review and sign the finalized Master Service Agreement before 5:00 PM today.',
+            message:
+              'Review and sign the finalized Master Service Agreement before 5:00 PM today.',
             type: 'task',
             isRead: true,
           },
           {
             title: 'Security Session Verified',
-            message: 'Authenticated session active with Multi-Factor Authentication enabled.',
+            message:
+              'Authenticated session active with Multi-Factor Authentication enabled.',
             type: 'security',
             isRead: true,
           },
@@ -141,7 +147,11 @@ export class NotificationsService {
     });
   }
 
-  async deleteNotification(tenantId: string, userId: string, notificationId: string) {
+  async deleteNotification(
+    tenantId: string,
+    userId: string,
+    notificationId: string,
+  ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const notification = await tx.notification.findUnique({
         where: { id: notificationId },
@@ -196,11 +206,27 @@ export class NotificationsService {
   async createTestNotification(tenantId: string, userId: string) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const sampleTitles = [
-        { title: 'New Deal Stage Update', message: 'Apex Software signed off on the technical assessment. Stage updated to Proposal.', type: 'deal' },
-        { title: 'AI Recommendation Triggered', message: 'AI recommends scheduling a discovery follow-up with Rajesh Kumar based on recent email engagement.', type: 'ai' },
-        { title: 'Task Due Reminder', message: 'Upcoming scheduled demonstration with Global Corp starts in 15 minutes.', type: 'task' },
+        {
+          title: 'New Deal Stage Update',
+          message:
+            'Apex Software signed off on the technical assessment. Stage updated to Proposal.',
+          type: 'deal',
+        },
+        {
+          title: 'AI Recommendation Triggered',
+          message:
+            'AI recommends scheduling a discovery follow-up with Rajesh Kumar based on recent email engagement.',
+          type: 'ai',
+        },
+        {
+          title: 'Task Due Reminder',
+          message:
+            'Upcoming scheduled demonstration with Global Corp starts in 15 minutes.',
+          type: 'task',
+        },
       ];
-      const sample = sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
+      const sample =
+        sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
 
       return tx.notification.create({
         data: {
@@ -215,4 +241,3 @@ export class NotificationsService {
     });
   }
 }
-

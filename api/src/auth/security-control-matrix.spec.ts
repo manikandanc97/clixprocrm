@@ -14,7 +14,7 @@ describe('P7 Security Control Matrix & RLS Governance Suite', () => {
 
     governanceService = new SecurityGovernanceService(
       {} as any,
-      mockSecOps as any,
+      mockSecOps,
       {} as any,
       {} as any,
       {} as any,
@@ -54,9 +54,13 @@ describe('P7 Security Control Matrix & RLS Governance Suite', () => {
     it('verifies all 25 tenant-scoped tables enforce FORCE RLS', async () => {
       const rls = await governanceService.getRlsGovernance();
       expect(rls.verifiedTenantTablesCount).toBe(25);
-      expect(rls.tables.every((t) => t.forceRlsEnabled && t.rlsEnabled)).toBe(true);
+      expect(rls.tables.every((t) => t.forceRlsEnabled && t.rlsEnabled)).toBe(
+        true,
+      );
       expect(rls.globalAuditLogScoped.table).toBe('AuditLog');
-      expect(rls.globalAuditLogScoped.classification).toBe('SYSTEM_GLOBAL_IMMUTABLE');
+      expect(rls.globalAuditLogScoped.classification).toBe(
+        'SYSTEM_GLOBAL_IMMUTABLE',
+      );
     });
   });
 });

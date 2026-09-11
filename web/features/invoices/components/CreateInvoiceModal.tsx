@@ -58,7 +58,7 @@ export function CreateInvoiceModal({
   initialQuotationId,
 }: CreateInvoiceModalProps) {
   const { data: settingsData } = useInvoiceSettings();
-  const settings = settingsData?.data || {};
+  const settings = settingsData?.data;
   const { data: customersData } = useCustomers();
   const { data: companiesData } = useCompanies();
   const { data: dealsData } = useDeals();
@@ -106,8 +106,15 @@ export function CreateInvoiceModal({
   // Load defaults from settings
   useEffect(() => {
     if (settings) {
-      if (settings.defaultNotes && !notes) setNotes(settings.defaultNotes);
-      if (settings.defaultTerms && !termsAndConditions) setTermsAndConditions(settings.defaultTerms);
+      const timer = setTimeout(() => {
+        if (settings.defaultNotes) {
+          setNotes((prev) => prev || settings.defaultNotes);
+        }
+        if (settings.defaultTerms) {
+          setTermsAndConditions((prev) => prev || settings.defaultTerms);
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [settings]);
 

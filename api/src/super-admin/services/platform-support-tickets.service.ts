@@ -1,4 +1,9 @@
-import { Injectable, NotFoundException, BadRequestException, Logger } from '@nestjs/common';
+import {
+  Injectable,
+  NotFoundException,
+  BadRequestException,
+  Logger,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/services/notifications.service';
 import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
@@ -50,7 +55,8 @@ export class PlatformSupportTicketsService {
       }
 
       if (query.assignedToId) {
-        where.assignedToId = query.assignedToId === 'unassigned' ? null : query.assignedToId;
+        where.assignedToId =
+          query.assignedToId === 'unassigned' ? null : query.assignedToId;
       }
 
       if (query.search && query.search.trim()) {
@@ -89,7 +95,10 @@ export class PlatformSupportTicketsService {
           orderBy = [{ createdAt: direction }];
         } else if (query.sortBy === 'assignedTo') {
           orderBy = [{ assignedTo: { name: direction } }];
-        } else if (query.sortBy === 'createdBy' || query.sortBy === 'raisedBy') {
+        } else if (
+          query.sortBy === 'createdBy' ||
+          query.sortBy === 'raisedBy'
+        ) {
           orderBy = [{ createdBy: { name: direction } }];
         }
       }
@@ -98,9 +107,15 @@ export class PlatformSupportTicketsService {
         tx.supportTicket.findMany({
           where,
           include: {
-            tenant: { select: { id: true, name: true, slug: true, plan: true } },
-            createdBy: { select: { id: true, name: true, email: true, avatar: true } },
-            assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+            tenant: {
+              select: { id: true, name: true, slug: true, plan: true },
+            },
+            createdBy: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
+            assignedTo: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
             attachments: true,
             _count: { select: { messages: true } },
           },
@@ -158,7 +173,13 @@ export class PlatformSupportTicketsService {
             orderBy: { createdAt: 'asc' },
             include: {
               sender: {
-                select: { id: true, name: true, email: true, avatar: true, isSuperAdmin: true },
+                select: {
+                  id: true,
+                  name: true,
+                  email: true,
+                  avatar: true,
+                  isSuperAdmin: true,
+                },
               },
             },
           },
@@ -207,7 +228,15 @@ export class PlatformSupportTicketsService {
           isInternal,
         },
         include: {
-          sender: { select: { id: true, name: true, email: true, avatar: true, isSuperAdmin: true } },
+          sender: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+              avatar: true,
+              isSuperAdmin: true,
+            },
+          },
         },
       });
 
@@ -236,7 +265,9 @@ export class PlatformSupportTicketsService {
             'support',
           );
         } catch (notifErr: any) {
-          this.logger.warn(`Failed to notify ticket creator: ${notifErr?.message || notifErr}`);
+          this.logger.warn(
+            `Failed to notify ticket creator: ${notifErr?.message || notifErr}`,
+          );
         }
       }
 
@@ -246,7 +277,9 @@ export class PlatformSupportTicketsService {
           tenantId: ticket.tenantId,
           userId: adminUserId,
           targetUserId: ticket.createdById,
-          action: isInternal ? 'SUPPORT_INTERNAL_NOTE_ADDED' : 'SUPPORT_TICKET_REPLIED',
+          action: isInternal
+            ? 'SUPPORT_INTERNAL_NOTE_ADDED'
+            : 'SUPPORT_TICKET_REPLIED',
           module: 'SupportDesk',
           details: {
             ticketId: ticket.id,
@@ -306,7 +339,9 @@ export class PlatformSupportTicketsService {
             'support',
           );
         } catch (notifErr: any) {
-          this.logger.warn(`Failed to notify ticket status update: ${notifErr?.message || notifErr}`);
+          this.logger.warn(
+            `Failed to notify ticket status update: ${notifErr?.message || notifErr}`,
+          );
         }
       }
 
@@ -366,7 +401,9 @@ export class PlatformSupportTicketsService {
             'support',
           );
         } catch (notifErr: any) {
-          this.logger.warn(`Failed to notify assignee: ${notifErr?.message || notifErr}`);
+          this.logger.warn(
+            `Failed to notify assignee: ${notifErr?.message || notifErr}`,
+          );
         }
       }
 
@@ -392,16 +429,33 @@ export class PlatformSupportTicketsService {
 
   async getSupportStats() {
     return this.prisma.withTenantContext({ isSuperAdmin: true }, async (tx) => {
-      const [total, open, inProgress, waitingForUser, resolved, closed, critical] =
-        await Promise.all([
-          tx.supportTicket.count(),
-          tx.supportTicket.count({ where: { status: SupportTicketStatus.OPEN } }),
-          tx.supportTicket.count({ where: { status: SupportTicketStatus.IN_PROGRESS } }),
-          tx.supportTicket.count({ where: { status: SupportTicketStatus.WAITING_FOR_USER } }),
-          tx.supportTicket.count({ where: { status: SupportTicketStatus.RESOLVED } }),
-          tx.supportTicket.count({ where: { status: SupportTicketStatus.CLOSED } }),
-          tx.supportTicket.count({ where: { priority: SupportTicketPriority.CRITICAL } }),
-        ]);
+      const [
+        total,
+        open,
+        inProgress,
+        waitingForUser,
+        resolved,
+        closed,
+        critical,
+      ] = await Promise.all([
+        tx.supportTicket.count(),
+        tx.supportTicket.count({ where: { status: SupportTicketStatus.OPEN } }),
+        tx.supportTicket.count({
+          where: { status: SupportTicketStatus.IN_PROGRESS },
+        }),
+        tx.supportTicket.count({
+          where: { status: SupportTicketStatus.WAITING_FOR_USER },
+        }),
+        tx.supportTicket.count({
+          where: { status: SupportTicketStatus.RESOLVED },
+        }),
+        tx.supportTicket.count({
+          where: { status: SupportTicketStatus.CLOSED },
+        }),
+        tx.supportTicket.count({
+          where: { priority: SupportTicketPriority.CRITICAL },
+        }),
+      ]);
 
       return {
         total,
@@ -458,7 +512,10 @@ export class PlatformSupportTicketsService {
       }
       if (data.status) {
         updatePayload.status = data.status;
-        if (data.status === SupportTicketStatus.RESOLVED && !ticket.resolvedAt) {
+        if (
+          data.status === SupportTicketStatus.RESOLVED &&
+          !ticket.resolvedAt
+        ) {
           updatePayload.resolvedAt = new Date();
         }
         if (data.status === SupportTicketStatus.CLOSED && !ticket.closedAt) {

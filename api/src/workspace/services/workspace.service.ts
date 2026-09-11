@@ -42,12 +42,18 @@ export class WorkspaceService {
       where: { id: tenantId },
       data: {
         ...(data.name !== undefined && { name: data.name }),
-        ...(data.taxId !== undefined && { taxId: this.enc.encrypt(data.taxId) }),
-        ...(data.address !== undefined && { address: this.enc.encrypt(data.address) }),
+        ...(data.taxId !== undefined && {
+          taxId: this.enc.encrypt(data.taxId),
+        }),
+        ...(data.address !== undefined && {
+          address: this.enc.encrypt(data.address),
+        }),
         ...(data.currency !== undefined && { currency: data.currency }),
         ...(data.timezone !== undefined && { timezone: data.timezone }),
         ...(data.logo !== undefined && { logo: data.logo }),
-        ...(data.brandPrimaryColor !== undefined && { brandPrimaryColor: data.brandPrimaryColor }),
+        ...(data.brandPrimaryColor !== undefined && {
+          brandPrimaryColor: data.brandPrimaryColor,
+        }),
       },
     });
 
@@ -82,18 +88,17 @@ export class WorkspaceService {
         );
 
       // 2. Enqueue branding media processing job with lightweight references
-      const enqueueResult =
-        await this.mediaQueueProducer.enqueueBrandingMedia({
-          tenantId,
-          userId,
-          mediaReference: storagePath,
-          storageBucket: 'workspace-logos',
-          storagePath,
-          targetStoragePath: `${tenantId}/logo.webp`,
-          originalFilename,
-          mimeType,
-          operation: 'PROCESS_WORKSPACE_LOGO',
-        });
+      const enqueueResult = await this.mediaQueueProducer.enqueueBrandingMedia({
+        tenantId,
+        userId,
+        mediaReference: storagePath,
+        storageBucket: 'workspace-logos',
+        storagePath,
+        targetStoragePath: `${tenantId}/logo.webp`,
+        originalFilename,
+        mimeType,
+        operation: 'PROCESS_WORKSPACE_LOGO',
+      });
 
       if (enqueueResult.enqueued) {
         // Fast response: compute deterministic public URL
@@ -108,8 +113,7 @@ export class WorkspaceService {
           status: 'queued',
           jobId: enqueueResult.jobId,
           logo: deterministicLogoUrl,
-          brandPrimaryColor:
-            (tenant as any)?.brandPrimaryColor || '#10b981',
+          brandPrimaryColor: (tenant as any)?.brandPrimaryColor || '#10b981',
           workspace: {
             name: tenant?.name || 'ClixProCRM Workspace',
             taxId: this.enc.decrypt(tenant?.taxId) || '',
@@ -117,8 +121,7 @@ export class WorkspaceService {
             currency: tenant?.currency || 'INR',
             timezone: tenant?.timezone || 'ist',
             logo: deterministicLogoUrl,
-            brandPrimaryColor:
-              (tenant as any)?.brandPrimaryColor || '#10b981',
+            brandPrimaryColor: (tenant as any)?.brandPrimaryColor || '#10b981',
             plan: tenant?.plan || 'free',
           },
         };

@@ -48,7 +48,9 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       ],
     }).compile();
 
-    service = module.get<SubscriptionEntitlementService>(SubscriptionEntitlementService);
+    service = module.get<SubscriptionEntitlementService>(
+      SubscriptionEntitlementService,
+    );
   });
 
   afterEach(() => {
@@ -119,7 +121,10 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
         subscriptionStatus: 'ACTIVE',
       });
 
-      const allowed = await service.hasFeature('tenant-1', 'Email Integration & Tracking');
+      const allowed = await service.hasFeature(
+        'tenant-1',
+        'Email Integration & Tracking',
+      );
       expect(allowed).toBe(true);
     });
 
@@ -145,7 +150,12 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       });
       prismaMock.tenantUser.count.mockResolvedValue(4);
 
-      const quote = await service.calculateQuote('tenant-1', 'starter', 5, 'monthly');
+      const quote = await service.calculateQuote(
+        'tenant-1',
+        'starter',
+        5,
+        'monthly',
+      );
 
       expect(quote.planId).toBe('starter');
       expect(quote.seats).toBe(5);
@@ -164,7 +174,12 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
       });
       prismaMock.tenantUser.count.mockResolvedValue(2);
 
-      const quote = await service.calculateQuote('tenant-1', 'starter', 2, 'annual');
+      const quote = await service.calculateQuote(
+        'tenant-1',
+        'starter',
+        2,
+        'annual',
+      );
 
       expect(quote.planId).toBe('starter');
       expect(quote.seats).toBe(2);
@@ -213,4 +228,3 @@ describe('SubscriptionEntitlementService Enterprise Suite', () => {
     });
   });
 });
-

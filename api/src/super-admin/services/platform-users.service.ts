@@ -49,7 +49,9 @@ export class PlatformUsersService {
           include: {
             memberships: {
               include: {
-                tenant: { select: { id: true, name: true, slug: true, status: true } },
+                tenant: {
+                  select: { id: true, name: true, slug: true, status: true },
+                },
                 role: { select: { id: true, name: true } },
               },
             },
@@ -141,11 +143,7 @@ export class PlatformUsersService {
     });
   }
 
-  async updateUserStatus(
-    id: string,
-    status: UserStatus,
-    adminActorId: string,
-  ) {
+  async updateUserStatus(id: string, status: UserStatus, adminActorId: string) {
     const user = await this.prisma.user.findUnique({ where: { id } });
     if (!user) {
       throw new NotFoundException('User not found');
@@ -202,12 +200,20 @@ export class PlatformUsersService {
       where: { id: adminActorId },
     });
 
-    if (!currentAdmin || !currentAdmin.isSuperAdmin || currentAdmin.status !== 'ACTIVE') {
-      throw new ForbiddenException('Only the current active Super Admin can transfer platform ownership.');
+    if (
+      !currentAdmin ||
+      !currentAdmin.isSuperAdmin ||
+      currentAdmin.status !== 'ACTIVE'
+    ) {
+      throw new ForbiddenException(
+        'Only the current active Super Admin can transfer platform ownership.',
+      );
     }
 
     if (targetUserId === adminActorId) {
-      throw new BadRequestException('Target user is already the current Super Admin.');
+      throw new BadRequestException(
+        'Target user is already the current Super Admin.',
+      );
     }
 
     const targetUser = await this.prisma.user.findUnique({
@@ -219,7 +225,9 @@ export class PlatformUsersService {
     }
 
     if (targetUser.status !== 'ACTIVE') {
-      throw new BadRequestException('Target user account must be ACTIVE to receive Super Admin ownership.');
+      throw new BadRequestException(
+        'Target user account must be ACTIVE to receive Super Admin ownership.',
+      );
     }
 
     // Atomic Transfer in a single transaction with advisory lock
@@ -306,7 +314,11 @@ export class PlatformUsersService {
       success: true,
       message: `Platform Super Admin ownership successfully transferred to ${targetUser.name || targetUser.email}.`,
       previousSuperAdmin: { id: currentAdmin.id, email: currentAdmin.email },
-      newSuperAdmin: { id: targetUser.id, email: targetUser.email, name: targetUser.name },
+      newSuperAdmin: {
+        id: targetUser.id,
+        email: targetUser.email,
+        name: targetUser.name,
+      },
     };
   }
 
@@ -346,7 +358,9 @@ export class PlatformUsersService {
     }
 
     if (user.id === adminActorId) {
-      throw new ForbiddenException('Cannot delete your own account while logged in as Super Admin.');
+      throw new ForbiddenException(
+        'Cannot delete your own account while logged in as Super Admin.',
+      );
     }
 
     await this.prisma.$transaction(
@@ -370,7 +384,10 @@ export class PlatformUsersService {
         await tx.userSession.deleteMany({ where: { userId: id } });
         await tx.mfaRecoveryCode.deleteMany({ where: { userId: id } });
         await tx.teamMember.deleteMany({ where: { userId: id } });
-        await tx.team.updateMany({ where: { leaderId: id }, data: { leaderId: null } });
+        await tx.team.updateMany({
+          where: { leaderId: id },
+          data: { leaderId: null },
+        });
         await tx.recordShare.deleteMany({
           where: { OR: [{ sharedWithUserId: id }, { createdById: id }] },
         });

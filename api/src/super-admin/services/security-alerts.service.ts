@@ -46,10 +46,14 @@ export class SecurityAlertsService {
    */
   async createAlert(dto: CreateSecurityAlertDto, actorId: string = 'SYSTEM') {
     if (!dto.title || dto.title.trim().length < 3) {
-      throw new BadRequestException('Alert title must be at least 3 characters');
+      throw new BadRequestException(
+        'Alert title must be at least 3 characters',
+      );
     }
     if (!dto.description || dto.description.trim().length < 5) {
-      throw new BadRequestException('Alert description must be at least 5 characters');
+      throw new BadRequestException(
+        'Alert description must be at least 5 characters',
+      );
     }
 
     // Deduplication check: check if an identical OPEN alert exists within the last 1 hour
@@ -65,7 +69,9 @@ export class SecurityAlertsService {
     });
 
     if (existing) {
-      this.logger.debug(`Suppressed duplicate security alert: [${dto.alertType}] ${dto.title}`);
+      this.logger.debug(
+        `Suppressed duplicate security alert: [${dto.alertType}] ${dto.title}`,
+      );
       return existing;
     }
 
@@ -102,7 +108,9 @@ export class SecurityAlertsService {
       },
     });
 
-    this.logger.warn(`Security Alert created: [${alert.severity}] ${alert.title} (ID: ${alert.id})`);
+    this.logger.warn(
+      `Security Alert created: [${alert.severity}] ${alert.title} (ID: ${alert.id})`,
+    );
     return alert;
   }
 
@@ -173,7 +181,9 @@ export class SecurityAlertsService {
   async acknowledgeAlert(id: string, actorId: string) {
     const existing = await this.getAlertById(id);
     if (existing.status === 'RESOLVED') {
-      throw new BadRequestException('Cannot acknowledge an already resolved alert');
+      throw new BadRequestException(
+        'Cannot acknowledge an already resolved alert',
+      );
     }
 
     const updated = await (this.prisma as any).securityAlert.update({
@@ -211,7 +221,8 @@ export class SecurityAlertsService {
         resolvedAt: now,
         resolvedBy: actorId,
         metadata: {
-          ...(typeof existing.metadata === 'object' && existing.metadata !== null
+          ...(typeof existing.metadata === 'object' &&
+          existing.metadata !== null
             ? existing.metadata
             : {}),
           resolutionNotes: notes || 'Resolved by Super Admin',
@@ -246,7 +257,7 @@ export class SecurityAlertsService {
       {
         title: `[Escalated] ${alert.title}`,
         description: `Escalated from Security Alert (${alert.alertType}): ${alert.description}`,
-        severity: alert.severity as any,
+        severity: alert.severity,
         incidentType: alert.alertType,
         tenantId: alert.organizationId || null,
         affectedUserId: alert.userId || null,
@@ -336,7 +347,9 @@ export class SecurityAlertsService {
         }
       }
     } catch (err: any) {
-      this.logger.warn(`Detection failed login spike error: ${err?.message || err}`);
+      this.logger.warn(
+        `Detection failed login spike error: ${err?.message || err}`,
+      );
     }
 
     // 2. Detection B: Account Lock Events
@@ -376,7 +389,12 @@ export class SecurityAlertsService {
     try {
       const revokeEvents = await this.prisma.auditLog.findMany({
         where: {
-          action: { in: ['USER_SESSIONS_EMERGENCY_REVOKED', 'ALL_OTHER_SESSIONS_REVOKED'] },
+          action: {
+            in: [
+              'USER_SESSIONS_EMERGENCY_REVOKED',
+              'ALL_OTHER_SESSIONS_REVOKED',
+            ],
+          },
           createdAt: { gte: windowStart },
         },
         orderBy: { createdAt: 'desc' },
@@ -394,7 +412,9 @@ export class SecurityAlertsService {
             organizationId: rev.tenantId,
             sourceEventId: rev.id,
             metadata: {
-              revokedCount: (rev.details as any)?.revokedSessionCount || (rev.details as any)?.revokedCount,
+              revokedCount:
+                (rev.details as any)?.revokedSessionCount ||
+                (rev.details as any)?.revokedCount,
               reason: (rev.details as any)?.reason,
             },
           },
@@ -403,14 +423,22 @@ export class SecurityAlertsService {
         if (alert) newAlerts.push(alert);
       }
     } catch (err: any) {
-      this.logger.warn(`Detection session activity error: ${err?.message || err}`);
+      this.logger.warn(
+        `Detection session activity error: ${err?.message || err}`,
+      );
     }
 
     // 4. Detection D: Privilege / Super Admin Changes
     try {
       const privEvents = await this.prisma.auditLog.findMany({
         where: {
-          action: { in: ['SUPER_ADMIN_TOGGLED', 'SUPER_ADMIN_TRANSFERRED', 'ROLE_PERMISSIONS_UPDATED'] },
+          action: {
+            in: [
+              'SUPER_ADMIN_TOGGLED',
+              'SUPER_ADMIN_TRANSFERRED',
+              'ROLE_PERMISSIONS_UPDATED',
+            ],
+          },
           createdAt: { gte: windowStart },
         },
         orderBy: { createdAt: 'desc' },
@@ -434,7 +462,9 @@ export class SecurityAlertsService {
         if (alert) newAlerts.push(alert);
       }
     } catch (err: any) {
-      this.logger.warn(`Detection privilege change error: ${err?.message || err}`);
+      this.logger.warn(
+        `Detection privilege change error: ${err?.message || err}`,
+      );
     }
 
     // 5. Detection E: Sensitive Security Actions (Tenant Lock, Force Reset, Platform Lockdown)
@@ -458,7 +488,10 @@ export class SecurityAlertsService {
         const alert = await this.createAlert(
           {
             alertType: 'SENSITIVE_SECURITY_ACTION',
-            severity: sens.action === 'PLATFORM_EMERGENCY_ENABLED' ? 'CRITICAL' : 'HIGH',
+            severity:
+              sens.action === 'PLATFORM_EMERGENCY_ENABLED'
+                ? 'CRITICAL'
+                : 'HIGH',
             title: `Sensitive Action Executed: ${sens.action}`,
             description: `Security control action ${sens.action} executed. Details: ${(sens.details as any)?.reason || 'Emergency administrative operation'}`,
             organizationId: sens.tenantId,
@@ -471,7 +504,9 @@ export class SecurityAlertsService {
         if (alert) newAlerts.push(alert);
       }
     } catch (err: any) {
-      this.logger.warn(`Detection sensitive actions error: ${err?.message || err}`);
+      this.logger.warn(
+        `Detection sensitive actions error: ${err?.message || err}`,
+      );
     }
 
     return {
@@ -485,7 +520,9 @@ export class SecurityAlertsService {
   /**
    * Sanitizes metadata to ensure zero passwords, hashes, tokens, or sensitive secrets are stored.
    */
-  private sanitizeMetadata(metadata?: Record<string, any> | null): Record<string, any> | null {
+  private sanitizeMetadata(
+    metadata?: Record<string, any> | null,
+  ): Record<string, any> | null {
     if (!metadata || typeof metadata !== 'object') return null;
 
     const forbiddenKeys = [

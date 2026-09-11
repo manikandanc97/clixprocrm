@@ -38,7 +38,9 @@ export class AuditLoggerService {
    */
   async log(dto: CreateAuditLogDto, customTx?: any): Promise<any> {
     const tenantId = dto.tenantId || null;
-    const sanitizedDetails = dto.details ? sanitizeAuditDetails(dto.details) : null;
+    const sanitizedDetails = dto.details
+      ? sanitizeAuditDetails(dto.details)
+      : null;
     const chainKey = `audit_chain_${tenantId || 'platform'}`;
 
     const executeWithChainLock = async (tx: any) => {
@@ -50,7 +52,9 @@ export class AuditLoggerService {
         );
       } catch (lockErr: any) {
         // Fallback for in-memory / mock testing environments where pg_advisory_xact_lock is unavailable
-        this.logger.debug(`Advisory lock notice for ${chainKey}: ${lockErr?.message || lockErr}`);
+        this.logger.debug(
+          `Advisory lock notice for ${chainKey}: ${lockErr?.message || lockErr}`,
+        );
       }
 
       // 2. Fetch the most recent record in this specific chain to link previousHash
@@ -108,7 +112,9 @@ export class AuditLoggerService {
             },
           });
         } catch (outboxErr: any) {
-          this.logger.warn(`Outbox creation notice: ${outboxErr?.message || outboxErr}`);
+          this.logger.warn(
+            `Outbox creation notice: ${outboxErr?.message || outboxErr}`,
+          );
         }
       }
 
@@ -128,7 +134,9 @@ export class AuditLoggerService {
    * Verifies the cryptographic integrity of an AuditLog chain (tenant-scoped or platform-scoped).
    * Detects modified content, forged timestamps, broken links, or altered hashes.
    */
-  async verifyAuditChain(tenantId?: string | null): Promise<AuditVerificationResult> {
+  async verifyAuditChain(
+    tenantId?: string | null,
+  ): Promise<AuditVerificationResult> {
     const where = tenantId ? { tenantId } : { tenantId: null };
 
     const records = await this.prisma.auditLog.findMany({

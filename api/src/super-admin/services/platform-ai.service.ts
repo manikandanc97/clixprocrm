@@ -30,7 +30,11 @@ export class PlatformAiService {
   /**
    * Enables or disables a model globally on the platform.
    */
-  async toggleModelAvailability(modelId: string, isAvailable: boolean, actorUserId: string) {
+  async toggleModelAvailability(
+    modelId: string,
+    isAvailable: boolean,
+    actorUserId: string,
+  ) {
     const model = await (this.prisma as any).aiModel.findUnique({
       where: { id: modelId },
     });
@@ -67,7 +71,11 @@ export class PlatformAiService {
   /**
    * Sets or toggles model lifecycle status ('ENABLED', 'DISABLED', 'DEPRECATED', 'UNAVAILABLE').
    */
-  async updateModelStatus(modelId: string, status: string, actorUserId: string) {
+  async updateModelStatus(
+    modelId: string,
+    status: string,
+    actorUserId: string,
+  ) {
     const validStatuses = ['ENABLED', 'DISABLED', 'DEPRECATED', 'UNAVAILABLE'];
     if (!validStatuses.includes(status)) {
       throw new BadRequestException(
@@ -160,7 +168,10 @@ export class PlatformAiService {
       },
     });
 
-    return { success: true, message: `Model '${model.displayName}' set as platform default.` };
+    return {
+      success: true,
+      message: `Model '${model.displayName}' set as platform default.`,
+    };
   }
 
   /**
@@ -209,7 +220,10 @@ export class PlatformAiService {
       },
     });
 
-    return { success: true, message: `Model '${model.displayName}' set as fallback.` };
+    return {
+      success: true,
+      message: `Model '${model.displayName}' set as fallback.`,
+    };
   }
 
   /**
@@ -237,12 +251,18 @@ export class PlatformAiService {
       ]);
 
       const activeChatModels = (allModels || []).filter(
-        (m: any) => m.status === 'ENABLED' && m.isChatModel !== false && m.isAvailable !== false,
+        (m: any) =>
+          m.status === 'ENABLED' &&
+          m.isChatModel !== false &&
+          m.isAvailable !== false,
       );
 
       const planOverviews = (plans || []).map((plan: any) => {
         const allowedModels = (plan.aiEntitlements || [])
-          .filter((e: any) => e.model && e.model.status === 'ENABLED' && e.model.isAvailable)
+          .filter(
+            (e: any) =>
+              e.model && e.model.status === 'ENABLED' && e.model.isAvailable,
+          )
           .map((e: any) => ({
             id: e.model.id,
             modelKey: e.model.modelKey,
@@ -253,7 +273,10 @@ export class PlatformAiService {
           }));
 
         let defaultModel = plan.defaultModel;
-        if (defaultModel && (defaultModel.status !== 'ENABLED' || !defaultModel.isAvailable)) {
+        if (
+          defaultModel &&
+          (defaultModel.status !== 'ENABLED' || !defaultModel.isAvailable)
+        ) {
           defaultModel = allowedModels.length > 0 ? allowedModels[0] : null;
         }
 
@@ -279,7 +302,9 @@ export class PlatformAiService {
       });
 
       return {
-        globalAiEnabled: platformConfig ? platformConfig.aiCopilot !== false : true,
+        globalAiEnabled: platformConfig
+          ? platformConfig.aiCopilot !== false
+          : true,
         plans: planOverviews,
         activeChatModels,
         allModels: allModels || [],
@@ -293,7 +318,11 @@ export class PlatformAiService {
   /**
    * Super Admin 1-Click: Changes the default AI model for a plan.
    */
-  async setPlanDefaultModel(planId: string, modelId: string, actorUserId: string) {
+  async setPlanDefaultModel(
+    planId: string,
+    modelId: string,
+    actorUserId: string,
+  ) {
     const [plan, model] = await Promise.all([
       (this.prisma as any).plan.findUnique({
         where: { id: planId },
@@ -309,7 +338,9 @@ export class PlatformAiService {
     }
 
     if (!model) {
-      throw new NotFoundException(`AI model '${modelId}' not found in catalog.`);
+      throw new NotFoundException(
+        `AI model '${modelId}' not found in catalog.`,
+      );
     }
 
     if (model.status !== 'ENABLED' || model.isAvailable === false) {
@@ -406,9 +437,13 @@ export class PlatformAiService {
       await (tx as any).plan.update({
         where: { id: planId },
         data: {
-          aiEnabled: dto.aiEnabled !== undefined ? dto.aiEnabled : plan.aiEnabled,
+          aiEnabled:
+            dto.aiEnabled !== undefined ? dto.aiEnabled : plan.aiEnabled,
           aiLevel: dto.aiLevel || plan.aiLevel,
-          dailyTokenLimit: dto.dailyTokenLimit !== undefined ? dto.dailyTokenLimit : plan.dailyTokenLimit,
+          dailyTokenLimit:
+            dto.dailyTokenLimit !== undefined
+              ? dto.dailyTokenLimit
+              : plan.dailyTokenLimit,
         },
       });
 
@@ -494,7 +529,9 @@ export class PlatformAiService {
 
     return {
       success: true,
-      message: enabled ? 'Platform AI services enabled.' : 'Platform AI services globally disabled.',
+      message: enabled
+        ? 'Platform AI services enabled.'
+        : 'Platform AI services globally disabled.',
       globalAiEnabled: enabled,
     };
   }
@@ -513,45 +550,41 @@ export class PlatformAiService {
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 3600000);
 
-    const [
-      totalRequests,
-      recentLogs,
-      aggregates,
-      tenantBreakdownRaw,
-    ] = await Promise.all([
-      (this.prisma as any).aiUsageLog.count(),
-      (this.prisma as any).aiUsageLog.findMany({
-        take: Math.min(100, Math.max(1, limit)),
-        orderBy: { createdAt: 'desc' },
-        include: {
-          model: {
-            select: { displayName: true, modelKey: true },
+    const [totalRequests, recentLogs, aggregates, tenantBreakdownRaw] =
+      await Promise.all([
+        (this.prisma as any).aiUsageLog.count(),
+        (this.prisma as any).aiUsageLog.findMany({
+          take: Math.min(100, Math.max(1, limit)),
+          orderBy: { createdAt: 'desc' },
+          include: {
+            model: {
+              select: { displayName: true, modelKey: true },
+            },
           },
-        },
-      }),
-      (this.prisma as any).aiUsageLog.aggregate({
-        _sum: {
-          totalTokens: true,
-          inputTokens: true,
-          outputTokens: true,
-        },
-        _avg: {
-          latencyMs: true,
-        },
-      }),
-      (this.prisma as any).aiUsageLog.groupBy({
-        by: ['tenantId'],
-        where: { createdAt: { gte: thirtyDaysAgo } },
-        _count: { id: true },
-        _sum: { totalTokens: true },
-        orderBy: {
+        }),
+        (this.prisma as any).aiUsageLog.aggregate({
           _sum: {
-            totalTokens: 'desc',
+            totalTokens: true,
+            inputTokens: true,
+            outputTokens: true,
           },
-        },
-        take: 10,
-      }),
-    ]);
+          _avg: {
+            latencyMs: true,
+          },
+        }),
+        (this.prisma as any).aiUsageLog.groupBy({
+          by: ['tenantId'],
+          where: { createdAt: { gte: thirtyDaysAgo } },
+          _count: { id: true },
+          _sum: { totalTokens: true },
+          orderBy: {
+            _sum: {
+              totalTokens: 'desc',
+            },
+          },
+          take: 10,
+        }),
+      ]);
 
     const totalTokens = aggregates._sum.totalTokens || 0;
     const avgLatencyMs = Math.round(aggregates._avg.latencyMs || 0);

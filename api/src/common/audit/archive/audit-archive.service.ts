@@ -24,14 +24,23 @@ export class AuditArchiveService implements OnModuleInit {
 
   private initProvider() {
     this.isEnabled = process.env.AUDIT_ARCHIVE_ENABLED === 'true';
-    this.retentionDays = parseInt(process.env.AUDIT_ARCHIVE_RETENTION_DAYS || '365', 10);
+    this.retentionDays = parseInt(
+      process.env.AUDIT_ARCHIVE_RETENTION_DAYS || '365',
+      10,
+    );
     if (isNaN(this.retentionDays) || this.retentionDays <= 0) {
       this.retentionDays = 365;
     }
-    this.maxAttempts = parseInt(process.env.AUDIT_ARCHIVE_MAX_ATTEMPTS || '10', 10);
+    this.maxAttempts = parseInt(
+      process.env.AUDIT_ARCHIVE_MAX_ATTEMPTS || '10',
+      10,
+    );
 
     const region = process.env.AWS_REGION || 'us-east-1';
-    const bucket = process.env.AUDIT_ARCHIVE_BUCKET || process.env.AWS_S3_AUDIT_BUCKET || 'clixpro-audit-archive-default';
+    const bucket =
+      process.env.AUDIT_ARCHIVE_BUCKET ||
+      process.env.AWS_S3_AUDIT_BUCKET ||
+      'clixpro-audit-archive-default';
     const accessKeyId = process.env.AWS_ACCESS_KEY_ID;
     const secretAccessKey = process.env.AWS_SECRET_ACCESS_KEY;
 
@@ -67,20 +76,24 @@ export class AuditArchiveService implements OnModuleInit {
    * Asynchronously processes pending audit outbox entries with exponential backoff.
    * Safe to call from scheduled background workers or post-commit dispatchers.
    */
-  async processPendingOutbox(batchSize = 50): Promise<{ processed: number; succeeded: number; failed: number }> {
+  async processPendingOutbox(
+    batchSize = 50,
+  ): Promise<{ processed: number; succeeded: number; failed: number }> {
     const now = new Date();
 
-    const pendingItems = await (this.prisma as any).auditArchiveOutbox.findMany({
-      where: {
-        status: 'PENDING',
-        nextAttemptAt: { lte: now },
+    const pendingItems = await (this.prisma as any).auditArchiveOutbox.findMany(
+      {
+        where: {
+          status: 'PENDING',
+          nextAttemptAt: { lte: now },
+        },
+        take: batchSize,
+        include: {
+          auditLog: true,
+        },
+        orderBy: { nextAttemptAt: 'asc' },
       },
-      take: batchSize,
-      include: {
-        auditLog: true,
-      },
-      orderBy: { nextAttemptAt: 'asc' },
-    });
+    );
 
     let succeeded = 0;
     let failed = 0;
@@ -91,7 +104,10 @@ export class AuditArchiveService implements OnModuleInit {
         // Orphaned outbox item
         await (this.prisma as any).auditArchiveOutbox.update({
           where: { id: item.id },
-          data: { status: 'FAILED', lastError: 'Referenced AuditLog record not found' },
+          data: {
+            status: 'FAILED',
+            lastError: 'Referenced AuditLog record not found',
+          },
         });
         failed++;
         continue;
@@ -113,7 +129,11 @@ export class AuditArchiveService implements OnModuleInit {
       }
 
       try {
-        const objectKey = buildAuditObjectKey(log.id, log.tenantId, log.createdAt);
+        const objectKey = buildAuditObjectKey(
+          log.id,
+          log.tenantId,
+          log.createdAt,
+        );
 
         // Idempotency check: check if object already exists in S3
         const head = await this.provider.headObject(objectKey);
@@ -152,7 +172,11 @@ export class AuditArchiveService implements OnModuleInit {
           },
         };
 
-        await this.provider.putObject(objectKey, canonicalPayload, this.retentionDays);
+        await this.provider.putObject(
+          objectKey,
+          canonicalPayload,
+          this.retentionDays,
+        );
 
         await (this.prisma as any).auditArchiveOutbox.update({
           where: { id: item.id },
@@ -195,20 +219,28 @@ export class AuditArchiveService implements OnModuleInit {
   /**
    * Verifies the cryptographic equivalence of a PostgreSQL audit row against the external WORM archive.
    */
-  async verifyArchivedRecord(auditLogId: string): Promise<{ valid: boolean; reason?: string }> {
+  async verifyArchivedRecord(
+    auditLogId: string,
+  ): Promise<{ valid: boolean; reason?: string }> {
     const log = await this.prisma.auditLog.findUnique({
       where: { id: auditLogId },
     });
 
     if (!log) {
-      return { valid: false, reason: `AuditLog ${auditLogId} not found in database` };
+      return {
+        valid: false,
+        reason: `AuditLog ${auditLogId} not found in database`,
+      };
     }
 
     const objectKey = buildAuditObjectKey(log.id, log.tenantId, log.createdAt);
     const archived = await this.provider.getObject(objectKey);
 
     if (!archived) {
-      return { valid: false, reason: `Archived audit object missing at ${objectKey}` };
+      return {
+        valid: false,
+        reason: `Archived audit object missing at ${objectKey}`,
+      };
     }
 
     if (archived.record.recordHash !== log.recordHash) {
@@ -231,7 +263,10 @@ export class AuditArchiveService implements OnModuleInit {
   /**
    * Verifies external archive completeness and cryptographic integrity across multiple records.
    */
-  async verifyTenantAuditArchive(tenantId: string | null, limit = 50): Promise<ArchiveIntegrityResult> {
+  async verifyTenantAuditArchive(
+    tenantId: string | null,
+    limit = 50,
+  ): Promise<ArchiveIntegrityResult> {
     const records = await this.prisma.auditLog.findMany({
       where: tenantId ? { tenantId } : { tenantId: null },
       orderBy: { createdAt: 'desc' },
@@ -271,8 +306,13 @@ export class AuditArchiveService implements OnModuleInit {
   /**
    * Scheduled incremental integrity monitor.
    */
-  async runScheduledIntegrityCheck(): Promise<{ healthy: boolean; details: any }> {
-    const recentArchived = await (this.prisma as any).auditArchiveOutbox.findMany({
+  async runScheduledIntegrityCheck(): Promise<{
+    healthy: boolean;
+    details: any;
+  }> {
+    const recentArchived = await (
+      this.prisma as any
+    ).auditArchiveOutbox.findMany({
       where: { status: 'ARCHIVED' },
       orderBy: { archivedAt: 'desc' },
       take: 25,
@@ -284,7 +324,9 @@ export class AuditArchiveService implements OnModuleInit {
       const v = await this.verifyArchivedRecord(item.auditLogId);
       if (!v.valid) {
         errors++;
-        this.logger.error(`Scheduled WORM integrity check failure for ${item.auditLogId}: ${v.reason}`);
+        this.logger.error(
+          `Scheduled WORM integrity check failure for ${item.auditLogId}: ${v.reason}`,
+        );
       }
     }
 

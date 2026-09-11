@@ -113,11 +113,16 @@ export class SettingsService {
       if (isAiEnabled !== undefined) updatePayload.isAiEnabled = isAiEnabled;
       if (useRag !== undefined) updatePayload.useRag = useRag;
       if (data.model) updatePayload.model = String(data.model);
-      if (typeof data.temperature === 'number') updatePayload.temperature = data.temperature;
+      if (typeof data.temperature === 'number')
+        updatePayload.temperature = data.temperature;
 
       // Handle Bring-Your-Own-Key API Key Encryption
       if (data.apiKey !== undefined) {
-        if (typeof data.apiKey === 'string' && data.apiKey.trim().length > 0 && !data.apiKey.includes('••••')) {
+        if (
+          typeof data.apiKey === 'string' &&
+          data.apiKey.trim().length > 0 &&
+          !data.apiKey.includes('••••')
+        ) {
           updatePayload.apiKey = this.enc.encrypt(data.apiKey.trim());
         } else if (data.apiKey === null || data.apiKey === '') {
           updatePayload.apiKey = null;
@@ -131,11 +136,14 @@ export class SettingsService {
           tenantId,
           provider: data.provider || 'gemini',
           model: data.model || 'gemini-1.5-flash',
-          temperature: typeof data.temperature === 'number' ? data.temperature : 0.7,
+          temperature:
+            typeof data.temperature === 'number' ? data.temperature : 0.7,
           isAiEnabled: isAiEnabled ?? true,
           useRag: useRag ?? true,
           useTools: true,
-          ...(updatePayload.apiKey !== undefined ? { apiKey: updatePayload.apiKey } : {}),
+          ...(updatePayload.apiKey !== undefined
+            ? { apiKey: updatePayload.apiKey }
+            : {}),
         },
       });
 
@@ -171,10 +179,26 @@ export class SettingsService {
       return {
         ...prefs,
         channels: [
-          { id: 'emailAlerts', name: 'Email Notifications', enabled: prefs.emailAlerts },
-          { id: 'inAppAlerts', name: 'In-App Banner Alerts', enabled: prefs.inAppAlerts },
-          { id: 'soundEnabled', name: 'Notification Sound Chime', enabled: prefs.soundEnabled },
-          { id: 'browserPush', name: 'Desktop Push Notifications', enabled: prefs.browserPush },
+          {
+            id: 'emailAlerts',
+            name: 'Email Notifications',
+            enabled: prefs.emailAlerts,
+          },
+          {
+            id: 'inAppAlerts',
+            name: 'In-App Banner Alerts',
+            enabled: prefs.inAppAlerts,
+          },
+          {
+            id: 'soundEnabled',
+            name: 'Notification Sound Chime',
+            enabled: prefs.soundEnabled,
+          },
+          {
+            id: 'browserPush',
+            name: 'Desktop Push Notifications',
+            enabled: prefs.browserPush,
+          },
         ],
         categories: [
           {
@@ -184,49 +208,56 @@ export class SettingsService {
               {
                 id: 'leadAssignment',
                 title: 'Lead Assignments & Imports',
-                description: 'Alert immediately when a new lead is assigned to you or imported.',
+                description:
+                  'Alert immediately when a new lead is assigned to you or imported.',
                 critical: false,
                 enabled: prefs.leadAssignment,
               },
               {
                 id: 'dealUpdates',
                 title: 'Deal Stage Movements & Wins',
-                description: 'Notify when monitored deals change stage or are marked Won/Lost.',
+                description:
+                  'Notify when monitored deals change stage or are marked Won/Lost.',
                 critical: false,
                 enabled: prefs.dealUpdates,
               },
               {
                 id: 'taskReminders',
                 title: 'Task Reminders & Overdue Alerts',
-                description: 'Reminders 15 minutes before tasks and overdue escalation notices.',
+                description:
+                  'Reminders 15 minutes before tasks and overdue escalation notices.',
                 critical: false,
                 enabled: prefs.taskReminders,
               },
               {
                 id: 'invoiceAlerts',
                 title: 'Quotations & Invoicing Updates',
-                description: 'Alerts on quotation approvals and invoice payment settlements.',
+                description:
+                  'Alerts on quotation approvals and invoice payment settlements.',
                 critical: false,
                 enabled: prefs.invoiceAlerts,
               },
               {
                 id: 'meetingAlerts',
                 title: 'Meeting & Calendar Reminders',
-                description: 'Notifications for upcoming team syncs and client demo reminders.',
+                description:
+                  'Notifications for upcoming team syncs and client demo reminders.',
                 critical: false,
                 enabled: prefs.meetingAlerts,
               },
               {
                 id: 'aiBriefing',
                 title: 'AI Daily Briefing & Insights',
-                description: 'Receive daily AI summaries of top priorities and actionable deals.',
+                description:
+                  'Receive daily AI summaries of top priorities and actionable deals.',
                 critical: false,
                 enabled: prefs.aiBriefing,
               },
               {
                 id: 'securityAlerts',
                 title: 'Security & Login Alerts',
-                description: 'Instant notifications for new logins, password changes, and MFA events.',
+                description:
+                  'Instant notifications for new logins, password changes, and MFA events.',
                 critical: true,
                 enabled: prefs.securityAlerts,
               },
@@ -237,7 +268,11 @@ export class SettingsService {
     });
   }
 
-  async updateNotificationSettings(tenantId: string, userId: string, data: any) {
+  async updateNotificationSettings(
+    tenantId: string,
+    userId: string,
+    data: any,
+  ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const user = await tx.user.findUnique({
         where: { id: userId },
@@ -256,4 +291,3 @@ export class SettingsService {
     });
   }
 }
-

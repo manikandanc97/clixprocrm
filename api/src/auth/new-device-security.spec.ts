@@ -1,5 +1,10 @@
 import { ExecutionContext } from '@nestjs/common';
-import { SupabaseAuthGuard, setSupabaseClient, invalidateTokenUserCache, invalidateSessionCache } from './supabase.guard';
+import {
+  SupabaseAuthGuard,
+  setSupabaseClient,
+  invalidateTokenUserCache,
+  invalidateSessionCache,
+} from './supabase.guard';
 import {
   EmailService,
   escapeHtml,
@@ -39,7 +44,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
   }
 
   function createValidTestJwt(payloadObj: Record<string, any>): string {
-    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
+    const header = Buffer.from(
+      JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
+    ).toString('base64');
     const payload = Buffer.from(JSON.stringify(payloadObj)).toString('base64');
     const signature = 'test_signature_bytes_new_device';
     return `${header}.${payload}.${signature}`;
@@ -55,7 +62,8 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
         browser: 'Google Chrome',
         operatingSystem: 'Windows',
         ipAddress: '192.168.1.10',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
         createdAt: new Date(Date.now() - 3600000),
         lastActiveAt: new Date(Date.now() - 60000),
         expiresAt: null,
@@ -95,37 +103,48 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
 
     mockEmailService = {
       shouldSendNewDeviceAlert: jest.fn().mockResolvedValue(true),
-      sendNewDeviceAlert: jest.fn().mockResolvedValue({ success: true, messageId: 'msg-123' }),
+      sendNewDeviceAlert: jest
+        .fn()
+        .mockResolvedValue({ success: true, messageId: 'msg-123' }),
     };
 
     mockNotificationsService = {
-      createNotification: jest.fn(async (tenantId, userId, title, message, type) => {
-        const notif = {
-          id: `notif-${Date.now()}-${Math.random()}`,
-          tenantId,
-          userId,
-          title,
-          message,
-          type,
-          createdAt: new Date(),
-        };
-        mockNotifications.push(notif);
-        return notif;
-      }),
+      createNotification: jest.fn(
+        async (tenantId, userId, title, message, type) => {
+          const notif = {
+            id: `notif-${Date.now()}-${Math.random()}`,
+            tenantId,
+            userId,
+            title,
+            message,
+            type,
+            createdAt: new Date(),
+          };
+          mockNotifications.push(notif);
+          return notif;
+        },
+      ),
     };
 
     mockPrisma = {
       userSession: {
         findUnique: jest.fn(async ({ where }) => {
-          return mockSessions.find((s) => s.sessionId === where.sessionId) || null;
+          return (
+            mockSessions.find((s) => s.sessionId === where.sessionId) || null
+          );
         }),
         findFirst: jest.fn(async ({ where }) => {
           return (
             mockSessions.find((s) => {
               if (where.userId && s.userId !== where.userId) return false;
-              if (where.deviceType && s.deviceType !== where.deviceType) return false;
+              if (where.deviceType && s.deviceType !== where.deviceType)
+                return false;
               if (where.browser && s.browser !== where.browser) return false;
-              if (where.operatingSystem && s.operatingSystem !== where.operatingSystem) return false;
+              if (
+                where.operatingSystem &&
+                s.operatingSystem !== where.operatingSystem
+              )
+                return false;
               return true;
             }) || null
           );
@@ -158,7 +177,8 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
           return (
             mockMemberships.find(
               (m) =>
-                m.userId === where.userId && (!where.status || m.status === where.status),
+                m.userId === where.userId &&
+                (!where.status || m.status === where.status),
             ) || null
           );
         }),
@@ -196,13 +216,18 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
           try {
             const parts = token.split('.');
             if (parts.length >= 2) {
-              const claims = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+              const claims = JSON.parse(
+                Buffer.from(parts[1], 'base64').toString('utf-8'),
+              );
               return { data: { claims }, error: null };
             }
           } catch {}
           return { data: null, error: new Error('Invalid token') };
         }),
-        getUser: jest.fn(async () => ({ data: null, error: new Error('Not used') })),
+        getUser: jest.fn(async () => ({
+          data: null,
+          error: new Error('Not used'),
+        })),
       },
     });
 
@@ -233,7 +258,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
       const result = await supabaseAuthGuard.canActivate(chromeContext);
       expect(result).toBe(true);
 
-      const auditEvent = mockAuditLogs.find((l) => l.userId === 'usr-david-new');
+      const auditEvent = mockAuditLogs.find(
+        (l) => l.userId === 'usr-david-new',
+      );
       expect(auditEvent).toBeDefined();
       expect(auditEvent.action).toBe('LOGIN_SUCCESS');
       expect(auditEvent.details.firstLogin).toBe(true);
@@ -255,7 +282,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
       await supabaseAuthGuard.canActivate(context);
 
       expect(mockEmailService.sendNewDeviceAlert).not.toHaveBeenCalled();
-      expect(mockNotificationsService.createNotification).not.toHaveBeenCalled();
+      expect(
+        mockNotificationsService.createNotification,
+      ).not.toHaveBeenCalled();
     });
   });
 
@@ -277,7 +306,10 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
       expect(result).toBe(true);
 
       const auditEvent = mockAuditLogs.find(
-        (l) => l.userId === 'usr-charlie' && l.details.sessionId && l.details.isNewDevice === false,
+        (l) =>
+          l.userId === 'usr-charlie' &&
+          l.details.sessionId &&
+          l.details.isNewDevice === false,
       );
       expect(auditEvent).toBeDefined();
       expect(auditEvent.action).toBe('LOGIN_SUCCESS');
@@ -300,7 +332,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
       await supabaseAuthGuard.canActivate(sameDeviceContext);
 
       expect(mockEmailService.sendNewDeviceAlert).not.toHaveBeenCalled();
-      expect(mockNotificationsService.createNotification).not.toHaveBeenCalled();
+      expect(
+        mockNotificationsService.createNotification,
+      ).not.toHaveBeenCalled();
     });
   });
 
@@ -350,7 +384,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
     });
 
     it('gracefully handles SMTP email delivery failures without blocking authentication', async () => {
-      mockEmailService.sendNewDeviceAlert.mockRejectedValueOnce(new Error('SMTP connection timed out'));
+      mockEmailService.sendNewDeviceAlert.mockRejectedValueOnce(
+        new Error('SMTP connection timed out'),
+      );
 
       const macToken = createValidTestJwt({
         sub: 'usr-charlie',
@@ -370,7 +406,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
 
       // In-app notification and audit log are still created
       expect(mockNotificationsService.createNotification).toHaveBeenCalled();
-      const auditEvent = mockAuditLogs.find((l) => l.action === 'NEW_DEVICE_LOGIN');
+      const auditEvent = mockAuditLogs.find(
+        (l) => l.action === 'NEW_DEVICE_LOGIN',
+      );
       expect(auditEvent).toBeDefined();
     });
 
@@ -399,17 +437,23 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
     beforeEach(() => {
       mockRedisStore = new Map<string, string>();
       mockRedisClient = {
-        set: jest.fn(async (key: string, value: string, options?: { nx?: boolean; ex?: number }) => {
-          if (options?.nx) {
-            if (mockRedisStore.has(key)) {
-              return null; // Key already exists -> NX failure
+        set: jest.fn(
+          async (
+            key: string,
+            value: string,
+            options?: { nx?: boolean; ex?: number },
+          ) => {
+            if (options?.nx) {
+              if (mockRedisStore.has(key)) {
+                return null; // Key already exists -> NX failure
+              }
+              mockRedisStore.set(key, value);
+              return 'OK'; // Key created
             }
             mockRedisStore.set(key, value);
-            return 'OK'; // Key created
-          }
-          mockRedisStore.set(key, value);
-          return 'OK';
-        }),
+            return 'OK';
+          },
+        ),
       };
       emailServiceWithRedis = new EmailService(mockRedisClient);
     });
@@ -451,9 +495,24 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
 
     it('concurrent requests for same device: exactly one receives alert permission', async () => {
       const promises = [
-        emailServiceWithRedis.shouldSendNewDeviceAlert('usr-concurrent', 'Google Chrome', 'macOS', 'desktop'),
-        emailServiceWithRedis.shouldSendNewDeviceAlert('usr-concurrent', 'Google Chrome', 'macOS', 'desktop'),
-        emailServiceWithRedis.shouldSendNewDeviceAlert('usr-concurrent', 'Google Chrome', 'macOS', 'desktop'),
+        emailServiceWithRedis.shouldSendNewDeviceAlert(
+          'usr-concurrent',
+          'Google Chrome',
+          'macOS',
+          'desktop',
+        ),
+        emailServiceWithRedis.shouldSendNewDeviceAlert(
+          'usr-concurrent',
+          'Google Chrome',
+          'macOS',
+          'desktop',
+        ),
+        emailServiceWithRedis.shouldSendNewDeviceAlert(
+          'usr-concurrent',
+          'Google Chrome',
+          'macOS',
+          'desktop',
+        ),
       ];
 
       const results = await Promise.all(promises);
@@ -465,7 +524,12 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
     });
 
     it('different browser generates an independent deduplication key', async () => {
-      await emailServiceWithRedis.shouldSendNewDeviceAlert('usr-alice', 'Google Chrome', 'Windows', 'desktop');
+      await emailServiceWithRedis.shouldSendNewDeviceAlert(
+        'usr-alice',
+        'Google Chrome',
+        'Windows',
+        'desktop',
+      );
       const diffBrowser = await emailServiceWithRedis.shouldSendNewDeviceAlert(
         'usr-alice',
         'Mozilla Firefox',
@@ -476,7 +540,12 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
     });
 
     it('different OS generates an independent deduplication key', async () => {
-      await emailServiceWithRedis.shouldSendNewDeviceAlert('usr-alice', 'Google Chrome', 'Windows', 'desktop');
+      await emailServiceWithRedis.shouldSendNewDeviceAlert(
+        'usr-alice',
+        'Google Chrome',
+        'Windows',
+        'desktop',
+      );
       const diffOS = await emailServiceWithRedis.shouldSendNewDeviceAlert(
         'usr-alice',
         'Google Chrome',
@@ -487,7 +556,12 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
     });
 
     it('different deviceType generates an independent deduplication key', async () => {
-      await emailServiceWithRedis.shouldSendNewDeviceAlert('usr-alice', 'Apple Safari', 'iOS', 'mobile');
+      await emailServiceWithRedis.shouldSendNewDeviceAlert(
+        'usr-alice',
+        'Apple Safari',
+        'iOS',
+        'mobile',
+      );
       const diffDevice = await emailServiceWithRedis.shouldSendNewDeviceAlert(
         'usr-alice',
         'Apple Safari',
@@ -498,7 +572,12 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
     });
 
     it('User A does NOT suppress User B alert', async () => {
-      await emailServiceWithRedis.shouldSendNewDeviceAlert('usr-alice', 'Google Chrome', 'Windows', 'desktop');
+      await emailServiceWithRedis.shouldSendNewDeviceAlert(
+        'usr-alice',
+        'Google Chrome',
+        'Windows',
+        'desktop',
+      );
       const userB = await emailServiceWithRedis.shouldSendNewDeviceAlert(
         'usr-bob',
         'Google Chrome',
@@ -510,15 +589,20 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
 
     it('Redis failure mode: gracefully suppresses spam and returns false without blocking login', async () => {
       const failingRedisClient = {
-        set: jest.fn().mockRejectedValue(new Error('Redis connection refused: ECONNREFUSED')),
+        set: jest
+          .fn()
+          .mockRejectedValue(
+            new Error('Redis connection refused: ECONNREFUSED'),
+          ),
       };
       const emailServiceWithBrokenRedis = new EmailService(failingRedisClient);
 
-      const shouldAlert = await emailServiceWithBrokenRedis.shouldSendNewDeviceAlert(
-        'usr-alice',
-        'Google Chrome',
-        'Windows',
-      );
+      const shouldAlert =
+        await emailServiceWithBrokenRedis.shouldSendNewDeviceAlert(
+          'usr-alice',
+          'Google Chrome',
+          'Windows',
+        );
 
       // Must return false to prevent spam, must not throw exception
       expect(shouldAlert).toBe(false);
@@ -537,7 +621,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
 
   describe('5. Deduplication Key Formatting & Validation', () => {
     it('normalizes key parts correctly', () => {
-      expect(normalizeKeyPart('Google Chrome 120.0')).toBe('google_chrome_120_0');
+      expect(normalizeKeyPart('Google Chrome 120.0')).toBe(
+        'google_chrome_120_0',
+      );
       expect(normalizeKeyPart('Mac OS X')).toBe('mac_os_x');
       expect(normalizeKeyPart(null)).toBe('unknown');
     });
@@ -549,7 +635,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
         'Windows 11',
         'desktop',
       );
-      expect(key).toBe('new-device-alert:usr-123:google_chrome:windows_11:desktop');
+      expect(key).toBe(
+        'new-device-alert:usr-123:google_chrome:windows_11:desktop',
+      );
       expect(key).not.toContain('token');
       expect(key).not.toContain('secret');
       expect(key).not.toContain('password');
@@ -590,7 +678,9 @@ describe('New Device Security Tests (Phase P0, P1, P2)', () => {
 
       await supabaseAuthGuard.canActivate(bobContext);
 
-      const bobAuditEvent = mockAuditLogs.find((l) => l.userId === 'usr-bob-isolated');
+      const bobAuditEvent = mockAuditLogs.find(
+        (l) => l.userId === 'usr-bob-isolated',
+      );
       expect(bobAuditEvent).toBeDefined();
       expect(bobAuditEvent.details.firstLogin).toBe(true);
       expect(mockEmailService.sendNewDeviceAlert).not.toHaveBeenCalled();

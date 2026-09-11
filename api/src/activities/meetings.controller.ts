@@ -70,6 +70,9 @@ export class MeetingsController {
   @Roles('ADMIN', 'MANAGER', 'SALES', 'EMPLOYEE')
   async deleteMeeting(@Req() req: any, @Param('id') id: string) {
     await this.meetingsService.deleteMeeting(req.tenantId, req.user, id);
-    return { success: true, message: 'Meeting deleted or cancelled successfully' };
+    return {
+      success: true,
+      message: 'Meeting deleted or cancelled successfully',
+    };
   }
 }

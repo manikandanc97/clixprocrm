@@ -285,14 +285,30 @@ async function runTests() {
     // 5. Verify that all Tenant 1 records have been permanently removed
     const verifyT1 = await prisma.tenant.findUnique({ where: { id: t1.id } });
     const verifyU1 = await prisma.user.findUnique({ where: { id: u1.id } });
-    const verifyLeads1 = await prisma.lead.count({ where: { tenantId: t1.id } });
-    const verifyCust1 = await prisma.customer.count({ where: { tenantId: t1.id } });
-    const verifyTasks1 = await prisma.task.count({ where: { tenantId: t1.id } });
-    const verifyDeals1 = await prisma.deal.count({ where: { tenantId: t1.id } });
-    const verifyInvoices1 = await prisma.invoice.count({ where: { tenantId: t1.id } });
-    const verifyAiConvs1 = await prisma.aiConversation.count({ where: { tenantId: t1.id } });
-    const verifyDocs1 = await prisma.document.count({ where: { tenantId: t1.id } });
-    const verifyAudit1 = await prisma.auditLog.count({ where: { tenantId: t1.id } });
+    const verifyLeads1 = await prisma.lead.count({
+      where: { tenantId: t1.id },
+    });
+    const verifyCust1 = await prisma.customer.count({
+      where: { tenantId: t1.id },
+    });
+    const verifyTasks1 = await prisma.task.count({
+      where: { tenantId: t1.id },
+    });
+    const verifyDeals1 = await prisma.deal.count({
+      where: { tenantId: t1.id },
+    });
+    const verifyInvoices1 = await prisma.invoice.count({
+      where: { tenantId: t1.id },
+    });
+    const verifyAiConvs1 = await prisma.aiConversation.count({
+      where: { tenantId: t1.id },
+    });
+    const verifyDocs1 = await prisma.document.count({
+      where: { tenantId: t1.id },
+    });
+    const verifyAudit1 = await prisma.auditLog.count({
+      where: { tenantId: t1.id },
+    });
 
     if (
       verifyT1 ||
@@ -307,20 +323,28 @@ async function runTests() {
       verifyAudit1 === 0 // AuditLog must NOT be deleted - must be preserved permanently
     ) {
       throw new Error(
-        `FAILED: Partial records remain or AuditLog was deleted for Tenant 1! (T1: ${!!verifyT1}, U1: ${!!verifyU1}, leads: ${verifyLeads1}, audit: ${verifyAudit1})`
+        `FAILED: Partial records remain or AuditLog was deleted for Tenant 1! (T1: ${!!verifyT1}, U1: ${!!verifyU1}, leads: ${verifyLeads1}, audit: ${verifyAudit1})`,
       );
     }
-    console.log('✓ Verified: Tenant 1 CRM entities purged while historical AuditLog records remain permanently preserved.');
+    console.log(
+      '✓ Verified: Tenant 1 CRM entities purged while historical AuditLog records remain permanently preserved.',
+    );
 
     // 6. Verify Tenant 2 Isolation: Ensure all Tenant 2 records remain completely intact
     const verifyT2 = await prisma.tenant.findUnique({ where: { id: t2.id } });
     const verifyU2 = await prisma.user.findUnique({ where: { id: u2.id } });
-    const verifyLead2 = await prisma.lead.findUnique({ where: { id: lead2.id } });
+    const verifyLead2 = await prisma.lead.findUnique({
+      where: { id: lead2.id },
+    });
 
     if (!verifyT2 || !verifyU2 || !verifyLead2) {
-      throw new Error('FAILED: Tenant 2 isolation breached! Records were affected.');
+      throw new Error(
+        'FAILED: Tenant 2 isolation breached! Records were affected.',
+      );
     }
-    console.log('✓ Verified: Tenant 2 records remain 100% untouched and secure.');
+    console.log(
+      '✓ Verified: Tenant 2 records remain 100% untouched and secure.',
+    );
 
     console.log('\n=============================================');
     console.log(' ALL VERIFICATION TESTS PASSED SUCCESSFULLY! ');
@@ -328,10 +352,12 @@ async function runTests() {
   } finally {
     // Clean up Tenant 2
     if (tenant2Id) {
-      await authService.deleteAccount(testUserId2, tenant2Id, {
-        confirm1: 'clixprocrm',
-        confirm2: 'delete my account',
-      }).catch(() => {});
+      await authService
+        .deleteAccount(testUserId2, tenant2Id, {
+          confirm1: 'clixprocrm',
+          confirm2: 'delete my account',
+        })
+        .catch(() => {});
     }
     await prisma.$disconnect();
   }

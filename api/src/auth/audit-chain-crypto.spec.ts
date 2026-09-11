@@ -43,7 +43,7 @@ describe('P1 Cryptographic Tamper Detection & Audit Chain Suite', () => {
       },
     };
 
-    auditLogger = new AuditLoggerService(mockPrisma as any);
+    auditLogger = new AuditLoggerService(mockPrisma);
   });
 
   describe('1. Cryptographic Record Sealing', () => {
@@ -55,7 +55,10 @@ describe('P1 Cryptographic Tamper Detection & Audit Chain Suite', () => {
         targetUserId: 'usr-target',
         action: 'ROLE_CREATED',
         module: 'Roles',
-        details: { roleName: 'Manager', permissions: ['Leads:Read', 'Deals:Read'] },
+        details: {
+          roleName: 'Manager',
+          permissions: ['Leads:Read', 'Deals:Read'],
+        },
         ipAddress: '192.168.1.1',
         userAgent: 'Mozilla/5.0',
         createdAt: new Date('2026-08-20T22:00:00.000Z'),
@@ -142,15 +145,30 @@ describe('P1 Cryptographic Tamper Detection & Audit Chain Suite', () => {
 
     it('maintains completely isolated chains for Tenant A, Tenant B, and Platform Global', async () => {
       // Tenant A
-      const a1 = await auditLogger.log({ tenantId: 'tenant-A', action: 'A_ACTION_1' });
-      const a2 = await auditLogger.log({ tenantId: 'tenant-A', action: 'A_ACTION_2' });
+      const a1 = await auditLogger.log({
+        tenantId: 'tenant-A',
+        action: 'A_ACTION_1',
+      });
+      const a2 = await auditLogger.log({
+        tenantId: 'tenant-A',
+        action: 'A_ACTION_2',
+      });
 
       // Tenant B
-      const b1 = await auditLogger.log({ tenantId: 'tenant-B', action: 'B_ACTION_1' });
+      const b1 = await auditLogger.log({
+        tenantId: 'tenant-B',
+        action: 'B_ACTION_1',
+      });
 
       // Global Platform (tenantId = null)
-      const g1 = await auditLogger.log({ tenantId: null, action: 'PLATFORM_MODULE_CREATED' });
-      const g2 = await auditLogger.log({ tenantId: null, action: 'PLATFORM_SETTINGS_UPDATED' });
+      const g1 = await auditLogger.log({
+        tenantId: null,
+        action: 'PLATFORM_MODULE_CREATED',
+      });
+      const g2 = await auditLogger.log({
+        tenantId: null,
+        action: 'PLATFORM_SETTINGS_UPDATED',
+      });
 
       // Tenant A chain
       expect(a1.previousHash).toBeNull();
@@ -172,8 +190,14 @@ describe('P1 Cryptographic Tamper Detection & Audit Chain Suite', () => {
 
   describe('3. Tamper Detection & Integrity Verification', () => {
     it('detects tampered action in historical record', async () => {
-      await auditLogger.log({ tenantId: 'tenant-tamper', action: 'ORIGINAL_ACTION' });
-      await auditLogger.log({ tenantId: 'tenant-tamper', action: 'SECOND_ACTION' });
+      await auditLogger.log({
+        tenantId: 'tenant-tamper',
+        action: 'ORIGINAL_ACTION',
+      });
+      await auditLogger.log({
+        tenantId: 'tenant-tamper',
+        action: 'SECOND_ACTION',
+      });
 
       // Attacker attempts to modify action in DB
       storedLogs[0].action = 'TAMPERED_ACTION';
@@ -194,14 +218,22 @@ describe('P1 Cryptographic Tamper Detection & Audit Chain Suite', () => {
       // Attacker attempts to alter invoice amount in audit log details
       storedLogs[0].details = { amount: 50000 };
 
-      const result = await auditLogger.verifyAuditChain('tenant-tamper-details');
+      const result = await auditLogger.verifyAuditChain(
+        'tenant-tamper-details',
+      );
       expect(result.valid).toBe(false);
       expect(result.firstInvalidRecordId).toBe(storedLogs[0].id);
     });
 
     it('detects tampered previousHash (chain fork/substitution)', async () => {
-      await auditLogger.log({ tenantId: 'tenant-chain-tamper', action: 'EVENT_1' });
-      await auditLogger.log({ tenantId: 'tenant-chain-tamper', action: 'EVENT_2' });
+      await auditLogger.log({
+        tenantId: 'tenant-chain-tamper',
+        action: 'EVENT_1',
+      });
+      await auditLogger.log({
+        tenantId: 'tenant-chain-tamper',
+        action: 'EVENT_2',
+      });
 
       // Attacker alters previousHash link
       storedLogs[1].previousHash = 'forged_fake_previous_hash_value';
@@ -213,14 +245,25 @@ describe('P1 Cryptographic Tamper Detection & Audit Chain Suite', () => {
     });
 
     it('detects missing/deleted record from middle of chain', async () => {
-      await auditLogger.log({ tenantId: 'tenant-deleted-record', action: 'EVENT_1' });
-      await auditLogger.log({ tenantId: 'tenant-deleted-record', action: 'EVENT_2' });
-      await auditLogger.log({ tenantId: 'tenant-deleted-record', action: 'EVENT_3' });
+      await auditLogger.log({
+        tenantId: 'tenant-deleted-record',
+        action: 'EVENT_1',
+      });
+      await auditLogger.log({
+        tenantId: 'tenant-deleted-record',
+        action: 'EVENT_2',
+      });
+      await auditLogger.log({
+        tenantId: 'tenant-deleted-record',
+        action: 'EVENT_3',
+      });
 
       // Attacker deletes record 2 from DB
       storedLogs.splice(1, 1);
 
-      const result = await auditLogger.verifyAuditChain('tenant-deleted-record');
+      const result = await auditLogger.verifyAuditChain(
+        'tenant-deleted-record',
+      );
       expect(result.valid).toBe(false);
       expect(result.firstInvalidRecordId).toBe(storedLogs[1].id);
       expect(result.reason).toContain('Broken chain link');
@@ -237,10 +280,18 @@ describe('P1 Cryptographic Tamper Detection & Audit Chain Suite', () => {
 
       const migrationSql = fs.readFileSync(migrationPath, 'utf8');
 
-      expect(migrationSql).toContain('ALTER TABLE "AuditLog" ADD COLUMN IF NOT EXISTS "previousHash" TEXT;');
-      expect(migrationSql).toContain('ALTER TABLE "AuditLog" ADD COLUMN IF NOT EXISTS "recordHash" TEXT;');
-      expect(migrationSql).toContain('CREATE INDEX IF NOT EXISTS "AuditLog_tenantId_createdAt_idx" ON "AuditLog"("tenantId", "createdAt" DESC);');
-      expect(migrationSql).toContain('CREATE INDEX IF NOT EXISTS "AuditLog_createdAt_idx" ON "AuditLog"("createdAt" DESC);');
+      expect(migrationSql).toContain(
+        'ALTER TABLE "AuditLog" ADD COLUMN IF NOT EXISTS "previousHash" TEXT;',
+      );
+      expect(migrationSql).toContain(
+        'ALTER TABLE "AuditLog" ADD COLUMN IF NOT EXISTS "recordHash" TEXT;',
+      );
+      expect(migrationSql).toContain(
+        'CREATE INDEX IF NOT EXISTS "AuditLog_tenantId_createdAt_idx" ON "AuditLog"("tenantId", "createdAt" DESC);',
+      );
+      expect(migrationSql).toContain(
+        'CREATE INDEX IF NOT EXISTS "AuditLog_createdAt_idx" ON "AuditLog"("createdAt" DESC);',
+      );
     });
   });
 });

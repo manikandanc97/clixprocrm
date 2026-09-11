@@ -43,9 +43,7 @@ const roleSchema = z.object({
         }),
       ]),
     )
-    .transform((arr) =>
-      arr.map((p) => (typeof p === 'string' ? p : p.module)),
-    )
+    .transform((arr) => arr.map((p) => (typeof p === 'string' ? p : p.module)))
     .default([]),
 });
 
@@ -65,9 +63,7 @@ const roleUpdateSchema = z.object({
         }),
       ]),
     )
-    .transform((arr) =>
-      arr.map((p) => (typeof p === 'string' ? p : p.module)),
-    )
+    .transform((arr) => arr.map((p) => (typeof p === 'string' ? p : p.module)))
     .optional(),
 });
 

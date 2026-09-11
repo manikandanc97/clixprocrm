@@ -75,7 +75,11 @@ export class RolesService {
     requestedPermissions: string[],
   ): Promise<void> {
     const roleUpper = actorRoleName.toUpperCase().replace(/[\s_]+/g, '');
-    if (roleUpper === 'SUPERADMIN' || roleUpper === 'ADMIN' || roleUpper === 'OWNER') {
+    if (
+      roleUpper === 'SUPERADMIN' ||
+      roleUpper === 'ADMIN' ||
+      roleUpper === 'OWNER'
+    ) {
       return; // Admins have full authority
     }
 
@@ -238,11 +242,10 @@ export class RolesService {
       }
 
       const actorUpper = actorRoleName.toUpperCase().replace(/[\s_]+/g, '');
-      const existingRoleNorm = existingRole.name.toUpperCase().replace(/[\s_]+/g, '');
-      if (
-        existingRoleNorm === 'SUPERADMIN' &&
-        actorUpper !== 'SUPERADMIN'
-      ) {
+      const existingRoleNorm = existingRole.name
+        .toUpperCase()
+        .replace(/[\s_]+/g, '');
+      if (existingRoleNorm === 'SUPERADMIN' && actorUpper !== 'SUPERADMIN') {
         throw new HttpException(
           {
             success: false,
@@ -308,8 +311,13 @@ export class RolesService {
       const role = await tx.role.update({
         where: { id: roleId },
         data: {
-          name: existingRole.isSystem ? existingRole.name : (parsedData.name?.trim() ?? existingRole.name),
-          description: parsedData.description !== undefined ? parsedData.description : existingRole.description,
+          name: existingRole.isSystem
+            ? existingRole.name
+            : (parsedData.name?.trim() ?? existingRole.name),
+          description:
+            parsedData.description !== undefined
+              ? parsedData.description
+              : existingRole.description,
           color: parsedData.color ?? existingRole.color,
           priority: parsedData.priority ?? existingRole.priority,
           isActive: existingRole.isSystem
@@ -344,7 +352,9 @@ export class RolesService {
           data: {
             tenantId,
             userId: actorUserId,
-            action: parsedData.isActive ? 'ROLE_REACTIVATED' : 'ROLE_DEACTIVATED',
+            action: parsedData.isActive
+              ? 'ROLE_REACTIVATED'
+              : 'ROLE_DEACTIVATED',
             module: 'Roles',
             details: { roleId: role.id, roleName: role.name },
             ipAddress: reqIp,
@@ -504,7 +514,10 @@ export class RolesService {
 
         if (!replacementRole) {
           throw new HttpException(
-            { success: false, message: 'Replacement role not found in workspace' },
+            {
+              success: false,
+              message: 'Replacement role not found in workspace',
+            },
             HttpStatus.NOT_FOUND,
           );
         }
@@ -641,7 +654,10 @@ export class RolesService {
       let newRoleName = `${existingRole.name} (Copy)`;
       while (
         await tx.role.findFirst({
-          where: { tenantId, name: { equals: newRoleName, mode: 'insensitive' } },
+          where: {
+            tenantId,
+            name: { equals: newRoleName, mode: 'insensitive' },
+          },
         })
       ) {
         copyIndex++;
@@ -652,7 +668,9 @@ export class RolesService {
         data: {
           tenantId,
           name: newRoleName,
-          description: existingRole.description ? `Copy of ${existingRole.description}` : `Copy of ${existingRole.name}`,
+          description: existingRole.description
+            ? `Copy of ${existingRole.description}`
+            : `Copy of ${existingRole.name}`,
           color: existingRole.color || '#3b82f6',
           priority: existingRole.priority,
           isSystem: false,
@@ -691,4 +709,3 @@ export class RolesService {
     });
   }
 }
-

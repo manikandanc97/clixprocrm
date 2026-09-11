@@ -1,11 +1,17 @@
-import { Injectable, Logger, NotFoundException, BadRequestException, ForbiddenException, Optional } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Optional,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/services/notifications.service';
 import { StorageService } from '../../common/services/storage.service';
 import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
-
 
 export interface SupportTicketRecord {
   id: string;
@@ -20,7 +26,12 @@ export interface SupportTicketRecord {
   status: 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED';
   description: string;
   diagnostics: any;
-  attachments: { filename: string; size: number; contentType?: string; url?: string }[];
+  attachments: {
+    filename: string;
+    size: number;
+    contentType?: string;
+    url?: string;
+  }[];
   estimatedResponseTime: string;
   createdAt: string;
   updatedAt: string;
@@ -53,12 +64,18 @@ export function mapPriorityToEnum(priority: string): SupportTicketPriority {
   return SupportTicketPriority.MEDIUM;
 }
 
-export function mapEnumToPriority(priority: SupportTicketPriority): 'Low' | 'Medium' | 'High' | 'Critical' {
+export function mapEnumToPriority(
+  priority: SupportTicketPriority,
+): 'Low' | 'Medium' | 'High' | 'Critical' {
   switch (priority) {
-    case SupportTicketPriority.CRITICAL: return 'Critical';
-    case SupportTicketPriority.HIGH: return 'High';
-    case SupportTicketPriority.LOW: return 'Low';
-    default: return 'Medium';
+    case SupportTicketPriority.CRITICAL:
+      return 'Critical';
+    case SupportTicketPriority.HIGH:
+      return 'High';
+    case SupportTicketPriority.LOW:
+      return 'Low';
+    default:
+      return 'Medium';
   }
 }
 
@@ -71,15 +88,26 @@ export function extractRoleString(roleInput: any): string {
   return String(roleInput);
 }
 
-export function formatTicketOutput(ticket: any, includeInternal = false): SupportTicketRecord {
+export function formatTicketOutput(
+  ticket: any,
+  includeInternal = false,
+): SupportTicketRecord {
   const replies = (ticket.messages || [])
     .filter((m: any) => includeInternal || !m.isInternal)
     .map((m: any) => ({
       id: m.id,
-      author: m.sender?.name || m.sender?.email || (m.isStaff ? 'ClixPro Support Staff' : 'Customer'),
-      authorRole: m.isStaff ? ('Support Engineer' as const) : ('Client' as const),
+      author:
+        m.sender?.name ||
+        m.sender?.email ||
+        (m.isStaff ? 'ClixPro Support Staff' : 'Customer'),
+      authorRole: m.isStaff
+        ? ('Support Engineer' as const)
+        : ('Client' as const),
       message: m.message,
-      createdAt: m.createdAt instanceof Date ? m.createdAt.toISOString() : String(m.createdAt),
+      createdAt:
+        m.createdAt instanceof Date
+          ? m.createdAt.toISOString()
+          : String(m.createdAt),
       isStaff: m.isStaff,
       isInternal: m.isInternal || false,
     }));
@@ -101,13 +129,19 @@ export function formatTicketOutput(ticket: any, includeInternal = false): Suppor
     subject: ticket.subject,
     category: ticket.category,
     priority: mapEnumToPriority(ticket.priority),
-    status: ticket.status as any,
+    status: ticket.status,
     description: ticket.description,
     diagnostics: ticket.diagnostics,
     attachments,
     estimatedResponseTime: ticket.estimatedResponseTime || 'Within 24 Hours',
-    createdAt: ticket.createdAt instanceof Date ? ticket.createdAt.toISOString() : String(ticket.createdAt),
-    updatedAt: ticket.updatedAt instanceof Date ? ticket.updatedAt.toISOString() : String(ticket.updatedAt),
+    createdAt:
+      ticket.createdAt instanceof Date
+        ? ticket.createdAt.toISOString()
+        : String(ticket.createdAt),
+    updatedAt:
+      ticket.updatedAt instanceof Date
+        ? ticket.updatedAt.toISOString()
+        : String(ticket.updatedAt),
     replies,
   };
 }
@@ -132,12 +166,17 @@ function formatTicketSummary(ticket: any): SupportTicketRecord {
       contentType: a.fileType,
     })),
     estimatedResponseTime: ticket.estimatedResponseTime || 'Within 24 Hours',
-    createdAt: ticket.createdAt instanceof Date ? ticket.createdAt.toISOString() : String(ticket.createdAt),
-    updatedAt: ticket.updatedAt instanceof Date ? ticket.updatedAt.toISOString() : String(ticket.updatedAt),
+    createdAt:
+      ticket.createdAt instanceof Date
+        ? ticket.createdAt.toISOString()
+        : String(ticket.createdAt),
+    updatedAt:
+      ticket.updatedAt instanceof Date
+        ? ticket.updatedAt.toISOString()
+        : String(ticket.updatedAt),
     replies: [],
   };
 }
-
 
 @Injectable()
 export class SupportService {
@@ -168,21 +207,34 @@ export class SupportService {
     description: string,
     diagnostics: any,
     attachments: { filename: string; content: Buffer; contentType?: string }[],
-    authenticatedContext?: { userId: string; tenantId: string; userEmail?: string; userName?: string },
+    authenticatedContext?: {
+      userId: string;
+      tenantId: string;
+      userEmail?: string;
+      userName?: string;
+    },
   ) {
     const year = new Date().getFullYear();
     const randomNum = Math.floor(100000 + Math.random() * 900000).toString();
     const ticketId = `CP-SUP-${year}-${randomNum}`;
 
     let estimatedResponseTime = 'Within 24 hours';
-    if (priority === 'Critical') estimatedResponseTime = '< 1 Hour (Priority Escalation)';
+    if (priority === 'Critical')
+      estimatedResponseTime = '< 1 Hour (Priority Escalation)';
     else if (priority === 'High') estimatedResponseTime = '< 4 Hours';
     else if (priority === 'Medium') estimatedResponseTime = '< 12 Hours';
     else estimatedResponseTime = 'Within 24 Hours';
 
-    const userId = authenticatedContext?.userId || diagnostics?.userId || 'system';
-    const userEmail = authenticatedContext?.userEmail || diagnostics?.email || 'support@clixprocrm.com';
-    const userName = authenticatedContext?.userName || diagnostics?.currentUserName || 'Workspace Member';
+    const userId =
+      authenticatedContext?.userId || diagnostics?.userId || 'system';
+    const userEmail =
+      authenticatedContext?.userEmail ||
+      diagnostics?.email ||
+      'support@clixprocrm.com';
+    const userName =
+      authenticatedContext?.userName ||
+      diagnostics?.currentUserName ||
+      'Workspace Member';
     const tenantId = authenticatedContext?.tenantId || diagnostics?.tenantId;
 
     const mappedPriority = mapPriorityToEnum(priority);
@@ -216,7 +268,9 @@ export class SupportService {
               storagePath: uploaded.storagePath,
             });
           } catch (uploadErr: any) {
-            this.logger.warn(`Storage upload warning for ${att.filename}: ${uploadErr?.message || uploadErr}`);
+            this.logger.warn(
+              `Storage upload warning for ${att.filename}: ${uploadErr?.message || uploadErr}`,
+            );
             uploadedAttachments.push({
               fileName: att.filename,
               fileUrl: '',
@@ -271,11 +325,15 @@ export class SupportService {
               },
             },
             include: {
-              createdBy: { select: { id: true, name: true, email: true, avatar: true } },
+              createdBy: {
+                select: { id: true, name: true, email: true, avatar: true },
+              },
               attachments: true,
               messages: {
                 include: {
-                  sender: { select: { id: true, name: true, email: true, avatar: true } },
+                  sender: {
+                    select: { id: true, name: true, email: true, avatar: true },
+                  },
                 },
               },
             },
@@ -302,7 +360,9 @@ export class SupportService {
           },
         });
       } catch (auditErr: any) {
-        this.logger.warn(`Failed to create sealed audit log for ticket ${ticketId}: ${auditErr?.message || auditErr}`);
+        this.logger.warn(
+          `Failed to create sealed audit log for ticket ${ticketId}: ${auditErr?.message || auditErr}`,
+        );
       }
 
       // 4. Notify all active Super Admins via existing Notification model & Supabase Realtime
@@ -323,7 +383,9 @@ export class SupportService {
             );
           }
         } catch (notifErr: any) {
-          this.logger.warn(`Failed to dispatch Super Admin notification for ticket ${ticketId}: ${notifErr?.message || notifErr}`);
+          this.logger.warn(
+            `Failed to dispatch Super Admin notification for ticket ${ticketId}: ${notifErr?.message || notifErr}`,
+          );
         }
       }
     } else {
@@ -392,7 +454,9 @@ export class SupportService {
     const safeDescription = escapeHtml(description);
 
     const safeDiagnostics = {
-      currentUserName: escapeHtml(diagnostics?.currentUserName || userName || 'N/A'),
+      currentUserName: escapeHtml(
+        diagnostics?.currentUserName || userName || 'N/A',
+      ),
       email: escapeHtml(diagnostics?.email || userEmail || 'N/A'),
       userId: escapeHtml(diagnostics?.userId || userId || 'N/A'),
       role: escapeHtml(diagnostics?.role || 'N/A'),
@@ -456,7 +520,8 @@ export class SupportService {
       </div>
     `;
 
-    const supportRecipient = process.env.SUPPORT_EMAIL || 'support@clixprocrm.com';
+    const supportRecipient =
+      process.env.SUPPORT_EMAIL || 'support@clixprocrm.com';
 
     if (process.env.SMTP_HOST && process.env.SMTP_USER) {
       try {
@@ -473,13 +538,18 @@ export class SupportService {
         );
       }
     } else {
-      this.logger.warn('SMTP configuration not found, skipping email dispatch.');
+      this.logger.warn(
+        'SMTP configuration not found, skipping email dispatch.',
+      );
     }
 
     return { ticketId, estimatedResponseTime, ticket: createdRecord };
   }
 
-  async getUserTickets(userId: string, tenantId?: string): Promise<SupportTicketRecord[]> {
+  async getUserTickets(
+    userId: string,
+    tenantId?: string,
+  ): Promise<SupportTicketRecord[]> {
     if (this.prisma && tenantId) {
       const tickets = await this.prisma.withTenantContext(
         { tenantId, userId },
@@ -490,14 +560,20 @@ export class SupportService {
               createdById: userId,
             },
             include: {
-              createdBy: { select: { id: true, name: true, email: true, avatar: true } },
-              assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+              createdBy: {
+                select: { id: true, name: true, email: true, avatar: true },
+              },
+              assignedTo: {
+                select: { id: true, name: true, email: true, avatar: true },
+              },
               attachments: true,
               messages: {
                 where: { isInternal: false }, // Internal notes strictly hidden from regular user
                 orderBy: { createdAt: 'asc' },
                 include: {
-                  sender: { select: { id: true, name: true, email: true, avatar: true } },
+                  sender: {
+                    select: { id: true, name: true, email: true, avatar: true },
+                  },
                 },
               },
             },
@@ -526,14 +602,20 @@ export class SupportService {
               OR: [{ id: ticketId }, { ticketNumber: ticketId }],
             },
             include: {
-              createdBy: { select: { id: true, name: true, email: true, avatar: true } },
-              assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+              createdBy: {
+                select: { id: true, name: true, email: true, avatar: true },
+              },
+              assignedTo: {
+                select: { id: true, name: true, email: true, avatar: true },
+              },
               attachments: true,
               messages: {
                 where: { isInternal: false }, // Internal notes strictly hidden
                 orderBy: { createdAt: 'asc' },
                 include: {
-                  sender: { select: { id: true, name: true, email: true, avatar: true } },
+                  sender: {
+                    select: { id: true, name: true, email: true, avatar: true },
+                  },
                 },
               },
             },
@@ -554,93 +636,104 @@ export class SupportService {
     tenantId?: string,
   ): Promise<SupportTicketRecord | null> {
     if (!this.prisma || !tenantId) {
-      throw new BadRequestException('Database tenant context required to add reply');
+      throw new BadRequestException(
+        'Database tenant context required to add reply',
+      );
     }
 
-    return this.prisma.withTenantContext(
-      { tenantId, userId },
-      async (tx) => {
-        const ticket = await tx.supportTicket.findFirst({
-          where: {
-            tenantId,
-            createdById: userId,
-            OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+    return this.prisma.withTenantContext({ tenantId, userId }, async (tx) => {
+      const ticket = await tx.supportTicket.findFirst({
+        where: {
+          tenantId,
+          createdById: userId,
+          OR: [{ id: ticketId }, { ticketNumber: ticketId }],
+        },
+      });
+
+      if (!ticket) {
+        throw new NotFoundException(
+          'Support ticket not found or access denied',
+        );
+      }
+
+      // Add message
+      await tx.supportTicketMessage.create({
+        data: {
+          ticketId: ticket.id,
+          senderId: userId,
+          message: message.trim(),
+          isStaff: false,
+          isInternal: false,
+        },
+      });
+
+      // If status was WAITING_FOR_USER or RESOLVED, move back to IN_PROGRESS
+      const newStatus =
+        ticket.status === SupportTicketStatus.WAITING_FOR_USER ||
+        ticket.status === SupportTicketStatus.RESOLVED
+          ? SupportTicketStatus.IN_PROGRESS
+          : ticket.status;
+
+      const updated = await tx.supportTicket.update({
+        where: { id: ticket.id },
+        data: {
+          status: newStatus,
+          updatedAt: new Date(),
+        },
+        include: {
+          createdBy: {
+            select: { id: true, name: true, email: true, avatar: true },
           },
-        });
-
-        if (!ticket) {
-          throw new NotFoundException('Support ticket not found or access denied');
-        }
-
-        // Add message
-        await tx.supportTicketMessage.create({
-          data: {
-            ticketId: ticket.id,
-            senderId: userId,
-            message: message.trim(),
-            isStaff: false,
-            isInternal: false,
+          assignedTo: {
+            select: { id: true, name: true, email: true, avatar: true },
           },
-        });
-
-        // If status was WAITING_FOR_USER or RESOLVED, move back to IN_PROGRESS
-        const newStatus =
-          ticket.status === SupportTicketStatus.WAITING_FOR_USER ||
-          ticket.status === SupportTicketStatus.RESOLVED
-            ? SupportTicketStatus.IN_PROGRESS
-            : ticket.status;
-
-        const updated = await tx.supportTicket.update({
-          where: { id: ticket.id },
-          data: {
-            status: newStatus,
-            updatedAt: new Date(),
-          },
-          include: {
-            createdBy: { select: { id: true, name: true, email: true, avatar: true } },
-            assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
-            attachments: true,
-            messages: {
-              where: { isInternal: false },
-              orderBy: { createdAt: 'asc' },
-              include: {
-                sender: { select: { id: true, name: true, email: true, avatar: true } },
+          attachments: true,
+          messages: {
+            where: { isInternal: false },
+            orderBy: { createdAt: 'asc' },
+            include: {
+              sender: {
+                select: { id: true, name: true, email: true, avatar: true },
               },
             },
           },
-        });
+        },
+      });
 
-        // Notify assigned agent or Super Admins
-        if (this.notificationsService) {
-          const recipientId = ticket.assignedToId;
-          if (recipientId) {
-            await this.notificationsService.createNotification(
+      // Notify assigned agent or Super Admins
+      if (this.notificationsService) {
+        const recipientId = ticket.assignedToId;
+        if (recipientId) {
+          await this.notificationsService
+            .createNotification(
               tenantId,
               recipientId,
               `New Reply on #${ticket.ticketNumber}`,
               `${userName}: ${message.slice(0, 100)}`,
               'support',
-            ).catch(() => {});
-          } else {
-            const superAdmins = await tx.user.findMany({
-              where: { isSuperAdmin: true, status: 'ACTIVE' },
-              select: { id: true },
-            });
-            for (const sa of superAdmins) {
-              await this.notificationsService.createNotification(
+            )
+            .catch(() => {});
+        } else {
+          const superAdmins = await tx.user.findMany({
+            where: { isSuperAdmin: true, status: 'ACTIVE' },
+            select: { id: true },
+          });
+          for (const sa of superAdmins) {
+            await this.notificationsService
+              .createNotification(
                 tenantId,
                 sa.id,
                 `New Reply on #${ticket.ticketNumber}`,
                 `${userName}: ${message.slice(0, 100)}`,
                 'support',
-              ).catch(() => {});
-            }
+              )
+              .catch(() => {});
           }
         }
+      }
 
-        return formatTicketOutput(updated);
-      },
-    );
+      return formatTicketOutput(updated);
+    });
   }
 
   async updateTicket(
@@ -651,7 +744,8 @@ export class SupportService {
       description?: string;
       category?: string;
       priority?: 'Low' | 'Medium' | 'High' | 'Critical';
-      status?: 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED';
+      status?:
+        'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED';
     },
     tenantId?: string,
     userRole?: any,
@@ -698,11 +792,15 @@ export class SupportService {
           normalizedRole === 'ORG_OWNER';
 
         if (!isOwner && !isAdmin) {
-          throw new ForbiddenException('You are only authorized to edit tickets that you submitted');
+          throw new ForbiddenException(
+            'You are only authorized to edit tickets that you submitted',
+          );
         }
 
         if (ticket.status === SupportTicketStatus.CLOSED && !isAdmin) {
-          throw new BadRequestException('Closed tickets cannot be edited. Please post a reply or open a new ticket.');
+          throw new BadRequestException(
+            'Closed tickets cannot be edited. Please post a reply or open a new ticket.',
+          );
         }
 
         const updatePayload: any = {
@@ -719,7 +817,7 @@ export class SupportService {
           updatePayload.priority = mapPriorityToEnum(updateData.priority);
         }
         if (updateData.status) {
-          updatePayload.status = updateData.status as SupportTicketStatus;
+          updatePayload.status = updateData.status;
           if (updateData.status === 'RESOLVED' && !ticket.resolvedAt) {
             updatePayload.resolvedAt = new Date();
           }
@@ -743,14 +841,20 @@ export class SupportService {
           where: { id: ticket.id },
           data: updatePayload,
           include: {
-            createdBy: { select: { id: true, name: true, email: true, avatar: true } },
-            assignedTo: { select: { id: true, name: true, email: true, avatar: true } },
+            createdBy: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
+            assignedTo: {
+              select: { id: true, name: true, email: true, avatar: true },
+            },
             attachments: true,
             messages: {
               where: { isInternal: false },
               orderBy: { createdAt: 'asc' },
               include: {
-                sender: { select: { id: true, name: true, email: true, avatar: true } },
+                sender: {
+                  select: { id: true, name: true, email: true, avatar: true },
+                },
               },
             },
           },
@@ -770,7 +874,9 @@ export class SupportService {
             },
           });
         } catch (auditErr: any) {
-          this.logger.warn(`Failed to create audit log for updated ticket: ${auditErr?.message || auditErr}`);
+          this.logger.warn(
+            `Failed to create audit log for updated ticket: ${auditErr?.message || auditErr}`,
+          );
         }
 
         return formatTicketOutput(updated);
@@ -823,14 +929,22 @@ export class SupportService {
           normalizedRole === 'ORG_OWNER';
 
         if (!isOwner && !isAdmin) {
-          throw new ForbiddenException('You are only authorized to delete tickets that you submitted');
+          throw new ForbiddenException(
+            'You are only authorized to delete tickets that you submitted',
+          );
         }
 
         // Clean up storage attachments if storage service is active
-        if (this.storageService && ticket.attachments && ticket.attachments.length > 0) {
+        if (
+          this.storageService &&
+          ticket.attachments &&
+          ticket.attachments.length > 0
+        ) {
           for (const att of ticket.attachments) {
             if (att.storagePath) {
-              await this.storageService.deleteAttachment(att.storagePath).catch(() => {});
+              await this.storageService
+                .deleteAttachment(att.storagePath)
+                .catch(() => {});
             }
           }
         }
@@ -862,7 +976,9 @@ export class SupportService {
             },
           });
         } catch (auditErr: any) {
-          this.logger.warn(`Failed to create audit log for deleted ticket: ${auditErr?.message || auditErr}`);
+          this.logger.warn(
+            `Failed to create audit log for deleted ticket: ${auditErr?.message || auditErr}`,
+          );
         }
 
         return {
@@ -882,9 +998,10 @@ export class SupportService {
       uptimeSeconds: Math.floor(process.uptime()),
       timestamp: new Date().toISOString(),
       database: 'CONNECTED',
-      smtpService: !!(process.env.SMTP_HOST && process.env.SMTP_USER)
-        ? 'CONFIGURED'
-        : 'LOCAL_LOG_ONLY',
+      smtpService:
+        process.env.SMTP_HOST && process.env.SMTP_USER
+          ? 'CONFIGURED'
+          : 'LOCAL_LOG_ONLY',
       serverLoad: 'HEALTHY',
     };
   }

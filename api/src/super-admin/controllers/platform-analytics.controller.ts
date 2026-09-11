@@ -1,7 +1,10 @@
 import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
-import { PlatformAnalyticsService, AnalyticsQueryDto } from '../services/platform-analytics.service';
+import {
+  PlatformAnalyticsService,
+  AnalyticsQueryDto,
+} from '../services/platform-analytics.service';
 
 @Controller(['super-admin/analytics', 'super_admin/analytics'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)

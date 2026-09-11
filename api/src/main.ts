@@ -14,7 +14,9 @@ async function bootstrap() {
   // Comprehensive fail-fast startup security validation
   const validation = SecurityConfigValidator.validateEnvironment();
   if (!validation.valid && process.env.NODE_ENV === 'production') {
-    logger.error('[FATAL] Production security configuration check failed. Refusing to boot.');
+    logger.error(
+      '[FATAL] Production security configuration check failed. Refusing to boot.',
+    );
     process.exit(1);
   }
 
@@ -41,7 +43,11 @@ async function bootstrap() {
         styleSrc: ["'self'", "'unsafe-inline'"],
         imgSrc: ["'self'", 'data:', 'https:'],
         scriptSrc: ["'self'", 'https://checkout.razorpay.com'],
-        frameSrc: ["'self'", 'https://api.razorpay.com', 'https://checkout.razorpay.com'],
+        frameSrc: [
+          "'self'",
+          'https://api.razorpay.com',
+          'https://checkout.razorpay.com',
+        ],
         connectSrc: ["'self'", 'https:', 'https://api.razorpay.com'],
       },
     },
@@ -66,10 +72,14 @@ async function bootstrap() {
   ];
 
   const envOrigins = process.env.ALLOWED_ORIGINS
-    ? process.env.ALLOWED_ORIGINS.split(',').map((origin) => origin.trim()).filter(Boolean)
+    ? process.env.ALLOWED_ORIGINS.split(',')
+        .map((origin) => origin.trim())
+        .filter(Boolean)
     : [];
 
-  const allowedOrigins = Array.from(new Set([...defaultOrigins, ...envOrigins]));
+  const allowedOrigins = Array.from(
+    new Set([...defaultOrigins, ...envOrigins]),
+  );
 
   app.enableCors({
     origin: (origin, callback) => {
@@ -87,7 +97,10 @@ async function bootstrap() {
       if (isAllowed) {
         return callback(null, true);
       }
-      return callback(new Error(`CORS error: Origin ${origin} not allowed`), false);
+      return callback(
+        new Error(`CORS error: Origin ${origin} not allowed`),
+        false,
+      );
     },
     credentials: true,
     methods: ['GET', 'HEAD', 'PUT', 'PATCH', 'POST', 'DELETE', 'OPTIONS'],
@@ -118,7 +131,8 @@ async function bootstrap() {
 
   const port = parseInt(process.env.PORT || '4000', 10);
   await app.listen(port, '0.0.0.0');
-  logger.log(`ClixPro CRM API server running on port ${port} (0.0.0.0:${port})`);
+  logger.log(
+    `ClixPro CRM API server running on port ${port} (0.0.0.0:${port})`,
+  );
 }
 bootstrap();
-

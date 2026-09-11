@@ -1,4 +1,13 @@
-import { Controller, Get, Patch, Post, Delete, Param, UseGuards, Req } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Patch,
+  Post,
+  Delete,
+  Param,
+  UseGuards,
+  Req,
+} from '@nestjs/common';
 import { NotificationsService } from '../services/notifications.service';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
@@ -29,7 +38,10 @@ export class NotificationsController {
   async createTestNotification(@Req() req: AuthenticatedRequest) {
     const tenantId = req.tenantId;
     const userId = req.user.id;
-    const notification = await this.notificationsService.createTestNotification(tenantId, userId);
+    const notification = await this.notificationsService.createTestNotification(
+      tenantId,
+      userId,
+    );
     return { success: true, data: notification };
   }
 
@@ -58,7 +70,10 @@ export class NotificationsController {
   }
 
   @Delete(':id')
-  async deleteNotification(@Req() req: AuthenticatedRequest, @Param('id') id: string) {
+  async deleteNotification(
+    @Req() req: AuthenticatedRequest,
+    @Param('id') id: string,
+  ) {
     const tenantId = req.tenantId;
     const userId = req.user.id;
     await this.notificationsService.deleteNotification(tenantId, userId, id);

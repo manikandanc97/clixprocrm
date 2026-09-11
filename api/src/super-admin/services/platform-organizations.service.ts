@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { SYSTEM_ROLE_PERMISSIONS } from '../../common/role-permissions.constants';
 import * as crypto from 'crypto';
@@ -89,7 +93,13 @@ export class PlatformOrganizationsService {
         users: {
           include: {
             user: {
-              select: { id: true, name: true, email: true, phone: true, status: true },
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                status: true,
+              },
             },
             role: {
               select: { id: true, name: true, priority: true },
@@ -273,7 +283,10 @@ export class PlatformOrganizationsService {
       data: {
         userId: adminActorId,
         tenantId: id,
-        action: status === 'ACTIVE' ? 'ORGANIZATION_ACTIVATED' : 'ORGANIZATION_SUSPENDED',
+        action:
+          status === 'ACTIVE'
+            ? 'ORGANIZATION_ACTIVATED'
+            : 'ORGANIZATION_SUSPENDED',
         module: 'SuperAdmin',
         details: { previousStatus: existing.status, newStatus: status, reason },
       },
@@ -389,7 +402,11 @@ export class PlatformOrganizationsService {
             userId: adminActorId,
             action: 'ORGANIZATION_DELETED',
             module: 'SuperAdmin',
-            details: { id: existing.id, name: existing.name, slug: existing.slug },
+            details: {
+              id: existing.id,
+              name: existing.name,
+              slug: existing.slug,
+            },
           },
         });
 

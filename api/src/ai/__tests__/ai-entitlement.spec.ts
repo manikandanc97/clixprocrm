@@ -59,7 +59,11 @@ describe('AiEntitlementService Enterprise Subscription Architecture Suite', () =
       });
 
       await expect(
-        entitlementService.validateModelAccess('tenant-1', 'gemini-2.5-flash', 'chat'),
+        entitlementService.validateModelAccess(
+          'tenant-1',
+          'gemini-2.5-flash',
+          'chat',
+        ),
       ).rejects.toThrow(ServiceUnavailableException);
     });
 
@@ -116,7 +120,11 @@ describe('AiEntitlementService Enterprise Subscription Architecture Suite', () =
       });
 
       await expect(
-        entitlementService.validateModelAccess('tenant-1', 'gemini-2.5-flash', 'chat'),
+        entitlementService.validateModelAccess(
+          'tenant-1',
+          'gemini-2.5-flash',
+          'chat',
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
 
@@ -169,7 +177,11 @@ describe('AiEntitlementService Enterprise Subscription Architecture Suite', () =
         _sum: { totalTokens: 1000 },
       });
 
-      const res = await entitlementService.validateModelAccess('tenant-2', undefined, 'chat');
+      const res = await entitlementService.validateModelAccess(
+        'tenant-2',
+        undefined,
+        'chat',
+      );
       expect(res.modelKey).toBe('gpt-4o');
       expect(res.displayName).toBe('GPT-4o');
     });
@@ -221,7 +233,11 @@ describe('AiEntitlementService Enterprise Subscription Architecture Suite', () =
 
       // Tenant attempts to use Claude 3.7 Sonnet which is only for Pro+ / Enterprise
       await expect(
-        entitlementService.validateModelAccess('tenant-3', 'claude-3-7-sonnet', 'chat'),
+        entitlementService.validateModelAccess(
+          'tenant-3',
+          'claude-3-7-sonnet',
+          'chat',
+        ),
       ).rejects.toThrow(ForbiddenException);
     });
   });
@@ -278,9 +294,12 @@ describe('AiEntitlementService Enterprise Subscription Architecture Suite', () =
       });
 
       await expect(
-        entitlementService.validateModelAccess('tenant-4', 'gemini-2.5-flash', 'chat'),
+        entitlementService.validateModelAccess(
+          'tenant-4',
+          'gemini-2.5-flash',
+          'chat',
+        ),
       ).rejects.toThrow(HttpException);
     });
   });
 });
-

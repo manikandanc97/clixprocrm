@@ -1,4 +1,9 @@
-import { Injectable, HttpException, HttpStatus, Optional } from '@nestjs/common';
+import {
+  Injectable,
+  HttpException,
+  HttpStatus,
+  Optional,
+} from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, UserStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -18,7 +23,8 @@ export class EmployeesService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly configService: ConfigService,
-    @Optional() private readonly entitlementService?: SubscriptionEntitlementService,
+    @Optional()
+    private readonly entitlementService?: SubscriptionEntitlementService,
   ) {}
 
   async getEmployees(tenantId: string, page = 1, limit = 10) {
@@ -67,13 +73,28 @@ export class EmployeesService {
       return {
         employees: mappedUsers,
         stats: [
-          { title: 'Total Employees', value: total.toString(), change: '0', positive: true },
-          { title: 'Active Now', value: total.toString(), change: '0', positive: true },
+          {
+            title: 'Total Employees',
+            value: total.toString(),
+            change: '0',
+            positive: true,
+          },
+          {
+            title: 'Active Now',
+            value: total.toString(),
+            change: '0',
+            positive: true,
+          },
           { title: 'Departments', value: '1', change: '0', positive: true },
           { title: 'On Leave', value: '0', change: '0', positive: true },
         ],
         activities: [],
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -235,7 +256,12 @@ export class EmployeesService {
 
       const invitation = await tx.invitation.upsert({
         where: { tenantId_email: { tenantId, email: normalizedEmail } },
-        update: { roleId: roleObj.id, token: hashedToken, expiresAt, status: 'PENDING' },
+        update: {
+          roleId: roleObj.id,
+          token: hashedToken,
+          expiresAt,
+          status: 'PENDING',
+        },
         create: {
           tenantId,
           email: normalizedEmail,
@@ -291,7 +317,11 @@ export class EmployeesService {
         throw new HttpException('Employee not found', HttpStatus.NOT_FOUND);
       }
 
-      if (existingUser.isOrgOwner && data.role !== undefined && data.role !== existingUser.role?.name) {
+      if (
+        existingUser.isOrgOwner &&
+        data.role !== undefined &&
+        data.role !== existingUser.role?.name
+      ) {
         throw new HttpException(
           'Cannot demote the active Organization Owner. Transfer ownership first.',
           HttpStatus.FORBIDDEN,
@@ -515,5 +545,4 @@ export class EmployeesService {
       return { id: userId };
     });
   }
-
 }

@@ -47,7 +47,10 @@ export class RolesGuard implements CanActivate {
     }
 
     const normalizedRequiredRoles = requiredRoles.map((r) =>
-      r.toUpperCase().trim().replace(/[\s_]+/g, ''),
+      r
+        .toUpperCase()
+        .trim()
+        .replace(/[\s_]+/g, ''),
     );
 
     if (normalizedRequiredRoles.includes(normalizedRole)) {
@@ -64,26 +67,27 @@ export class RolesGuard implements CanActivate {
         r.toLowerCase().replace(/[\s_]+/g, ''),
       );
 
-      const hasModuleEquivalence = activeModules.some((mod: string) =>
-        mod === 'all' ||
-        normalizedRoles.some(
-          (reqRole) =>
-            reqRole === mod ||
-            (reqRole === 'sales' &&
-              (mod.includes('lead') ||
-                mod.includes('deal') ||
-                mod.includes('quotation') ||
-                mod.includes('customer') ||
-                mod.includes('contact') ||
-                mod.includes('company'))) ||
-            (reqRole === 'manager' &&
-              (mod.includes('lead') ||
-                mod.includes('deal') ||
-                mod.includes('report') ||
-                mod.includes('employee'))) ||
-            (reqRole === 'employee' &&
-              (mod.includes('task') || mod.includes('calendar'))),
-        ),
+      const hasModuleEquivalence = activeModules.some(
+        (mod: string) =>
+          mod === 'all' ||
+          normalizedRoles.some(
+            (reqRole) =>
+              reqRole === mod ||
+              (reqRole === 'sales' &&
+                (mod.includes('lead') ||
+                  mod.includes('deal') ||
+                  mod.includes('quotation') ||
+                  mod.includes('customer') ||
+                  mod.includes('contact') ||
+                  mod.includes('company'))) ||
+              (reqRole === 'manager' &&
+                (mod.includes('lead') ||
+                  mod.includes('deal') ||
+                  mod.includes('report') ||
+                  mod.includes('employee'))) ||
+              (reqRole === 'employee' &&
+                (mod.includes('task') || mod.includes('calendar'))),
+          ),
       );
 
       if (hasModuleEquivalence) {
@@ -94,4 +98,3 @@ export class RolesGuard implements CanActivate {
     throw new ForbiddenException('Insufficient role permissions');
   }
 }
-

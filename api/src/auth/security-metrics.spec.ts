@@ -14,7 +14,8 @@ describe('P6 Security Metrics & Threshold Anomaly Detection Suite', () => {
           if (where.action === 'LOGIN_SUCCESS') return Promise.resolve(200);
           if (where.action === 'LOGIN_FAILED') return Promise.resolve(5);
           if (where.action === 'NEW_DEVICE_LOGIN') return Promise.resolve(8);
-          if (where.action === 'MFA_CHALLENGE_FAILED') return Promise.resolve(2);
+          if (where.action === 'MFA_CHALLENGE_FAILED')
+            return Promise.resolve(2);
           return Promise.resolve(0);
         }),
         findMany: jest.fn().mockResolvedValue([]),
@@ -22,11 +23,15 @@ describe('P6 Security Metrics & Threshold Anomaly Detection Suite', () => {
       user: { count: jest.fn().mockResolvedValue(0) },
       tenant: { count: jest.fn().mockResolvedValue(0) },
       securityIncident: { count: jest.fn().mockResolvedValue(0) },
-      platformSecurityState: { findUnique: jest.fn().mockResolvedValue({ emergencyMode: false }) },
+      platformSecurityState: {
+        findUnique: jest.fn().mockResolvedValue({ emergencyMode: false }),
+      },
     };
 
     mockIntegrityMonitor = {
-      getSystemStatus: jest.fn().mockResolvedValue({ brokenLinks: 0, hashMismatches: 0 }),
+      getSystemStatus: jest
+        .fn()
+        .mockResolvedValue({ brokenLinks: 0, hashMismatches: 0 }),
     };
 
     mockArchiveService = {
@@ -34,14 +39,16 @@ describe('P6 Security Metrics & Threshold Anomaly Detection Suite', () => {
     };
 
     mockIncidentsService = {
-      getSecurityCenterStatus: jest.fn().mockResolvedValue({ openIncidents: 0, criticalIncidents: 0 }),
+      getSecurityCenterStatus: jest
+        .fn()
+        .mockResolvedValue({ openIncidents: 0, criticalIncidents: 0 }),
     };
 
     secOpsService = new SecurityOperationsService(
-      mockPrisma as any,
-      mockIntegrityMonitor as any,
-      mockArchiveService as any,
-      mockIncidentsService as any,
+      mockPrisma,
+      mockIntegrityMonitor,
+      mockArchiveService,
+      mockIncidentsService,
     );
   });
 

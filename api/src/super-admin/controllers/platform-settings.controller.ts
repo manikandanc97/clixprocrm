@@ -19,7 +19,10 @@ export class PlatformSettingsController {
 
   @Post()
   async updateSettings(@Req() req: any, @Body() body: any) {
-    const data = await this.settingsService.updatePlatformSettings(body, req.user.id);
+    const data = await this.settingsService.updatePlatformSettings(
+      body,
+      req.user.id,
+    );
     return {
       success: true,
       data,

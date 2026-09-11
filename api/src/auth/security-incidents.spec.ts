@@ -31,23 +31,33 @@ describe('P4 Security Incidents Management Suite', () => {
       },
       securityIncident: {
         create: jest.fn().mockImplementation(({ data }) => {
-          const record = { id: `inc-${storedIncidents.length + 1}`, ...data, createdAt: new Date() };
+          const record = {
+            id: `inc-${storedIncidents.length + 1}`,
+            ...data,
+            createdAt: new Date(),
+          };
           storedIncidents.push(record);
           return Promise.resolve(record);
         }),
         findMany: jest.fn().mockImplementation(({ where }) => {
           let items = storedIncidents;
-          if (where?.severity) items = items.filter((i) => i.severity === where.severity);
-          if (where?.status) items = items.filter((i) => i.status === where.status);
+          if (where?.severity)
+            items = items.filter((i) => i.severity === where.severity);
+          if (where?.status)
+            items = items.filter((i) => i.status === where.status);
           return Promise.resolve(items);
         }),
         findUnique: jest.fn().mockImplementation(({ where }) => {
-          return Promise.resolve(storedIncidents.find((i) => i.id === where.id) || null);
+          return Promise.resolve(
+            storedIncidents.find((i) => i.id === where.id) || null,
+          );
         }),
         count: jest.fn().mockImplementation(({ where }) => {
           let items = storedIncidents;
-          if (where?.severity) items = items.filter((i) => i.severity === where.severity);
-          if (where?.status?.in) items = items.filter((i) => where.status.in.includes(i.status));
+          if (where?.severity)
+            items = items.filter((i) => i.severity === where.severity);
+          if (where?.status?.in)
+            items = items.filter((i) => where.status.in.includes(i.status));
           return Promise.resolve(items.length);
         }),
         update: jest.fn().mockImplementation(({ where, data }) => {
@@ -66,11 +76,13 @@ describe('P4 Security Incidents Management Suite', () => {
         count: jest.fn().mockResolvedValue(0),
       },
       platformSecurityState: {
-        findUnique: jest.fn().mockResolvedValue({ id: 'global', emergencyMode: false }),
+        findUnique: jest
+          .fn()
+          .mockResolvedValue({ id: 'global', emergencyMode: false }),
       },
     };
 
-    auditLogger = new AuditLoggerService(mockPrisma as any);
+    auditLogger = new AuditLoggerService(mockPrisma);
     mockIntegrityMonitor = {
       getSystemStatus: jest.fn().mockResolvedValue({
         status: 'HEALTHY',
@@ -80,9 +92,9 @@ describe('P4 Security Incidents Management Suite', () => {
     };
 
     incidentsService = new SecurityIncidentsService(
-      mockPrisma as any,
+      mockPrisma,
       auditLogger,
-      mockIntegrityMonitor as any,
+      mockIntegrityMonitor,
     );
   });
 

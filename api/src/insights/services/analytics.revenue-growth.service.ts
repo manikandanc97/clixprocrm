@@ -141,7 +141,8 @@ export class AnalyticsRevenueGrowthService {
         previousDeals > 0 ? previousRevenue / previousDeals : 0;
       const avgDealSizeGrowth =
         previousAvgDealSize > 0
-          ? ((averageDealSize - previousAvgDealSize) / previousAvgDealSize) * 100
+          ? ((averageDealSize - previousAvgDealSize) / previousAvgDealSize) *
+            100
           : averageDealSize > 0
             ? 100
             : 0;
@@ -152,7 +153,8 @@ export class AnalyticsRevenueGrowthService {
         previousTotalLeads > 0 ? (previousDeals / previousTotalLeads) * 100 : 0;
       const conversionRateGrowth =
         previousConversionRate > 0
-          ? ((conversionRate - previousConversionRate) / previousConversionRate) *
+          ? ((conversionRate - previousConversionRate) /
+              previousConversionRate) *
             100
           : conversionRate > 0
             ? 100
@@ -175,7 +177,11 @@ export class AnalyticsRevenueGrowthService {
           'Nov',
           'Dec',
         ];
-        chartData = months.map((month) => ({ name: month, value: 0, deals: 0 }));
+        chartData = months.map((month) => ({
+          name: month,
+          value: 0,
+          deals: 0,
+        }));
 
         currentWonLeads.forEach((lead) => {
           const monthIndex = new Date(lead.updatedAt).getMonth();
@@ -185,7 +191,10 @@ export class AnalyticsRevenueGrowthService {
 
         if (filter === 'Quarter') {
           const currentQuarter = Math.floor(startDate.getMonth() / 3);
-          chartData = chartData.slice(currentQuarter * 3, currentQuarter * 3 + 3);
+          chartData = chartData.slice(
+            currentQuarter * 3,
+            currentQuarter * 3 + 3,
+          );
         }
       } else {
         const days = Math.round(

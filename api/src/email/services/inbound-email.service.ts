@@ -1,4 +1,9 @@
-import { Injectable, Logger, BadRequestException, NotFoundException } from '@nestjs/common';
+import {
+  Injectable,
+  Logger,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { ConnectionVerifierService } from './connection-verifier.service';
@@ -7,7 +12,12 @@ import { EmailHtmlSanitizerService } from './email-html-sanitizer.service';
 import { EmailAttachmentStorageService } from './email-attachment-storage.service';
 import { ImapClientFactory, IImapClient } from './imap-client.factory';
 import { SyncInboxJobPayload } from '../../queue/interfaces/email-jobs';
-import { EmailSyncStatus, EmailDirection, EmailMessageStatus, Prisma } from '@prisma/client';
+import {
+  EmailSyncStatus,
+  EmailDirection,
+  EmailMessageStatus,
+  Prisma,
+} from '@prisma/client';
 
 export interface InboundSyncResult {
   success: boolean;
@@ -39,18 +49,30 @@ export class InboundEmailService {
    * Enforces strict tenant isolation, memory-only credential decryption,
    * SSRF protection, idempotent deduplication, RFC threading, and incremental cursor management.
    */
-  async processSyncInboxJob(payload: SyncInboxJobPayload): Promise<InboundSyncResult> {
+  async processSyncInboxJob(
+    payload: SyncInboxJobPayload,
+  ): Promise<InboundSyncResult> {
     const { tenantId, accountId, folder = 'INBOX', limit = 50 } = payload;
 
     if (!tenantId || !accountId) {
-      throw new BadRequestException('tenantId and accountId are required for sync-inbox');
+      throw new BadRequestException(
+        'tenantId and accountId are required for sync-inbox',
+      );
     }
 
     // Mutex: Prevent overlapping sync worker executions for the same account
     const lockKey = `${tenantId}:${accountId}`;
     if (this.activeSyncAccounts.has(lockKey)) {
-      this.logger.warn(`Sync already active in worker memory for account ${accountId}; skipping overlapping execution.`);
-      return { success: true, messagesProcessed: 0, messagesSkipped: 0, skipped: true, reason: 'Sync already running for account' };
+      this.logger.warn(
+        `Sync already active in worker memory for account ${accountId}; skipping overlapping execution.`,
+      );
+      return {
+        success: true,
+        messagesProcessed: 0,
+        messagesSkipped: 0,
+        skipped: true,
+        reason: 'Sync already running for account',
+      };
     }
 
     this.activeSyncAccounts.add(lockKey);
@@ -71,18 +93,42 @@ export class InboundEmailService {
       );
 
       if (!account) {
-        this.logger.warn(`Email account ${accountId} not found in tenant ${tenantId}. Aborting sync.`);
-        return { success: false, messagesProcessed: 0, messagesSkipped: 0, skipped: true, reason: 'Account not found' };
+        this.logger.warn(
+          `Email account ${accountId} not found in tenant ${tenantId}. Aborting sync.`,
+        );
+        return {
+          success: false,
+          messagesProcessed: 0,
+          messagesSkipped: 0,
+          skipped: true,
+          reason: 'Account not found',
+        };
       }
 
       if (!account.isActive) {
-        this.logger.log(`Email account ${accountId} is inactive. Skipping sync.`);
-        return { success: true, messagesProcessed: 0, messagesSkipped: 0, skipped: true, reason: 'Account is inactive' };
+        this.logger.log(
+          `Email account ${accountId} is inactive. Skipping sync.`,
+        );
+        return {
+          success: true,
+          messagesProcessed: 0,
+          messagesSkipped: 0,
+          skipped: true,
+          reason: 'Account is inactive',
+        };
       }
 
       if (!account.imapHost) {
-        this.logger.warn(`Email account ${accountId} has no IMAP host configured.`);
-        return { success: false, messagesProcessed: 0, messagesSkipped: 0, skipped: true, reason: 'No IMAP host' };
+        this.logger.warn(
+          `Email account ${accountId} has no IMAP host configured.`,
+        );
+        return {
+          success: false,
+          messagesProcessed: 0,
+          messagesSkipped: 0,
+          skipped: true,
+          reason: 'No IMAP host',
+        };
       }
 
       // 2. SSRF Protection: Ensure target host does not resolve to private/loopback/cloud metadata
@@ -96,15 +142,20 @@ export class InboundEmailService {
       // 4. Decrypt IMAP credentials strictly in worker memory (zero logging, zero Redis)
       let decryptedPass: string | undefined;
       if (account.encryptedImapPass) {
-        decryptedPass = this.enc.decrypt(account.encryptedImapPass) || undefined;
+        decryptedPass =
+          this.enc.decrypt(account.encryptedImapPass) || undefined;
       }
       let decryptedOAuth: string | undefined;
       if (account.encryptedOauthAccess) {
-        decryptedOAuth = this.enc.decrypt(account.encryptedOauthAccess) || undefined;
+        decryptedOAuth =
+          this.enc.decrypt(account.encryptedOauthAccess) || undefined;
       }
 
       const imapPort = account.imapPort || 993;
-      const imapSecure = account.imapSecure !== undefined ? account.imapSecure : imapPort === 993;
+      const imapSecure =
+        account.imapSecure !== undefined
+          ? account.imapSecure
+          : imapPort === 993;
       const imapUser = account.imapUser || account.email;
 
       // 5. Connect to IMAP server
@@ -122,9 +173,15 @@ export class InboundEmailService {
       try {
         await imapClient.connect();
       } catch (connErr: any) {
-        const errorMsg = this.sanitizeErrorMessage(connErr?.message || 'IMAP connection failed');
-        const isAuthError = /auth|credential|login|denied|password/i.test(connErr?.message || '');
-        const newStatus = isAuthError ? EmailSyncStatus.AUTH_FAILED : EmailSyncStatus.ERROR;
+        const errorMsg = this.sanitizeErrorMessage(
+          connErr?.message || 'IMAP connection failed',
+        );
+        const isAuthError = /auth|credential|login|denied|password/i.test(
+          connErr?.message || '',
+        );
+        const newStatus = isAuthError
+          ? EmailSyncStatus.AUTH_FAILED
+          : EmailSyncStatus.ERROR;
 
         await this.updateAccountState(tenantId, account.id, {
           syncStatus: newStatus,
@@ -140,7 +197,11 @@ export class InboundEmailService {
       lastProcessedUid = lastSyncedUid;
 
       // 7. Fetch messages starting from cursor
-      const fetchedMessages = await imapClient.fetchMessages(folder, fromUid, limit);
+      const fetchedMessages = await imapClient.fetchMessages(
+        folder,
+        fromUid,
+        limit,
+      );
       this.logger.log(
         `[INBOUND EMAIL] Account ${accountId}: Fetched ${fetchedMessages.length} messages (fromUid: ${fromUid}, folder: ${folder})`,
       );
@@ -154,7 +215,13 @@ export class InboundEmailService {
           // Establish authoritative Message-ID or deterministic fallback
           const internetMessageId =
             parsed.internetMessageId ||
-            this.generateSyntheticMessageId(account.id, folder, msg.uid, parsed.subject, parsed.date);
+            this.generateSyntheticMessageId(
+              account.id,
+              folder,
+              msg.uid,
+              parsed.subject,
+              parsed.date,
+            );
 
           // Atomically persist message, thread, attachments, and timeline event
           const persistResult = await this.persistInboundMessageAtomic(
@@ -179,8 +246,12 @@ export class InboundEmailService {
         } catch (msgErr: any) {
           // Failure on message msg.uid:
           // CRITICAL: Cursor is NOT advanced past this message!
-          const sanitizedErr = this.sanitizeErrorMessage(msgErr?.message || 'Message processing failed');
-          this.logger.error(`Failed to process message UID ${msg.uid} for account ${account.id}: ${sanitizedErr}`);
+          const sanitizedErr = this.sanitizeErrorMessage(
+            msgErr?.message || 'Message processing failed',
+          );
+          this.logger.error(
+            `Failed to process message UID ${msg.uid} for account ${account.id}: ${sanitizedErr}`,
+          );
 
           await this.updateAccountState(tenantId, account.id, {
             syncStatus: EmailSyncStatus.ERROR,
@@ -319,7 +390,10 @@ export class InboundEmailService {
           }
         }
 
-        const snippet = this.htmlSanitizer.generateSnippet(parsed.bodyPlain, parsed.bodyHtml);
+        const snippet = this.htmlSanitizer.generateSnippet(
+          parsed.bodyPlain,
+          parsed.bodyHtml,
+        );
         const hasAttachments = parsed.attachments.length > 0;
         const msgDate = parsed.date || new Date();
 
@@ -390,11 +464,12 @@ export class InboundEmailService {
 
         // 5. Store Attachments in Private Storage & Database
         if (hasAttachments) {
-          const storedAttachments = await this.attachmentStorage.processAndStoreAttachments(
-            tenantId,
-            createdMessage.id,
-            parsed.attachments,
-          );
+          const storedAttachments =
+            await this.attachmentStorage.processAndStoreAttachments(
+              tenantId,
+              createdMessage.id,
+              parsed.attachments,
+            );
 
           for (const att of storedAttachments) {
             await tx.emailAttachment.create({
@@ -472,13 +547,19 @@ export class InboundEmailService {
   /**
    * Parses current cursor string (JSON or legacy UID).
    */
-  private parseCursor(cursor: string | null | undefined, targetFolder: string): number {
+  private parseCursor(
+    cursor: string | null | undefined,
+    targetFolder: string,
+  ): number {
     if (!cursor) return 0;
 
     try {
       const parsed = JSON.parse(cursor);
       if (parsed && typeof parsed.lastUid === 'number') {
-        if (!parsed.folder || parsed.folder.toLowerCase() === targetFolder.toLowerCase()) {
+        if (
+          !parsed.folder ||
+          parsed.folder.toLowerCase() === targetFolder.toLowerCase()
+        ) {
           return parsed.lastUid;
         }
       }
@@ -535,7 +616,9 @@ export class InboundEmailService {
         });
       });
     } catch (err: any) {
-      this.logger.warn(`Failed to update account sync state for ${accountId}: ${err?.message || err}`);
+      this.logger.warn(
+        `Failed to update account sync state for ${accountId}: ${err?.message || err}`,
+      );
     }
   }
 

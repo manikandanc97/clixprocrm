@@ -1,4 +1,10 @@
-import { Injectable, OnModuleInit, OnModuleDestroy, Logger, Optional } from '@nestjs/common';
+import {
+  Injectable,
+  OnModuleInit,
+  OnModuleDestroy,
+  Logger,
+  Optional,
+} from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { sanitizeAuditDetails } from '../common/utils/audit-sanitizer.util';
@@ -25,7 +31,9 @@ export class PrismaService
   private isReady = false;
   private readyPromise: Promise<void> | null = null;
 
-  constructor(@Optional() private readonly tenantContext?: TenantContextService) {
+  constructor(
+    @Optional() private readonly tenantContext?: TenantContextService,
+  ) {
     super();
   }
 
@@ -59,7 +67,10 @@ export class PrismaService
         return;
       } catch (err: any) {
         this.isReady = false;
-        const delay = Math.min(initialBackoffMs * Math.pow(2, attempt - 1), 10000);
+        const delay = Math.min(
+          initialBackoffMs * Math.pow(2, attempt - 1),
+          10000,
+        );
         this.logger.warn(
           `Database connection attempt ${attempt}/${maxRetries} failed: ${err.message}. Retrying in ${delay}ms...`,
         );
@@ -219,9 +230,9 @@ export class PrismaService
         },
       });
 
-      if ((tx as any).auditArchiveOutbox) {
+      if (tx.auditArchiveOutbox) {
         try {
-          await (tx as any).auditArchiveOutbox.create({
+          await tx.auditArchiveOutbox.create({
             data: {
               auditLogId: id,
               status: 'PENDING',
@@ -229,7 +240,9 @@ export class PrismaService
             },
           });
         } catch (outboxErr: any) {
-          this.logger.warn(`Outbox creation notice: ${outboxErr?.message || outboxErr}`);
+          this.logger.warn(
+            `Outbox creation notice: ${outboxErr?.message || outboxErr}`,
+          );
         }
       }
 
@@ -245,4 +258,3 @@ export class PrismaService
     });
   }
 }
-

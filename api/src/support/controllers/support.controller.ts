@@ -95,7 +95,11 @@ export class SupportController {
   async getTicketById(@Param('id') id: string, @Req() req: any) {
     const userId = req.user.id;
     const tenantId = req.tenantId;
-    const ticket = await this.supportService.getTicketById(id, userId, tenantId);
+    const ticket = await this.supportService.getTicketById(
+      id,
+      userId,
+      tenantId,
+    );
     if (!ticket) {
       throw new NotFoundException('Support ticket not found or access denied');
     }
@@ -116,7 +120,11 @@ export class SupportController {
       throw new BadRequestException('Message cannot be empty');
     }
     const userId = req.user.id;
-    const userName = req.user?.name || req.user?.user_metadata?.name || req.user?.email || 'Customer';
+    const userName =
+      req.user?.name ||
+      req.user?.user_metadata?.name ||
+      req.user?.email ||
+      'Customer';
     const tenantId = req.tenantId;
 
     const updatedTicket = await this.supportService.addReplyToTicket(
@@ -139,12 +147,14 @@ export class SupportController {
   @Patch('tickets/:id')
   async updateTicket(
     @Param('id') id: string,
-    @Body() body: {
+    @Body()
+    body: {
       subject?: string;
       description?: string;
       category?: string;
       priority?: 'Low' | 'Medium' | 'High' | 'Critical';
-      status?: 'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED';
+      status?:
+        'OPEN' | 'IN_PROGRESS' | 'WAITING_FOR_USER' | 'RESOLVED' | 'CLOSED';
     },
     @Req() req: any,
   ) {
@@ -196,7 +206,11 @@ export class SupportController {
     const userId = req.user.id;
     const tenantId = req.tenantId;
     const userEmail = req.user.email;
-    const userName = req.user.name || req.user.user_metadata?.name || userEmail || 'Workspace Member';
+    const userName =
+      req.user.name ||
+      req.user.user_metadata?.name ||
+      userEmail ||
+      'Workspace Member';
     const ip = getClientIp(req);
     const identifier = `support_${userId}_${ip}`;
 
@@ -211,7 +225,8 @@ export class SupportController {
           success: false,
           error: {
             code: 'TOO_MANY_REQUESTS',
-            message: 'Too many support tickets submitted. Please try again later.',
+            message:
+              'Too many support tickets submitted. Please try again later.',
           },
         },
         HttpStatus.TOO_MANY_REQUESTS,
@@ -220,14 +235,20 @@ export class SupportController {
 
     try {
       const fastifyReq = req;
-      const isMultipart = typeof fastifyReq.isMultipart === 'function' && fastifyReq.isMultipart();
+      const isMultipart =
+        typeof fastifyReq.isMultipart === 'function' &&
+        fastifyReq.isMultipart();
 
       let subject = '';
       let category = '';
       let priority: 'Low' | 'Medium' | 'High' | 'Critical' = 'Medium';
       let description = '';
       let diagnosticsStr = '';
-      const attachments: { filename: string; content: Buffer; contentType?: string }[] = [];
+      const attachments: {
+        filename: string;
+        content: Buffer;
+        contentType?: string;
+      }[] = [];
       let totalSize = 0;
 
       if (isMultipart) {
@@ -271,11 +292,16 @@ export class SupportController {
               contentType: part.mimetype || 'application/octet-stream',
             });
           } else {
-            if (part.fieldname === 'subject') subject = String(part.value || '').trim();
-            if (part.fieldname === 'category') category = String(part.value || '').trim();
-            if (part.fieldname === 'priority') priority = String(part.value || 'Medium').trim() as any;
-            if (part.fieldname === 'description') description = String(part.value || '').trim();
-            if (part.fieldname === 'diagnostics') diagnosticsStr = String(part.value || '').trim();
+            if (part.fieldname === 'subject')
+              subject = String(part.value || '').trim();
+            if (part.fieldname === 'category')
+              category = String(part.value || '').trim();
+            if (part.fieldname === 'priority')
+              priority = String(part.value || 'Medium').trim() as any;
+            if (part.fieldname === 'description')
+              description = String(part.value || '').trim();
+            if (part.fieldname === 'diagnostics')
+              diagnosticsStr = String(part.value || '').trim();
           }
         }
       }
@@ -284,10 +310,15 @@ export class SupportController {
       const body = req.body || {};
       if (!subject && body.subject) subject = String(body.subject).trim();
       if (!category && body.category) category = String(body.category).trim();
-      if (!priority && body.priority) priority = String(body.priority).trim() as any;
-      if (!description && body.description) description = String(body.description).trim();
+      if (!priority && body.priority)
+        priority = String(body.priority).trim() as any;
+      if (!description && body.description)
+        description = String(body.description).trim();
       if (!diagnosticsStr && body.diagnostics) {
-        diagnosticsStr = typeof body.diagnostics === 'string' ? body.diagnostics : JSON.stringify(body.diagnostics);
+        diagnosticsStr =
+          typeof body.diagnostics === 'string'
+            ? body.diagnostics
+            : JSON.stringify(body.diagnostics);
       }
 
       if (!subject || !description) {
@@ -327,7 +358,10 @@ export class SupportController {
         ticket: data.ticket,
       };
     } catch (error: any) {
-      this.logger.error(`Error processing support ticket: ${error?.message || error}`, error?.stack);
+      this.logger.error(
+        `Error processing support ticket: ${error?.message || error}`,
+        error?.stack,
+      );
       if (error instanceof HttpException) {
         throw error;
       }

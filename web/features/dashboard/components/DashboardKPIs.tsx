@@ -27,7 +27,7 @@ export default function DashboardKPIs() {
   const dashboardQuery = useDashboardData();
   const leadsQuery = useLeads();
   const pipelineQuery = usePipeline();
-  const { formatCurrency, currency, CurrencyIcon } = useCurrency();
+  const { formatCurrency, CurrencyIcon } = useCurrency();
 
   // Extract query data safely
   const dashboardData = dashboardQuery.data;
@@ -140,13 +140,13 @@ export default function DashboardKPIs() {
     dashboardQuery, dashboardRevenue, dashboardLeads, dashboardActiveDeals, dashboardWinRate,
     leadsQuery, leadsData, 
     pipelineQuery, pipelineActiveDeals, pipelineWinRate, 
-    formatCurrency, currency
+    formatCurrency, CurrencyIcon
   ]);
 
   // RBAC & KPI Layout Protection:
   // Admin bypasses widget permission checks entirely.
   // All other roles must have the widget ID in their dashboardWidgets list.
-  const isSuperAdmin = (user as any)?.isSuperAdmin;
+  const isSuperAdmin = (user as { isSuperAdmin?: boolean } | null)?.isSuperAdmin;
   const accessibleKpis = useMemo(() => {
     return kpiConfigs
       .filter(kpi => TOP_KPI_IDS.includes(kpi.id))

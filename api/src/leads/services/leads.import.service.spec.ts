@@ -43,15 +43,25 @@ describe('LeadsImportService Suite', () => {
     };
 
     service = new LeadsImportService(
-      mockPrisma as any,
+      mockPrisma,
       mockEncService,
       mockEntitlementService,
     );
   });
 
   it('should return 0 counts when empty leads array is passed', async () => {
-    const result = await service.bulkImportLeads('tenant-1', 'usr-1', [], 'skip');
-    expect(result).toEqual({ imported: 0, skipped: 0, failed: 0, failedRows: [] });
+    const result = await service.bulkImportLeads(
+      'tenant-1',
+      'usr-1',
+      [],
+      'skip',
+    );
+    expect(result).toEqual({
+      imported: 0,
+      skipped: 0,
+      failed: 0,
+      failedRows: [],
+    });
     expect(mockPrisma.withTenantContext).not.toHaveBeenCalled();
   });
 
@@ -74,7 +84,12 @@ describe('LeadsImportService Suite', () => {
       },
     ];
 
-    const result = await service.bulkImportLeads('tenant-1', 'usr-1', leads, 'skip');
+    const result = await service.bulkImportLeads(
+      'tenant-1',
+      'usr-1',
+      leads,
+      'skip',
+    );
 
     expect(result.imported).toBe(1);
     expect(result.skipped).toBe(0);
@@ -130,7 +145,12 @@ describe('LeadsImportService Suite', () => {
     mockTx.lead.findFirst.mockResolvedValue({ id: 'existing-lead-1' });
 
     const leads = [{ name: 'Existing User', email: 'existing@example.com' }];
-    const result = await service.bulkImportLeads('tenant-1', 'usr-1', leads, 'skip');
+    const result = await service.bulkImportLeads(
+      'tenant-1',
+      'usr-1',
+      leads,
+      'skip',
+    );
 
     expect(result.imported).toBe(0);
     expect(result.skipped).toBe(1);
@@ -157,7 +177,12 @@ describe('LeadsImportService Suite', () => {
       },
     ];
 
-    const result = await service.bulkImportLeads('tenant-1', 'usr-1', leads, 'update');
+    const result = await service.bulkImportLeads(
+      'tenant-1',
+      'usr-1',
+      leads,
+      'update',
+    );
 
     expect(result.imported).toBe(1);
     expect(result.skipped).toBe(0);
@@ -177,7 +202,12 @@ describe('LeadsImportService Suite', () => {
     mockTx.auditLog.create.mockResolvedValue({ id: 'al-1' });
 
     const leads = [{ name: 'Duplicated User', email: 'existing@example.com' }];
-    const result = await service.bulkImportLeads('tenant-1', 'usr-1', leads, 'create');
+    const result = await service.bulkImportLeads(
+      'tenant-1',
+      'usr-1',
+      leads,
+      'create',
+    );
 
     expect(result.imported).toBe(1);
     expect(mockTx.lead.create).toHaveBeenCalledWith({
@@ -194,13 +224,22 @@ describe('LeadsImportService Suite', () => {
       { name: 'No Email', email: '' },
     ];
 
-    const result = await service.bulkImportLeads('tenant-1', 'usr-1', leads, 'skip');
+    const result = await service.bulkImportLeads(
+      'tenant-1',
+      'usr-1',
+      leads,
+      'skip',
+    );
 
     expect(result.imported).toBe(0);
     expect(result.failed).toBe(2);
     expect(result.failedRows).toHaveLength(2);
-    expect(result.failedRows[0].ErrorReason).toBe('Missing required fields (Name or Email)');
-    expect(result.failedRows[1].ErrorReason).toBe('Missing required fields (Name or Email)');
+    expect(result.failedRows[0].ErrorReason).toBe(
+      'Missing required fields (Name or Email)',
+    );
+    expect(result.failedRows[1].ErrorReason).toBe(
+      'Missing required fields (Name or Email)',
+    );
   });
 
   it('should process large datasets in bounded batches (50 rows per batch)', async () => {
@@ -214,7 +253,12 @@ describe('LeadsImportService Suite', () => {
       email: `lead${i + 1}@example.com`,
     }));
 
-    const result = await service.bulkImportLeads('tenant-1', 'usr-1', leads, 'skip');
+    const result = await service.bulkImportLeads(
+      'tenant-1',
+      'usr-1',
+      leads,
+      'skip',
+    );
 
     expect(result.imported).toBe(120);
     expect(result.failed).toBe(0);

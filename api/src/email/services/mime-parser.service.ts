@@ -49,7 +49,9 @@ export class MimeParserService {
       const parsed: ParsedMail = await simpleParser(rawMime);
 
       // 1. Message-ID extraction
-      const internetMessageId = parsed.messageId ? parsed.messageId.trim() : null;
+      const internetMessageId = parsed.messageId
+        ? parsed.messageId.trim()
+        : null;
 
       // 2. In-Reply-To extraction
       let inReplyTo: string | null = null;
@@ -76,7 +78,8 @@ export class MimeParserService {
 
       // 4. From address extraction
       const fromObj = parsed.from?.value?.[0];
-      const fromAddress = fromObj?.address?.trim().toLowerCase() || 'unknown@sender.invalid';
+      const fromAddress =
+        fromObj?.address?.trim().toLowerCase() || 'unknown@sender.invalid';
       const fromName = fromObj?.name?.trim() || null;
 
       // 5. To recipients
@@ -86,7 +89,8 @@ export class MimeParserService {
         for (const item of toList) {
           if (item.value && Array.isArray(item.value)) {
             for (const addr of item.value) {
-              if (addr.address) toRecipients.push(addr.address.trim().toLowerCase());
+              if (addr.address)
+                toRecipients.push(addr.address.trim().toLowerCase());
             }
           }
         }
@@ -99,7 +103,8 @@ export class MimeParserService {
         for (const item of ccList) {
           if (item.value && Array.isArray(item.value)) {
             for (const addr of item.value) {
-              if (addr.address) ccRecipients.push(addr.address.trim().toLowerCase());
+              if (addr.address)
+                ccRecipients.push(addr.address.trim().toLowerCase());
             }
           }
         }
@@ -112,7 +117,8 @@ export class MimeParserService {
         for (const item of bccList) {
           if (item.value && Array.isArray(item.value)) {
             for (const addr of item.value) {
-              if (addr.address) bccRecipients.push(addr.address.trim().toLowerCase());
+              if (addr.address)
+                bccRecipients.push(addr.address.trim().toLowerCase());
             }
           }
         }
@@ -124,9 +130,10 @@ export class MimeParserService {
 
       // 9. Subject & Date
       const subject = parsed.subject?.trim() || '(No Subject)';
-      const date = parsed.date instanceof Date && !isNaN(parsed.date.getTime())
-        ? parsed.date
-        : new Date();
+      const date =
+        parsed.date instanceof Date && !isNaN(parsed.date.getTime())
+          ? parsed.date
+          : new Date();
 
       // 10. Bodies
       const bodyPlain = parsed.text || '';
@@ -139,7 +146,10 @@ export class MimeParserService {
           const lowerKey = (h.key || '').toLowerCase();
           if (ALLOWED_HEADER_KEYS.has(lowerKey)) {
             const colonIdx = h.line.indexOf(':');
-            const val = colonIdx !== -1 ? h.line.slice(colonIdx + 1).trim() : h.line.trim();
+            const val =
+              colonIdx !== -1
+                ? h.line.slice(colonIdx + 1).trim()
+                : h.line.trim();
             headers[lowerKey] = val;
           }
         }
@@ -153,8 +163,13 @@ export class MimeParserService {
           const contentType = att.contentType || 'application/octet-stream';
           const content = att.content || Buffer.alloc(0);
           const size = att.size !== undefined ? att.size : content.length;
-          const contentId = att.cid ? att.cid.replace(/^<|>$/g, '').trim() : null;
-          const isInline = !!att.related || (att as any).disposition === 'inline' || Boolean(contentId);
+          const contentId = att.cid
+            ? att.cid.replace(/^<|>$/g, '').trim()
+            : null;
+          const isInline =
+            !!att.related ||
+            (att as any).disposition === 'inline' ||
+            Boolean(contentId);
 
           attachments.push({
             fileName,

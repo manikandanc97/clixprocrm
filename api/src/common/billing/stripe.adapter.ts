@@ -26,7 +26,10 @@ export class StripeAdapter implements IPaymentGatewayAdapter {
    * Creates a Stripe Checkout Session or PaymentIntent order.
    */
   async createOrder(params: CreateOrderParams): Promise<PaymentOrderResult> {
-    const pubKey = this.publishableKey || process.env.STRIPE_PUBLISHABLE_KEY || 'pk_test_clixpro';
+    const pubKey =
+      this.publishableKey ||
+      process.env.STRIPE_PUBLISHABLE_KEY ||
+      'pk_test_clixpro';
     const secKey = this.secretKey || process.env.STRIPE_SECRET_KEY;
     const amount = Math.round(params.amountInMinorUnits);
 
@@ -34,9 +37,13 @@ export class StripeAdapter implements IPaymentGatewayAdapter {
       try {
         const body = new URLSearchParams({
           'payment_method_types[0]': 'card',
-          'line_items[0][price_data][currency]': (params.currency || 'INR').toLowerCase(),
+          'line_items[0][price_data][currency]': (
+            params.currency || 'INR'
+          ).toLowerCase(),
           'line_items[0][price_data][product_data][name]': `${params.planName} Plan (${params.seats} seats)`,
-          'line_items[0][price_data][unit_amount]': String(Math.round(amount / Math.max(params.seats, 1))),
+          'line_items[0][price_data][unit_amount]': String(
+            Math.round(amount / Math.max(params.seats, 1)),
+          ),
           'line_items[0][quantity]': String(params.seats),
           mode: 'payment',
           'metadata[tenantId]': params.tenantId,
@@ -47,14 +54,17 @@ export class StripeAdapter implements IPaymentGatewayAdapter {
           cancel_url: `${process.env.APP_URL || 'http://localhost:3000'}/upgrade?status=cancelled`,
         });
 
-        const response = await fetch('https://api.stripe.com/v1/checkout/sessions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/x-www-form-urlencoded',
-            Authorization: `Bearer ${secKey}`,
+        const response = await fetch(
+          'https://api.stripe.com/v1/checkout/sessions',
+          {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/x-www-form-urlencoded',
+              Authorization: `Bearer ${secKey}`,
+            },
+            body: body.toString(),
           },
-          body: body.toString(),
-        });
+        );
 
         if (response.ok) {
           const session = await response.json();
@@ -69,7 +79,9 @@ export class StripeAdapter implements IPaymentGatewayAdapter {
           };
         }
       } catch (err: any) {
-        this.logger.warn(`Stripe checkout session API call failed: ${err.message}`);
+        this.logger.warn(
+          `Stripe checkout session API call failed: ${err.message}`,
+        );
       }
     }
 
@@ -102,11 +114,15 @@ export class StripeAdapter implements IPaymentGatewayAdapter {
   async verifyAndParseWebhook(
     params: WebhookVerificationParams,
   ): Promise<NormalizedWebhookEvent | null> {
-    const secret = params.secret || this.webhookSecret || process.env.STRIPE_WEBHOOK_SECRET;
+    const secret =
+      params.secret || this.webhookSecret || process.env.STRIPE_WEBHOOK_SECRET;
 
     if (secret && params.signature) {
       try {
-        const rawPayload = typeof params.rawBody === 'string' ? params.rawBody : params.rawBody.toString('utf8');
+        const rawPayload =
+          typeof params.rawBody === 'string'
+            ? params.rawBody
+            : params.rawBody.toString('utf8');
         // Stripe signature header format: t=timestamp,v1=signature
         const elements = params.signature.split(',');
         const timestamp = elements.find((e) => e.startsWith('t='))?.slice(2);
@@ -125,13 +141,18 @@ export class StripeAdapter implements IPaymentGatewayAdapter {
           }
         }
       } catch (sigErr: any) {
-        this.logger.error(`Stripe webhook signature verification error: ${sigErr.message}`);
+        this.logger.error(
+          `Stripe webhook signature verification error: ${sigErr.message}`,
+        );
         return null;
       }
     }
 
     try {
-      const body = typeof params.rawBody === 'string' ? JSON.parse(params.rawBody) : JSON.parse(params.rawBody.toString('utf8'));
+      const body =
+        typeof params.rawBody === 'string'
+          ? JSON.parse(params.rawBody)
+          : JSON.parse(params.rawBody.toString('utf8'));
       const eventType = body.type || 'unknown';
       const eventId = body.id || `evt_${crypto.randomBytes(8).toString('hex')}`;
       const dataObject = body.data?.object || {};
@@ -167,7 +188,9 @@ export class StripeAdapter implements IPaymentGatewayAdapter {
         currency: (dataObject.currency || 'INR').toUpperCase(),
         status,
         rawPayload: body,
-        eventTimestamp: body.created ? new Date(body.created * 1000) : new Date(),
+        eventTimestamp: body.created
+          ? new Date(body.created * 1000)
+          : new Date(),
       };
     } catch (parseErr: any) {
       this.logger.error(`Failed to parse Stripe webhook: ${parseErr.message}`);

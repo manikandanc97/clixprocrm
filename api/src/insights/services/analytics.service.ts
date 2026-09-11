@@ -229,7 +229,10 @@ export class AnalyticsService {
         previous: number,
       ): { change: string; positive: boolean } {
         if (previous === 0)
-          return { change: current > 0 ? '+100%' : '0%', positive: current >= 0 };
+          return {
+            change: current > 0 ? '+100%' : '0%',
+            positive: current >= 0,
+          };
         const pct = ((current - previous) / previous) * 100;
         const sign = pct >= 0 ? '+' : '';
         return { change: `${sign}${pct.toFixed(1)}%`, positive: pct >= 0 };
@@ -281,7 +284,8 @@ export class AnalyticsService {
       const annualTarget = revenueTargetRecord
         ? toNumber(revenueTargetRecord.value)
         : 0;
-      const monthlyTarget = annualTarget > 0 ? Math.round(annualTarget / 12) : 0;
+      const monthlyTarget =
+        annualTarget > 0 ? Math.round(annualTarget / 12) : 0;
       const revenueOverview = months.map((month) => ({
         name: month,
         target: monthlyTarget,
@@ -336,11 +340,17 @@ export class AnalyticsService {
   }
 
   async getRevenueGrowth(tenantId: string, filter?: string) {
-    return this.analyticsRevenueGrowthService.getRevenueGrowth(tenantId, filter);
+    return this.analyticsRevenueGrowthService.getRevenueGrowth(
+      tenantId,
+      filter,
+    );
   }
 
   async getRevenueGrowthData(tenantId: string, filter = 'Year') {
-    return this.analyticsRevenueGrowthService.getRevenueGrowth(tenantId, filter);
+    return this.analyticsRevenueGrowthService.getRevenueGrowth(
+      tenantId,
+      filter,
+    );
   }
 
   async getAiInsights(tenantId: string) {

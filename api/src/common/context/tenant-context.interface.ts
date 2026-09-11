@@ -6,4 +6,3 @@ export interface RequestTenantContext {
   branchId?: string | null;
   userRole?: any;
 }
-

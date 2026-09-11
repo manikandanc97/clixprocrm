@@ -20,8 +20,13 @@ import { Roles } from '../../auth/roles.decorator';
 
 export function isUserTenantAdmin(req: any): boolean {
   if (req.isSuperAdmin || req.isOrgOwner) return true;
-  const roleName = (req.userRole?.name || '').toUpperCase().trim().replace(/[\s_]+/g, '');
-  return roleName === 'ADMIN' || roleName === 'SUPERADMIN' || roleName === 'OWNER';
+  const roleName = (req.userRole?.name || '')
+    .toUpperCase()
+    .trim()
+    .replace(/[\s_]+/g, '');
+  return (
+    roleName === 'ADMIN' || roleName === 'SUPERADMIN' || roleName === 'OWNER'
+  );
 }
 
 @Controller(['crm/email-accounts', 'crm/email/accounts'])

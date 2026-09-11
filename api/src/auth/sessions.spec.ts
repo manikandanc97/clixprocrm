@@ -1,7 +1,18 @@
-import { ExecutionContext, UnauthorizedException, NotFoundException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ExecutionContext,
+  UnauthorizedException,
+  NotFoundException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { SessionsService } from './sessions.service';
 import { SessionsController } from './sessions.controller';
-import { SupabaseAuthGuard, invalidateSessionCache, invalidateTokenUserCache, setSupabaseClient } from './supabase.guard';
+import {
+  SupabaseAuthGuard,
+  invalidateSessionCache,
+  invalidateTokenUserCache,
+  setSupabaseClient,
+} from './supabase.guard';
 import { AuthService } from './auth.service';
 import { AuthController } from './auth.controller';
 import { getSessionTimeoutConfig } from '../common/utils/session-config.util';
@@ -16,7 +27,10 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
   let mockBrandingService: any;
   let mockSessions: any[];
 
-  function createMockContext(token: string, userAgent = 'Chrome'): ExecutionContext {
+  function createMockContext(
+    token: string,
+    userAgent = 'Chrome',
+  ): ExecutionContext {
     const request: any = {
       headers: {
         authorization: `Bearer ${token}`,
@@ -32,7 +46,9 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
   }
 
   function createValidTestJwt(payloadObj: Record<string, any>): string {
-    const header = Buffer.from(JSON.stringify({ alg: 'HS256', typ: 'JWT' })).toString('base64');
+    const header = Buffer.from(
+      JSON.stringify({ alg: 'HS256', typ: 'JWT' }),
+    ).toString('base64');
     const payload = Buffer.from(JSON.stringify(payloadObj)).toString('base64');
     const signature = 'test_signature_bytes_123';
     return `${header}.${payload}.${signature}`;
@@ -49,7 +65,8 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
         browser: 'Google Chrome',
         operatingSystem: 'Windows',
         ipAddress: '192.168.1.10',
-        userAgent: 'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
+        userAgent:
+          'Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 Chrome/120.0.0.0',
         createdAt: new Date(Date.now() - 3600000), // 1 hour ago
         lastActiveAt: new Date(Date.now() - 60000), // 1 min ago
         expiresAt: null,
@@ -92,24 +109,38 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
         findMany: jest.fn(async ({ where }) => {
           return mockSessions.filter((s) => {
             if (where.userId && s.userId !== where.userId) return false;
-            if (where.sessionId && where.sessionId.not && s.sessionId === where.sessionId.not) return false;
+            if (
+              where.sessionId &&
+              where.sessionId.not &&
+              s.sessionId === where.sessionId.not
+            )
+              return false;
             if (where.revokedAt === null && s.revokedAt !== null) return false;
             return true;
           });
         }),
         findFirst: jest.fn(async ({ where }) => {
-          return mockSessions.find((s) => {
-            if (where.id && s.id !== where.id) return false;
-            if (where.userId && s.userId !== where.userId) return false;
-            if (where.sessionId && s.sessionId !== where.sessionId) return false;
-            return true;
-          }) || null;
+          return (
+            mockSessions.find((s) => {
+              if (where.id && s.id !== where.id) return false;
+              if (where.userId && s.userId !== where.userId) return false;
+              if (where.sessionId && s.sessionId !== where.sessionId)
+                return false;
+              return true;
+            }) || null
+          );
         }),
         findUnique: jest.fn(async ({ where }) => {
-          return mockSessions.find((s) => s.sessionId === where.sessionId || s.id === where.id) || null;
+          return (
+            mockSessions.find(
+              (s) => s.sessionId === where.sessionId || s.id === where.id,
+            ) || null
+          );
         }),
         update: jest.fn(async ({ where, data }) => {
-          const session = mockSessions.find((s) => s.id === where.id || s.sessionId === where.sessionId);
+          const session = mockSessions.find(
+            (s) => s.id === where.id || s.sessionId === where.sessionId,
+          );
           if (!session) throw new Error('Record not found');
           Object.assign(session, data);
           return session;
@@ -118,7 +149,12 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
           let count = 0;
           for (const s of mockSessions) {
             if (where.userId && s.userId !== where.userId) continue;
-            if (where.sessionId && where.sessionId.not && s.sessionId === where.sessionId.not) continue;
+            if (
+              where.sessionId &&
+              where.sessionId.not &&
+              s.sessionId === where.sessionId.not
+            )
+              continue;
             if (where.revokedAt === null && s.revokedAt !== null) continue;
             Object.assign(s, data);
             count++;
@@ -126,7 +162,12 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
           return { count };
         }),
         create: jest.fn(async ({ data }) => {
-          const newSess = { id: `sess-${Date.now()}`, ...data, createdAt: new Date(), revokedAt: null };
+          const newSess = {
+            id: `sess-${Date.now()}`,
+            ...data,
+            createdAt: new Date(),
+            revokedAt: null,
+          };
           mockSessions.push(newSess);
           return newSess;
         }),
@@ -144,7 +185,9 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
           try {
             const parts = token.split('.');
             if (parts.length >= 2) {
-              const claims = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+              const claims = JSON.parse(
+                Buffer.from(parts[1], 'base64').toString('utf-8'),
+              );
               return { data: { claims }, error: null };
             }
           } catch {}
@@ -154,7 +197,9 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
           try {
             const parts = token.split('.');
             if (parts.length >= 2) {
-              const payload = JSON.parse(Buffer.from(parts[1], 'base64').toString('utf-8'));
+              const payload = JSON.parse(
+                Buffer.from(parts[1], 'base64').toString('utf-8'),
+              );
               return {
                 data: {
                   user: {
@@ -188,7 +233,10 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
 
   describe('1. User Session Listing & Data Sanitization', () => {
     it("should return ONLY the authenticated user's sessions and NEVER expose token hashes", async () => {
-      const result = await sessionsService.listUserSessions('usr-alice', 'supabase-sess-alice-1');
+      const result = await sessionsService.listUserSessions(
+        'usr-alice',
+        'supabase-sess-alice-1',
+      );
 
       expect(result).toHaveLength(2);
       expect(result.every((s) => s.id !== 'sess-bob-1')).toBe(true);
@@ -311,7 +359,9 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
       });
 
       // Mark session 2 as revoked
-      const target = mockSessions.find((s) => s.sessionId === 'supabase-sess-alice-2');
+      const target = mockSessions.find(
+        (s) => s.sessionId === 'supabase-sess-alice-2',
+      );
       if (target) target.revokedAt = new Date();
 
       invalidateSessionCache('supabase-sess-alice-2');
@@ -483,7 +533,9 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
       );
 
       // Verify session was marked revoked in DB
-      const session = mockSessions.find((s) => s.sessionId === 'supabase-sess-alice-idle-expired');
+      const session = mockSessions.find(
+        (s) => s.sessionId === 'supabase-sess-alice-idle-expired',
+      );
       expect(session?.revokedAt).not.toBeNull();
 
       // Verify audit log for idle timeout was created
@@ -521,7 +573,9 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
       );
 
       // Verify session was marked revoked in DB
-      const session = mockSessions.find((s) => s.sessionId === 'supabase-sess-alice-absolute-expired');
+      const session = mockSessions.find(
+        (s) => s.sessionId === 'supabase-sess-alice-absolute-expired',
+      );
       expect(session?.revokedAt).not.toBeNull();
 
       // Verify audit log for absolute timeout was created
@@ -637,7 +691,11 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
 
       // 2. Perform logout
       const req: any = {
-        user: { id: 'usr-alice', sub: 'usr-alice', sessionId: 'supabase-sess-alice-logout-test' },
+        user: {
+          id: 'usr-alice',
+          sub: 'usr-alice',
+          sessionId: 'supabase-sess-alice-logout-test',
+        },
         sessionId: 'supabase-sess-alice-logout-test',
         headers: { 'user-agent': 'Chrome' },
         ip: '127.0.0.1',

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useCallback } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
@@ -219,12 +219,12 @@ export default function UpgradePage() {
   const activePlanId = normalizePlanId(subscription?.planId || "free");
   const currentActiveUsers = usage?.users?.current ?? 1;
 
-  const rawDisplayPlans = availablePlans && availablePlans.length > 0 ? availablePlans : (isLoading ? [] : Object.values(CANONICAL_PLANS));
   const displayPlans = useMemo(() => {
+    const rawDisplayPlans = availablePlans && availablePlans.length > 0 ? availablePlans : (isLoading ? [] : Object.values(CANONICAL_PLANS));
     return [...rawDisplayPlans]
       .filter((p) => p.isActive !== false)
       .sort((a, b) => (a.displayOrder || 0) - (b.displayOrder || 0));
-  }, [rawDisplayPlans]);
+  }, [availablePlans, isLoading]);
 
   // Compute live quote instantly (0ms latency, perfectly responsive stepper and toggles)
   const currentQuote = useMemo(() => {
@@ -257,7 +257,7 @@ export default function UpgradePage() {
     return displayPlans.length > 1 ? displayPlans[1].id : null;
   }, [displayPlans]);
 
-  const handleOpenUpgradeModal = (planItem: PlanDefinition) => {
+  const handleOpenUpgradeModal = useCallback((planItem: PlanDefinition) => {
     if (!canManageBilling) {
       toast.error("Only workspace administrators can manage subscription plans.");
       return;
@@ -269,21 +269,24 @@ export default function UpgradePage() {
     setUpgradeSuccess(false);
     setUpgradeModalOpen(true);
     loadRazorpayCheckoutScript();
-  };
+  }, [canManageBilling, currentActiveUsers]);
 
   // Pre-select plan if passed in query param
   useEffect(() => {
     if (highlightParam && displayPlans.length > 0) {
       const match = displayPlans.find((p) => p.id.toLowerCase() === highlightParam.toLowerCase());
       if (match && match.id !== activePlanId) {
-        if (match.pricingMode === "CUSTOM") {
-          setEnterpriseModalOpen(true);
-        } else {
-          handleOpenUpgradeModal(match);
-        }
+        const timer = setTimeout(() => {
+          if (match.pricingMode === "CUSTOM") {
+            setEnterpriseModalOpen(true);
+          } else {
+            handleOpenUpgradeModal(match);
+          }
+        }, 0);
+        return () => clearTimeout(timer);
       }
     }
-  }, [highlightParam, activePlanId, displayPlans]);
+  }, [highlightParam, activePlanId, displayPlans, handleOpenUpgradeModal]);
 
   const handleSeatChange = (newSeats: number) => {
     const minSeats = Math.max(currentActiveUsers, 1);

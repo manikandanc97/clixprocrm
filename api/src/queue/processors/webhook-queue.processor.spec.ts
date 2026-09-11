@@ -147,7 +147,9 @@ describe('WebhookQueueProcessor Suite', () => {
 
     const result = await processor.process(mockJob);
 
-    expect(mockBillingWebhookService.processBillingWebhookEvent).not.toHaveBeenCalled();
+    expect(
+      mockBillingWebhookService.processBillingWebhookEvent,
+    ).not.toHaveBeenCalled();
     expect(result).toEqual({
       skipped: true,
       reason: 'Unknown job type: unknown-webhook-job',

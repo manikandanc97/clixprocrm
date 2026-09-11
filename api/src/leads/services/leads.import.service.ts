@@ -17,7 +17,8 @@ export class LeadsImportService {
   constructor(
     private readonly prisma: PrismaService,
     private readonly enc: EncryptionService,
-    @Optional() private readonly entitlementService?: SubscriptionEntitlementService,
+    @Optional()
+    private readonly entitlementService?: SubscriptionEntitlementService,
   ) {}
 
   async bulkImportLeads(
@@ -32,7 +33,11 @@ export class LeadsImportService {
 
     // Atomically validate that the workspace has sufficient lead capacity for this import
     if (duplicateStrategy !== 'update') {
-      await this.entitlementService?.assertWithinLimit(tenantId, 'maxLeads', leadsData.length);
+      await this.entitlementService?.assertWithinLimit(
+        tenantId,
+        'maxLeads',
+        leadsData.length,
+      );
     }
 
     let totalImported = 0;
@@ -73,13 +78,16 @@ export class LeadsImportService {
             ).toUpperCase();
             let priorityToUse = defaults.priority;
             if (row.priority) {
-              priorityToUse = String(row.priority).toUpperCase() as LeadPriority;
+              priorityToUse = String(
+                row.priority,
+              ).toUpperCase() as LeadPriority;
             }
 
             let valueToUse = 0;
             if (row.valueAmount !== undefined) {
               valueToUse =
-                parseFloat(String(row.valueAmount).replace(/[^0-9.-]+/g, '')) || 0;
+                parseFloat(String(row.valueAmount).replace(/[^0-9.-]+/g, '')) ||
+                0;
             } else if (row.value !== undefined) {
               valueToUse =
                 parseFloat(String(row.value).replace(/[^0-9.-]+/g, '')) || 0;
@@ -193,7 +201,11 @@ export class LeadsImportService {
             userId,
             action: 'BULK_IMPORT_LEADS',
             module: 'PIPELINE',
-            details: { imported: totalImported, skipped: totalSkipped, failed: totalFailed },
+            details: {
+              imported: totalImported,
+              skipped: totalSkipped,
+              failed: totalFailed,
+            },
           },
         });
       });

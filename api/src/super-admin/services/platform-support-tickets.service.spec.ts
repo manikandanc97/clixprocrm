@@ -25,7 +25,12 @@ describe('PlatformSupportTicketsService (Super Admin Operations)', () => {
     closedAt: null,
     createdAt: new Date(),
     updatedAt: new Date(),
-    tenant: { id: 'tenant-beta', name: 'Beta Corp', slug: 'beta', plan: 'enterprise' },
+    tenant: {
+      id: 'tenant-beta',
+      name: 'Beta Corp',
+      slug: 'beta',
+      plan: 'enterprise',
+    },
     createdBy: { id: 'user-bob', name: 'Bob', email: 'bob@beta.com' },
     assignedTo: null,
     attachments: [],
@@ -70,17 +75,27 @@ describe('PlatformSupportTicketsService (Super Admin Operations)', () => {
       ],
     }).compile();
 
-    service = module.get<PlatformSupportTicketsService>(PlatformSupportTicketsService);
+    service = module.get<PlatformSupportTicketsService>(
+      PlatformSupportTicketsService,
+    );
   });
 
   it('1. Lists tickets across all tenants with platform Super Admin context', async () => {
-    const result = await service.listTickets({ status: 'ALL', priority: 'ALL' });
+    const result = await service.listTickets({
+      status: 'ALL',
+      priority: 'ALL',
+    });
     expect(result.tickets).toHaveLength(1);
     expect(result.tickets[0].tenant.name).toBe('Beta Corp');
   });
 
   it('2. Super Admin public reply notifies ticket creator and creates sealed audit log', async () => {
-    await service.addReplyOrNote('ticket-101', 'sa-1', 'We have updated the SAML certificate', false);
+    await service.addReplyOrNote(
+      'ticket-101',
+      'sa-1',
+      'We have updated the SAML certificate',
+      false,
+    );
 
     expect(mockNotifications.createNotification).toHaveBeenCalledWith(
       'tenant-beta',
@@ -101,7 +116,12 @@ describe('PlatformSupportTicketsService (Super Admin Operations)', () => {
   it('3. Super Admin internal note does NOT notify ticket creator', async () => {
     mockNotifications.createNotification.mockClear();
 
-    await service.addReplyOrNote('ticket-101', 'sa-1', 'Internal: Check Okta connector logs', true);
+    await service.addReplyOrNote(
+      'ticket-101',
+      'sa-1',
+      'Internal: Check Okta connector logs',
+      true,
+    );
 
     expect(mockNotifications.createNotification).not.toHaveBeenCalled();
     expect(mockPrisma.createSealedAuditLog).toHaveBeenCalledWith(
@@ -112,7 +132,11 @@ describe('PlatformSupportTicketsService (Super Admin Operations)', () => {
   });
 
   it('4. Super Admin status update transitions to RESOLVED and records sealed audit log', async () => {
-    await service.updateTicketStatus('ticket-101', 'sa-1', SupportTicketStatus.RESOLVED);
+    await service.updateTicketStatus(
+      'ticket-101',
+      'sa-1',
+      SupportTicketStatus.RESOLVED,
+    );
 
     expect(mockNotifications.createNotification).toHaveBeenCalledWith(
       'tenant-beta',

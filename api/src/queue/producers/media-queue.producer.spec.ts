@@ -45,7 +45,9 @@ describe('MediaQueueProducer Suite', () => {
       });
 
       expect(result.enqueued).toBe(true);
-      expect(result.jobId).toMatch(/^branding-media:tenant-brand-1:staging_tenant-brand-1_raw-logo-12345_png:PROCESS_WORKSPACE_LOGO$/);
+      expect(result.jobId).toMatch(
+        /^branding-media:tenant-brand-1:staging_tenant-brand-1_raw-logo-12345_png:PROCESS_WORKSPACE_LOGO$/,
+      );
       expect(mockQueue.add).toHaveBeenCalledWith(
         MEDIA_JOB_NAMES.PROCESS_BRANDING,
         expect.objectContaining({
@@ -147,7 +149,9 @@ describe('MediaQueueProducer Suite', () => {
       });
 
       expect(result.enqueued).toBe(true);
-      expect(result.jobId).toMatch(/^avatar-media:usr-123:staging_avatars_usr-123_raw-avatar-12345_png:PROCESS_USER_AVATAR$/);
+      expect(result.jobId).toMatch(
+        /^avatar-media:usr-123:staging_avatars_usr-123_raw-avatar-12345_png:PROCESS_USER_AVATAR$/,
+      );
       expect(mockQueue.add).toHaveBeenCalledWith(
         MEDIA_JOB_NAMES.PROCESS_AVATAR,
         expect.objectContaining({

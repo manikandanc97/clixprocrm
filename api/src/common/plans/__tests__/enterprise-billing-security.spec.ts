@@ -2,7 +2,11 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { SubscriptionEntitlementService } from '../subscription-entitlement.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { BillingGatewayService } from '../../billing/billing-gateway.service';
-import { BadRequestException, ForbiddenException, NotFoundException } from '@nestjs/common';
+import {
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
+} from '@nestjs/common';
 
 describe('Enterprise Billing & Entitlement Security Tests', () => {
   let service: SubscriptionEntitlementService;
@@ -67,13 +71,24 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
     jest.clearAllMocks();
     mockPrisma.plan.findFirst.mockResolvedValue(null);
     mockPrisma.plan.findMany.mockResolvedValue([]);
-    mockPrisma.attachment.aggregate.mockResolvedValue({ _sum: { fileSize: 0 } });
+    mockPrisma.attachment.aggregate.mockResolvedValue({
+      _sum: { fileSize: 0 },
+    });
     mockPrisma.platformInvoice.count.mockResolvedValue(0);
     mockPrisma.platformPayment.count.mockResolvedValue(0);
-    mockPrisma.platformSubscription.create.mockResolvedValue({ id: 'sub-created-1' });
-    mockPrisma.platformSubscription.update.mockResolvedValue({ id: 'sub-updated-1' });
-    mockPrisma.platformInvoice.create.mockResolvedValue({ id: 'inv-created-1', invoiceNumber: 'CP-INV-2026-000001' });
-    mockPrisma.platformPayment.create.mockResolvedValue({ id: 'pay-created-1' });
+    mockPrisma.platformSubscription.create.mockResolvedValue({
+      id: 'sub-created-1',
+    });
+    mockPrisma.platformSubscription.update.mockResolvedValue({
+      id: 'sub-updated-1',
+    });
+    mockPrisma.platformInvoice.create.mockResolvedValue({
+      id: 'inv-created-1',
+      invoiceNumber: 'CP-INV-2026-000001',
+    });
+    mockPrisma.platformPayment.create.mockResolvedValue({
+      id: 'pay-created-1',
+    });
 
     const module: TestingModule = await Test.createTestingModule({
       providers: [
@@ -83,7 +98,9 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
       ],
     }).compile();
 
-    service = module.get<SubscriptionEntitlementService>(SubscriptionEntitlementService);
+    service = module.get<SubscriptionEntitlementService>(
+      SubscriptionEntitlementService,
+    );
     prisma = module.get<PrismaService>(PrismaService);
     billingGateway = module.get<BillingGatewayService>(BillingGatewayService);
   });
@@ -171,7 +188,12 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
       });
       mockPrisma.tenantUser.count.mockResolvedValue(5);
 
-      const quote = await service.calculateQuote('customer-tenant-1', 'starter', 5, 'monthly');
+      const quote = await service.calculateQuote(
+        'customer-tenant-1',
+        'starter',
+        5,
+        'monthly',
+      );
 
       // Starter plan: ₹499/user/mo * 5 users = ₹2495 subtotal
       expect(quote.subtotal).toBe(2495);
@@ -193,12 +215,19 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
       });
       mockPrisma.tenantUser.count.mockResolvedValue(2);
 
-      const quote = await service.calculateQuote('customer-tenant-1', 'starter', 2, 'annual');
+      const quote = await service.calculateQuote(
+        'customer-tenant-1',
+        'starter',
+        2,
+        'annual',
+      );
 
       // Starter annual: ₹4990/user/yr * 2 = ₹9980
       expect(quote.subtotal).toBe(9980);
       expect(quote.annualDiscountAmount).toBeGreaterThan(0);
-      expect(quote.totalAmountInMinorUnits).toBe(Math.round(quote.totalAmount * 100));
+      expect(quote.totalAmountInMinorUnits).toBe(
+        Math.round(quote.totalAmount * 100),
+      );
     });
   });
 
@@ -242,20 +271,26 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
       mockPrisma.tenantUser.count.mockResolvedValue(3);
       mockPrisma.platformSubscription.findFirst.mockResolvedValue(null);
 
-      const result = await service.verifyAndActivatePayment('customer-tenant-1', {
-        orderId: 'order_valid_123',
-        paymentId: 'pay_valid_456',
-        signature: 'valid_sig_hash',
-        planId: 'starter',
-        seats: 3,
-        billingCycle: 'monthly',
-      });
+      const result = await service.verifyAndActivatePayment(
+        'customer-tenant-1',
+        {
+          orderId: 'order_valid_123',
+          paymentId: 'pay_valid_456',
+          signature: 'valid_sig_hash',
+          planId: 'starter',
+          seats: 3,
+          billingCycle: 'monthly',
+        },
+      );
 
       expect(mockPrisma.$transaction).toHaveBeenCalled();
       expect(mockPrisma.tenant.update).toHaveBeenCalledWith(
         expect.objectContaining({
           where: { id: 'customer-tenant-1' },
-          data: expect.objectContaining({ plan: 'starter', subscriptionStatus: 'ACTIVE' }),
+          data: expect.objectContaining({
+            plan: 'starter',
+            subscriptionStatus: 'ACTIVE',
+          }),
         }),
       );
       expect(mockPrisma.platformPayment.create).toHaveBeenCalled();
@@ -274,7 +309,10 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
       });
 
       // Free plan does not have 'custom_modules' (requires Business)
-      const hasCustomModules = await service.hasFeature('customer-tenant-1', 'custom_modules');
+      const hasCustomModules = await service.hasFeature(
+        'customer-tenant-1',
+        'custom_modules',
+      );
       expect(hasCustomModules).toBe(false);
 
       await expect(

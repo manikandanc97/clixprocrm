@@ -76,14 +76,20 @@ export function ContextualSettingsDrawer({
   // Sync active section ONLY when drawer opens
   useEffect(() => {
     if (open) {
-      setActiveSectionId(defaultSection || sections[0]?.id || "");
+      const timer = setTimeout(() => {
+        setActiveSectionId(defaultSection || sections[0]?.id || "");
+      }, 0);
+      return () => clearTimeout(timer);
     }
-  }, [open, defaultSection]);
+  }, [open, defaultSection, sections]);
 
   // Fallback if current activeSectionId no longer exists
   useEffect(() => {
     if (sections.length > 0 && !sections.some((s) => s.id === activeSectionId)) {
-      setActiveSectionId(sections[0].id);
+      const timer = setTimeout(() => {
+        setActiveSectionId(sections[0].id);
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [sections, activeSectionId]);
 

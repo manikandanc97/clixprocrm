@@ -61,8 +61,12 @@ describe('BrandingService', () => {
     });
 
     it('should reject invalid / executable files', () => {
-      const invalidBuffer = Buffer.from('MZ...This program cannot be run in DOS mode');
-      expect(() => service.validateImageBuffer(invalidBuffer, 'malicious.exe')).toThrow();
+      const invalidBuffer = Buffer.from(
+        'MZ...This program cannot be run in DOS mode',
+      );
+      expect(() =>
+        service.validateImageBuffer(invalidBuffer, 'malicious.exe'),
+      ).toThrow();
     });
   });
 
@@ -142,9 +146,15 @@ describe('BrandingService', () => {
     beforeEach(() => {
       mockSupabase = {
         storage: {
-          listBuckets: jest.fn().mockResolvedValue({ data: [{ name: 'workspace-logos' }], error: null }),
+          listBuckets: jest.fn().mockResolvedValue({
+            data: [{ name: 'workspace-logos' }],
+            error: null,
+          }),
           from: jest.fn().mockReturnValue({
-            upload: jest.fn().mockResolvedValue({ data: { path: 'staging/path' }, error: null }),
+            upload: jest.fn().mockResolvedValue({
+              data: { path: 'staging/path' },
+              error: null,
+            }),
           }),
         },
       };
@@ -163,11 +173,17 @@ describe('BrandingService', () => {
         .png()
         .toBuffer();
 
-      const result = await service.persistRawMedia('tenant-unit-1', pngBuffer, 'logo.png');
+      const result = await service.persistRawMedia(
+        'tenant-unit-1',
+        pngBuffer,
+        'logo.png',
+      );
 
       expect(result.mimeType).toBe('image/png');
       expect(result.format).toBe('png');
-      expect(result.storagePath).toMatch(/^staging\/tenant-unit-1\/raw-logo-\d+\.png$/);
+      expect(result.storagePath).toMatch(
+        /^staging\/tenant-unit-1\/raw-logo-\d+\.png$/,
+      );
       expect(mockSupabase.storage.from).toHaveBeenCalledWith('workspace-logos');
     });
 
@@ -180,7 +196,9 @@ describe('BrandingService', () => {
 
     it('should reject invalid file types before uploading to storage', async () => {
       const invalidBuffer = Buffer.from('NOT_AN_IMAGE_BUFFER');
-      await expect(service.persistRawMedia('tenant-unit-1', invalidBuffer)).rejects.toThrow();
+      await expect(
+        service.persistRawMedia('tenant-unit-1', invalidBuffer),
+      ).rejects.toThrow();
       expect(mockSupabase.storage.from).not.toHaveBeenCalled();
     });
   });
@@ -203,18 +221,30 @@ describe('BrandingService', () => {
 
       mockSupabase = {
         storage: {
-          listBuckets: jest.fn().mockResolvedValue({ data: [{ name: 'workspace-logos' }], error: null }),
+          listBuckets: jest.fn().mockResolvedValue({
+            data: [{ name: 'workspace-logos' }],
+            error: null,
+          }),
           from: jest.fn().mockReturnValue({
             download: jest.fn().mockResolvedValue({
               data: {
-                arrayBuffer: async () => validPngBuffer.buffer.slice(validPngBuffer.byteOffset, validPngBuffer.byteOffset + validPngBuffer.byteLength),
+                arrayBuffer: async () =>
+                  validPngBuffer.buffer.slice(
+                    validPngBuffer.byteOffset,
+                    validPngBuffer.byteOffset + validPngBuffer.byteLength,
+                  ),
               },
               error: null,
             }),
-            upload: jest.fn().mockResolvedValue({ data: { path: 'uploaded' }, error: null }),
+            upload: jest
+              .fn()
+              .mockResolvedValue({ data: { path: 'uploaded' }, error: null }),
             remove: jest.fn().mockResolvedValue({ data: [], error: null }),
             getPublicUrl: jest.fn().mockReturnValue({
-              data: { publicUrl: 'https://example.com/storage/workspace-logos/tenant-unit-1/logo.webp' },
+              data: {
+                publicUrl:
+                  'https://example.com/storage/workspace-logos/tenant-unit-1/logo.webp',
+              },
             }),
           }),
         },
@@ -229,8 +259,12 @@ describe('BrandingService', () => {
         'logo.png',
       );
 
-      expect(result.storageUrl).toContain('https://example.com/storage/workspace-logos/tenant-unit-1/logo.webp?v=');
-      expect(result.storagePath).toBe('workspace-logos/tenant-unit-1/logo.webp');
+      expect(result.storageUrl).toContain(
+        'https://example.com/storage/workspace-logos/tenant-unit-1/logo.webp?v=',
+      );
+      expect(result.storagePath).toBe(
+        'workspace-logos/tenant-unit-1/logo.webp',
+      );
       expect(result.dominantColor.toLowerCase()).toMatch(/^#2[456]63eb$/);
       expect(mockSupabase.storage.from).toHaveBeenCalledWith('workspace-logos');
     });
@@ -243,7 +277,9 @@ describe('BrandingService', () => {
 
       await expect(
         service.processPersistedLogo('tenant-unit-1', 'staging/missing.png'),
-      ).rejects.toThrow('Failed to retrieve raw branding media from Supabase Storage: Object not found');
+      ).rejects.toThrow(
+        'Failed to retrieve raw branding media from Supabase Storage: Object not found',
+      );
     });
   });
 
@@ -253,7 +289,10 @@ describe('BrandingService', () => {
         storage: {
           from: jest.fn().mockReturnValue({
             getPublicUrl: jest.fn().mockReturnValue({
-              data: { publicUrl: 'https://example.com/storage/workspace-logos/tenant-xyz/logo.webp' },
+              data: {
+                publicUrl:
+                  'https://example.com/storage/workspace-logos/tenant-xyz/logo.webp',
+              },
             }),
           }),
         },
@@ -261,7 +300,9 @@ describe('BrandingService', () => {
       (service as any).getSupabase = jest.fn().mockReturnValue(mockSupabase);
 
       const url = service.getPublicLogoUrl('tenant-xyz');
-      expect(url).toMatch(/^https:\/\/example\.com\/storage\/workspace-logos\/tenant-xyz\/logo\.webp\?v=\d+$/);
+      expect(url).toMatch(
+        /^https:\/\/example\.com\/storage\/workspace-logos\/tenant-xyz\/logo\.webp\?v=\d+$/,
+      );
     });
   });
 
@@ -269,7 +310,10 @@ describe('BrandingService', () => {
     it('should validate and persist raw avatar buffer into staging', async () => {
       const mockSupabase = {
         storage: {
-          listBuckets: jest.fn().mockResolvedValue({ data: [{ name: 'workspace-logos' }], error: null }),
+          listBuckets: jest.fn().mockResolvedValue({
+            data: [{ name: 'workspace-logos' }],
+            error: null,
+          }),
           from: jest.fn().mockReturnValue({
             upload: jest.fn().mockResolvedValue({ error: null }),
           }),
@@ -278,13 +322,24 @@ describe('BrandingService', () => {
       (service as any).getSupabase = jest.fn().mockReturnValue(mockSupabase);
 
       const buffer = await sharp({
-        create: { width: 30, height: 30, channels: 4, background: { r: 10, g: 20, b: 30, alpha: 1 } },
+        create: {
+          width: 30,
+          height: 30,
+          channels: 4,
+          background: { r: 10, g: 20, b: 30, alpha: 1 },
+        },
       })
         .png()
         .toBuffer();
 
-      const result = await service.persistRawAvatar('usr-unit-1', buffer, 'profile.png');
-      expect(result.storagePath).toMatch(/^staging\/avatars\/usr-unit-1\/raw-avatar-\d+\.png$/);
+      const result = await service.persistRawAvatar(
+        'usr-unit-1',
+        buffer,
+        'profile.png',
+      );
+      expect(result.storagePath).toMatch(
+        /^staging\/avatars\/usr-unit-1\/raw-avatar-\d+\.png$/,
+      );
       expect(result.mimeType).toBe('image/png');
       expect(result.format).toBe('png');
       expect(mockSupabase.storage.from).toHaveBeenCalledWith('workspace-logos');
@@ -292,7 +347,9 @@ describe('BrandingService', () => {
 
     it('should throw if userId is missing', async () => {
       const buffer = Buffer.from('fake');
-      await expect(service.persistRawAvatar('', buffer)).rejects.toThrow('User ID is required for avatar upload');
+      await expect(service.persistRawAvatar('', buffer)).rejects.toThrow(
+        'User ID is required for avatar upload',
+      );
     });
   });
 
@@ -314,18 +371,26 @@ describe('BrandingService', () => {
 
       mockSupabase = {
         storage: {
-          listBuckets: jest.fn().mockResolvedValue({ data: [{ name: 'workspace-logos' }], error: null }),
+          listBuckets: jest.fn().mockResolvedValue({
+            data: [{ name: 'workspace-logos' }],
+            error: null,
+          }),
           from: jest.fn().mockReturnValue({
             download: jest.fn().mockResolvedValue({
               data: {
-                arrayBuffer: jest.fn().mockResolvedValue(sampleAvatarPng.buffer),
+                arrayBuffer: jest
+                  .fn()
+                  .mockResolvedValue(sampleAvatarPng.buffer),
               },
               error: null,
             }),
             upload: jest.fn().mockResolvedValue({ error: null }),
             remove: jest.fn().mockResolvedValue({ error: null }),
             getPublicUrl: jest.fn().mockReturnValue({
-              data: { publicUrl: 'https://example.com/storage/workspace-logos/avatars/usr-unit-1/avatar.webp' },
+              data: {
+                publicUrl:
+                  'https://example.com/storage/workspace-logos/avatars/usr-unit-1/avatar.webp',
+              },
             }),
           }),
         },
@@ -340,8 +405,12 @@ describe('BrandingService', () => {
         'profile.png',
       );
 
-      expect(result.storageUrl).toContain('https://example.com/storage/workspace-logos/avatars/usr-unit-1/avatar.webp?v=');
-      expect(result.storagePath).toBe('workspace-logos/avatars/usr-unit-1/avatar.webp');
+      expect(result.storageUrl).toContain(
+        'https://example.com/storage/workspace-logos/avatars/usr-unit-1/avatar.webp?v=',
+      );
+      expect(result.storagePath).toBe(
+        'workspace-logos/avatars/usr-unit-1/avatar.webp',
+      );
       expect(mockSupabase.storage.from).toHaveBeenCalledWith('workspace-logos');
     });
 
@@ -352,8 +421,13 @@ describe('BrandingService', () => {
       });
 
       await expect(
-        service.processPersistedAvatar('usr-unit-1', 'staging/avatars/usr-unit-1/missing.png'),
-      ).rejects.toThrow('Failed to retrieve raw avatar from Supabase Storage: File not found');
+        service.processPersistedAvatar(
+          'usr-unit-1',
+          'staging/avatars/usr-unit-1/missing.png',
+        ),
+      ).rejects.toThrow(
+        'Failed to retrieve raw avatar from Supabase Storage: File not found',
+      );
     });
   });
 
@@ -363,7 +437,10 @@ describe('BrandingService', () => {
         storage: {
           from: jest.fn().mockReturnValue({
             getPublicUrl: jest.fn().mockReturnValue({
-              data: { publicUrl: 'https://example.com/storage/workspace-logos/avatars/usr-abc/avatar.webp' },
+              data: {
+                publicUrl:
+                  'https://example.com/storage/workspace-logos/avatars/usr-abc/avatar.webp',
+              },
             }),
           }),
         },
@@ -371,7 +448,9 @@ describe('BrandingService', () => {
       (service as any).getSupabase = jest.fn().mockReturnValue(mockSupabase);
 
       const url = service.getPublicAvatarUrl('usr-abc');
-      expect(url).toMatch(/^https:\/\/example\.com\/storage\/workspace-logos\/avatars\/usr-abc\/avatar\.webp\?v=\d+$/);
+      expect(url).toMatch(
+        /^https:\/\/example\.com\/storage\/workspace-logos\/avatars\/usr-abc\/avatar\.webp\?v=\d+$/,
+      );
     });
   });
 });

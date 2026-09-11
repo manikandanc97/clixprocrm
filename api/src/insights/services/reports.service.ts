@@ -207,7 +207,9 @@ export class ReportsService {
         revenueChart[date.getMonth()].total += toNumber(lead.value);
       });
 
-      const funnelMap = new Map(funnelCounts.map((f) => [f.stage, f._count.id]));
+      const funnelMap = new Map(
+        funnelCounts.map((f) => [f.stage, f._count.id]),
+      );
       const funnel = [
         { stage: 'NEW', count: funnelMap.get('NEW') || 0, percentage: 0 },
         {
@@ -350,10 +352,9 @@ export class ReportsService {
       const completedTasks =
         salesActivitiesTasks.find((t) => t.status === 'COMPLETED')?._count.id ||
         0;
-      const pendingTasks =
-        salesActivitiesTasks
-          .filter((t) => t.status === 'PENDING' || t.status === 'IN_PROGRESS')
-          .reduce((sum, t) => sum + t._count.id, 0);
+      const pendingTasks = salesActivitiesTasks
+        .filter((t) => t.status === 'PENDING' || t.status === 'IN_PROGRESS')
+        .reduce((sum, t) => sum + t._count.id, 0);
       const salesActivities = [
         { name: 'Completed Tasks', value: completedTasks },
         { name: 'Pending Tasks', value: pendingTasks },

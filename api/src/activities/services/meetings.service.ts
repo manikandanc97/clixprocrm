@@ -12,7 +12,14 @@ export class MeetingsService {
     private readonly enc: EncryptionService,
   ) {}
 
-  private async checkConflict(tx: any, tenantId: string, ownerId: string, startTime: Date, endTime: Date, excludeMeetingId?: string) {
+  private async checkConflict(
+    tx: any,
+    tenantId: string,
+    ownerId: string,
+    startTime: Date,
+    endTime: Date,
+    excludeMeetingId?: string,
+  ) {
     const conflict = await tx.meeting.findFirst({
       where: {
         tenantId,
@@ -22,18 +29,24 @@ export class MeetingsService {
         OR: [
           { startTime: { lt: endTime, gte: startTime } },
           { endTime: { gt: startTime, lte: endTime } },
-          { startTime: { lte: startTime }, endTime: { gte: endTime } }
-        ]
-      }
+          { startTime: { lte: startTime }, endTime: { gte: endTime } },
+        ],
+      },
     });
     if (conflict) {
-      throw new HttpException({ success: false, message: 'Scheduling conflict detected for the owner.' }, HttpStatus.CONFLICT);
+      throw new HttpException(
+        {
+          success: false,
+          message: 'Scheduling conflict detected for the owner.',
+        },
+        HttpStatus.CONFLICT,
+      );
     }
   }
 
   private async getManagedUsers(tx: any, tenantId: string, userId: string) {
     const subordinates = await tx.tenantUser.findMany({
-      where: { tenantId, reportingManagerId: userId }
+      where: { tenantId, reportingManagerId: userId },
     });
     return subordinates.map((s: any) => s.userId);
   }
@@ -90,58 +103,106 @@ export class MeetingsService {
       }
 
       await tx.auditLog.create({
-        data: { tenantId, userId, action: 'MEETING_CREATED', module: 'CALENDAR', details: { meetingId: meeting.id } }
+        data: {
+          tenantId,
+          userId,
+          action: 'MEETING_CREATED',
+          module: 'CALENDAR',
+          details: { meetingId: meeting.id },
+        },
       });
 
       return meeting;
     });
   }
 
-  async updateMeeting(tenantId: string, user: any, id: string, data: UpdateMeetingDto) {
+  async updateMeeting(
+    tenantId: string,
+    user: any,
+    id: string,
+    data: UpdateMeetingDto,
+  ) {
     const userId = user.id || user.sub;
-    const rawRole = typeof user.role === 'object' ? user.role?.name || '' : String(user.role || '');
+    const rawRole =
+      typeof user.role === 'object'
+        ? user.role?.name || ''
+        : String(user.role || '');
     const role = rawRole.toUpperCase().replace(/[\s_]+/g, '');
-    const isAdmin = role === 'ADMIN' || role === 'SUPERADMIN' || role === 'OWNER';
+    const isAdmin =
+      role === 'ADMIN' || role === 'SUPERADMIN' || role === 'OWNER';
 
     return this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
       // @ts-ignore
       const existing = await tx.meeting.findUnique({ where: { id, tenantId } });
-      if (!existing) throw new HttpException('Meeting not found', HttpStatus.NOT_FOUND);
+      if (!existing)
+        throw new HttpException('Meeting not found', HttpStatus.NOT_FOUND);
 
       // RBAC Edit check
-      const isOwner = existing.ownerId === userId || existing.assignedToId === userId;
+      const isOwner =
+        existing.ownerId === userId || existing.assignedToId === userId;
       let isManager = false;
-      
+
       if (role === 'MANAGER') {
         const managed = await this.getManagedUsers(tx, tenantId, userId);
-        if (managed.includes(existing.ownerId) || managed.includes(existing.assignedToId)) isManager = true;
+        if (
+          managed.includes(existing.ownerId) ||
+          managed.includes(existing.assignedToId)
+        )
+          isManager = true;
       }
 
       if (!isOwner && !isAdmin && !isManager) {
-        throw new HttpException('Forbidden: Cannot edit this meeting', HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          'Forbidden: Cannot edit this meeting',
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       if (data.startTime && data.endTime) {
-         await this.checkConflict(tx, tenantId, existing.ownerId || existing.assignedToId || userId, new Date(data.startTime), new Date(data.endTime), id);
+        await this.checkConflict(
+          tx,
+          tenantId,
+          existing.ownerId || existing.assignedToId || userId,
+          new Date(data.startTime),
+          new Date(data.endTime),
+          id,
+        );
       }
 
       const updateData: any = {
         ...(data.title && { title: data.title }),
         ...(data.startTime && { startTime: new Date(data.startTime) }),
         ...(data.endTime && { endTime: new Date(data.endTime) }),
-        ...(data.location !== undefined && { location: this.enc.encrypt(data.location) }),
+        ...(data.location !== undefined && {
+          location: this.enc.encrypt(data.location),
+        }),
         ...(data.isOnline !== undefined && { isOnline: data.isOnline }),
-        ...(data.description !== undefined && { description: this.enc.encrypt(data.description) }),
+        ...(data.description !== undefined && {
+          description: this.enc.encrypt(data.description),
+        }),
         ...(data.assignedToId && { assignedToId: data.assignedToId }),
         ...(data.status && { status: data.status }),
         ...(data.visibility && { visibility: data.visibility }),
         ...(data.ownerId && { ownerId: data.ownerId }),
       };
 
-      if (data.startTime && new Date(data.startTime).getTime() !== existing.startTime.getTime()) {
-         await tx.auditLog.create({
-            data: { tenantId, userId, action: 'MEETING_RESCHEDULED', module: 'CALENDAR', details: { meetingId: id, oldStartAt: existing.startTime, newStartAt: data.startTime } }
-         });
+      if (
+        data.startTime &&
+        new Date(data.startTime).getTime() !== existing.startTime.getTime()
+      ) {
+        await tx.auditLog.create({
+          data: {
+            tenantId,
+            userId,
+            action: 'MEETING_RESCHEDULED',
+            module: 'CALENDAR',
+            details: {
+              meetingId: id,
+              oldStartAt: existing.startTime,
+              newStartAt: data.startTime,
+            },
+          },
+        });
       }
 
       // @ts-ignore
@@ -156,29 +217,41 @@ export class MeetingsService {
 
   async deleteMeeting(tenantId: string, user: any, id: string) {
     const userId = user.id || user.sub;
-    const rawRole = typeof user.role === 'object' ? user.role?.name || '' : String(user.role || '');
+    const rawRole =
+      typeof user.role === 'object'
+        ? user.role?.name || ''
+        : String(user.role || '');
     const role = rawRole.toUpperCase().replace(/[\s_]+/g, '');
-    const isAdmin = role === 'ADMIN' || role === 'SUPERADMIN' || role === 'OWNER';
+    const isAdmin =
+      role === 'ADMIN' || role === 'SUPERADMIN' || role === 'OWNER';
 
     return this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
       // @ts-ignore
       const existing = await tx.meeting.findUnique({ where: { id, tenantId } });
-      if (!existing) throw new HttpException('Meeting not found', HttpStatus.NOT_FOUND);
+      if (!existing)
+        throw new HttpException('Meeting not found', HttpStatus.NOT_FOUND);
 
-      const isOwner = existing.ownerId === userId || existing.assignedToId === userId;
+      const isOwner =
+        existing.ownerId === userId || existing.assignedToId === userId;
       let isManager = false;
-      
+
       if (role === 'MANAGER') {
         const managed = await this.getManagedUsers(tx, tenantId, userId);
         if (managed.includes(existing.ownerId)) isManager = true;
       }
 
       if (!isOwner && !isAdmin && !isManager) {
-        throw new HttpException('Forbidden: Cannot delete this meeting', HttpStatus.FORBIDDEN);
+        throw new HttpException(
+          'Forbidden: Cannot delete this meeting',
+          HttpStatus.FORBIDDEN,
+        );
       }
 
       if (existing.status === 'COMPLETED') {
-        throw new HttpException('Cannot delete a completed meeting, business history must be preserved.', HttpStatus.BAD_REQUEST);
+        throw new HttpException(
+          'Cannot delete a completed meeting, business history must be preserved.',
+          HttpStatus.BAD_REQUEST,
+        );
       }
 
       // @ts-ignore
@@ -186,23 +259,37 @@ export class MeetingsService {
         where: { id, tenantId },
         data: {
           status: 'CANCELLED',
-          cancelledAt: new Date()
-        }
+          cancelledAt: new Date(),
+        },
       });
     });
   }
 
-  async getMeetings(tenantId: string, user: any, startDate?: string, endDate?: string) {
+  async getMeetings(
+    tenantId: string,
+    user: any,
+    startDate?: string,
+    endDate?: string,
+  ) {
     const userId = user.id || user.sub;
-    const rawRole = typeof user.role === 'object' ? user.role?.name || '' : String(user.role || '');
+    const rawRole =
+      typeof user.role === 'object'
+        ? user.role?.name || ''
+        : String(user.role || '');
     const role = rawRole.toUpperCase().replace(/[\s_]+/g, '');
-    const isAdmin = role === 'ADMIN' || role === 'SUPERADMIN' || role === 'OWNER';
-    
-    let start = startDate ? new Date(startDate) : new Date();
-    let end = endDate ? new Date(endDate) : new Date(new Date().setMonth(new Date().getMonth() + 1));
+    const isAdmin =
+      role === 'ADMIN' || role === 'SUPERADMIN' || role === 'OWNER';
+
+    const start = startDate ? new Date(startDate) : new Date();
+    const end = endDate
+      ? new Date(endDate)
+      : new Date(new Date().setMonth(new Date().getMonth() + 1));
 
     return this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
-      const managedUsers = role === 'MANAGER' ? await this.getManagedUsers(tx, tenantId, userId) : [];
+      const managedUsers =
+        role === 'MANAGER'
+          ? await this.getManagedUsers(tx, tenantId, userId)
+          : [];
 
       // Fetch meetings and calendar-dated tasks in parallel
       const [meetings, tasks] = await Promise.all([
@@ -261,7 +348,10 @@ export class MeetingsService {
 
       const mappedMeetings = meetings.map((m: any) => ({
         id: m.id,
-        title: (m.visibility === 'PRIVATE' && m.ownerId !== userId && !isAdmin) ? 'Busy' : m.title,
+        title:
+          m.visibility === 'PRIVATE' && m.ownerId !== userId && !isAdmin
+            ? 'Busy'
+            : m.title,
         date: formatDate(m.startTime),
         startTime: m.startTime,
         endTime: m.endTime,
@@ -272,7 +362,7 @@ export class MeetingsService {
         isToday: false,
         attendees: m.assignedTo ? [m.assignedTo] : [],
         color: m.status === 'CANCELLED' ? '#ef4444' : '#2563eb',
-        isTask: false
+        isTask: false,
       }));
 
       const mappedTasks = tasks.map((t: any) => ({
@@ -288,10 +378,13 @@ export class MeetingsService {
         isToday: false,
         attendees: t.assignedTo ? [t.assignedTo] : [],
         color: t.status === 'COMPLETED' ? '#10b981' : '#f59e0b',
-        isTask: true
+        isTask: true,
       }));
 
-      return [...mappedMeetings, ...mappedTasks].sort((a, b) => new Date(a.startTime).getTime() - new Date(b.startTime).getTime());
+      return [...mappedMeetings, ...mappedTasks].sort(
+        (a, b) =>
+          new Date(a.startTime).getTime() - new Date(b.startTime).getTime(),
+      );
     });
   }
 
@@ -314,4 +407,3 @@ export class MeetingsService {
     });
   }
 }
-

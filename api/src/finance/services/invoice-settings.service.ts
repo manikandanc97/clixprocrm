@@ -62,26 +62,46 @@ export class InvoiceSettingsService {
       });
 
       const dataToSave: any = {
-        ...(dto.invoicePrefix !== undefined && { invoicePrefix: dto.invoicePrefix.toUpperCase().trim() }),
-        ...(dto.nextInvoiceNumber !== undefined && { nextInvoiceNumber: Math.max(1, dto.nextInvoiceNumber) }),
-        ...(dto.financialYear !== undefined && { financialYear: dto.financialYear }),
+        ...(dto.invoicePrefix !== undefined && {
+          invoicePrefix: dto.invoicePrefix.toUpperCase().trim(),
+        }),
+        ...(dto.nextInvoiceNumber !== undefined && {
+          nextInvoiceNumber: Math.max(1, dto.nextInvoiceNumber),
+        }),
+        ...(dto.financialYear !== undefined && {
+          financialYear: dto.financialYear,
+        }),
         ...(dto.gstin !== undefined && { gstin: dto.gstin?.toUpperCase() }),
         ...(dto.pan !== undefined && { pan: dto.pan?.toUpperCase() }),
         ...(dto.legalName !== undefined && { legalName: dto.legalName }),
-        ...(dto.billingAddress !== undefined && { billingAddress: dto.billingAddress }),
+        ...(dto.billingAddress !== undefined && {
+          billingAddress: dto.billingAddress,
+        }),
         ...(dto.city !== undefined && { city: dto.city }),
         ...(dto.state !== undefined && { state: dto.state }),
         ...(dto.postalCode !== undefined && { postalCode: dto.postalCode }),
         ...(dto.country !== undefined && { country: dto.country }),
         ...(dto.bankName !== undefined && { bankName: dto.bankName }),
-        ...(dto.accountNumber !== undefined && { accountNumber: dto.accountNumber }),
-        ...(dto.ifscCode !== undefined && { ifscCode: dto.ifscCode?.toUpperCase() }),
-        ...(dto.accountHolderName !== undefined && { accountHolderName: dto.accountHolderName }),
+        ...(dto.accountNumber !== undefined && {
+          accountNumber: dto.accountNumber,
+        }),
+        ...(dto.ifscCode !== undefined && {
+          ifscCode: dto.ifscCode?.toUpperCase(),
+        }),
+        ...(dto.accountHolderName !== undefined && {
+          accountHolderName: dto.accountHolderName,
+        }),
         ...(dto.upiId !== undefined && { upiId: dto.upiId }),
-        ...(dto.defaultNotes !== undefined && { defaultNotes: dto.defaultNotes }),
-        ...(dto.defaultTerms !== undefined && { defaultTerms: dto.defaultTerms }),
+        ...(dto.defaultNotes !== undefined && {
+          defaultNotes: dto.defaultNotes,
+        }),
+        ...(dto.defaultTerms !== undefined && {
+          defaultTerms: dto.defaultTerms,
+        }),
         ...(dto.taxType !== undefined && { taxType: dto.taxType }),
-        ...(dto.defaultTaxRate !== undefined && { defaultTaxRate: dto.defaultTaxRate }),
+        ...(dto.defaultTaxRate !== undefined && {
+          defaultTaxRate: dto.defaultTaxRate,
+        }),
       };
 
       const updated = existing

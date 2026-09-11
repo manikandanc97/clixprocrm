@@ -8,8 +8,12 @@ describe('P5 File Upload Security & Magic Byte Suite', () => {
   describe('1. Filename & Path Traversal Sanitization', () => {
     it('strips directory traversal sequences', () => {
       expect(sanitizeUploadedFilename('../../../etc/passwd')).toBe('passwd');
-      expect(sanitizeUploadedFilename('..\\..\\windows\\system32\\calc.exe')).toBe('calc.exe');
-      expect(sanitizeUploadedFilename('uploads/../../secret.pdf')).toBe('secret.pdf');
+      expect(
+        sanitizeUploadedFilename('..\\..\\windows\\system32\\calc.exe'),
+      ).toBe('calc.exe');
+      expect(sanitizeUploadedFilename('uploads/../../secret.pdf')).toBe(
+        'secret.pdf',
+      );
     });
 
     it('strips null bytes and control characters', () => {
@@ -18,13 +22,22 @@ describe('P5 File Upload Security & Magic Byte Suite', () => {
     });
 
     it('sanitizes unsafe characters to underscores', () => {
-      expect(sanitizeUploadedFilename('my report<script>?.pdf')).toBe('my_report_script__.pdf');
+      expect(sanitizeUploadedFilename('my report<script>?.pdf')).toBe(
+        'my_report_script__.pdf',
+      );
     });
   });
 
   describe('2. Dangerous & Executable Extensions', () => {
     it('rejects executable extensions', () => {
-      const exes = ['payload.exe', 'script.sh', 'batch.bat', 'shell.php', 'backdoor.py', 'code.ps1'];
+      const exes = [
+        'payload.exe',
+        'script.sh',
+        'batch.bat',
+        'shell.php',
+        'backdoor.py',
+        'code.ps1',
+      ];
       for (const f of exes) {
         const res = validateUploadedFile({
           filename: f,
@@ -41,7 +54,11 @@ describe('P5 File Upload Security & Magic Byte Suite', () => {
       for (const f of allowed) {
         const res = validateUploadedFile({
           filename: f,
-          mimeType: f.endsWith('.pdf') ? 'application/pdf' : f.endsWith('.jpg') ? 'image/jpeg' : 'image/png',
+          mimeType: f.endsWith('.pdf')
+            ? 'application/pdf'
+            : f.endsWith('.jpg')
+              ? 'image/jpeg'
+              : 'image/png',
           size: 1024,
         });
         expect(res.safe).toBe(true);
@@ -51,7 +68,9 @@ describe('P5 File Upload Security & Magic Byte Suite', () => {
 
   describe('3. Magic Byte Verification', () => {
     it('validates authentic PNG magic header', () => {
-      const pngBuffer = Buffer.from([0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a]);
+      const pngBuffer = Buffer.from([
+        0x89, 0x50, 0x4e, 0x47, 0x0d, 0x0a, 0x1a, 0x0a,
+      ]);
       const res = validateFileMagicBytes(pngBuffer, 'image/png');
       expect(res.valid).toBe(true);
       expect(res.detectedMime).toBe('image/png');

@@ -52,7 +52,8 @@ export class CustomersService {
             email: this.enc.decrypt(c.email),
             company: this.enc.decrypt(c.company),
             dealsCount: c._count.deals,
-            revenueValue: dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
+            revenueValue:
+              dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
           };
         });
 
@@ -69,7 +70,12 @@ export class CustomersService {
 
         return {
           customers: paginated,
-          pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+          },
         };
       }
 
@@ -103,14 +109,20 @@ export class CustomersService {
           email: this.enc.decrypt(c.email),
           company: this.enc.decrypt(c.company),
           dealsCount: c._count.deals,
-          revenueValue: dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
+          revenueValue:
+            dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
         };
         return decrypted;
       });
 
       return {
         customers: mappedCustomers,
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -188,5 +200,4 @@ export class CustomersService {
       });
     });
   }
-
 }

@@ -3,7 +3,10 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
 import { AuditArchiveService } from '../../common/audit/archive/audit-archive.service';
 import { SecurityIncidentsService } from './security-incidents.service';
-import { SecurityOperationsService, HealthStatus } from './security-operations.service';
+import {
+  SecurityOperationsService,
+  HealthStatus,
+} from './security-operations.service';
 import * as crypto from 'crypto';
 
 export interface SecurityControlItem {
@@ -137,7 +140,8 @@ export class SecurityGovernanceService {
     // Verify RLS dynamically
     let isRlsVerified = true;
     try {
-      const rlsCheck: Array<{ cnt: number }> = (await (this.prisma as any).$queryRaw`
+      const rlsCheck: Array<{ cnt: number }> =
+        (await (this.prisma as any).$queryRaw`
         SELECT COUNT(*)::int as cnt
         FROM pg_class c
         JOIN pg_namespace n ON n.oid = c.relnamespace
@@ -158,7 +162,8 @@ export class SecurityGovernanceService {
         name: 'Supabase Cryptographic JWT Verification',
         status: 'VERIFIED',
         severity: 'CRITICAL',
-        evidence: 'Authoritative server-side SupabaseAuthGuard extracts identity from verified JWT signatures',
+        evidence:
+          'Authoritative server-side SupabaseAuthGuard extracts identity from verified JWT signatures',
         lastVerifiedAt: now,
       },
       // 2. MFA
@@ -168,7 +173,8 @@ export class SecurityGovernanceService {
         name: 'AAL2 Multi-Factor Authentication Enforcement',
         status: 'VERIFIED',
         severity: 'CRITICAL',
-        evidence: 'AalGuard enforces AAL2 verification for all Super Admin and sensitive CRM mutation endpoints',
+        evidence:
+          'AalGuard enforces AAL2 verification for all Super Admin and sensitive CRM mutation endpoints',
         lastVerifiedAt: now,
       },
       // 3. SESSION
@@ -178,7 +184,8 @@ export class SecurityGovernanceService {
         name: 'Authoritative Session Registry & Dual Timeouts',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'UserSession table enforces 30m idle timeout, 24h absolute timeout, and instant revocation sets',
+        evidence:
+          'UserSession table enforces 30m idle timeout, 24h absolute timeout, and instant revocation sets',
         lastVerifiedAt: now,
       },
       // 4. RBAC
@@ -188,7 +195,8 @@ export class SecurityGovernanceService {
         name: 'Role-Based Access Control Matrix',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'RolePermission evaluation with SuperAdmin isolation and strict permission guards',
+        evidence:
+          'RolePermission evaluation with SuperAdmin isolation and strict permission guards',
         lastVerifiedAt: now,
       },
       // 5. RLS
@@ -210,7 +218,8 @@ export class SecurityGovernanceService {
         name: 'PostgreSQL AuditLog Immutability Trigger',
         status: 'VERIFIED',
         severity: 'CRITICAL',
-        evidence: 'trg_audit_log_immutable trigger strictly blocks UPDATE and DELETE operations on AuditLog table',
+        evidence:
+          'trg_audit_log_immutable trigger strictly blocks UPDATE and DELETE operations on AuditLog table',
         lastVerifiedAt: now,
       },
       // 7. CRYPTO
@@ -218,9 +227,11 @@ export class SecurityGovernanceService {
         controlId: 'CRYP-01',
         category: 'CRYPTO',
         name: 'HMAC-SHA256 Audit Record Sealing & Hash Chain',
-        status: health.auditIntegrity.status === 'HEALTHY' ? 'VERIFIED' : 'DEGRADED',
+        status:
+          health.auditIntegrity.status === 'HEALTHY' ? 'VERIFIED' : 'DEGRADED',
         severity: 'CRITICAL',
-        evidence: 'Deterministic HMAC-SHA256 canonical hashing with advisory locking and isolated tenant chains',
+        evidence:
+          'Deterministic HMAC-SHA256 canonical hashing with advisory locking and isolated tenant chains',
         lastVerifiedAt: now,
       },
       // 8. WORM
@@ -242,7 +253,8 @@ export class SecurityGovernanceService {
         name: 'Continuous 3-Tier Audit Integrity Monitor',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'AuditIntegrityMonitorService verifies cryptographic integrity, link continuity, and zero-write DR restore',
+        evidence:
+          'AuditIntegrityMonitorService verifies cryptographic integrity, link continuity, and zero-write DR restore',
         lastVerifiedAt: now,
       },
       // 10. INCIDENT
@@ -252,7 +264,8 @@ export class SecurityGovernanceService {
         name: 'Emergency Controls & Incident Response Lifecycle',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'Single-use break-glass codes, user/tenant lockdowns, and automated alert triage',
+        evidence:
+          'Single-use break-glass codes, user/tenant lockdowns, and automated alert triage',
         lastVerifiedAt: now,
       },
       // 11. NETWORK
@@ -262,7 +275,8 @@ export class SecurityGovernanceService {
         name: 'Enterprise SSRF Protection & Private IP Filtering',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'Blocks loopback, RFC1918, link-local, cloud metadata (169.254.169.254), and non-HTTP protocols',
+        evidence:
+          'Blocks loopback, RFC1918, link-local, cloud metadata (169.254.169.254), and non-HTTP protocols',
         lastVerifiedAt: now,
       },
       // 12. UPLOAD
@@ -272,7 +286,8 @@ export class SecurityGovernanceService {
         name: 'Magic-Byte File Verification & Extension Allowlist',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'Validates byte signatures for PNG/JPEG/GIF/WebP/PDF/ZIP and sanitizes path traversal sequences',
+        evidence:
+          'Validates byte signatures for PNG/JPEG/GIF/WebP/PDF/ZIP and sanitizes path traversal sequences',
         lastVerifiedAt: now,
       },
       // 13. INPUT
@@ -282,7 +297,8 @@ export class SecurityGovernanceService {
         name: 'Mass Assignment & Recursive XSS Sanitization',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'NestJS ValidationPipe whitelist transforms DTOs and scrubs script tags, iframes, and inline event handlers',
+        evidence:
+          'NestJS ValidationPipe whitelist transforms DTOs and scrubs script tags, iframes, and inline event handlers',
         lastVerifiedAt: now,
       },
       // 14. CONFIG
@@ -292,7 +308,8 @@ export class SecurityGovernanceService {
         name: 'Production Environment & Secret Validation',
         status: 'VERIFIED',
         severity: 'HIGH',
-        evidence: 'SecurityConfigValidator halts startup on placeholder secrets or missing mandatory configuration',
+        evidence:
+          'SecurityConfigValidator halts startup on placeholder secrets or missing mandatory configuration',
         lastVerifiedAt: now,
       },
       // 15. BACKUP
@@ -349,7 +366,8 @@ export class SecurityGovernanceService {
       } else {
         const catControls = controls.filter((c) => c.category === cat);
         isCatVerified =
-          catControls.length > 0 && catControls.every((c) => c.status === 'VERIFIED');
+          catControls.length > 0 &&
+          catControls.every((c) => c.status === 'VERIFIED');
       }
 
       const earned = isCatVerified ? weight : 0;
@@ -387,7 +405,8 @@ export class SecurityGovernanceService {
       verified: controls.filter((c) => c.status === 'VERIFIED').length,
       configured: controls.filter((c) => c.status === 'CONFIGURED').length,
       degraded: controls.filter((c) => c.status === 'DEGRADED').length,
-      notConfigured: controls.filter((c) => c.status === 'NOT_CONFIGURED').length,
+      notConfigured: controls.filter((c) => c.status === 'NOT_CONFIGURED')
+        .length,
     };
 
     const isWormConfigured = !!(
@@ -396,7 +415,8 @@ export class SecurityGovernanceService {
       process.env.AWS_SECRET_ACCESS_KEY
     );
 
-    const incidentsStatus = await this.incidentsService.getSecurityCenterStatus();
+    const incidentsStatus =
+      await this.incidentsService.getSecurityCenterStatus();
 
     return {
       overallStatus,
@@ -405,12 +425,14 @@ export class SecurityGovernanceService {
       complianceReadiness: [
         {
           framework: 'SOC 2 Type II Readiness',
-          readinessStatus: score >= 90 ? 'HIGH' : score >= 75 ? 'MEDIUM' : 'LOW',
+          readinessStatus:
+            score >= 90 ? 'HIGH' : score >= 75 ? 'MEDIUM' : 'LOW',
           verifiedControlsCount: summary.verified,
         },
         {
           framework: 'ISO/IEC 27001 Readiness',
-          readinessStatus: score >= 90 ? 'HIGH' : score >= 75 ? 'MEDIUM' : 'LOW',
+          readinessStatus:
+            score >= 90 ? 'HIGH' : score >= 75 ? 'MEDIUM' : 'LOW',
           verifiedControlsCount: summary.verified,
         },
         {
@@ -444,7 +466,11 @@ export class SecurityGovernanceService {
    */
   async getRlsGovernance() {
     try {
-      const rlsRows: Array<{ relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }> =
+      const rlsRows: Array<{
+        relname: string;
+        relrowsecurity: boolean;
+        relforcerowsecurity: boolean;
+      }> =
         (await (this.prisma as any).$queryRaw`
           SELECT c.relname, c.relrowsecurity, c.relforcerowsecurity
           FROM pg_class c
@@ -453,9 +479,14 @@ export class SecurityGovernanceService {
             AND c.relname = ANY(${this.TENANT_SCOPED_TABLES})
         `) || [];
 
-      const rlsMap = new Map<string, { relname: string; relrowsecurity: boolean; relforcerowsecurity: boolean }>(
-        rlsRows.map((r) => [r.relname, r]),
-      );
+      const rlsMap = new Map<
+        string,
+        {
+          relname: string;
+          relrowsecurity: boolean;
+          relforcerowsecurity: boolean;
+        }
+      >(rlsRows.map((r) => [r.relname, r]));
 
       const tableReports = this.TENANT_SCOPED_TABLES.map((table) => {
         const row = rlsMap.get(table);
@@ -465,7 +496,9 @@ export class SecurityGovernanceService {
           table,
           rlsEnabled,
           forceRlsEnabled,
-          tenantIsolationPolicy: rlsEnabled ? 'tenant_isolation_policy' : 'UNCONFIGURED',
+          tenantIsolationPolicy: rlsEnabled
+            ? 'tenant_isolation_policy'
+            : 'UNCONFIGURED',
           status: rlsEnabled ? 'VERIFIED_ACTIVE' : 'NOT_CONFIGURED',
         };
       });
@@ -547,11 +580,15 @@ export class SecurityGovernanceService {
       })),
     });
 
-    const checksum = crypto.createHash('sha256').update(canonicalPayload).digest('hex');
+    const checksum = crypto
+      .createHash('sha256')
+      .update(canonicalPayload)
+      .digest('hex');
     reportData.sha256Checksum = checksum;
 
     if (format === 'csv') {
-      const header = 'Control ID,Category,Name,Status,Severity,Evidence,Last Verified At\n';
+      const header =
+        'Control ID,Category,Name,Status,Severity,Evidence,Last Verified At\n';
       const rows = controls
         .map(
           (c) =>

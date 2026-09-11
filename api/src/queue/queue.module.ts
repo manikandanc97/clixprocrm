@@ -30,14 +30,23 @@ function parseRedisUrl(redisUrl: string) {
     const isStandard = url.protocol === 'redis:';
 
     if (!isTls && !isStandard) {
-      throw new Error(`Unsupported Redis protocol: "${url.protocol}". Expected "redis:" or "rediss:".`);
+      throw new Error(
+        `Unsupported Redis protocol: "${url.protocol}". Expected "redis:" or "rediss:".`,
+      );
     }
 
     const host = url.hostname || '127.0.0.1';
     const port = url.port ? parseInt(url.port, 10) : 6379;
-    const username = url.username ? decodeURIComponent(url.username) : undefined;
-    const password = url.password ? decodeURIComponent(url.password) : undefined;
-    const db = url.pathname && url.pathname.length > 1 ? parseInt(url.pathname.slice(1), 10) : 0;
+    const username = url.username
+      ? decodeURIComponent(url.username)
+      : undefined;
+    const password = url.password
+      ? decodeURIComponent(url.password)
+      : undefined;
+    const db =
+      url.pathname && url.pathname.length > 1
+        ? parseInt(url.pathname.slice(1), 10)
+        : 0;
 
     return {
       host,
@@ -67,16 +76,20 @@ function parseRedisUrl(redisUrl: string) {
       imports: [ConfigModule],
       inject: [ConfigService],
       useFactory: (configService: ConfigService) => {
-        const isProduction = configService.get<string>('NODE_ENV') === 'production';
+        const isProduction =
+          configService.get<string>('NODE_ENV') === 'production';
         const redisUrl = configService.get<string>('REDIS_URL');
 
         if (!redisUrl) {
           if (isProduction) {
-            const msg = '[FATAL] REDIS_URL environment variable is mandatory for BullMQ queue operations in production.';
+            const msg =
+              '[FATAL] REDIS_URL environment variable is mandatory for BullMQ queue operations in production.';
             logger.error(msg);
             throw new Error(msg);
           }
-          logger.warn('[QUEUE] REDIS_URL not set; defaulting to local redis://127.0.0.1:6379 for non-production environment.');
+          logger.warn(
+            '[QUEUE] REDIS_URL not set; defaulting to local redis://127.0.0.1:6379 for non-production environment.',
+          );
           return {
             connection: {
               host: '127.0.0.1',
@@ -135,6 +148,3 @@ function parseRedisUrl(redisUrl: string) {
   ],
 })
 export class QueueModule {}
-
-
-

@@ -44,10 +44,10 @@ describe('P5 Input Validation & Mass Assignment Protection Suite', () => {
         phone?: string;
       }
 
-      const cleanPayload = sanitizeDtoAssignment<UpdateProfileDto>(maliciousBody, [
-        'name',
-        'phone',
-      ]);
+      const cleanPayload = sanitizeDtoAssignment<UpdateProfileDto>(
+        maliciousBody,
+        ['name', 'phone'],
+      );
 
       expect(cleanPayload.name).toBe('Updated User Name');
       expect((cleanPayload as any).isSuperAdmin).toBeUndefined();
@@ -64,7 +64,9 @@ describe('P5 Input Validation & Mass Assignment Protection Suite', () => {
       };
 
       const allowedKeys = ['title', 'amount', 'status'];
-      const filteredKeys = Object.keys(payload).filter((k) => !allowedKeys.includes(k));
+      const filteredKeys = Object.keys(payload).filter(
+        (k) => !allowedKeys.includes(k),
+      );
 
       expect(filteredKeys).toEqual(['previousHash', 'recordHash']);
       expect(PROTECTED_SYSTEM_FIELDS).toEqual(

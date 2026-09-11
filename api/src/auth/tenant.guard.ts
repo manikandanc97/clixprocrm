@@ -81,7 +81,9 @@ export class TenantGuard implements CanActivate {
     }
 
     if (userRecord.status !== 'ACTIVE') {
-      throw new UnauthorizedException('User account is deactivated or suspended');
+      throw new UnauthorizedException(
+        'User account is deactivated or suspended',
+      );
     }
 
     if (userRecord.isSuperAdmin) {
@@ -121,7 +123,8 @@ export class TenantGuard implements CanActivate {
     }
 
     const membership = tenantId
-      ? userRecord.memberships.find((m: any) => m.tenantId === tenantId) || userRecord.memberships[0]
+      ? userRecord.memberships.find((m: any) => m.tenantId === tenantId) ||
+        userRecord.memberships[0]
       : userRecord.memberships[0];
 
     if (!membership) {
@@ -152,5 +155,3 @@ export class TenantGuard implements CanActivate {
     return true;
   }
 }
-
-

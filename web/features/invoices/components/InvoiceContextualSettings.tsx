@@ -148,9 +148,9 @@ export function InvoiceContextualSettings({
   defaultSection = "identity",
 }: InvoiceContextualSettingsProps) {
   const { data: settingsData } = useInvoiceSettings();
-  const settings = settingsData?.data || {};
+  const settings = settingsData?.data;
   const { data: workspaceData } = useWorkspace();
-  const workspace: any = workspaceData || {};
+  const workspace = workspaceData;
   const { mutateAsync: updateSettingsMutate, isPending } = useUpdateInvoiceSettings();
 
   // -------------------------------------------------------------
@@ -252,37 +252,40 @@ export function InvoiceContextualSettings({
   // Initialize from backend settings
   useEffect(() => {
     if (settings && Object.keys(settings).length > 0) {
-      setLegalName(settings.legalName || workspace?.name || "");
-      setGstin(settings.gstin || workspace?.taxId || "");
-      setPan(settings.pan || "");
-      setBillingAddress(settings.billingAddress || workspace?.address || "");
-      setCity(settings.city || "");
-      setState(settings.state || "Karnataka");
-      setPostalCode(settings.postalCode || "");
-      setCountry(settings.country || "India");
-      setTaxType(settings.taxType || "GST");
+      const timer = setTimeout(() => {
+        setLegalName(settings.legalName || workspace?.name || "");
+        setGstin(settings.gstin || workspace?.taxId || "");
+        setPan(settings.pan || "");
+        setBillingAddress(settings.billingAddress || workspace?.address || "");
+        setCity(settings.city || "");
+        setState(settings.state || "Karnataka");
+        setPostalCode(settings.postalCode || "");
+        setCountry(settings.country || "India");
+        setTaxType(settings.taxType || "GST");
 
-      if (settings.invoicePrefix) setInvoicePrefix(settings.invoicePrefix);
-      if (settings.financialYear) setFinancialYear(settings.financialYear);
-      if (settings.nextInvoiceNumber) setNextInvoiceNumber(String(settings.nextInvoiceNumber));
-      if (settings.defaultTaxRate !== undefined) setDefaultTaxRate(String(settings.defaultTaxRate));
-      if (settings.defaultNotes) setDefaultNotes(settings.defaultNotes);
-      if (settings.defaultTerms) setDefaultTerms(settings.defaultTerms);
+        if (settings.invoicePrefix) setInvoicePrefix(settings.invoicePrefix);
+        if (settings.financialYear) setFinancialYear(settings.financialYear);
+        if (settings.nextInvoiceNumber) setNextInvoiceNumber(String(settings.nextInvoiceNumber));
+        if (settings.defaultTaxRate !== undefined) setDefaultTaxRate(String(settings.defaultTaxRate));
+        if (settings.defaultNotes) setDefaultNotes(settings.defaultNotes);
+        if (settings.defaultTerms) setDefaultTerms(settings.defaultTerms);
 
-      // Initialize Bank Accounts
-      if (settings.bankName || settings.accountNumber) {
-        setBankAccounts([
-          {
-            id: "primary-bank",
-            bankName: settings.bankName || "HDFC Bank",
-            accountHolderName: settings.accountHolderName || settings.legalName || workspace?.name || "",
-            accountNumber: settings.accountNumber || "",
-            ifscCode: settings.ifscCode || "",
-            upiId: settings.upiId || "",
-            isPrimary: true,
-          },
-        ]);
-      }
+        // Initialize Bank Accounts
+        if (settings.bankName || settings.accountNumber) {
+          setBankAccounts([
+            {
+              id: "primary-bank",
+              bankName: settings.bankName || "HDFC Bank",
+              accountHolderName: settings.accountHolderName || settings.legalName || workspace?.name || "",
+              accountNumber: settings.accountNumber || "",
+              ifscCode: settings.ifscCode || "",
+              upiId: settings.upiId || "",
+              isPrimary: true,
+            },
+          ]);
+        }
+      }, 0);
+      return () => clearTimeout(timer);
     }
   }, [settings, workspace]);
 

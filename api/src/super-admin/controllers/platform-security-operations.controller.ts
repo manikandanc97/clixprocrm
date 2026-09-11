@@ -59,8 +59,13 @@ export class PlatformSecurityOperationsController {
       };
     }
 
-    if (queueName && Object.values(QUEUE_NAMES).includes(queueName as QueueName)) {
-      const data = await this.queueMetricsService.getSingleQueueMetrics(queueName as QueueName);
+    if (
+      queueName &&
+      Object.values(QUEUE_NAMES).includes(queueName as QueueName)
+    ) {
+      const data = await this.queueMetricsService.getSingleQueueMetrics(
+        queueName as QueueName,
+      );
       return { success: true, data };
     }
 
@@ -88,9 +93,15 @@ export class PlatformSecurityOperationsController {
     const limitNum = limit ? parseInt(limit, 10) : 20;
     const offsetNum = offset ? parseInt(offset, 10) : 0;
 
-    const targetQueues: QueueName[] = queueName && Object.values(QUEUE_NAMES).includes(queueName as QueueName)
-      ? [queueName as QueueName]
-      : [QUEUE_NAMES.EMAIL, QUEUE_NAMES.IMPORT, QUEUE_NAMES.WEBHOOK, QUEUE_NAMES.MEDIA];
+    const targetQueues: QueueName[] =
+      queueName && Object.values(QUEUE_NAMES).includes(queueName as QueueName)
+        ? [queueName as QueueName]
+        : [
+            QUEUE_NAMES.EMAIL,
+            QUEUE_NAMES.IMPORT,
+            QUEUE_NAMES.WEBHOOK,
+            QUEUE_NAMES.MEDIA,
+          ];
 
     const results = await Promise.all(
       targetQueues.map((q) =>
@@ -121,7 +132,10 @@ export class PlatformSecurityOperationsController {
       };
     }
 
-    const result = await this.queueMetricsService.retryDeadLetterJob(queueName as QueueName, jobId);
+    const result = await this.queueMetricsService.retryDeadLetterJob(
+      queueName as QueueName,
+      jobId,
+    );
     return { success: result.success, message: result.message };
   }
 
@@ -203,7 +217,11 @@ export class PlatformSecurityOperationsController {
     @Req() req: any,
   ) {
     const actorId = req.user?.id || 'SUPER_ADMIN';
-    const data = await this.alertsService.resolveAlert(id, body?.notes, actorId);
+    const data = await this.alertsService.resolveAlert(
+      id,
+      body?.notes,
+      actorId,
+    );
     return { success: true, data };
   }
 

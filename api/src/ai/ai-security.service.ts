@@ -1,7 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { PERMISSION_MODULES, PermissionModule } from '../common/role-permissions.constants';
+import {
+  PERMISSION_MODULES,
+  PermissionModule,
+} from '../common/role-permissions.constants';
 
 export interface UserSecurityContext {
   userId: string;
@@ -53,8 +56,10 @@ export class AiSecurityService {
         }
 
         const role = userRole || tenantUser?.role;
-        const rawRole = typeof role === 'object' ? role?.name || '' : String(role || '');
-        const roleName = rawRole.toUpperCase() || (isSuperAdmin ? 'SUPER_ADMIN' : '');
+        const rawRole =
+          typeof role === 'object' ? role?.name || '' : String(role || '');
+        const roleName =
+          rawRole.toUpperCase() || (isSuperAdmin ? 'SUPER_ADMIN' : '');
         const normRole = roleName.replace(/[\s_]+/g, '');
         const isSystemAdmin =
           isSuperAdmin ||
@@ -69,7 +74,11 @@ export class AiSecurityService {
         if (tenantUser && tenantId) {
           const [subordinates, teamMembers] = await Promise.all([
             tx.tenantUser.findMany({
-              where: { tenantId, reportingManagerId: tenantUser.id, status: 'ACTIVE' },
+              where: {
+                tenantId,
+                reportingManagerId: tenantUser.id,
+                status: 'ACTIVE',
+              },
               select: { userId: true },
             }),
             tenantUser.departmentId
@@ -93,7 +102,9 @@ export class AiSecurityService {
           tenantId: tenantId || '',
           roleName: roleName || (isSuperAdmin ? 'SUPER_ADMIN' : 'USER'),
           isSystemAdmin,
-          permissions: isRoleActive ? (role?.permissions || [{ module: 'ALL', hasAccess: true }]) : [],
+          permissions: isRoleActive
+            ? role?.permissions || [{ module: 'ALL', hasAccess: true }]
+            : [],
           departmentId: tenantUser?.departmentId || null,
           subordinateUserIds,
           teamUserIds,
@@ -123,7 +134,9 @@ export class AiSecurityService {
   /**
    * Builds record visibility WHERE clause for Leads.
    */
-  getLeadsVisibilityFilter(context: UserSecurityContext): Prisma.LeadWhereInput {
+  getLeadsVisibilityFilter(
+    context: UserSecurityContext,
+  ): Prisma.LeadWhereInput {
     const baseWhere: Prisma.LeadWhereInput = {
       tenantId: context.tenantId,
       deletedAt: null,
@@ -148,17 +161,16 @@ export class AiSecurityService {
     // Default Employee / Sales scoping
     return {
       ...baseWhere,
-      OR: [
-        { assignedToId: context.userId },
-        { createdById: context.userId },
-      ],
+      OR: [{ assignedToId: context.userId }, { createdById: context.userId }],
     };
   }
 
   /**
    * Builds record visibility WHERE clause for Deals.
    */
-  getDealsVisibilityFilter(context: UserSecurityContext): Prisma.DealWhereInput {
+  getDealsVisibilityFilter(
+    context: UserSecurityContext,
+  ): Prisma.DealWhereInput {
     const baseWhere: Prisma.DealWhereInput = {
       tenantId: context.tenantId,
       deletedAt: null,
@@ -202,10 +214,7 @@ export class AiSecurityService {
       const allowedUserIds = [context.userId, ...context.subordinateUserIds];
       return {
         ...baseWhere,
-        OR: [
-          { assignedToId: { in: allowedUserIds } },
-          { assignedToId: null },
-        ],
+        OR: [{ assignedToId: { in: allowedUserIds } }, { assignedToId: null }],
       };
     }
 
@@ -219,7 +228,9 @@ export class AiSecurityService {
   /**
    * Builds record visibility WHERE clause for Tasks.
    */
-  getTasksVisibilityFilter(context: UserSecurityContext): Prisma.TaskWhereInput {
+  getTasksVisibilityFilter(
+    context: UserSecurityContext,
+  ): Prisma.TaskWhereInput {
     const baseWhere: Prisma.TaskWhereInput = {
       tenantId: context.tenantId,
       deletedAt: null,
@@ -316,10 +327,7 @@ export class AiSecurityService {
       const allowedUserIds = [context.userId, ...context.subordinateUserIds];
       return {
         ...baseWhere,
-        OR: [
-          { assignedToId: { in: allowedUserIds } },
-          { assignedToId: null },
-        ],
+        OR: [{ assignedToId: { in: allowedUserIds } }, { assignedToId: null }],
       };
     }
 
@@ -341,22 +349,25 @@ export class AiSecurityService {
     details?: Record<string, any>,
   ): Promise<void> {
     try {
-      await this.prisma.withTenantContext({ tenantId: context.tenantId }, async (tx) => {
-        await tx.auditLog.create({
-          data: {
-            tenantId: context.tenantId,
-            userId: context.userId,
-            action: `AI_TOOL:${toolName}`,
-            module: 'AI_CHAT',
-            details: {
-              toolName,
-              status,
-              role: context.roleName,
-              ...details,
+      await this.prisma.withTenantContext(
+        { tenantId: context.tenantId },
+        async (tx) => {
+          await tx.auditLog.create({
+            data: {
+              tenantId: context.tenantId,
+              userId: context.userId,
+              action: `AI_TOOL:${toolName}`,
+              module: 'AI_CHAT',
+              details: {
+                toolName,
+                status,
+                role: context.roleName,
+                ...details,
+              },
             },
-          },
-        });
-      });
+          });
+        },
+      );
     } catch (e: any) {
       this.logger.error(`Failed to record AI tool audit log: ${e.message}`);
     }

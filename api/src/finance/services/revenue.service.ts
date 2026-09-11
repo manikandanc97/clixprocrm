@@ -148,7 +148,9 @@ export class RevenueService {
 
       let achievementPercentage = 0;
       if (targetValue > 0) {
-        achievementPercentage = Math.round((currentRevenue / targetValue) * 100);
+        achievementPercentage = Math.round(
+          (currentRevenue / targetValue) * 100,
+        );
       }
 
       let trend = 0;
@@ -181,4 +183,3 @@ export class RevenueService {
     });
   }
 }
-

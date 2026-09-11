@@ -52,7 +52,11 @@ export class AuthorizationCacheService {
   getPermissions(
     tenantId: string,
     userId: string,
-  ): { permissions: Map<string, DataScope>; isOrgOwner: boolean; isSuperAdmin: boolean } | null {
+  ): {
+    permissions: Map<string, DataScope>;
+    isOrgOwner: boolean;
+    isSuperAdmin: boolean;
+  } | null {
     const key = this.userKey(tenantId, userId);
     const cached = this.permissionCache.get(key);
     if (!cached || cached.expiresAt <= Date.now()) {
@@ -137,7 +141,9 @@ export class AuthorizationCacheService {
     this.permissionCache.delete(key);
     this.teamCache.delete(key);
     this.hierarchyCache.delete(key);
-    this.logger.debug(`Invalidated auth cache for user ${userId} in tenant ${tenantId}`);
+    this.logger.debug(
+      `Invalidated auth cache for user ${userId} in tenant ${tenantId}`,
+    );
   }
 
   invalidateTenant(tenantId: string): void {

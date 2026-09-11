@@ -1,5 +1,8 @@
 import { Test } from '@nestjs/testing';
-import { FastifyAdapter, NestFastifyApplication } from '@nestjs/platform-fastify';
+import {
+  FastifyAdapter,
+  NestFastifyApplication,
+} from '@nestjs/platform-fastify';
 import { Controller, Get, Module } from '@nestjs/common';
 
 @Controller('health')

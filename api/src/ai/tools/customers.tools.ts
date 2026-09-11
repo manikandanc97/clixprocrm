@@ -20,29 +20,65 @@ export function buildCustomersTools(
 ) {
   return {
     getCustomers: tool({
-      description: 'Get a list of customers visible to the user. Optionally filter by status.',
+      description:
+        'Get a list of customers visible to the user. Optionally filter by status.',
       parameters: z.object({
-        limit: z.number().optional().describe('Maximum number of customers to return. Default is 5, max 50.'),
-        status: z.string().optional().describe('Customer status to filter by (e.g. ACTIVE, PREMIUM, INACTIVE)'),
-        search: z.string().optional().describe('Search query for customer or company name'),
+        limit: z
+          .number()
+          .optional()
+          .describe(
+            'Maximum number of customers to return. Default is 5, max 50.',
+          ),
+        status: z
+          .string()
+          .optional()
+          .describe(
+            'Customer status to filter by (e.g. ACTIVE, PREMIUM, INACTIVE)',
+          ),
+        search: z
+          .string()
+          .optional()
+          .describe('Search query for customer or company name'),
       }),
-      execute: async (args: { limit?: number; status?: string; search?: string }) => {
+      execute: async (args: {
+        limit?: number;
+        status?: string;
+        search?: string;
+      }) => {
         const toolName = 'getCustomers';
-        const hasContactsPerm = aiSecurityService.hasModulePermission(userContext, PERMISSION_MODULES.CONTACTS);
-        const hasCompaniesPerm = aiSecurityService.hasModulePermission(userContext, PERMISSION_MODULES.COMPANIES);
-        const hasDashboardPerm = aiSecurityService.hasModulePermission(userContext, PERMISSION_MODULES.DASHBOARD);
+        const hasContactsPerm = aiSecurityService.hasModulePermission(
+          userContext,
+          PERMISSION_MODULES.CONTACTS,
+        );
+        const hasCompaniesPerm = aiSecurityService.hasModulePermission(
+          userContext,
+          PERMISSION_MODULES.COMPANIES,
+        );
+        const hasDashboardPerm = aiSecurityService.hasModulePermission(
+          userContext,
+          PERMISSION_MODULES.DASHBOARD,
+        );
 
         if (!hasContactsPerm && !hasCompaniesPerm && !hasDashboardPerm) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'DENIED', {
-            reason: 'Missing Contacts/Companies/Dashboard permission',
-          });
-          return { error: 'ACCESS_DENIED', message: 'You do not have permission to view Customers.' };
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'DENIED',
+            {
+              reason: 'Missing Contacts/Companies/Dashboard permission',
+            },
+          );
+          return {
+            error: 'ACCESS_DENIED',
+            message: 'You do not have permission to view Customers.',
+          };
         }
 
         try {
           const { limit = 5, status, search } = args;
           const safeLimit = Math.max(1, Math.min(limit, 50));
-          const visibilityFilter = aiSecurityService.getCustomersVisibilityFilter(userContext);
+          const visibilityFilter =
+            aiSecurityService.getCustomersVisibilityFilter(userContext);
 
           // Note: search on encrypted fields must be done post-decryption
           const whereClause: any = { ...visibilityFilter };
@@ -56,7 +92,15 @@ export function buildCustomersTools(
                 orderBy: { createdAt: 'desc' },
                 // Fetch more when search is active so we can filter post-decryption
                 take: search ? Math.min(safeLimit * 10, 200) : safeLimit,
-                select: { id: true, name: true, company: true, email: true, status: true, revenue: true, createdAt: true },
+                select: {
+                  id: true,
+                  name: true,
+                  company: true,
+                  email: true,
+                  status: true,
+                  revenue: true,
+                  createdAt: true,
+                },
               }),
           );
 
@@ -76,17 +120,31 @@ export function buildCustomersTools(
             ? decrypted
                 .filter(
                   (c) =>
-                    (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
-                    (c.company || '').toLowerCase().includes(search.toLowerCase()),
+                    (c.name || '')
+                      .toLowerCase()
+                      .includes(search.toLowerCase()) ||
+                    (c.company || '')
+                      .toLowerCase()
+                      .includes(search.toLowerCase()),
                 )
                 .slice(0, safeLimit)
             : decrypted;
 
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ALLOWED', { count: filtered.length });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ALLOWED',
+            { count: filtered.length },
+          );
 
           return filtered;
         } catch (e: any) {
-          await aiSecurityService.logToolExecution(userContext, toolName, 'ERROR', { error: e.message });
+          await aiSecurityService.logToolExecution(
+            userContext,
+            toolName,
+            'ERROR',
+            { error: e.message },
+          );
           return { error: 'Failed to fetch customers.', details: e.message };
         }
       },

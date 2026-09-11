@@ -53,8 +53,7 @@ export class EmailQueueProducer {
     const tenantId = payload.tenantId || 'system';
     const userId = payload.userId || 'system';
     const jobId =
-      payload.jobId ||
-      `security-alert:${tenantId}:${userId}:${correlationId}`;
+      payload.jobId || `security-alert:${tenantId}:${userId}:${correlationId}`;
 
     const fullPayload: SecurityAlertJobPayload = {
       ...payload,
@@ -91,7 +90,10 @@ export class EmailQueueProducer {
    * Enqueues an invoice notification email.
    */
   async enqueueInvoiceNotification(
-    payload: Omit<InvoiceNotificationJobPayload, 'correlationId' | 'timestamp'> & {
+    payload: Omit<
+      InvoiceNotificationJobPayload,
+      'correlationId' | 'timestamp'
+    > & {
       correlationId?: string;
       timestamp?: string;
     },
@@ -102,8 +104,7 @@ export class EmailQueueProducer {
       ? payload.options.recipientEmail.replace(/[^a-zA-Z0-9_-]/g, '_')
       : 'default';
     const jobId =
-      payload.jobId ||
-      `invoice-email:${payload.invoiceId}:${recipientSuffix}`;
+      payload.jobId || `invoice-email:${payload.invoiceId}:${recipientSuffix}`;
 
     const fullPayload: InvoiceNotificationJobPayload = {
       ...payload,
@@ -145,8 +146,7 @@ export class EmailQueueProducer {
   ): Promise<{ enqueued: boolean; jobId?: string }> {
     const correlationId = payload.correlationId || randomUUID();
     const timestamp = payload.timestamp || new Date().toISOString();
-    const jobId =
-      payload.jobId || `payment-receipt:${payload.paymentId}`;
+    const jobId = payload.jobId || `payment-receipt:${payload.paymentId}`;
 
     const fullPayload: PaymentReceiptJobPayload = {
       ...payload,
@@ -234,7 +234,8 @@ export class EmailQueueProducer {
   ): Promise<{ enqueued: boolean; jobId?: string; reason?: string }> {
     const correlationId = payload.correlationId || randomUUID();
     const timestamp = payload.timestamp || new Date().toISOString();
-    const jobId = payload.jobId || `sync-inbox:${payload.tenantId}:${payload.accountId}`;
+    const jobId =
+      payload.jobId || `sync-inbox:${payload.tenantId}:${payload.accountId}`;
 
     const fullPayload: SyncInboxJobPayload = {
       ...payload,
@@ -259,11 +260,17 @@ export class EmailQueueProducer {
           this.logger.warn(
             `[EMAIL QUEUE] Sync job ${jobId} already in state "${state}"; skipping duplicate enqueue.`,
           );
-          return { enqueued: false, jobId, reason: `Job already in state: ${state}` };
+          return {
+            enqueued: false,
+            jobId,
+            reason: `Job already in state: ${state}`,
+          };
         }
       }
     } catch (err: any) {
-      this.logger.warn(`Notice while checking existing sync job ${jobId}: ${err?.message || err}`);
+      this.logger.warn(
+        `Notice while checking existing sync job ${jobId}: ${err?.message || err}`,
+      );
     }
 
     const job = await this.emailQueue.add(

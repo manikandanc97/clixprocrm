@@ -7,10 +7,6 @@ import {
   X,
   Download,
   MoreVertical,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
   Loader2,
   Trash2,
   AlertTriangle,
@@ -47,6 +43,7 @@ import { SuperAdminTicketModal } from "./SuperAdminTicketModal";
 import {
   CRMPageContainer,
   formatTicketCode,
+  CRMPagination,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
 import { cn } from "@/shared/lib/utils";
@@ -804,100 +801,18 @@ export default function SuperAdminSupportPage() {
         </div>
 
         {/* Bottom Pagination */}
-        <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
-          <div>
-            Showing{" "}
-            <span className="font-semibold text-foreground">
-              {totalCount === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
-            </span>
-            -
-            <span className="font-semibold text-foreground">
-              {Math.min(currentPage * rowsPerPage, totalCount)}
-            </span>{" "}
-            of <span className="font-semibold text-foreground">{totalCount}</span> Tickets
-          </div>
-
-          <div className="flex items-center gap-4">
-            <div className="flex items-center gap-2">
-              <span>Rows per page:</span>
-              <select
-                value={rowsPerPage}
-                onChange={(e) => {
-                  setRowsPerPage(Number(e.target.value));
-                  setCurrentPage(1);
-                }}
-                className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-              >
-                <option value={10}>10</option>
-                <option value={15}>15</option>
-                <option value={25}>25</option>
-                <option value={50}>50</option>
-                <option value={100}>100</option>
-              </select>
-            </div>
-
-            <div className="flex items-center gap-3">
-              <span>
-                Page <strong className="text-foreground">{currentPage}</strong> of{" "}
-                <strong className="text-foreground">{totalPages}</strong>
-              </span>
-
-              <div className="flex items-center gap-1">
-                {/* First Page */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage(1)}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="First page"
-                  aria-label="First page"
-                >
-                  <AppIcon name="chevronsLeft" icon={ChevronsLeft} size={14} className="h-4 w-4" />
-                </Button>
-
-                {/* Previous Page */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage <= 1}
-                  onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="Previous page"
-                  aria-label="Previous page"
-                >
-                  <AppIcon name="chevronLeft" icon={ChevronLeft} size={14} className="h-4 w-4" />
-                </Button>
-
-                {/* Next Page */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="Next page"
-                  aria-label="Next page"
-                >
-                  <AppIcon name="chevronRight" icon={ChevronRight} size={14} className="h-4 w-4" />
-                </Button>
-
-                {/* Last Page */}
-                <Button
-                  variant="outline"
-                  size="icon"
-                  disabled={currentPage >= totalPages}
-                  onClick={() => setCurrentPage(totalPages)}
-                  className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
-                  title="Last page"
-                  aria-label="Last page"
-                >
-                  <AppIcon name="chevronsRight" icon={ChevronsRight} size={14} className="h-4 w-4" />
-                </Button>
-              </div>
-            </div>
-          </div>
-        </div>
+        <CRMPagination
+          currentPage={currentPage}
+          totalPages={totalPages}
+          totalItems={totalCount}
+          rowsPerPage={rowsPerPage}
+          onPageChange={setCurrentPage}
+          onRowsPerPageChange={(rows) => {
+            setRowsPerPage(rows);
+            setCurrentPage(1);
+          }}
+          itemName="Tickets"
+        />
       </div>
 
       {/* Delete Confirmation Dialog */}

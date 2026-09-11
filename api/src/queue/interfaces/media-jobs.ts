@@ -102,7 +102,4 @@ export interface AvatarMediaJobPayload extends BaseJobPayload {
   operation: 'PROCESS_USER_AVATAR';
 }
 
-export type MediaJobPayload =
-  | BrandingMediaJobPayload
-  | AvatarMediaJobPayload;
-
+export type MediaJobPayload = BrandingMediaJobPayload | AvatarMediaJobPayload;

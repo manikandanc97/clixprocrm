@@ -18,7 +18,12 @@ import { AuthModule } from '../auth/auth.module';
     RolesController,
     RoleManagementController,
   ],
-  providers: [DepartmentsService, EmployeesService, RolesService, RoleStatsService],
+  providers: [
+    DepartmentsService,
+    EmployeesService,
+    RolesService,
+    RoleStatsService,
+  ],
   exports: [RolesService, EmployeesService],
 })
 export class AdminModule {}

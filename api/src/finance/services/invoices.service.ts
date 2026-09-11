@@ -68,9 +68,18 @@ export class InvoicesService {
   /**
    * Helper to check and evaluate overdue invoices.
    */
-  private checkIsOverdue(dueDate: Date | null, balanceAmount: number, status: string): boolean {
+  private checkIsOverdue(
+    dueDate: Date | null,
+    balanceAmount: number,
+    status: string,
+  ): boolean {
     if (!dueDate || balanceAmount <= 0) return false;
-    if (status === 'PAID' || status === 'CANCELLED' || status === 'VOID' || status === 'REFUNDED') {
+    if (
+      status === 'PAID' ||
+      status === 'CANCELLED' ||
+      status === 'VOID' ||
+      status === 'REFUNDED'
+    ) {
       return false;
     }
     const today = new Date();
@@ -85,7 +94,7 @@ export class InvoicesService {
   ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       // 1. Determine customer & company linkage
-      let customerId = data.customerId || null;
+      const customerId = data.customerId || null;
       let companyId = data.companyId || null;
 
       if (customerId && !companyId) {
@@ -100,26 +109,30 @@ export class InvoicesService {
       const [settings, tenant, customer] = await Promise.all([
         tx.tenantInvoiceSettings.findUnique({ where: { tenantId } }),
         tx.tenant.findUnique({ where: { id: tenantId } }),
-        customerId ? tx.customer.findFirst({ where: { id: customerId, tenantId } }) : null,
+        customerId
+          ? tx.customer.findFirst({ where: { id: customerId, tenantId } })
+          : null,
       ]);
 
       const isInterState = Boolean(
         settings?.state &&
-          data.customerBillingAddress?.state &&
-          settings.state.trim().toLowerCase() !== data.customerBillingAddress.state.trim().toLowerCase(),
+        data.customerBillingAddress?.state &&
+        settings.state.trim().toLowerCase() !==
+          data.customerBillingAddress.state.trim().toLowerCase(),
       );
 
       // 3. Perform server-side precise financial calculation
-      const rawItems = data.items && data.items.length > 0
-        ? data.items
-        : [
-            {
-              name: 'Custom Service / Product',
-              quantity: 1,
-              unitPrice: data.amount || 0,
-              taxRate: settings ? toNumber(settings.defaultTaxRate) : 18.0,
-            },
-          ];
+      const rawItems =
+        data.items && data.items.length > 0
+          ? data.items
+          : [
+              {
+                name: 'Custom Service / Product',
+                quantity: 1,
+                unitPrice: data.amount || 0,
+                taxRate: settings ? toNumber(settings.defaultTaxRate) : 18.0,
+              },
+            ];
 
       const calc = calculateInvoiceTotals({
         items: rawItems,
@@ -130,11 +143,34 @@ export class InvoicesService {
       });
 
       // 4. Allocate unique invoice number
-      const invoiceNumber = data.invoiceNumber?.trim() || (await this.allocateInvoiceNumber(tenantId, tx));
+      const invoiceNumber =
+        data.invoiceNumber?.trim() ||
+        (await this.allocateInvoiceNumber(tenantId, tx));
 
       // 5. Build billing address snapshots
-      const customerBillingSnapshot = data.customerBillingAddress || (customer ? { name: customer.name, email: customer.email, company: customer.company } : null);
-      const orgBillingSnapshot = data.orgBillingAddress || (settings ? { legalName: settings.legalName, gstin: settings.gstin, pan: settings.pan, address: settings.billingAddress, bankName: settings.bankName, accountNumber: settings.accountNumber, ifscCode: settings.ifscCode, upiId: settings.upiId } : { legalName: tenant?.name, address: tenant?.address });
+      const customerBillingSnapshot =
+        data.customerBillingAddress ||
+        (customer
+          ? {
+              name: customer.name,
+              email: customer.email,
+              company: customer.company,
+            }
+          : null);
+      const orgBillingSnapshot =
+        data.orgBillingAddress ||
+        (settings
+          ? {
+              legalName: settings.legalName,
+              gstin: settings.gstin,
+              pan: settings.pan,
+              address: settings.billingAddress,
+              bankName: settings.bankName,
+              accountNumber: settings.accountNumber,
+              ifscCode: settings.ifscCode,
+              upiId: settings.upiId,
+            }
+          : { legalName: tenant?.name, address: tenant?.address });
 
       // 6. Create Invoice in Database
       const invoice = await tx.invoice.create({
@@ -145,10 +181,13 @@ export class InvoicesService {
           dealId: data.dealId || null,
           quotationId: data.quotationId || null,
           invoiceNumber,
-          invoiceDate: data.invoiceDate ? new Date(data.invoiceDate) : new Date(),
+          invoiceDate: data.invoiceDate
+            ? new Date(data.invoiceDate)
+            : new Date(),
           dueDate: data.dueDate ? new Date(data.dueDate) : null,
           currency: data.currency || tenant?.currency || 'INR',
-          paymentTerms: data.paymentTerms || settings?.defaultTerms || 'DUE_ON_RECEIPT',
+          paymentTerms:
+            data.paymentTerms || settings?.defaultTerms || 'DUE_ON_RECEIPT',
           status: data.status || 'DRAFT',
           amount: calc.totalAmount,
           subtotal: calc.subtotal,
@@ -165,7 +204,8 @@ export class InvoicesService {
           paidAmount: 0,
           balanceAmount: calc.totalAmount,
           notes: data.notes || settings?.defaultNotes || null,
-          termsAndConditions: data.termsAndConditions || settings?.defaultTerms || null,
+          termsAndConditions:
+            data.termsAndConditions || settings?.defaultTerms || null,
           customerBillingAddress: customerBillingSnapshot,
           orgBillingAddress: orgBillingSnapshot,
           createdById: userId,
@@ -254,23 +294,29 @@ export class InvoicesService {
       if (!existing) throw new NotFoundException('Invoice not found');
 
       if (existing.status === 'PAID') {
-        throw new BadRequestException('Cannot modify an invoice that is already fully PAID.');
+        throw new BadRequestException(
+          'Cannot modify an invoice that is already fully PAID.',
+        );
       }
 
       // If items provided, recalculate server totals
       let calcUpdate: any = {};
       if (data.items && data.items.length > 0) {
-        const settings = await tx.tenantInvoiceSettings.findUnique({ where: { tenantId } });
+        const settings = await tx.tenantInvoiceSettings.findUnique({
+          where: { tenantId },
+        });
         const isInterState = Boolean(
           settings?.state &&
-            data.customerBillingAddress?.state &&
-            settings.state.trim().toLowerCase() !== data.customerBillingAddress.state.trim().toLowerCase(),
+          data.customerBillingAddress?.state &&
+          settings.state.trim().toLowerCase() !==
+            data.customerBillingAddress.state.trim().toLowerCase(),
         );
 
         const currentPaid = toNumber(existing.paidAmount);
         const calc = calculateInvoiceTotals({
           items: data.items,
-          invoiceDiscountType: data.discountType || (existing.discountType as any),
+          invoiceDiscountType:
+            data.discountType || (existing.discountType as any),
           invoiceDiscountValue: data.discountValue ?? existing.discountValue,
           isInterState,
           paidAmount: currentPaid,
@@ -317,17 +363,35 @@ export class InvoicesService {
       const updated = await tx.invoice.update({
         where: { id, tenantId },
         data: {
-          ...(data.customerId !== undefined && { customerId: data.customerId || null }),
-          ...(data.companyId !== undefined && { companyId: data.companyId || null }),
+          ...(data.customerId !== undefined && {
+            customerId: data.customerId || null,
+          }),
+          ...(data.companyId !== undefined && {
+            companyId: data.companyId || null,
+          }),
           ...(data.dealId !== undefined && { dealId: data.dealId || null }),
-          ...(data.quotationId !== undefined && { quotationId: data.quotationId || null }),
-          ...(data.dueDate !== undefined && { dueDate: data.dueDate ? new Date(data.dueDate) : null }),
-          ...(data.invoiceDate !== undefined && { invoiceDate: data.invoiceDate ? new Date(data.invoiceDate) : undefined }),
-          ...(data.paymentTerms !== undefined && { paymentTerms: data.paymentTerms }),
+          ...(data.quotationId !== undefined && {
+            quotationId: data.quotationId || null,
+          }),
+          ...(data.dueDate !== undefined && {
+            dueDate: data.dueDate ? new Date(data.dueDate) : null,
+          }),
+          ...(data.invoiceDate !== undefined && {
+            invoiceDate: data.invoiceDate
+              ? new Date(data.invoiceDate)
+              : undefined,
+          }),
+          ...(data.paymentTerms !== undefined && {
+            paymentTerms: data.paymentTerms,
+          }),
           ...(data.status && { status: data.status }),
           ...(data.notes !== undefined && { notes: data.notes }),
-          ...(data.termsAndConditions !== undefined && { termsAndConditions: data.termsAndConditions }),
-          ...(data.customerBillingAddress !== undefined && { customerBillingAddress: data.customerBillingAddress }),
+          ...(data.termsAndConditions !== undefined && {
+            termsAndConditions: data.termsAndConditions,
+          }),
+          ...(data.customerBillingAddress !== undefined && {
+            customerBillingAddress: data.customerBillingAddress,
+          }),
           ...calcUpdate,
         },
         include: {
@@ -412,10 +476,20 @@ export class InvoicesService {
           skip,
           take: limit,
           include: {
-            customer: { select: { id: true, name: true, company: true, email: true } },
+            customer: {
+              select: { id: true, name: true, company: true, email: true },
+            },
             company: { select: { id: true, name: true } },
             deal: { select: { id: true, name: true, value: true } },
-            payments: { select: { id: true, amount: true, paymentDate: true, paymentMethod: true, status: true } },
+            payments: {
+              select: {
+                id: true,
+                amount: true,
+                paymentDate: true,
+                paymentMethod: true,
+                status: true,
+              },
+            },
           },
         }),
         tx.invoice.count({ where }),
@@ -448,12 +522,18 @@ export class InvoicesService {
       for (const inv of allStats) {
         const tot = toNumber(inv.totalAmount);
         const pd = toNumber(inv.paidAmount);
-        const bal = toNumber(inv.balanceAmount) || (tot - pd);
+        const bal = toNumber(inv.balanceAmount) || tot - pd;
 
         totalInvoiced += tot;
         totalPaid += pd;
 
-        const isOverdue = inv.dueDate && new Date(inv.dueDate) < now && bal > 0 && inv.status !== 'PAID' && inv.status !== 'CANCELLED' && inv.status !== 'VOID';
+        const isOverdue =
+          inv.dueDate &&
+          new Date(inv.dueDate) < now &&
+          bal > 0 &&
+          inv.status !== 'PAID' &&
+          inv.status !== 'CANCELLED' &&
+          inv.status !== 'VOID';
 
         if (inv.status === 'PAID') {
           paidCount++;
@@ -484,9 +564,12 @@ export class InvoicesService {
         invoices: invoices.map((inv) => {
           const tot = toNumber(inv.totalAmount || inv.amount);
           const pd = toNumber(inv.paidAmount);
-          const bal = toNumber(inv.balanceAmount) || (tot - pd);
+          const bal = toNumber(inv.balanceAmount) || tot - pd;
           const isOverdue = this.checkIsOverdue(inv.dueDate, bal, inv.status);
-          const displayStatus = isOverdue && inv.status !== 'CANCELLED' && inv.status !== 'VOID' ? 'OVERDUE' : inv.status;
+          const displayStatus =
+            isOverdue && inv.status !== 'CANCELLED' && inv.status !== 'VOID'
+              ? 'OVERDUE'
+              : inv.status;
 
           return {
             id: inv.id,
@@ -513,7 +596,10 @@ export class InvoicesService {
             paidAmount: pd,
             paidAmountFormatted: formatCurrency(pd, inv.currency || currency),
             balanceAmount: bal,
-            balanceAmountFormatted: formatCurrency(bal, inv.currency || currency),
+            balanceAmountFormatted: formatCurrency(
+              bal,
+              inv.currency || currency,
+            ),
             customer: inv.customer,
             company: inv.company,
             deal: inv.deal,
@@ -522,7 +608,12 @@ export class InvoicesService {
             updatedAt: inv.updatedAt.toISOString(),
           };
         }),
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -547,12 +638,21 @@ export class InvoicesService {
       const currency = invoice.currency || 'INR';
       const tot = toNumber(invoice.totalAmount || invoice.amount);
       const pd = toNumber(invoice.paidAmount);
-      const bal = toNumber(invoice.balanceAmount) || (tot - pd);
-      const isOverdue = this.checkIsOverdue(invoice.dueDate, bal, invoice.status);
+      const bal = toNumber(invoice.balanceAmount) || tot - pd;
+      const isOverdue = this.checkIsOverdue(
+        invoice.dueDate,
+        bal,
+        invoice.status,
+      );
 
       return {
         ...invoice,
-        status: isOverdue && invoice.status !== 'CANCELLED' && invoice.status !== 'VOID' ? 'OVERDUE' : invoice.status,
+        status:
+          isOverdue &&
+          invoice.status !== 'CANCELLED' &&
+          invoice.status !== 'VOID'
+            ? 'OVERDUE'
+            : invoice.status,
         amount: tot,
         subtotal: toNumber(invoice.subtotal),
         discountValue: toNumber(invoice.discountValue),
@@ -582,7 +682,10 @@ export class InvoicesService {
         payments: invoice.payments.map((p) => ({
           ...p,
           amount: toNumber(p.amount),
-          amountFormatted: formatCurrency(toNumber(p.amount), p.currency || currency),
+          amountFormatted: formatCurrency(
+            toNumber(p.amount),
+            p.currency || currency,
+          ),
         })),
       };
     });
@@ -689,7 +792,12 @@ export class InvoicesService {
     });
   }
 
-  async updateInvoiceStatus(tenantId: string, id: string, status: string, userId: string) {
+  async updateInvoiceStatus(
+    tenantId: string,
+    id: string,
+    status: string,
+    userId: string,
+  ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const invoice = await tx.invoice.findFirst({
         where: { id, tenantId },
@@ -697,9 +805,21 @@ export class InvoicesService {
       if (!invoice) throw new NotFoundException('Invoice not found');
 
       const upper = status.toUpperCase();
-      const validStatuses = ['DRAFT', 'SENT', 'VIEWED', 'PARTIALLY_PAID', 'PAID', 'OVERDUE', 'CANCELLED', 'VOID', 'REFUNDED'];
+      const validStatuses = [
+        'DRAFT',
+        'SENT',
+        'VIEWED',
+        'PARTIALLY_PAID',
+        'PAID',
+        'OVERDUE',
+        'CANCELLED',
+        'VOID',
+        'REFUNDED',
+      ];
       if (!validStatuses.includes(upper)) {
-        throw new BadRequestException(`Invalid invoice status '${status}'. Must be one of: ${validStatuses.join(', ')}`);
+        throw new BadRequestException(
+          `Invalid invoice status '${status}'. Must be one of: ${validStatuses.join(', ')}`,
+        );
       }
 
       if (invoice.status === 'PAID' && upper === 'DRAFT') {
@@ -712,7 +832,8 @@ export class InvoicesService {
           status: upper,
           ...(upper === 'CANCELLED' && { cancelledAt: new Date() }),
           ...(upper === 'PAID' && !invoice.paidAt && { paidAt: new Date() }),
-          ...(upper === 'VIEWED' && !invoice.viewedAt && { viewedAt: new Date() }),
+          ...(upper === 'VIEWED' &&
+            !invoice.viewedAt && { viewedAt: new Date() }),
         },
       });
 

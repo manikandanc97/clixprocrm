@@ -28,4 +28,3 @@ import { ActivitiesModule } from '../activities/activities.module';
   ],
 })
 export class LeadsModule {}
-

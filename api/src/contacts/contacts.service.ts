@@ -68,7 +68,8 @@ export class ContactsService implements OnModuleInit {
             leadId: c.leadId,
             companyId: c.companyId,
             dealsCount: c._count.deals,
-            revenueValue: dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
+            revenueValue:
+              dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
           };
         });
 
@@ -85,7 +86,12 @@ export class ContactsService implements OnModuleInit {
 
         return {
           customers: paginated,
-          pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+          pagination: {
+            page,
+            limit,
+            total,
+            totalPages: Math.ceil(total / limit),
+          },
         };
       }
 
@@ -128,13 +134,19 @@ export class ContactsService implements OnModuleInit {
           leadId: c.leadId,
           companyId: c.companyId,
           dealsCount: c._count.deals,
-          revenueValue: dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
+          revenueValue:
+            dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
         };
       });
 
       return {
         customers: mappedCustomers,
-        pagination: { page, limit, total, totalPages: Math.ceil(total / limit) },
+        pagination: {
+          page,
+          limit,
+          total,
+          totalPages: Math.ceil(total / limit),
+        },
       };
     });
   }
@@ -145,7 +157,9 @@ export class ContactsService implements OnModuleInit {
     userId: string,
   ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const { encrypted: encEmail, hash: emailHash } = this.enc.encryptWithHash(data.email);
+      const { encrypted: encEmail, hash: emailHash } = this.enc.encryptWithHash(
+        data.email,
+      );
       return tx.customer.create({
         data: {
           name: this.enc.encrypt(data.name)!,
@@ -161,4 +175,3 @@ export class ContactsService implements OnModuleInit {
     });
   }
 }
-

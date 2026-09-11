@@ -1,4 +1,11 @@
-import { ExecutionContext, ForbiddenException, UnauthorizedException, BadRequestException, HttpException, HttpStatus } from '@nestjs/common';
+import {
+  ExecutionContext,
+  ForbiddenException,
+  UnauthorizedException,
+  BadRequestException,
+  HttpException,
+  HttpStatus,
+} from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { SuperAdminGuard } from './super-admin.guard';
 import { AalGuard } from './aal.guard';
@@ -45,7 +52,11 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
     resetRateLimit('auth:mfa:recovery:127.0.0.1:usr-test-123');
   });
 
-  function createMockContext(user: any, headers: Record<string, string> = {}, extra: Record<string, any> = {}): ExecutionContext {
+  function createMockContext(
+    user: any,
+    headers: Record<string, string> = {},
+    extra: Record<string, any> = {},
+  ): ExecutionContext {
     const request: any = {
       user,
       headers,
@@ -106,7 +117,11 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
     });
 
     it('should REJECT non-super-admin user regardless of AAL', async () => {
-      const user = { id: 'regular-user', email: 'regular@example.com', aal: 'aal2' };
+      const user = {
+        id: 'regular-user',
+        email: 'regular@example.com',
+        aal: 'aal2',
+      };
       const context = createMockContext(user);
 
       mockPrisma.user.findUnique.mockResolvedValue({
@@ -116,7 +131,9 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
       });
 
       await expect(superAdminGuard.canActivate(context)).rejects.toThrow(
-        new ForbiddenException('Access denied: Super Admin platform privileges required'),
+        new ForbiddenException(
+          'Access denied: Super Admin platform privileges required',
+        ),
       );
     });
   });
@@ -156,10 +173,14 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
 
       const user = { id: 'admin-1', email: 'admin@tenant.com', aal: 'aal1' };
-      const context = createMockContext(user, {}, {
-        tenantId: 'tenant-1',
-        userRole: { name: 'ADMIN' },
-      });
+      const context = createMockContext(
+        user,
+        {},
+        {
+          tenantId: 'tenant-1',
+          userRole: { name: 'ADMIN' },
+        },
+      );
 
       mockPrisma.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
@@ -175,10 +196,14 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
 
       const user = { id: 'admin-1', email: 'admin@tenant.com', aal: 'aal2' };
-      const context = createMockContext(user, {}, {
-        tenantId: 'tenant-1',
-        userRole: { name: 'ADMIN' },
-      });
+      const context = createMockContext(
+        user,
+        {},
+        {
+          tenantId: 'tenant-1',
+          userRole: { name: 'ADMIN' },
+        },
+      );
 
       mockPrisma.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
@@ -193,10 +218,14 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
 
       const user = { id: 'admin-1', email: 'admin@tenant.com', aal: 'aal1' };
-      const context = createMockContext(user, {}, {
-        tenantId: 'tenant-1',
-        userRole: { name: 'ADMIN' },
-      });
+      const context = createMockContext(
+        user,
+        {},
+        {
+          tenantId: 'tenant-1',
+          userRole: { name: 'ADMIN' },
+        },
+      );
 
       mockPrisma.tenant.findUnique.mockResolvedValue({
         id: 'tenant-1',
@@ -211,10 +240,14 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
       jest.spyOn(reflector, 'getAllAndOverride').mockReturnValue(undefined);
 
       const user = { id: 'emp-1', email: 'emp@tenant.com', aal: 'aal1' };
-      const context = createMockContext(user, {}, {
-        tenantId: 'tenant-1',
-        userRole: { name: 'EMPLOYEE' },
-      });
+      const context = createMockContext(
+        user,
+        {},
+        {
+          tenantId: 'tenant-1',
+          userRole: { name: 'EMPLOYEE' },
+        },
+      );
 
       const result = await aalGuard.canActivate(context);
       expect(result).toBe(true);
@@ -223,7 +256,10 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
 
   describe('3. MFA Backup Recovery Codes & Hash Verification', () => {
     it('should generate 10 recovery codes and store ONLY cryptographic hashes', async () => {
-      const res = await mfaService.generateRecoveryCodes('usr-test-123', 'usr-test-123');
+      const res = await mfaService.generateRecoveryCodes(
+        'usr-test-123',
+        'usr-test-123',
+      );
 
       expect(res.recoveryCodes).toHaveLength(10);
       expect(res.count).toBe(10);
@@ -241,7 +277,8 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
       );
 
       // Verify code hashes are 64-char hex strings (SHA-256) and NOT plaintext codes
-      const createManyArg = mockPrisma.mfaRecoveryCode.createMany.mock.calls[0][0];
+      const createManyArg =
+        mockPrisma.mfaRecoveryCode.createMany.mock.calls[0][0];
       for (const entry of createManyArg.data) {
         expect(entry.codeHash).toMatch(/^[a-f0-9]{64}$/i);
         expect(res.recoveryCodes).not.toContain(entry.codeHash);
@@ -282,14 +319,20 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
       mockPrisma.mfaRecoveryCode.findFirst.mockResolvedValue(null);
 
       await expect(
-        mfaService.verifyAndConsumeRecoveryCode('usr-test-123', 'INVALID-CODE', '127.0.0.1'),
+        mfaService.verifyAndConsumeRecoveryCode(
+          'usr-test-123',
+          'INVALID-CODE',
+          '127.0.0.1',
+        ),
       ).rejects.toThrow(BadRequestException);
 
       expect(mockPrisma.auditLog.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
             action: 'MFA_CHALLENGE_FAILED',
-            details: expect.objectContaining({ reason: 'Invalid or already used recovery code' }),
+            details: expect.objectContaining({
+              reason: 'Invalid or already used recovery code',
+            }),
           }),
         }),
       );
@@ -327,7 +370,8 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
         }),
       );
 
-      const savedDetails = mockPrisma.auditLog.create.mock.calls[0][0].data.details;
+      const savedDetails =
+        mockPrisma.auditLog.create.mock.calls[0][0].data.details;
       expect(savedDetails.otpCode).toBeUndefined();
       expect(savedDetails.secret).toBeUndefined();
       expect(savedDetails.token).toBeUndefined();
@@ -353,7 +397,9 @@ describe('P1 Enterprise MFA & AAL2 Security Tests', () => {
 
       // 3 attempts allowed
       for (let i = 0; i < 3; i++) {
-        const res = await mfaController.verifyRecoveryCode(req, { code: 'AAAA-1111' });
+        const res = await mfaController.verifyRecoveryCode(req, {
+          code: 'AAAA-1111',
+        });
         expect(res.success).toBe(true);
       }
 

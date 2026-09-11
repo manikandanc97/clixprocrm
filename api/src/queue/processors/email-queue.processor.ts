@@ -14,7 +14,10 @@ import {
   SyncInboxJobPayload,
 } from '../interfaces/email-jobs';
 import { escapeHtml } from '../../common/services/email.service';
-import { formatCurrency, toNumber } from '../../common/utils/crm-formatters.util';
+import {
+  formatCurrency,
+  toNumber,
+} from '../../common/utils/crm-formatters.util';
 import { InboundEmailService } from '../../email/services/inbound-email.service';
 
 @Processor(QUEUE_NAMES.EMAIL)
@@ -48,7 +51,9 @@ export class EmailQueueProcessor extends WorkerHost {
     try {
       switch (job.name) {
         case EMAIL_JOB_NAMES.SECURITY_ALERT:
-          return await this.handleSecurityAlert(job.data as SecurityAlertJobPayload);
+          return await this.handleSecurityAlert(
+            job.data as SecurityAlertJobPayload,
+          );
 
         case EMAIL_JOB_NAMES.INVOICE_NOTIFICATION:
           return await this.handleInvoiceNotification(
@@ -66,12 +71,12 @@ export class EmailQueueProcessor extends WorkerHost {
           );
 
         case EMAIL_JOB_NAMES.SYNC_INBOX:
-          return await this.handleSyncInbox(
-            job.data as SyncInboxJobPayload,
-          );
+          return await this.handleSyncInbox(job.data as SyncInboxJobPayload);
 
         default:
-          this.logger.warn(`[EMAIL WORKER] Unknown email job type received: "${job.name}"`);
+          this.logger.warn(
+            `[EMAIL WORKER] Unknown email job type received: "${job.name}"`,
+          );
           return { skipped: true, reason: `Unknown job type: ${job.name}` };
       }
     } catch (err: any) {
@@ -90,10 +95,13 @@ export class EmailQueueProcessor extends WorkerHost {
   private async handleSecurityAlert(
     payload: SecurityAlertJobPayload,
   ): Promise<{ success: boolean; messageId?: string; skipped?: boolean }> {
-    const { to, deviceType, browser, operatingSystem, ipAddress, time } = payload;
+    const { to, deviceType, browser, operatingSystem, ipAddress, time } =
+      payload;
 
     if (!to || typeof to !== 'string' || !to.includes('@')) {
-      this.logger.warn('[EMAIL WORKER] Skipping security alert: Invalid recipient email.');
+      this.logger.warn(
+        '[EMAIL WORKER] Skipping security alert: Invalid recipient email.',
+      );
       return { success: false, skipped: true };
     }
 
@@ -101,10 +109,13 @@ export class EmailQueueProcessor extends WorkerHost {
     const safeBrowser = escapeHtml(browser || 'Unknown Browser');
     const safeOS = escapeHtml(operatingSystem || 'Unknown OS');
     const safeIp = escapeHtml(ipAddress || 'Unknown IP');
-    const loginTime = time ? new Date(time).toUTCString() : new Date().toUTCString();
+    const loginTime = time
+      ? new Date(time).toUTCString()
+      : new Date().toUTCString();
     const safeTime = escapeHtml(loginTime);
 
-    const appUrl = process.env.NEXT_PUBLIC_APP_URL || 'https://app.clixprocrm.com';
+    const appUrl =
+      process.env.NEXT_PUBLIC_APP_URL || 'https://app.clixprocrm.com';
     const securitySettingsUrl = `${appUrl}/settings`;
 
     const htmlContent = `
@@ -162,18 +173,24 @@ export class EmailQueueProcessor extends WorkerHost {
     `;
 
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-      this.logger.warn('[EMAIL WORKER] SMTP configuration not set; security alert delivery simulated.');
+      this.logger.warn(
+        '[EMAIL WORKER] SMTP configuration not set; security alert delivery simulated.',
+      );
       return { success: true, messageId: `sim_${Date.now()}` };
     }
 
     const info = await this.transporter.sendMail({
-      from: process.env.SMTP_FROM || '"ClixProCRM Security" <no-reply@clixprocrm.com>',
+      from:
+        process.env.SMTP_FROM ||
+        '"ClixProCRM Security" <no-reply@clixprocrm.com>',
       to,
       subject: 'New sign-in detected on your ClixProCRM account',
       html: htmlContent,
     });
 
-    this.logger.log(`[EMAIL WORKER] Security alert sent to ${to} (Message ID: ${info?.messageId || 'sent'})`);
+    this.logger.log(
+      `[EMAIL WORKER] Security alert sent to ${to} (Message ID: ${info?.messageId || 'sent'})`,
+    );
     return { success: true, messageId: info?.messageId };
   }
 
@@ -198,25 +215,40 @@ export class EmailQueueProcessor extends WorkerHost {
       });
 
       if (!invoice) {
-        this.logger.warn(`[EMAIL WORKER] Invoice ${invoiceId} not found in tenant ${tenantId}`);
+        this.logger.warn(
+          `[EMAIL WORKER] Invoice ${invoiceId} not found in tenant ${tenantId}`,
+        );
         return { success: false, message: 'Invoice not found' };
       }
 
       const toEmail = options?.recipientEmail || invoice.customer?.email;
       if (!toEmail) {
-        this.logger.warn(`[EMAIL WORKER] Customer for invoice ${invoiceId} has no valid email`);
-        return { success: false, message: 'Customer has no valid email address' };
+        this.logger.warn(
+          `[EMAIL WORKER] Customer for invoice ${invoiceId} has no valid email`,
+        );
+        return {
+          success: false,
+          message: 'Customer has no valid email address',
+        };
       }
 
       const companyName = invoice.tenant?.name || 'Our Company';
       const currency = invoice.currency || 'INR';
       const invNumber = invoice.invoiceNumber || invoice.id.slice(0, 8);
-      const totalFormatted = formatCurrency(toNumber(invoice.totalAmount || invoice.amount), currency);
+      const totalFormatted = formatCurrency(
+        toNumber(invoice.totalAmount || invoice.amount),
+        currency,
+      );
       const dueFormatted = invoice.dueDate
-        ? new Date(invoice.dueDate).toLocaleDateString('en-IN', { day: '2-digit', month: 'short', year: 'numeric' })
+        ? new Date(invoice.dueDate).toLocaleDateString('en-IN', {
+            day: '2-digit',
+            month: 'short',
+            year: 'numeric',
+          })
         : 'Due upon receipt';
 
-      const subject = options?.subject || `Invoice ${invNumber} from ${companyName}`;
+      const subject =
+        options?.subject || `Invoice ${invNumber} from ${companyName}`;
       const customMsg = options?.message
         ? `<p style="font-size: 14px; line-height: 1.6; color: #334155; margin-bottom: 20px;">${escapeHtml(options.message)}</p>`
         : '';
@@ -268,7 +300,9 @@ export class EmailQueueProcessor extends WorkerHost {
       let messageId = `msg_${Date.now()}`;
       if (process.env.SMTP_HOST && process.env.SMTP_USER) {
         const info = await this.transporter.sendMail({
-          from: process.env.SMTP_FROM || `"${companyName}" <billing@clixprocrm.com>`,
+          from:
+            process.env.SMTP_FROM ||
+            `"${companyName}" <billing@clixprocrm.com>`,
           to: toEmail,
           cc: options?.cc,
           subject,
@@ -300,7 +334,9 @@ export class EmailQueueProcessor extends WorkerHost {
         });
       }
 
-      this.logger.log(`[EMAIL WORKER] Invoice email dispatched to ${toEmail} for invoice ${invNumber}`);
+      this.logger.log(
+        `[EMAIL WORKER] Invoice email dispatched to ${toEmail} for invoice ${invNumber}`,
+      );
       return {
         success: true,
         message: `Invoice successfully sent to ${toEmail}`,
@@ -329,24 +365,34 @@ export class EmailQueueProcessor extends WorkerHost {
       });
 
       if (!payment || !payment.invoice) {
-        this.logger.warn(`[EMAIL WORKER] Payment ${paymentId} or linked invoice not found in tenant ${tenantId}`);
+        this.logger.warn(
+          `[EMAIL WORKER] Payment ${paymentId} or linked invoice not found in tenant ${tenantId}`,
+        );
         return { success: false, message: 'Payment record not found' };
       }
 
       const toEmail = payment.invoice.customer?.email;
       if (!toEmail) {
-        this.logger.warn(`[EMAIL WORKER] Customer for payment ${paymentId} has no email address`);
+        this.logger.warn(
+          `[EMAIL WORKER] Customer for payment ${paymentId} has no email address`,
+        );
         return { success: false, message: 'No customer email address on file' };
       }
 
       const companyName = payment.invoice.tenant?.name || 'Our Company';
       const currency = payment.currency || 'INR';
-      const amountFormatted = formatCurrency(toNumber(payment.amount), currency);
-      const invNumber = payment.invoice.invoiceNumber || payment.invoice.id.slice(0, 8);
+      const amountFormatted = formatCurrency(
+        toNumber(payment.amount),
+        currency,
+      );
+      const invNumber =
+        payment.invoice.invoiceNumber || payment.invoice.id.slice(0, 8);
 
       if (process.env.SMTP_HOST && process.env.SMTP_USER) {
         await this.transporter.sendMail({
-          from: process.env.SMTP_FROM || `"${companyName}" <billing@clixprocrm.com>`,
+          from:
+            process.env.SMTP_FROM ||
+            `"${companyName}" <billing@clixprocrm.com>`,
           to: toEmail,
           subject: `Payment Receipt: ${payment.paymentNumber} for Invoice ${invNumber}`,
           html: `<p>Thank you! We received your payment of ${amountFormatted} for invoice ${invNumber}.</p>`,
@@ -363,12 +409,21 @@ export class EmailQueueProcessor extends WorkerHost {
           customerId: payment.invoice.customerId,
           companyId: payment.invoice.companyId,
           dealId: payment.invoice.dealId,
-          metadata: { paymentNumber: payment.paymentNumber, amountFormatted, toEmail },
+          metadata: {
+            paymentNumber: payment.paymentNumber,
+            amountFormatted,
+            toEmail,
+          },
         },
       });
 
-      this.logger.log(`[EMAIL WORKER] Payment receipt email logged for payment ${payment.paymentNumber}`);
-      return { success: true, message: `Payment receipt successfully sent to ${toEmail}` };
+      this.logger.log(
+        `[EMAIL WORKER] Payment receipt email logged for payment ${payment.paymentNumber}`,
+      );
+      return {
+        success: true,
+        message: `Payment receipt successfully sent to ${toEmail}`,
+      };
     });
   }
 
@@ -397,7 +452,9 @@ export class EmailQueueProcessor extends WorkerHost {
     const safeDescription = escapeHtml(description);
 
     const safeDiagnostics = {
-      currentUserName: escapeHtml(diagnostics?.currentUserName || userName || 'N/A'),
+      currentUserName: escapeHtml(
+        diagnostics?.currentUserName || userName || 'N/A',
+      ),
       email: escapeHtml(diagnostics?.email || userEmail || 'N/A'),
       userId: escapeHtml(diagnostics?.userId || userId || 'N/A'),
       role: escapeHtml(diagnostics?.role || 'N/A'),
@@ -461,10 +518,13 @@ export class EmailQueueProcessor extends WorkerHost {
       </div>
     `;
 
-    const supportRecipient = process.env.SUPPORT_EMAIL || 'support@clixprocrm.com';
+    const supportRecipient =
+      process.env.SUPPORT_EMAIL || 'support@clixprocrm.com';
 
     if (!process.env.SMTP_HOST || !process.env.SMTP_USER) {
-      this.logger.warn('[EMAIL WORKER] SMTP configuration not found, skipping email dispatch.');
+      this.logger.warn(
+        '[EMAIL WORKER] SMTP configuration not found, skipping email dispatch.',
+      );
       return { success: true, messageId: `sim_${Date.now()}` };
     }
 
@@ -475,7 +535,9 @@ export class EmailQueueProcessor extends WorkerHost {
       html: htmlContent,
     });
 
-    this.logger.log(`[EMAIL WORKER] Support ticket email delivered for #${ticketId}`);
+    this.logger.log(
+      `[EMAIL WORKER] Support ticket email delivered for #${ticketId}`,
+    );
     return { success: true, messageId: info?.messageId };
   }
 

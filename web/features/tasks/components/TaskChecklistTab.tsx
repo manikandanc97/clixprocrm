@@ -5,12 +5,7 @@ import { Plus, ChevronRight, Trash2, Paperclip, X } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { Label } from "@/shared/ui/label";
-
-interface ChecklistItem {
-  id: string;
-  title: string;
-  completed?: boolean;
-}
+import { ChecklistItem } from "@/shared/types/task";
 
 interface AttachmentItem {
   id: string;

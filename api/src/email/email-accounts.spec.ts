@@ -12,7 +12,11 @@ import { PrismaService } from '../prisma/prisma.service';
 import { EncryptionService } from '../common/encryption/encryption.service';
 import { CreateEmailAccountDto } from './dto/create-email-account.dto';
 import { UpdateEmailAccountDto } from './dto/update-email-account.dto';
-import { EmailProviderType, EmailAuthType, EmailSyncStatus } from '@prisma/client';
+import {
+  EmailProviderType,
+  EmailAuthType,
+  EmailSyncStatus,
+} from '@prisma/client';
 
 describe('EmailAccountsService & Security Tests', () => {
   let service: EmailAccountsService;
@@ -22,7 +26,8 @@ describe('EmailAccountsService & Security Tests', () => {
   // In-memory mock database store for EmailAccount table
   let emailAccountsDb: any[] = [];
 
-  const TEST_KEY = 'a1b2c3d4e5f67890123456789abcdef0a1b2c3d4e5f67890123456789abcdef0';
+  const TEST_KEY =
+    'a1b2c3d4e5f67890123456789abcdef0a1b2c3d4e5f67890123456789abcdef0';
   const TENANT_A = 'tenant-uuid-1111';
   const TENANT_B = 'tenant-uuid-2222';
   const USER_1 = 'user-uuid-aaaa';
@@ -33,18 +38,27 @@ describe('EmailAccountsService & Security Tests', () => {
       const tx = {
         emailAccount: {
           findFirst: jest.fn(async ({ where }: any) => {
-            return emailAccountsDb.find((item) => {
-              for (const [key, val] of Object.entries(where)) {
-                if (key === 'deletedAt' && val === null && item.deletedAt !== null) return false;
-                if (item[key] !== val) return false;
-              }
-              return true;
-            }) || null;
+            return (
+              emailAccountsDb.find((item) => {
+                for (const [key, val] of Object.entries(where)) {
+                  if (
+                    key === 'deletedAt' &&
+                    val === null &&
+                    item.deletedAt !== null
+                  )
+                    return false;
+                  if (item[key] !== val) return false;
+                }
+                return true;
+              }) || null
+            );
           }),
           findMany: jest.fn(async ({ where }: any) => {
             return emailAccountsDb.filter((item) => {
-              if (where.tenantId && item.tenantId !== where.tenantId) return false;
-              if (where.deletedAt === null && item.deletedAt !== null) return false;
+              if (where.tenantId && item.tenantId !== where.tenantId)
+                return false;
+              if (where.deletedAt === null && item.deletedAt !== null)
+                return false;
               if (where.OR) {
                 const matchesOr = where.OR.some((cond: any) => {
                   return Object.entries(cond).every(([k, v]) => item[k] === v);
@@ -57,10 +71,15 @@ describe('EmailAccountsService & Security Tests', () => {
           create: jest.fn(async ({ data }: any) => {
             // Enforce unique constraint [tenantId, emailHash]
             const dup = emailAccountsDb.find(
-              (item) => item.tenantId === data.tenantId && item.emailHash === data.emailHash && !item.deletedAt,
+              (item) =>
+                item.tenantId === data.tenantId &&
+                item.emailHash === data.emailHash &&
+                !item.deletedAt,
             );
             if (dup) {
-              const err: any = new Error('Unique constraint failed on the fields: (`tenantId`,`emailHash`)');
+              const err: any = new Error(
+                'Unique constraint failed on the fields: (`tenantId`,`emailHash`)',
+              );
               err.code = 'P2002';
               throw err;
             }
@@ -125,7 +144,9 @@ describe('EmailAccountsService & Security Tests', () => {
 
     service = module.get<EmailAccountsService>(EmailAccountsService);
     encService = module.get<EncryptionService>(EncryptionService);
-    verifierService = module.get<ConnectionVerifierService>(ConnectionVerifierService);
+    verifierService = module.get<ConnectionVerifierService>(
+      ConnectionVerifierService,
+    );
 
     encService.onModuleInit();
   });
@@ -201,7 +222,12 @@ describe('EmailAccountsService & Security Tests', () => {
       oauthRefresh: 'PlainOauthRefreshToken',
     };
 
-    const result: any = await service.createAccount(TENANT_A, USER_1, false, dto);
+    const result: any = await service.createAccount(
+      TENANT_A,
+      USER_1,
+      false,
+      dto,
+    );
 
     expect(result.encryptedSmtpPass).toBeUndefined();
     expect(result.encryptedImapPass).toBeUndefined();
@@ -228,7 +254,12 @@ describe('EmailAccountsService & Security Tests', () => {
     const created = await service.createAccount(TENANT_A, USER_1, false, dto);
 
     const list = await service.getAccounts(TENANT_A, USER_1, false);
-    const fetched = await service.getAccountById(TENANT_A, USER_1, false, created.id);
+    const fetched = await service.getAccountById(
+      TENANT_A,
+      USER_1,
+      false,
+      created.id,
+    );
 
     for (const item of [...list, fetched] as any[]) {
       expect(item.encryptedSmtpPass).toBeUndefined();
@@ -246,13 +277,24 @@ describe('EmailAccountsService & Security Tests', () => {
       email: 'update-test@example.com',
       smtpPass: 'InitialPass',
     };
-    const created = await service.createAccount(TENANT_A, USER_1, false, createDto);
+    const created = await service.createAccount(
+      TENANT_A,
+      USER_1,
+      false,
+      createDto,
+    );
 
     const updateDto: UpdateEmailAccountDto = {
       smtpPass: 'UpdatedNewPassword999!',
       displayName: 'Renamed Account',
     };
-    const updatedResult = await service.updateAccount(TENANT_A, USER_1, false, created.id, updateDto);
+    const updatedResult = await service.updateAccount(
+      TENANT_A,
+      USER_1,
+      false,
+      created.id,
+      updateDto,
+    );
 
     expect(updatedResult.displayName).toBe('Renamed Account');
 
@@ -267,7 +309,12 @@ describe('EmailAccountsService & Security Tests', () => {
       email: 'delete-me@example.com',
     });
 
-    const delResult = await service.deleteAccount(TENANT_A, USER_1, false, created.id);
+    const delResult = await service.deleteAccount(
+      TENANT_A,
+      USER_1,
+      false,
+      created.id,
+    );
     expect(delResult.success).toBe(true);
 
     const stored = emailAccountsDb.find((item) => item.id === created.id);
@@ -275,9 +322,9 @@ describe('EmailAccountsService & Security Tests', () => {
     expect(stored.isActive).toBe(false);
 
     // Further get should return 404
-    await expect(service.getAccountById(TENANT_A, USER_1, false, created.id)).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(
+      service.getAccountById(TENANT_A, USER_1, false, created.id),
+    ).rejects.toThrow(NotFoundException);
   });
 
   // 7. Cross-tenant account access is rejected
@@ -288,9 +335,9 @@ describe('EmailAccountsService & Security Tests', () => {
     });
 
     // Tenant B attempts to fetch it
-    await expect(service.getAccountById(TENANT_B, 'some-tenant-b-user', true, createdA.id)).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(
+      service.getAccountById(TENANT_B, 'some-tenant-b-user', true, createdA.id),
+    ).rejects.toThrow(NotFoundException);
 
     // Tenant B attempts to update it
     await expect(
@@ -300,17 +347,22 @@ describe('EmailAccountsService & Security Tests', () => {
     ).rejects.toThrow(NotFoundException);
 
     // Tenant B attempts to delete it
-    await expect(service.deleteAccount(TENANT_B, 'some-tenant-b-user', true, createdA.id)).rejects.toThrow(
-      NotFoundException,
-    );
+    await expect(
+      service.deleteAccount(TENANT_B, 'some-tenant-b-user', true, createdA.id),
+    ).rejects.toThrow(NotFoundException);
   });
 
   // 8. Personal mailbox authorization
   it('8. should enforce personal mailbox authorization: only owner or tenant admin can manage', async () => {
     // User 1 creates personal account
-    const personalAccount = await service.createAccount(TENANT_A, USER_1, false, {
-      email: 'user1.personal@example.com',
-    });
+    const personalAccount = await service.createAccount(
+      TENANT_A,
+      USER_1,
+      false,
+      {
+        email: 'user1.personal@example.com',
+      },
+    );
 
     // User 2 (same tenant, regular user) attempts to view User 1's personal mailbox
     await expect(
@@ -319,7 +371,9 @@ describe('EmailAccountsService & Security Tests', () => {
 
     // User 2 attempts to update User 1's personal mailbox
     await expect(
-      service.updateAccount(TENANT_A, USER_2, false, personalAccount.id, { displayName: 'Tamper' }),
+      service.updateAccount(TENANT_A, USER_2, false, personalAccount.id, {
+        displayName: 'Tamper',
+      }),
     ).rejects.toThrow(ForbiddenException);
 
     // User 2 attempts to delete User 1's personal mailbox
@@ -328,7 +382,12 @@ describe('EmailAccountsService & Security Tests', () => {
     ).rejects.toThrow(ForbiddenException);
 
     // Tenant Admin in same tenant CAN view and manage User 1's personal mailbox
-    const adminView = await service.getAccountById(TENANT_A, USER_2, true, personalAccount.id);
+    const adminView = await service.getAccountById(
+      TENANT_A,
+      USER_2,
+      true,
+      personalAccount.id,
+    );
     expect(adminView.id).toBe(personalAccount.id);
   });
 
@@ -352,12 +411,19 @@ describe('EmailAccountsService & Security Tests', () => {
     expect(sharedAccount.userId).toBeNull();
 
     // Regular user CAN view shared mailbox
-    const userView = await service.getAccountById(TENANT_A, USER_2, false, sharedAccount.id);
+    const userView = await service.getAccountById(
+      TENANT_A,
+      USER_2,
+      false,
+      sharedAccount.id,
+    );
     expect(userView.id).toBe(sharedAccount.id);
 
     // Regular user CANNOT update shared mailbox
     await expect(
-      service.updateAccount(TENANT_A, USER_2, false, sharedAccount.id, { displayName: 'User rename' }),
+      service.updateAccount(TENANT_A, USER_2, false, sharedAccount.id, {
+        displayName: 'User rename',
+      }),
     ).rejects.toThrow(ForbiddenException);
 
     // Regular user CANNOT delete shared mailbox
@@ -378,7 +444,12 @@ describe('EmailAccountsService & Security Tests', () => {
       imapPass: 'SecretImapPass',
     });
 
-    const verifyResult = await service.verifyAccount(TENANT_A, USER_1, false, created.id);
+    const verifyResult = await service.verifyAccount(
+      TENANT_A,
+      USER_1,
+      false,
+      created.id,
+    );
 
     expect(verifyResult.success).toBe(true);
     expect(mockVerifierService.verifySmtp).toHaveBeenCalledWith(
@@ -427,10 +498,15 @@ describe('EmailAccountsService & Security Tests', () => {
     ).rejects.toThrow(ConflictException);
 
     // Creating same email in Tenant B is ALLOWED (tenant-isolated unique constraint)
-    const tenantBAccount = await service.createAccount(TENANT_B, 'tenant-b-user', false, {
-      email: 'duplicate@example.com',
-      displayName: 'Tenant B Account',
-    });
+    const tenantBAccount = await service.createAccount(
+      TENANT_B,
+      'tenant-b-user',
+      false,
+      {
+        email: 'duplicate@example.com',
+        displayName: 'Tenant B Account',
+      },
+    );
     expect(tenantBAccount.tenantId).toBe(TENANT_B);
   });
 });

@@ -99,8 +99,12 @@ describe('QueueMetricsService', () => {
   describe('Queue Resolution', () => {
     it('resolves the correct queue instance for each known QueueName', () => {
       expect(service.getQueueInstance(QUEUE_NAMES.EMAIL)).toBe(mockEmailQueue);
-      expect(service.getQueueInstance(QUEUE_NAMES.IMPORT)).toBe(mockImportQueue);
-      expect(service.getQueueInstance(QUEUE_NAMES.WEBHOOK)).toBe(mockWebhookQueue);
+      expect(service.getQueueInstance(QUEUE_NAMES.IMPORT)).toBe(
+        mockImportQueue,
+      );
+      expect(service.getQueueInstance(QUEUE_NAMES.WEBHOOK)).toBe(
+        mockWebhookQueue,
+      );
       expect(service.getQueueInstance(QUEUE_NAMES.MEDIA)).toBe(mockMediaQueue);
       expect(service.getQueueInstance('non-existent' as any)).toBeUndefined();
     });
@@ -167,14 +171,18 @@ describe('QueueMetricsService', () => {
     });
 
     it('gracefully handles unavailable queue', async () => {
-      const metrics = await service.getSingleQueueMetrics('unknown-queue' as any);
+      const metrics = await service.getSingleQueueMetrics(
+        'unknown-queue' as any,
+      );
       expect(metrics.available).toBe(false);
       expect(metrics.status).toBe('WARNING');
       expect(metrics.counts.total).toBe(0);
     });
 
     it('gracefully handles queue count errors', async () => {
-      mockEmailQueue.getJobCounts.mockRejectedValueOnce(new Error('Redis connection lost'));
+      mockEmailQueue.getJobCounts.mockRejectedValueOnce(
+        new Error('Redis connection lost'),
+      );
 
       const metrics = await service.getSingleQueueMetrics(QUEUE_NAMES.EMAIL);
       expect(metrics.available).toBe(false);
@@ -264,7 +272,9 @@ describe('QueueMetricsService', () => {
       const res = await service.getDeadLetterJobs('unknown-queue' as any);
       expect(res).toEqual([]);
 
-      mockEmailQueue.getFailed.mockRejectedValueOnce(new Error('Redis buffer overflow'));
+      mockEmailQueue.getFailed.mockRejectedValueOnce(
+        new Error('Redis buffer overflow'),
+      );
       const errorRes = await service.getDeadLetterJobs(QUEUE_NAMES.EMAIL);
       expect(errorRes).toEqual([]);
     });
@@ -278,7 +288,10 @@ describe('QueueMetricsService', () => {
       };
       mockEmailQueue.getJob.mockResolvedValueOnce(mockJob);
 
-      const result = await service.retryDeadLetterJob(QUEUE_NAMES.EMAIL, 'job-retry-1');
+      const result = await service.retryDeadLetterJob(
+        QUEUE_NAMES.EMAIL,
+        'job-retry-1',
+      );
       expect(result.success).toBe(true);
       expect(mockJob.retry).toHaveBeenCalled();
       expect(result.message).toContain('successfully re-queued');
@@ -287,20 +300,30 @@ describe('QueueMetricsService', () => {
     it('returns failure when job is not found', async () => {
       mockEmailQueue.getJob.mockResolvedValueOnce(null);
 
-      const result = await service.retryDeadLetterJob(QUEUE_NAMES.EMAIL, 'job-missing');
+      const result = await service.retryDeadLetterJob(
+        QUEUE_NAMES.EMAIL,
+        'job-missing',
+      );
       expect(result.success).toBe(false);
       expect(result.message).toContain('not found');
     });
 
     it('returns failure when queue is unavailable', async () => {
-      const result = await service.retryDeadLetterJob('unknown-queue' as any, 'job-1');
+      const result = await service.retryDeadLetterJob(
+        'unknown-queue' as any,
+        'job-1',
+      );
       expect(result.success).toBe(false);
     });
   });
 
   describe('Dead-Letter Clean', () => {
     it('cleans failed jobs and returns cleaned count', async () => {
-      const result = await service.cleanDeadLetterJobs(QUEUE_NAMES.EMAIL, 3600000, 50);
+      const result = await service.cleanDeadLetterJobs(
+        QUEUE_NAMES.EMAIL,
+        3600000,
+        50,
+      );
       expect(mockEmailQueue.clean).toHaveBeenCalledWith(3600000, 50, 'failed');
       expect(result.cleanedCount).toBe(2);
     });

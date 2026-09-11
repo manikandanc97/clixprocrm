@@ -34,7 +34,11 @@ export class PlatformUsersController {
       search,
       status,
       isSuperAdmin:
-        isSuperAdmin === 'true' ? true : isSuperAdmin === 'false' ? false : undefined,
+        isSuperAdmin === 'true'
+          ? true
+          : isSuperAdmin === 'false'
+            ? false
+            : undefined,
       page: page ? parseInt(page) : 1,
       limit: limit ? parseInt(limit) : 20,
     });
@@ -59,9 +63,15 @@ export class PlatformUsersController {
     @Param('id') id: string,
     @Body() body: { status: UserStatus },
   ) {
-    if (!body.status || !['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(body.status)) {
+    if (
+      !body.status ||
+      !['ACTIVE', 'INACTIVE', 'SUSPENDED'].includes(body.status)
+    ) {
       throw new HttpException(
-        { success: false, message: 'Valid status (ACTIVE, INACTIVE, SUSPENDED) is required' },
+        {
+          success: false,
+          message: 'Valid status (ACTIVE, INACTIVE, SUSPENDED) is required',
+        },
         HttpStatus.BAD_REQUEST,
       );
     }
@@ -136,18 +146,11 @@ export class PlatformUsersController {
   }
 
   @Delete(':id')
-  async deleteUser(
-    @Req() req: any,
-    @Param('id') id: string,
-  ) {
-    const data = await this.usersService.deleteUser(
-      id,
-      req.user.id,
-      {
-        ip: req.ip || req.headers?.['x-forwarded-for'],
-        userAgent: req.headers?.['user-agent'],
-      },
-    );
+  async deleteUser(@Req() req: any, @Param('id') id: string) {
+    const data = await this.usersService.deleteUser(id, req.user.id, {
+      ip: req.ip || req.headers?.['x-forwarded-for'],
+      userAgent: req.headers?.['user-agent'],
+    });
     return {
       success: true,
       data,
