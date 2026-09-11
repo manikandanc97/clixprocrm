@@ -3,7 +3,7 @@
 import React from "react";
 import { AlertCircle, RefreshCw, Loader2, type LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { Skeleton } from "@/shared/ui/skeleton";
+
 import { cn } from "@/shared/lib/utils";
 import { EmptyState, type EmptyStateAction } from "@/shared/components/EmptyState";
 import {
@@ -11,8 +11,10 @@ import {
   MetricCardSkeleton,
   ToolbarSkeleton,
   TableSkeleton,
-  FormSkeleton,
 } from "@/shared/components/skeletons";
+
+import { CRMPageContainer } from "./CRMPageContainer";
+import { CRMPageHeader, type CRMPageHeaderAction } from "./CRMPageHeader";
 
 /**
  * Metric Card Usage Rule:
@@ -27,6 +29,26 @@ export interface LoadingStateProps {
   /** Explicitly enable metric card skeletons (Allowed only for Dashboard & Analytics) */
   showMetrics?: boolean;
   className?: string;
+  /** Number of table skeleton rows (default: 8) */
+  rows?: number;
+  /** Number of table skeleton columns (default: 6) */
+  cols?: number;
+  /** Whether the first column displays an avatar (default: true) */
+  hasAvatar?: boolean;
+  /** Whether pagination controls are shown below the table (default: true) */
+  showPagination?: boolean;
+  /** Enable twoStageScroll layout on CRMPageContainer (default: true) */
+  twoStageScroll?: boolean;
+  /** Dedicated page title for the header */
+  title?: string;
+  /** Dedicated page description for the header */
+  description?: string;
+  /** Dedicated page icon for the header */
+  icon?: LucideIcon;
+  /** Primary action button configuration */
+  primaryAction?: CRMPageHeaderAction;
+  /** Secondary action buttons configuration */
+  secondaryActions?: CRMPageHeaderAction[];
 }
 
 export interface ErrorStateProps {
@@ -50,6 +72,16 @@ export function PageLoadingState({
   variant = "skeleton",
   showMetrics = false,
   className,
+  rows = 8,
+  cols = 6,
+  hasAvatar = true,
+  showPagination = true,
+  twoStageScroll = true,
+  title,
+  description,
+  icon,
+  primaryAction,
+  secondaryActions,
 }: LoadingStateProps) {
   const displayMessage = message ?? label;
 
@@ -70,13 +102,21 @@ export function PageLoadingState({
   }
 
   return (
-    <div
-      role="status"
-      aria-live="polite"
-      className={cn("flex flex-col space-y-6 w-full p-2 animate-in fade-in duration-200", className)}
-    >
+    <CRMPageContainer twoStageScroll={twoStageScroll} className={className}>
       <span className="sr-only">{displayMessage || "Loading page content..."}</span>
-      <PageHeaderSkeleton />
+
+      {/* Header: Exact CRMPageHeader if title provided, otherwise fallback PageHeaderSkeleton */}
+      {title ? (
+        <CRMPageHeader
+          title={title}
+          description={description}
+          icon={icon}
+          primaryAction={primaryAction}
+          secondaryActions={secondaryActions}
+        />
+      ) : (
+        <PageHeaderSkeleton />
+      )}
 
       {/* Metrics Grid Skeleton — Rendered only when showMetrics is explicitly true */}
       {showMetrics && (
@@ -87,26 +127,26 @@ export function PageLoadingState({
         </div>
       )}
 
-      <ToolbarSkeleton />
-
-      <TableSkeleton rows={8} cols={6} showPagination={true} hasAvatar={true} />
-    </div>
-  );
-}
-
-export function ComponentLoadingState(_props: LoadingStateProps) {
-  return (
-    <div className="flex flex-col space-y-6 w-full">
-      <div className="rounded-xl border border-border bg-card p-6 space-y-6 shadow-xs">
-        <div className="space-y-2">
-          <Skeleton className="h-6 w-[150px]" />
-          <Skeleton className="h-4 w-[250px]" />
+      {/* Canonical Data Card Container with Toolbar and Table Skeletons */}
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="shrink-0">
+          <ToolbarSkeleton />
         </div>
-        <FormSkeleton />
+        <div className="flex-1 min-h-0 flex flex-col">
+          <TableSkeleton
+            rows={rows}
+            cols={cols}
+            showPagination={showPagination}
+            hasAvatar={hasAvatar}
+          />
+        </div>
       </div>
-    </div>
+    </CRMPageContainer>
   );
 }
+
+
+
 
 export function PageErrorState({
   title = "Something went wrong",

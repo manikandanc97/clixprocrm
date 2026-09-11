@@ -6,7 +6,6 @@ import {
   UserPlus,
   Download,
   Trash2,
-  AlertTriangle,
   RotateCcw,
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
@@ -18,22 +17,13 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
-import {
   CRMPageContainer,
   CRMPageHeader,
   CRMToolbar,
   CRMPagination,
   PageErrorState,
   FormModal,
+  CRMDeleteDialog,
 } from "@/shared/components/crm";
 import { toast } from "sonner";
 import { useDeleteEmployee } from "@/shared/hooks/use-hrm";
@@ -374,75 +364,39 @@ export default function EmployeesPage() {
       />
 
       {/* 8. Single Delete Confirmation Dialog */}
-      <AlertDialog
-        open={Boolean(employeeToDelete)}
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={Boolean(employeeToDelete)}
         onOpenChange={(open) => !open && setEmployeeToDelete(null)}
-      >
-        <AlertDialogContent className="rounded-2xl border-border bg-card">
-          <AlertDialogHeader>
-            <div className="h-10 w-10 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mb-2">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <AlertDialogTitle className="text-base font-bold text-foreground">
-              Delete Employee?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
-              Are you sure you want to remove{" "}
-              <strong className="text-foreground">
-                {employeeToDelete ? getSafeEmployeeStr(employeeToDelete.name) : ""}
-              </strong>
-              ? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 gap-2">
-            <AlertDialogCancel
-              disabled={deleting}
-              className="text-xs h-9 rounded-xl font-semibold border-border hover:bg-muted"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleDeleteSingle}
-              disabled={deleting}
-              className="text-xs h-9 rounded-xl font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
-            >
-              {deleting ? "Deleting..." : "Delete Employee"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="Delete Employee?"
+        itemName="Employee"
+        description={
+          <>
+            Are you sure you want to remove{" "}
+            <strong className="text-foreground">
+              {employeeToDelete ? getSafeEmployeeStr(employeeToDelete.name) : ""}
+            </strong>
+            ? This action cannot be undone.
+          </>
+        }
+        confirmLabel="Delete Employee"
+        onConfirm={handleDeleteSingle}
+        isDeleting={deleting}
+      />
 
       {/* 9. Bulk Delete Confirmation Dialog */}
-      <AlertDialog open={bulkDeleteModalOpen} onOpenChange={setBulkDeleteModalOpen}>
-        <AlertDialogContent className="rounded-2xl border-border bg-card">
-          <AlertDialogHeader>
-            <div className="h-10 w-10 rounded-full bg-rose-500/10 text-rose-500 flex items-center justify-center mb-2">
-              <AlertTriangle className="h-5 w-5" />
-            </div>
-            <AlertDialogTitle className="text-base font-bold text-foreground">
-              Delete {selectedEmployeeIds.length} Selected Employees?
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-muted-foreground leading-relaxed">
-              This will permanently delete all selected staff profiles. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4 gap-2">
-            <AlertDialogCancel
-              disabled={bulkDeleting}
-              className="text-xs h-9 rounded-xl font-semibold border-border hover:bg-muted"
-            >
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleBulkDelete}
-              disabled={bulkDeleting}
-              className="text-xs h-9 rounded-xl font-semibold bg-rose-600 hover:bg-rose-700 text-white shadow-xs"
-            >
-              {bulkDeleting ? "Deleting..." : "Delete Selected"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        mode="bulk"
+        isOpen={bulkDeleteModalOpen}
+        onOpenChange={setBulkDeleteModalOpen}
+        title={`Delete ${selectedEmployeeIds.length} Selected Employees?`}
+        itemName="Employee"
+        selectedCount={selectedEmployeeIds.length}
+        description="This will permanently delete all selected staff profiles. This action cannot be undone."
+        confirmLabel="Delete Selected"
+        onConfirm={handleBulkDelete}
+        isDeleting={bulkDeleting}
+      />
     </CRMPageContainer>
   );
 }

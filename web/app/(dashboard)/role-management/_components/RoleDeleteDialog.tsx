@@ -19,14 +19,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
+import { Role } from "@/shared/types/role";
 
 interface RoleDeleteDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  deletingRole: any | null;
+  deletingRole: Role | null;
   replacementRoleId: string;
   setReplacementRoleId: (id: string) => void;
-  availableReplacementRoles: any[];
+  availableReplacementRoles: Role[];
   isPending: boolean;
   onConfirmDelete: () => void;
 }

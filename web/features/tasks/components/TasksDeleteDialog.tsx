@@ -1,23 +1,13 @@
 "use client";
 
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
-import { Trash2 } from "lucide-react";
+import { CRMDeleteDialog } from "@/shared/components/crm/CRMDeleteDialog";
 
 // ---------------------------------------------------------------------------
 // TasksDeleteDialog
 //
 // Presentational / orchestration-friendly delete confirmation dialog.
-// Mutation logic lives in the parent (tasks/page.tsx).
+// Reuses the canonical CRMDeleteDialog component while preserving the
+// existing component interface.
 //
 // Modes:
 //   - mode="single"  → shows the single-task title in the description
@@ -62,42 +52,23 @@ export function TasksDeleteDialog({
     ? "This action will permanently delete the task and its history. This action cannot be undone."
     : "This action cannot be undone. All selected tasks will be permanently removed.";
 
-  const confirmLabel = isDeleting
-    ? "Deleting\u2026"
-    : isSingle
-      ? "Delete Task"
-      : `Delete ${selectedCount} Task${selectedCount !== 1 ? "s" : ""}`;
+  const confirmLabel = isSingle
+    ? "Delete Task"
+    : `Delete ${selectedCount} Task${selectedCount !== 1 ? "s" : ""}`;
 
   return (
-    <AlertDialog open={open} onOpenChange={onOpenChange}>
-      <AlertDialogContent>
-        <AlertDialogHeader>
-          <AlertDialogMedia className="bg-destructive/10 text-destructive">
-            <Trash2 />
-          </AlertDialogMedia>
-          <AlertDialogTitle>{title}</AlertDialogTitle>
-          <AlertDialogDescription>{description}</AlertDialogDescription>
-        </AlertDialogHeader>
-
-        <p className="text-xs text-muted-foreground bg-muted/40 px-3 py-2.5 rounded-lg border border-border/40">
-          {warningText}
-        </p>
-
-        <AlertDialogFooter>
-          <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={(e) => {
-              // Prevent AlertDialog from auto-closing before onConfirm resolves.
-              e.preventDefault();
-              onConfirm();
-            }}
-            disabled={isDeleting}
-          >
-            {confirmLabel}
-          </AlertDialogAction>
-        </AlertDialogFooter>
-      </AlertDialogContent>
-    </AlertDialog>
+    <CRMDeleteDialog
+      mode={mode}
+      isOpen={open}
+      onOpenChange={onOpenChange}
+      title={title}
+      itemName="Task"
+      selectedCount={selectedCount}
+      description={description}
+      warningText={warningText}
+      confirmLabel={confirmLabel}
+      onConfirm={onConfirm}
+      isDeleting={isDeleting}
+    />
   );
 }

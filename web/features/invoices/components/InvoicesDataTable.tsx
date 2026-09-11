@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo } from "react";
+import { useMemo, useCallback } from "react";
 import {
   Receipt,
   Calendar,
@@ -8,22 +8,8 @@ import {
   Printer,
   CreditCard,
   Trash2,
-  RotateCcw,
-  Plus,
 } from "lucide-react";
-import {
-  CRMDataTable,
-  CRMTableHeader,
-  CRMTableBody,
-  CRMTableRow,
-  CRMTableCell,
-  CRMTableHeaderCell,
-  EmptyState,
-} from "@/shared/components/crm";
-import {
-  DataTableColumnHeader,
-  SortDirection,
-} from "@/shared/components/DataTableColumnHeader";
+import { CRMDataTable, CRMDataTableColumn } from "@/shared/components/crm/CRMDataTable";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import { CRMActionMenu } from "@/shared/components/crm/CRMActionMenu";
 import { Checkbox } from "@/shared/ui/checkbox";
@@ -31,6 +17,7 @@ import { cn } from "@/shared/lib/utils";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { formatDate } from "@/shared/utils/formatters";
 import { InvoiceSortConfig } from "@/features/invoices/hooks/use-invoices-data";
+import type { SortDirection } from "@/shared/components/DataTableColumnHeader";
 
 // ─── Status Variant Mapping ──────────────────────────────────────────────────
 export function getInvoiceStatusVariant(
@@ -72,51 +59,6 @@ export interface InvoicesDataTableProps {
   onCreateInvoice: () => void;
 }
 
-// ─── Skeleton Rows ───────────────────────────────────────────────────────────
-function InvoicesTableSkeleton() {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <CRMTableRow key={i} className="animate-pulse h-16 hover:bg-transparent">
-          <CRMTableCell className="px-4 py-4 text-center">
-            <div className="h-4 w-4 bg-muted rounded mx-auto" />
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-muted rounded-lg shrink-0" />
-              <div className="space-y-1.5 min-w-0 flex-1">
-                <div className="h-3.5 w-28 bg-muted rounded" />
-                <div className="h-2.5 w-20 bg-muted/60 rounded" />
-              </div>
-            </div>
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4">
-            <div className="h-4 w-32 bg-muted rounded" />
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4">
-            <div className="h-4 w-24 bg-muted rounded" />
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4">
-            <div className="h-4 w-24 bg-muted rounded" />
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4">
-            <div className="h-4 w-20 bg-muted rounded" />
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4">
-            <div className="h-4 w-20 bg-muted rounded" />
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4">
-            <div className="h-6 w-20 bg-muted rounded-md" />
-          </CRMTableCell>
-          <CRMTableCell className="px-4 py-4 text-right">
-            <div className="h-6 w-6 bg-muted rounded ml-auto" />
-          </CRMTableCell>
-        </CRMTableRow>
-      ))}
-    </>
-  );
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 export function InvoicesDataTable({
   paginatedInvoices,
@@ -128,15 +70,12 @@ export function InvoicesDataTable({
   toggleSelectInvoice,
   sortConfig,
   setSort,
-  hasActiveFilters,
-  handleClearFilters,
   formatCurrency,
   getInvoiceColor: getCustomInvoiceColor,
   onOpenDetail,
   onOpenPayment,
   onPrintPdf,
   onDeleteInvoice,
-  onCreateInvoice,
 }: InvoicesDataTableProps) {
   // Master-checkbox: current page selection state
   const isAllSelected =
@@ -149,328 +88,307 @@ export function InvoicesDataTable({
     !isAllSelected &&
     paginatedInvoices.some((inv) => selectedInvoiceIds.includes(inv.id));
 
-  // Sort helper — converts DataTableColumnHeader's 3-state output to setSort
-  const makeSortHandler = (key: string) => (dir: SortDirection) => {
-    setSort(key, dir);
-  };
-
   // Stable sort direction per key for DataTableColumnHeader
   const sortDirection = useMemo(
     () => (key: string) =>
-      sortConfig?.key === key ? (sortConfig.direction as "asc" | "desc") : null,
+      sortConfig?.key === key ? (sortConfig.direction as SortDirection) : null,
     [sortConfig]
   );
 
-  const resolveInvoiceColor = (name: string) => {
-    if (getCustomInvoiceColor) {
-      return getCustomInvoiceColor(name);
-    }
-    return getOrgAvatarColor(name || "Invoice");
-  };
+  const resolveInvoiceColor = useCallback(
+    (name: string) => {
+      if (getCustomInvoiceColor) {
+        return getCustomInvoiceColor(name);
+      }
+      return getOrgAvatarColor(name || "Invoice");
+    },
+    [getCustomInvoiceColor]
+  );
 
-  return (
-    <div className="overflow-auto flex-1 min-h-0 relative flex flex-col kanban-board-scroll">
-      <CRMDataTable
-        hasPagination
-        containerClassName="border-0 shadow-none rounded-none flex-1 min-h-0"
-        className="w-full text-left text-xs border-collapse table-fixed"
-      >
-        {/* ── Header ─────────────────────────────────────────────────── */}
-        <CRMTableHeader className="sticky top-0 z-20 bg-muted/60 dark:bg-muted/40 border-b border-border shadow-xs backdrop-blur-xs">
-          <CRMTableRow className="text-xs font-bold text-foreground hover:bg-transparent">
-            {/* Master checkbox */}
-            <CRMTableHeaderCell className="w-12 px-4 py-3.5 text-center bg-muted/60 dark:bg-muted/40 border-r border-border/40">
-              <Checkbox
-                checked={isAllSelected ? true : somePageSelected ? "indeterminate" : false}
-                onCheckedChange={() => {
-                  if (toggleSelectAllCurrentPage) {
-                    toggleSelectAllCurrentPage();
+  const columns = useMemo<CRMDataTableColumn<any>[]>(() => {
+    return [
+      // 1. Checkbox
+      {
+        header: (
+          <div className="flex items-center justify-center">
+            <Checkbox
+              checked={isAllSelected ? true : somePageSelected ? "indeterminate" : false}
+              onCheckedChange={() => {
+                if (toggleSelectAllCurrentPage) {
+                  toggleSelectAllCurrentPage();
+                } else {
+                  if (isAllSelected) {
+                    const pageIds = new Set(paginatedInvoices.map((inv) => inv.id));
+                    setSelectedInvoiceIds((prev) => prev.filter((id) => !pageIds.has(id)));
                   } else {
-                    if (isAllSelected) {
-                      const pageIds = new Set(paginatedInvoices.map((inv) => inv.id));
-                      setSelectedInvoiceIds((prev) => prev.filter((id) => !pageIds.has(id)));
-                    } else {
-                      setSelectedInvoiceIds((prev) =>
-                        Array.from(new Set([...prev, ...paginatedInvoices.map((inv) => inv.id)]))
-                      );
-                    }
+                    setSelectedInvoiceIds((prev) =>
+                      Array.from(new Set([...prev, ...paginatedInvoices.map((inv) => inv.id)]))
+                    );
+                  }
+                }
+              }}
+              aria-label="Select all on this page"
+              className="mx-auto"
+            />
+          </div>
+        ),
+        cell: (inv: any) => {
+          const isSelected = selectedInvoiceIds.includes(inv.id);
+          return (
+            <div
+              className="flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => {
+                  if (toggleSelectInvoice) {
+                    toggleSelectInvoice(inv.id);
+                  } else {
+                    setSelectedInvoiceIds((prev) =>
+                      prev.includes(inv.id)
+                        ? prev.filter((id) => id !== inv.id)
+                        : [...prev, inv.id]
+                    );
                   }
                 }}
-                aria-label="Select all on this page"
+                aria-label={`Select invoice ${inv.invoiceNumber || inv.id}`}
                 className="mx-auto"
               />
-            </CRMTableHeaderCell>
+            </div>
+          );
+        },
+        className: "w-12 px-4 py-3.5 text-center",
+        headerClassName: "w-12 px-4 py-3.5 text-center",
+        align: "center",
+      },
 
-            {/* Invoice # */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-              <DataTableColumnHeader
-                title="Invoice #"
-                sortable
-                sortDirection={sortDirection("invoiceNumber")}
-                onSort={makeSortHandler("invoiceNumber")}
-              />
-            </CRMTableHeaderCell>
-
-            {/* Customer / Company */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-              <DataTableColumnHeader
-                title="Customer / Company"
-                sortable
-                sortDirection={sortDirection("client")}
-                onSort={makeSortHandler("client")}
-              />
-            </CRMTableHeaderCell>
-
-            {/* Due Date */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-              <DataTableColumnHeader
-                title="Due Date"
-                sortable
-                sortDirection={sortDirection("dueDate")}
-                onSort={makeSortHandler("dueDate")}
-              />
-            </CRMTableHeaderCell>
-
-            {/* Total Amount */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-              <DataTableColumnHeader
-                title="Total Amount"
-                sortable
-                sortDirection={sortDirection("totalAmount")}
-                onSort={makeSortHandler("totalAmount")}
-              />
-            </CRMTableHeaderCell>
-
-            {/* Paid */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-              <DataTableColumnHeader
-                title="Paid"
-                sortable
-                sortDirection={sortDirection("paidAmount")}
-                onSort={makeSortHandler("paidAmount")}
-              />
-            </CRMTableHeaderCell>
-
-            {/* Balance */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-              <DataTableColumnHeader
-                title="Balance"
-                sortable
-                sortDirection={sortDirection("balanceAmount")}
-                onSort={makeSortHandler("balanceAmount")}
-              />
-            </CRMTableHeaderCell>
-
-            {/* Status */}
-            <CRMTableHeaderCell className="px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-              <DataTableColumnHeader
-                title="Status"
-                sortable
-                sortDirection={sortDirection("status")}
-                onSort={makeSortHandler("status")}
-              />
-            </CRMTableHeaderCell>
-
-            {/* Actions */}
-            <CRMTableHeaderCell className="w-16 px-4 py-3.5 text-right bg-muted/60 dark:bg-muted/40">
-              <span className="sr-only">Actions</span>
-            </CRMTableHeaderCell>
-          </CRMTableRow>
-        </CRMTableHeader>
-
-        {/* ── Body ───────────────────────────────────────────────────── */}
-        <CRMTableBody className="divide-y divide-border/40 text-xs">
-          {isInitialLoading ? (
-            <InvoicesTableSkeleton />
-          ) : paginatedInvoices.length > 0 ? (
-            paginatedInvoices.map((inv: any) => {
-              const clientName =
-                inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned";
-              const color = resolveInvoiceColor(clientName || inv.invoiceNumber);
-              const isSelected = selectedInvoiceIds.includes(inv.id);
-
-              return (
-                <CRMTableRow
-                  key={inv.id}
-                  className={cn(
-                    "group h-16 hover:bg-muted/30 transition-colors",
-                    isSelected && "bg-primary/[0.03]"
-                  )}
+      // 2. Invoice # & Icon
+      {
+        header: "Invoice #",
+        sortable: true,
+        sortDirection: sortDirection("invoiceNumber"),
+        onSort: (dir) => setSort("invoiceNumber", dir),
+        cell: (inv: any) => {
+          const clientName =
+            inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned";
+          const color = resolveInvoiceColor(clientName || inv.invoiceNumber);
+          return (
+            <div className="flex items-center gap-3 min-w-0">
+              <div
+                className={cn(
+                  "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm shadow-xs border shrink-0",
+                  color.bg,
+                  color.text,
+                  color.border
+                )}
+              >
+                <Receipt className="h-4 w-4" />
+              </div>
+              <div className="min-w-0 flex-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onOpenDetail(inv.id);
+                  }}
+                  className="font-bold text-sm text-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer truncate font-mono block text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xs"
                 >
-                  {/* Checkbox */}
-                  <CRMTableCell className="px-4 py-3.5 text-center">
-                    <Checkbox
-                      checked={isSelected}
-                      onCheckedChange={() => {
-                        if (toggleSelectInvoice) {
-                          toggleSelectInvoice(inv.id);
-                        } else {
-                          setSelectedInvoiceIds((prev) =>
-                            prev.includes(inv.id)
-                              ? prev.filter((id) => id !== inv.id)
-                              : [...prev, inv.id]
-                          );
-                        }
-                      }}
-                      aria-label={`Select invoice ${inv.invoiceNumber || inv.id}`}
-                      className="mx-auto"
-                    />
-                  </CRMTableCell>
+                  {inv.invoiceNumber}
+                </button>
+                <p className="text-[11px] text-muted-foreground truncate">
+                  {formatDate(inv.invoiceDate, "No date")}
+                </p>
+              </div>
+            </div>
+          );
+        },
+        className: "px-4 py-3.5 font-medium overflow-hidden",
+      },
 
-                  {/* Invoice # & Icon */}
-                  <CRMTableCell className="px-4 py-3.5 font-medium overflow-hidden">
-                    <div className="flex items-center gap-3 min-w-0">
-                      <div
-                        className={cn(
-                          "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm shadow-xs border shrink-0",
-                          color.bg,
-                          color.text,
-                          color.border
-                        )}
-                      >
-                        <Receipt className="h-4 w-4" />
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p
-                          onClick={() => onOpenDetail(inv.id)}
-                          className="font-bold text-sm text-foreground hover:text-emerald-600 dark:hover:text-emerald-400 transition-colors cursor-pointer truncate font-mono"
-                        >
-                          {inv.invoiceNumber}
-                        </p>
-                        <p className="text-[11px] text-muted-foreground truncate">
-                          {formatDate(inv.invoiceDate, "No date")}
-                        </p>
-                      </div>
-                    </div>
-                  </CRMTableCell>
+      // 3. Customer / Company
+      {
+        header: "Customer / Company",
+        sortable: true,
+        sortDirection: sortDirection("client"),
+        onSort: (dir) => setSort("client", dir),
+        cell: (inv: any) => {
+          const clientName =
+            inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned";
+          return (
+            <div className="flex items-center gap-2 min-w-0">
+              <div className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 uppercase">
+                {clientName ? clientName.charAt(0) : "C"}
+              </div>
+              <div className="min-w-0 flex-1">
+                <p className="text-xs font-semibold text-foreground truncate">
+                  {clientName}
+                </p>
+                {inv.customer?.name && inv.company?.name && (
+                  <p className="text-[10px] text-muted-foreground truncate">
+                    {inv.customer.name}
+                  </p>
+                )}
+              </div>
+            </div>
+          );
+        },
+        className: "px-4 py-3.5",
+      },
 
-                  {/* Customer / Company */}
-                  <CRMTableCell className="px-4 py-3.5">
-                    <div className="flex items-center gap-2 min-w-0">
-                      <div className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 uppercase">
-                        {clientName ? clientName.charAt(0) : "C"}
-                      </div>
-                      <div className="min-w-0 flex-1">
-                        <p className="text-xs font-semibold text-foreground truncate">
-                          {clientName}
-                        </p>
-                        {inv.customer?.name && inv.company?.name && (
-                          <p className="text-[10px] text-muted-foreground truncate">
-                            {inv.customer.name}
-                          </p>
-                        )}
-                      </div>
-                    </div>
-                  </CRMTableCell>
+      // 4. Due Date
+      {
+        header: "Due Date",
+        sortable: true,
+        sortDirection: sortDirection("dueDate"),
+        onSort: (dir) => setSort("dueDate", dir),
+        cell: (inv: any) => (
+          <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
+            <Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
+            <span>{formatDate(inv.dueDate, "On Receipt")}</span>
+          </div>
+        ),
+        className: "px-4 py-3.5",
+      },
 
-                  {/* Due Date */}
-                  <CRMTableCell className="px-4 py-3.5">
-                    <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
-                      <Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
-                      <span>{formatDate(inv.dueDate, "On Receipt")}</span>
-                    </div>
-                  </CRMTableCell>
+      // 5. Total Amount
+      {
+        header: "Total Amount",
+        sortable: true,
+        sortDirection: sortDirection("totalAmount"),
+        onSort: (dir) => setSort("totalAmount", dir),
+        cell: (inv: any) => (
+          <span className="font-bold text-foreground text-xs font-mono">
+            {formatCurrency(inv.totalAmount || inv.total || 0, inv.currency)}
+          </span>
+        ),
+        className: "px-4 py-3.5",
+      },
 
-                  {/* Total Amount */}
-                  <CRMTableCell className="px-4 py-3.5">
-                    <span className="font-bold text-foreground text-xs font-mono">
-                      {formatCurrency(inv.totalAmount || inv.total || 0, inv.currency)}
-                    </span>
-                  </CRMTableCell>
+      // 6. Paid Amount
+      {
+        header: "Paid",
+        sortable: true,
+        sortDirection: sortDirection("paidAmount"),
+        onSort: (dir) => setSort("paidAmount", dir),
+        cell: (inv: any) => (
+          <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-xs font-mono">
+            {inv.paidAmount > 0
+              ? formatCurrency(inv.paidAmount, inv.currency)
+              : "—"}
+          </span>
+        ),
+        className: "px-4 py-3.5",
+      },
 
-                  {/* Paid Amount */}
-                  <CRMTableCell className="px-4 py-3.5">
-                    <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-xs font-mono">
-                      {inv.paidAmount > 0
-                        ? formatCurrency(inv.paidAmount, inv.currency)
-                        : "—"}
-                    </span>
-                  </CRMTableCell>
+      // 7. Balance Amount
+      {
+        header: "Balance",
+        sortable: true,
+        sortDirection: sortDirection("balanceAmount"),
+        onSort: (dir) => setSort("balanceAmount", dir),
+        cell: (inv: any) => (
+          <span className="font-bold text-foreground text-xs font-mono">
+            {formatCurrency(inv.balanceAmount || inv.balance || 0, inv.currency)}
+          </span>
+        ),
+        className: "px-4 py-3.5",
+      },
 
-                  {/* Balance Amount */}
-                  <CRMTableCell className="px-4 py-3.5">
-                    <span className="font-bold text-foreground text-xs font-mono">
-                      {formatCurrency(inv.balanceAmount || inv.balance || 0, inv.currency)}
-                    </span>
-                  </CRMTableCell>
+      // 8. Status
+      {
+        header: "Status",
+        sortable: true,
+        sortDirection: sortDirection("status"),
+        onSort: (dir) => setSort("status", dir),
+        cell: (inv: any) => (
+          <StatusBadge
+            status={inv.status || "DRAFT"}
+            variant={getInvoiceStatusVariant(inv.status, inv.paymentStatus, inv.isOverdue)}
+          />
+        ),
+        className: "px-4 py-3.5",
+      },
 
-                  {/* Status */}
-                  <CRMTableCell className="px-4 py-3.5">
-                    <StatusBadge
-                      status={inv.status || "DRAFT"}
-                      variant={getInvoiceStatusVariant(inv.status, inv.paymentStatus, inv.isOverdue)}
-                    />
-                  </CRMTableCell>
+      // 9. Actions
+      {
+        header: <span className="sr-only">Actions</span>,
+        align: "right",
+        cell: (inv: any) => (
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-end">
+            <CRMActionMenu
+              triggerOrientation="vertical"
+              items={[
+                {
+                  label: "View Details",
+                  icon: Eye,
+                  onClick: () => onOpenDetail(inv.id),
+                },
+                {
+                  label: "Print / PDF",
+                  icon: Printer,
+                  onClick: () => onPrintPdf(inv.id),
+                },
+                ...((inv.balanceAmount > 0 || inv.balance > 0) && inv.status !== "CANCELLED"
+                  ? [
+                      {
+                        label: "Record Payment",
+                        icon: CreditCard,
+                        className:
+                          "text-emerald-600 dark:text-emerald-400 font-medium hover:bg-emerald-500/10 focus:bg-emerald-500/10",
+                        onClick: () => onOpenPayment(inv),
+                      },
+                    ]
+                  : []),
+                {
+                  label: "Delete Invoice",
+                  icon: Trash2,
+                  variant: "destructive" as const,
+                  separatorBefore: true,
+                  onClick: () => onDeleteInvoice(inv),
+                },
+              ]}
+            />
+          </div>
+        ),
+        className: "w-16 px-4 py-3.5 text-right",
+        headerClassName: "w-16 px-4 py-3.5 text-right",
+      },
+    ];
+  }, [
+    isAllSelected,
+    somePageSelected,
+    paginatedInvoices,
+    selectedInvoiceIds,
+    setSelectedInvoiceIds,
+    toggleSelectAllCurrentPage,
+    toggleSelectInvoice,
+    sortDirection,
+    setSort,
+    resolveInvoiceColor,
+    formatCurrency,
+    onOpenDetail,
+    onPrintPdf,
+    onOpenPayment,
+    onDeleteInvoice,
+  ]);
 
-                  {/* Actions */}
-                  <CRMTableCell className="px-4 py-3.5 text-right">
-                    <CRMActionMenu
-                      triggerOrientation="vertical"
-                      items={[
-                        {
-                          label: "View Details",
-                          icon: Eye,
-                          onClick: () => onOpenDetail(inv.id),
-                        },
-                        {
-                          label: "Print / PDF",
-                          icon: Printer,
-                          onClick: () => onPrintPdf(inv.id),
-                        },
-                        ...((inv.balanceAmount > 0 || inv.balance > 0) && inv.status !== "CANCELLED"
-                          ? [
-                              {
-                                label: "Record Payment",
-                                icon: CreditCard,
-                                className:
-                                  "text-emerald-600 dark:text-emerald-400 font-medium hover:bg-emerald-500/10 focus:bg-emerald-500/10",
-                                onClick: () => onOpenPayment(inv),
-                              },
-                            ]
-                          : []),
-                        {
-                          label: "Delete Invoice",
-                          icon: Trash2,
-                          variant: "destructive" as const,
-                          separatorBefore: true,
-                          onClick: () => onDeleteInvoice(inv),
-                        },
-                      ]}
-                    />
-                  </CRMTableCell>
-                </CRMTableRow>
-              );
-            })
-          ) : (
-            /* Empty state */
-            <CRMTableRow className="hover:bg-transparent border-0">
-              <CRMTableCell colSpan={9} className="p-6 text-center text-muted-foreground align-middle border-0">
-                <div className="flex flex-col items-center justify-center py-6">
-                  <EmptyState
-                    icon={Receipt}
-                    title="No invoices found"
-                    description="No customer invoices match your current search or filter criteria."
-                    className="border-none bg-transparent shadow-none p-0 min-h-0"
-                    action={
-                      hasActiveFilters
-                        ? {
-                            label: "Clear Filters",
-                            onClick: handleClearFilters,
-                            icon: RotateCcw,
-                          }
-                        : {
-                            label: "Create Invoice",
-                            onClick: onCreateInvoice,
-                            icon: Plus,
-                          }
-                    }
-                  />
-                </div>
-              </CRMTableCell>
-            </CRMTableRow>
-          )}
-        </CRMTableBody>
-      </CRMDataTable>
-    </div>
+  return (
+    <CRMDataTable
+      data={paginatedInvoices}
+      columns={columns}
+      isLoading={isInitialLoading}
+      onRowClick={(inv) => onOpenDetail(inv.id)}
+      hasPagination={false}
+      rowClassName={(inv) =>
+        cn(
+          "group h-16 hover:bg-muted/30 transition-colors",
+          selectedInvoiceIds.includes(inv.id) && "bg-primary/[0.03]"
+        )
+      }
+      emptyIcon={Receipt}
+      emptyTitle="No invoices found"
+      emptyDescription="No customer invoices match your current search or filter criteria."
+    />
   );
 }

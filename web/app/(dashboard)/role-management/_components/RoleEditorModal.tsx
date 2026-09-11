@@ -16,6 +16,7 @@ import { Label } from "@/shared/ui/label";
 import { ScrollArea } from "@/shared/ui/scroll-area";
 import { cn } from "@/shared/lib/utils";
 import { RolePermissionMatrix } from "./RolePermissionMatrix";
+import { Role, RoleFormData } from "@/shared/types/role";
 
 export const PRESET_COLORS = [
   { label: "Blue", value: "#3b82f6" },
@@ -31,21 +32,9 @@ export const PRESET_COLORS = [
 interface RoleEditorModalProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  editingRole: any | null;
-  formData: {
-    name: string;
-    description: string;
-    color: string;
-    permissions: string[];
-  };
-  setFormData: React.Dispatch<
-    React.SetStateAction<{
-      name: string;
-      description: string;
-      color: string;
-      permissions: string[];
-    }>
-  >;
+  editingRole: Role | null;
+  formData: RoleFormData;
+  setFormData: React.Dispatch<React.SetStateAction<RoleFormData>>;
   isFormDirty: boolean;
   isPending: boolean;
   onSave: () => void;

@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Building2, Users, Briefcase, RotateCcw, Plus } from "lucide-react";
+import { Building2, Users, Briefcase } from "lucide-react";
 import { CRMDataTable, CRMDataTableColumn } from "@/shared/components/crm/CRMDataTable";
 import { CRMActionMenu } from "@/shared/components/crm/CRMActionMenu";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { EmptyState } from "@/shared/components/EmptyState";
 import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { formatDate } from "@/shared/utils/formatters";
@@ -51,9 +50,7 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
   onRetry,
   onEditCompany,
   onDeleteCompany,
-  onClearFilters,
   hasActiveFilters,
-  onAddCompany,
 }) => {
   const isAllSelected =
     companies.length > 0 && companies.every((c) => selectedCompanyIds.includes(c.id));
@@ -281,32 +278,12 @@ export const CompaniesDataTable: React.FC<CompaniesDataTableProps> = ({
           selectedCompanyIds.includes(company.id) && "bg-primary/[0.04]"
         )
       }
-      emptyMessage={
-        <div className="flex flex-col items-center justify-center py-10">
-          <EmptyState
-            icon={Building2}
-            title={hasActiveFilters ? "No companies found" : "No companies yet"}
-            description={
-              hasActiveFilters
-                ? "No companies match your current search or filter criteria."
-                : "Add your first B2B company account to start organizing your client relationships."
-            }
-            className="border-none bg-transparent shadow-none p-0 min-h-0"
-            action={
-              hasActiveFilters
-                ? {
-                    label: "Clear Filters",
-                    onClick: onClearFilters,
-                    icon: RotateCcw,
-                  }
-                : {
-                    label: "Create Company",
-                    onClick: onAddCompany,
-                    icon: Plus,
-                  }
-            }
-          />
-        </div>
+      emptyIcon={Building2}
+      emptyTitle={hasActiveFilters ? "No companies found" : "No companies yet"}
+      emptyDescription={
+        hasActiveFilters
+          ? "No companies match your current search or filter criteria."
+          : "Add your first B2B company account to start organizing your client relationships."
       }
     />
   );

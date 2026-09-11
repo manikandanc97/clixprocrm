@@ -21,16 +21,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
+import { CRMDeleteDialog } from "@/shared/components/crm/CRMDeleteDialog";
 import { toast } from "sonner";
 import {
   CheckSquare,
@@ -53,7 +44,6 @@ import {
   Info,
   SlidersHorizontal,
   CheckCircle2,
-  AlertCircle,
 } from "lucide-react";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { useTasks } from "@/shared/hooks/use-crm";
@@ -1561,72 +1551,60 @@ export function TaskContextualSettings({
       />
 
       {/* Confirm Delete Task Type Dialog */}
-      <AlertDialog open={!!typeToDelete} onOpenChange={(o) => !o && setTypeToDelete(null)}>
-        <AlertDialogContent className="max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              Delete Task Type
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-muted-foreground pt-1">
-              Are you sure you want to delete the custom task type{" "}
-              <strong className="text-foreground">&quot;{typeToDelete?.name}&quot;</strong>?
-              {typeToDelete && getTypeUsageCount(typeToDelete.name) > 0 ? (
-                <span className="block mt-2 font-medium text-amber-600 dark:text-amber-400">
-                  Warning: This task type is actively referenced by {getTypeUsageCount(typeToDelete.name)} task(s). Deleting it may cause data inconsistencies. Consider deactivating instead.
-                </span>
-              ) : (
-                <span className="block mt-1">
-                  This action is permanent and removes the option from creation dialogs.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel className="text-xs">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDeleteType}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-semibold"
-            >
-              Delete Task Type
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        isOpen={Boolean(typeToDelete)}
+        onOpenChange={(open) => !open && setTypeToDelete(null)}
+        title="Delete Task Type"
+        itemName="Task Type"
+        description={
+          <>
+            Are you sure you want to delete the custom task type{" "}
+            <strong className="text-foreground font-semibold">&quot;{typeToDelete?.name}&quot;</strong>?
+            {(!typeToDelete || getTypeUsageCount(typeToDelete.name) === 0) && (
+              <span className="block mt-1">
+                This action is permanent and removes the option from creation dialogs.
+              </span>
+            )}
+          </>
+        }
+        warningText={
+          typeToDelete && getTypeUsageCount(typeToDelete.name) > 0 ? (
+            <span className="font-medium text-amber-600 dark:text-amber-400">
+              Warning: This task type is actively referenced by {getTypeUsageCount(typeToDelete.name)} task(s). Deleting it may cause data inconsistencies. Consider deactivating instead.
+            </span>
+          ) : undefined
+        }
+        confirmLabel="Delete Task Type"
+        onConfirm={handleConfirmDeleteType}
+      />
 
       {/* Confirm Delete Task Status Dialog */}
-      <AlertDialog open={!!statusToDelete} onOpenChange={(o) => !o && setStatusToDelete(null)}>
-        <AlertDialogContent className="max-w-md">
-          <AlertDialogHeader>
-            <AlertDialogTitle className="flex items-center gap-2 text-destructive">
-              <AlertCircle className="w-5 h-5 shrink-0" />
-              Delete Task Status
-            </AlertDialogTitle>
-            <AlertDialogDescription className="text-xs text-muted-foreground pt-1">
-              Are you sure you want to delete status{" "}
-              <strong className="text-foreground">&quot;{statusToDelete?.name}&quot;</strong>?
-              {statusToDelete && getStatusUsageCount(statusToDelete.key) > 0 ? (
-                <span className="block mt-2 font-medium text-amber-600 dark:text-amber-400">
-                  Warning: This status is actively assigned to {getStatusUsageCount(statusToDelete.key)} task(s). Deletion is blocked to prevent data corruption.
-                </span>
-              ) : (
-                <span className="block mt-1">
-                  This action cannot be undone.
-                </span>
-              )}
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter className="mt-4">
-            <AlertDialogCancel className="text-xs">Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              onClick={handleConfirmDeleteStatus}
-              className="bg-destructive hover:bg-destructive/90 text-destructive-foreground text-xs font-semibold"
-            >
-              Delete Status
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        isOpen={Boolean(statusToDelete)}
+        onOpenChange={(open) => !open && setStatusToDelete(null)}
+        title="Delete Task Status"
+        itemName="Task Status"
+        description={
+          <>
+            Are you sure you want to delete status{" "}
+            <strong className="text-foreground font-semibold">&quot;{statusToDelete?.name}&quot;</strong>?
+            {(!statusToDelete || getStatusUsageCount(statusToDelete.key) === 0) && (
+              <span className="block mt-1">
+                This action cannot be undone.
+              </span>
+            )}
+          </>
+        }
+        warningText={
+          statusToDelete && getStatusUsageCount(statusToDelete.key) > 0 ? (
+            <span className="font-medium text-amber-600 dark:text-amber-400">
+              Warning: This status is actively assigned to {getStatusUsageCount(statusToDelete.key)} task(s). Deletion is blocked to prevent data corruption.
+            </span>
+          ) : undefined
+        }
+        confirmLabel="Delete Status"
+        onConfirm={handleConfirmDeleteStatus}
+      />
     </>
   );
 }

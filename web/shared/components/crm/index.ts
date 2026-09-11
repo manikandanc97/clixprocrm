@@ -8,11 +8,7 @@ export * from "./ViewToggle";
 export * from "./CRMPageContainer";
 export * from "./CRMMetricsGrid";
 export * from "./CRMPageSection";
-export * from "./CRMContentWrapper";
-export * from "./CRMSearchBar";
-export * from "./CRMActionButton";
-export * from "./CRMSortIndicator";
-export * from "./CRMCardHeader";
+
 export * from "./ActivityTimeline";
 export * from "../EmptyState";
 export * from "./CRMPagination";
@@ -22,6 +18,7 @@ export * from "./ContextualSettingsComponents";
 export * from "./CRMActionMenu";
 export * from "./FormModal";
 export * from "./PageFeedbackStates";
+export * from "./CRMDeleteDialog";
 
 // Semantic aliases — backward compatible
 export { CRMMetricCard as MetricCard } from "./CRMMetricCard";

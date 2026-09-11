@@ -40,16 +40,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/shared/ui/dropdown-menu";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
+import { CRMDeleteDialog } from "@/shared/components/crm/CRMDeleteDialog";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { getQuotationStatusVariant } from "@/features/quotations/utils/quotation-status";
 
@@ -420,30 +411,17 @@ const QuotationPreview = ({ quotation, isOpen, onClose }: QuotationPreviewProps)
         </DialogContent>
       </Dialog>
 
-      <AlertDialog open={showDeleteConfirm} onOpenChange={setShowDeleteConfirm}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Quotation</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this quotation? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeleting}>Cancel</AlertDialogCancel>
-            {/*
-             * Redundant bg-rose-600 / hover:bg-rose-700 / focus:ring-rose-600 removed —
-             * variant="destructive" owns those styles.
-             */}
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? "Deleting..." : "Delete"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={showDeleteConfirm}
+        onOpenChange={setShowDeleteConfirm}
+        title="Delete Quotation"
+        itemName="Quotation"
+        description="Are you sure you want to delete this quotation? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={handleDelete}
+        isDeleting={isDeleting}
+      />
     </>
   );
 };

@@ -6,7 +6,6 @@ import {
   Plus,
   Download,
   Trash2,
-  AlertTriangle,
   RotateCcw,
   Settings,
 } from "lucide-react";
@@ -20,21 +19,11 @@ import {
 } from "@/shared/ui/select";
 import { toast } from "sonner";
 import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
-import {
   CRMPageContainer,
   CRMPageHeader,
   CRMToolbar,
   CRMPagination,
+  CRMDeleteDialog,
 } from "@/shared/components/crm";
 import { useDeleteInvoice } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
@@ -320,64 +309,37 @@ export default function InvoicesPage() {
       )}
 
       {/* Single Delete Dialog */}
-      <AlertDialog open={Boolean(invoiceToDelete)} onOpenChange={(open) => !open && setInvoiceToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              Delete Invoice?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete invoice{" "}
-              <strong className="text-foreground">{invoiceToDelete?.invoiceNumber}</strong>? This action cannot
-              be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDeleteSingle}
-              disabled={deleting}
-            >
-              {deleting ? "Deleting..." : "Delete Invoice"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={Boolean(invoiceToDelete)}
+        onOpenChange={(open) => !open && setInvoiceToDelete(null)}
+        title="Delete Invoice?"
+        itemName="Invoice"
+        description={
+          <>
+            Are you sure you want to delete invoice{" "}
+            <strong className="text-foreground">{invoiceToDelete?.invoiceNumber}</strong>? This action cannot
+            be undone.
+          </>
+        }
+        confirmLabel="Delete Invoice"
+        onConfirm={handleDeleteSingle}
+        isDeleting={deleting}
+      />
 
       {/* Bulk Delete Dialog */}
-      <AlertDialog open={bulkDeleteModalOpen} onOpenChange={setBulkDeleteModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              Delete {selectedInvoiceIds.length} Selected Invoices?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all selected invoices. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkDeleting}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleBulkDelete}
-              disabled={bulkDeleting}
-            >
-              {bulkDeleting ? "Deleting..." : "Delete Selected"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        mode="bulk"
+        isOpen={bulkDeleteModalOpen}
+        onOpenChange={setBulkDeleteModalOpen}
+        title={`Delete ${selectedInvoiceIds.length} Selected Invoices?`}
+        itemName="Invoice"
+        selectedCount={selectedInvoiceIds.length}
+        description="This will permanently delete all selected invoices. This action cannot be undone."
+        confirmLabel="Delete Selected"
+        onConfirm={handleBulkDelete}
+        isDeleting={bulkDeleting}
+      />
 
       <InvoiceContextualSettings
         open={isCustomizeOpen}

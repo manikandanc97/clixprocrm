@@ -8,21 +8,11 @@ import {
   Edit,
   Eye,
   Link2,
-  Plus,
   RotateCcw,
   Trash2,
 } from "lucide-react";
+import { CRMDataTable, CRMDataTableColumn } from "@/shared/components/crm/CRMDataTable";
 import {
-  CRMDataTable,
-  CRMTableHeader,
-  CRMTableBody,
-  CRMTableRow,
-  CRMTableCell,
-  CRMTableHeaderCell,
-  EmptyState,
-} from "@/shared/components/crm";
-import {
-  DataTableColumnHeader,
   SortDirection,
 } from "@/shared/components/DataTableColumnHeader";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
@@ -32,7 +22,7 @@ import { cn } from "@/shared/lib/utils";
 import { TaskType } from "@/shared/types/task";
 import { TaskSortConfig } from "@/features/tasks/hooks/use-tasks-data";
 
-// ─── Status Variant Mapping ──────────────────────────────────────────────────
+// ─── Status & Priority Variant Mapping ───────────────────────────────────────
 export function getTaskStatusVariant(status?: string): StatusVariant {
   switch (status?.toUpperCase()) {
     case "COMPLETED":
@@ -46,6 +36,21 @@ export function getTaskStatusVariant(status?: string): StatusVariant {
       return "rose";
     case "CANCELLED":
       return "neutral";
+    default:
+      return "neutral";
+  }
+}
+
+export function getPriorityVariant(priority?: string): StatusVariant {
+  switch (priority?.toUpperCase()) {
+    case "URGENT":
+      return "purple";
+    case "HIGH":
+      return "rose";
+    case "MEDIUM":
+      return "amber";
+    case "LOW":
+      return "blue";
     default:
       return "neutral";
   }
@@ -73,51 +78,6 @@ export interface TasksDataTableProps {
   onCreateTask: () => void;
 }
 
-// ─── Skeleton Rows ───────────────────────────────────────────────────────────
-function TasksTableSkeleton() {
-  return (
-    <>
-      {Array.from({ length: 5 }).map((_, i) => (
-        <CRMTableRow key={i} className="animate-pulse h-16 hover:bg-transparent">
-          <CRMTableCell className="w-12 px-4 py-4 text-center">
-            <div className="h-4 w-4 bg-muted rounded mx-auto" />
-          </CRMTableCell>
-          <CRMTableCell className="min-w-[240px] px-4 py-4">
-            <div className="flex items-center gap-3">
-              <div className="h-10 w-10 bg-muted rounded-lg shrink-0" />
-              <div className="space-y-1.5 min-w-0 flex-1">
-                <div className="h-3.5 w-36 bg-muted rounded" />
-                <div className="h-2.5 w-24 bg-muted/60 rounded" />
-              </div>
-            </div>
-          </CRMTableCell>
-          <CRMTableCell className="w-32 px-4 py-4">
-            <div className="h-6 w-20 bg-muted rounded-md" />
-          </CRMTableCell>
-          <CRMTableCell className="w-28 px-4 py-4">
-            <div className="h-6 w-16 bg-muted rounded-md" />
-          </CRMTableCell>
-          <CRMTableCell className="w-36 px-4 py-4">
-            <div className="h-4 w-24 bg-muted rounded" />
-          </CRMTableCell>
-          <CRMTableCell className="min-w-[160px] px-4 py-4">
-            <div className="h-6 w-24 bg-muted rounded-md" />
-          </CRMTableCell>
-          <CRMTableCell className="w-36 px-4 py-4">
-            <div className="flex items-center gap-2">
-              <div className="h-6 w-6 rounded-full bg-muted shrink-0" />
-              <div className="h-3.5 w-20 bg-muted rounded" />
-            </div>
-          </CRMTableCell>
-          <CRMTableCell className="w-16 px-4 py-4 text-right">
-            <div className="h-6 w-6 bg-muted rounded ml-auto" />
-          </CRMTableCell>
-        </CRMTableRow>
-      ))}
-    </>
-  );
-}
-
 // ─── Component ───────────────────────────────────────────────────────────────
 export function TasksDataTable({
   paginatedTasks,
@@ -126,8 +86,6 @@ export function TasksDataTable({
   setSelectedTaskIds,
   sortConfig,
   setSort,
-  hasActiveFilters,
-  handleClearFilters,
   isTaskOverdue,
   formatDate,
   getTaskColor,
@@ -137,7 +95,6 @@ export function TasksDataTable({
   onToggleComplete,
   onScheduleMeeting,
   onDeleteTask,
-  onCreateTask,
 }: TasksDataTableProps) {
   // Current page selection state
   const allPageSelected =
@@ -155,27 +112,18 @@ export function TasksDataTable({
     : false;
 
   // Sorting helpers
-  const makeSortHandler = (key: string) => (dir: SortDirection) => {
-    setSort(key, dir);
-  };
-
   const sortDirection = useMemo(
     () => (key: string) =>
       sortConfig?.key === key ? (sortConfig.direction as SortDirection) : null,
     [sortConfig]
   );
 
-  return (
-    <CRMDataTable
-      hasPagination
-      containerClassName="border-0 shadow-none rounded-none flex-1 min-h-0"
-      className="w-full text-left text-xs border-collapse"
-    >
-      {/* ── Header ─────────────────────────────────────────────────── */}
-      <CRMTableHeader className="sticky top-0 z-20 bg-muted/60 dark:bg-muted/40 border-b border-border shadow-xs backdrop-blur-xs">
-        <CRMTableRow className="text-xs font-bold text-foreground hover:bg-transparent">
-          {/* Master checkbox */}
-          <CRMTableHeaderCell className="w-12 px-4 py-3.5 text-center border-r border-border/40 bg-muted/60 dark:bg-muted/40">
+  const columns = useMemo<CRMDataTableColumn<TaskType>[]>(() => {
+    return [
+      // 1. Master Checkbox
+      {
+        header: (
+          <div className="flex items-center justify-center">
             <Checkbox
               checked={masterChecked}
               onCheckedChange={(checked) => {
@@ -191,298 +139,276 @@ export function TasksDataTable({
               aria-label="Select all tasks on this page"
               className="mx-auto"
             />
-          </CRMTableHeaderCell>
+          </div>
+        ),
+        cell: (task) => {
+          const isSelected = selectedTaskIds.includes(task.id);
+          return (
+            <div
+              className="flex items-center justify-center"
+              onClick={(e) => e.stopPropagation()}
+            >
+              <Checkbox
+                checked={isSelected}
+                onCheckedChange={() => {
+                  setSelectedTaskIds((prev) =>
+                    prev.includes(task.id)
+                      ? prev.filter((id) => id !== task.id)
+                      : [...prev, task.id]
+                  );
+                }}
+                aria-label={`Select task ${task.title || "Untitled Task"}`}
+                className="mx-auto"
+              />
+            </div>
+          );
+        },
+        className: "w-12 px-4 py-3.5 text-center",
+        headerClassName: "w-12 px-4 py-3.5 text-center",
+        align: "center",
+      },
 
-          {/* Task */}
-          <CRMTableHeaderCell className="min-w-[240px] px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-            <DataTableColumnHeader
-              title="Task"
-              sortable
-              sortDirection={sortDirection("title")}
-              onSort={makeSortHandler("title")}
-            />
-          </CRMTableHeaderCell>
-
-          {/* Status */}
-          <CRMTableHeaderCell className="w-32 px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-            <DataTableColumnHeader
-              title="Status"
-              sortable
-              sortDirection={sortDirection("status")}
-              onSort={makeSortHandler("status")}
-            />
-          </CRMTableHeaderCell>
-
-          {/* Priority */}
-          <CRMTableHeaderCell className="w-28 px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-            <DataTableColumnHeader
-              title="Priority"
-              sortable
-              sortDirection={sortDirection("priority")}
-              onSort={makeSortHandler("priority")}
-            />
-          </CRMTableHeaderCell>
-
-          {/* Due Date */}
-          <CRMTableHeaderCell className="w-36 px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-            <DataTableColumnHeader
-              title="Due Date"
-              sortable
-              sortDirection={sortDirection("dueDate")}
-              onSort={makeSortHandler("dueDate")}
-            />
-          </CRMTableHeaderCell>
-
-          {/* Related Record */}
-          <CRMTableHeaderCell className="min-w-[160px] px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-            <DataTableColumnHeader title="Related Record" />
-          </CRMTableHeaderCell>
-
-          {/* Assignee */}
-          <CRMTableHeaderCell className="w-36 px-4 py-3.5 text-left border-r border-border/40 bg-muted/60 dark:bg-muted/40 select-none">
-            <DataTableColumnHeader
-              title="Assignee"
-              sortable
-              sortDirection={sortDirection("assignedTo")}
-              onSort={makeSortHandler("assignedTo")}
-            />
-          </CRMTableHeaderCell>
-
-          {/* Actions */}
-          <CRMTableHeaderCell className="w-16 px-4 py-3.5 text-right bg-muted/60 dark:bg-muted/40">
-            <span className="sr-only">Actions</span>
-          </CRMTableHeaderCell>
-        </CRMTableRow>
-      </CRMTableHeader>
-
-      {/* ── Body ───────────────────────────────────────────────────── */}
-      <CRMTableBody className="divide-y divide-border/40 text-xs">
-        {isInitialLoading ? (
-          <TasksTableSkeleton />
-        ) : paginatedTasks.length > 0 ? (
-          paginatedTasks.map((task: TaskType) => {
-            const color = getTaskColor(task.title || "Task");
-            const { date } = formatDate(task.dueDate);
-            const isSelected = selectedTaskIds.includes(task.id);
-            const overdue = isTaskOverdue(task);
-
-            const relatedName =
-              task.relatedLead?.name ||
-              task.relatedCustomer?.name ||
-              task.relatedQuotation?.title ||
-              null;
-
-            return (
-              <CRMTableRow
-                key={task.id}
+      // 2. Task Name & Avatar
+      {
+        header: "Task",
+        sortable: true,
+        sortDirection: sortDirection("title"),
+        onSort: (dir) => setSort("title", dir),
+        cell: (task) => {
+          const color = getTaskColor(task.title || "Task");
+          return (
+            <div className="flex items-center gap-3 min-w-0">
+              <div
                 className={cn(
-                  "group h-16 hover:bg-muted/30 transition-colors",
-                  isSelected && "bg-primary/[0.03]"
+                  "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm shadow-xs border shrink-0",
+                  color.bg,
+                  color.text,
+                  color.border
                 )}
               >
-                {/* Checkbox */}
-                <CRMTableCell className="w-12 px-4 py-3.5 text-center">
-                  <Checkbox
-                    checked={isSelected}
-                    onCheckedChange={() => {
-                      setSelectedTaskIds((prev) =>
-                        prev.includes(task.id)
-                          ? prev.filter((id) => id !== task.id)
-                          : [...prev, task.id]
-                      );
-                    }}
-                    aria-label={`Select task ${task.title || "Untitled Task"}`}
-                    className="mx-auto"
-                  />
-                </CRMTableCell>
-
-                {/* Task Name & Avatar */}
-                <CRMTableCell className="min-w-[240px] px-4 py-3.5 font-medium overflow-hidden">
-                  <div className="flex items-center gap-3 min-w-0">
-                    <div
-                      className={cn(
-                        "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm shadow-xs border shrink-0",
-                        color.bg,
-                        color.text,
-                        color.border
-                      )}
-                    >
-                      {task.title ? task.title.charAt(0).toUpperCase() : "T"}
-                    </div>
-                    <div className="min-w-0 flex-1">
-                      <p
-                        onClick={() => onSelectTask(task)}
-                        className={cn(
-                          "font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate",
-                          task.status === "COMPLETED" && "line-through text-muted-foreground"
-                        )}
-                      >
-                        {task.title || "Untitled Task"}
-                      </p>
-                      <p className="text-xs text-muted-foreground truncate">
-                        {task.description ||
-                          (task.tags && task.tags.length > 0
-                            ? task.tags.join(", ")
-                            : "No description")}
-                      </p>
-                    </div>
-                  </div>
-                </CRMTableCell>
-
-                {/* Status — canonical StatusBadge */}
-                <CRMTableCell className="w-32 px-4 py-3.5">
-                  <StatusBadge
-                    status={task.status || "PENDING"}
-                    variant={getTaskStatusVariant(task.status)}
-                  />
-                </CRMTableCell>
-
-                {/* Priority — semantic design tokens */}
-                <CRMTableCell className="w-28 px-4 py-3.5">
-                  <span
-                    className={cn(
-                      "inline-flex items-center px-2 py-0.5 rounded-md text-[10px] font-bold uppercase tracking-wider border shadow-xs",
-                      task.priority === "HIGH" &&
-                        "bg-destructive/15 text-destructive border-destructive/25",
-                      (task.priority === "MEDIUM" || !task.priority) &&
-                        "bg-warning/15 text-warning border-warning/25",
-                      task.priority === "LOW" &&
-                        "bg-info/15 text-info border-info/25"
-                    )}
-                  >
-                    {task.priority || "MEDIUM"}
-                  </span>
-                </CRMTableCell>
-
-                {/* Due Date & Overdue */}
-                <CRMTableCell className="w-36 px-4 py-3.5">
-                  <div className="flex items-center gap-1.5 text-foreground">
-                    <Calendar
-                      className={cn(
-                        "h-3.5 w-3.5 shrink-0",
-                        overdue ? "text-destructive" : "text-muted-foreground"
-                      )}
-                    />
-                    <div>
-                      <p
-                        className={cn(
-                          "text-xs font-semibold",
-                          overdue && "text-destructive font-bold"
-                        )}
-                      >
-                        {date}
-                      </p>
-                      {overdue && (
-                        <span className="text-[10px] font-bold text-destructive uppercase tracking-tight">
-                          Overdue
-                        </span>
-                      )}
-                    </div>
-                  </div>
-                </CRMTableCell>
-
-                {/* Related Record */}
-                <CRMTableCell className="min-w-[160px] px-4 py-3.5">
-                  {relatedName ? (
-                    <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-border/60 bg-muted/40 text-muted-foreground max-w-[150px] truncate">
-                      <Link2 className="h-3 w-3 text-primary shrink-0" />
-                      <span className="text-xs font-semibold text-foreground truncate">
-                        {relatedName}
-                      </span>
-                    </div>
-                  ) : (
-                    <span className="text-xs text-muted-foreground/50">—</span>
-                  )}
-                </CRMTableCell>
-
-                {/* Assignee */}
-                <CRMTableCell className="w-36 px-4 py-3.5">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <div className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 uppercase">
-                      {task.assignedTo?.name ? task.assignedTo.name.charAt(0) : "U"}
-                    </div>
-                    <span className="text-xs font-semibold text-foreground truncate">
-                      {task.assignedTo?.name || "Unassigned"}
-                    </span>
-                  </div>
-                </CRMTableCell>
-
-                {/* Actions — canonical CRMActionMenu */}
-                <CRMTableCell className="w-16 px-4 py-3.5 text-right">
-                  <CRMActionMenu
-                    triggerOrientation="vertical"
-                    aria-label={`Actions for ${task.title || "task"}`}
-                    items={[
-                      {
-                        label: "View Details",
-                        icon: Eye,
-                        onClick: () => onSelectTask(task),
-                      },
-                      {
-                        label: "Edit Task",
-                        icon: Edit,
-                        onClick: () => onEditTask(task),
-                      },
-                      {
-                        label:
-                          task.status === "COMPLETED"
-                            ? "Reopen Task"
-                            : "Mark Complete",
-                        icon:
-                          task.status === "COMPLETED" ? RotateCcw : CheckCircle2,
-                        disabled: togglingTaskId === task.id,
-                        onClick: () => onToggleComplete(task),
-                      },
-                      {
-                        label: "Schedule Meeting",
-                        icon: Calendar,
-                        onClick: () => onScheduleMeeting(task),
-                      },
-                      {
-                        label: "Delete Task",
-                        icon: Trash2,
-                        variant: "destructive",
-                        separatorBefore: true,
-                        onClick: () => onDeleteTask(task),
-                      },
-                    ]}
-                  />
-                </CRMTableCell>
-              </CRMTableRow>
-            );
-          })
-        ) : (
-          /* Empty state */
-          <CRMTableRow className="hover:bg-transparent border-0">
-            <CRMTableCell
-              colSpan={8}
-              className="p-6 text-center text-muted-foreground align-middle border-0"
-            >
-              <div className="flex flex-col items-center justify-center py-6">
-                <EmptyState
-                  icon={CheckSquare}
-                  title="No tasks found"
-                  description="No tasks match your current search or filter criteria."
-                  className="border-none bg-transparent shadow-none p-0 min-h-0"
-                  action={
-                    hasActiveFilters
-                      ? {
-                          label: "Clear Filters",
-                          onClick: handleClearFilters,
-                          icon: RotateCcw,
-                        }
-                      : {
-                          label: "Create Task",
-                          onClick: onCreateTask,
-                          icon: Plus,
-                        }
-                  }
-                />
+                {task.title ? task.title.charAt(0).toUpperCase() : "T"}
               </div>
-            </CRMTableCell>
-          </CRMTableRow>
-        )}
-      </CRMTableBody>
-    </CRMDataTable>
+              <div className="min-w-0 flex-1">
+                <button
+                  type="button"
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onSelectTask(task);
+                  }}
+                  className={cn(
+                    "font-bold text-sm text-foreground hover:text-primary transition-colors cursor-pointer truncate block text-left w-full focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 rounded-xs",
+                    task.status === "COMPLETED" && "line-through text-muted-foreground"
+                  )}
+                >
+                  {task.title || "Untitled Task"}
+                </button>
+                <p className="text-xs text-muted-foreground truncate">
+                  {task.description ||
+                    (task.tags && task.tags.length > 0
+                      ? task.tags.join(", ")
+                      : "No description")}
+                </p>
+              </div>
+            </div>
+          );
+        },
+        className: "min-w-[240px] px-4 py-3.5 font-medium overflow-hidden",
+      },
+
+      // 3. Status
+      {
+        header: "Status",
+        sortable: true,
+        sortDirection: sortDirection("status"),
+        onSort: (dir) => setSort("status", dir),
+        cell: (task) => (
+          <StatusBadge
+            status={task.status || "PENDING"}
+            variant={getTaskStatusVariant(task.status)}
+          />
+        ),
+        className: "w-32 px-4 py-3.5",
+      },
+
+      // 4. Priority
+      {
+        header: "Priority",
+        sortable: true,
+        sortDirection: sortDirection("priority"),
+        onSort: (dir) => setSort("priority", dir),
+        cell: (task) => (
+          <StatusBadge
+            status={task.priority || "MEDIUM"}
+            variant={getPriorityVariant(task.priority)}
+          />
+        ),
+        className: "w-28 px-4 py-3.5",
+      },
+
+      // 5. Due Date
+      {
+        header: "Due Date",
+        sortable: true,
+        sortDirection: sortDirection("dueDate"),
+        onSort: (dir) => setSort("dueDate", dir),
+        cell: (task) => {
+          const { date } = formatDate(task.dueDate);
+          const overdue = isTaskOverdue(task);
+          return (
+            <div className="flex items-center gap-1.5 text-foreground">
+              <Calendar
+                className={cn(
+                  "h-3.5 w-3.5 shrink-0",
+                  overdue ? "text-destructive" : "text-muted-foreground"
+                )}
+              />
+              <div>
+                <p
+                  className={cn(
+                    "text-xs font-semibold",
+                    overdue && "text-destructive font-bold"
+                  )}
+                >
+                  {date}
+                </p>
+                {overdue && (
+                  <span className="text-[10px] font-bold text-destructive uppercase tracking-tight">
+                    Overdue
+                  </span>
+                )}
+              </div>
+            </div>
+          );
+        },
+        className: "w-36 px-4 py-3.5",
+      },
+
+      // 6. Related Record
+      {
+        header: "Related Record",
+        cell: (task) => {
+          const relatedName =
+            task.relatedLead?.name ||
+            task.relatedCustomer?.name ||
+            task.relatedQuotation?.title ||
+            null;
+          return relatedName ? (
+            <div className="inline-flex items-center gap-1.5 px-2 py-1 rounded-md border border-border/60 bg-muted/40 text-muted-foreground max-w-[150px] truncate">
+              <Link2 className="h-3 w-3 text-primary shrink-0" />
+              <span className="text-xs font-semibold text-foreground truncate">
+                {relatedName}
+              </span>
+            </div>
+          ) : (
+            <span className="text-xs text-muted-foreground/50">—</span>
+          );
+        },
+        className: "min-w-[160px] px-4 py-3.5",
+      },
+
+      // 7. Assignee
+      {
+        header: "Assignee",
+        sortable: true,
+        sortDirection: sortDirection("assignedTo"),
+        onSort: (dir) => setSort("assignedTo", dir),
+        cell: (task) => (
+          <div className="flex items-center gap-2 min-w-0">
+            <div className="h-6 w-6 rounded-full bg-primary/10 border border-primary/20 flex items-center justify-center text-[10px] font-bold text-primary shrink-0 uppercase">
+              {task.assignedTo?.name ? task.assignedTo.name.charAt(0) : "U"}
+            </div>
+            <span className="text-xs font-semibold text-foreground truncate">
+              {task.assignedTo?.name || "Unassigned"}
+            </span>
+          </div>
+        ),
+        className: "w-36 px-4 py-3.5",
+      },
+
+      // 8. Actions
+      {
+        header: <span className="sr-only">Actions</span>,
+        align: "right",
+        cell: (task) => (
+          <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-end">
+            <CRMActionMenu
+              triggerOrientation="vertical"
+              aria-label={`Actions for ${task.title || "task"}`}
+              items={[
+                {
+                  label: "View Details",
+                  icon: Eye,
+                  onClick: () => onSelectTask(task),
+                },
+                {
+                  label: "Edit Task",
+                  icon: Edit,
+                  onClick: () => onEditTask(task),
+                },
+                {
+                  label:
+                    task.status === "COMPLETED"
+                      ? "Reopen Task"
+                      : "Mark Complete",
+                  icon:
+                    task.status === "COMPLETED" ? RotateCcw : CheckCircle2,
+                  disabled: togglingTaskId === task.id,
+                  onClick: () => onToggleComplete(task),
+                },
+                {
+                  label: "Schedule Meeting",
+                  icon: Calendar,
+                  onClick: () => onScheduleMeeting(task),
+                },
+                {
+                  label: "Delete Task",
+                  icon: Trash2,
+                  variant: "destructive",
+                  separatorBefore: true,
+                  onClick: () => onDeleteTask(task),
+                },
+              ]}
+            />
+          </div>
+        ),
+        className: "w-16 px-4 py-3.5 text-right",
+        headerClassName: "w-16 px-4 py-3.5 text-right",
+      },
+    ];
+  }, [
+    masterChecked,
+    paginatedTasks,
+    selectedTaskIds,
+    setSelectedTaskIds,
+    sortDirection,
+    setSort,
+    getTaskColor,
+    formatDate,
+    isTaskOverdue,
+    onSelectTask,
+    onEditTask,
+    togglingTaskId,
+    onToggleComplete,
+    onScheduleMeeting,
+    onDeleteTask,
+  ]);
+
+  return (
+    <CRMDataTable
+      data={paginatedTasks}
+      columns={columns}
+      isLoading={isInitialLoading}
+      onRowClick={(task) => onSelectTask(task)}
+      hasPagination={false}
+      rowClassName={(task) =>
+        cn(
+          "group h-16 hover:bg-muted/30 transition-colors",
+          selectedTaskIds.includes(task.id) && "bg-primary/[0.03]"
+        )
+      }
+      emptyIcon={CheckSquare}
+      emptyTitle="No tasks found"
+      emptyDescription="No tasks match your current search or filter criteria."
+    />
   );
 }

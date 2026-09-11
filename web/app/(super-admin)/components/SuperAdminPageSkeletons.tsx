@@ -13,7 +13,6 @@ import { Skeleton } from "@/shared/ui/skeleton";
 import { Card } from "@/shared/ui/card";
 import {
   Users,
-  CreditCard,
   Layers,
   ShieldAlert,
   ScrollText,
@@ -47,40 +46,7 @@ export function SuperAdminUsersSkeleton() {
   );
 }
 
-export function SuperAdminPlansSkeleton() {
-  return (
-    <CRMPageContainer>
-      <CRMPageHeader
-        title="Plans & Subscriptions"
-        subtitle="Manage canonical subscription tiers, real-time pricing models, resource quotas, AI entitlements, and custom tiers."
-        icon={CreditCard}
-      />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-        {Array.from({ length: 4 }).map((_, i) => (
-          <div
-            key={i}
-            className="rounded-2xl bg-card border border-border p-6 flex flex-col justify-between shadow-card animate-pulse space-y-4 min-h-[420px]"
-          >
-            <div className="space-y-3">
-              <div className="h-5 bg-muted rounded-lg w-1/2" />
-              <div className="h-3.5 bg-muted/60 rounded-md w-4/5" />
-              <div className="h-8 bg-muted rounded-lg w-2/3 mt-4" />
-              <div className="h-8 bg-muted/40 rounded-xl w-full mt-2" />
-              <div className="space-y-2 pt-4">
-                <div className="h-3 bg-muted/60 rounded w-1/3" />
-                <div className="h-3 bg-muted/40 rounded w-full" />
-                <div className="h-3 bg-muted/40 rounded w-5/6" />
-                <div className="h-3 bg-muted/40 rounded w-4/6" />
-              </div>
-            </div>
-            <div className="h-10 bg-muted rounded-xl w-full" />
-          </div>
-        ))}
-      </div>
-    </CRMPageContainer>
-  );
-}
 
 function ModulesTableRowSkeleton() {
   return (

@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Users, Shield, Calendar, RotateCcw, UserPlus } from "lucide-react";
+import { Users, Shield, Calendar } from "lucide-react";
 import { CRMDataTable, CRMDataTableColumn } from "@/shared/components/crm/CRMDataTable";
 import { CRMActionMenu } from "@/shared/components/crm/CRMActionMenu";
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
-import { EmptyState } from "@/shared/components/EmptyState";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
@@ -48,9 +47,7 @@ export const EmployeesDataTable: React.FC<EmployeesDataTableProps> = ({
   onEditEmployee,
   onToggleStatus,
   onDeleteEmployee,
-  onClearFilters,
   hasActiveFilters,
-  onAddEmployee,
 }) => {
   const isAllSelected =
     employees.length > 0 && employees.every((emp) => selectedEmployeeIds.includes(emp.id));
@@ -255,32 +252,12 @@ export const EmployeesDataTable: React.FC<EmployeesDataTableProps> = ({
           selectedEmployeeIds.includes(emp.id) && "bg-primary/[0.04]"
         )
       }
-      emptyMessage={
-        <div className="flex flex-col items-center justify-center py-10">
-          <EmptyState
-            icon={Users}
-            title={hasActiveFilters ? "No employees found" : "No staff members yet"}
-            description={
-              hasActiveFilters
-                ? "No staff records match your current search or filter criteria."
-                : "Add your first employee to start managing your team and permissions."
-            }
-            className="border-none bg-transparent shadow-none p-0 min-h-0"
-            action={
-              hasActiveFilters
-                ? {
-                    label: "Clear Filters",
-                    onClick: onClearFilters,
-                    icon: RotateCcw,
-                  }
-                : {
-                    label: "Add Employee",
-                    onClick: onAddEmployee,
-                    icon: UserPlus,
-                  }
-            }
-          />
-        </div>
+      emptyIcon={Users}
+      emptyTitle={hasActiveFilters ? "No employees found" : "No staff members yet"}
+      emptyDescription={
+        hasActiveFilters
+          ? "No staff records match your current search or filter criteria."
+          : "Add your first employee to start managing your team and permissions."
       }
     />
   );

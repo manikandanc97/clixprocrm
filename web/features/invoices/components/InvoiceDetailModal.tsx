@@ -23,16 +23,7 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/shared/ui/dialog";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
+import { CRMDeleteDialog } from "@/shared/components/crm/CRMDeleteDialog";
 import {
   Tabs,
   TabsList,
@@ -617,53 +608,32 @@ export function InvoiceDetailModal({
       </Dialog>
 
       {/* Delete Invoice Confirmation Dialog */}
-      <AlertDialog open={isDeleteInvoiceOpen} onOpenChange={setIsDeleteInvoiceOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Invoice</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete invoice {invoice?.invoiceNumber}? This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingInvoice}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleConfirmDeleteInvoice}
-              disabled={isDeletingInvoice}
-            >
-              {isDeletingInvoice ? "Deleting..." : "Delete Invoice"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={isDeleteInvoiceOpen}
+        onOpenChange={setIsDeleteInvoiceOpen}
+        title="Delete Invoice"
+        itemName="Invoice"
+        description={`Are you sure you want to delete invoice ${invoice?.invoiceNumber}? This action cannot be undone.`}
+        confirmLabel="Delete Invoice"
+        onConfirm={handleConfirmDeleteInvoice}
+        isDeleting={isDeletingInvoice}
+      />
 
       {/* Delete Payment Confirmation Dialog */}
-      <AlertDialog
-        open={Boolean(paymentToDelete)}
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={Boolean(paymentToDelete)}
         onOpenChange={(open) => {
           if (!open) setPaymentToDelete(null);
         }}
-      >
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Delete Payment</AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete this payment record{paymentToDelete?.paymentNumber ? ` (${paymentToDelete.paymentNumber})` : ""}? Outstanding balance will be restored.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={isDeletingPayment}>Cancel</AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleConfirmDeletePayment}
-              disabled={isDeletingPayment}
-            >
-              {isDeletingPayment ? "Deleting..." : "Delete Payment"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+        title="Delete Payment"
+        itemName="Payment"
+        description={`Are you sure you want to delete this payment record${paymentToDelete?.paymentNumber ? ` (${paymentToDelete.paymentNumber})` : ""}? Outstanding balance will be restored.`}
+        confirmLabel="Delete Payment"
+        onConfirm={handleConfirmDeletePayment}
+        isDeleting={isDeletingPayment}
+      />
 
       {/* Record Payment Sub-Modal */}
       {invoice && (

@@ -12,11 +12,12 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { normalizeToModuleTitle } from "@/shared/lib/auth/rbac";
+import { Role, RolePermission } from "@/shared/types/role";
 
 interface RoleDetailsDialogProps {
   isOpen: boolean;
   onOpenChange: (open: boolean) => void;
-  role: any | null;
+  role: Role | null;
   roleColor: string;
 }
 
@@ -31,7 +32,7 @@ export function RoleDetailsDialog({
     role?.name?.toUpperCase() === "SUPER ADMIN";
 
   const activePermissions = (role?.permissions || []).filter(
-    (p: any) => p.hasAccess,
+    (p: RolePermission) => p.hasAccess,
   );
 
   return (
@@ -71,7 +72,7 @@ export function RoleDetailsDialog({
                   No active module permissions.
                 </span>
               ) : (
-                activePermissions.map((p: any) => (
+                activePermissions.map((p: RolePermission) => (
                   <Badge key={p.module} variant="secondary" className="text-xs">
                     <Check className="h-3 w-3 mr-1 text-emerald-500" />
                     {normalizeToModuleTitle(p.module) || p.module}

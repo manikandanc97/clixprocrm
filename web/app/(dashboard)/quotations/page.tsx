@@ -6,23 +6,11 @@ import {
   Plus,
   Download,
   Trash2,
-  AlertTriangle,
   RotateCcw,
   Settings,
 } from "lucide-react";
 import dynamic from "next/dynamic";
 import { Button } from "@/shared/ui/button";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogMedia,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
 import {
   Select,
   SelectContent,
@@ -35,6 +23,7 @@ import {
   CRMPageHeader,
   CRMToolbar,
   CRMPagination,
+  CRMDeleteDialog,
 } from "@/shared/components/crm";
 import {
   useDeleteQuotation,
@@ -330,64 +319,37 @@ export default function QuotationsPage() {
       )}
 
       {/* Single Delete Dialog */}
-      <AlertDialog open={Boolean(quoteToDelete)} onOpenChange={(open) => !open && setQuoteToDelete(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              Delete Quotation?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              Are you sure you want to delete quotation{" "}
-              <strong className="text-foreground">{quoteToDelete?.quoteId}</strong>? This action cannot be
-              undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={deleting}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleDeleteSingle}
-              disabled={deleting}
-            >
-              {deleting ? "Deleting..." : "Delete Quotation"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={Boolean(quoteToDelete)}
+        onOpenChange={(open) => !open && setQuoteToDelete(null)}
+        title="Delete Quotation?"
+        itemName="Quotation"
+        description={
+          <>
+            Are you sure you want to delete quotation{" "}
+            <strong className="text-foreground">{quoteToDelete?.quoteId}</strong>? This action cannot be
+            undone.
+          </>
+        }
+        confirmLabel="Delete Quotation"
+        onConfirm={handleDeleteSingle}
+        isDeleting={deleting}
+      />
 
       {/* Bulk Delete Dialog */}
-      <AlertDialog open={bulkDeleteModalOpen} onOpenChange={setBulkDeleteModalOpen}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogMedia className="bg-destructive/10 text-destructive">
-              <AlertTriangle className="h-5 w-5" />
-            </AlertDialogMedia>
-            <AlertDialogTitle>
-              Delete {selectedQuoteIds.length} Selected Quotations?
-            </AlertDialogTitle>
-            <AlertDialogDescription>
-              This will permanently delete all selected quotations. This action cannot be undone.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel disabled={bulkDeleting}>
-              Cancel
-            </AlertDialogCancel>
-            <AlertDialogAction
-              variant="destructive"
-              onClick={handleBulkDelete}
-              disabled={bulkDeleting}
-            >
-              {bulkDeleting ? "Deleting..." : "Delete Selected"}
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        mode="bulk"
+        isOpen={bulkDeleteModalOpen}
+        onOpenChange={setBulkDeleteModalOpen}
+        title={`Delete ${selectedQuoteIds.length} Selected Quotations?`}
+        itemName="Quotation"
+        selectedCount={selectedQuoteIds.length}
+        description="This will permanently delete all selected quotations. This action cannot be undone."
+        confirmLabel="Delete Selected"
+        onConfirm={handleBulkDelete}
+        isDeleting={bulkDeleting}
+      />
 
       <QuotationContextualSettings
         open={isCustomizeOpen}

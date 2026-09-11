@@ -5,7 +5,7 @@ import {
   Clock, 
   MessageSquare 
 } from "lucide-react";
-import { Badge } from "@/shared/ui/badge";
+import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import { CRMActionMenu } from "@/shared/components/crm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
 import { motion } from "framer-motion";
@@ -18,6 +18,21 @@ interface Props {
   item: PipelineLeadType;
   isOverlay?: boolean;
   onSelect?: () => void;
+}
+
+export function getPriorityVariant(priority?: string): StatusVariant {
+  switch (priority?.toUpperCase()) {
+    case "URGENT":
+      return "purple";
+    case "HIGH":
+      return "rose";
+    case "MEDIUM":
+      return "amber";
+    case "LOW":
+      return "blue";
+    default:
+      return "neutral";
+  }
 }
 
 const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
@@ -35,17 +50,6 @@ const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
   const style = {
     transform: CSS.Translate.toString(transform),
     transition,
-  };
-
-  const getPriorityColor = (p?: string) => {
-    if (!p) return "bg-muted text-muted-foreground border-border";
-    switch (p.toUpperCase()) {
-      case "URGENT": return "bg-purple-500/10 text-purple-700 dark:text-purple-400 border-purple-500/25";
-      case "HIGH": return "bg-rose-500/10 text-rose-700 dark:text-rose-400 border-rose-500/25";
-      case "MEDIUM": return "bg-amber-500/10 text-amber-700 dark:text-amber-400 border-amber-500/25";
-      case "LOW": return "bg-blue-500/10 text-blue-700 dark:text-blue-400 border-blue-500/25";
-      default: return "bg-muted text-muted-foreground border-border";
-    }
   };
 
   if (isDragging && !isOverlay) {
@@ -91,9 +95,11 @@ const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
 
       {/* Header: Priority & Options */}
       <div className="flex justify-between items-center">
-        <Badge variant="outline" className={cn("text-[9px] font-bold uppercase tracking-wider px-1.5 py-0 h-4", getPriorityColor(item.priority || "Low"))}>
-          {item.priority || "Low"}
-        </Badge>
+        <StatusBadge
+          status={item.priority || "Low"}
+          variant={getPriorityVariant(item.priority)}
+          className="text-[9px] px-1.5 py-0 h-4"
+        />
         
         <CRMActionMenu
           triggerOrientation="horizontal"

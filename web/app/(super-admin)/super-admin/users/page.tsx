@@ -32,6 +32,7 @@ import {
   CRMPageContainer,
   CRMRoleBadge,
   CRMActionMenu,
+  CRMDeleteDialog,
 } from "@/shared/components/crm";
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { SortDirection } from "@/shared/components/DataTableColumnHeader";
@@ -46,6 +47,8 @@ export default function SuperAdminUsersPage() {
   const [statusFilter, setStatusFilter] = useState("ALL");
   const [superAdminOnly, setSuperAdminOnly] = useState(false);
   const [selectedUserIds, setSelectedUserIds] = useState<string[]>([]);
+  const [isBulkDeleteOpen, setIsBulkDeleteOpen] = useState(false);
+  const [isBulkDeleting, setIsBulkDeleting] = useState(false);
   const [selectedUser, setSelectedUser] = useState<PlatformUser | null>(null);
   const [transferTargetUser, setTransferTargetUser] = useState<PlatformUser | null>(null);
   const [transferConfirmText, setTransferConfirmText] = useState("");
@@ -259,16 +262,19 @@ export default function SuperAdminUsersPage() {
     setCurrentPage(1);
   };
 
-  const handleBulkDelete = async () => {
+  const handleConfirmBulkDelete = async () => {
     if (selectedUserIds.length === 0) return;
-    if (!confirm(`Are you sure you want to delete ${selectedUserIds.length} user(s)?`)) return;
     try {
+      setIsBulkDeleting(true);
       await Promise.all(selectedUserIds.map((id) => deletePlatformUser(id)));
       toast.success(`${selectedUserIds.length} user(s) deleted successfully.`);
       setSelectedUserIds([]);
+      setIsBulkDeleteOpen(false);
       loadUsers();
     } catch {
       toast.error("Failed to delete selected users.");
+    } finally {
+      setIsBulkDeleting(false);
     }
   };
 
@@ -350,7 +356,7 @@ export default function SuperAdminUsersPage() {
             {/* Multi-Select Delete Button */}
             {selectedUserIds.length > 0 && (
               <button
-                onClick={handleBulkDelete}
+                onClick={() => setIsBulkDeleteOpen(true)}
                 className="group flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-rose-500/30 bg-rose-500/10 text-rose-600 dark:text-rose-400 hover:bg-rose-500/20 text-xs font-semibold transition-all shadow-xs cursor-pointer animate-in fade-in zoom-in-95 duration-150"
               >
                 <AppIcon name="trash" icon={Trash2} size={14} className="w-3.5 h-3.5 text-rose-500 shrink-0" />
@@ -1070,6 +1076,21 @@ export default function SuperAdminUsersPage() {
           </div>
         </div>
       )}
+
+      {/* 9. Bulk Delete Confirmation Dialog */}
+      <CRMDeleteDialog
+        mode="bulk"
+        isOpen={isBulkDeleteOpen}
+        onOpenChange={setIsBulkDeleteOpen}
+        title={`Delete ${selectedUserIds.length} Selected Users?`}
+        itemName="User"
+        selectedCount={selectedUserIds.length}
+        description="This will permanently delete all selected users. This action cannot be undone."
+        warningText="All sessions, permissions, and associated platform records for these users will be permanently removed."
+        confirmLabel="Delete Selected"
+        onConfirm={handleConfirmBulkDelete}
+        isDeleting={isBulkDeleting}
+      />
     </CRMPageContainer>
   );
 }

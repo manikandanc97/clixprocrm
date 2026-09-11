@@ -32,8 +32,7 @@ import {
 } from "@/shared/hooks/use-crm";
 import { FormModal } from "@/shared/components/crm/FormModal";
 import { MeetingForm } from "@/features/forms/MeetingForm";
-import { CreateTaskModal } from "@/features/tasks/components/CreateTaskModal";
-import { EditTaskModal } from "@/features/tasks/components/EditTaskModal";
+import { TaskModal } from "@/features/tasks/components/TaskModal";
 import { TasksDataTable } from "@/features/tasks/components/TasksDataTable";
 import { TasksDeleteDialog } from "@/features/tasks/components/TasksDeleteDialog";
 import { useTasksUrlState } from "@/features/tasks/hooks/use-tasks-url-state";
@@ -342,21 +341,16 @@ export default function TasksPage() {
         isDeleting={bulkDeleting}
       />
 
-      {/* Task Modals */}
-      <CreateTaskModal
-        isOpen={isAddModalOpen}
-        onClose={() => setIsAddModalOpen(false)}
+      {/* Task Modal (Create & Edit) */}
+      <TaskModal
+        task={taskToEdit}
+        isOpen={isAddModalOpen || !!taskToEdit}
+        onClose={() => {
+          setIsAddModalOpen(false);
+          setTaskToEdit(null);
+        }}
         onSuccess={() => {
           setIsAddModalOpen(false);
-          refetch();
-        }}
-      />
-
-      <EditTaskModal
-        task={taskToEdit}
-        isOpen={!!taskToEdit}
-        onClose={() => setTaskToEdit(null)}
-        onSuccess={() => {
           setTaskToEdit(null);
           refetch();
         }}

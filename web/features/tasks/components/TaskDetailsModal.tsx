@@ -10,6 +10,8 @@ import {
 import { TaskType, TaskHistoryLog, TaskTimelineEvent } from "@/shared/types/task";
 import { EmployeeType } from "@/shared/types/employee";
 import { Badge } from "@/shared/ui/badge";
+import { StatusBadge } from "@/shared/components/StatusBadge";
+import { getPriorityVariant } from "./TasksDataTable";
 import { Avatar, AvatarFallback } from "@/shared/ui/avatar";
 import {
   AlertCircle,
@@ -334,11 +336,12 @@ const TaskDetailsModal = ({
                 </DropdownMenuContent>
               )}
             </DropdownMenu>
-            <div className="rounded-lg border border-border/60 bg-background/80 px-3 py-2 text-xs font-medium text-muted-foreground">
-              Priority:{" "}
-              <span className="font-semibold text-foreground">
-                {task.priority}
-              </span>
+            <div className="flex items-center gap-1.5 rounded-lg border border-border/60 bg-background/80 px-3 py-2 text-xs font-medium text-muted-foreground">
+              <span>Priority:</span>
+              <StatusBadge
+                status={task.priority || "MEDIUM"}
+                variant={getPriorityVariant(task.priority)}
+              />
             </div>
             <div className="rounded-lg border border-border/60 bg-background/80 px-3 py-2 text-xs font-medium text-muted-foreground">
               Due:{" "}

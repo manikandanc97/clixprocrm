@@ -72,9 +72,7 @@ export function MetricCardSkeleton({ className }: { className?: string } = {}) {
   );
 }
 
-export function KpiCardSkeleton({ className }: { className?: string } = {}) {
-  return <MetricCardSkeleton className={className} />;
-}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                   CHARTS                                   */
@@ -318,126 +316,9 @@ export function ToolbarSkeleton() {
   );
 }
 
-export function FilterBarSkeleton() {
-  return (
-    <div className="flex flex-col sm:flex-row items-center gap-3 mb-6">
-      <Skeleton className="h-10 flex-1 w-full rounded-xl" />
-      <Skeleton className="h-10 w-28 rounded-xl" />
-      <Skeleton className="h-10 w-28 rounded-xl" />
-    </div>
-  );
-}
 
-/* -------------------------------------------------------------------------- */
-/*                                TIMELINE & NOTES                            */
-/* -------------------------------------------------------------------------- */
 
-export function TimelineSkeleton({ items = 4 }: { items?: number }) {
-  return (
-    <div className="space-y-6 relative pl-6">
-      <div className="absolute left-[11px] top-2 bottom-2 w-0.5 bg-border/60" />
-      {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="relative">
-          <div className="absolute -left-6 mt-0.5 w-6 h-6 rounded-full bg-background border-2 border-muted-foreground/30 flex items-center justify-center z-10">
-            <Skeleton className="w-2.5 h-2.5 rounded-full" />
-          </div>
-          <div className="bg-card border border-border/60 rounded-xl p-4 shadow-sm ml-4 space-y-3">
-            <div className="flex items-center justify-between gap-4">
-              <Skeleton className="h-4 w-32" />
-              <Skeleton className="h-3 w-20" />
-            </div>
-            <Skeleton className="h-3 w-5/6" />
-            <div className="flex items-center gap-2 pt-2 border-t border-border/40">
-              <Skeleton className="w-5 h-5 rounded-full" />
-              <Skeleton className="h-3 w-28" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
-export function NotesSkeleton({ items = 3 }: { items?: number }) {
-  return (
-    <div className="space-y-4 relative">
-      <div className="absolute left-4 top-2 bottom-2 w-0.5 bg-border/60" />
-      {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex gap-4 relative">
-          <div className="flex flex-col items-center z-10 pt-1">
-            <Skeleton className="w-8 h-8 rounded-full border-2 border-background shadow-sm" />
-          </div>
-          <div className="flex-1 bg-card border border-border/60 rounded-xl p-4 shadow-sm space-y-3">
-            <div className="flex items-start justify-between gap-4">
-              <div className="space-y-1">
-                <Skeleton className="h-4 w-28" />
-                <Skeleton className="h-2.5 w-20" />
-              </div>
-              <Skeleton className="h-6 w-6 rounded-full" />
-            </div>
-            <div className="space-y-1.5">
-              <Skeleton className="h-3.5 w-full" />
-              <Skeleton className="h-3.5 w-4/5" />
-            </div>
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function MeetingsSkeleton({ items = 3 }: { items?: number }) {
-  return (
-    <div className="space-y-4 relative">
-      <div className="absolute left-6 top-2 bottom-2 w-0.5 bg-border/60" />
-      {Array.from({ length: items }).map((_, i) => (
-        <div key={i} className="flex gap-4 relative">
-          <div className="flex flex-col items-center z-10 pt-1">
-            <div className="w-12 h-12 rounded-full bg-muted/40 border-2 border-background flex flex-col items-center justify-center p-1 space-y-1">
-              <Skeleton className="h-2 w-6" />
-              <Skeleton className="h-3.5 w-5" />
-            </div>
-          </div>
-          <div className="flex-1 bg-card border border-border/60 rounded-xl p-4 shadow-sm space-y-3">
-            <div className="space-y-1.5">
-              <Skeleton className="h-4 w-44" />
-              <div className="flex items-center gap-3">
-                <Skeleton className="h-3 w-28" />
-                <Skeleton className="h-3 w-24" />
-              </div>
-            </div>
-            <Skeleton className="h-12 w-full rounded-lg bg-muted/20" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function AttachmentsSkeleton({ items = 3 }: { items?: number }) {
-  return (
-    <div className="space-y-3">
-      {Array.from({ length: items }).map((_, i) => (
-        <div
-          key={i}
-          className="flex items-center justify-between p-3.5 rounded-xl border border-border/60 bg-card shadow-sm"
-        >
-          <div className="flex items-center gap-3">
-            <Skeleton className="w-9 h-9 rounded-lg shrink-0" />
-            <div className="space-y-1.5">
-              <Skeleton className="h-3.5 w-40" />
-              <Skeleton className="h-2.5 w-24" />
-            </div>
-          </div>
-          <div className="flex items-center gap-2">
-            <Skeleton className="h-8 w-8 rounded-lg" />
-            <Skeleton className="h-8 w-8 rounded-lg" />
-          </div>
-        </div>
-      ))}
-    </div>
-  );
-}
 
 /* -------------------------------------------------------------------------- */
 /*                                FORMS & MODALS                              */
@@ -519,17 +400,7 @@ export function QuoteFormSkeleton() {
   );
 }
 
-export function ModalSkeleton() {
-  return (
-    <div className="p-6 space-y-6">
-      <div className="space-y-2">
-        <Skeleton className="h-6 w-1/3" />
-        <Skeleton className="h-3.5 w-2/3" />
-      </div>
-      <FormSkeleton />
-    </div>
-  );
-}
+
 
 /* -------------------------------------------------------------------------- */
 /*                                KANBAN BOARD                                */
@@ -595,63 +466,7 @@ export function CardSkeleton({ className }: { className?: string } = {}) {
   );
 }
 
-export function AvatarSkeleton({ size = "md" }: { size?: "sm" | "md" | "lg" }) {
-  const sizeClasses = {
-    sm: "h-8 w-8",
-    md: "h-10 w-10",
-    lg: "h-12 w-12",
-  };
-  return <Skeleton className={cn(sizeClasses[size], "rounded-full")} />;
-}
 
-export function ListSkeleton({ rows = 5 }: { rows?: number }) {
-  return (
-    <div className="space-y-4">
-      {Array.from({ length: rows }).map((_, i) => (
-        <div key={i} className="flex items-center gap-4">
-          <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-          <div className="space-y-2 flex-1">
-            <Skeleton className="h-4 w-1/3" />
-            <Skeleton className="h-3 w-1/4" />
-          </div>
-          <Skeleton className="h-4 w-16" />
-        </div>
-      ))}
-    </div>
-  );
-}
-
-export function DetailSkeleton() {
-  return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row gap-6 items-start sm:items-center">
-        <Skeleton className="h-20 w-20 rounded-2xl shrink-0" />
-        <div className="space-y-3 flex-1 w-full">
-          <Skeleton className="h-7 w-1/3" />
-          <Skeleton className="h-3.5 w-1/4" />
-          <div className="flex gap-2 pt-1">
-            <Skeleton className="h-6 w-20 rounded-full" />
-            <Skeleton className="h-6 w-24 rounded-full" />
-          </div>
-        </div>
-        <div className="flex gap-2.5 mt-4 sm:mt-0 w-full sm:w-auto">
-          <Skeleton className="h-9 w-24 rounded-xl" />
-          <Skeleton className="h-9 w-32 rounded-xl" />
-        </div>
-      </div>
-      <Skeleton className="h-10 w-full max-w-md rounded-xl" />
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
-        <div className="md:col-span-2 space-y-6">
-          <CardSkeleton />
-          <CardSkeleton />
-        </div>
-        <div className="space-y-6">
-          <CardSkeleton />
-        </div>
-      </div>
-    </div>
-  );
-}
 
 export function CalendarSkeleton() {
   return (
@@ -681,40 +496,4 @@ export function CalendarSkeleton() {
   );
 }
 
-export function SidebarSkeleton() {
-  return (
-    <div className="w-64 h-full border-r border-border bg-sidebar flex flex-col p-4 gap-6">
-      <div className="flex items-center gap-3 px-2">
-        <Skeleton className="h-8 w-8 rounded-xl" />
-        <Skeleton className="h-5 w-32" />
-      </div>
-      <div className="flex-1 space-y-2 pt-4">
-        {Array.from({ length: 8 }).map((_, i) => (
-          <Skeleton key={i} className="h-10 w-full rounded-xl" />
-        ))}
-      </div>
-      <div className="mt-auto border-t border-border pt-4">
-        <div className="flex items-center gap-3 px-2">
-          <Skeleton className="h-10 w-10 rounded-full shrink-0" />
-          <div className="space-y-1.5 flex-1">
-            <Skeleton className="h-3.5 w-24" />
-            <Skeleton className="h-2.5 w-16" />
-          </div>
-        </div>
-      </div>
-    </div>
-  );
-}
 
-export function HeaderSkeleton() {
-  return (
-    <header className="h-16 border-b border-border bg-card flex items-center justify-between px-6 w-full">
-      <Skeleton className="h-10 w-64 rounded-xl" />
-      <div className="flex items-center gap-3">
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <Skeleton className="h-9 w-9 rounded-full" />
-        <Skeleton className="h-9 w-9 rounded-full" />
-      </div>
-    </header>
-  );
-}

@@ -1,11 +1,10 @@
 "use client";
 
 import React, { useMemo } from "react";
-import { Mail, Phone, Edit, Trash2, Users, RotateCcw, UserPlus } from "lucide-react";
+import { Mail, Phone, Edit, Trash2, Users } from "lucide-react";
 import { CRMDataTable, CRMDataTableColumn } from "@/shared/components/crm/CRMDataTable";
 import { CRMActionMenu, CRMActionMenuItemConfig } from "@/shared/components/crm/CRMActionMenu";
 import { StatusBadge } from "@/shared/components/StatusBadge";
-import { EmptyState } from "@/shared/components/EmptyState";
 import { Badge } from "@/shared/ui/badge";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { formatCurrency, formatDate } from "@/shared/utils/formatters";
@@ -50,9 +49,7 @@ export const ContactsDataTable: React.FC<ContactsDataTableProps> = ({
   onRetry,
   onEditContact,
   onDeleteContact,
-  onClearFilters,
   hasActiveFilters,
-  onAddContact,
 }) => {
   const isAllSelected =
     contacts.length > 0 && contacts.every((c) => selectedContactIds.includes(c.id));
@@ -300,30 +297,12 @@ export const ContactsDataTable: React.FC<ContactsDataTableProps> = ({
       isError={isError}
       error={error}
       onRetry={onRetry}
-      emptyMessage={
-        <EmptyState
-          icon={Users}
-          title="No contacts found"
-          description={
-            hasActiveFilters
-              ? "No contacts match your current search or filter criteria."
-              : "Get started by adding your first lead or customer."
-          }
-          className="border-none bg-transparent shadow-none p-6 min-h-0"
-          action={
-            hasActiveFilters
-              ? {
-                  label: "Clear Filters",
-                  onClick: onClearFilters,
-                  icon: RotateCcw,
-                }
-              : {
-                  label: "Add Contact",
-                  onClick: onAddContact,
-                  icon: UserPlus,
-                }
-          }
-        />
+      emptyIcon={Users}
+      emptyTitle="No contacts found"
+      emptyDescription={
+        hasActiveFilters
+          ? "No contacts match your current search or filter criteria."
+          : "Get started by adding your first lead or customer."
       }
       hasPagination={false}
       rowClassName={(contact) =>
