@@ -15,14 +15,10 @@ import {
   Key,
   ShieldCheck,
   Clock,
-  ChevronLeft,
-  ChevronRight,
-  ChevronsLeft,
-  ChevronsRight,
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
-import { Button } from "@/shared/ui/button";
+import { CRMPagination } from "@/shared/components/crm";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
 import { EmptyState } from "@/shared/components/EmptyState";
@@ -486,85 +482,19 @@ export default function AuditLogSettings() {
         </table>
       </div>
 
-      {/* Bottom Pagination - Exactly matches Contacts / Employees / Companies */}
-      <div className="p-3.5 sm:p-4 flex flex-col sm:flex-row items-center justify-between gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto">
-        <div>
-          Showing{" "}
-          <span className="font-semibold text-foreground">
-            {filteredActivities.length === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1}
-          </span>
-          -
-          <span className="font-semibold text-foreground">
-            {Math.min(currentPage * rowsPerPage, filteredActivities.length)}
-          </span>{" "}
-          of <span className="font-semibold text-foreground">{filteredActivities.length}</span> Audit Events
-        </div>
-
-        <div className="flex items-center gap-4">
-          <div className="flex items-center gap-2">
-            <span>Rows per page:</span>
-            <select
-              value={rowsPerPage}
-              onChange={(e) => {
-                setRowsPerPage(Number(e.target.value));
-                setCurrentPage(1);
-              }}
-              className="h-8 px-2.5 rounded-lg border border-border/60 bg-background text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary cursor-pointer"
-            >
-              <option value={10}>10</option>
-              <option value={20}>20</option>
-              <option value={50}>50</option>
-              <option value={100}>100</option>
-            </select>
-          </div>
-
-          <div className="flex items-center gap-3">
-            <span>
-              Page <strong className="text-foreground">{currentPage}</strong> of{" "}
-              <strong className="text-foreground">{totalPages}</strong>
-            </span>
-
-            <div className="flex items-center gap-1">
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(1)}
-                disabled={currentPage === 1}
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-              >
-                <ChevronsLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
-                disabled={currentPage === 1}
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-              >
-                <ChevronLeft className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage((p) => Math.min(totalPages, p + 1))}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-              >
-                <ChevronRight className="h-4 w-4" />
-              </Button>
-              <Button
-                variant="outline"
-                size="icon"
-                onClick={() => setCurrentPage(totalPages)}
-                disabled={currentPage === totalPages || totalPages === 0}
-                className="h-8 w-8 rounded-lg text-muted-foreground hover:text-foreground"
-              >
-                <ChevronsRight className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
-        </div>
-      </div>
+      {/* Bottom Pagination */}
+      <CRMPagination
+        currentPage={currentPage}
+        totalPages={totalPages}
+        totalItems={filteredActivities.length}
+        rowsPerPage={rowsPerPage}
+        onPageChange={setCurrentPage}
+        onRowsPerPageChange={(rows) => {
+          setRowsPerPage(rows);
+          setCurrentPage(1);
+        }}
+        itemName="Audit Events"
+      />
     </div>
   );
 }

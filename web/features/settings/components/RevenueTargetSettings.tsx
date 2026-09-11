@@ -15,20 +15,10 @@ import { useCurrency } from "@/shared/hooks/use-currency";
 import { useDirtyState } from "@/shared/hooks/use-dirty-form";
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 import { Dialog, DialogContent, DialogDescription, DialogHeader, DialogTitle, DialogFooter } from "@/shared/ui/dialog";
-import { CRMActionMenu } from "@/shared/components/crm";
+import { CRMActionMenu, CRMDeleteDialog } from "@/shared/components/crm";
 import { Badge } from "@/shared/ui/badge";
 import { Progress } from "@/shared/ui/progress";
 import { ScrollArea } from "@/shared/ui/scroll-area";
-import {
-  AlertDialog,
-  AlertDialogAction,
-  AlertDialogCancel,
-  AlertDialogContent,
-  AlertDialogDescription,
-  AlertDialogFooter,
-  AlertDialogHeader,
-  AlertDialogTitle,
-} from "@/shared/ui/alert-dialog";
 import { Label } from "@/shared/ui/label";
 import { Skeleton } from "@/shared/ui/skeleton";
 
@@ -541,22 +531,18 @@ export default function RevenueTargetSettings() {
         onCancel={() => setShowWarning(false)} 
       />
 
-      <AlertDialog open={!!deleteId} onOpenChange={(open) => !open && setDeleteId(null)}>
-        <AlertDialogContent>
-          <AlertDialogHeader>
-            <AlertDialogTitle>Are you absolutely sure?</AlertDialogTitle>
-            <AlertDialogDescription>
-              This action cannot be undone. This will permanently delete the revenue target and remove it from all dashboards.
-            </AlertDialogDescription>
-          </AlertDialogHeader>
-          <AlertDialogFooter>
-            <AlertDialogCancel>Cancel</AlertDialogCancel>
-            <AlertDialogAction variant="destructive" onClick={() => deleteId && deleteTarget.mutate(deleteId)}>
-              Delete Target
-            </AlertDialogAction>
-          </AlertDialogFooter>
-        </AlertDialogContent>
-      </AlertDialog>
+      <CRMDeleteDialog
+        isOpen={!!deleteId}
+        onOpenChange={(open) => !open && setDeleteId(null)}
+        title="Delete Revenue Target?"
+        itemName="Revenue Target"
+        description="This action cannot be undone. This will permanently delete the revenue target and remove it from all dashboards."
+        confirmLabel="Delete Target"
+        isDeleting={deleteTarget.isPending}
+        onConfirm={() => {
+          if (deleteId) deleteTarget.mutate(deleteId);
+        }}
+      />
 
     </Card>
   );

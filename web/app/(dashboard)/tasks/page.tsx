@@ -24,6 +24,7 @@ import {
   CRMPageHeader,
   CRMToolbar,
   CRMPagination,
+  CRMDeleteDialog,
 } from "@/shared/components/crm";
 import {
   useDeleteTask,
@@ -34,7 +35,6 @@ import { FormModal } from "@/shared/components/crm/FormModal";
 import { MeetingForm } from "@/features/forms/MeetingForm";
 import { TaskModal } from "@/features/tasks/components/TaskModal";
 import { TasksDataTable } from "@/features/tasks/components/TasksDataTable";
-import { TasksDeleteDialog } from "@/features/tasks/components/TasksDeleteDialog";
 import { useTasksUrlState } from "@/features/tasks/hooks/use-tasks-url-state";
 import { useTasksData } from "@/features/tasks/hooks/use-tasks-data";
 import { TaskType } from "@/shared/types/task";
@@ -322,21 +322,30 @@ export default function TasksPage() {
       </div>
 
       {/* Delete Confirmation — single task */}
-      <TasksDeleteDialog
-        open={!!taskToDelete}
+      <CRMDeleteDialog
+        isOpen={!!taskToDelete}
         onOpenChange={(open) => !open && setTaskToDelete(null)}
         mode="single"
-        taskTitle={taskToDelete?.title}
+        title="Delete Task?"
+        itemName="Task"
+        description={`Are you sure you want to delete "${taskToDelete?.title}"?`}
+        warningText="This action will permanently delete the task and its history. This action cannot be undone."
+        confirmLabel="Delete Task"
         onConfirm={handleDeleteTask}
         isDeleting={deleting}
       />
 
       {/* Delete Confirmation — bulk tasks */}
-      <TasksDeleteDialog
-        open={bulkDeleteModalOpen}
+      <CRMDeleteDialog
+        isOpen={bulkDeleteModalOpen}
         onOpenChange={setBulkDeleteModalOpen}
         mode="bulk"
+        title="Delete Selected Tasks?"
+        itemName="Task"
         selectedCount={selectedTaskIds.length}
+        description={`You are about to delete ${selectedTaskIds.length} selected task${selectedTaskIds.length !== 1 ? "s" : ""}.`}
+        warningText="This action cannot be undone. All selected tasks will be permanently removed."
+        confirmLabel={`Delete ${selectedTaskIds.length} Task${selectedTaskIds.length !== 1 ? "s" : ""}`}
         onConfirm={handleBulkDelete}
         isDeleting={bulkDeleting}
       />
