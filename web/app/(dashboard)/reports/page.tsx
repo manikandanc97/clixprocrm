@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useMemo } from "react";
+import { useState, useMemo } from "react";
 import { 
   BarChart3, 
   Download, 
@@ -61,17 +61,21 @@ const ReportsPage = () => {
   const searchParams = useSearchParams();
   const [selectedPeriod, setSelectedPeriod] = useState<PeriodKey>("this_month");
   const [filters, setFilters] = useState<{ startDate?: string; endDate?: string; assignedToId?: string }>({});
-  const [isTargetsConfigOpen, setIsTargetsConfigOpen] = useState(false);
-  
   const { data, isLoading: loading, isPending, error, refetch, isFetching } = useReports(filters);
   const { CurrencyIcon, formatCurrency } = useCurrency();
 
-  useEffect(() => {
-    const cust = searchParams.get("customize");
-    if (cust === "targets" || cust === "true") {
+  const custParam = searchParams.get("customize");
+  const [prevCustParam, setPrevCustParam] = useState(custParam);
+  const [isTargetsConfigOpen, setIsTargetsConfigOpen] = useState(
+    () => custParam === "targets" || custParam === "true"
+  );
+
+  if (custParam !== prevCustParam) {
+    setPrevCustParam(custParam);
+    if (custParam === "targets" || custParam === "true") {
       setIsTargetsConfigOpen(true);
     }
-  }, [searchParams]);
+  }
 
   // Handle date period selection
   const handlePeriodSelect = (period: PeriodKey) => {

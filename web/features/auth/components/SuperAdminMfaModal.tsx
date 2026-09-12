@@ -105,10 +105,17 @@ export const SuperAdminMfaModal: React.FC<SuperAdminMfaModalProps> = ({
     }
   }, []);
 
-  useEffect(() => {
+  const [prevOpen, setPrevOpen] = useState(open);
+  if (open !== prevOpen) {
+    setPrevOpen(open);
     if (open) {
       setCode("");
       setIsRecoveryMode(false);
+    }
+  }
+
+  useEffect(() => {
+    if (open) {
       initMfaState();
     }
   }, [open, initMfaState]);

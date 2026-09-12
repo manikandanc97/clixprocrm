@@ -1,4 +1,4 @@
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo } from "react";
 import { useQuotations } from "@/shared/hooks/use-crm";
 import { QuotationType } from "@/shared/types/quotation";
 import { toast } from "sonner";
@@ -101,9 +101,12 @@ export function useQuotationsData(): UseQuotationsDataReturn {
   };
 
   // Reset page when search or filter changes
-  useEffect(() => {
+  const [prevFilterKey, setPrevFilterKey] = useState(`${search}::${statusFilter}`);
+  const currentFilterKey = `${search}::${statusFilter}`;
+  if (currentFilterKey !== prevFilterKey) {
+    setPrevFilterKey(currentFilterKey);
     setCurrentPage(1);
-  }, [search, statusFilter]);
+  }
 
   // --- derived data ---
   const filteredQuotations = useMemo(() => {

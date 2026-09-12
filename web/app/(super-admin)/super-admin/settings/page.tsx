@@ -155,7 +155,46 @@ export default function SuperAdminSettingsPage() {
   };
 
   useEffect(() => {
-    loadSettings();
+    let active = true;
+    fetchPlatformSettings()
+      .then((res) => {
+        if (!active) return;
+        setSettingsData(res);
+
+        const general = res?.general || res?.platform || {};
+        const reg = res?.workspaceRegistration || res?.platform || {};
+
+        const loaded: FormState = {
+          platformName: general?.name || "ClixProCRM",
+          defaultTenantPlan: general?.defaultTenantPlan || "free",
+          defaultCurrency: general?.defaultCurrency || "INR",
+          defaultTimezone: general?.defaultTimezone || "Asia/Kolkata",
+          allowPublicRegistrations: reg?.allowPublicRegistrations ?? true,
+          requireEmailVerification: reg?.requireEmailVerification ?? false,
+          allowWorkspaceSelfRegistration: reg?.allowWorkspaceSelfRegistration ?? true,
+          maintenanceMode: reg?.maintenanceMode ?? false,
+        };
+
+        setPlatformName(loaded.platformName);
+        setDefaultTenantPlan(loaded.defaultTenantPlan);
+        setDefaultCurrency(loaded.defaultCurrency);
+        setDefaultTimezone(loaded.defaultTimezone);
+        setAllowPublicRegistrations(loaded.allowPublicRegistrations);
+        setRequireEmailVerification(loaded.requireEmailVerification);
+        setAllowWorkspaceSelfRegistration(loaded.allowWorkspaceSelfRegistration);
+        setMaintenanceMode(loaded.maintenanceMode);
+        setInitialFormState(loaded);
+      })
+      .catch(() => {
+        if (!active) return;
+        toast.error("Failed to load platform settings.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const handleMaintenanceToggle = (checked: boolean) => {

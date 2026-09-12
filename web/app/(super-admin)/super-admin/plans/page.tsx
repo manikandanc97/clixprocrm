@@ -196,8 +196,29 @@ export default function SuperAdminPlansPage() {
   }, []);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    let active = true;
+    fetchPlatformPlans()
+      .then((res) => {
+        if (!active) return;
+        setPlans(Array.isArray(res?.plans) ? res.plans : []);
+        setDistribution(res?.distribution || {});
+        setFeatureCatalog(Array.isArray(res?.featureCatalog) ? res.featureCatalog : []);
+        setAiModels(Array.isArray(res?.aiModels) ? res.aiModels : []);
+      })
+      .catch((err: any) => {
+        if (!active) return;
+        console.error("Failed to load subscription plans:", err);
+        const msg = err?.response?.data?.message || err?.message || "Failed to load subscription plans.";
+        setError(msg);
+        toast.error(msg);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
   // Filtered Catalog for modal search
   const filteredCatalog = useMemo(() => {

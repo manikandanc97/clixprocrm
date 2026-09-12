@@ -249,8 +249,27 @@ export default function SuperAdminTicketDetailPage() {
   }, [ticketId, router]);
 
   useEffect(() => {
-    loadTicket();
-  }, [loadTicket]);
+    if (!ticketId) return;
+    let active = true;
+    fetchPlatformSupportTicketDetails(ticketId)
+      .then((data) => {
+        if (!active) return;
+        setTicket(data);
+        setSubjectDraft(data.subject);
+      })
+      .catch((err: any) => {
+        if (!active) return;
+        console.error("Failed to load ticket:", err);
+        toast.error("Could not find ticket or load ticket thread.");
+        router.push("/super-admin/support");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [ticketId, router]);
 
   const copyId = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();

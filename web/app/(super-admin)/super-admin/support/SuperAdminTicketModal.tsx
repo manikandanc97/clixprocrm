@@ -252,13 +252,38 @@ export function SuperAdminTicketModal({
     }
   }, [ticketId, onOpenChange]);
 
-  useEffect(() => {
-    if (open && ticketId) {
-      loadTicket();
-    } else {
+  // Adjust ticket to null during render when closed or ticketId changes
+  const [prevTicketSession, setPrevTicketSession] = useState(open ? ticketId : null);
+  const currentTicketSession = open ? ticketId : null;
+  if (currentTicketSession !== prevTicketSession) {
+    setPrevTicketSession(currentTicketSession);
+    if (!currentTicketSession) {
       setTicket(null);
     }
-  }, [open, ticketId, loadTicket]);
+  }
+
+  useEffect(() => {
+    if (!open || !ticketId) return;
+    let active = true;
+    fetchPlatformSupportTicketDetails(ticketId)
+      .then((data) => {
+        if (!active) return;
+        setTicket(data);
+        setSubjectDraft(data.subject);
+      })
+      .catch((err: any) => {
+        if (!active) return;
+        console.error("Failed to load ticket:", err);
+        toast.error("Could not load support ticket details.");
+        onOpenChange(false);
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [open, ticketId, onOpenChange]);
 
   const copyId = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();

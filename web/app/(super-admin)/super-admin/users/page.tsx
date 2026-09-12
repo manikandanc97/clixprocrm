@@ -72,21 +72,37 @@ export default function SuperAdminUsersPage() {
     }
   };
 
+  const [prevFilterKey, setPrevFilterKey] = useState(`${search}::${statusFilter}::${superAdminOnly}`);
+  const currentFilterKey = `${search}::${statusFilter}::${superAdminOnly}`;
+  if (currentFilterKey !== prevFilterKey) {
+    setPrevFilterKey(currentFilterKey);
+    setCurrentPage(1);
+  }
+
   useEffect(() => {
-    loadUsers();
+    let active = true;
+    fetchPlatformUsers({ limit: 1000 })
+      .then((res) => {
+        if (!active) return;
+        setUsers(res.users || []);
+      })
+      .catch(() => {
+        if (!active) return;
+        toast.error("Failed to load platform users.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     const handleAal2Verified = () => {
       loadUsers();
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      active = false;
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, statusFilter, superAdminOnly]);
 
   const handleExecuteTransfer = async () => {
     if (!transferTargetUser) return;

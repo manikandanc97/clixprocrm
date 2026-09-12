@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useCallback, useSyncExternalStore } from "react";
 
 export interface ContactSettingsConfig {
   // 1. Contact Fields
@@ -107,33 +107,54 @@ export function saveStoredContactSettings(settings: ContactSettingsConfig): void
   } catch {}
 }
 
+let cachedRaw: string | null = null;
+let cachedSettings: ContactSettingsConfig = DEFAULT_CONTACT_SETTINGS;
+
+function getContactSettingsSnapshot(): ContactSettingsConfig {
+  if (typeof window === "undefined") return DEFAULT_CONTACT_SETTINGS;
+  try {
+    const raw = localStorage.getItem(CONTACT_SETTINGS_STORAGE_KEY);
+    if (raw === cachedRaw) {
+      return cachedSettings;
+    }
+    cachedRaw = raw;
+    cachedSettings = raw ? parseContactSettings(JSON.parse(raw)) : DEFAULT_CONTACT_SETTINGS;
+    return cachedSettings;
+  } catch {
+    return DEFAULT_CONTACT_SETTINGS;
+  }
+}
+
+function subscribeContactSettings(callback: () => void): () => void {
+  const handleUpdate = () => {
+    cachedRaw = null;
+    callback();
+  };
+  window.addEventListener("clixpro:contact-settings-updated", handleUpdate);
+  window.addEventListener("storage", handleUpdate);
+  return () => {
+    window.removeEventListener("clixpro:contact-settings-updated", handleUpdate);
+    window.removeEventListener("storage", handleUpdate);
+  };
+}
+
 export function useContactSettings() {
-  const [settings, setSettings] = useState<ContactSettingsConfig>(DEFAULT_CONTACT_SETTINGS);
-  const [isLoaded, setIsLoaded] = useState(false);
-
-  useEffect(() => {
-    setSettings(getStoredContactSettings());
-    setIsLoaded(true);
-
-    const handleUpdate = (e: Event) => {
-      const customEvent = e as CustomEvent<ContactSettingsConfig>;
-      if (customEvent.detail) {
-        setSettings(customEvent.detail);
-      }
-    };
-
-    window.addEventListener("clixpro:contact-settings-updated", handleUpdate);
-    return () => {
-      window.removeEventListener("clixpro:contact-settings-updated", handleUpdate);
-    };
-  }, []);
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
+  const settings = useSyncExternalStore(
+    subscribeContactSettings,
+    getContactSettingsSnapshot,
+    () => DEFAULT_CONTACT_SETTINGS
+  );
 
   const updateSettings = useCallback((newSettings: ContactSettingsConfig) => {
     saveStoredContactSettings(newSettings);
-    setSettings(newSettings);
   }, []);
 
-  return { settings, isLoaded, updateSettings };
+  return { settings, isLoaded: isClient, updateSettings };
 }
 
 /**

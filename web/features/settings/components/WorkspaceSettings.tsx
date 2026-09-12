@@ -113,40 +113,54 @@ const WorkspaceSettings = () => {
     brandPrimaryColor: "#10b981",
   });
 
-  useEffect(() => {
-    if (workspace?.logo) {
-      void extractLogoPalette(workspace.logo, 6).then((colors) => {
-        if (colors && colors.length > 0) {
-          setLogoColors(colors);
-        } else {
-          setLogoColors([]);
-        }
-      });
-    } else {
+  const [prevLogo, setPrevLogo] = useState(workspace?.logo);
+  if (workspace?.logo !== prevLogo) {
+    setPrevLogo(workspace?.logo);
+    if (!workspace?.logo) {
       setLogoColors([]);
     }
-  }, [workspace?.logo]);
+  }
 
   useEffect(() => {
-    if (workspace) {
-      const activeColor = workspace.brandPrimaryColor || "#10b981";
-      setFormData({
-        name: workspace.name || "",
-        taxId: workspace.taxId || "",
-        currency: normalizeCurrency(workspace.currency),
-        timezone: normalizeTimezone(workspace.timezone),
-        address: workspace.address || "",
-        logo: workspace.logo || null,
-        brandPrimaryColor: activeColor,
-      });
-      if (workspace.currency) {
-        setStoreCurrency(workspace.currency);
+    if (!workspace?.logo) return;
+    let active = true;
+    void extractLogoPalette(workspace.logo, 6).then((colors) => {
+      if (!active) return;
+      if (colors && colors.length > 0) {
+        setLogoColors(colors);
+      } else {
+        setLogoColors([]);
       }
-      if (workspace.brandPrimaryColor) {
-        setAccentColor(workspace.brandPrimaryColor);
-      }
+    });
+    return () => {
+      active = false;
+    };
+  }, [workspace?.logo]);
+
+  // Sync form data when workspace data loads or updates
+  const [prevWorkspace, setPrevWorkspace] = useState(workspace);
+  if (workspace && workspace !== prevWorkspace) {
+    setPrevWorkspace(workspace);
+    const activeColor = workspace.brandPrimaryColor || "#10b981";
+    setFormData({
+      name: workspace.name || "",
+      taxId: workspace.taxId || "",
+      currency: normalizeCurrency(workspace.currency),
+      timezone: normalizeTimezone(workspace.timezone),
+      address: workspace.address || "",
+      logo: workspace.logo || null,
+      brandPrimaryColor: activeColor,
+    });
+  }
+
+  useEffect(() => {
+    if (workspace?.currency) {
+      setStoreCurrency(workspace.currency);
     }
-  }, [workspace, setStoreCurrency, setAccentColor]);
+    if (workspace?.brandPrimaryColor) {
+      setAccentColor(workspace.brandPrimaryColor);
+    }
+  }, [workspace?.currency, workspace?.brandPrimaryColor, setStoreCurrency, setAccentColor]);
 
   const handleSelectRawFile = (file: File) => {
     if (!file.type.startsWith("image/")) {

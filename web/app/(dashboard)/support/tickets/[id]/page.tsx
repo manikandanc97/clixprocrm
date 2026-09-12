@@ -266,8 +266,29 @@ export default function CustomerTicketDetailPage() {
   }, [ticketId, router]);
 
   useEffect(() => {
-    loadTicket();
-  }, [loadTicket]);
+    if (!ticketId) return;
+    let active = true;
+    client.get(`/support/tickets/${ticketId}`)
+      .then((res) => {
+        if (!active) return;
+        const data = res.data?.data;
+        if (!data) throw new Error("Ticket not found");
+        setTicket(data);
+        setSubjectDraft(data.subject);
+      })
+      .catch((err: unknown) => {
+        if (!active) return;
+        console.error("Failed to load ticket:", err);
+        toast.error("Could not find ticket or load ticket thread.");
+        router.push("/support");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [ticketId, router]);
 
   const copyId = (id: string, e?: React.MouseEvent) => {
     if (e) e.stopPropagation();

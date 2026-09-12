@@ -99,20 +99,29 @@ export default function CompaniesPage() {
   });
 
   // Handle deep-link ?new=true to open creation modal
-  useEffect(() => {
+  const [prevNewParam, setPrevNewParam] = useState(newParam);
+  if (newParam !== prevNewParam) {
+    setPrevNewParam(newParam);
     if (newParam === "true") {
       setSelectedCompany(null);
       setIsAddModalOpen(true);
+    }
+  }
+
+  useEffect(() => {
+    if (newParam === "true") {
       clearNewParam();
     }
   }, [newParam, clearNewParam]);
 
   // Sync customize URL parameter if opened via query parameter
-  useEffect(() => {
+  const [prevCustomizeOpen, setPrevCustomizeOpen] = useState(initialCustomizeOpen);
+  if (initialCustomizeOpen !== prevCustomizeOpen) {
+    setPrevCustomizeOpen(initialCustomizeOpen);
     if (initialCustomizeOpen) {
       setIsCustomizeOpen(true);
     }
-  }, [initialCustomizeOpen]);
+  }
 
   // Reset pagination on filter or search changes
   const handleSearchChange = useCallback((val: string) => {

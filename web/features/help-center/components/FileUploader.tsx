@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useRef, useState, useSyncExternalStore } from "react";
 import { createPortal } from "react-dom";
 import { motion, AnimatePresence } from "framer-motion";
 import {
@@ -47,15 +47,15 @@ export function FileUploader({
 }: FileUploaderProps) {
   const [isDragActive, setIsDragActive] = useState(false);
   const [isWindowDragging, setIsWindowDragging] = useState(false);
-  const [mounted, setMounted] = useState(false);
+  const isMounted = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
   const [previewFile, setPreviewFile] = useState<FileWithPreview | null>(null);
 
   const windowDragCounterRef = useRef(0);
   const localDragCounterRef = useRef(0);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
 
   const handleProcessFiles = useCallback(
     (newFiles: File[] | FileList | null) => {
@@ -261,7 +261,7 @@ export function FileUploader({
   };
 
   // Screen-wide enterprise drag overlay portal
-  const screenDragOverlay = mounted
+  const screenDragOverlay = isMounted
     ? createPortal(
         <AnimatePresence>
           {isWindowDragging && (

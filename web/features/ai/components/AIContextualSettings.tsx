@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
@@ -61,20 +61,20 @@ export function AIContextualSettings({
   const [enableActionConfirmations, setEnableActionConfirmations] = useState(true);
 
   const [hasChanges, setHasChanges] = useState(false);
+  const [syncedAiData, setSyncedAiData] = useState<any>(null);
 
-  useEffect(() => {
-    if (aiData?.features) {
-      const getFeat = (id: string, def = true) => {
-        const found = aiData.features.find((f: any) => f.id === id);
-        return found ? found.enabled : def;
-      };
-      setSmartReply(getFeat("smart_reply", true));
-      setLeadScoring(getFeat("lead_scoring", true));
-      setDealWinRate(getFeat("deal_win_rate", true));
-      setSentimentAnalysis(getFeat("sentiment_analysis", true));
-      setMeetingSummarizer(getFeat("meeting_summarizer", true));
-    }
-  }, [aiData]);
+  if (aiData?.features && syncedAiData !== aiData && !hasChanges) {
+    setSyncedAiData(aiData);
+    const getFeat = (id: string, def = true) => {
+      const found = aiData.features.find((f: any) => f.id === id);
+      return found ? found.enabled : def;
+    };
+    setSmartReply(getFeat("smart_reply", true));
+    setLeadScoring(getFeat("lead_scoring", true));
+    setDealWinRate(getFeat("deal_win_rate", true));
+    setSentimentAnalysis(getFeat("sentiment_analysis", true));
+    setMeetingSummarizer(getFeat("meeting_summarizer", true));
+  }
 
   const handleSave = async () => {
     try {

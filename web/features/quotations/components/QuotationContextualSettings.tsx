@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { useState, useRef, useMemo } from "react";
 import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
@@ -158,9 +158,13 @@ export function QuotationContextualSettings({
   const [hasChanges, setHasChanges] = useState(false);
   const isLoadedRef = useRef(false);
 
-  // Load persisted configuration from storage
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // Load persisted configuration from storage on open / mount
+  const [prevOpen, setPrevOpen] = useState(false);
+  const [prevStorageKey, setPrevStorageKey] = useState(storageKey);
+
+  if (typeof window !== "undefined" && open && (!prevOpen || storageKey !== prevStorageKey)) {
+    setPrevOpen(open);
+    setPrevStorageKey(storageKey);
     try {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
@@ -208,7 +212,9 @@ export function QuotationContextualSettings({
     } finally {
       isLoadedRef.current = true;
     }
-  }, [storageKey]);
+  } else if (!open && prevOpen) {
+    setPrevOpen(false);
+  }
 
   // Validation checks
   const errors = useMemo(() => {

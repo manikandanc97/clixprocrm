@@ -38,7 +38,7 @@ export function ImageCropperModal({
   title = "Crop & Align Workspace Logo",
   description = "Drag to reposition and zoom for a perfect square logo display.",
 }: ImageCropperModalProps) {
-  const [dataUrl, setDataUrl] = useState<string | null>(null);
+  const [fileDataUrl, setFileDataUrl] = useState<string | null>(null);
   const [imageLoaded, setImageLoaded] = useState<boolean>(false);
   const [zoom, setZoom] = useState<number>(1);
   const [rotation, setRotation] = useState<number>(0);
@@ -51,32 +51,41 @@ export function ImageCropperModal({
   const offsetStartRef = useRef<{ x: number; y: number }>({ x: 0, y: 0 });
   const imgRef = useRef<HTMLImageElement>(null);
 
-  // Convert imageFile to Data URL to guarantee instantaneous, CORS-free loading
-  useEffect(() => {
-    if (!open) {
-      setDataUrl(null);
-      setImageLoaded(false);
-      return;
-    }
+  // Source identity tracking for transform resets
+  const sourceKey = open
+    ? imageFile
+      ? `${imageFile.name}_${imageFile.lastModified}_${imageFile.size}`
+      : imageSrc || ""
+    : "";
+  const [prevSourceKey, setPrevSourceKey] = useState(sourceKey);
 
-    // Reset controls
+  if (sourceKey !== prevSourceKey) {
+    setPrevSourceKey(sourceKey);
     setZoom(1);
     setRotation(0);
     setOffset({ x: 0, y: 0 });
     setImageLoaded(false);
+  }
 
-    if (imageFile) {
-      const reader = new FileReader();
-      reader.onload = () => {
-        setDataUrl(reader.result as string);
-      };
-      reader.readAsDataURL(imageFile);
-    } else if (imageSrc) {
-      setDataUrl(imageSrc);
-    } else {
-      setDataUrl(null);
-    }
-  }, [open, imageFile, imageSrc]);
+  // Convert imageFile to Data URL asynchronously
+  useEffect(() => {
+    if (!open || !imageFile) return;
+
+    let active = true;
+    const reader = new FileReader();
+    reader.onload = () => {
+      if (active && typeof reader.result === "string") {
+        setFileDataUrl(reader.result);
+      }
+    };
+    reader.readAsDataURL(imageFile);
+
+    return () => {
+      active = false;
+    };
+  }, [open, imageFile]);
+
+  const activeImageUrl = imageFile ? fileDataUrl : (imageSrc || null);
 
   // Fixed 1:1 Square Crop Dimensions (220px x 220px)
   const cropSize = 220;
@@ -127,7 +136,7 @@ export function ImageCropperModal({
 
   // Generate high quality canvas output (512x512 Square)
   const handleApplyCrop = async () => {
-    if (!imgRef.current || !dataUrl) return;
+    if (!imgRef.current || !activeImageUrl) return;
     setIsProcessing(true);
 
     try {
@@ -235,11 +244,11 @@ export function ImageCropperModal({
             />
 
             {/* Rendered Image */}
-            {dataUrl && (
+            {activeImageUrl && (
               // eslint-disable-next-line @next/next/no-img-element
               <img
                 ref={imgRef}
-                src={dataUrl}
+                src={activeImageUrl}
                 alt="Crop target"
                 crossOrigin="anonymous"
                 onLoad={() => setImageLoaded(true)}

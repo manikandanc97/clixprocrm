@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import Link from "next/link";
 import { usePathname, useSearchParams } from "next/navigation";
 import { ChevronLeft, ChevronRight, ChevronsUpDown } from "lucide-react";
@@ -121,16 +121,18 @@ function MobileExpandableNavItem({
   themeClasses: SidebarThemeClasses;
 }) {
   const isAnyChildActive = item.children?.some(isChildActive) ?? false;
+  const [prevIsAnyChildActive, setPrevIsAnyChildActive] = useState(isAnyChildActive);
   const [isOpen, setIsOpen] = useState(isAnyChildActive);
   const [isHovered, setIsHovered] = useState(false);
   const [clickKey, setClickKey] = useState(0);
   const Icon = item.icon;
 
-  useEffect(() => {
+  if (isAnyChildActive !== prevIsAnyChildActive) {
+    setPrevIsAnyChildActive(isAnyChildActive);
     if (isAnyChildActive) {
       setIsOpen(true);
     }
-  }, [isAnyChildActive]);
+  }
 
   return (
     <div className="flex flex-col">
@@ -434,16 +436,18 @@ function DesktopExpandedExpandableItem({
   themeClasses: SidebarThemeClasses;
 }) {
   const isAnyChildActive = item.children?.some(isChildActive) ?? false;
+  const [prevIsAnyChildActive, setPrevIsAnyChildActive] = useState(isAnyChildActive);
   const [isOpen, setIsOpen] = useState(isAnyChildActive);
   const [isHovered, setIsHovered] = useState(false);
   const [clickKey, setClickKey] = useState(0);
   const Icon = item.icon;
 
-  useEffect(() => {
+  if (isAnyChildActive !== prevIsAnyChildActive) {
+    setPrevIsAnyChildActive(isAnyChildActive);
     if (isAnyChildActive) {
       setIsOpen(true);
     }
-  }, [isAnyChildActive]);
+  }
 
   return (
     <div className="flex flex-col">

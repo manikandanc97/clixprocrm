@@ -189,8 +189,34 @@ export default function SuperAdminSupportPage() {
   }, [statusFilter, priorityFilter, search, currentPage, rowsPerPage, sortConfig]);
 
   useEffect(() => {
-    loadData();
-  }, [loadData]);
+    let active = true;
+    fetchPlatformSupportTickets({
+      status: statusFilter,
+      priority: priorityFilter,
+      search: search ? search.trim() : undefined,
+      page: currentPage,
+      limit: rowsPerPage,
+      sortBy: sortConfig?.key,
+      sortOrder: sortConfig?.direction,
+    })
+      .then((ticketsData) => {
+        if (!active) return;
+        setTickets(ticketsData.tickets || []);
+        setTotalPages(ticketsData.pagination?.totalPages || 1);
+        setTotalCount(ticketsData.pagination?.total || 0);
+      })
+      .catch((err: any) => {
+        if (!active) return;
+        console.error("Failed to load support tickets:", err);
+        toast.error("Failed to fetch support tickets from database.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, [statusFilter, priorityFilter, search, currentPage, rowsPerPage, sortConfig]);
 
   const handleOpenTicket = (ticket: PlatformSupportTicket) => {
     setSelectedTicketId(ticket.id);

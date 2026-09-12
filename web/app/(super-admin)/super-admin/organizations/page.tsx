@@ -116,21 +116,37 @@ export default function OrganizationsPage() {
     }
   };
 
+  const [prevFilterKey, setPrevFilterKey] = useState(`${search}::${planFilter}::${statusFilter}`);
+  const currentFilterKey = `${search}::${planFilter}::${statusFilter}`;
+  if (currentFilterKey !== prevFilterKey) {
+    setPrevFilterKey(currentFilterKey);
+    setCurrentPage(1);
+  }
+
   useEffect(() => {
-    loadOrganizations();
+    let active = true;
+    fetchPlatformOrganizations()
+      .then((res) => {
+        if (!active) return;
+        setOrganizations(res.organizations || []);
+      })
+      .catch(() => {
+        if (!active) return;
+        toast.error("Failed to load organizations.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     const handleAal2Verified = () => {
       loadOrganizations();
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      active = false;
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, []);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search, planFilter, statusFilter]);
 
   const handleCreateOrg = async (e: React.FormEvent) => {
     e.preventDefault();

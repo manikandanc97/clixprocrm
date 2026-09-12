@@ -97,7 +97,25 @@ export default function SuperAdminAiPage() {
   };
 
   useEffect(() => {
-    loadData();
+    let active = true;
+    fetchPlanAiOverview()
+      .then((res) => {
+        if (!active) return;
+        setGlobalAiEnabled(res.globalAiEnabled);
+        setPlans(res.plans);
+        setActiveChatModels(res.activeChatModels);
+        setAllModels(res.allModels);
+      })
+      .catch(() => {
+        if (!active) return;
+        toast.error("Failed to load AI platform configuration.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   // Filter and order actual CRM subscription plans (Free, Growth, Business)

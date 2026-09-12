@@ -42,7 +42,25 @@ export function SuperAdminTelemetryCard({ onTriggerAnalysis }: SuperAdminTelemet
   };
 
   useEffect(() => {
-    loadData();
+    let active = true;
+    Promise.all([
+      fetchPlatformOverview().catch(() => null),
+      fetchPlatformAnalytics().catch(() => null),
+    ])
+      .then(([overviewData, analyticsData]) => {
+        if (!active) return;
+        if (overviewData) setOverview(overviewData);
+        if (analyticsData) setAnalytics(analyticsData);
+      })
+      .catch(() => {
+        // Graceful fallback
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
   }, []);
 
   const totalTenants = overview?.metrics?.totalOrganizations ?? analytics?.totals?.totalTenants ?? 0;

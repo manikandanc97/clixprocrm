@@ -113,12 +113,18 @@ export function useAIWorkspace() {
     );
   }, [auth?.user, pathname]);
 
-  // Load URL query context on initial mount
-  useEffect(() => {
-    const contextParam = searchParams.get('context');
-    const typeParam = searchParams.get('type') as any;
-    const idParam = searchParams.get('id');
+  // Load URL query context on initial mount or searchParams change
+  const contextParam = searchParams.get('context');
+  const typeParam = searchParams.get('type') as any;
+  const idParam = searchParams.get('id');
 
+  const [prevContextKey, setPrevContextKey] = useState<string | null>(() =>
+    contextParam ? `${contextParam}::${typeParam}::${idParam}` : null
+  );
+
+  const currentContextKey = contextParam ? `${contextParam}::${typeParam}::${idParam}` : null;
+  if (currentContextKey !== prevContextKey) {
+    setPrevContextKey(currentContextKey);
     if (contextParam) {
       setActiveContext({
         name: contextParam,
@@ -126,7 +132,7 @@ export function useAIWorkspace() {
         id: idParam || undefined,
       });
     }
-  }, [searchParams]);
+  }
 
   // Restore sessions from LocalStorage on mount
   useEffect(() => {

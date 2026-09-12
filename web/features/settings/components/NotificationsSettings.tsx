@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import {
   Bell,
   Mail,
@@ -74,28 +74,34 @@ export default function NotificationsSettings() {
   const updateSettingsMutation = useUpdateNotificationSettings();
   const testNotificationMutation = useCreateTestNotification();
 
-  const [prefs, setPrefs] = useState<NotificationConfig>(DEFAULT_PREFS);
-  const [saved, setSaved] = useState(false);
-  const [isPlayingTestAudio, setIsPlayingTestAudio] = useState(false);
-
-  // Sync server data to state when loaded
-  useEffect(() => {
+  const [prefs, setPrefs] = useState<NotificationConfig>(() => {
     if (serverSettings) {
-      setPrefs((prev) => ({
-        ...prev,
-        ...serverSettings,
-      }));
-    } else {
+      return { ...DEFAULT_PREFS, ...serverSettings };
+    }
+    if (typeof window !== "undefined") {
       try {
         const stored = localStorage.getItem(STORAGE_KEY);
         if (stored) {
-          setPrefs((prev) => ({ ...prev, ...JSON.parse(stored) }));
+          return { ...DEFAULT_PREFS, ...JSON.parse(stored) };
         }
       } catch {
         // ignore
       }
     }
-  }, [serverSettings]);
+    return DEFAULT_PREFS;
+  });
+  const [saved, setSaved] = useState(false);
+  const [isPlayingTestAudio, setIsPlayingTestAudio] = useState(false);
+
+  // Sync server data to state when loaded asynchronously
+  const [prevServerSettings, setPrevServerSettings] = useState(serverSettings);
+  if (serverSettings && serverSettings !== prevServerSettings) {
+    setPrevServerSettings(serverSettings);
+    setPrefs((prev) => ({
+      ...prev,
+      ...serverSettings,
+    }));
+  }
 
   const handleToggle = (key: keyof NotificationConfig) => {
     const updated = { ...prefs, [key]: !prefs[key] };

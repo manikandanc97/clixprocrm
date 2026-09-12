@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
@@ -258,8 +258,12 @@ export function CompanyContextualSettings({
   const [hasChanges, setHasChanges] = useState(false);
 
   // Load persistent configuration from storage on open / tenant load
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  const [prevOpen, setPrevOpen] = useState(false);
+  const [prevStorageKey, setPrevStorageKey] = useState(storageKey);
+
+  if (typeof window !== "undefined" && open && (!prevOpen || storageKey !== prevStorageKey)) {
+    setPrevOpen(open);
+    setPrevStorageKey(storageKey);
     try {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
@@ -281,7 +285,9 @@ export function CompanyContextualSettings({
     } catch {
       // Fall back to defaults
     }
-  }, [storageKey, open]);
+  } else if (!open && prevOpen) {
+    setPrevOpen(false);
+  }
 
   // Compute usage counts for industries
   const industryUsageCounts = useMemo(() => {

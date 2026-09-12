@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useCallback } from "react";
+import { useEffect, useState, useCallback, useSyncExternalStore } from "react";
 import {
   TrendingUp,
   Building2,
@@ -71,11 +71,11 @@ export default function SuperAdminAnalyticsPage() {
   const [customStart, setCustomStart] = useState("");
   const [customEnd, setCustomEnd] = useState("");
   const [customPopoverOpen, setCustomPopoverOpen] = useState(false);
-  const [isClient, setIsClient] = useState(false);
-
-  useEffect(() => {
-    setIsClient(true);
-  }, []);
+  const isClient = useSyncExternalStore(
+    () => () => {},
+    () => true,
+    () => false
+  );
 
   const loadData = useCallback(
     async (selectedRange = range, startDate?: string, endDate?: string) => {
@@ -100,16 +100,36 @@ export default function SuperAdminAnalyticsPage() {
   );
 
   useEffect(() => {
-    loadData(range);
+    let active = true;
+    const params: { range?: string; startDate?: string; endDate?: string } = {
+      range,
+    };
+    if (range === "custom" && (customStart || customEnd)) {
+      params.startDate = customStart;
+      params.endDate = customEnd;
+    }
+    fetchPlatformAnalytics(params)
+      .then((res) => {
+        if (!active) return;
+        setData(res);
+      })
+      .catch(() => {
+        if (!active) return;
+        toast.error("Failed to load platform analytics.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     const handleAal2Verified = () => {
       loadData(range);
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      active = false;
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
-  }, [loadData, range]);
+  }, [range, customStart, customEnd, loadData]);
 
   const handleRangeChange = (newRange: DateRangeOption) => {
     setRange(newRange);

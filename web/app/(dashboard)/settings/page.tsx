@@ -68,32 +68,10 @@ const SettingsPage = () => {
     }
   }, [rawSectionParam, router]);
 
-  // Validate permission and fallback to first permitted section if unauthorized
-  useEffect(() => {
-    if (isInitializing) return;
-
-    const authorized = isSectionAuthorized(
-      activeSection,
-      user?.role,
-      access?.permissions || [],
-      isSuperAdmin
-    );
-
-    if (!authorized) {
-      const authorizedNav = getAuthorizedSettingsNav(
-        user?.role,
-        access?.permissions || [],
-        isSuperAdmin
-      );
-      const fallbackSection = authorizedNav[0]?.items[0]?.id || "profile";
-      setActiveSection(fallbackSection);
-      const newUrl = fallbackSection === "profile" ? "/settings" : `/settings?section=${fallbackSection}`;
-      router.replace(newUrl);
-    }
-  }, [activeSection, user?.role, access?.permissions, isSuperAdmin, isInitializing, router]);
-
   // Sync state if URL query changes externally
-  useEffect(() => {
+  const [prevRawSection, setPrevRawSection] = useState(rawSectionParam);
+  if (rawSectionParam !== prevRawSection) {
+    setPrevRawSection(rawSectionParam);
     if (rawSectionParam) {
       const canonical = resolveCanonicalSectionId(rawSectionParam);
       if (!canonical.endsWith("_redirect") && canonical !== activeSection) {
@@ -102,7 +80,30 @@ const SettingsPage = () => {
     } else if (activeSection !== "profile") {
       setActiveSection("profile");
     }
-  }, [rawSectionParam, activeSection]);
+  }
+
+  // Validate permission and fallback to first permitted section if unauthorized
+  const authorized = isSectionAuthorized(
+    activeSection,
+    user?.role,
+    access?.permissions || [],
+    isSuperAdmin
+  );
+
+  useEffect(() => {
+    if (isInitializing) return;
+
+    if (!authorized) {
+      const authorizedNav = getAuthorizedSettingsNav(
+        user?.role,
+        access?.permissions || [],
+        isSuperAdmin
+      );
+      const fallbackSection = authorizedNav[0]?.items[0]?.id || "profile";
+      const newUrl = fallbackSection === "profile" ? "/settings" : `/settings?section=${fallbackSection}`;
+      router.replace(newUrl);
+    }
+  }, [authorized, user?.role, access?.permissions, isSuperAdmin, isInitializing, router]);
 
   // Sync with browser back/forward buttons
   useEffect(() => {

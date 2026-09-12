@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
@@ -54,13 +54,16 @@ export function ContactContextualSettings({
   const [isSaving, setIsSaving] = useState(false);
 
   // Load persisted configuration on modal open
-  useEffect(() => {
-    if (open) {
-      const stored = getStoredContactSettings();
-      setSavedSettings(stored);
-      setDraft(stored);
-    }
-  }, [open]);
+  const [prevOpen, setPrevOpen] = useState(false);
+
+  if (open && !prevOpen) {
+    setPrevOpen(true);
+    const stored = getStoredContactSettings();
+    setSavedSettings(stored);
+    setDraft(stored);
+  } else if (!open && prevOpen) {
+    setPrevOpen(false);
+  }
 
   // Strict dirty checking against saved state
   const hasChanges = useMemo(() => {

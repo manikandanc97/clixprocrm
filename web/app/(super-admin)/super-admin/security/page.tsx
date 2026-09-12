@@ -76,13 +76,30 @@ export default function SecurityCenterPage() {
   };
 
   useEffect(() => {
-    loadData();
+    let active = true;
+    Promise.all([
+      fetchSecurityCenterStatus().catch(() => null),
+      fetchSecurityIncidents({ limit: 50 }).catch(() => ({ incidents: [], pagination: { page: 1, limit: 50, total: 0, totalPages: 0 } })),
+    ])
+      .then(([statusRes, incidentsRes]) => {
+        if (!active) return;
+        if (statusRes) setStatus(statusRes);
+        setIncidents(incidentsRes.incidents || []);
+      })
+      .catch(() => {
+        if (!active) return;
+        toast.error("Failed to load security center data.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     const handleAal2Verified = () => {
       loadData();
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      active = false;
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, []);

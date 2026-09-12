@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useRef, useCallback } from "react";
+import React, { useState, useRef, useCallback } from "react";
 import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
@@ -192,9 +192,13 @@ export function DealContextualSettings({
   const isLoadedRef = useRef(false);
   const saveTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Load persistent configuration from storage on mount
-  useEffect(() => {
-    if (typeof window === "undefined") return;
+  // Load persistent configuration from storage on open / mount
+  const [prevOpen, setPrevOpen] = useState(false);
+  const [prevStorageKey, setPrevStorageKey] = useState(storageKey);
+
+  if (typeof window !== "undefined" && open && (!prevOpen || storageKey !== prevStorageKey)) {
+    setPrevOpen(open);
+    setPrevStorageKey(storageKey);
     try {
       const stored = localStorage.getItem(storageKey);
       if (stored) {
@@ -230,7 +234,9 @@ export function DealContextualSettings({
     } finally {
       isLoadedRef.current = true;
     }
-  }, [storageKey]);
+  } else if (!open && prevOpen) {
+    setPrevOpen(false);
+  }
 
   // Auto-save mutation trigger
   const triggerAutoSave = useCallback(() => {

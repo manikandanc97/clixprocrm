@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo, useEffect } from "react";
+import React, { useState, useMemo } from "react";
 import {
   History,
   Search,
@@ -55,9 +55,12 @@ export default function AuditLogSettings() {
     [activityData]
   );
 
-  useEffect(() => {
+  const [prevFilterKey, setPrevFilterKey] = useState(`${searchTerm}::${actionFilter}`);
+  const currentFilterKey = `${searchTerm}::${actionFilter}`;
+  if (currentFilterKey !== prevFilterKey) {
+    setPrevFilterKey(currentFilterKey);
     setCurrentPage(1);
-  }, [searchTerm, actionFilter]);
+  }
 
   const hasActiveFilters = actionFilter !== "ALL" || searchTerm.trim().length > 0;
 

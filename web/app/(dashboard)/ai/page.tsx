@@ -22,14 +22,18 @@ export default function AIWorkspacePage() {
   const [isMobileSidebarOpen, setIsMobileSidebarOpen] = useState(false);
   const [isRightSidebarOpen, setIsRightSidebarOpen] = useState(true);
   const [activeRightTab, setActiveRightTab] = useState<'chats' | 'context'>('chats');
-  const [isSettingsOpen, setIsSettingsOpen] = useState(false);
+  const custParam = searchParams.get('customize');
+  const [prevCustParam, setPrevCustParam] = useState(custParam);
+  const [isSettingsOpen, setIsSettingsOpen] = useState(
+    () => custParam === 'true' || custParam === 'settings'
+  );
 
-  useEffect(() => {
-    const cust = searchParams.get('customize');
-    if (cust === 'true' || cust === 'settings') {
+  if (custParam !== prevCustParam) {
+    setPrevCustParam(custParam);
+    if (custParam === 'true' || custParam === 'settings') {
       setIsSettingsOpen(true);
     }
-  }, [searchParams]);
+  }
 
   const {
     messages,

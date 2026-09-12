@@ -67,22 +67,37 @@ export default function SuperAdminAuditLogsPage() {
     }
   };
 
-  useEffect(() => {
-    loadLogs();
+  const [prevFilterKey, setPrevFilterKey] = useState(`${search}::${moduleFilter}`);
+  const currentFilterKey = `${search}::${moduleFilter}`;
+  if (currentFilterKey !== prevFilterKey) {
+    setPrevFilterKey(currentFilterKey);
     setCurrentPage(1);
+  }
+
+  useEffect(() => {
+    let active = true;
+    fetchPlatformAuditLogs({ limit: 1000 })
+      .then((res) => {
+        if (!active) return;
+        setLogs(res.logs || []);
+      })
+      .catch(() => {
+        if (!active) return;
+        toast.error("Failed to load audit logs.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
 
     const handleAal2Verified = () => {
       loadLogs();
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
+      active = false;
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, [moduleFilter]);
-
-  useEffect(() => {
-    setCurrentPage(1);
-  }, [search]);
 
   const exportCSV = () => {
     if (logs.length === 0) {

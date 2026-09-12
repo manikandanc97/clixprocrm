@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useMemo } from "react";
 import {
   Plus,
   Trash2,
@@ -92,8 +92,8 @@ export function CreateInvoiceModal({
   });
   const [paymentTerms, setPaymentTerms] = useState("NET15");
   const [currency, setCurrency] = useState("INR");
-  const [notes, setNotes] = useState("");
-  const [termsAndConditions, setTermsAndConditions] = useState("");
+  const [notes, setNotes] = useState(() => settings?.defaultNotes || "");
+  const [termsAndConditions, setTermsAndConditions] = useState(() => settings?.defaultTerms || "");
   const defaultTax = settings?.defaultTaxRate ?? 18;
 
   const [items, setItems] = useState<LineItemState[]>([
@@ -110,17 +110,17 @@ export function CreateInvoiceModal({
     },
   ]);
 
-  // Load defaults from settings
-  useEffect(() => {
-    if (settings) {
-      if (settings.defaultNotes) {
-        setNotes((prev) => prev || settings.defaultNotes);
-      }
-      if (settings.defaultTerms) {
-        setTermsAndConditions((prev) => prev || settings.defaultTerms);
-      }
+  // Load defaults from settings if loaded asynchronously
+  const [prevSettings, setPrevSettings] = useState(settings);
+  if (settings && settings !== prevSettings) {
+    setPrevSettings(settings);
+    if (!notes && settings.defaultNotes) {
+      setNotes(settings.defaultNotes);
     }
-  }, [settings]);
+    if (!termsAndConditions && settings.defaultTerms) {
+      setTermsAndConditions(settings.defaultTerms);
+    }
+  }
 
   // Auto-sync company when customer selected
   const handleCustomerChange = (cId: string) => {

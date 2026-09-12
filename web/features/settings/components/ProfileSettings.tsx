@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useRef, useEffect } from "react";
+import { useState, useMemo, useRef } from "react";
 import { 
   Loader2, 
   Camera,
@@ -73,15 +73,16 @@ const ProfileSettings = () => {
     phone: user?.phone || "",
   });
 
-  useEffect(() => {
-    if (user) {
-      setFormData({
-        name: user.name || "",
-        email: user.email || "",
-        phone: user.phone || "",
-      });
-    }
-  }, [user]);
+  // Sync initial user data or when user identity changes
+  const [prevUserId, setPrevUserId] = useState(user?.id);
+  if (user?.id && user.id !== prevUserId) {
+    setPrevUserId(user.id);
+    setFormData({
+      name: user.name || "",
+      email: user.email || "",
+      phone: user.phone || "",
+    });
+  }
 
   const initials = getInitials(user?.name);
   

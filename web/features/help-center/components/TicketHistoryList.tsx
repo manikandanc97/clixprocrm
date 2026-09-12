@@ -320,12 +320,33 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   };
 
   useEffect(() => {
-    fetchTickets();
-  }, [fetchTickets]);
+    let active = true;
+    client.get("/support/tickets")
+      .then((res) => {
+        if (!active) return;
+        setTickets(res.data?.data || []);
+      })
+      .catch((error) => {
+        if (!active) return;
+        console.error("Failed to load tickets:", error);
+        toast.error("Could not fetch support tickets.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => {
+      active = false;
+    };
+  }, []);
 
-  useEffect(() => {
+  const [prevFilterKey, setPrevFilterKey] = useState(
+    `${searchTerm}::${statusFilter}::${priorityFilter}::${categoryFilter}`
+  );
+  const currentFilterKey = `${searchTerm}::${statusFilter}::${priorityFilter}::${categoryFilter}`;
+  if (currentFilterKey !== prevFilterKey) {
+    setPrevFilterKey(currentFilterKey);
     setCurrentPage(1);
-  }, [searchTerm, statusFilter, priorityFilter, categoryFilter]);
+  }
 
   // Active ticket being edited
   const activeEditTicket = targetTicket || selectedTicket;
