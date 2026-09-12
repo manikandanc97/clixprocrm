@@ -30,7 +30,7 @@ export default function PublicRoute({ children }: PublicRouteProps) {
       const isSuperAdmin =
         user.role?.toUpperCase() === "SUPER_ADMIN" ||
         user.role?.toUpperCase() === "SUPER ADMIN" ||
-        (user as any)?.isSuperAdmin === true;
+        user.isSuperAdmin === true;
 
       if (isSuperAdmin) {
         router.replace("/super-admin");

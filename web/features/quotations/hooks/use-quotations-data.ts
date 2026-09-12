@@ -24,6 +24,8 @@ export interface UseQuotationsDataReturn {
   safeQuotations: QuotationType[];
   isLoading: boolean;
   isPending: boolean;
+  isError: boolean;
+  error: unknown;
   refetch: () => void;
 
   // filter/search state
@@ -69,7 +71,7 @@ export interface UseQuotationsDataReturn {
  *   - CSV export
  */
 export function useQuotationsData(): UseQuotationsDataReturn {
-  const { data, isLoading, isPending, refetch } = useQuotations();
+  const { data, isLoading, isPending, isError, error, refetch } = useQuotations();
 
   const safeQuotations = useMemo<QuotationType[]>(
     () =>
@@ -212,6 +214,8 @@ export function useQuotationsData(): UseQuotationsDataReturn {
     safeQuotations,
     isLoading,
     isPending,
+    isError,
+    error,
     refetch,
     search,
     setSearch,

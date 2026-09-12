@@ -53,6 +53,7 @@ import {
   extractLogoPalette,
 } from "@/shared/lib/utils/color-utils";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/shared/lib/api/error";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -223,10 +224,8 @@ const WorkspaceSettings = () => {
         void refreshUser();
         toast.success("Workspace logo updated successfully!");
       }
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || err?.message || "Failed to upload workspace logo"
-      );
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, "Failed to upload workspace logo"));
     } finally {
       setUploadingLogo(false);
     }
@@ -244,8 +243,8 @@ const WorkspaceSettings = () => {
           void refreshUser();
           toast.success("Logo removed successfully");
         },
-        onError: (err: any) => {
-          toast.error(err?.response?.data?.message || err?.message || "Failed to remove logo");
+        onError: (err: unknown) => {
+          toast.error(getApiErrorMessage(err, "Failed to remove logo"));
         },
       }
     );
@@ -281,12 +280,8 @@ const WorkspaceSettings = () => {
         setEditModalOpen(false);
         toast.success("Workspace details updated successfully!");
       },
-      onError: (err: any) => {
-        toast.error(
-          err?.response?.data?.message ||
-            err?.message ||
-            "Failed to update workspace details"
-        );
+      onError: (err: unknown) => {
+        toast.error(getApiErrorMessage(err, "Failed to update workspace details"));
       },
     });
   };

@@ -19,7 +19,7 @@ import {
   UserSquare2,
 } from "lucide-react";
 import { CRM_ROLES, type RoleKey } from "./roles";
-import type { NavGroup, NavItem } from "../rbac";
+import type { NavGroup, NavItem } from "./types";
 
 export const navLibrary: Record<string, NavItem> = {
   dashboard: { title: "Dashboard", href: "/dashboard", icon: LayoutDashboard, exact: true },

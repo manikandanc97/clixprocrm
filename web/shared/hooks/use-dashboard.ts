@@ -7,10 +7,6 @@ import {
   fetchMeetings, 
   fetchNotifications, 
   fetchAiInsights,
-  fetchLeadsData,
-  fetchTasksData,
-  fetchPipelineData,
-  fetchCustomersData,
   fetchRevenueGrowth,
   markNotificationAsRead,
   markAllNotificationsAsRead,
@@ -146,63 +142,9 @@ export function useAiInsights() {
   });
 }
 
-// ─── Entity Hooks ────────────────────────────────────────────────────────────
+// ─── Entity Hooks (canonical implementations in ./use-crm) ───────────────────
 
-export function useLeads(
-  params?: import("@/shared/lib/api/crm").LeadsQueryParams,
-  options?: { enabled?: boolean }
-) {
-  const { isAuthenticated, isHydrated } = useAuth();
-  const isEnabled = (options?.enabled !== undefined ? options.enabled : true) && isHydrated && isAuthenticated;
-  return useQuery({
-    queryKey: params && Object.keys(params).length > 0 ? ["leads", params] : ["leads"],
-    queryFn: () => fetchLeadsData(params),
-    enabled: isEnabled,
-    staleTime: 3 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-}
-
-export function useTasks() {
-  const { isAuthenticated, isHydrated } = useAuth();
-  return useQuery({
-    queryKey: ["tasks"],
-    queryFn: () => fetchTasksData(),
-    enabled: isHydrated && isAuthenticated,
-    staleTime: 3 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-}
-
-export function usePipeline() {
-  const { isAuthenticated, isHydrated } = useAuth();
-  return useQuery({
-    queryKey: ["pipeline"],
-    queryFn: fetchPipelineData,
-    enabled: isHydrated && isAuthenticated,
-    staleTime: 3 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-}
-
-export function useCustomers(
-  params?: import("@/shared/lib/api/crm").CustomersQueryParams,
-  options?: { enabled?: boolean }
-) {
-  const { isAuthenticated, isHydrated } = useAuth();
-  const isEnabled = (options?.enabled !== undefined ? options.enabled : true) && isHydrated && isAuthenticated;
-  return useQuery({
-    queryKey: params && Object.keys(params).length > 0 ? ["customers", params] : ["customers"],
-    queryFn: () => fetchCustomersData(params),
-    enabled: isEnabled,
-    staleTime: 3 * 60 * 1000,
-    gcTime: 10 * 60 * 1000,
-    refetchOnWindowFocus: false,
-  });
-}
+export { useLeads, useTasks, usePipeline, useCustomers } from "./use-crm";
 
 /**
  * Hook to manage core dashboard data initialization.

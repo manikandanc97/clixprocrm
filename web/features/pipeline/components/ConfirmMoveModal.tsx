@@ -3,7 +3,7 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogFooter, DialogD
 import { Button } from "@/shared/ui/button";
 import { PipelineLeadType } from "@/shared/types/pipeline";
 import { Loader2, X, Check } from "lucide-react";
-import { PIPELINE_STAGE_LABELS } from "@/lib/crm-formatters";
+import { PIPELINE_STAGE_LABELS } from "@/shared/utils/formatters";
 
 interface ConfirmMoveModalProps {
   isOpen: boolean;

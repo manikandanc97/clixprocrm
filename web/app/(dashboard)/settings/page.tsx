@@ -30,7 +30,7 @@ const SettingsPage = () => {
   const isSuperAdmin =
     user?.role?.toUpperCase() === "SUPER_ADMIN" ||
     user?.role?.toUpperCase() === "SUPERADMIN" ||
-    (user as any)?.isSuperAdmin === true;
+    user?.isSuperAdmin === true;
 
   const rawSectionParam = searchParams.get("section");
   const canonicalInitial = resolveCanonicalSectionId(rawSectionParam);

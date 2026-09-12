@@ -34,6 +34,7 @@ import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
 import { DeleteAccountModal } from "./DeleteAccountModal";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/shared/lib/api/error";
 
 const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
 
@@ -93,8 +94,8 @@ const ProfileSettings = () => {
       setEditModalOpen(false);
       toast.success("Profile details updated successfully!");
     },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to update profile");
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, "Failed to update profile"));
     }
   });
 
@@ -160,10 +161,8 @@ const ProfileSettings = () => {
         await refreshUser();
         toast.success("Profile photo updated successfully!");
       }
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || err?.message || "Failed to upload profile photo"
-      );
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, "Failed to upload profile photo"));
     } finally {
       setUploadingAvatar(false);
     }
@@ -175,10 +174,8 @@ const ProfileSettings = () => {
       await updateProfile({ avatar: null });
       await refreshUser();
       toast.success("Profile photo removed successfully");
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || err?.message || "Failed to remove profile photo"
-      );
+    } catch (err: unknown) {
+      toast.error(getApiErrorMessage(err, "Failed to remove profile photo"));
     } finally {
       setUploadingAvatar(false);
     }

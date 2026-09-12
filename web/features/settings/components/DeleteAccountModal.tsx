@@ -36,7 +36,7 @@ export function DeleteAccountModal({
   const [isDeleting, setIsDeleting] = useState(false);
   const queryClient = useQueryClient();
 
-  const companyName = workspace?.name || (user as any)?.companyName || "clixprocrm";
+  const companyName = workspace?.name || user?.companyName || "clixprocrm";
 
   const isFirstValid =
     confirm1.trim().toLowerCase() === companyName.trim().toLowerCase() ||
@@ -96,23 +96,24 @@ export function DeleteAccountModal({
       if (typeof window !== "undefined") {
         window.location.replace("/account-deleted");
       }
-    } catch (error: any) {
+    } catch (error: unknown) {
       setIsDeleting(false);
 
+      const err = error as { code?: string; message?: string; response?: { data?: unknown } } | null;
       const isNetworkTimeout =
-        error?.code === "ECONNABORTED" ||
-        error?.message?.toLowerCase().includes("timeout") ||
-        error?.message?.toLowerCase().includes("network error") ||
-        !error?.response;
+        err?.code === "ECONNABORTED" ||
+        err?.message?.toLowerCase().includes("timeout") ||
+        err?.message?.toLowerCase().includes("network error") ||
+        !err?.response;
 
-      if (isNetworkTimeout && !error?.response) {
+      if (isNetworkTimeout && !err?.response) {
         toast.error(
           "We could not confirm that your account was deleted. Please check your account status or try again."
         );
       } else {
         const errorMsg = extractErrorMessage(
-          error?.response?.data,
-          error?.message || "Account deletion failed. No data was deleted. Please try again."
+          err?.response?.data,
+          err?.message || "Account deletion failed. No data was deleted. Please try again."
         );
         toast.error(errorMsg);
       }

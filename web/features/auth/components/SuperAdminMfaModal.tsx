@@ -23,6 +23,7 @@ import {
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { createClient } from "@/lib/supabase/client";
+import { getApiErrorMessage } from "@/shared/lib/api/error";
 import { verifyRecoveryCode, recordMfaAuditEvent } from "@/shared/lib/api/mfa.api";
 import { useAuth } from "./auth-provider";
 import { toast } from "sonner";
@@ -73,7 +74,7 @@ export const SuperAdminMfaModal: React.FC<SuperAdminMfaModalProps> = ({
       }
 
       const totpFactors = factorsData?.totp || [];
-      const verifiedTotp = totpFactors.find((f: any) => f.status === "verified") || totpFactors[0];
+      const verifiedTotp = totpFactors.find((f: { status?: string; id: string }) => f.status === "verified") || totpFactors[0];
 
       if (verifiedTotp) {
         setMode("verify");
@@ -98,8 +99,8 @@ export const SuperAdminMfaModal: React.FC<SuperAdminMfaModalProps> = ({
           secret: enrollRes.totp.secret,
         });
       }
-    } catch (err: any) {
-      setError(err?.message || "Failed to initialize MFA assurance flow.");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Failed to initialize MFA assurance flow."));
     } finally {
       setCheckingFactors(false);
     }
@@ -192,8 +193,8 @@ export const SuperAdminMfaModal: React.FC<SuperAdminMfaModalProps> = ({
       setCode("");
       onOpenChange(false);
       onVerified?.();
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Verification failed. Please try again.");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Verification failed. Please try again."));
     } finally {
       setLoading(false);
     }

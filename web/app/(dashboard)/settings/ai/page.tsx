@@ -11,10 +11,24 @@ import { CRMPageHeader } from '@/shared/components/crm';
 import { compareFormValues } from '@/shared/hooks/use-dirty-form';
 import { toast } from 'sonner';
 
+interface AISettingsConfig {
+  provider?: string;
+  model?: string;
+  apiKey?: string;
+  isAiEnabled?: boolean;
+  /** Canonical backend field name for RAG toggle */
+  useRag?: boolean;
+  /** Canonical backend field name for tool-calling toggle */
+  useTools?: boolean;
+  enableRag?: boolean;
+  enableTools?: boolean;
+  ragTopK?: number;
+  [key: string]: unknown;
+}
+
 export default function AISettingsPage() {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  const [config, setConfig] = useState<any>(null);
-  const [initialConfig, setInitialConfig] = useState<any>(null);
+  const [config, setConfig] = useState<AISettingsConfig | null>(null);
+  const [initialConfig, setInitialConfig] = useState<AISettingsConfig | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
 

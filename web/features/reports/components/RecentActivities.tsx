@@ -5,7 +5,7 @@ import { History } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { RecentActivityType } from "@/shared/types/report";
 import { motion } from "framer-motion";
-import { formatRelativeDate } from "@/lib/crm-formatters";
+import { formatRelativeDate } from "@/shared/utils/formatters";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface RecentActivitiesProps {

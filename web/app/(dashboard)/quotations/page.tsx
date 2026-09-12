@@ -25,6 +25,7 @@ import {
   CRMPagination,
   CRMDeleteDialog,
 } from "@/shared/components/crm";
+import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import {
   useDeleteQuotation,
   useUpdateQuotationStatus,
@@ -63,6 +64,7 @@ export default function QuotationsPage() {
     safeQuotations,
     isLoading: loading,
     isPending,
+    isError,
     refetch,
     search,
     setSearch,
@@ -151,6 +153,18 @@ export default function QuotationsPage() {
 
   const isInitialLoading =
     safeQuotations.length === 0 && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
+
+  if (isError) {
+    return (
+      <CRMPageContainer twoStageScroll>
+        <PageErrorState
+          title="Failed to load quotations"
+          description="An error occurred while loading your quotations list. Please check your connection and try again."
+          onRetry={() => { refetch(); }}
+        />
+      </CRMPageContainer>
+    );
+  }
 
   return (
     <CRMPageContainer twoStageScroll>

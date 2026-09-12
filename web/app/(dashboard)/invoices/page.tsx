@@ -26,6 +26,7 @@ import {
   CRMPagination,
   CRMDeleteDialog,
 } from "@/shared/components/crm";
+import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { useDeleteInvoice } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { CreateInvoiceModal } from "@/features/invoices/components/CreateInvoiceModal";
@@ -65,6 +66,7 @@ export default function InvoicesPage() {
   const {
     refetch,
     isInitialLoading,
+    isError,
     search,
     setSearch,
     statusFilter,
@@ -136,6 +138,18 @@ export default function InvoicesPage() {
       setBulkDeleting(false);
     }
   };
+
+  if (isError) {
+    return (
+      <CRMPageContainer twoStageScroll>
+        <PageErrorState
+          title="Failed to load invoices"
+          description="An error occurred while loading your invoices list. Please check your connection and try again."
+          onRetry={() => { refetch(); }}
+        />
+      </CRMPageContainer>
+    );
+  }
 
   return (
     <CRMPageContainer twoStageScroll>

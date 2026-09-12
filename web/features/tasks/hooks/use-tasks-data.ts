@@ -59,6 +59,8 @@ export interface UseTasksDataReturn {
   isLoading: boolean;
   isInitialLoading: boolean;
   isPending: boolean;
+  isError: boolean;
+  error: unknown;
   refetch: () => void;
 
   // Search
@@ -112,7 +114,7 @@ export interface UseTasksDataReturn {
  */
 export function useTasksData(): UseTasksDataReturn {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
-  const { data, isLoading: loading, isPending, refetch } = useTasks();
+  const { data, isLoading: loading, isPending, isError, error, refetch } = useTasks();
 
   const safeTasks = useMemo(
     () => (Array.isArray(data?.tasks) ? (data.tasks as TaskType[]) : []),
@@ -330,6 +332,8 @@ export function useTasksData(): UseTasksDataReturn {
     isLoading: loading,
     isInitialLoading,
     isPending,
+    isError,
+    error,
     refetch,
     search,
     setSearch,

@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { createClient } from "@/lib/supabase/client";
 import { verifyRecoveryCode, recordMfaAuditEvent } from "@/shared/lib/api/mfa.api";
+import { getApiErrorMessage } from "@/shared/lib/api/error";
 
 interface MfaChallengeModalProps {
   open: boolean;
@@ -71,8 +72,8 @@ export const MfaChallengeModal: React.FC<MfaChallengeModalProps> = ({
         onSuccess?.();
         onOpenChange(false);
       }
-    } catch (err: any) {
-      setError(err?.message || "Verification failed. Please check your code.");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Verification failed. Please check your code."));
     } finally {
       setLoading(false);
     }
@@ -95,8 +96,8 @@ export const MfaChallengeModal: React.FC<MfaChallengeModalProps> = ({
         onSuccess?.();
         onOpenChange(false);
       }
-    } catch (err: any) {
-      setError(err?.response?.data?.message || err?.message || "Invalid or used recovery code.");
+    } catch (err: unknown) {
+      setError(getApiErrorMessage(err, "Invalid or used recovery code."));
     } finally {
       setLoading(false);
     }

@@ -32,6 +32,8 @@ export interface UseInvoicesDataReturn {
   isLoading: boolean;
   isInitialLoading: boolean;
   isPending: boolean;
+  isError: boolean;
+  error: unknown;
   refetch: () => void;
 
   // Search
@@ -81,7 +83,7 @@ export interface UseInvoicesDataReturn {
  */
 export function useInvoicesData(): UseInvoicesDataReturn {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
-  const { data, isLoading: loading, isPending, refetch } = useInvoices();
+  const { data, isLoading: loading, isPending, isError, error, refetch } = useInvoices();
 
   const rawInvoices = useMemo(
     () => (Array.isArray(data?.invoices) ? (data.invoices as InvoiceType[]) : []),
@@ -284,6 +286,8 @@ export function useInvoicesData(): UseInvoicesDataReturn {
     isLoading: loading,
     isInitialLoading,
     isPending,
+    isError,
+    error,
     refetch,
     search,
     setSearch,

@@ -5,7 +5,7 @@ import { Calendar, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { UpcomingFollowUpType } from "@/shared/types/report";
 import { motion } from "framer-motion";
-import { formatDate } from "@/lib/crm-formatters";
+import { formatDate } from "@/shared/utils/formatters";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface UpcomingFollowUpsProps {

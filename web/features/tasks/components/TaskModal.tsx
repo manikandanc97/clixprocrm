@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo, useEffect, useCallback } from "react";
-import { useForm, useFieldArray } from "react-hook-form";
+import { useForm, useFieldArray, useWatch } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import * as z from "zod";
 import {
@@ -328,7 +328,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
     }
   };
 
-  const dueDateValue = form.watch("dueDate");
+  const dueDateValue = useWatch({ control: form.control, name: "dueDate" });
   const isPastDue = dueDateValue ? new Date(dueDateValue) < new Date() : false;
   const hasErrors = Object.keys(form.formState.errors).length > 0;
 

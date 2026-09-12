@@ -24,7 +24,7 @@ export default function SuperAdminRoute({ children }: SuperAdminRouteProps) {
     const isSuperAdmin =
       user?.role?.toUpperCase() === "SUPER_ADMIN" ||
       user?.role?.toUpperCase() === "SUPER ADMIN" ||
-      (user as any)?.isSuperAdmin === true;
+      user?.isSuperAdmin === true;
 
     if (!isSuperAdmin) {
       // Non-super-admin user attempting to access /super-admin
@@ -39,7 +39,7 @@ export default function SuperAdminRoute({ children }: SuperAdminRouteProps) {
   const isSuperAdmin =
     user?.role?.toUpperCase() === "SUPER_ADMIN" ||
     user?.role?.toUpperCase() === "SUPER ADMIN" ||
-    (user as any)?.isSuperAdmin === true;
+    user?.isSuperAdmin === true;
 
   if (!isSuperAdmin) {
     return <AuthLoadingScreen />;

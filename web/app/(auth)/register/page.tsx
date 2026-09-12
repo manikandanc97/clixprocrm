@@ -98,7 +98,7 @@ export default function RegisterPage() {
             const isSuperAdmin =
               user.role?.toUpperCase() === "SUPER_ADMIN" ||
               user.role?.toUpperCase() === "SUPER ADMIN" ||
-              (user as any)?.isSuperAdmin === true;
+              user.isSuperAdmin === true;
             if (isSuperAdmin) {
               router.replace("/super-admin");
             } else {
@@ -108,9 +108,9 @@ export default function RegisterPage() {
             router.replace("/login");
             setGoogleLoading(false);
           }
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        } catch (err: any) {
-          if (err?.message === "NEEDS_ONBOARDING") {
+        } catch (err: unknown) {
+          const message = err instanceof Error ? err.message : String(err);
+          if (message === "NEEDS_ONBOARDING") {
             setGoogleLoadingText("Opening onboarding...");
             router.replace("/onboarding");
           } else {
@@ -121,13 +121,13 @@ export default function RegisterPage() {
       } else {
         setGoogleLoading(false);
       }
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } catch (error: any) {
+    } catch (error: unknown) {
       setGoogleLoading(false);
-      if (error?.message === "Google sign-in was cancelled.") {
+      const message = error instanceof Error ? error.message : "Unable to sign in with Google.";
+      if (message === "Google sign-in was cancelled.") {
         toast.info("Google sign-in was cancelled.");
       } else {
-        toast.error(error.message || "Unable to sign in with Google.");
+        toast.error(message);
       }
     }
   };

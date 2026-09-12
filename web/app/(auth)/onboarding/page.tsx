@@ -12,7 +12,7 @@ import { Label } from "@/shared/ui/label";
 import client from "@/shared/lib/api/client";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { fetchDashboardData } from "@/shared/lib/api/crm";
-import { extractErrorMessage } from "@/shared/lib/api/error";
+import { extractErrorMessage, getApiErrorMessage } from "@/shared/lib/api/error";
 import { extractDominantColorClient } from "@/shared/lib/utils/color-utils";
 import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
 import { toast } from "sonner";
@@ -173,10 +173,10 @@ export default function OnboardingPage() {
       }
 
       router.push("/dashboard");
-    } catch (err: any) {
-      const msg = extractErrorMessage(
-        err.response?.data,
-        err.message || "Something went wrong creating your workspace. Please try again."
+    } catch (err: unknown) {
+      const msg = getApiErrorMessage(
+        err,
+        "Something went wrong creating your workspace. Please try again."
       );
       setError(msg);
       setLoading(false);

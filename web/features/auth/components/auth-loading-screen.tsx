@@ -17,7 +17,7 @@
  */
 
 import React, { useEffect, useState, useMemo } from "react";
-import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
+import { motion, AnimatePresence, useReducedMotion, type Variants } from "framer-motion";
 import { AlertCircle, RotateCcw, LogOut } from "lucide-react";
 import { ClixProIcon } from "@/shared/ui/logo";
 import { Button } from "@/shared/ui/button";
@@ -129,7 +129,7 @@ export default function AuthLoadingScreen({
   const currentConfig = STAGE_CONFIG[currentStage] || STAGE_CONFIG.connecting;
 
   // Animation variants optimized for enterprise calm motion
-  const containerVariants: any = useMemo(
+  const containerVariants: Variants = useMemo(
     () => ({
       initial: { opacity: 0 },
       animate: {
@@ -148,7 +148,7 @@ export default function AuthLoadingScreen({
     [prefersReducedMotion]
   );
 
-  const itemVariants: any = useMemo(
+  const itemVariants: Variants = useMemo(
     () => ({
       initial: prefersReducedMotion ? { opacity: 0 } : { opacity: 0, y: 6 },
       animate: {

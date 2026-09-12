@@ -124,7 +124,7 @@ function buildAccess(user: AuthUser | null): RoleAccess {
   }
 
   const roleKey = normalizeRole(user.role);
-  const isSuperAdmin = roleKey === CRM_ROLES.SUPER_ADMIN || (user as any).isSuperAdmin === true;
+  const isSuperAdmin = roleKey === CRM_ROLES.SUPER_ADMIN || user.isSuperAdmin === true;
 
   const allowedRoutes = isSuperAdmin
     ? ["*", ...(roleRouteConfig[CRM_ROLES.SUPER_ADMIN] || [])]
@@ -295,8 +295,8 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       setStatus("authenticated");
       setInitStage("ready");
      
-    } catch (error: any) {
-      if (error.message === "NEEDS_ONBOARDING") {
+    } catch (error: unknown) {
+      if (error instanceof Error && error.message === "NEEDS_ONBOARDING") {
         if (typeof window !== "undefined" && window.location.pathname !== "/onboarding") {
           window.location.href = "/onboarding";
           return;
@@ -306,7 +306,7 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       }
       console.warn("Auth initialization issue:", error);
       if (typeof window !== "undefined") localStorage.removeItem("has_session");
-      setInitError(error?.message || "Failed to restore session");
+      setInitError(error instanceof Error ? error.message : "Failed to restore session");
       setStatus("unauthenticated");
     } finally {
       setLoading(false);
@@ -381,10 +381,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       // Clear cache to ensure fresh data for the new user
       await queryClient.clear();
       return response.data.user;
-    } catch (error: any) {
+    } catch (error: unknown) {
       // If login fails, reset hasFetched so a retry can proceed cleanly
       hasFetched.current = false;
-      if (error.message === "NEEDS_ONBOARDING") {
+      if (error instanceof Error && error.message === "NEEDS_ONBOARDING") {
         if (typeof window !== "undefined" && window.location.pathname !== "/onboarding") {
           window.location.href = "/onboarding";
           return;

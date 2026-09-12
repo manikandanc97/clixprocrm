@@ -26,6 +26,7 @@ import {
   CRMPagination,
   CRMDeleteDialog,
 } from "@/shared/components/crm";
+import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import {
   useDeleteTask,
   useBulkDeleteTasks,
@@ -80,6 +81,7 @@ export default function TasksPage() {
   // Data, filtering, sorting, pagination, and export
   const {
     isInitialLoading,
+    isError,
     refetch,
     search,
     setSearch,
@@ -162,6 +164,18 @@ export default function TasksPage() {
     }
     setMeetingTask(task);
   };
+
+  if (isError) {
+    return (
+      <CRMPageContainer twoStageScroll>
+        <PageErrorState
+          title="Failed to load tasks"
+          description="An error occurred while loading your tasks list. Please check your connection and try again."
+          onRetry={() => { refetch(); }}
+        />
+      </CRMPageContainer>
+    );
+  }
 
   return (
     <CRMPageContainer twoStageScroll>

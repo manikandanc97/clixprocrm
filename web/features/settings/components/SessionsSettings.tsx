@@ -28,6 +28,7 @@ import {
   revokeAllOtherSessions,
 } from "@/shared/lib/api/sessions.api";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/shared/lib/api/error";
 
 export default function SessionsSettings() {
   const queryClient = useQueryClient();
@@ -52,8 +53,8 @@ export default function SessionsSettings() {
       void queryClient.invalidateQueries({ queryKey: ["user-sessions"] });
       void queryClient.invalidateQueries({ queryKey: ["security-activity"] });
     },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to revoke session");
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, "Failed to revoke session"));
     },
     onSettled: () => setRevokingSessionId(null),
   });
@@ -66,8 +67,8 @@ export default function SessionsSettings() {
       void queryClient.invalidateQueries({ queryKey: ["user-sessions"] });
       void queryClient.invalidateQueries({ queryKey: ["security-activity"] });
     },
-    onError: (err: any) => {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to sign out sessions");
+    onError: (err: unknown) => {
+      toast.error(getApiErrorMessage(err, "Failed to sign out sessions"));
     },
   });
 

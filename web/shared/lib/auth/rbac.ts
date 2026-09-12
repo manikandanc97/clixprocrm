@@ -11,38 +11,13 @@ import {
 // Re-export everything from modular files
 export * from "./rbac/roles";
 export * from "./rbac/permissions";
+export * from "./rbac/types";
 export * from "./rbac/menu-config";
 export * from "./rbac/route-guards";
 
 import { CRM_ROLES, type RoleKey } from "./rbac/roles";
 import { roleMenuConfig, navLibrary } from "./rbac/menu-config";
-
-// Maintain shared types for compatibility
-export type RoleAccess = {
-  roleName: string;
-  description: string;
-  permissions: string[];
-  routes: string[];
-  dashboardWidgets: string[];
-  analyticsVisibility: "full" | "team" | "self" | "limited" | "hr";
-};
-
-export type NavItem = {
-  title: string;
-  href: string;
-  icon: React.ComponentType<{ className?: string }>;
-  exact?: boolean;
-  match?: "exact" | "prefix";
-  badge?: string | number;
-  children?: NavItem[];
-  permission?: string;
-  isAuthorized?: (ctx: { role: string; permissions: string[]; isSuperAdmin?: boolean }) => boolean;
-};
-
-export type NavGroup = {
-  label: string;
-  items: NavItem[];
-};
+import type { RoleAccess, NavItem, NavGroup } from "./rbac/types";
 
 /**
  * Resolves whether a navigation item is active given the current pathname and URL,
