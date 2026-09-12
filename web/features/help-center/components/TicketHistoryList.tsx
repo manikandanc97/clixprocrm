@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useCallback, useMemo } from "react";
+import React, { useState, useEffect, useMemo } from "react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   Ticket,
@@ -289,20 +289,6 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
     isImage: boolean;
     isVideo: boolean;
   } | null>(null);
-
-  const fetchTickets = useCallback(async () => {
-    try {
-      setLoading(true);
-      const res = await client.get("/support/tickets");
-      const list = res.data?.data || [];
-      setTickets(list);
-    } catch (error) {
-      console.error("Failed to load tickets:", error);
-      toast.error("Could not fetch support tickets.");
-    } finally {
-      setLoading(false);
-    }
-  }, []);
 
   const handleSelectTicket = async (ticket: TicketItem) => {
     setSelectedTicket(ticket);

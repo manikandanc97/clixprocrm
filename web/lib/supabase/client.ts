@@ -16,7 +16,18 @@ function parseCookies(cookieHeader: string): Array<{ name: string; value: string
     });
 }
 
-function serializeCookie(name: string, value: string, options: any = {}): string {
+interface CookieSerializeOptions {
+  path?: string;
+  sameSite?: boolean | string;
+  secure?: boolean;
+  maxAge?: number;
+  domain?: string;
+  expires?: Date | string;
+  httpOnly?: boolean;
+  partitioned?: boolean;
+}
+
+function serializeCookie(name: string, value: string, options: CookieSerializeOptions = {}): string {
   let cookieStr = `${name}=${value}; Path=${options.path || '/'}; SameSite=${options.sameSite || 'Lax'}`;
   if (options.secure || (typeof window !== 'undefined' && window.location.protocol === 'https:')) {
     cookieStr += '; Secure';

@@ -118,42 +118,6 @@ export default function SuperAdminSettingsPage() {
     return !compareFormValues(initialFormState, currentFormState);
   }, [initialFormState, currentFormState]);
 
-  const loadSettings = async () => {
-    try {
-      setLoading(true);
-      const res = await fetchPlatformSettings();
-      setSettingsData(res);
-
-      const general = res?.general || res?.platform || {};
-      const reg = res?.workspaceRegistration || res?.platform || {};
-
-      const loaded: FormState = {
-        platformName: general?.name || "ClixProCRM",
-        defaultTenantPlan: general?.defaultTenantPlan || "free",
-        defaultCurrency: general?.defaultCurrency || "INR",
-        defaultTimezone: general?.defaultTimezone || "Asia/Kolkata",
-        allowPublicRegistrations: reg?.allowPublicRegistrations ?? true,
-        requireEmailVerification: reg?.requireEmailVerification ?? false,
-        allowWorkspaceSelfRegistration: reg?.allowWorkspaceSelfRegistration ?? true,
-        maintenanceMode: reg?.maintenanceMode ?? false,
-      };
-
-      setPlatformName(loaded.platformName);
-      setDefaultTenantPlan(loaded.defaultTenantPlan);
-      setDefaultCurrency(loaded.defaultCurrency);
-      setDefaultTimezone(loaded.defaultTimezone);
-      setAllowPublicRegistrations(loaded.allowPublicRegistrations);
-      setRequireEmailVerification(loaded.requireEmailVerification);
-      setAllowWorkspaceSelfRegistration(loaded.allowWorkspaceSelfRegistration);
-      setMaintenanceMode(loaded.maintenanceMode);
-      setInitialFormState(loaded);
-    } catch {
-      toast.error("Failed to load platform settings.");
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     let active = true;
     fetchPlatformSettings()

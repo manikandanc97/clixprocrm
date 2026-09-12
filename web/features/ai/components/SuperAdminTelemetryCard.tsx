@@ -26,21 +26,6 @@ export function SuperAdminTelemetryCard({ onTriggerAnalysis }: SuperAdminTelemet
   const [analytics, setAnalytics] = useState<PlatformAnalyticsData | null>(null);
   const [loading, setLoading] = useState(true);
 
-  const loadData = async () => {
-    try {
-      const [overviewData, analyticsData] = await Promise.all([
-        fetchPlatformOverview().catch(() => null),
-        fetchPlatformAnalytics().catch(() => null),
-      ]);
-      if (overviewData) setOverview(overviewData);
-      if (analyticsData) setAnalytics(analyticsData);
-    } catch {
-      // Graceful fallback
-    } finally {
-      setLoading(false);
-    }
-  };
-
   useEffect(() => {
     let active = true;
     Promise.all([

@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState } from "react";
 import { useParams, useRouter } from "next/navigation";
 import Link from "next/link";
 import {
@@ -230,23 +230,6 @@ export default function SuperAdminTicketDetailPage() {
     isImage: boolean;
     isVideo: boolean;
   } | null>(null);
-
-  // Load Ticket Data
-  const loadTicket = useCallback(async () => {
-    if (!ticketId) return;
-    try {
-      setLoading(true);
-      const data = await fetchPlatformSupportTicketDetails(ticketId);
-      setTicket(data);
-      setSubjectDraft(data.subject);
-    } catch (err: any) {
-      console.error("Failed to load ticket:", err);
-      toast.error("Could not find ticket or load ticket thread.");
-      router.push("/super-admin/support");
-    } finally {
-      setLoading(false);
-    }
-  }, [ticketId, router]);
 
   useEffect(() => {
     if (!ticketId) return;
