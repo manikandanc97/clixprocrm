@@ -43,6 +43,7 @@ import {
   PlatformSubscriptionItem,
   PlatformInvoiceItemData,
   PlatformOrganization,
+  PlatformBillingSettingsData,
 } from "@/shared/lib/api/super-admin.api";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { toast } from "sonner";
@@ -86,7 +87,7 @@ export default function PlatformBillingAdminPage() {
   const [subscriptions, setSubscriptions] = useState<PlatformSubscriptionItem[]>([]);
   const [invoices, setInvoices] = useState<PlatformInvoiceItemData[]>([]);
   const [organizations, setOrganizations] = useState<PlatformOrganization[]>([]);
-  const [configForm, setConfigForm] = useState<any>({});
+  const [configForm, setConfigForm] = useState<Partial<PlatformBillingSettingsData>>({});
   const [savingConfig, setSavingConfig] = useState(false);
   const [showAccountNumber, setShowAccountNumber] = useState(false);
 
@@ -138,8 +139,9 @@ export default function PlatformBillingAdminPage() {
       setInvoices(invData?.invoices || []);
       setConfigForm(cfgData || {});
       setOrganizations(orgsData?.organizations || []);
-    } catch (err: any) {
-      toast.error(err.message || "Failed to load platform billing data");
+    } catch (err: unknown) {
+      const errorMsg = (err as { message?: string })?.message || "Failed to load platform billing data";
+      toast.error(errorMsg);
     } finally {
       setLoading(false);
     }
@@ -188,8 +190,12 @@ export default function PlatformBillingAdminPage() {
       setIsCreateSubModalOpen(false);
       setSelectedTenantId("");
       loadData();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to configure subscription");
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to configure subscription";
+      toast.error(errorMsg);
     } finally {
       setIsSubmittingSub(false);
     }
@@ -220,8 +226,12 @@ export default function PlatformBillingAdminPage() {
       setRefundTargetInvoice(null);
       setRefundReason("");
       loadData();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to process refund");
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to process refund";
+      toast.error(errorMsg);
     } finally {
       setIsProcessingRefund(false);
     }
@@ -234,8 +244,12 @@ export default function PlatformBillingAdminPage() {
       setSavingConfig(true);
       await updatePlatformBillingSettings(configForm);
       toast.success("Platform billing configuration updated successfully!");
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to update configuration");
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update configuration";
+      toast.error(errorMsg);
     } finally {
       setSavingConfig(false);
     }
@@ -354,13 +368,14 @@ export default function PlatformBillingAdminPage() {
     }
 
     if (subSortConfig) {
+      const key = subSortConfig.key as keyof PlatformSubscriptionItem;
       list.sort((a, b) => {
-        let valA = (a as any)[subSortConfig.key];
-        let valB = (b as any)[subSortConfig.key];
+        let valA: unknown = a[key];
+        let valB: unknown = b[key];
         if (typeof valA === "string") valA = valA.toLowerCase();
         if (typeof valB === "string") valB = valB.toLowerCase();
-        if (valA < valB) return subSortConfig.direction === "asc" ? -1 : 1;
-        if (valA > valB) return subSortConfig.direction === "asc" ? 1 : -1;
+        if (String(valA ?? "") < String(valB ?? "")) return subSortConfig.direction === "asc" ? -1 : 1;
+        if (String(valA ?? "") > String(valB ?? "")) return subSortConfig.direction === "asc" ? 1 : -1;
         return 0;
       });
     }
@@ -395,13 +410,14 @@ export default function PlatformBillingAdminPage() {
     }
 
     if (invSortConfig) {
+      const key = invSortConfig.key as keyof PlatformInvoiceItemData;
       list.sort((a, b) => {
-        let valA = (a as any)[invSortConfig.key];
-        let valB = (b as any)[invSortConfig.key];
+        let valA: unknown = a[key];
+        let valB: unknown = b[key];
         if (typeof valA === "string") valA = valA.toLowerCase();
         if (typeof valB === "string") valB = valB.toLowerCase();
-        if (valA < valB) return invSortConfig.direction === "asc" ? -1 : 1;
-        if (valA > valB) return invSortConfig.direction === "asc" ? 1 : -1;
+        if (String(valA ?? "") < String(valB ?? "")) return invSortConfig.direction === "asc" ? -1 : 1;
+        if (String(valA ?? "") > String(valB ?? "")) return invSortConfig.direction === "asc" ? 1 : -1;
         return 0;
       });
     }
@@ -553,7 +569,7 @@ export default function PlatformBillingAdminPage() {
             return (
               <button
                 key={tab.id}
-                onClick={() => setActiveTab(tab.id as any)}
+                onClick={() => setActiveTab(tab.id as "overview" | "subscriptions" | "invoices" | "settings")}
                 className={`flex items-center gap-2 px-3.5 py-1.5 rounded-lg transition-all ${
                   isCurrent
                     ? "bg-card text-foreground shadow-xs font-bold border border-border/50"
@@ -734,7 +750,7 @@ export default function PlatformBillingAdminPage() {
                             fontSize: "11px",
                             boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
                           }}
-                          formatter={(val: any) => [formatCurrency(Number(val)), "Revenue"]}
+                          formatter={(val) => [formatCurrency(Number(val)), "Revenue"]}
                           labelStyle={{ fontWeight: "bold", color: "var(--foreground)" }}
                         />
                         <Area
@@ -1053,7 +1069,7 @@ export default function PlatformBillingAdminPage() {
                             onClick={() => {
                               setSelectedTenantId(sub.tenantId);
                               setSelectedPlanId(sub.planId || "growth");
-                              setSelectedBillingCycle((sub.billingCycle as any) || "monthly");
+                              setSelectedBillingCycle((sub.billingCycle as "monthly" | "annual") || "monthly");
                               setSelectedSeats(sub.seats || 5);
                               setIsCreateSubModalOpen(true);
                             }}
@@ -1539,7 +1555,7 @@ export default function PlatformBillingAdminPage() {
                   <Label className="text-xs font-semibold text-foreground mb-1">Billing Cycle</Label>
                   <select
                     value={selectedBillingCycle}
-                    onChange={(e) => setSelectedBillingCycle(e.target.value as any)}
+                    onChange={(e) => setSelectedBillingCycle(e.target.value as "monthly" | "annual")}
                     className="w-full h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
                   >
                     <option value="monthly">Monthly</option>

@@ -230,10 +230,12 @@ export default function SuperAdminAiPage() {
         setIsPlanModalOpen(false);
         await loadData();
       }
-    } catch (err: any) {
-      toast.error(
-        err.response?.data?.message || err.message || "Failed to update plan configuration."
-      );
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update plan configuration.";
+      toast.error(msg);
     } finally {
       setSavingPlan(false);
     }

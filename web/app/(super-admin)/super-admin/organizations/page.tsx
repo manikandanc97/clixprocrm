@@ -22,6 +22,7 @@ import {
   deletePlatformOrganization,
   fetchPlatformOrganizationDetails,
   PlatformOrganization,
+  PlatformOrganizationDetail,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -78,7 +79,7 @@ export default function OrganizationsPage() {
 
   // Details Modal State
   const [detailsModalOpen, setDetailsModalOpen] = useState(false);
-  const [selectedOrgDetails, setSelectedOrgDetails] = useState<any>(null);
+  const [selectedOrgDetails, setSelectedOrgDetails] = useState<PlatformOrganizationDetail | null>(null);
   const [loadingDetails, setLoadingDetails] = useState(false);
 
   const getOrgColor = (name: string) => {
@@ -168,12 +169,12 @@ export default function OrganizationsPage() {
       setNewOrgName("");
       setNewOrgSlug("");
       loadOrganizations();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to create organization."
-      );
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to create organization.";
+      toast.error(errorMsg);
     } finally {
       setCreating(false);
     }
@@ -190,12 +191,12 @@ export default function OrganizationsPage() {
         setSelectedOrgDetails(null);
       }
       await loadOrganizations();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to delete organization."
-      );
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to delete organization.";
+      toast.error(errorMsg);
     } finally {
       setDeleting(false);
     }
@@ -210,12 +211,12 @@ export default function OrganizationsPage() {
       setSelectedOrgIds([]);
       setBulkDeleteModalOpen(false);
       await loadOrganizations();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ||
-          err?.message ||
-          "Failed to delete selected workspaces."
-      );
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to delete selected workspaces.";
+      toast.error(errorMsg);
     } finally {
       setBulkDeleting(false);
     }
@@ -282,9 +283,10 @@ export default function OrganizationsPage() {
       return org.name.toLowerCase().includes(q) || org.slug.toLowerCase().includes(q);
     });
     if (!sortConfig) return filtered;
-    return [...filtered].sort((a: any, b: any) => {
-      const aVal = (a as any)[sortConfig.key] ?? "";
-      const bVal = (b as any)[sortConfig.key] ?? "";
+    const key = sortConfig.key as keyof PlatformOrganization;
+    return [...filtered].sort((a, b) => {
+      const aVal = String(a[key] ?? "");
+      const bVal = String(b[key] ?? "");
       if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
       if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
       return 0;
@@ -954,7 +956,7 @@ export default function OrganizationsPage() {
                       </thead>
                       <tbody className="divide-y divide-border/30">
                         {selectedOrgDetails.members && selectedOrgDetails.members.length > 0 ? (
-                          selectedOrgDetails.members.map((m: any) => (
+                          selectedOrgDetails.members.map((m) => (
                             <tr key={m.membershipId} className="hover:bg-muted/20 h-12">
                               <td className="py-2.5 px-4">
                                 <p className="font-semibold text-foreground">{m.name}</p>

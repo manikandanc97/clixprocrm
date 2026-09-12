@@ -278,8 +278,9 @@ export default function SecurityOperationsPage() {
       setSelectedIncident(null);
       setIncidentResolveNotes("");
       loadData(true);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update incident.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to update incident.";
+      toast.error(msg);
     } finally {
       setUpdatingIncident(false);
     }
@@ -325,8 +326,9 @@ export default function SecurityOperationsPage() {
 
       setEmergencyModal({ action: null, targetId: "", reason: "", confirmText: "" });
       loadData(true);
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Emergency action failed.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Emergency action failed.";
+      toast.error(msg);
     } finally {
       setExecutingEmergency(false);
     }

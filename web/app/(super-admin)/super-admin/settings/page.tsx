@@ -16,6 +16,9 @@ import {
 import {
   fetchPlatformSettings,
   updatePlatformSettings,
+  PlatformSettingsResponse,
+  PlatformSettingsPlanItem,
+  UpdatePlatformSettingsPayload,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
@@ -74,7 +77,7 @@ interface FormState {
 }
 
 export default function SuperAdminSettingsPage() {
-  const [settingsData, setSettingsData] = useState<any>(null);
+  const [settingsData, setSettingsData] = useState<PlatformSettingsResponse | null>(null);
   const [initialFormState, setInitialFormState] = useState<FormState | null>(null);
   const [loading, setLoading] = useState(true);
   const [saving, setSaving] = useState(false);
@@ -184,9 +187,9 @@ export default function SuperAdminSettingsPage() {
       setSaving(true);
 
       // Extract changed settings only
-      const payload: Record<string, any> = {};
-      const generalPayload: Record<string, any> = {};
-      const regPayload: Record<string, any> = {};
+      const payload: UpdatePlatformSettingsPayload = {};
+      const generalPayload: NonNullable<UpdatePlatformSettingsPayload["general"]> = {};
+      const regPayload: NonNullable<UpdatePlatformSettingsPayload["workspaceRegistration"]> = {};
 
       if (platformName !== initialFormState.platformName) {
         generalPayload.name = platformName;
@@ -228,27 +231,30 @@ export default function SuperAdminSettingsPage() {
         const updatedReg = res?.data?.workspaceRegistration || res?.data?.platform || {};
 
         const updatedState: FormState = {
-          platformName: updatedGeneral?.name ?? platformName,
-          defaultTenantPlan: updatedGeneral?.defaultTenantPlan ?? defaultTenantPlan,
-          defaultCurrency: updatedGeneral?.defaultCurrency ?? defaultCurrency,
-          defaultTimezone: updatedGeneral?.defaultTimezone ?? defaultTimezone,
-          allowPublicRegistrations: updatedReg?.allowPublicRegistrations ?? allowPublicRegistrations,
-          requireEmailVerification: updatedReg?.requireEmailVerification ?? requireEmailVerification,
-          allowWorkspaceSelfRegistration: updatedReg?.allowWorkspaceSelfRegistration ?? allowWorkspaceSelfRegistration,
-          maintenanceMode: updatedReg?.maintenanceMode ?? maintenanceMode,
+          platformName: (updatedGeneral as { name?: string })?.name ?? platformName,
+          defaultTenantPlan: (updatedGeneral as { defaultTenantPlan?: string })?.defaultTenantPlan ?? defaultTenantPlan,
+          defaultCurrency: (updatedGeneral as { defaultCurrency?: string })?.defaultCurrency ?? defaultCurrency,
+          defaultTimezone: (updatedGeneral as { defaultTimezone?: string })?.defaultTimezone ?? defaultTimezone,
+          allowPublicRegistrations: (updatedReg as { allowPublicRegistrations?: boolean })?.allowPublicRegistrations ?? allowPublicRegistrations,
+          requireEmailVerification: (updatedReg as { requireEmailVerification?: boolean })?.requireEmailVerification ?? requireEmailVerification,
+          allowWorkspaceSelfRegistration: (updatedReg as { allowWorkspaceSelfRegistration?: boolean })?.allowWorkspaceSelfRegistration ?? allowWorkspaceSelfRegistration,
+          maintenanceMode: (updatedReg as { maintenanceMode?: boolean })?.maintenanceMode ?? maintenanceMode,
         };
 
         setInitialFormState(updatedState);
         toast.success("Platform settings saved successfully.");
       }
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update platform settings.");
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Failed to update platform settings.";
+      toast.error(errorMsg);
     } finally {
       setSaving(false);
     }
   };
 
-  const availablePlans = useMemo(() => {
+  const availablePlans = useMemo<PlatformSettingsPlanItem[]>(() => {
     if (settingsData?.availablePlans && Array.isArray(settingsData.availablePlans)) {
       return settingsData.availablePlans;
     }
@@ -324,7 +330,7 @@ export default function SuperAdminSettingsPage() {
                   onChange={(e) => setDefaultTenantPlan(e.target.value)}
                   className="w-full h-10 px-3 rounded-xl bg-card border border-border text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
                 >
-                  {availablePlans.map((plan: any) => (
+                  {availablePlans.map((plan) => (
                     <option key={plan.id} value={plan.id}>
                       {plan.name} {plan.price ? `(${plan.price})` : ""}
                     </option>

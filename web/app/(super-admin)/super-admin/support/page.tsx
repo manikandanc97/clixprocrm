@@ -180,7 +180,7 @@ export default function SuperAdminSupportPage() {
       setTickets(ticketsData.tickets || []);
       setTotalPages(ticketsData.pagination?.totalPages || 1);
       setTotalCount(ticketsData.pagination?.total || 0);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to load support tickets:", err);
       toast.error("Failed to fetch support tickets from database.");
     } finally {
@@ -205,7 +205,7 @@ export default function SuperAdminSupportPage() {
         setTotalPages(ticketsData.pagination?.totalPages || 1);
         setTotalCount(ticketsData.pagination?.total || 0);
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         if (!active) return;
         console.error("Failed to load support tickets:", err);
         toast.error("Failed to fetch support tickets from database.");
@@ -234,13 +234,13 @@ export default function SuperAdminSupportPage() {
       }
       toast.success(`Ticket #${ticketToDelete.ticketNumber || ticketToDelete.id} deleted successfully.`);
       await loadData();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete ticket:", err);
-      toast.error(
-        err?.response?.data?.error?.message ||
-        err?.response?.data?.message ||
-        "Failed to delete ticket."
-      );
+      const msg =
+        (err as { response?: { data?: { error?: { message?: string }; message?: string } } })?.response?.data?.error?.message ||
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Failed to delete ticket.";
+      toast.error(msg);
     } finally {
       setDeletingTicket(false);
     }
@@ -255,12 +255,12 @@ export default function SuperAdminSupportPage() {
       setSelectedTicketIds([]);
       setBulkDeleteModalOpen(false);
       await loadData();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message ||
-        err?.message ||
-        "Failed to delete selected tickets."
-      );
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to delete selected tickets.";
+      toast.error(msg);
     } finally {
       setBulkDeleting(false);
     }

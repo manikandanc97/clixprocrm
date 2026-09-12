@@ -114,10 +114,11 @@ export default function SuperAdminDashboardPage() {
       const overview = await fetchPlatformOverview();
       setData(overview);
       setAal2Required(false);
-    } catch (err: any) {
-      const errData = err?.response?.data;
+    } catch (err: unknown) {
+      const errResponse = (err as { response?: { data?: { code?: string; message?: string }; status?: number } })?.response;
+      const errData = errResponse?.data;
       const isAal =
-        err?.response?.status === 403 &&
+        errResponse?.status === 403 &&
         (errData?.code === "AAL2_REQUIRED" ||
           String(errData?.message || "").includes("AAL2") ||
           String(errData?.message || "").includes("MFA verification required"));
@@ -130,16 +131,9 @@ export default function SuperAdminDashboardPage() {
         );
       } else {
         setAal2Required(false);
-        setError(
-          errData?.message ||
-            err?.message ||
-            "Failed to load platform overview data."
-        );
-        toast.error(
-          errData?.message ||
-            err?.message ||
-            "Failed to load platform overview data."
-        );
+        const msg = errData?.message || (err as { message?: string })?.message || "Failed to load platform overview data.";
+        setError(msg);
+        toast.error(msg);
       }
     } finally {
       setLoading(false);

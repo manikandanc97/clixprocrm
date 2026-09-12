@@ -240,7 +240,7 @@ export default function SuperAdminTicketDetailPage() {
         setTicket(data);
         setSubjectDraft(data.subject);
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         if (!active) return;
         console.error("Failed to load ticket:", err);
         toast.error("Could not find ticket or load ticket thread.");
@@ -276,9 +276,13 @@ export default function SuperAdminTicketDetailPage() {
       setTicket(updated);
       setIsEditingSubject(false);
       toast.success("Subject updated successfully");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update subject:", err);
-      toast.error(err.response?.data?.message || "Failed to update subject");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update subject";
+      toast.error(msg);
     } finally {
       setSavingSubject(false);
     }
@@ -292,9 +296,13 @@ export default function SuperAdminTicketDetailPage() {
       const updated = await updatePlatformSupportTicketStatus(ticket.id, newStatus);
       setTicket(updated);
       toast.success(`Status changed to ${STATUS_CONFIG[newStatus]?.label || newStatus}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update status:", err);
-      toast.error(err.response?.data?.message || "Failed to update status");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update status";
+      toast.error(msg);
     } finally {
       setSavingStatus(false);
     }
@@ -310,9 +318,13 @@ export default function SuperAdminTicketDetailPage() {
       });
       setTicket(updated);
       toast.success(`Priority updated to ${PRIORITY_CONFIG[newPriority]?.label || newPriority}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update priority:", err);
-      toast.error(err.response?.data?.message || "Failed to update priority");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update priority";
+      toast.error(msg);
     } finally {
       setSavingPriority(false);
     }
@@ -328,9 +340,13 @@ export default function SuperAdminTicketDetailPage() {
       const updated = await assignPlatformSupportTicket(ticket.id, targetId);
       setTicket(updated);
       toast.success(targetId ? "Ticket assigned successfully" : "Ticket unassigned");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to assign ticket:", err);
-      toast.error(err.response?.data?.message || "Failed to assign ticket");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to assign ticket";
+      toast.error(msg);
     } finally {
       setSavingAssignee(false);
     }
@@ -346,9 +362,13 @@ export default function SuperAdminTicketDetailPage() {
       });
       setTicket(updated);
       toast.success(`Category updated to ${newCategory}`);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update category:", err);
-      toast.error(err.response?.data?.message || "Failed to update category");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update category";
+      toast.error(msg);
     } finally {
       setSavingCategory(false);
     }
@@ -369,9 +389,13 @@ export default function SuperAdminTicketDetailPage() {
       toast.success(
         isInternalNote ? "Internal staff note recorded" : "Reply sent to customer"
       );
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to send reply:", err);
-      toast.error(err.response?.data?.message || "Failed to send response");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to send response";
+      toast.error(msg);
     } finally {
       setSendingReply(false);
     }
@@ -386,9 +410,13 @@ export default function SuperAdminTicketDetailPage() {
       toast.success(`Ticket #${ticket.ticketNumber} permanently deleted`);
       setIsDeleteDialogOpen(false);
       router.push("/super-admin/support");
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete ticket:", err);
-      toast.error(err.response?.data?.message || "Failed to delete ticket");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to delete ticket";
+      toast.error(msg);
       setDeletingTicket(false);
     }
   };
@@ -658,8 +686,8 @@ export default function SuperAdminTicketDetailPage() {
                                 size: att.fileSize,
                                 contentType: att.fileType,
                                 isImage: isImg,
-                                video: isVid,
-                              } as any);
+                                isVideo: isVid,
+                              });
                             } else {
                               window.open(att.fileUrl, "_blank", "noopener,noreferrer");
                             }
@@ -720,8 +748,8 @@ export default function SuperAdminTicketDetailPage() {
                                     size: att.fileSize,
                                     contentType: att.fileType,
                                     isImage: isImg,
-                                    video: isVid,
-                                  } as any);
+                                    isVideo: isVid,
+                                  });
                                 } else {
                                   window.open(att.fileUrl, "_blank");
                                 }

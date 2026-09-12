@@ -206,18 +206,19 @@ export default function SuperAdminModulesPage() {
     try {
       const res = await fetchPlatformModules({ navigationScope: "TENANT_CRM" });
       setTenantModules(res.modules || []);
-    } catch (err: any) {
-      const errData = err?.response?.data;
+    } catch (err: unknown) {
+      const errResponse = (err as { response?: { data?: { code?: string; message?: string }; status?: number } })?.response;
+      const errData = errResponse?.data;
       const isAal =
         errData?.code === "AAL2_REQUIRED" ||
         String(errData?.message || "").includes("AAL2") ||
-        (err?.response?.status === 403 && String(errData?.message || "").includes("MFA"));
+        (errResponse?.status === 403 && String(errData?.message || "").includes("MFA"));
 
       if (isAal) {
         setAal2Required(true);
         setLoadError("MFA verification required (AAL2 Assurance).");
       } else {
-        setLoadError(errData?.message || err?.message || "Failed to load Tenant CRM navigation.");
+        setLoadError(errData?.message || (err as { message?: string })?.message || "Failed to load Tenant CRM navigation.");
       }
     }
   }, []);
@@ -511,8 +512,9 @@ export default function SuperAdminModulesPage() {
       setIsModalOpen(false);
       await loadAllModules();
       invalidateNavCaches();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to save menu.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to save menu.";
+      toast.error(msg);
     } finally {
       setSaving(false);
     }
@@ -545,9 +547,10 @@ export default function SuperAdminModulesPage() {
       );
       await loadAllModules();
       invalidateNavCaches();
-    } catch (err: any) {
+    } catch (err: unknown) {
       await loadAllModules();
-      toast.error(err?.response?.data?.message || "Failed to update status.");
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to update status.";
+      toast.error(msg);
     }
   };
 
@@ -584,8 +587,9 @@ export default function SuperAdminModulesPage() {
       );
       toast.success("Menu order updated.");
       invalidateNavCaches();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to reorder menus.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to reorder menus.";
+      toast.error(msg);
       await loadAllModules();
     } finally {
       setReordering(false);
@@ -602,8 +606,9 @@ export default function SuperAdminModulesPage() {
       setModuleToDelete(null);
       await loadAllModules();
       invalidateNavCaches();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to delete menu.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Failed to delete menu.";
+      toast.error(msg);
     } finally {
       setDeleting(false);
     }
@@ -833,7 +838,7 @@ export default function SuperAdminModulesPage() {
             <select
               value={statusFilter}
               onChange={(e) => {
-                setStatusFilter(e.target.value as any);
+                setStatusFilter(e.target.value as "ALL" | "ENABLED" | "DISABLED");
                 setCurrentPage(1);
               }}
               className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
@@ -1249,7 +1254,7 @@ export default function SuperAdminModulesPage() {
                 <select
                   id="access-preset"
                   value={formAccessPreset}
-                  onChange={(e) => setFormAccessPreset(e.target.value as any)}
+                  onChange={(e) => setFormAccessPreset(e.target.value as "ALL" | "ADMIN_ONLY" | "MANAGER_ADMIN" | "CUSTOM")}
                   className="w-full h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
                 >
                   <option value="ALL">All CRM Users (Standard Access)</option>

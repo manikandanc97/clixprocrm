@@ -120,8 +120,7 @@ export default function SuperAdminAiPage() {
           }`,
         },
       ],
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any);
+    });
   }
 
   // Right Panel Drawer Content (Chats & Telemetry Tabs)
@@ -254,7 +253,7 @@ export default function SuperAdminAiPage() {
                 {displayMessages.map((msg, idx) => (
                   <AIMessageItem
                     key={msg.id || idx}
-                    message={msg as any}
+                    message={msg}
                     onConfirmAction={confirmAction}
                     isLast={idx === displayMessages.length - 1}
                   />
@@ -265,13 +264,11 @@ export default function SuperAdminAiPage() {
                   (!displayMessages.length ||
                     displayMessages[displayMessages.length - 1]?.role === 'user') && (
                     <AIMessageItem
-                      message={
-                        {
-                          id: 'streaming-temp',
-                          role: 'assistant',
-                          parts: [],
-                        } as any
-                      }
+                      message={{
+                        id: 'streaming-temp',
+                        role: 'assistant',
+                        parts: [],
+                      }}
                     />
                   )}
                 <div ref={messagesEndRef} />

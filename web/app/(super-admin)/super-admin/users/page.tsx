@@ -119,10 +119,12 @@ export default function SuperAdminUsersPage() {
       setTransferConfirmText("");
       setSelectedUser(null);
       await loadUsers();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || err?.message || "Failed to transfer Super Admin ownership."
-      );
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to transfer Super Admin ownership.";
+      toast.error(errorMsg);
     } finally {
       setIsTransferring(false);
     }
@@ -143,10 +145,12 @@ export default function SuperAdminUsersPage() {
       setDeleteConfirmText("");
       setSelectedUser(null);
       await loadUsers();
-    } catch (err: any) {
-      toast.error(
-        err?.response?.data?.message || err?.message || "Failed to delete user account."
-      );
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to delete user account.";
+      toast.error(errorMsg);
     } finally {
       setIsDeleting(false);
     }
@@ -158,7 +162,7 @@ export default function SuperAdminUsersPage() {
       return;
     }
 
-    const nextStatus = user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
+    const nextStatus: "ACTIVE" | "SUSPENDED" = user.status === "ACTIVE" ? "SUSPENDED" : "ACTIVE";
     const confirmMsg = `Are you sure you want to ${
       nextStatus === "SUSPENDED" ? "suspend" : "activate"
     } user "${user.name || user.email}"?`;
@@ -166,11 +170,14 @@ export default function SuperAdminUsersPage() {
     if (!confirm(confirmMsg)) return;
 
     try {
-      await updatePlatformUserStatus(user.id, nextStatus as any);
+      await updatePlatformUserStatus(user.id, nextStatus);
       toast.success(`User status updated to ${nextStatus}.`);
       loadUsers();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Failed to update user status.");
+    } catch (err: unknown) {
+      const errorMsg =
+        (err as { response?: { data?: { message?: string } } })?.response?.data?.message ||
+        "Failed to update user status.";
+      toast.error(errorMsg);
     }
   };
 
@@ -578,7 +585,7 @@ export default function SuperAdminUsersPage() {
                       <td className="px-4 py-3.5">
                         {u.organizations && u.organizations.length > 0 ? (
                           <div className="flex flex-wrap gap-1.5 max-w-[240px]">
-                            {u.organizations.map((org: any) => (
+                            {u.organizations.map((org) => (
                               <div
                                 key={org.tenantId}
                                 className="inline-flex items-center gap-1.5 px-2 py-0.5 rounded-md bg-muted/60 border border-border/70 text-[11px] max-w-[200px]"

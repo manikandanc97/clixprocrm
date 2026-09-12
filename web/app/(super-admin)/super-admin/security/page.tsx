@@ -160,8 +160,9 @@ export default function SecurityCenterPage() {
       setConfirmationInput("");
       setBreakGlassCode("");
       loadData();
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || "Emergency action failed.");
+    } catch (err: unknown) {
+      const msg = (err as { response?: { data?: { message?: string } } })?.response?.data?.message || "Emergency action failed.";
+      toast.error(msg);
     } finally {
       setExecutingEmergency(false);
     }

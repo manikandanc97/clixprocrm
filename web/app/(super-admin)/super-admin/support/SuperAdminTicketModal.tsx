@@ -243,7 +243,7 @@ export function SuperAdminTicketModal({
       const data = await fetchPlatformSupportTicketDetails(ticketId);
       setTicket(data);
       setSubjectDraft(data.subject);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to load ticket:", err);
       toast.error("Could not load support ticket details.");
       onOpenChange(false);
@@ -271,7 +271,7 @@ export function SuperAdminTicketModal({
         setTicket(data);
         setSubjectDraft(data.subject);
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         if (!active) return;
         console.error("Failed to load ticket:", err);
         toast.error("Could not load support ticket details.");
@@ -308,9 +308,13 @@ export function SuperAdminTicketModal({
       setIsEditingSubject(false);
       toast.success("Subject updated successfully");
       onTicketUpdated?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update subject:", err);
-      toast.error(err.response?.data?.message || "Failed to update subject");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update subject";
+      toast.error(msg);
     } finally {
       setSavingSubject(false);
     }
@@ -325,9 +329,13 @@ export function SuperAdminTicketModal({
       setTicket(updated);
       toast.success(`Status changed to ${STATUS_CONFIG[newStatus]?.label || newStatus}`);
       onTicketUpdated?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update status:", err);
-      toast.error(err.response?.data?.message || "Failed to update status");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update status";
+      toast.error(msg);
     } finally {
       setSavingStatus(false);
     }
@@ -344,9 +352,13 @@ export function SuperAdminTicketModal({
       setTicket(updated);
       toast.success(`Priority updated to ${PRIORITY_CONFIG[newPriority]?.label || newPriority}`);
       onTicketUpdated?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update priority:", err);
-      toast.error(err.response?.data?.message || "Failed to update priority");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update priority";
+      toast.error(msg);
     } finally {
       setSavingPriority(false);
     }
@@ -363,9 +375,13 @@ export function SuperAdminTicketModal({
       setTicket(updated);
       toast.success(targetId ? "Ticket assigned successfully" : "Ticket unassigned");
       onTicketUpdated?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to assign ticket:", err);
-      toast.error(err.response?.data?.message || "Failed to assign ticket");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to assign ticket";
+      toast.error(msg);
     } finally {
       setSavingAssignee(false);
     }
@@ -382,9 +398,13 @@ export function SuperAdminTicketModal({
       setTicket(updated);
       toast.success(`Category updated to ${newCategory}`);
       onTicketUpdated?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to update category:", err);
-      toast.error(err.response?.data?.message || "Failed to update category");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to update category";
+      toast.error(msg);
     } finally {
       setSavingCategory(false);
     }
@@ -406,9 +426,13 @@ export function SuperAdminTicketModal({
         isInternalNote ? "Internal staff note recorded" : "Reply sent to customer"
       );
       onTicketUpdated?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to send reply:", err);
-      toast.error(err.response?.data?.message || "Failed to send response");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to send response";
+      toast.error(msg);
     } finally {
       setSendingReply(false);
     }
@@ -424,9 +448,13 @@ export function SuperAdminTicketModal({
       setIsDeleteDialogOpen(false);
       onOpenChange(false);
       onTicketUpdated?.();
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to delete ticket:", err);
-      toast.error(err.response?.data?.message || "Failed to delete ticket");
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to delete ticket";
+      toast.error(msg);
     } finally {
       setDeletingTicket(false);
     }

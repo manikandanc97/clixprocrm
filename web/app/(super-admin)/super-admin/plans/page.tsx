@@ -185,9 +185,12 @@ export default function SuperAdminPlansPage() {
       setDistribution(res?.distribution || {});
       setFeatureCatalog(Array.isArray(res?.featureCatalog) ? res.featureCatalog : []);
       setAiModels(Array.isArray(res?.aiModels) ? res.aiModels : []);
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error("Failed to load subscription plans:", err);
-      const msg = err?.response?.data?.message || err?.message || "Failed to load subscription plans.";
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to load subscription plans.";
       setError(msg);
       toast.error(msg);
     } finally {
@@ -205,10 +208,13 @@ export default function SuperAdminPlansPage() {
         setFeatureCatalog(Array.isArray(res?.featureCatalog) ? res.featureCatalog : []);
         setAiModels(Array.isArray(res?.aiModels) ? res.aiModels : []);
       })
-      .catch((err: any) => {
+      .catch((err: unknown) => {
         if (!active) return;
         console.error("Failed to load subscription plans:", err);
-        const msg = err?.response?.data?.message || err?.message || "Failed to load subscription plans.";
+        const msg =
+          (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+          (err as { message?: string })?.message ||
+          "Failed to load subscription plans.";
         setError(msg);
         toast.error(msg);
       })
@@ -396,8 +402,11 @@ export default function SuperAdminPlansPage() {
           await loadData();
         }
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Failed to save plan configuration.";
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        "Failed to save plan configuration.";
       toast.error(msg);
     } finally {
       setSaving(false);
@@ -416,8 +425,11 @@ export default function SuperAdminPlansPage() {
         }
         await loadData();
       }
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || `Failed to delete plan "${plan.name}".`;
+    } catch (err: unknown) {
+      const msg =
+        (err as { response?: { data?: { message?: string } }; message?: string })?.response?.data?.message ||
+        (err as { message?: string })?.message ||
+        `Failed to delete plan "${plan.name}".`;
       toast.error(msg);
     } finally {
       setDeleting(false);
@@ -933,7 +945,7 @@ export default function SuperAdminPlansPage() {
                           onChange={(e) =>
                             setEditingPlan({
                               ...editingPlan,
-                              status: e.target.value as any,
+                              status: e.target.value as "ACTIVE" | "INACTIVE" | "ARCHIVED",
                             })
                           }
                           className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
@@ -1008,7 +1020,7 @@ export default function SuperAdminPlansPage() {
                           onChange={(e) =>
                             setEditingPlan({
                               ...editingPlan,
-                              pricingMode: e.target.value as any,
+                              pricingMode: e.target.value as "FIXED" | "CUSTOM",
                             })
                           }
                           className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"

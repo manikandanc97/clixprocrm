@@ -1047,17 +1047,29 @@ export interface PlatformSettingsRegistration {
   maintenanceMode?: boolean;
 }
 
+export interface PlatformSettingsPlanItem {
+  id: string;
+  name: string;
+  price?: string;
+  priceNum?: number;
+  status?: string;
+}
+
+export interface PlatformSystemInfo {
+  platformVersion?: string;
+  apiVersion?: string;
+  platformStatus?: string;
+  databaseStatus?: string;
+  environment?: string;
+}
+
 export interface PlatformSettingsResponse {
   general?: PlatformSettingsGeneral;
   workspaceRegistration?: PlatformSettingsRegistration;
   platform?: PlatformSettingsGeneral & PlatformSettingsRegistration;
-  activePlans?: Array<{
-    id: string;
-    name: string;
-    price: string;
-    priceNum: number;
-    status: string;
-  }>;
+  activePlans?: PlatformSettingsPlanItem[];
+  availablePlans?: PlatformSettingsPlanItem[];
+  systemInfo?: PlatformSystemInfo;
   dbStatus?: string;
   [key: string]: unknown;
 }
