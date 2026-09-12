@@ -445,6 +445,7 @@ export function InvoiceContextualSettings({
           <div className="p-3.5 rounded-xl bg-muted/40 border border-border/70 flex items-center justify-between gap-4">
             <div className="flex items-center gap-3">
               {workspace?.logo ? (
+                // eslint-disable-next-line @next/next/no-img-element
                 <img
                   src={workspace.logo}
                   alt="Workspace Logo"
@@ -1634,6 +1635,7 @@ export function InvoiceContextualSettings({
             <div className="flex justify-between items-start border-b border-slate-200 pb-5">
               <div className="space-y-1">
                 {showLogoOnPDF && workspace?.logo && (
+                  // eslint-disable-next-line @next/next/no-img-element
                   <img src={workspace.logo} alt="Logo" className="h-10 object-contain mb-2" />
                 )}
                 <h2 className="text-base font-extrabold text-slate-950">

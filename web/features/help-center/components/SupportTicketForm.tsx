@@ -111,6 +111,7 @@ export function SupportTicketForm({ onTicketCreated, onSwitchToHistory }: Suppor
     },
   });
 
+  // eslint-disable-next-line react-hooks/incompatible-library -- React Hook Form watch() is not memoizable; this is a known RHF/React Compiler incompatibility
   const priorityValue = watch("priority") || "Medium";
   const subjectValue = watch("subject") || "";
   const categoryValue = watch("category") || "";

@@ -6,6 +6,7 @@ import {
   createUIMessageStreamResponse,
   toUIMessageStream,
   isStepCount,
+  type UIMessage,
 } from 'ai';
 import { getMcpTools } from '@/lib/mcp/mcp-client';
 import { createClient } from '@/lib/supabase/server';
@@ -21,21 +22,28 @@ function getApiKey(): string | undefined {
   );
 }
 
-function sanitizeMessages(messages: any[]): any[] {
+function sanitizeMessages(messages: unknown[]): Array<Omit<UIMessage, 'id'>> {
   return (messages || []).map((m) => {
     if (typeof m === 'string') {
-      return { role: 'user', parts: [{ type: 'text', text: m }] };
+      return { role: 'user' as const, parts: [{ type: 'text' as const, text: m }] };
     }
-    if (m.parts && Array.isArray(m.parts) && m.parts.length > 0) {
-      return m;
+    const msg = (m && typeof m === 'object' ? m : {}) as { role?: string; parts?: unknown[]; content?: unknown };
+    const validRole: 'system' | 'user' | 'assistant' =
+      msg.role === 'system' || msg.role === 'assistant' ? msg.role : 'user';
+
+    if (Array.isArray(msg.parts) && msg.parts.length > 0) {
+      const textPart = msg.parts.find(
+        (p): p is { type: 'text'; text: string } =>
+          typeof p === 'object' && p !== null && 'type' in p && (p as { type: string }).type === 'text'
+      );
+      if (textPart && typeof textPart.text === 'string') {
+        return { role: validRole, parts: [{ type: 'text' as const, text: textPart.text }] };
+      }
     }
-    if (typeof m.content === 'string') {
-      return { ...m, role: m.role || 'user', parts: [{ type: 'text', text: m.content }] };
+    if (typeof msg.content === 'string') {
+      return { role: validRole, parts: [{ type: 'text' as const, text: msg.content }] };
     }
-    if (Array.isArray(m.content)) {
-      return { ...m, role: m.role || 'user', parts: m.content };
-    }
-    return { ...m, role: m.role || 'user', parts: [{ type: 'text', text: '' }] };
+    return { role: validRole, parts: [{ type: 'text' as const, text: '' }] };
   });
 }
 
@@ -195,20 +203,27 @@ RESPONSE & TOKEN RULES:
       stream: toUIMessageStream({
         stream: result.stream,
         tools,
-        onError: (streamError: any) => {
-          const message = streamError?.message || String(streamError) || 'AI stream error occurred';
+        onError: (streamError: unknown) => {
+          const message =
+            streamError instanceof Error
+              ? streamError.message
+              : String(streamError) || 'AI stream error occurred';
           console.error('[AI Stream Error]:', message);
           return message;
         },
       }),
     });
-  } catch (error: any) {
+  } catch (error: unknown) {
     console.error('[AI Chat Route Error]:', error);
+    const message =
+      error instanceof Error
+        ? error.message
+        : typeof error === 'object' && error !== null && 'message' in error
+        ? String((error as { message: unknown }).message)
+        : 'An unexpected error occurred while communicating with the AI service.';
     return NextResponse.json(
       {
-        error:
-          error?.message ||
-          'An unexpected error occurred while communicating with the AI service.',
+        error: message,
       },
       { status: 500 }
     );

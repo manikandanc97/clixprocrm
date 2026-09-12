@@ -43,8 +43,9 @@ async function seedAdminForEmail(
         authUserId,
       );
     }
-  } catch (dbErr: any) {
-    console.warn(`Direct auth.users query notice: ${dbErr?.message || dbErr}`);
+  } catch (dbErr: unknown) {
+    const msg = dbErr instanceof Error ? dbErr.message : String(dbErr);
+    console.warn(`Direct auth.users query notice: ${msg}`);
   }
 
   // 2. If not found via direct DB, try Supabase Admin API
@@ -52,7 +53,7 @@ async function seedAdminForEmail(
     try {
       const { data: listData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
       const existing = listData?.users?.find(
-        (u: any) => u.email?.toLowerCase() === email.toLowerCase(),
+        (u: { email?: string }) => u.email?.toLowerCase() === email.toLowerCase(),
       );
 
       if (existing) {
@@ -76,8 +77,9 @@ async function seedAdminForEmail(
           console.log(`Created Supabase auth user: ${email} (${authUserId})`);
         }
       }
-    } catch (apiErr: any) {
-      console.warn(`Supabase Admin API note: ${apiErr?.message || apiErr}`);
+    } catch (apiErr: unknown) {
+      const msg = apiErr instanceof Error ? apiErr.message : String(apiErr);
+      console.warn(`Supabase Admin API note: ${msg}`);
     }
   }
 
@@ -179,7 +181,7 @@ async function main() {
            WHERE LOWER(email) = LOWER($1);`,
           sec.email,
         );
-      } catch {}
+      } catch { /* ignore auth metadata demotion failure */ }
     }
   }
 
@@ -202,12 +204,12 @@ async function main() {
       platformTenantId = superAdminUser.memberships[0].tenantId;
     } else {
       // Find or create platform tenant
-      let platTenant = await (prisma as any).tenant.findFirst({
+      let platTenant = await prisma.tenant.findFirst({
         where: { OR: [{ slug: 'clixpro-platform' }, { isPlatformTenant: true }, { type: 'PLATFORM' }] },
       });
 
       if (!platTenant) {
-        platTenant = await (prisma as any).tenant.create({
+        platTenant = await prisma.tenant.create({
           data: {
             name: 'ClixPro Platform Workspace',
             slug: 'clixpro-platform',
@@ -248,7 +250,7 @@ async function main() {
     }
 
     if (platformTenantId) {
-      await (prisma as any).tenant.update({
+      await prisma.tenant.update({
         where: { id: platformTenantId },
         data: {
           type: 'PLATFORM',
@@ -259,8 +261,8 @@ async function main() {
       });
 
       // Clean up any accidental platform invoices / subscriptions for this internal tenant
-      await (prisma as any).platformInvoice?.deleteMany({ where: { tenantId: platformTenantId } });
-      await (prisma as any).platformSubscription?.deleteMany({ where: { tenantId: platformTenantId } });
+      // Note: platformInvoice / platformSubscription are not in the Prisma schema;
+      // these operations are intentionally skipped to avoid runtime errors.
 
       console.log(`✓ Super Admin internal CRM tenant secured: ID ${platformTenantId} (Type: PLATFORM, Plan: Enterprise)`);
     }

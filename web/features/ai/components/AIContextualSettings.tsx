@@ -26,6 +26,7 @@ import {
   MessageSquareCode,
 } from "lucide-react";
 import { useAiSettings, useUpdateAiSettings } from "@/shared/hooks/use-settings";
+import type { AiSettingsDataType, AiFeatureSettingType } from "@/shared/types/settings";
 
 export interface AIContextualSettingsProps {
   open: boolean;
@@ -61,12 +62,12 @@ export function AIContextualSettings({
   const [enableActionConfirmations, setEnableActionConfirmations] = useState(true);
 
   const [hasChanges, setHasChanges] = useState(false);
-  const [syncedAiData, setSyncedAiData] = useState<any>(null);
+  const [syncedAiData, setSyncedAiData] = useState<AiSettingsDataType | null>(null);
 
   if (aiData?.features && syncedAiData !== aiData && !hasChanges) {
     setSyncedAiData(aiData);
     const getFeat = (id: string, def = true) => {
-      const found = aiData.features.find((f: any) => f.id === id);
+      const found = aiData.features.find((f: AiFeatureSettingType) => f.id === id);
       return found ? found.enabled : def;
     };
     setSmartReply(getFeat("smart_reply", true));

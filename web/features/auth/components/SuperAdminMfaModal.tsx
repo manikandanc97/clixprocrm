@@ -117,6 +117,7 @@ export const SuperAdminMfaModal: React.FC<SuperAdminMfaModalProps> = ({
 
   useEffect(() => {
     if (open) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       initMfaState();
     }
   }, [open, initMfaState]);
@@ -209,6 +210,7 @@ export const SuperAdminMfaModal: React.FC<SuperAdminMfaModalProps> = ({
       qrCodeStr.startsWith("blob:")
     ) {
       return (
+        // eslint-disable-next-line @next/next/no-img-element
         <img
           src={qrCodeStr}
           alt="Two-factor authentication QR Code"
@@ -225,6 +227,7 @@ export const SuperAdminMfaModal: React.FC<SuperAdminMfaModalProps> = ({
       );
     }
     return (
+      // eslint-disable-next-line @next/next/no-img-element
       <img
         src={`data:image/svg+xml;utf-8,${encodeURIComponent(qrCodeStr)}`}
         alt="Two-factor authentication QR Code"

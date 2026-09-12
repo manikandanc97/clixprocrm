@@ -99,11 +99,17 @@ export async function GET(req: NextRequest) {
 
     const json = await backendRes.json();
     return NextResponse.json(json);
-  } catch (err: any) {
+  } catch (err: unknown) {
+    const errorMsg =
+      err instanceof Error
+        ? err.message
+        : typeof err === 'object' && err !== null && 'message' in err
+        ? String((err as { message: unknown }).message)
+        : 'Failed to resolve entitled AI models';
     return NextResponse.json(
       {
         success: false,
-        error: err?.message || 'Failed to resolve entitled AI models',
+        error: errorMsg,
       },
       { status: 500 }
     );

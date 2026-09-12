@@ -41,6 +41,6 @@ export interface SlashCommand {
 export interface ActionConfirmationData {
   toolName: string;
   actionDescription: string;
-  proposedData: Record<string, any>;
+  proposedData: Record<string, unknown>;
   confirmedPrompt: string;
 }

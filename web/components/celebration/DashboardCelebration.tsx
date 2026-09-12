@@ -55,6 +55,7 @@ export function DashboardCelebration() {
     }
 
     // 3. Mount activation overlay and display floating banner
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsActivating(true);
     const tBanner = setTimeout(() => {
       setShowSuccessBanner(true);

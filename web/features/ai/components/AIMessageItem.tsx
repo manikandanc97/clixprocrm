@@ -11,12 +11,31 @@ import {
   ShieldAlert,
   Sparkles,
 } from 'lucide-react';
-import { UIMessage } from '@ai-sdk/react';
 import { toast } from 'sonner';
 import { Button } from '@/shared/ui/button';
 
+interface NormalizedToolInvocation {
+  toolName?: string;
+  hasResult?: boolean;
+  result?: {
+    confirmationRequired?: boolean;
+    proposedData?: Record<string, unknown>;
+    message?: string;
+    [key: string]: unknown;
+  };
+  state?: string;
+  output?: unknown;
+  [key: string]: unknown;
+}
+
 interface AIMessageItemProps {
-  message: UIMessage & { id: string; toolInvocations?: any[] };
+  message: {
+    id: string;
+    role: string;
+    content?: string;
+    toolInvocations?: NormalizedToolInvocation[];
+    parts?: unknown[];
+  };
   onConfirmAction?: (prompt: string) => void;
   isLast?: boolean;
 }
@@ -45,44 +64,67 @@ export function AIMessageItem({ message, onConfirmAction }: AIMessageItemProps) 
   const isUser = message.role === 'user';
 
   // Extract content
-  const content =
-    (message as any).content ||
-    (message.parts?.find((p: any) => p.type === 'text') as any)?.text ||
-    '';
+  let textContent = message.content || '';
+  if (!textContent && Array.isArray(message.parts)) {
+    for (const part of message.parts) {
+      if (typeof part === 'object' && part !== null && 'type' in part) {
+        const p = part as { type: unknown; text?: unknown };
+        if (p.type === 'text' && typeof p.text === 'string') {
+          textContent = p.text;
+          break;
+        }
+      }
+    }
+  }
+  const content = textContent;
   const isError = message.role === 'system' && content.includes('Error:');
 
   // Compatibility for tool invocations
-  const toolInvocations =
+  const toolInvocations: NormalizedToolInvocation[] =
     message.toolInvocations ||
-    message.parts
-      ?.filter(
-        (p: any) =>
-          p.type === 'tool-invocation' ||
-          p.type?.startsWith('tool-') ||
-          p.type === 'dynamic-tool'
-      )
-      .map((p: any) => ({
-        toolName:
-          p.toolName ||
-          (p.type?.startsWith('tool-') ? p.type.replace('tool-', '') : 'unknown'),
-        hasResult:
-          'output' in p ||
-          'result' in p ||
-          p.state === 'output-available' ||
-          p.state === 'output-error',
-        result: p.output || p.result,
-        ...p,
-      })) ||
-    [];
+    (Array.isArray(message.parts)
+      ? message.parts
+          .filter((p): p is Record<string, unknown> => {
+            if (typeof p !== 'object' || p === null || !('type' in p)) return false;
+            const rec = p as { type: unknown };
+            return (
+              typeof rec.type === 'string' &&
+              (rec.type === 'tool-invocation' ||
+                rec.type.startsWith('tool-') ||
+                rec.type === 'dynamic-tool')
+            );
+          })
+          .map((p) => {
+            const typeStr = typeof p.type === 'string' ? p.type : '';
+            const toolName =
+              typeof p.toolName === 'string'
+                ? p.toolName
+                : typeStr.startsWith('tool-')
+                ? typeStr.replace('tool-', '')
+                : 'unknown';
+            const state = typeof p.state === 'string' ? p.state : undefined;
+            const hasResult =
+              'output' in p ||
+              'result' in p ||
+              state === 'output-available' ||
+              state === 'output-error';
+            return {
+              toolName,
+              hasResult,
+              result: (p.output || p.result) as NormalizedToolInvocation['result'],
+              ...p,
+            };
+          })
+      : []);
 
-  const activeTool = toolInvocations.find((t: any) => !t.hasResult);
+  const activeTool = toolInvocations.find((t) => !t.hasResult);
   const loadingStatusText = getToolStatusLabel(
     activeTool?.toolName || toolInvocations[0]?.toolName
   );
 
   // Check if any tool output requested confirmation
   const confirmationReq = toolInvocations.find(
-    (t: any) => t.result && t.result.confirmationRequired === true
+    (t) => t.result && t.result.confirmationRequired === true
   );
 
   const handleCopyText = async () => {
@@ -173,7 +215,7 @@ export function AIMessageItem({ message, onConfirmAction }: AIMessageItemProps) 
             )}
 
             {/* Mutation Confirmation Card if write operation requires confirmation */}
-            {confirmationReq && onConfirmAction && (
+            {confirmationReq?.result && onConfirmAction && (
               <div className="mt-4 p-4 rounded-xl bg-amber-500/10 border border-amber-500/30 space-y-3 animate-in fade-in duration-150">
                 <div className="flex items-center gap-2 text-amber-600 dark:text-amber-400 font-semibold text-xs">
                   <ShieldAlert className="w-4 h-4" />

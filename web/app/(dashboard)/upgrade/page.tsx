@@ -55,6 +55,44 @@ import { motion, AnimatePresence } from "framer-motion";
 
 import { loadRazorpayCheckoutScript } from "@/shared/lib/billing/razorpay-loader";
 
+interface RazorpayPaymentResponse {
+  razorpay_payment_id?: string;
+  razorpay_order_id?: string;
+  razorpay_signature?: string;
+}
+
+interface RazorpayPaymentFailedResponse {
+  error?: {
+    code?: string;
+    description?: string;
+    source?: string;
+    step?: string;
+    reason?: string;
+    metadata?: Record<string, unknown>;
+  };
+}
+
+interface RazorpayCheckoutOptions {
+  key: string;
+  amount: number;
+  currency: string;
+  name: string;
+  description: string;
+  order_id: string;
+  prefill: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  notes: Record<string, string | undefined>;
+  theme: { color: string };
+  modal: {
+    ondismiss: () => void;
+  };
+  handler: (response: RazorpayPaymentResponse) => Promise<void> | void;
+  [key: string]: unknown;
+}
+
 function UpgradePageSkeleton() {
   return (
     <CRMPageContainer>
@@ -279,6 +317,7 @@ export default function UpgradePage() {
       if (match && match.id !== activePlanId) {
         highlightHandledRef.current = true;
         if (match.pricingMode === "CUSTOM") {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setEnterpriseModalOpen(true);
         } else {
           handleOpenUpgradeModal(match);
@@ -341,7 +380,7 @@ export default function UpgradePage() {
       const prefEmail = user?.email || order?.customer?.email || "";
       const prefContact = user?.phone || order?.customer?.contact || "";
 
-      const options: any = {
+      const options: RazorpayCheckoutOptions = {
         key: order.keyId,
         amount: order.amount,
         currency: order.currency || "INR",
@@ -366,22 +405,23 @@ export default function UpgradePage() {
             toast.info("Payment was cancelled. Your subscription plan remains unchanged.");
           },
         },
-        handler: async (response: any) => {
+        handler: async (response: RazorpayPaymentResponse) => {
           try {
             toast.loading("Verifying payment with gateway...", { id: "payment-verify" });
             await verifyPayment({
-              orderId: response.razorpay_order_id || order.orderId,
-              paymentId: response.razorpay_payment_id,
-              signature: response.razorpay_signature,
+              orderId: response.razorpay_order_id || order.orderId || "",
+              paymentId: response.razorpay_payment_id || "",
+              signature: response.razorpay_signature || "",
               planId: targetPlan.id,
               billingCycle,
               seats,
             });
             toast.dismiss("payment-verify");
             setUpgradeSuccess(true);
-          } catch (vErr: any) {
+          } catch (vErr: unknown) {
             toast.dismiss("payment-verify");
-            const msg = vErr?.response?.data?.message || "Payment verification failed. Your plan has not changed.";
+            const errObj = vErr as { response?: { data?: { message?: string } } } | undefined;
+            const msg = errObj?.response?.data?.message || "Payment verification failed. Your plan has not changed.";
             console.error("[Checkout] Payment verification error:", msg);
             toast.error(msg);
           } finally {
@@ -390,18 +430,23 @@ export default function UpgradePage() {
         },
       };
 
-      const rzp = new (window as any).Razorpay(options);
+      if (!window.Razorpay) {
+        throw new Error("Razorpay checkout script failed to initialize.");
+      }
+      const rzp = new window.Razorpay(options);
 
-      rzp.on("payment.failed", (failResponse: any) => {
+      rzp.on("payment.failed", (failResponse: unknown) => {
         setIsProcessingCheckout(false);
-        const reason = failResponse?.error?.description || "Payment failed. Your subscription plan remains unchanged.";
+        const errObj = failResponse as RazorpayPaymentFailedResponse | undefined;
+        const reason = errObj?.error?.description || "Payment failed. Your subscription plan remains unchanged.";
         console.warn("[Checkout] Payment failed on gateway:", reason);
         toast.error(reason);
       });
 
       rzp.open();
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Failed to process payment checkout.";
+    } catch (err: unknown) {
+      const errObj = err as { response?: { data?: { message?: string } }; message?: string } | undefined;
+      const msg = errObj?.response?.data?.message || errObj?.message || "Failed to process payment checkout.";
       console.error("[Checkout] Exception during checkout initiation:", msg);
       toast.error(msg);
       setIsProcessingCheckout(false);

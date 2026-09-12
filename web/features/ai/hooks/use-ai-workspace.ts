@@ -60,11 +60,15 @@ export const DEFAULT_WORKSPACE_MODELS: ModelOption[] = [
   },
 ];
 
-export function extractMessageText(m: any): string {
-  if (!m) return '';
-  if (typeof m.content === 'string' && m.content.trim()) return m.content;
-  if (m.parts && Array.isArray(m.parts)) {
-    const textPart = m.parts.find((p: any) => p.type === 'text' && p.text);
+export function extractMessageText(m: unknown): string {
+  if (!m || typeof m !== 'object') return '';
+  const candidate = m as { content?: unknown; parts?: unknown };
+  if (typeof candidate.content === 'string' && candidate.content.trim()) return candidate.content;
+  if (Array.isArray(candidate.parts)) {
+    const textPart = candidate.parts.find(
+      (p: unknown): p is { type: string; text?: string } =>
+        typeof p === 'object' && p !== null && 'type' in p && (p as { type: string }).type === 'text'
+    );
     if (textPart && typeof textPart.text === 'string') return textPart.text;
   }
   return '';
@@ -106,16 +110,17 @@ export function useAIWorkspace() {
 
   const isSuperAdmin = useMemo(() => {
     const norm = (auth?.user?.role || '').toUpperCase().trim().replace(/[\s_]+/g, '');
+    const userWithSuperAdmin = auth?.user as { isSuperAdmin?: boolean } | null | undefined;
     return (
       norm === 'SUPERADMIN' ||
-      (auth?.user as any)?.isSuperAdmin === true ||
+      userWithSuperAdmin?.isSuperAdmin === true ||
       (pathname ? pathname.startsWith('/super-admin') : false)
     );
   }, [auth?.user, pathname]);
 
   // Load URL query context on initial mount or searchParams change
   const contextParam = searchParams.get('context');
-  const typeParam = searchParams.get('type') as any;
+  const typeParam = (searchParams.get('type') as CrmContextData['type']) || 'general';
   const idParam = searchParams.get('id');
 
   const [prevContextKey, setPrevContextKey] = useState<string | null>(() =>
@@ -141,6 +146,7 @@ export function useAIWorkspace() {
       if (stored) {
         const parsed = JSON.parse(stored);
         if (Array.isArray(parsed) && parsed.length > 0) {
+          // eslint-disable-next-line react-hooks/set-state-in-effect
           setSessions(parsed);
           setCurrentSessionId(parsed[0].id);
         }
@@ -192,7 +198,13 @@ export function useAIWorkspace() {
               currentPlanId === 'enterprise' ||
               currentPlanId === 'pro_plus';
 
-            const rawModels: any[] = Array.isArray(json.data.models) ? json.data.models : [];
+            interface BackendModelItem {
+              modelKey?: string;
+              id?: string;
+              displayName?: string;
+              description?: string;
+            }
+            const rawModels: BackendModelItem[] = Array.isArray(json.data.models) ? json.data.models : [];
 
             // Map canonical models dynamically with live backend data and entitlements
             const mappedModels: ModelOption[] = DEFAULT_WORKSPACE_MODELS.map((canonical) => {
@@ -231,15 +243,16 @@ export function useAIWorkspace() {
   }, [isSuperAdmin]);
 
   // Setup transport fetch handler
-  const customFetch = useCallback(async (url: any, options: any) => {
+  const customFetch = useCallback(async (url: RequestInfo | URL, options?: RequestInit) => {
     try {
-      const fullUrl = url.startsWith('http')
-        ? url
+      const urlStr = typeof url === 'string' ? url : url.toString();
+      const fullUrl = urlStr.startsWith('http')
+        ? urlStr
         : typeof window !== 'undefined'
-        ? `${window.location.origin}${url.startsWith('/') ? url : `/${url}`}`
-        : url;
+        ? `${window.location.origin}${urlStr.startsWith('/') ? urlStr : `/${urlStr}`}`
+        : urlStr;
 
-      const headers = new Headers(options.headers || {});
+      const headers = new Headers(options?.headers || {});
 
       if (typeof window !== 'undefined') {
         const currency = localStorage.getItem('orbit_currency') || 'INR';
@@ -257,8 +270,8 @@ export function useAIWorkspace() {
       }
 
       // Inject selected model and CRM context if present
-      let payload = options.body;
-      if (options.body) {
+      let payload = options?.body;
+      if (options?.body) {
         try {
           const parsed = typeof options.body === 'string' ? JSON.parse(options.body) : options.body;
           
@@ -274,7 +287,7 @@ export function useAIWorkspace() {
       }
 
       const response = await fetch(fullUrl, {
-        method: options.method,
+        method: options?.method,
         body: payload,
         headers: headers,
       });
@@ -286,7 +299,7 @@ export function useAIWorkspace() {
       }
 
       return response;
-    } catch (err: any) {
+    } catch (err: unknown) {
       console.error('[ClixPro AI] Connection error:', err);
       throw err;
     }
@@ -330,6 +343,7 @@ export function useAIWorkspace() {
         ? `${firstText.slice(0, 40)}...`
         : firstText || 'New Conversation';
 
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setSessions((prevSessions) => {
       let updated: ChatSession[];
       if (!currentSessionId) {

@@ -34,7 +34,7 @@ async function callCrmApi(
   method = 'GET',
   body?: unknown,
   query?: Record<string, string | number | boolean | undefined | null>
-): Promise<any> {
+): Promise<unknown> {
   const cleanBase = CRM_API_BASE_URL.replace(/\/+$/, '');
   const cleanPath = endpoint.startsWith('/') ? endpoint : `/${endpoint}`;
   const url = new URL(`${cleanBase}${cleanPath}`);
@@ -106,9 +106,9 @@ async function callCrmApi(
 
     const data = await res.json();
     return data?.data !== undefined ? data.data : data;
-  } catch (err: any) {
+  } catch (err: unknown) {
     clearTimeout(timeoutId);
-    if (err.name === 'AbortError') {
+    if (err instanceof Error && err.name === 'AbortError') {
       return { error: 'Request to CRM service timed out. Please try again.' };
     }
     return { error: 'Could not connect to CRM backend service. Please check your network connection.' };
@@ -183,7 +183,19 @@ export function getMcpTools(context: McpUserContext) {
           .boolean()
           .describe('Explicit confirmation must be true to authorize CRM lead creation'),
       }),
-      execute: async (args: any) => {
+      execute: async (args: {
+        name: string;
+        email: string;
+        company?: string;
+        phone?: string;
+        source?: string;
+        stage?: 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'NEGOTIATION' | 'WON' | 'LOST';
+        priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+        value?: number;
+        expectedCloseDate?: string;
+        tags?: string[];
+        confirmed: boolean;
+      }) => {
         if (args.confirmed !== true) {
           return {
             confirmationRequired: true,
@@ -222,7 +234,19 @@ export function getMcpTools(context: McpUserContext) {
           .boolean()
           .describe('Explicit confirmation must be true to authorize CRM lead update'),
       }),
-      execute: async (args: any) => {
+      execute: async (args: {
+        id: string;
+        name?: string;
+        company?: string;
+        email?: string;
+        phone?: string;
+        stage?: 'NEW' | 'CONTACTED' | 'QUALIFIED' | 'PROPOSAL' | 'NEGOTIATION' | 'WON' | 'LOST';
+        priority?: 'LOW' | 'MEDIUM' | 'HIGH' | 'URGENT';
+        value?: number;
+        expectedCloseDate?: string;
+        notes?: string;
+        confirmed: boolean;
+      }) => {
         if (args.confirmed !== true) {
           return {
             confirmationRequired: true,
@@ -282,7 +306,14 @@ export function getMcpTools(context: McpUserContext) {
           .boolean()
           .describe('Explicit confirmation must be true to authorize CRM customer creation'),
       }),
-      execute: async (args: any) => {
+      execute: async (args: {
+        name: string;
+        company: string;
+        email?: string;
+        revenue?: number;
+        status?: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'VIP';
+        confirmed: boolean;
+      }) => {
         if (args.confirmed !== true) {
           return {
             confirmationRequired: true,
@@ -315,7 +346,15 @@ export function getMcpTools(context: McpUserContext) {
           .boolean()
           .describe('Explicit confirmation must be true to authorize CRM customer update'),
       }),
-      execute: async (args: any) => {
+      execute: async (args: {
+        id: string;
+        name?: string;
+        company?: string;
+        email?: string;
+        revenue?: number;
+        status?: 'ACTIVE' | 'INACTIVE' | 'PENDING' | 'VIP';
+        confirmed: boolean;
+      }) => {
         if (args.confirmed !== true) {
           return {
             confirmationRequired: true,

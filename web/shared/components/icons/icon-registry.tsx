@@ -182,7 +182,7 @@ export type IconName =
 export interface AppIconProps {
   name?: string;
   href?: string;
-  icon?: LucideIcon | React.ComponentType<{ className?: string; size?: number; [key: string]: any }>;
+  icon?: LucideIcon | React.ComponentType<{ className?: string; size?: number; [key: string]: unknown }>;
   size?: number;
   className?: string;
   active?: boolean;
@@ -574,6 +574,7 @@ export function AppIcon({
       return;
     }
     if (triggerAnimation !== undefined && triggerAnimation !== 0) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       playOneShotAnimation();
     }
   }, [triggerAnimation, playOneShotAnimation]);
@@ -599,6 +600,7 @@ export function AppIcon({
       }
     } else {
       hasAnimatedForCurrentHoverRef.current = false;
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       stopCurrentAnimation();
     }
   }, [isHovered, disableHover, playOneShotAnimation, stopCurrentAnimation]);

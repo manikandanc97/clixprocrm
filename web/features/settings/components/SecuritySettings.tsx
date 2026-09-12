@@ -48,6 +48,16 @@ import {
 import { exportUserData } from "@/shared/lib/api/privacy.api";
 import client from "@/shared/lib/api/client";
 import { toast } from "sonner";
+import type { NotificationSettingsDataType } from "@/shared/types/settings";
+
+function extractErrorMessage(err: unknown, fallback: string): string {
+  if (err instanceof Error) return err.message;
+  if (typeof err === "object" && err !== null) {
+    const candidate = err as { response?: { data?: { message?: string } }; message?: string };
+    return candidate.response?.data?.message || candidate.message || fallback;
+  }
+  return fallback;
+}
 
 export default function SecuritySettings() {
   const queryClient = useQueryClient();
@@ -105,7 +115,7 @@ export default function SecuritySettings() {
   } = useQuery({
     queryKey: ["notification-settings"],
     queryFn: async () => {
-      const res = await client.get<{ success: boolean; data: any }>("/crm/settings/notifications");
+      const res = await client.get<{ success: boolean; data: NotificationSettingsDataType }>("/crm/settings/notifications");
       return res.data.data;
     },
     staleTime: 30000,
@@ -118,17 +128,15 @@ export default function SecuritySettings() {
       toast.success(data?.message || "Organization MFA policy updated successfully");
       void queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
     },
-    onError: (err: any) => {
-      toast.error(
-        err?.response?.data?.message || err?.message || "Failed to update organization MFA policy"
-      );
+    onError: (err: unknown) => {
+      toast.error(extractErrorMessage(err, "Failed to update organization MFA policy"));
     },
   });
 
   // Notification Preference Mutation
   const notifMutation = useMutation({
     mutationFn: async (enabled: boolean) => {
-      const res = await client.patch<{ success: boolean; data: any }>("/crm/settings/notifications", {
+      const res = await client.patch<{ success: boolean; data: NotificationSettingsDataType }>("/crm/settings/notifications", {
         securityAlerts: enabled,
       });
       return res.data.data;
@@ -137,10 +145,8 @@ export default function SecuritySettings() {
       toast.success("Security notification preference updated");
       void queryClient.invalidateQueries({ queryKey: ["notification-settings"] });
     },
-    onError: (err: any) => {
-      toast.error(
-        err?.response?.data?.message || err?.message || "Failed to update notification settings"
-      );
+    onError: (err: unknown) => {
+      toast.error(extractErrorMessage(err, "Failed to update notification settings"));
     },
   });
 
@@ -175,8 +181,8 @@ export default function SecuritySettings() {
       setGeneratedCodes(recoveryRes.recoveryCodes || []);
 
       setShowEnrollModal(true);
-    } catch (err: any) {
-      const msg = err?.message || "Could not start 2FA setup. Please try again.";
+    } catch (err: unknown) {
+      const msg = extractErrorMessage(err, "Could not start 2FA setup. Please try again.");
       setEnrollError(msg);
       toast.error(msg);
     } finally {
@@ -215,8 +221,8 @@ export default function SecuritySettings() {
       toast.success("Two-Factor Authentication activated successfully!");
       await queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
       setShowEnrollModal(false);
-    } catch (err: any) {
-      setEnrollError(err?.message || "Verification failed. Please check the code in your authenticator app.");
+    } catch (err: unknown) {
+      setEnrollError(extractErrorMessage(err, "Verification failed. Please check the code in your authenticator app."));
     } finally {
       setEnrollLoading(false);
     }
@@ -232,8 +238,8 @@ export default function SecuritySettings() {
       toast.success("Two-Factor Authentication disabled.");
       await queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
       setShowDisableModal(false);
-    } catch (err: any) {
-      const msg = err?.response?.data?.message || err?.message || "Failed to disable 2FA.";
+    } catch (err: unknown) {
+      const msg = extractErrorMessage(err, "Failed to disable 2FA.");
       setDisableError(msg);
       toast.error(msg);
     } finally {
@@ -251,8 +257,8 @@ export default function SecuritySettings() {
       setShowRecoveryModal(true);
       toast.success("Fresh backup recovery codes generated.");
       await queryClient.invalidateQueries({ queryKey: ["mfa-status"] });
-    } catch (err: any) {
-      toast.error(err?.response?.data?.message || err?.message || "Failed to generate backup codes");
+    } catch (err: unknown) {
+      toast.error(extractErrorMessage(err, "Failed to generate backup codes"));
     } finally {
       setEnrollLoading(false);
     }
@@ -277,9 +283,9 @@ export default function SecuritySettings() {
       downloadAnchor.remove();
 
       toast.success("Personal data archive exported successfully.");
-    } catch (err: any) {
+    } catch (err: unknown) {
       toast.error(
-        err?.response?.data?.message || err?.message || "Failed to export personal data archive."
+        extractErrorMessage(err, "Failed to export personal data archive.")
       );
     } finally {
       setIsExporting(false);
@@ -661,6 +667,7 @@ export default function SecuritySettings() {
                     {enrollData.qrCode.startsWith("data:") ||
                     enrollData.qrCode.startsWith("http://") ||
                     enrollData.qrCode.startsWith("https://") ? (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={enrollData.qrCode}
                         alt="2FA QR Code"
@@ -672,6 +679,7 @@ export default function SecuritySettings() {
                         dangerouslySetInnerHTML={{ __html: enrollData.qrCode }}
                       />
                     ) : (
+                      // eslint-disable-next-line @next/next/no-img-element
                       <img
                         src={`data:image/svg+xml;utf-8,${encodeURIComponent(enrollData.qrCode)}`}
                         alt="2FA QR Code"

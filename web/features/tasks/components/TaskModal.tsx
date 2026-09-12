@@ -266,6 +266,7 @@ export const TaskModal: React.FC<TaskModalProps> = ({
 
   useEffect(() => {
     if (isOpen) {
+      // eslint-disable-next-line react-hooks/set-state-in-effect
       resetForm();
     }
   }, [isOpen, resetForm]);
