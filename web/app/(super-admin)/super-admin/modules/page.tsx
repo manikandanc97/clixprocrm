@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState, useMemo, useCallback } from "react";
+import { useEffect, useState, useMemo, useCallback, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { SUPER_ADMIN_NAV_QUERY_KEY } from "@/shared/hooks/use-super-admin-navigation";
 import {
@@ -245,11 +245,18 @@ export default function SuperAdminModulesPage() {
   }, [loadTenantModules, loadPlatformModules]);
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadAllModules();
-    }, 0);
+    let isCancelled = false;
+    const run = async () => {
+      try {
+        await loadAllModules();
+      } catch {
+        // Errors handled within loadAllModules
+      }
+    };
+    run();
 
     const handleAal2Verified = () => {
+      if (isCancelled) return;
       setAal2Required(false);
       setLoadError(null);
       loadAllModules();
@@ -257,7 +264,7 @@ export default function SuperAdminModulesPage() {
 
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
-      clearTimeout(timer);
+      isCancelled = true;
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, [loadAllModules]);
@@ -287,22 +294,18 @@ export default function SuperAdminModulesPage() {
   }, [activeScope, rawCurrentList.length]);
 
   // Handle "+ Add" query param from deep link
+  const addParamHandledRef = useRef(false);
   useEffect(() => {
-    if (searchParams.get("add") === "true") {
-      const timer = setTimeout(() => {
-        handleOpenCreate();
-      }, 0);
-      return () => clearTimeout(timer);
+    if (searchParams.get("add") === "true" && !addParamHandledRef.current) {
+      addParamHandledRef.current = true;
+      handleOpenCreate();
+      if (typeof window !== "undefined") {
+        const url = new URL(window.location.href);
+        url.searchParams.delete("add");
+        window.history.replaceState({}, "", url.pathname + (url.search ? url.search : ""));
+      }
     }
   }, [searchParams, handleOpenCreate]);
-
-  // Reset pagination on filter, search, or tab change
-  useEffect(() => {
-    const timer = setTimeout(() => {
-      setCurrentPage(1);
-    }, 0);
-    return () => clearTimeout(timer);
-  }, [search, groupFilter, statusFilter, activeScope]);
 
   // Available groups for active tab
   const availableGroups = useMemo(() => {
@@ -762,6 +765,7 @@ export default function SuperAdminModulesPage() {
               setGroupFilter("ALL");
               setStatusFilter("ALL");
               setSearch("");
+              setCurrentPage(1);
             }}
             className={cn(
               "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer",
@@ -779,6 +783,7 @@ export default function SuperAdminModulesPage() {
               setGroupFilter("ALL");
               setStatusFilter("ALL");
               setSearch("");
+              setCurrentPage(1);
             }}
             className={cn(
               "px-4 py-2 rounded-lg text-xs font-bold transition-all flex items-center gap-2 cursor-pointer",
@@ -810,7 +815,10 @@ export default function SuperAdminModulesPage() {
             {/* Group Filter */}
             <select
               value={groupFilter}
-              onChange={(e) => setGroupFilter(e.target.value)}
+              onChange={(e) => {
+                setGroupFilter(e.target.value);
+                setCurrentPage(1);
+              }}
               className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="ALL">All Groups</option>
@@ -824,7 +832,10 @@ export default function SuperAdminModulesPage() {
             {/* Status Filter */}
             <select
               value={statusFilter}
-              onChange={(e) => setStatusFilter(e.target.value as any)}
+              onChange={(e) => {
+                setStatusFilter(e.target.value as any);
+                setCurrentPage(1);
+              }}
               className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
               <option value="ALL">All Statuses</option>
@@ -839,7 +850,10 @@ export default function SuperAdminModulesPage() {
               </div>
               <input
                 value={search}
-                onChange={(e) => setSearch(e.target.value)}
+                onChange={(e) => {
+                  setSearch(e.target.value);
+                  setCurrentPage(1);
+                }}
                 placeholder={
                   activeScope === "tenant"
                     ? "Search modules by name, route..."
@@ -850,7 +864,10 @@ export default function SuperAdminModulesPage() {
               {search && (
                 <button
                   type="button"
-                  onClick={() => setSearch("")}
+                  onClick={() => {
+                    setSearch("");
+                    setCurrentPage(1);
+                  }}
                   className="absolute right-2.5 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground"
                 >
                   <X className="w-3.5 h-3.5" />

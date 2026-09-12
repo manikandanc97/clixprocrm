@@ -1,7 +1,7 @@
 "use client";
 
 import { useSearchParams, usePathname } from "next/navigation";
-import { useEffect, useCallback } from "react";
+import { useEffect, useCallback, useRef } from "react";
 
 export interface UseEmployeesUrlStateProps {
   onOpenAddModal?: () => void;
@@ -18,6 +18,7 @@ export function useEmployeesUrlState(props?: UseEmployeesUrlStateProps): UseEmpl
 
   const newParam = searchParams.get("new");
   const onOpenAddModal = props?.onOpenAddModal;
+  const newHandledRef = useRef(false);
 
   const clearNewParam = useCallback(() => {
     if (typeof window !== "undefined") {
@@ -30,12 +31,10 @@ export function useEmployeesUrlState(props?: UseEmployeesUrlStateProps): UseEmpl
   }, [pathname]);
 
   useEffect(() => {
-    if (newParam === "true") {
-      const timer = setTimeout(() => {
-        onOpenAddModal?.();
-        clearNewParam();
-      }, 0);
-      return () => clearTimeout(timer);
+    if (newParam === "true" && !newHandledRef.current) {
+      newHandledRef.current = true;
+      onOpenAddModal?.();
+      clearNewParam();
     }
   }, [newParam, onOpenAddModal, clearNewParam]);
 

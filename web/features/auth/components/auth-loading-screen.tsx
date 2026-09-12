@@ -66,7 +66,7 @@ export default function AuthLoadingScreen({
   error: propError,
   onRetry,
   onSignOut,
-  timeoutMs = 12000,
+  timeoutMs = 25000,
 }: AuthLoadingScreenProps) {
   const prefersReducedMotion = useReducedMotion();
 

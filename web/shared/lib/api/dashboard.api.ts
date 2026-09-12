@@ -2,10 +2,12 @@
  * @file shared/lib/api/dashboard.api.ts
  * Dashboard-related API endpoints.
  */
+import axios from "axios";
 import client from "./client";
 import { ApiResponseType } from "@/shared/types/api";
 import { DashboardDataType } from "@/shared/types/dashboard";
 import {
+  ApiNotification,
   HotLeadsDataType,
   NotificationsDataType,
   AiInsightsDataType,
@@ -19,11 +21,15 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
       throw new Error(response.data?.message || "Invalid API response.");
     }
     return response.data.data;
-  } catch (error: any) {
-    const msg = error.response?.data?.message;
-    if (msg) {
-      if (typeof msg === 'string') throw new Error(msg);
-      else if (typeof msg === 'object') throw new Error(msg.message || JSON.stringify(msg));
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const msg = error.response?.data?.message;
+      if (msg) {
+        if (typeof msg === 'string') throw new Error(msg);
+        else if (typeof msg === 'object' && msg !== null) {
+          throw new Error((msg as { message?: string }).message || JSON.stringify(msg));
+        }
+      }
     }
     throw error;
   }
@@ -95,7 +101,7 @@ export function clearAllReadNotifications() {
 }
 
 export function createTestNotification() {
-  return unwrapResponse<any>(client.post("/crm/notifications/test"));
+  return unwrapResponse<ApiNotification>(client.post("/crm/notifications/test"));
 }
 
 export function fetchAiInsights() {

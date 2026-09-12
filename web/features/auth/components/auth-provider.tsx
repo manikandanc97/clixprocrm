@@ -41,6 +41,9 @@ type AuthUser = {
   dashboardWidgets?: string[];
   analyticsVisibility?: RoleAccess["analyticsVisibility"];
   description?: string;
+  isSuperAdmin?: boolean;
+  isOrgOwner?: boolean;
+  isOrgAdmin?: boolean;
 };
 
 export type AuthInitStage =

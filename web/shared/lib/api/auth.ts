@@ -41,6 +41,9 @@ export interface AuthUser {
   routes?: string[];
   dashboardWidgets?: string[];
   analyticsVisibility?: "full" | "team" | "self" | "limited" | "hr";
+  isSuperAdmin?: boolean;
+  isOrgOwner?: boolean;
+  isOrgAdmin?: boolean;
 }
 
 interface AuthResponse {
@@ -250,13 +253,30 @@ export const logoutUser = async () => {
     localStorage.removeItem("clixpro_remember_me");
     sessionStorage.removeItem("clixpro_session_active");
   }
+  if (typeof document !== "undefined") {
+    const cookies = document.cookie.split(";");
+    for (const cookie of cookies) {
+      const eqPos = cookie.indexOf("=");
+      const name = eqPos > -1 ? cookie.slice(0, eqPos).trim() : cookie.trim();
+      if (name) {
+        document.cookie = `${name}=; Path=/; Expires=Thu, 01 Jan 1970 00:00:01 GMT; Max-Age=0; SameSite=Lax`;
+      }
+    }
+  }
   try {
-    await client.post('/auth/logout');
+    await client.post('/auth/logout', {});
   } catch {
     // Ignore server logout errors if token already invalidated
   }
-  const supabase = createClient();
-  await supabase.auth.signOut();
+  try {
+    const supabase = createClient();
+    await Promise.race([
+      supabase.auth.signOut(),
+      new Promise((resolve) => setTimeout(resolve, 1500)),
+    ]);
+  } catch {
+    // Ignore supabase signOut network issues
+  }
 };
 
 export const updateProfile = async (data: Record<string, ReturnType<typeof JSON.parse>>) => {
@@ -280,7 +300,7 @@ export const uploadUserAvatar = async (
       data: {
         success: boolean;
         avatar: string;
-        user: any;
+        user: AuthUser;
       };
     }>("/auth/avatar", {
       fileData: base64Data,
@@ -294,7 +314,7 @@ export const uploadUserAvatar = async (
     data: {
       success: boolean;
       avatar: string;
-      user: any;
+      user: AuthUser;
     };
   }>("/auth/avatar", file);
   return response.data?.data;

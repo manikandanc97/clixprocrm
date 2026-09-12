@@ -62,7 +62,12 @@ function initBrowserClient() {
 
           cookiesToSet.forEach(({ name, value, options }) => {
             const cookieOpts = { ...options };
-            if (cookieOpts.maxAge === 0) {
+            const isDeleting =
+              cookieOpts.maxAge === 0 ||
+              value === '' ||
+              (cookieOpts.expires && new Date(cookieOpts.expires).getTime() <= Date.now());
+
+            if (isDeleting) {
               // Explicit cookie removal
               cookieOpts.maxAge = 0;
             } else if (isRemembered) {

@@ -18,6 +18,7 @@ import {
   InvoiceSettingsData,
 } from "@/shared/lib/api/invoices.api";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/shared/lib/api/error";
 
 export function useInvoices(params?: {
   page?: number;
@@ -85,8 +86,8 @@ export function useCreateInvoice() {
       queryClient.invalidateQueries({ queryKey: ["reports"] });
       toast.success("Invoice created successfully");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to create invoice");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to create invoice"));
     },
   });
 }
@@ -103,8 +104,8 @@ export function useUpdateInvoice() {
       queryClient.invalidateQueries({ queryKey: ["dashboardData"] });
       toast.success("Invoice updated successfully");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to update invoice");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to update invoice"));
     },
   });
 }
@@ -118,8 +119,8 @@ export function useDeleteInvoice() {
       queryClient.invalidateQueries({ queryKey: ["revenue"] });
       toast.success("Invoice deleted successfully");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to delete invoice");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to delete invoice"));
     },
   });
 }
@@ -136,8 +137,8 @@ export function useRecordPayment() {
       queryClient.invalidateQueries({ queryKey: ["revenue"] });
       toast.success("Payment recorded successfully");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to record payment");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to record payment"));
     },
   });
 }
@@ -153,8 +154,8 @@ export function useDeletePayment() {
       queryClient.invalidateQueries({ queryKey: ["revenue"] });
       toast.success("Payment deleted successfully");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to delete payment");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to delete payment"));
     },
   });
 }
@@ -164,13 +165,13 @@ export function useSendInvoiceEmail() {
   return useMutation({
     mutationFn: ({ id, payload }: { id: string; payload?: SendInvoicePayload }) =>
       sendInvoiceEmail(id, payload),
-    onSuccess: (data: any, { id }) => {
+    onSuccess: (data: { message?: string } | undefined, { id }) => {
       queryClient.invalidateQueries({ queryKey: ["crm-invoices"] });
       queryClient.invalidateQueries({ queryKey: ["crm-invoice-detail", id] });
       toast.success(data?.message || "Invoice email sent successfully");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to send invoice email");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to send invoice email"));
     },
   });
 }
@@ -183,8 +184,8 @@ export function useUpdateInvoiceSettings() {
       queryClient.invalidateQueries({ queryKey: ["crm-invoice-settings"] });
       toast.success("Invoice settings updated successfully");
     },
-    onError: (error: any) => {
-      toast.error(error?.response?.data?.message || error?.message || "Failed to update settings");
+    onError: (error: unknown) => {
+      toast.error(getApiErrorMessage(error, "Failed to update settings"));
     },
   });
 }

@@ -135,7 +135,7 @@ export interface PlatformOverviewData {
     actor: string;
     actorEmail: string | null;
     tenantId: string | null;
-    details: any;
+    details: Record<string, unknown>;
     createdAt: string;
   }>;
 }
@@ -281,10 +281,27 @@ export interface PlatformAuditLog {
   actor: string;
   actorEmail: string | null;
   targetUser: string | null;
-  details: any;
+  details: Record<string, unknown>;
   ipAddress: string | null;
   userAgent: string | null;
   createdAt: string;
+}
+
+export interface PlatformOrganizationDetail extends PlatformOrganization {
+  taxId?: string | null;
+  address?: string | null;
+  logo?: string | null;
+  counts?: Record<string, number>;
+  members?: Array<{
+    membershipId: string;
+    userId: string;
+    name: string;
+    email: string;
+    phone?: string;
+    status: string;
+    role: string;
+    joinedAt: string;
+  }>;
 }
 
 export const fetchPlatformOverview = async (): Promise<PlatformOverviewData> => {
@@ -314,8 +331,8 @@ export const fetchPlatformOrganizations = async (params?: {
   return response.data.data;
 };
 
-export const fetchPlatformOrganizationDetails = async (id: string) => {
-  const response = await client.get<{ success: boolean; data: any }>(
+export const fetchPlatformOrganizationDetails = async (id: string): Promise<PlatformOrganizationDetail> => {
+  const response = await client.get<{ success: boolean; data: PlatformOrganizationDetail }>(
     `/super-admin/organizations/${id}`
   );
   return response.data.data;
@@ -327,8 +344,8 @@ export const createPlatformOrganization = async (data: {
   plan?: string;
   currency?: string;
   timezone?: string;
-}) => {
-  const response = await client.post<{ success: boolean; data: any; message: string }>(
+}): Promise<{ success: boolean; data: PlatformOrganization; message: string }> => {
+  const response = await client.post<{ success: boolean; data: PlatformOrganization; message: string }>(
     "/super-admin/organizations",
     data
   );
@@ -338,8 +355,8 @@ export const createPlatformOrganization = async (data: {
 export const updatePlatformOrganization = async (
   id: string,
   data: Partial<PlatformOrganization>
-) => {
-  const response = await client.put<{ success: boolean; data: any; message: string }>(
+): Promise<{ success: boolean; data: PlatformOrganization; message: string }> => {
+  const response = await client.put<{ success: boolean; data: PlatformOrganization; message: string }>(
     `/super-admin/organizations/${id}`,
     data
   );
@@ -350,16 +367,16 @@ export const updateOrganizationStatus = async (
   id: string,
   status: "ACTIVE" | "SUSPENDED",
   reason?: string
-) => {
-  const response = await client.patch<{ success: boolean; data: any; message: string }>(
+): Promise<{ success: boolean; data: PlatformOrganization; message: string }> => {
+  const response = await client.patch<{ success: boolean; data: PlatformOrganization; message: string }>(
     `/super-admin/organizations/${id}/status`,
     { status, reason }
   );
   return response.data;
 };
 
-export const deletePlatformOrganization = async (id: string) => {
-  const response = await client.delete<{ success: boolean; data: any; message: string }>(
+export const deletePlatformOrganization = async (id: string): Promise<{ success: boolean; data: { id: string }; message: string }> => {
+  const response = await client.delete<{ success: boolean; data: { id: string }; message: string }>(
     `/super-admin/organizations/${id}`
   );
   return response.data;
@@ -388,32 +405,39 @@ export const fetchPlatformUsers = async (params?: {
 export const updatePlatformUserStatus = async (
   id: string,
   status: "ACTIVE" | "INACTIVE" | "SUSPENDED"
-) => {
-  const response = await client.patch<{ success: boolean; data: any; message: string }>(
+): Promise<{ success: boolean; data: PlatformUser; message: string }> => {
+  const response = await client.patch<{ success: boolean; data: PlatformUser; message: string }>(
     `/super-admin/users/${id}/status`,
     { status }
   );
   return response.data;
 };
 
-export const toggleSuperAdminRole = async (id: string, isSuperAdmin: boolean) => {
-  const response = await client.patch<{ success: boolean; data: any; message: string }>(
+export const toggleSuperAdminRole = async (
+  id: string,
+  isSuperAdmin: boolean
+): Promise<{ success: boolean; data: PlatformUser; message: string }> => {
+  const response = await client.patch<{ success: boolean; data: PlatformUser; message: string }>(
     `/super-admin/users/${id}/super-admin`,
     { isSuperAdmin }
   );
   return response.data;
 };
 
-export const transferSuperAdminRole = async (targetUserId: string) => {
-  const response = await client.post<{ success: boolean; data: any; message: string }>(
+export const transferSuperAdminRole = async (
+  targetUserId: string
+): Promise<{ success: boolean; data: PlatformUser; message: string }> => {
+  const response = await client.post<{ success: boolean; data: PlatformUser; message: string }>(
     "/super-admin/users/transfer-super-admin",
     { targetUserId }
   );
   return response.data;
 };
 
-export const deletePlatformUser = async (id: string) => {
-  const response = await client.delete<{ success: boolean; data: any; message: string }>(
+export const deletePlatformUser = async (
+  id: string
+): Promise<{ success: boolean; data: { id: string }; message: string }> => {
+  const response = await client.delete<{ success: boolean; data: { id: string }; message: string }>(
     `/super-admin/users/${id}`
   );
   return response.data;
@@ -620,7 +644,7 @@ export interface SecurityAlertItem {
   status: "OPEN" | "ACKNOWLEDGED" | "RESOLVED";
   resolvedAt: string | null;
   resolvedBy: string | null;
-  metadata: any;
+  metadata: Record<string, unknown>;
   createdAt: string;
   updatedAt: string;
 }
@@ -738,7 +762,7 @@ export const forcePasswordResetUser = async (userId: string, reason: string) => 
 };
 
 export const emergencyRevokeUser = async (userId: string, reason: string) => {
-  const response = await client.post<{ success: boolean; message: string; data?: any }>(
+  const response = await client.post<{ success: boolean; message: string; data?: unknown }>(
     `/super-admin/security/emergency/revoke-user/${userId}`,
     { reason }
   );
@@ -817,7 +841,7 @@ export interface ComponentHealthInfo {
   status: "HEALTHY" | "DEGRADED" | "CRITICAL" | "UNKNOWN";
   latencyMs?: number;
   message?: string;
-  details?: Record<string, any>;
+  details?: Record<string, unknown>;
 }
 
 export interface SecurityHealthData {
@@ -883,16 +907,38 @@ export const fetchSecOpsMetrics = async (
   return response.data.data;
 };
 
-export const fetchSecOpsTimeline = async (limit: number = 25): Promise<any[]> => {
-  const response = await client.get<{ success: boolean; data: any[] }>(
+export interface SecOpsTimelineEvent {
+  id: string;
+  timestamp: string;
+  type: string;
+  severity: "INFO" | "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
+  title: string;
+  description: string;
+  actor?: string;
+  ipAddress?: string;
+  [key: string]: unknown;
+}
+
+export interface SecOpsConfigData {
+  threatDetectionEnabled: boolean;
+  rateLimitThreshold: number;
+  ipAllowlist: string[];
+  ipBlocklist: string[];
+  mfaEnforcement: string;
+  sessionTimeoutMinutes: number;
+  [key: string]: unknown;
+}
+
+export const fetchSecOpsTimeline = async (limit: number = 25): Promise<SecOpsTimelineEvent[]> => {
+  const response = await client.get<{ success: boolean; data: SecOpsTimelineEvent[] }>(
     "/super-admin/security/operations/timeline",
     { params: { limit } }
   );
   return response.data.data;
 };
 
-export const fetchSecOpsConfig = async (): Promise<any> => {
-  const response = await client.get<{ success: boolean; data: any }>(
+export const fetchSecOpsConfig = async (): Promise<SecOpsConfigData> => {
+  const response = await client.get<{ success: boolean; data: SecOpsConfigData }>(
     "/super-admin/security/operations/config"
   );
   return response.data.data;
@@ -956,8 +1002,22 @@ export const fetchGovernanceControls = async (): Promise<GovernanceControlData[]
   return response.data.data;
 };
 
-export const fetchGovernanceRls = async (): Promise<any> => {
-  const response = await client.get<{ success: boolean; data: any }>(
+export interface GovernanceRlsPolicy {
+  tableName: string;
+  rlsEnabled: boolean;
+  policiesCount: number;
+  status: "SECURED" | "WARNING" | "UNSECURED";
+  issues?: string[];
+}
+
+export interface GovernanceRlsData {
+  tables?: GovernanceRlsPolicy[];
+  summary?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export const fetchGovernanceRls = async (): Promise<GovernanceRlsData> => {
+  const response = await client.get<{ success: boolean; data: GovernanceRlsData }>(
     "/super-admin/security/governance/rls"
   );
   return response.data.data;
@@ -973,15 +1033,61 @@ export const generateGovernanceEvidence = async (
   return response.data.data;
 };
 
-export const fetchPlatformSettings = async () => {
-  const response = await client.get<{ success: boolean; data: any }>(
+export interface PlatformSettingsGeneral {
+  name?: string;
+  defaultTenantPlan?: string;
+  defaultCurrency?: string;
+  defaultTimezone?: string;
+}
+
+export interface PlatformSettingsRegistration {
+  allowPublicRegistrations?: boolean;
+  requireEmailVerification?: boolean;
+  allowWorkspaceSelfRegistration?: boolean;
+  maintenanceMode?: boolean;
+}
+
+export interface PlatformSettingsResponse {
+  general?: PlatformSettingsGeneral;
+  workspaceRegistration?: PlatformSettingsRegistration;
+  platform?: PlatformSettingsGeneral & PlatformSettingsRegistration;
+  activePlans?: Array<{
+    id: string;
+    name: string;
+    price: string;
+    priceNum: number;
+    status: string;
+  }>;
+  dbStatus?: string;
+  [key: string]: unknown;
+}
+
+export interface UpdatePlatformSettingsPayload {
+  name?: string;
+  defaultTenantPlan?: string;
+  defaultCurrency?: string;
+  defaultTimezone?: string;
+  allowPublicRegistrations?: boolean;
+  requireEmailVerification?: boolean;
+  allowWorkspaceSelfRegistration?: boolean;
+  maintenanceMode?: boolean;
+  general?: Record<string, unknown>;
+  workspaceRegistration?: Record<string, unknown>;
+  platform?: Record<string, unknown>;
+  [key: string]: unknown;
+}
+
+export const fetchPlatformSettings = async (): Promise<PlatformSettingsResponse> => {
+  const response = await client.get<{ success: boolean; data: PlatformSettingsResponse }>(
     "/super-admin/settings"
   );
   return response.data.data;
 };
 
-export const updatePlatformSettings = async (data: any) => {
-  const response = await client.post<{ success: boolean; data: any }>(
+export const updatePlatformSettings = async (
+  data: UpdatePlatformSettingsPayload
+): Promise<{ success: boolean; data: PlatformSettingsResponse; message?: string }> => {
+  const response = await client.post<{ success: boolean; data: PlatformSettingsResponse; message?: string }>(
     "/super-admin/settings",
     data
   );
@@ -1235,7 +1341,7 @@ export const fetchPlatformPlans = async (): Promise<PlatformPlansResponse> => {
     success: boolean;
     data?: PlatformPlansResponse;
   } & PlatformPlansResponse>("/super-admin/plans");
-  const payload = (response?.data as any)?.data || response?.data || {};
+  const payload = (response?.data as { data?: PlatformPlansResponse })?.data || response?.data || {};
   return {
     plans: Array.isArray(payload.plans) ? payload.plans : [],
     distribution: payload.distribution || {},
@@ -1459,7 +1565,7 @@ export const setPlanDefaultAiModel = async (planId: string, modelId: string) => 
     success: boolean;
     message: string;
     planId: string;
-    defaultModel: any;
+    defaultModel: Record<string, unknown> | string;
   }>(`/super-admin/ai/plans/${planId}/default-model`, { modelId });
   return response.data;
 };
@@ -1535,7 +1641,7 @@ export interface PlatformBillingOverviewData {
   };
   planDistribution: Array<{ count: number; name: string; revenue: number; percentage?: number }>;
   monthlyTrend: Array<{ month: string; revenue: number; projected?: number; invoicesCount: number }>;
-  config: any;
+  config: Record<string, unknown>;
 }
 
 export interface PlatformSubscriptionItem {
@@ -1557,7 +1663,7 @@ export interface PlatformSubscriptionItem {
   trialStart?: string | null;
   trialEnd?: string | null;
   cancelAtPeriodEnd: boolean;
-  latestInvoice?: any;
+  latestInvoice?: PlatformInvoiceItemData | null;
   createdAt: string;
   updatedAt: string;
 }
@@ -1611,14 +1717,36 @@ export const fetchPlatformSubscriptions = async (params?: {
   return response.data;
 };
 
+export interface PlatformBillingSettingsData {
+  companyLegalName?: string;
+  billingAddress?: string;
+  city?: string;
+  state?: string;
+  postalCode?: string;
+  country?: string;
+  gstin?: string;
+  pan?: string;
+  invoicePrefix?: string;
+  currency?: string;
+  taxRate?: number;
+  paymentTermsDays?: number;
+  bankName?: string;
+  accountNumber?: string;
+  ifscCode?: string;
+  accountHolder?: string;
+  upiId?: string;
+  paymentGateway?: string;
+  [key: string]: unknown;
+}
+
 export const createOrUpdatePlatformSubscription = async (data: {
   tenantId: string;
   planId: string;
   billingCycle?: "monthly" | "annual";
   seats?: number;
   status?: string;
-}) => {
-  const response = await client.post<{ success: boolean; data: any }>(
+}): Promise<{ success: boolean; data: PlatformSubscriptionItem }> => {
+  const response = await client.post<{ success: boolean; data: PlatformSubscriptionItem }>(
     "/super-admin/billing/subscriptions",
     data
   );
@@ -1641,8 +1769,8 @@ export const fetchPlatformInvoices = async (params?: {
   return response.data;
 };
 
-export const fetchPlatformInvoiceById = async (id: string) => {
-  const response = await client.get<{ success: boolean; data: any }>(
+export const fetchPlatformInvoiceById = async (id: string): Promise<PlatformInvoiceItemData> => {
+  const response = await client.get<{ success: boolean; data: PlatformInvoiceItemData }>(
     `/super-admin/billing/invoices/${id}`
   );
   return response.data.data;
@@ -1651,23 +1779,25 @@ export const fetchPlatformInvoiceById = async (id: string) => {
 export const processPlatformRefund = async (
   invoiceId: string,
   data: { amount: number; reason: string; paymentId?: string }
-) => {
-  const response = await client.post<{ success: boolean; data: any }>(
+): Promise<{ success: boolean; data: Record<string, unknown> }> => {
+  const response = await client.post<{ success: boolean; data: Record<string, unknown> }>(
     `/super-admin/billing/invoices/${invoiceId}/refund`,
     data
   );
   return response.data;
 };
 
-export const fetchPlatformBillingSettings = async () => {
-  const response = await client.get<{ success: boolean; data: any }>(
+export const fetchPlatformBillingSettings = async (): Promise<PlatformBillingSettingsData> => {
+  const response = await client.get<{ success: boolean; data: PlatformBillingSettingsData }>(
     "/super-admin/billing/settings"
   );
   return response.data.data;
 };
 
-export const updatePlatformBillingSettings = async (data: any) => {
-  const response = await client.put<{ success: boolean; data: any }>(
+export const updatePlatformBillingSettings = async (
+  data: Partial<PlatformBillingSettingsData>
+): Promise<PlatformBillingSettingsData> => {
+  const response = await client.put<{ success: boolean; data: PlatformBillingSettingsData }>(
     "/super-admin/billing/settings",
     data
   );
@@ -1689,7 +1819,7 @@ export interface PlatformSupportTicket {
   priority: "LOW" | "MEDIUM" | "HIGH" | "CRITICAL";
   status: "OPEN" | "IN_PROGRESS" | "WAITING_FOR_USER" | "RESOLVED" | "CLOSED";
   description: string;
-  diagnostics?: any;
+  diagnostics?: Record<string, unknown>;
   estimatedResponseTime?: string;
   resolvedAt?: string | null;
   closedAt?: string | null;

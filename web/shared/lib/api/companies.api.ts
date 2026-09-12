@@ -25,8 +25,15 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
   }
 }
 
+export interface CompanyType {
+  id: string;
+  name: string;
+  domain?: string | null;
+  [key: string]: unknown;
+}
+
 export function fetchCompaniesData() {
-  return unwrapResponse<{ companies: unknown[] }>(client.get("/crm/companies"));
+  return unwrapResponse<{ companies: CompanyType[] }>(client.get("/crm/companies"));
 }
 
 export function createCompany(data: Record<string, unknown>) {

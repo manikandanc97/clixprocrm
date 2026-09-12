@@ -77,7 +77,7 @@ export function DataTableColumnHeader({
     <div
       role="button"
       tabIndex={0}
-      aria-sort={sortDirection === "asc" ? "ascending" : sortDirection === "desc" ? "descending" : "none"}
+      aria-label={`${typeof content === "string" ? content : "Column"}, sort ${sortDirection === "asc" ? "descending" : "ascending"}`}
       onClick={handleToggleSort}
       onKeyDown={handleKeyDown}
       className={cn(

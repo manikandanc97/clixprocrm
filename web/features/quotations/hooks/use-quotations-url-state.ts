@@ -1,4 +1,4 @@
-import { useEffect } from "react";
+import { useEffect, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 import { QuotationType } from "@/shared/types/quotation";
 
@@ -56,20 +56,17 @@ export function useQuotationsUrlState({
     }
   }, [searchParams, safeQuotations, setIsAddModalOpen, setQuoteToEdit]);
 
-  // ?new=true — only checked once on mount via window.location to avoid
-  // re-opening the modal when searchParams object reference changes.
+  // ?new=true — handled once on mount via newHandledRef
+  const newHandledRef = useRef(false);
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("new") === "true") {
-      const timer = setTimeout(() => {
-        setQuoteToEdit(null);
-        setIsAddModalOpen(true);
-        const newUrl = window.location.pathname;
-        window.history.replaceState({}, "", newUrl);
-      }, 0);
-      return () => clearTimeout(timer);
+    if (params.get("new") === "true" && !newHandledRef.current) {
+      newHandledRef.current = true;
+      setQuoteToEdit(null);
+      setIsAddModalOpen(true);
+      const newUrl = window.location.pathname;
+      window.history.replaceState({}, "", newUrl);
     }
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [setIsAddModalOpen, setQuoteToEdit]);
 }

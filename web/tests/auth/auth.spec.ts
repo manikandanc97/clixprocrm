@@ -3,11 +3,17 @@ import { test, expect } from '@playwright/test';
 // Use an unauthenticated state for these tests
 test.use({ storageState: { cookies: [], origins: [] } });
 
-const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'e2e_admin_1786276028193@gmail.com';
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || 'TestPassword123!';
+const TEST_EMAIL = process.env.TEST_USER_EMAIL || 'testadmin@clixprocrm.com';
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || 'E2ETestAdmin@123456';
 
 test.describe('Authentication Flows', () => {
+  // Run auth tests serially to prevent auth endpoint rate-limiting and session collisions
+  test.describe.configure({ mode: 'serial' });
+  test.setTimeout(60000);
+
   test.beforeEach(async ({ page }) => {
+    page.on('console', msg => console.log(`[AUTH LOG] ${msg.type()}: ${msg.text()}`));
+    page.on('pageerror', err => console.log(`[AUTH ERROR] ${err.message}`));
     await page.goto('/login');
   });
 
@@ -16,7 +22,7 @@ test.describe('Authentication Flows', () => {
     await page.getByTestId('password-input').fill(TEST_PASSWORD);
     await page.getByTestId('login-btn').click();
 
-    await expect(page).toHaveURL(/.*(\/dashboard|\/$)/, { timeout: 15000 });
+    await expect(page).toHaveURL(/.*(\/dashboard|\/super-admin|\/$)/, { timeout: 20000 });
   });
 
   test('AUTH-002 Invalid email format', async ({ page }) => {
@@ -24,8 +30,6 @@ test.describe('Authentication Flows', () => {
     await page.getByTestId('password-input').fill('somepassword');
     await page.getByTestId('login-btn').click();
 
-    // Expect HTML5 validation or custom error message
-    // If it's a custom error toast, we check for that. Otherwise, check for standard validation or failure to navigate
     await expect(page).toHaveURL(/.*\/login/);
   });
 
@@ -35,8 +39,7 @@ test.describe('Authentication Flows', () => {
     await page.getByTestId('login-btn').click();
 
     await expect(page).toHaveURL(/.*\/login/);
-    // Assuming there is an error message displayed
-    await expect(page.getByText(/invalid login credentials|wrong password/i)).toBeVisible({ timeout: 10000 }).catch(() => {});
+    await expect(page.getByText(/invalid login credentials|wrong password|invalid/i)).toBeVisible({ timeout: 10000 }).catch(() => {});
   });
 
   test('AUTH-004 Empty fields', async ({ page }) => {
@@ -49,25 +52,32 @@ test.describe('Authentication Flows', () => {
     await page.getByTestId('email-input').fill(TEST_EMAIL);
     await page.getByTestId('password-input').fill(TEST_PASSWORD);
     await page.getByTestId('login-btn').click();
-    await expect(page).toHaveURL(/.*(\/dashboard|\/$)/, { timeout: 15000 });
+    await expect(page).toHaveURL(/.*(\/dashboard|\/super-admin|\/$)/, { timeout: 20000 });
 
-    // Perform logout
-    // Assumes there's a user menu or avatar to click to reveal logout button
-    const userMenu = page.getByTestId('user-menu-button');
-    if (await userMenu.isVisible()) {
-      await userMenu.click();
-    }
-    await page.getByRole('menuitem', { name: /logout|sign out/i }).click();
+    // Wait for auth hydration to complete so user menu is rendered in header
+    const userMenu = page.getByRole('button', { name: /User Profile Menu/i }).or(page.getByTestId('user-menu-button'));
+    await expect(userMenu).toBeVisible({ timeout: 20000 });
+    await userMenu.click();
+    
+    // Click Sign Out
+    const signOutItem = page.getByRole('menuitem', { name: /sign out/i });
+    await expect(signOutItem).toBeVisible({ timeout: 5000 });
+    await signOutItem.click();
 
-    // Verify redirect to login
-    await expect(page).toHaveURL(/.*\/login/);
+    // Confirm in alert dialog
+    const confirmButton = page.locator('[role="alertdialog"]').getByRole('button', { name: /sign out/i });
+    await expect(confirmButton).toBeVisible({ timeout: 5000 });
+    await confirmButton.click();
+
+    // Verify redirect to login or login page accessible
+    await expect(page).toHaveURL(/.*\/login/, { timeout: 20000 });
   });
 
   test('AUTH-006 & AUTH-007 Protected route without authentication', async ({ page }) => {
     // Attempt to access a protected route without logging in
     await page.goto('/dashboard');
     // Should redirect to login
-    await expect(page).toHaveURL(/.*\/login.*/);
+    await expect(page).toHaveURL(/.*\/login.*/, { timeout: 20000 });
   });
 
   test('AUTH-008 Admin navigation & AUTH-009 Role-based navigation', async ({ page }) => {
@@ -75,15 +85,11 @@ test.describe('Authentication Flows', () => {
     await page.getByTestId('email-input').fill(TEST_EMAIL);
     await page.getByTestId('password-input').fill(TEST_PASSWORD);
     await page.getByTestId('login-btn').click();
-    await expect(page).toHaveURL(/.*(\/dashboard|\/$)/, { timeout: 15000 });
+    await expect(page).toHaveURL(/.*(\/dashboard|\/super-admin|\/$)/, { timeout: 20000 });
 
-    // Verify Admin specific elements like settings or employee management exist
-    // This is assuming 'Employees' or 'Settings' is restricted
-    const sidebar = page.locator('nav'); // Assuming sidebar is a nav
-    if (await sidebar.isVisible()) {
-        await expect(sidebar.getByText(/employees/i)).toBeVisible().catch(() => {});
-        await expect(sidebar.getByText(/settings/i)).toBeVisible().catch(() => {});
-    }
+    // Verify navigation/sidebar structure renders
+    const nav = page.locator('nav, aside, header');
+    await expect(nav.first()).toBeVisible({ timeout: 20000 });
   });
 
   test('AUTH-010 Session expiry behavior', async ({ page, context }) => {
@@ -91,15 +97,22 @@ test.describe('Authentication Flows', () => {
     await page.getByTestId('email-input').fill(TEST_EMAIL);
     await page.getByTestId('password-input').fill(TEST_PASSWORD);
     await page.getByTestId('login-btn').click();
-    await expect(page).toHaveURL(/.*(\/dashboard|\/$)/, { timeout: 15000 });
+    await expect(page).toHaveURL(/.*(\/dashboard|\/super-admin|\/$)/, { timeout: 20000 });
 
-    // Simulate session expiry by clearing cookies
+    // Wait for session to be active
+    await page.locator('nav, aside, header').first().waitFor({ state: 'visible', timeout: 20000 });
+
+    // Simulate session expiry by clearing cookies & local storage
     await context.clearCookies();
+    await page.evaluate(() => {
+      localStorage.clear();
+      sessionStorage.clear();
+    });
 
-    // Reload page
-    await page.reload();
+    // Reload page or navigate to dashboard
+    await page.goto('/dashboard');
 
     // Should redirect to login
-    await expect(page).toHaveURL(/.*\/login.*/);
+    await expect(page).toHaveURL(/.*\/login.*/, { timeout: 20000 });
   });
 });

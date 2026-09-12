@@ -1,12 +1,30 @@
 import { MetricCardType } from "./common";
 
+export interface QuotationItemType {
+  id?: string;
+  name: string;
+  description?: string;
+  quantity: number;
+  unit?: string;
+  price: number;
+  rate?: number;
+  unitPrice?: number;
+  discount?: number;
+  taxRate?: number;
+  total?: number;
+  [key: string]: unknown;
+}
+
 export interface QuotationType {
   id: string;
-  quoteId: string;
+  quoteId?: string;
+  quoteNumber?: string;
+  customerId?: string | null;
+  dealId?: string | null;
   client: string;
   amount: string;
   amountValue: number;
-  status: "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "EXPIRED";
+  status: "DRAFT" | "SENT" | "ACCEPTED" | "REJECTED" | "EXPIRED" | string;
   validTill: string;
   validTillValue: string | null;
   leadId?: string;
@@ -18,8 +36,8 @@ export interface QuotationType {
     company: string;
   };
   isSigned?: boolean;
-  notes?: string;
-  items?: { name: string; quantity: number; price: number; total: number }[];
+  notes?: string | null;
+  items?: QuotationItemType[];
   tax?: number;
   discount?: number;
   lastActivity?: string;

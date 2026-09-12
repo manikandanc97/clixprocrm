@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useMemo, useEffect } from "react";
+import { useState, useMemo, useEffect, useRef } from "react";
 import { motion, AnimatePresence } from "framer-motion";
 import { Handshake, Plus, Settings } from "lucide-react";
 import { useSearchParams } from "next/navigation";
@@ -32,33 +32,22 @@ const DealsPage = () => {
 
   const { pipelineItems, setPipelineItems } = useCRMStore();
 
+  const customizeParam = searchParams.get("customize");
   const [isAddModalOpen, setIsAddModalOpen] = useState(false);
-  const [isCustomizeOpen, setIsCustomizeOpen] = useState(false);
-  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>();
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(() => Boolean(customizeParam));
+  const customizeDefaultSection = customizeParam && customizeParam !== "true" ? customizeParam : undefined;
   const [selectedDeal, setSelectedDeal] = useState<PipelineLeadType | null>(null);
   const [preselectedStage, setPreselectedStage] = useState<string | undefined>();
 
+  const newParamHandledRef = useRef(false);
   useEffect(() => {
-    const cust = searchParams.get("customize");
-    if (cust) {
-      const timer = setTimeout(() => {
-        if (cust !== "true") {
-          setCustomizeDefaultSection(cust);
-        }
-        setIsCustomizeOpen(true);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [searchParams]);
-
-  useEffect(() => {
-    if (searchParams.get("new") === "true") {
-      const timer = setTimeout(() => {
-        setIsAddModalOpen(true);
+    if (searchParams.get("new") === "true" && !newParamHandledRef.current) {
+      newParamHandledRef.current = true;
+      setIsAddModalOpen(true);
+      if (typeof window !== "undefined") {
         const newUrl = window.location.pathname;
         window.history.replaceState({}, "", newUrl);
-      }, 0);
-      return () => clearTimeout(timer);
+      }
     }
   }, [searchParams]);
 

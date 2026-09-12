@@ -60,8 +60,19 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
   const handleLogout = async () => {
     setShowLogoutConfirm(false);
     await new Promise((resolve) => requestAnimationFrame(resolve));
-    await logout();
-    router.push("/login");
+    try {
+      await Promise.race([
+        logout(),
+        new Promise((resolve) => setTimeout(resolve, 2000)),
+      ]);
+    } catch {
+      // Ignore logout errors
+    }
+    if (typeof window !== "undefined") {
+      window.location.href = "/login";
+    } else {
+      router.push("/login");
+    }
   };
 
   const filteredFonts = ALL_GOOGLE_FONTS.filter(f => 
@@ -356,7 +367,15 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
           
           <DropdownMenuSeparator className="my-1 -mx-1 border-t border-dashed border-border/80 h-0 bg-transparent" />
 
-          <DropdownMenuItem onClick={() => setShowLogoutConfirm(true)} variant="destructive" className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive group">
+          <DropdownMenuItem 
+            onSelect={(e) => {
+              e.preventDefault();
+              setShowLogoutConfirm(true);
+            }}
+            onClick={() => setShowLogoutConfirm(true)} 
+            variant="destructive" 
+            className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5 text-destructive hover:bg-destructive/10 hover:text-destructive group"
+          >
             <AppIcon name="logout" size={16} className="text-destructive transition-colors" />
             <span className="font-medium text-[13px] transition-colors">Sign out</span>
           </DropdownMenuItem>

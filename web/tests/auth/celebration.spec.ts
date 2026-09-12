@@ -44,7 +44,7 @@ test.describe('Account Creation & Workspace Opening Experience', () => {
     await page.goto('/onboarding');
 
     // Fill company name
-    const companyInput = page.getByPlaceholder('e.g. Acme Corp or Growth Labs');
+    const companyInput = page.getByRole('textbox', { name: /company/i }).or(page.getByPlaceholder(/company|workspace/i));
     await expect(companyInput).toBeVisible();
     await companyInput.fill('Acme SaaS Corp');
 
@@ -83,7 +83,7 @@ test.describe('Account Creation & Workspace Opening Experience', () => {
     });
 
     await page.goto('/onboarding');
-    const companyInput = page.getByPlaceholder('e.g. Acme Corp or Growth Labs');
+    const companyInput = page.getByRole('textbox', { name: /company/i }).or(page.getByPlaceholder(/company|workspace/i));
     await companyInput.fill('Existing Company');
     await page.getByRole('button', { name: /Create Workspace/i }).click();
 

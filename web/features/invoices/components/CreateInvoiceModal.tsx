@@ -26,7 +26,15 @@ import { FormModal } from "@/shared/components/crm/FormModal";
 import { useCreateInvoice, useInvoiceSettings } from "@/shared/hooks/use-invoices";
 import { useCustomers, useCompanies, useDeals, useQuotations } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
+import { QuotationType } from "@/shared/types/quotation";
+import { PipelineLeadType } from "@/shared/types/pipeline";
+import { CustomerType } from "@/shared/types/customer";
 import { toast } from "sonner";
+
+interface CompanyOption {
+  id: string;
+  name: string;
+}
 
 interface CreateInvoiceModalProps {
   isOpen: boolean;
@@ -66,10 +74,10 @@ export function CreateInvoiceModal({
   const { mutateAsync: createInvoiceMutate, isPending: isSubmitting } = useCreateInvoice();
   const { formatCurrency } = useCurrency();
 
-  const safeCustomers = Array.isArray(customersData) ? customersData : customersData?.customers || [];
-  const safeCompanies = Array.isArray(companiesData) ? companiesData : companiesData?.companies || [];
-  const safeDeals = Array.isArray(dealsData) ? dealsData : dealsData?.deals || [];
-  const safeQuotations = Array.isArray(quotationsData) ? quotationsData : quotationsData?.quotations || [];
+  const safeCustomers: CustomerType[] = Array.isArray(customersData) ? (customersData as CustomerType[]) : (customersData?.customers as CustomerType[]) || [];
+  const safeCompanies: CompanyOption[] = Array.isArray(companiesData) ? (companiesData as CompanyOption[]) : (companiesData?.companies as CompanyOption[]) || [];
+  const safeDeals: PipelineLeadType[] = Array.isArray(dealsData) ? (dealsData as PipelineLeadType[]) : (dealsData?.deals as PipelineLeadType[]) || [];
+  const safeQuotations: QuotationType[] = Array.isArray(quotationsData) ? (quotationsData as QuotationType[]) : (quotationsData?.quotations as QuotationType[]) || [];
 
   // Form State
   const [customerId, setCustomerId] = useState(initialCustomerId || "");
@@ -86,8 +94,7 @@ export function CreateInvoiceModal({
   const [currency, setCurrency] = useState("INR");
   const [notes, setNotes] = useState("");
   const [termsAndConditions, setTermsAndConditions] = useState("");
-
-  const defaultTax = settings.defaultTaxRate ?? 18;
+  const defaultTax = settings?.defaultTaxRate ?? 18;
 
   const [items, setItems] = useState<LineItemState[]>([
     {
@@ -106,22 +113,19 @@ export function CreateInvoiceModal({
   // Load defaults from settings
   useEffect(() => {
     if (settings) {
-      const timer = setTimeout(() => {
-        if (settings.defaultNotes) {
-          setNotes((prev) => prev || settings.defaultNotes);
-        }
-        if (settings.defaultTerms) {
-          setTermsAndConditions((prev) => prev || settings.defaultTerms);
-        }
-      }, 0);
-      return () => clearTimeout(timer);
+      if (settings.defaultNotes) {
+        setNotes((prev) => prev || settings.defaultNotes);
+      }
+      if (settings.defaultTerms) {
+        setTermsAndConditions((prev) => prev || settings.defaultTerms);
+      }
     }
   }, [settings]);
 
   // Auto-sync company when customer selected
   const handleCustomerChange = (cId: string) => {
     setCustomerId(cId);
-    const found = safeCustomers.find((c: any) => c.id === cId);
+    const found = safeCustomers.find((c: CustomerType) => c.id === cId);
     if (found?.companyId) {
       setCompanyId(found.companyId);
     }
@@ -130,18 +134,18 @@ export function CreateInvoiceModal({
   // If quotation selected, import items
   const handleQuotationChange = (qId: string) => {
     setQuotationId(qId);
-    const found = safeQuotations.find((q: any) => q.id === qId);
+    const found = safeQuotations.find((q: QuotationType) => q.id === qId);
     if (found) {
       if (found.customerId) setCustomerId(found.customerId);
       if (found.dealId) setDealId(found.dealId);
       if (Array.isArray(found.items) && found.items.length > 0) {
         setItems(
-          found.items.map((it: any, idx: number) => ({
+          found.items.map((it: Record<string, unknown>, idx: number) => ({
             id: `quote_item_${idx}`,
-            name: it.name || it.item || "Quotation Item",
-            description: it.description || "",
+            name: String(it.name || it.item || "Quotation Item"),
+            description: String(it.description || ""),
             quantity: Number(it.quantity || it.qty) || 1,
-            unit: it.unit || "unit",
+            unit: String(it.unit || "unit"),
             unitPrice: Number(it.rate || it.unitPrice || it.price) || 0,
             discountType: "PERCENTAGE",
             discountValue: Number(it.discount) || 0,
@@ -177,7 +181,7 @@ export function CreateInvoiceModal({
     setItems((prev) => prev.filter((_, i) => i !== index));
   };
 
-  const updateItem = (index: number, field: keyof LineItemState, value: any) => {
+  const updateItem = <K extends keyof LineItemState>(index: number, field: K, value: LineItemState[K]) => {
     setItems((prev) => {
       const next = [...prev];
       next[index] = { ...next[index], [field]: value };
@@ -191,8 +195,8 @@ export function CreateInvoiceModal({
     const hasCompanyChanged = companyId !== (initialCompanyId || "");
     const hasDealChanged = dealId !== (initialDealId || "");
     const hasQuotationChanged = quotationId !== (initialQuotationId || "");
-    const hasNotes = Boolean(notes && notes !== (settings.defaultNotes || ""));
-    const hasTerms = Boolean(termsAndConditions && termsAndConditions !== (settings.defaultTerms || ""));
+    const hasNotes = Boolean(notes && notes !== (settings?.defaultNotes || ""));
+    const hasTerms = Boolean(termsAndConditions && termsAndConditions !== (settings?.defaultTerms || ""));
     const hasItemData =
       items.length > 1 ||
       Boolean(items[0]?.name.trim()) ||
@@ -217,9 +221,9 @@ export function CreateInvoiceModal({
     quotationId,
     initialQuotationId,
     notes,
-    settings.defaultNotes,
+    settings?.defaultNotes,
     termsAndConditions,
-    settings.defaultTerms,
+    settings?.defaultTerms,
     items,
   ]);
 
@@ -383,7 +387,7 @@ export function CreateInvoiceModal({
                 <SelectValue placeholder="Select Customer" />
               </SelectTrigger>
               <SelectContent className="max-h-56">
-                {safeCustomers.map((c: any) => (
+                {safeCustomers.map((c: CustomerType) => (
                   <SelectItem key={c.id} value={c.id} className="text-xs">
                     {c.name} {c.company ? `(${c.company})` : ""}
                   </SelectItem>
@@ -401,7 +405,7 @@ export function CreateInvoiceModal({
                 <SelectValue placeholder="Select Company" />
               </SelectTrigger>
               <SelectContent className="max-h-56">
-                {safeCompanies.map((comp: any) => (
+                {safeCompanies.map((comp: CompanyOption) => (
                   <SelectItem key={comp.id} value={comp.id} className="text-xs">
                     {comp.name}
                   </SelectItem>
@@ -419,7 +423,7 @@ export function CreateInvoiceModal({
                 <SelectValue placeholder="Import Quotation" />
               </SelectTrigger>
               <SelectContent className="max-h-56">
-                {safeQuotations.map((q: any) => (
+                {safeQuotations.map((q: QuotationType) => (
                   <SelectItem key={q.id} value={q.id} className="text-xs">
                     {q.quoteNumber || "Quote"} - {q.client}
                   </SelectItem>
@@ -437,7 +441,7 @@ export function CreateInvoiceModal({
                 <SelectValue placeholder="Link Deal" />
               </SelectTrigger>
               <SelectContent className="max-h-56">
-                {safeDeals.map((d: any) => (
+                {safeDeals.map((d: PipelineLeadType) => (
                   <SelectItem key={d.id} value={d.id} className="text-xs">
                     {d.name} ({formatCurrency(Number(d.value) || 0)})
                   </SelectItem>
@@ -549,7 +553,7 @@ export function CreateInvoiceModal({
                             type="number"
                             min="1"
                             value={item.quantity}
-                            onChange={(e) => updateItem(idx, "quantity", e.target.value)}
+                            onChange={(e) => updateItem(idx, "quantity", Number(e.target.value) || 0)}
                             className="h-8 text-xs text-center px-1"
                             aria-label={`Quantity, row ${idx + 1}`}
                           />
@@ -568,7 +572,7 @@ export function CreateInvoiceModal({
                           min="0"
                           step="0.01"
                           value={item.unitPrice}
-                          onChange={(e) => updateItem(idx, "unitPrice", e.target.value)}
+                          onChange={(e) => updateItem(idx, "unitPrice", Number(e.target.value) || 0)}
                           className="h-8 text-xs text-right font-mono"
                           aria-label={`Unit price, row ${idx + 1}`}
                         />
@@ -579,7 +583,7 @@ export function CreateInvoiceModal({
                           min="0"
                           max="100"
                           value={item.discountValue}
-                          onChange={(e) => updateItem(idx, "discountValue", e.target.value)}
+                          onChange={(e) => updateItem(idx, "discountValue", Number(e.target.value) || 0)}
                           className="h-8 text-xs text-right"
                           aria-label={`Discount, row ${idx + 1}`}
                         />

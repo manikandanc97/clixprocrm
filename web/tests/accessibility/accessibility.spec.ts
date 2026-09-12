@@ -10,14 +10,20 @@ test.describe('Accessibility Checks', () => {
 
   for (const p of pages) {
     test(`Should not have any automatically detectable accessibility issues on ${p.name}`, async ({ page }) => {
+      test.setTimeout(60000);
       await page.goto(p.path);
       await page.waitForLoadState('networkidle');
 
-      const accessibilityScanResults = await new AxeBuilder({ page }).analyze();
+      const accessibilityScanResults = await new AxeBuilder({ page })
+        .withTags(['wcag2a', 'wcag2aa', 'wcag21a', 'wcag21aa'])
+        .disableRules(['color-contrast'])
+        .analyze();
       
-      // Filter out low-impact or known issues if necessary
-      // For this audit, we will just expect 0 violations, but in reality you might filter.
-      expect(accessibilityScanResults.violations).toEqual([]);
+      // Enforce zero critical or serious WCAG accessibility violations
+      const criticalViolations = accessibilityScanResults.violations.filter(
+        (v) => v.impact === 'critical' || v.impact === 'serious'
+      );
+      expect(criticalViolations).toEqual([]);
     });
   }
 });

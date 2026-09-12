@@ -46,6 +46,7 @@ import {
   useSendInvoiceEmail,
 } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
+import { InvoiceType, InvoiceItemType, InvoicePaymentType, InvoiceTimelineEventType } from "@/shared/types/invoice";
 import { RecordPaymentModal } from "./RecordPaymentModal";
 import { toast } from "sonner";
 
@@ -61,7 +62,7 @@ export function InvoiceDetailModal({
   onClose,
 }: InvoiceDetailModalProps) {
   const { data: invoiceData, isLoading, refetch } = useInvoiceDetails(invoiceId);
-  const invoice = invoiceData?.data || invoiceData;
+  const invoice: InvoiceType | undefined = invoiceData?.data;
   const { formatCurrency } = useCurrency();
 
   const { mutateAsync: deleteInvoiceMutate, isPending: isDeletingInvoice } = useDeleteInvoice();
@@ -121,12 +122,14 @@ export function InvoiceDetailModal({
   };
 
   const handlePrint = () => {
+    if (!invoice?.id) return;
     const printUrl = `/api/crm/invoices/${invoice.id}/pdf`;
     window.open(printUrl, "_blank");
   };
 
   const handleSendEmail = async () => {
-    if (!invoice?.customer?.email) {
+    if (!invoice?.id) return;
+    if (!invoice.customer?.email) {
       toast.error("Customer has no email address configured.");
       return;
     }
@@ -233,7 +236,7 @@ export function InvoiceDetailModal({
           {/* Tab Navigation & Body */}
           <Tabs
             value={activeTab}
-            onValueChange={(v) => setActiveTab(v as any)}
+            onValueChange={(v) => setActiveTab(v as "document" | "payments" | "timeline")}
             className="flex flex-col flex-1 min-h-0"
           >
             <div className="px-6 border-b border-border/80 bg-background/50">
@@ -299,9 +302,9 @@ export function InvoiceDetailModal({
                           {invoice.customer?.email && (
                             <p className="text-xs text-muted-foreground">{invoice.customer.email}</p>
                           )}
-                          {(invoice.customerBillingAddress as any)?.gstin && (
+                          {Boolean((invoice.customerBillingAddress as Record<string, unknown> | null)?.gstin) && (
                             <p className="text-xs font-mono font-medium text-foreground mt-1">
-                              GSTIN: {(invoice.customerBillingAddress as any).gstin}
+                              GSTIN: {String((invoice.customerBillingAddress as Record<string, unknown>).gstin)}
                             </p>
                           )}
                         </div>
@@ -350,7 +353,7 @@ export function InvoiceDetailModal({
                           </TableRow>
                         </TableHeader>
                         <TableBody className="divide-y divide-border/60">
-                          {invoice.items?.map((it: any) => (
+                          {invoice.items?.map((it: InvoiceItemType) => (
                             <TableRow key={it.id} className="h-auto hover:bg-muted/20 transition-colors border-b border-border/60">
                               <TableCell className="py-3 px-4 align-top">
                                 <div className="font-semibold text-foreground text-xs">{it.name}</div>
@@ -382,32 +385,32 @@ export function InvoiceDetailModal({
                             <span>Subtotal:</span>
                             <span className="font-mono font-semibold text-foreground">{formatCurrency(invoice.subtotal, curr)}</span>
                           </div>
-                          {invoice.discountAmount > 0 && (
+                          {Boolean(invoice.discountAmount && invoice.discountAmount > 0) && (
                             <div className="flex justify-between text-emerald-600 dark:text-emerald-400 font-semibold">
                               <span>Discount:</span>
-                              <span className="font-mono">-{formatCurrency(invoice.discountAmount, curr)}</span>
+                              <span className="font-mono">-{formatCurrency(invoice.discountAmount || 0, curr)}</span>
                             </div>
                           )}
                           <div className="flex justify-between text-muted-foreground">
                             <span>Taxable Amount:</span>
-                            <span className="font-mono font-semibold text-foreground">{formatCurrency(invoice.taxableAmount, curr)}</span>
+                            <span className="font-mono font-semibold text-foreground">{formatCurrency(invoice.taxableAmount || 0, curr)}</span>
                           </div>
-                          {invoice.cgstAmount > 0 && (
+                          {Boolean(invoice.cgstAmount && invoice.cgstAmount > 0) && (
                             <div className="flex justify-between text-muted-foreground">
                               <span>CGST:</span>
-                              <span className="font-mono">{formatCurrency(invoice.cgstAmount, curr)}</span>
+                              <span className="font-mono">{formatCurrency(invoice.cgstAmount || 0, curr)}</span>
                             </div>
                           )}
-                          {invoice.sgstAmount > 0 && (
+                          {Boolean(invoice.sgstAmount && invoice.sgstAmount > 0) && (
                             <div className="flex justify-between text-muted-foreground">
                               <span>SGST:</span>
-                              <span className="font-mono">{formatCurrency(invoice.sgstAmount, curr)}</span>
+                              <span className="font-mono">{formatCurrency(invoice.sgstAmount || 0, curr)}</span>
                             </div>
                           )}
-                          {invoice.igstAmount > 0 && (
+                          {Boolean(invoice.igstAmount && invoice.igstAmount > 0) && (
                             <div className="flex justify-between text-muted-foreground">
                               <span>IGST:</span>
-                              <span className="font-mono">{formatCurrency(invoice.igstAmount, curr)}</span>
+                              <span className="font-mono">{formatCurrency(invoice.igstAmount || 0, curr)}</span>
                             </div>
                           )}
                           <div className="pt-2 border-t border-border flex justify-between font-bold text-sm text-foreground">
@@ -509,13 +512,13 @@ export function InvoiceDetailModal({
                           </TableRow>
                         </TableHeader>
                         <TableBody className="divide-y divide-border/60">
-                          {invoice.payments.map((p: any) => (
+                          {(invoice.payments || []).map((p: InvoicePaymentType) => (
                             <TableRow key={p.id} className="h-auto hover:bg-muted/20 transition-colors border-b border-border/60">
                               <TableCell className="py-3 px-4 font-mono font-bold text-foreground text-xs">
                                 {p.paymentNumber}
                               </TableCell>
                               <TableCell className="py-3 px-3 text-muted-foreground text-xs">
-                                {new Date(p.paymentDate).toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
+                                {new Date(p.paymentDate || p.createdAt || "").toLocaleDateString("en-IN", { day: "2-digit", month: "short", year: "numeric" })}
                               </TableCell>
                               <TableCell className="py-3 px-3 font-medium text-foreground text-xs">
                                 {p.paymentMethod.replace(/_/g, " ")}
@@ -561,7 +564,7 @@ export function InvoiceDetailModal({
                       />
                     ) : (
                       <div className="relative pl-6 space-y-6 before:absolute before:left-2.5 before:top-2 before:bottom-2 before:w-0.5 before:bg-border/60">
-                        {invoice.timelineEvents.map((evt: any) => (
+                        {(invoice.timelineEvents || []).map((evt: InvoiceTimelineEventType) => (
                           <div key={evt.id} className="relative group">
                             <div className="absolute -left-6 top-0.5 size-3 rounded-full bg-primary ring-4 ring-background" />
                             <div className="text-xs font-semibold text-foreground">{evt.description || evt.action}</div>

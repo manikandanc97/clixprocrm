@@ -248,7 +248,7 @@ export interface MatrixFeatureItem {
   name: string;
   description: string;
   values?: Record<string, string | boolean>;
-  [planId: string]: any;
+  [planId: string]: string | boolean | undefined | Record<string, string | boolean>;
 }
 
 export interface MatrixCategory {

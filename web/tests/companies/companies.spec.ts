@@ -6,15 +6,15 @@ test.describe('Companies Module', () => {
   });
 
   test('Page loads correctly with table rendering', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /companies/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /companies/i })).toBeVisible({ timeout: 15000 });
     const listContainer = page.locator('table, [data-testid="companies-list"], [data-testid="companies-grid"]');
-    await expect(listContainer.first()).toBeVisible({ timeout: 10000 });
+    await expect(listContainer.first()).toBeVisible({ timeout: 15000 });
   });
 
   test('Create new company', async ({ page }) => {
     await page.getByRole('button', { name: /add company|create company/i }).click();
     
-    const modal = page.locator('[role="dialog"], form');
+    const modal = page.locator('[role="dialog"]').first();
     await expect(modal).toBeVisible();
 
     const testId = Date.now();
@@ -30,7 +30,7 @@ test.describe('Companies Module', () => {
     await expect(page.getByText(/company created successfully|success/i)).toBeVisible().catch(() => {});
     
     // Verify it appears in the list
-    await expect(page.getByText(companyName)).toBeVisible();
+    await expect(page.getByRole('button', { name: companyName, exact: true }).or(page.getByText(companyName, { exact: true }))).toBeVisible();
   });
 
   test('Search companies', async ({ page }) => {

@@ -6,10 +6,10 @@ test.describe('Calendar Module', () => {
   });
 
   test('Calendar renders properly', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /calendar/i })).toBeVisible();
+    await expect(page.getByText('Scheduling Hub')).toBeVisible({ timeout: 15000 });
     
-    // Check for the calendar grid or month view
-    const calendarView = page.locator('.fc, [data-testid="calendar-view"]');
-    await expect(calendarView.first()).toBeVisible({ timeout: 10000 });
+    // Check for the calendar view controls and action button
+    await expect(page.getByRole('button', { name: /new event/i })).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('button', { name: /month/i })).toBeVisible({ timeout: 10000 });
   });
 });

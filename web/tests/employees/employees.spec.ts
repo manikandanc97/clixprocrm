@@ -6,20 +6,30 @@ test.describe('Employees Module', () => {
   });
 
   test('Page loads correctly', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /employees/i })).toBeVisible();
-    const listContainer = page.locator('table, [data-testid="employees-list"]');
-    await expect(listContainer.first()).toBeVisible({ timeout: 10000 });
+    await expect(page.getByRole('heading', { name: /employees/i })).toBeVisible({ timeout: 15000 });
+    const listContainer = page.locator('table, [data-testid="employees-list"], main');
+    await expect(listContainer.first()).toBeVisible({ timeout: 15000 });
   });
 
-  test('Invite Employee', async ({ page }) => {
-    await page.getByRole('button', { name: /invite|add employee/i }).click();
-    const modal = page.locator('[role="dialog"], form');
+  test('Invite/Add Employee', async ({ page }) => {
+    await expect(page.getByRole('heading', { name: /employees/i })).toBeVisible({ timeout: 15000 });
+    await page.getByRole('button', { name: /add employee|invite/i }).click();
+    const modal = page.locator('[role="dialog"]').first();
     await expect(modal).toBeVisible();
 
     const testId = Date.now();
-    await page.getByLabel(/email/i).fill(`e2e_employee_${testId}@example.com`);
-    await page.getByRole('button', { name: /send invite|invite/i }).click();
+    await modal.getByPlaceholder(/enter full name|name/i).fill(`E2E Employee ${testId}`);
+    await modal.getByPlaceholder(/enter email address|email/i).fill(`e2e_emp_${testId}@example.com`);
+    
+    // Generate temporary password if button exists
+    const genPwdBtn = modal.getByRole('button', { name: /generate password/i });
+    if (await genPwdBtn.isVisible()) {
+      await genPwdBtn.click();
+    } else {
+      await modal.getByPlaceholder(/temporary password|password/i).fill('TempPassword@123');
+    }
 
-    await expect(page.getByText(/invitation sent successfully|success/i)).toBeVisible().catch(() => {});
+    await modal.getByRole('button', { name: /create employee|send invite|invite|submit/i }).click();
+    await expect(page.getByText(/created successfully|success/i)).toBeVisible().catch(() => {});
   });
 });

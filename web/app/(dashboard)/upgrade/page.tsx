@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo, useCallback } from "react";
+import React, { useState, useEffect, useMemo, useCallback, useRef } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   Check,
@@ -272,18 +272,17 @@ export default function UpgradePage() {
   }, [canManageBilling, currentActiveUsers]);
 
   // Pre-select plan if passed in query param
+  const highlightHandledRef = useRef(false);
   useEffect(() => {
-    if (highlightParam && displayPlans.length > 0) {
+    if (highlightParam && displayPlans.length > 0 && !highlightHandledRef.current) {
       const match = displayPlans.find((p) => p.id.toLowerCase() === highlightParam.toLowerCase());
       if (match && match.id !== activePlanId) {
-        const timer = setTimeout(() => {
-          if (match.pricingMode === "CUSTOM") {
-            setEnterpriseModalOpen(true);
-          } else {
-            handleOpenUpgradeModal(match);
-          }
-        }, 0);
-        return () => clearTimeout(timer);
+        highlightHandledRef.current = true;
+        if (match.pricingMode === "CUSTOM") {
+          setEnterpriseModalOpen(true);
+        } else {
+          handleOpenUpgradeModal(match);
+        }
       }
     }
   }, [highlightParam, activePlanId, displayPlans, handleOpenUpgradeModal]);
@@ -1316,7 +1315,7 @@ export default function UpgradePage() {
   );
 }
 
-function renderMatrixCell(val: string | boolean) {
+function renderMatrixCell(val: unknown) {
   if (typeof val === "boolean") {
     return val ? (
       <div className="inline-flex p-1 rounded-full bg-emerald-500/15 text-emerald-600 dark:text-emerald-400">
@@ -1326,5 +1325,11 @@ function renderMatrixCell(val: string | boolean) {
       <span className="text-muted-foreground/40 font-bold">—</span>
     );
   }
-  return <span className="font-semibold text-foreground">{val}</span>;
+  if (typeof val === "string") {
+    return <span className="font-semibold text-foreground">{val}</span>;
+  }
+  if (val && typeof val === "object") {
+    return <span className="font-semibold text-foreground">{JSON.stringify(val)}</span>;
+  }
+  return <span className="text-muted-foreground/40 font-bold">—</span>;
 }

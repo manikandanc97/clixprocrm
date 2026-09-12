@@ -52,7 +52,7 @@ export const disableMfa = async (factorId?: string): Promise<{ success: boolean;
 
 export const recordMfaAuditEvent = async (
   event: 'MFA_ENROLLED' | 'MFA_VERIFIED' | 'MFA_CHALLENGE_FAILED',
-  details: Record<string, any> = {}
+  details: Record<string, unknown> = {}
 ): Promise<{ success: boolean }> => {
   const response = await client.post<{ success: boolean; data: { success: boolean } }>(
     '/auth/mfa/audit-event',

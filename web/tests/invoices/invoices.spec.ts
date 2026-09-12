@@ -6,8 +6,8 @@ test.describe('Invoices Module', () => {
   });
 
   test('Page loads correctly', async ({ page }) => {
-    await expect(page.getByRole('heading', { name: /invoices/i })).toBeVisible();
+    await expect(page.getByRole('heading', { name: /invoices/i })).toBeVisible({ timeout: 15000 });
     const listContainer = page.locator('table, [data-testid="invoices-list"]');
-    await expect(listContainer.first()).toBeVisible({ timeout: 10000 });
+    await expect(listContainer.first()).toBeVisible({ timeout: 15000 });
   });
 });

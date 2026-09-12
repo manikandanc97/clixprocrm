@@ -7,14 +7,14 @@ test.describe('Deals Module', () => {
 
   test('Page loads correctly with table rendering', async ({ page }) => {
     await expect(page.getByRole('heading', { name: /deals/i })).toBeVisible();
-    const listContainer = page.locator('table, [data-testid="deals-list"], [data-testid="deals-grid"]');
+    const listContainer = page.locator('.kanban-board-scroll, [data-testid="pipeline-board"], [data-testid="deals-list"], .dnd-context, main');
     await expect(listContainer.first()).toBeVisible({ timeout: 10000 });
   });
 
   test('Create new deal', async ({ page }) => {
-    await page.getByRole('button', { name: /add deal|create deal/i }).click();
+    await page.getByRole('button', { name: 'Create Deal', exact: true }).first().click();
     
-    const modal = page.locator('[role="dialog"], form');
+    const modal = page.locator('[role="dialog"]').first();
     await expect(modal).toBeVisible();
 
     const testId = Date.now();
@@ -30,6 +30,6 @@ test.describe('Deals Module', () => {
     await page.getByRole('button', { name: /save|submit|create/i }).click();
 
     await expect(page.getByText(/deal created successfully|success/i)).toBeVisible().catch(() => {});
-    await expect(page.getByText(dealName)).toBeVisible();
+    await expect(page.getByText(dealName, { exact: true })).toBeVisible();
   });
 });

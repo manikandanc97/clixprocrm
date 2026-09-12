@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 export interface UseInvoicesUrlStateOptions {
@@ -26,8 +26,8 @@ export interface UseInvoicesUrlStateReturn {
 }
 
 /**
- * Hook to manage URL-synchronized state for Invoices:
- * - ?customize=... (e.g. ?customize=true or ?customize=<sectionKey>)
+ * Standardized URL query parameters synchronization hook for Invoices:
+ * - ?customize=true or ?customize=<sectionId>
  * - ?new=true (triggers create modal on mount, then cleans URL via history replacement)
  */
 export function useInvoicesUrlState(options?: UseInvoicesUrlStateOptions): UseInvoicesUrlStateReturn {
@@ -40,7 +40,7 @@ export function useInvoicesUrlState(options?: UseInvoicesUrlStateOptions): UseIn
     cust && cust !== "true" ? cust : undefined
   );
 
-  // Synchronize state when customize URL parameter changes
+  // Synchronize state when customize URL parameter changes without cascading renders
   if (cust !== prevCust) {
     setPrevCust(cust);
     if (cust) {
@@ -52,6 +52,7 @@ export function useInvoicesUrlState(options?: UseInvoicesUrlStateOptions): UseIn
   }
 
   const [isNewInvoiceRequested, setIsNewInvoiceRequested] = useState(false);
+  const newHandledRef = useRef(false);
 
   // Clean-history helper for ?new=true using imperative history replacement
   const clearNewParam = useCallback(() => {
@@ -64,18 +65,16 @@ export function useInvoicesUrlState(options?: UseInvoicesUrlStateOptions): UseIn
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("new") === "true") {
-      const timer = setTimeout(() => {
-        setIsNewInvoiceRequested(true);
-        if (options?.setIsCreateModalOpen) {
-          options.setIsCreateModalOpen(true);
-        }
-        if (options?.onOpenCreate) {
-          options.onOpenCreate();
-        }
-        clearNewParam();
-      }, 0);
-      return () => clearTimeout(timer);
+    if (params.get("new") === "true" && !newHandledRef.current) {
+      newHandledRef.current = true;
+      setIsNewInvoiceRequested(true);
+      if (options?.setIsCreateModalOpen) {
+        options.setIsCreateModalOpen(true);
+      }
+      if (options?.onOpenCreate) {
+        options.onOpenCreate();
+      }
+      clearNewParam();
     }
   }, [options, clearNewParam]);
 

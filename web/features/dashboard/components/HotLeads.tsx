@@ -69,7 +69,7 @@ export default function HotLeads() {
                         <Flame className="w-3 h-3" /> {lead.score} Score
                       </span>
                     </div>
-                    <button className="opacity-0 group-hover:opacity-100 p-2 bg-muted hover:bg-warning/10 text-muted-foreground hover:text-warning rounded-xl transition-all">
+                    <button aria-label="View lead" className="opacity-0 group-hover:opacity-100 p-2 bg-muted hover:bg-warning/10 text-muted-foreground hover:text-warning rounded-xl transition-all">
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>

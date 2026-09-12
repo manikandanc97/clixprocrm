@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, ReactNode } from "react";
+import React, { useState, useEffect, useRef, ReactNode } from "react";
 import {
   Dialog,
   DialogContent,
@@ -72,26 +72,15 @@ export function ContextualSettingsDrawer({
     defaultSection || sections[0]?.id || ""
   );
   const [showExitConfirm, setShowExitConfirm] = useState(false);
+  const wasOpenRef = useRef(open);
 
-  // Sync active section ONLY when drawer opens
+  // Sync active section ONLY on drawer open transition (false -> true)
   useEffect(() => {
-    if (open) {
-      const timer = setTimeout(() => {
-        setActiveSectionId(defaultSection || sections[0]?.id || "");
-      }, 0);
-      return () => clearTimeout(timer);
+    if (open && !wasOpenRef.current) {
+      setActiveSectionId(defaultSection || sections[0]?.id || "");
     }
+    wasOpenRef.current = open;
   }, [open, defaultSection, sections]);
-
-  // Fallback if current activeSectionId no longer exists
-  useEffect(() => {
-    if (sections.length > 0 && !sections.some((s) => s.id === activeSectionId)) {
-      const timer = setTimeout(() => {
-        setActiveSectionId(sections[0].id);
-      }, 0);
-      return () => clearTimeout(timer);
-    }
-  }, [sections, activeSectionId]);
 
   const handleRequestClose = (nextOpen: boolean) => {
     if (!nextOpen && hasUnsavedChanges && !autoSave) {
@@ -107,7 +96,10 @@ export function ContextualSettingsDrawer({
     onOpenChange(false);
   };
 
-  const activeSection = sections.find((s) => s.id === activeSectionId) || sections[0];
+  const activeSection =
+    sections.find((s) => s.id === activeSectionId) ||
+    (defaultSection ? sections.find((s) => s.id === defaultSection) : null) ||
+    sections[0];
 
   return (
     <>

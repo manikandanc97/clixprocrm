@@ -18,6 +18,7 @@ import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { formatDate } from "@/shared/utils/formatters";
 import { InvoiceSortConfig } from "@/features/invoices/hooks/use-invoices-data";
 import type { SortDirection } from "@/shared/components/DataTableColumnHeader";
+import type { InvoiceType } from "@/shared/types/invoice";
 
 // ─── Status Variant Mapping ──────────────────────────────────────────────────
 export function getInvoiceStatusVariant(
@@ -39,7 +40,7 @@ export function getInvoiceStatusVariant(
 
 // ─── Props Interface ─────────────────────────────────────────────────────────
 export interface InvoicesDataTableProps {
-  paginatedInvoices: any[];
+  paginatedInvoices: InvoiceType[];
   isInitialLoading: boolean;
   selectedInvoiceIds: string[];
   setSelectedInvoiceIds: React.Dispatch<React.SetStateAction<string[]>>;
@@ -53,9 +54,9 @@ export interface InvoicesDataTableProps {
   formatCurrency: (amount: number, currency?: string) => string;
   getInvoiceColor?: (name: string) => { bg: string; text: string; border: string };
   onOpenDetail: (id: string) => void;
-  onOpenPayment: (invoice: any) => void;
+  onOpenPayment: (invoice: InvoiceType) => void;
   onPrintPdf: (id: string) => void;
-  onDeleteInvoice: (invoice: any) => void;
+  onDeleteInvoice: (invoice: InvoiceType) => void;
   onCreateInvoice: () => void;
 }
 
@@ -105,7 +106,7 @@ export function InvoicesDataTable({
     [getCustomInvoiceColor]
   );
 
-  const columns = useMemo<CRMDataTableColumn<any>[]>(() => {
+  const columns = useMemo<CRMDataTableColumn<InvoiceType>[]>(() => {
     return [
       // 1. Checkbox
       {
@@ -132,7 +133,7 @@ export function InvoicesDataTable({
             />
           </div>
         ),
-        cell: (inv: any) => {
+        cell: (inv: InvoiceType) => {
           const isSelected = selectedInvoiceIds.includes(inv.id);
           return (
             <div
@@ -169,10 +170,10 @@ export function InvoicesDataTable({
         sortable: true,
         sortDirection: sortDirection("invoiceNumber"),
         onSort: (dir) => setSort("invoiceNumber", dir),
-        cell: (inv: any) => {
+        cell: (inv: InvoiceType) => {
           const clientName =
             inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned";
-          const color = resolveInvoiceColor(clientName || inv.invoiceNumber);
+          const color = resolveInvoiceColor(clientName || inv.invoiceNumber || "Invoice");
           return (
             <div className="flex items-center gap-3 min-w-0">
               <div
@@ -212,7 +213,7 @@ export function InvoicesDataTable({
         sortable: true,
         sortDirection: sortDirection("client"),
         onSort: (dir) => setSort("client", dir),
-        cell: (inv: any) => {
+        cell: (inv: InvoiceType) => {
           const clientName =
             inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned";
           return (
@@ -242,7 +243,7 @@ export function InvoicesDataTable({
         sortable: true,
         sortDirection: sortDirection("dueDate"),
         onSort: (dir) => setSort("dueDate", dir),
-        cell: (inv: any) => (
+        cell: (inv: InvoiceType) => (
           <div className="flex items-center gap-1.5 text-muted-foreground text-xs">
             <Calendar className="h-3.5 w-3.5 shrink-0 text-muted-foreground/70" />
             <span>{formatDate(inv.dueDate, "On Receipt")}</span>
@@ -257,9 +258,9 @@ export function InvoicesDataTable({
         sortable: true,
         sortDirection: sortDirection("totalAmount"),
         onSort: (dir) => setSort("totalAmount", dir),
-        cell: (inv: any) => (
+        cell: (inv: InvoiceType) => (
           <span className="font-bold text-foreground text-xs font-mono">
-            {formatCurrency(inv.totalAmount || inv.total || 0, inv.currency)}
+            {formatCurrency(inv.totalAmount || inv.amount || 0, inv.currency)}
           </span>
         ),
         className: "px-4 py-3.5",
@@ -271,7 +272,7 @@ export function InvoicesDataTable({
         sortable: true,
         sortDirection: sortDirection("paidAmount"),
         onSort: (dir) => setSort("paidAmount", dir),
-        cell: (inv: any) => (
+        cell: (inv: InvoiceType) => (
           <span className="font-semibold text-emerald-600 dark:text-emerald-400 text-xs font-mono">
             {inv.paidAmount > 0
               ? formatCurrency(inv.paidAmount, inv.currency)
@@ -287,9 +288,9 @@ export function InvoicesDataTable({
         sortable: true,
         sortDirection: sortDirection("balanceAmount"),
         onSort: (dir) => setSort("balanceAmount", dir),
-        cell: (inv: any) => (
+        cell: (inv: InvoiceType) => (
           <span className="font-bold text-foreground text-xs font-mono">
-            {formatCurrency(inv.balanceAmount || inv.balance || 0, inv.currency)}
+            {formatCurrency(inv.balanceAmount || 0, inv.currency)}
           </span>
         ),
         className: "px-4 py-3.5",
@@ -301,10 +302,10 @@ export function InvoicesDataTable({
         sortable: true,
         sortDirection: sortDirection("status"),
         onSort: (dir) => setSort("status", dir),
-        cell: (inv: any) => (
+        cell: (inv: InvoiceType) => (
           <StatusBadge
             status={inv.status || "DRAFT"}
-            variant={getInvoiceStatusVariant(inv.status, inv.paymentStatus, inv.isOverdue)}
+            variant={getInvoiceStatusVariant(inv.status, (inv as { paymentStatus?: string }).paymentStatus)}
           />
         ),
         className: "px-4 py-3.5",
@@ -314,7 +315,7 @@ export function InvoicesDataTable({
       {
         header: <span className="sr-only">Actions</span>,
         align: "right",
-        cell: (inv: any) => (
+        cell: (inv: InvoiceType) => (
           <div onClick={(e) => e.stopPropagation()} className="flex items-center justify-end">
             <CRMActionMenu
               triggerOrientation="vertical"
@@ -329,7 +330,7 @@ export function InvoicesDataTable({
                   icon: Printer,
                   onClick: () => onPrintPdf(inv.id),
                 },
-                ...((inv.balanceAmount > 0 || inv.balance > 0) && inv.status !== "CANCELLED"
+                ...((inv.balanceAmount > 0) && inv.status !== "CANCELLED"
                   ? [
                       {
                         label: "Record Payment",

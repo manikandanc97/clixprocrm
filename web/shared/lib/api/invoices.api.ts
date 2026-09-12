@@ -1,4 +1,7 @@
 import client from "./client";
+import type { InvoiceType, InvoicesListResponse } from "@/shared/types/invoice";
+
+export type { InvoiceType, InvoicesListResponse };
 
 export interface InvoiceItemPayload {
   id?: string;
@@ -30,8 +33,8 @@ export interface CreateInvoicePayload {
   discountValue?: number;
   notes?: string;
   termsAndConditions?: string;
-  customerBillingAddress?: any;
-  orgBillingAddress?: any;
+  customerBillingAddress?: Record<string, unknown>;
+  orgBillingAddress?: Record<string, unknown>;
 }
 
 export interface RecordPaymentPayload {
@@ -87,7 +90,7 @@ export async function fetchInvoices(params?: {
   dealId?: string;
   dateFrom?: string;
   dateTo?: string;
-}) {
+}): Promise<InvoicesListResponse> {
   const query = new URLSearchParams();
   if (params?.page) query.set("page", params.page.toString());
   if (params?.limit) query.set("limit", params.limit.toString());
@@ -99,27 +102,27 @@ export async function fetchInvoices(params?: {
   if (params?.dateFrom) query.set("dateFrom", params.dateFrom);
   if (params?.dateTo) query.set("dateTo", params.dateTo);
 
-  const res = await client.get(`/crm/invoices?${query.toString()}`);
+  const res = await client.get<InvoicesListResponse>(`/crm/invoices?${query.toString()}`);
   return res.data;
 }
 
-export async function fetchInvoiceById(id: string) {
-  const res = await client.get(`/crm/invoices/${id}`);
+export async function fetchInvoiceById(id: string): Promise<{ success: boolean; data?: InvoiceType; message?: string }> {
+  const res = await client.get<{ success: boolean; data?: InvoiceType; message?: string }>(`/crm/invoices/${id}`);
   return res.data;
 }
 
-export async function createInvoice(payload: CreateInvoicePayload) {
-  const res = await client.post("/crm/invoices", payload);
+export async function createInvoice(payload: CreateInvoicePayload): Promise<{ success: boolean; data: InvoiceType }> {
+  const res = await client.post<{ success: boolean; data: InvoiceType }>("/crm/invoices", payload);
   return res.data;
 }
 
-export async function updateInvoice(id: string, payload: Partial<CreateInvoicePayload>) {
-  const res = await client.patch(`/crm/invoices/${id}`, payload);
+export async function updateInvoice(id: string, payload: Partial<CreateInvoicePayload>): Promise<{ success: boolean; data: InvoiceType }> {
+  const res = await client.patch<{ success: boolean; data: InvoiceType }>(`/crm/invoices/${id}`, payload);
   return res.data;
 }
 
-export async function deleteInvoice(id: string) {
-  const res = await client.delete(`/crm/invoices/${id}`);
+export async function deleteInvoice(id: string): Promise<{ success: boolean; message?: string }> {
+  const res = await client.delete<{ success: boolean; message?: string }>(`/crm/invoices/${id}`);
   return res.data;
 }
 

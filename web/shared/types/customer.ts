@@ -6,6 +6,7 @@ export interface CustomerType {
   id: string;
   name: string;
   company: string;
+  companyId?: string | null;
   email: string;
   status: "PREMIUM" | "ACTIVE" | "INACTIVE";
   revenue: string;

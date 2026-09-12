@@ -4,6 +4,7 @@ import { useEffect, useRef } from "react";
 import { useQueryClient } from "@tanstack/react-query";
 import { createClient } from "@/lib/supabase/client";
 import { useAuth } from "@/features/auth/components/auth-provider";
+import type { RealtimeChannel } from "@supabase/supabase-js";
 import { playEnterpriseNotificationChime, sendBrowserDesktopNotification } from "@/shared/lib/notifications/sound-chime";
 import { toast } from "sonner";
 
@@ -14,7 +15,7 @@ import { toast } from "sonner";
 export function useRealtimeNotifications() {
   const { user, isAuthenticated } = useAuth();
   const queryClient = useQueryClient();
-  const channelRef = useRef<any>(null);
+  const channelRef = useRef<RealtimeChannel | null>(null);
 
   useEffect(() => {
     if (!isAuthenticated || !user?.id) {

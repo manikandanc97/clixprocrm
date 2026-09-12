@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useEffect, useMemo } from "react";
+import React, { useState, useEffect, useMemo, useRef } from "react";
 import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
@@ -248,44 +248,43 @@ export function InvoiceContextualSettings({
   const [additionalClauses, setAdditionalClauses] = useState<AdditionalClauseItem[]>([]);
 
   const [hasChanges, setHasChanges] = useState(false);
+  const isInitializedRef = useRef(false);
 
-  // Initialize from backend settings
+  // Initialize from backend settings once upon arrival
   useEffect(() => {
-    if (settings && Object.keys(settings).length > 0) {
-      const timer = setTimeout(() => {
-        setLegalName(settings.legalName || workspace?.name || "");
-        setGstin(settings.gstin || workspace?.taxId || "");
-        setPan(settings.pan || "");
-        setBillingAddress(settings.billingAddress || workspace?.address || "");
-        setCity(settings.city || "");
-        setState(settings.state || "Karnataka");
-        setPostalCode(settings.postalCode || "");
-        setCountry(settings.country || "India");
-        setTaxType(settings.taxType || "GST");
+    if (settings && Object.keys(settings).length > 0 && !isInitializedRef.current) {
+      isInitializedRef.current = true;
+      setLegalName(settings.legalName || workspace?.name || "");
+      setGstin(settings.gstin || workspace?.taxId || "");
+      setPan(settings.pan || "");
+      setBillingAddress(settings.billingAddress || workspace?.address || "");
+      setCity(settings.city || "");
+      setState(settings.state || "Karnataka");
+      setPostalCode(settings.postalCode || "");
+      setCountry(settings.country || "India");
+      setTaxType(settings.taxType || "GST");
 
-        if (settings.invoicePrefix) setInvoicePrefix(settings.invoicePrefix);
-        if (settings.financialYear) setFinancialYear(settings.financialYear);
-        if (settings.nextInvoiceNumber) setNextInvoiceNumber(String(settings.nextInvoiceNumber));
-        if (settings.defaultTaxRate !== undefined) setDefaultTaxRate(String(settings.defaultTaxRate));
-        if (settings.defaultNotes) setDefaultNotes(settings.defaultNotes);
-        if (settings.defaultTerms) setDefaultTerms(settings.defaultTerms);
+      if (settings.invoicePrefix) setInvoicePrefix(settings.invoicePrefix);
+      if (settings.financialYear) setFinancialYear(settings.financialYear);
+      if (settings.nextInvoiceNumber) setNextInvoiceNumber(String(settings.nextInvoiceNumber));
+      if (settings.defaultTaxRate !== undefined) setDefaultTaxRate(String(settings.defaultTaxRate));
+      if (settings.defaultNotes) setDefaultNotes(settings.defaultNotes);
+      if (settings.defaultTerms) setDefaultTerms(settings.defaultTerms);
 
-        // Initialize Bank Accounts
-        if (settings.bankName || settings.accountNumber) {
-          setBankAccounts([
-            {
-              id: "primary-bank",
-              bankName: settings.bankName || "HDFC Bank",
-              accountHolderName: settings.accountHolderName || settings.legalName || workspace?.name || "",
-              accountNumber: settings.accountNumber || "",
-              ifscCode: settings.ifscCode || "",
-              upiId: settings.upiId || "",
-              isPrimary: true,
-            },
-          ]);
-        }
-      }, 0);
-      return () => clearTimeout(timer);
+      // Initialize Bank Accounts
+      if (settings.bankName || settings.accountNumber) {
+        setBankAccounts([
+          {
+            id: "primary-bank",
+            bankName: settings.bankName || "HDFC Bank",
+            accountHolderName: settings.accountHolderName || settings.legalName || workspace?.name || "",
+            accountNumber: settings.accountNumber || "",
+            ifscCode: settings.ifscCode || "",
+            upiId: settings.upiId || "",
+            isPrimary: true,
+          },
+        ]);
+      }
     }
   }, [settings, workspace]);
 

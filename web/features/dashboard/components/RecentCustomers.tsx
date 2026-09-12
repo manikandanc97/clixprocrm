@@ -63,7 +63,7 @@ export default function RecentCustomers({ data: initialData }: { data?: Customer
                     <div className="text-right">
                       <span className="block text-xs font-medium text-muted-foreground">{customer.status}</span>
                     </div>
-                    <button className="opacity-0 group-hover:opacity-100 p-2 bg-muted hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-xl transition-all">
+                    <button aria-label="View customer" className="opacity-0 group-hover:opacity-100 p-2 bg-muted hover:bg-primary/10 text-muted-foreground hover:text-primary rounded-xl transition-all">
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>

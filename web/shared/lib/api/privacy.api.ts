@@ -33,7 +33,7 @@ export interface PrivacyExportData {
     remainingRecoveryCodes: number;
     orgMfaPolicy: 'OPTIONAL' | 'REQUIRED';
   };
-  notificationPreferences: Record<string, any>;
+  notificationPreferences: Record<string, boolean | string | number>;
   workspaceActivitySummary: {
     tasksCreated: number;
     tasksAssigned: number;

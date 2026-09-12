@@ -2,9 +2,10 @@
  * @file shared/lib/api/deals.api.ts
  * Deals and pipeline API endpoints.
  */
+import axios from "axios";
 import client from "./client";
 import { ApiResponseType } from "@/shared/types/api";
-import { PipelineDataType } from "@/shared/types/pipeline";
+import { PipelineDataType, PipelineLeadType } from "@/shared/types/pipeline";
 
 async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>) {
   try {
@@ -13,11 +14,15 @@ async function unwrapResponse<T>(request: Promise<{ data: ApiResponseType<T> }>)
       throw new Error(response.data?.message || "Invalid API response.");
     }
     return response.data.data;
-  } catch (error: any) {
-    const msg = error.response?.data?.message;
-    if (msg) {
-      if (typeof msg === 'string') throw new Error(msg);
-      else if (typeof msg === 'object') throw new Error(msg.message || JSON.stringify(msg));
+  } catch (error: unknown) {
+    if (axios.isAxiosError(error)) {
+      const msg = error.response?.data?.message;
+      if (msg) {
+        if (typeof msg === 'string') throw new Error(msg);
+        else if (typeof msg === 'object' && msg !== null) {
+          throw new Error((msg as { message?: string }).message || JSON.stringify(msg));
+        }
+      }
     }
     throw error;
   }
@@ -47,7 +52,7 @@ export function bulkDeleteDeals(ids: string[]) {
   return unwrapResponse<{ count: number }>(client.post("/crm/deals/bulk", { ids }));
 }
 
-export function updatePipelineItem(id: string, data: Record<string, any>) {
-  return unwrapResponse<any>(client.patch(`/crm/pipeline/${id}`, data));
+export function updatePipelineItem(id: string, data: Record<string, unknown>) {
+  return unwrapResponse<PipelineLeadType | { id: string }>(client.patch(`/crm/pipeline/${id}`, data));
 }
 

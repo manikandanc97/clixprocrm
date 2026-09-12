@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useEffect, useCallback } from "react";
+import { useState, useEffect, useCallback, useRef } from "react";
 import { useSearchParams } from "next/navigation";
 
 export interface UseTasksUrlStateOptions {
@@ -21,7 +21,7 @@ export interface UseTasksUrlStateReturn {
   isNewTaskRequested: boolean;
   clearNewParam: () => void;
 
-  // Edit task state (if present in URL)
+  // Edit task state
   editTaskId: string | null;
   clearEditParam: () => void;
 
@@ -35,28 +35,23 @@ export interface UseTasksUrlStateReturn {
  * - ?new=true (triggers create modal on mount, then cleans URL via history replacement)
  * - ?edit=<id> (if present, exposes editTaskId and cleanup helper)
  */
-export function useTasksUrlState(options?: UseTasksUrlStateOptions): UseTasksUrlStateReturn {
+export function useTasksUrlState(
+  options?: UseTasksUrlStateOptions
+): UseTasksUrlStateReturn {
   const searchParams = useSearchParams();
 
-  const cust = searchParams.get("customize");
-  const [prevCust, setPrevCust] = useState(cust);
-  const [isCustomizeOpen, setIsCustomizeOpen] = useState(Boolean(cust));
-  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<string | undefined>(
-    cust && cust !== "true" ? cust : undefined
+  // Customize drawer state
+  const customizeParam = searchParams.get("customize");
+  const [isCustomizeOpen, setIsCustomizeOpen] = useState(
+    Boolean(customizeParam)
   );
+  const [customizeDefaultSection, setCustomizeDefaultSection] = useState<
+    string | undefined
+  >(customizeParam && customizeParam !== "true" ? customizeParam : undefined);
 
-  // Synchronize state when customize URL parameter changes without cascading renders
-  if (cust !== prevCust) {
-    setPrevCust(cust);
-    if (cust) {
-      setIsCustomizeOpen(true);
-      if (cust !== "true") {
-        setCustomizeDefaultSection(cust);
-      }
-    }
-  }
-
+  // New task modal requested via ?new=true
   const [isNewTaskRequested, setIsNewTaskRequested] = useState(false);
+  const newHandledRef = useRef(false);
 
   // Clean-history helper for ?new=true using imperative history replacement
   const clearNewParam = useCallback(() => {
@@ -77,18 +72,16 @@ export function useTasksUrlState(options?: UseTasksUrlStateOptions): UseTasksUrl
   useEffect(() => {
     if (typeof window === "undefined") return;
     const params = new URLSearchParams(window.location.search);
-    if (params.get("new") === "true") {
-      const timer = setTimeout(() => {
-        setIsNewTaskRequested(true);
-        if (options?.setIsAddModalOpen) {
-          options.setIsAddModalOpen(true);
-        }
-        if (options?.onOpenCreate) {
-          options.onOpenCreate();
-        }
-        clearNewParam();
-      }, 0);
-      return () => clearTimeout(timer);
+    if (params.get("new") === "true" && !newHandledRef.current) {
+      newHandledRef.current = true;
+      setIsNewTaskRequested(true);
+      if (options?.setIsAddModalOpen) {
+        options.setIsAddModalOpen(true);
+      }
+      if (options?.onOpenCreate) {
+        options.onOpenCreate();
+      }
+      clearNewParam();
     }
   }, [options, clearNewParam]);
 

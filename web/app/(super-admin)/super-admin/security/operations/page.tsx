@@ -171,16 +171,23 @@ export default function SecurityOperationsPage() {
   };
 
   useEffect(() => {
-    const timer = setTimeout(() => {
-      loadData();
-    }, 0);
+    let isCancelled = false;
+    const run = async () => {
+      try {
+        await loadData();
+      } catch {
+        // Handled inside loadData
+      }
+    };
+    run();
 
     const handleAal2Verified = () => {
+      if (isCancelled) return;
       loadData(true);
     };
     window.addEventListener("clixpro:aal2-verified", handleAal2Verified);
     return () => {
-      clearTimeout(timer);
+      isCancelled = true;
       window.removeEventListener("clixpro:aal2-verified", handleAal2Verified);
     };
   }, []);

@@ -18,6 +18,7 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { toast } from "sonner";
+import type { InvoiceType } from "@/shared/types/invoice";
 import {
   CRMPageContainer,
   CRMPageHeader,
@@ -42,11 +43,11 @@ export default function InvoicesPage() {
   const [isCreateModalOpen, setIsCreateModalOpen] = useState(false);
   const [selectedInvoiceId, setSelectedInvoiceId] = useState<string | null>(null);
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
-  const [paymentTargetInvoice, setPaymentTargetInvoice] = useState<any | null>(null);
+  const [paymentTargetInvoice, setPaymentTargetInvoice] = useState<InvoiceType | null>(null);
   const [isPaymentModalOpen, setIsPaymentModalOpen] = useState(false);
 
   // Delete modal state
-  const [invoiceToDelete, setInvoiceToDelete] = useState<any | null>(null);
+  const [invoiceToDelete, setInvoiceToDelete] = useState<InvoiceType | null>(null);
   const [deleting, setDeleting] = useState(false);
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
@@ -95,7 +96,7 @@ export default function InvoicesPage() {
     setIsDetailModalOpen(true);
   };
 
-  const handleOpenPayment = (inv: any) => {
+  const handleOpenPayment = (inv: InvoiceType) => {
     setPaymentTargetInvoice(inv);
     setIsPaymentModalOpen(true);
   };

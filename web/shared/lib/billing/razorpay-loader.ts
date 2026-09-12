@@ -1,3 +1,13 @@
+declare global {
+  interface Window {
+    Razorpay?: new (options: Record<string, unknown>) => {
+      open: () => void;
+      on: (event: string, handler: (response: unknown) => void) => void;
+      close?: () => void;
+    };
+  }
+}
+
 /**
  * Dynamically and reliably loads the official Razorpay Checkout SDK (checkout.js).
  * Ensures singleton script loading, handles re-entrant calls, and guarantees promise resolution without hanging.
@@ -10,7 +20,7 @@ export function loadRazorpayCheckoutScript(): Promise<boolean> {
   }
 
   // If already available on window
-  if ((window as any).Razorpay) {
+  if (window.Razorpay) {
     return Promise.resolve(true);
   }
 
@@ -24,7 +34,7 @@ export function loadRazorpayCheckoutScript(): Promise<boolean> {
     
     // Safety timeout to prevent any infinite hang
     const timeoutId = setTimeout(() => {
-      if ((window as any).Razorpay) {
+      if (window.Razorpay) {
         resolve(true);
       } else {
         console.warn("[Razorpay Loader] Timed out waiting for Razorpay checkout SDK.");
@@ -34,7 +44,7 @@ export function loadRazorpayCheckoutScript(): Promise<boolean> {
 
     const onScriptLoaded = () => {
       clearTimeout(timeoutId);
-      if ((window as any).Razorpay) {
+      if (window.Razorpay) {
         resolve(true);
       } else {
         console.warn("[Razorpay Loader] Script loaded but window.Razorpay is undefined.");
@@ -42,7 +52,7 @@ export function loadRazorpayCheckoutScript(): Promise<boolean> {
       }
     };
 
-    const onScriptError = (err?: any) => {
+    const onScriptError = (err?: unknown) => {
       clearTimeout(timeoutId);
       console.error("[Razorpay Loader] Failed to load Razorpay checkout script:", err);
       // Reset so retry is possible
@@ -51,7 +61,7 @@ export function loadRazorpayCheckoutScript(): Promise<boolean> {
     };
 
     if (existingScript) {
-      if ((window as any).Razorpay) {
+      if (window.Razorpay) {
         clearTimeout(timeoutId);
         resolve(true);
         return;

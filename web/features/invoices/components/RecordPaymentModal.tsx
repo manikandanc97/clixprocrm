@@ -34,17 +34,13 @@ import {
 } from "@/shared/ui/dialog";
 import { useRecordPayment } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
+import { InvoiceType } from "@/shared/types/invoice";
 import { toast } from "sonner";
 
-interface InvoiceTarget {
-  id: string;
-  invoiceNumber: string;
-  totalAmount: number;
-  paidAmount: number;
-  balanceAmount: number;
-  currency: string;
-  customer?: { name?: string; company?: string; email?: string } | null;
-}
+export type InvoiceTarget = Pick<
+  InvoiceType,
+  "id" | "invoiceNumber" | "totalAmount" | "paidAmount" | "balanceAmount" | "currency" | "customer"
+>;
 
 interface RecordPaymentModalProps {
   isOpen: boolean;
@@ -122,7 +118,7 @@ function RecordPaymentForm({
               Record Customer Payment
             </DialogTitle>
             <DialogDescription className="text-xs text-muted-foreground mt-0.5 font-mono">
-              Invoice {invoice.invoiceNumber}
+              Invoice {invoice.invoiceNumber || "Draft"}
               {customerDisplay ? ` • ${customerDisplay}` : ""}
             </DialogDescription>
           </div>

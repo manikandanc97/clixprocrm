@@ -15,6 +15,7 @@ import {
 import { CRM_ROLES, normalizeRole } from "@/shared/lib/auth/rbac";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { toast } from "sonner";
+import { getApiErrorMessage } from "@/shared/lib/api/error";
 
 export interface WorkspaceUsageStats {
   users: { current: number; limit: number; remaining: number; percentage: number; isLimitReached: boolean };
@@ -73,6 +74,20 @@ export interface SubscriptionQuote {
   effectiveImmediately: boolean;
 }
 
+export interface CheckoutOrderResult {
+  orderId: string;
+  keyId: string;
+  amount: number;
+  currency: string;
+  provider?: string;
+  customer?: {
+    name?: string;
+    email?: string;
+    contact?: string;
+  };
+  [key: string]: unknown;
+}
+
 export interface BillingInvoiceItem {
   id: string;
   invoiceNumber: string;
@@ -101,7 +116,7 @@ export function useSubscription() {
   const isSuperAdmin =
     roleKey === CRM_ROLES.SUPER_ADMIN ||
     user?.role === "SUPER_ADMIN" ||
-    (user as any)?.isSuperAdmin === true;
+    user?.isSuperAdmin === true;
   const userRole = (user?.role || access?.roleName || "").toUpperCase();
   // Billing management requires ADMIN or organization owner
   const canManageBilling =
@@ -110,8 +125,8 @@ export function useSubscription() {
     userRole === "ADMIN" ||
     userRole === "ORG_ADMIN" ||
     userRole === "OWNER" ||
-    (user as any)?.isOrgOwner === true ||
-    (user as any)?.isOrgAdmin === true;
+    user?.isOrgOwner === true ||
+    user?.isOrgAdmin === true;
 
   const query = useQuery<WorkspaceSubscriptionResponse>({
     queryKey: ["workspace", "subscription"],
@@ -208,7 +223,7 @@ export function useSubscription() {
       planId: string;
       seats?: number;
       billingCycle?: "monthly" | "annual";
-    }): Promise<{ quote: SubscriptionQuote; order: any }> => {
+    }): Promise<{ quote: SubscriptionQuote; order: CheckoutOrderResult }> => {
       const res = await api.post("/crm/subscription/create-checkout-order", params);
       return res.data?.data;
     },
@@ -232,8 +247,8 @@ export function useSubscription() {
       queryClient.invalidateQueries({ queryKey: ["workspace", "subscription", "invoices"] });
       toast.success("Payment verified and plan activated successfully!");
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || "Failed to verify payment.";
+    onError: (err: unknown) => {
+      const msg = getApiErrorMessage(err, "Failed to verify payment.");
       toast.error(msg);
     },
   });
@@ -247,8 +262,8 @@ export function useSubscription() {
       queryClient.invalidateQueries({ queryKey: ["workspace", "subscription"] });
       toast.success("Billing cycle updated.");
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || "Failed to switch billing cycle.";
+    onError: (err: unknown) => {
+      const msg = getApiErrorMessage(err, "Failed to switch billing cycle.");
       toast.error(msg);
     },
   });
@@ -275,8 +290,8 @@ export function useSubscription() {
       queryClient.invalidateQueries({ queryKey: ["workspace"] });
       toast.success(`Plan updated to ${data.planName} successfully!`);
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || "Failed to update subscription.";
+    onError: (err: unknown) => {
+      const msg = getApiErrorMessage(err, "Failed to update subscription.");
       toast.error(msg);
     },
   });
@@ -289,8 +304,8 @@ export function useSubscription() {
     onSuccess: () => {
       toast.success("Thank you! Our enterprise sales team will contact you shortly.");
     },
-    onError: (err: any) => {
-      const msg = err?.response?.data?.message || err?.message || "Failed to submit inquiry.";
+    onError: (err: unknown) => {
+      const msg = getApiErrorMessage(err, "Failed to submit inquiry.");
       toast.error(msg);
     },
   });

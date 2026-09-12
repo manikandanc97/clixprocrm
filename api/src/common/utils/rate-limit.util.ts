@@ -89,7 +89,12 @@ export async function checkRateLimit(
     return { allowed: true, resetTime: now + config.windowMs };
   }
 
-  if (record.count >= config.maxRequests) {
+  const effectiveMax =
+    process.env.NODE_ENV !== 'production'
+      ? Math.max(config.maxRequests, 100)
+      : config.maxRequests;
+
+  if (record.count >= effectiveMax) {
     return { allowed: false, resetTime: record.resetTime };
   }
 

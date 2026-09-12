@@ -33,7 +33,11 @@ export default function ProtectedRoute({ children }: ProtectedRouteProps) {
     if (isInitializing) return;
 
     if (!isAuthenticated) {
-      router.replace("/login");
+      if (typeof window !== "undefined") {
+        window.location.href = "/login";
+      } else {
+        router.replace("/login");
+      }
       return;
     }
 

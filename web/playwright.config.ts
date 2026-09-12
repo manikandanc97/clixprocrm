@@ -3,8 +3,8 @@ import { defineConfig, devices } from '@playwright/test';
 export default defineConfig({
   testDir: './tests',
 
-  /* Run tests in parallel */
-  fullyParallel: true,
+  /* Run tests sequentially to avoid Supabase concurrent session and rate limit conflicts */
+  fullyParallel: false,
 
   /* Fail if test.only is committed */
   forbidOnly: !!process.env.CI,
@@ -12,8 +12,8 @@ export default defineConfig({
   /* Retry only in CI */
   retries: process.env.CI ? 2 : 0,
 
-  /* One worker in CI */
-  workers: process.env.CI ? 1 : undefined,
+  /* One worker for deterministic session stability */
+  workers: 1,
 
   /* HTML Report */
   reporter: 'html',
@@ -51,8 +51,11 @@ export default defineConfig({
     { name: 'teardown', testMatch: /.*global\.teardown\.ts/ },
     {
       name: 'chromium',
+      dependencies: ['setup'],
+      testIgnore: [/.*\.setup\.ts/, /.*global\.teardown\.ts/],
       use: {
         ...devices['Desktop Chrome'],
+        storageState: 'playwright/.auth/user.json',
       },
     },
   ],

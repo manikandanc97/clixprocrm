@@ -4,6 +4,7 @@ import { useState, useMemo, useCallback } from "react";
 import { useInvoices } from "@/shared/hooks/use-invoices";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
+import type { InvoiceType } from "@/shared/types/invoice";
 import { toast } from "sonner";
 
 export type InvoiceStatusFilter =
@@ -27,7 +28,7 @@ export function getInvoiceColor(name: string) {
 export interface UseInvoicesDataReturn {
   // Query state
   data: ReturnType<typeof useInvoices>["data"];
-  rawInvoices: any[];
+  rawInvoices: InvoiceType[];
   isLoading: boolean;
   isInitialLoading: boolean;
   isPending: boolean;
@@ -66,8 +67,8 @@ export interface UseInvoicesDataReturn {
   toggleSelectInvoice: (invoiceId: string) => void;
 
   // Data sets
-  filteredInvoices: any[];
-  paginatedInvoices: any[];
+  filteredInvoices: InvoiceType[];
+  paginatedInvoices: InvoiceType[];
   totalInvoices: number;
 
   // Actions & Helpers
@@ -83,7 +84,7 @@ export function useInvoicesData(): UseInvoicesDataReturn {
   const { data, isLoading: loading, isPending, refetch } = useInvoices();
 
   const rawInvoices = useMemo(
-    () => (Array.isArray(data?.invoices) ? data.invoices : []),
+    () => (Array.isArray(data?.invoices) ? (data.invoices as InvoiceType[]) : []),
     [data]
   );
 
@@ -120,7 +121,7 @@ export function useInvoicesData(): UseInvoicesDataReturn {
   // Filter and sort logic
   const filteredInvoices = useMemo(() => {
     return rawInvoices
-      .filter((inv: any) => {
+      .filter((inv: InvoiceType) => {
         const clientName =
           inv.company?.name || inv.customer?.company || inv.customer?.name || "";
         const matchSearch =
@@ -131,11 +132,11 @@ export function useInvoicesData(): UseInvoicesDataReturn {
         const matchStatus =
           statusFilter === "ALL" ||
           inv.status?.toUpperCase() === statusFilter.toUpperCase() ||
-          inv.paymentStatus?.toUpperCase() === statusFilter.toUpperCase();
+          (inv as { paymentStatus?: string }).paymentStatus?.toUpperCase() === statusFilter.toUpperCase();
 
         return matchSearch && matchStatus;
       })
-      .sort((a: any, b: any) => {
+      .sort((a: InvoiceType, b: InvoiceType) => {
         if (!sortConfig) return 0;
         const dir = sortConfig.direction === "asc" ? 1 : -1;
 
@@ -158,13 +159,13 @@ export function useInvoicesData(): UseInvoicesDataReturn {
           return (dateA - dateB) * dir;
         }
         if (sortConfig.key === "totalAmount") {
-          return ((a.totalAmount || a.total || 0) - (b.totalAmount || b.total || 0)) * dir;
+          return ((a.totalAmount || a.amount || 0) - (b.totalAmount || b.amount || 0)) * dir;
         }
         if (sortConfig.key === "paidAmount") {
           return ((a.paidAmount || 0) - (b.paidAmount || 0)) * dir;
         }
         if (sortConfig.key === "balanceAmount") {
-          return ((a.balanceAmount || a.balance || 0) - (b.balanceAmount || b.balance || 0)) * dir;
+          return ((a.balanceAmount || 0) - (b.balanceAmount || 0)) * dir;
         }
         if (sortConfig.key === "status") {
           return (a.status || "").localeCompare(b.status || "") * dir;
@@ -200,17 +201,17 @@ export function useInvoicesData(): UseInvoicesDataReturn {
   const isAllCurrentPageSelected = useMemo(() => {
     return (
       paginatedInvoices.length > 0 &&
-      paginatedInvoices.every((inv: any) => selectedInvoiceIds.includes(inv.id))
+      paginatedInvoices.every((inv: InvoiceType) => selectedInvoiceIds.includes(inv.id))
     );
   }, [paginatedInvoices, selectedInvoiceIds]);
 
   const toggleSelectAllCurrentPage = useCallback(() => {
     if (isAllCurrentPageSelected) {
-      const pageIds = new Set(paginatedInvoices.map((inv: any) => inv.id));
+      const pageIds = new Set(paginatedInvoices.map((inv: InvoiceType) => inv.id));
       setSelectedInvoiceIds((prev) => prev.filter((id) => !pageIds.has(id)));
     } else {
       setSelectedInvoiceIds((prev) =>
-        Array.from(new Set([...prev, ...paginatedInvoices.map((inv: any) => inv.id)]))
+        Array.from(new Set([...prev, ...paginatedInvoices.map((inv: InvoiceType) => inv.id)]))
       );
     }
   }, [isAllCurrentPageSelected, paginatedInvoices]);
@@ -248,7 +249,7 @@ export function useInvoicesData(): UseInvoicesDataReturn {
       "Balance",
       "Status",
     ];
-    const rows = rawInvoices.map((inv: any) => {
+    const rows = rawInvoices.map((inv: InvoiceType) => {
       const clientName =
         inv.company?.name || inv.customer?.company || inv.customer?.name || "Unassigned";
       return [
@@ -256,9 +257,9 @@ export function useInvoicesData(): UseInvoicesDataReturn {
         `"${clientName.replace(/"/g, '""')}"`,
         inv.invoiceDate ? new Date(inv.invoiceDate).toISOString().slice(0, 10) : "",
         inv.dueDate ? new Date(inv.dueDate).toISOString().slice(0, 10) : "",
-        inv.totalAmount || inv.total || 0,
+        inv.totalAmount || inv.amount || 0,
         inv.paidAmount || 0,
-        inv.balanceAmount || inv.balance || 0,
+        inv.balanceAmount || 0,
         inv.status || "DRAFT",
       ];
     });
