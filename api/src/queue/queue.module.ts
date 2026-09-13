@@ -57,6 +57,7 @@ function parseRedisUrl(redisUrl: string) {
       tls: isTls ? { rejectUnauthorized: false } : undefined,
       maxRetriesPerRequest: null,
       enableReadyCheck: false,
+      retryStrategy: (times: number) => Math.min(times * 2000, 30000),
     };
   } catch (err: any) {
     logger.error(`Failed to parse REDIS_URL ("${redisUrl}"): ${err.message}`);
@@ -96,6 +97,7 @@ function parseRedisUrl(redisUrl: string) {
               port: 6379,
               maxRetriesPerRequest: null,
               enableReadyCheck: false,
+              retryStrategy: (times: number) => Math.min(times * 2000, 30000),
             },
           };
         }

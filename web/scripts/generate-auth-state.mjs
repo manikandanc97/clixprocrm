@@ -21,17 +21,23 @@ import { fileURLToPath } from 'url';
 const __dirname = path.dirname(fileURLToPath(import.meta.url));
 
 // ── Config ────────────────────────────────────────────────────────────────────
+const SUPABASE_URL =
+  process.env.NEXT_PUBLIC_SUPABASE_URL || process.env.SUPABASE_URL;
+const SUPABASE_ANON_KEY =
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY || process.env.SUPABASE_ANON_KEY;
 const SUPABASE_SERVICE_KEY =
-  process.env.SUPABASE_SERVICE_KEY || process.env.SUPABASE_SECRET_KEY;
+  process.env.SUPABASE_SERVICE_KEY ||
+  process.env.SUPABASE_SECRET_KEY ||
+  process.env.SUPABASE_SERVICE_ROLE_KEY;
 
-if (!SUPABASE_SERVICE_KEY) {
+if (!SUPABASE_URL || !SUPABASE_SERVICE_KEY) {
   throw new Error(
-    'Missing SUPABASE_SERVICE_KEY or SUPABASE_SECRET_KEY environment variable'
+    'Missing SUPABASE_URL, SUPABASE_SERVICE_KEY or SUPABASE_SECRET_KEY environment variable'
   );
 }
 
-const TEST_EMAIL    = process.env.TEST_USER_EMAIL    || 'superadmin@clixprocrm.com';
-const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || 'SuperAdmin@123456';
+const TEST_EMAIL    = process.env.TEST_USER_EMAIL    || 'testadmin@clixprocrm.com';
+const TEST_PASSWORD = process.env.TEST_USER_PASSWORD || 'E2ETestAdmin@123456';
 
 const AUTH_FILE = path.join(__dirname, '../playwright/.auth/user.json');
 const COOKIE_NAME = `sb-oscksafwlfkpqvifcvae-auth-token`;
