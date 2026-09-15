@@ -5,34 +5,13 @@ import {
   ContextualSettingsDrawer,
   ContextualSettingSection,
 } from "@/shared/components/crm/ContextualSettingsDrawer";
-import {
-  SettingsSection,
-  SettingsRow,
-  SettingsToggleRow,
-} from "@/shared/components/crm/ContextualSettingsComponents";
-import { Input } from "@/shared/ui/input";
-import { Button } from "@/shared/ui/button";
-import { Badge } from "@/shared/ui/badge";
-import { Switch } from "@/shared/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import { toast } from "sonner";
 import {
   Building2,
   Factory,
   CheckSquare,
   CopyX,
-  Plus,
-  Trash2,
   SlidersHorizontal,
-  GitMerge,
-  Lock,
-  Info,
 } from "lucide-react";
 import { useCompanies } from "@/shared/hooks/use-crm";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -54,6 +33,12 @@ import {
 import { CompanyIndustryReassignModal } from "./contextual-settings/CompanyIndustryReassignModal";
 import { CompanyCustomFieldModal } from "./contextual-settings/CompanyCustomFieldModal";
 import { CompanyMergeModal } from "./contextual-settings/CompanyMergeModal";
+
+import { CompanyIndustriesSection } from "./company-sections/CompanyIndustriesSection";
+import { CompanyAccountTypesSection } from "./company-sections/CompanyAccountTypesSection";
+import { CompanyFieldsSection } from "./company-sections/CompanyFieldsSection";
+import { CompanyRequiredFieldsSection } from "./company-sections/CompanyRequiredFieldsSection";
+import { CompanyDuplicateRulesSection } from "./company-sections/CompanyDuplicateRulesSection";
 
 export type { CustomField, StandardFieldConfig };
 export {
@@ -198,12 +183,10 @@ export function CompanyContextualSettings({
   const handleInitiateDeleteIndustry = (ind: string) => {
     const usage = industryUsageCounts[ind] || 0;
     if (usage > 0) {
-      // Must reassign
       setIndustryToDelete(ind);
       const firstOther = industries.find((i) => i !== ind) || "";
       setReassignTargetIndustry(firstOther);
     } else {
-      // Safe immediate delete
       setIndustries((prev) => prev.filter((i) => i !== ind));
       setHasChanges(true);
       toast.success(`Industry "${ind}" removed`);
@@ -355,468 +338,113 @@ export function CompanyContextualSettings({
 
   // Define exactly the 5 requested sections
   const sections: ContextualSettingSection[] = [
-    // 1. Industries
     {
       id: "industries",
       label: "Industries",
       icon: Factory,
       badge: `${industries.length}`,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Industry Classifications"
-            description="Manage industry classifications available when categorizing company accounts. Includes safe deletion protection."
-            icon={Factory}
-          >
-            <div className="space-y-2">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {industries.map((ind) => {
-                  const count = industryUsageCounts[ind] || 0;
-                  return (
-                    <div
-                      key={ind}
-                      className="flex items-center justify-between p-2.5 rounded-lg border border-border/70 bg-card hover:bg-muted/20 transition-colors"
-                    >
-                      <div className="flex items-center gap-2 min-w-0 pr-2">
-                        <span className="text-xs font-semibold text-foreground truncate">
-                          {ind}
-                        </span>
-                        {count > 0 ? (
-                          <Badge
-                            variant="secondary"
-                            className="text-[10px] py-0 px-1.5 h-4 bg-muted text-muted-foreground font-normal shrink-0"
-                          >
-                            {count} {count === 1 ? "account" : "accounts"}
-                          </Badge>
-                        ) : (
-                          <span className="text-[10px] text-muted-foreground/60 shrink-0">
-                            Unassigned
-                          </span>
-                        )}
-                      </div>
-                      <Button
-                        type="button"
-                        size="icon"
-                        variant="ghost"
-                        onClick={() => handleInitiateDeleteIndustry(ind)}
-                        aria-label={`Delete industry ${ind}`}
-                        className="w-7 h-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                        title={
-                          count > 0
-                            ? `Used by ${count} companies (requires reassignment)`
-                            : "Delete classification"
-                        }
-                      >
-                        <Trash2 className="w-3.5 h-3.5" />
-                      </Button>
-                    </div>
-                  );
-                })}
-              </div>
-
-              <form onSubmit={handleAddIndustry} className="mt-4 flex items-center gap-2 pt-2 border-t border-border/40">
-                <Input
-                  placeholder="New industry classification (e.g., Aerospace, Hospitality)..."
-                  value={newIndustry}
-                  onChange={(e) => setNewIndustry(e.target.value)}
-                  className="text-xs h-9 flex-1"
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="secondary"
-                  className="text-xs font-semibold h-9 shrink-0 gap-1"
-                  disabled={!newIndustry.trim()}
-                >
-                  <Plus className="w-3.5 h-3.5" /> Add Industry
-                </Button>
-              </form>
-            </div>
-          </SettingsSection>
-        </div>
+        <CompanyIndustriesSection
+          industries={industries}
+          industryUsageCounts={industryUsageCounts}
+          newIndustry={newIndustry}
+          setNewIndustry={setNewIndustry}
+          onAddIndustry={handleAddIndustry}
+          onInitiateDeleteIndustry={handleInitiateDeleteIndustry}
+        />
       ),
     },
-
-    // 2. Account Types
     {
       id: "account-types",
       label: "Account Types",
       icon: Building2,
       badge: `${accountTypes.length}`,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Account Types & Business Roles"
-            description="Categorize companies by commercial relationship and partnership type."
-            icon={Building2}
-          >
-            <div className="space-y-3">
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                {accountTypes.map((type) => (
-                  <div
-                    key={type}
-                    className="flex items-center justify-between p-2.5 rounded-lg border border-border/70 bg-card hover:bg-muted/20 transition-colors"
-                  >
-                    <span className="text-xs font-semibold text-foreground truncate">
-                      {type}
-                    </span>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleRemoveAccountType(type)}
-                      disabled={accountTypes.length <= 1}
-                      aria-label={`Delete account type ${type}`}
-                      className="w-7 h-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10 shrink-0"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-
-              <form onSubmit={handleAddAccountType} className="mt-4 flex items-center gap-2 pt-2 border-t border-border/40">
-                <Input
-                  placeholder="New account type (e.g., Affiliate, Sub-Contractor)..."
-                  value={newAccountType}
-                  onChange={(e) => setNewAccountType(e.target.value)}
-                  className="text-xs h-9 flex-1"
-                />
-                <Button
-                  type="submit"
-                  size="sm"
-                  variant="secondary"
-                  className="text-xs font-semibold h-9 shrink-0 gap-1"
-                  disabled={!newAccountType.trim()}
-                >
-                  <Plus className="w-3.5 h-3.5" /> Add Account Type
-                </Button>
-              </form>
-            </div>
-          </SettingsSection>
-        </div>
+        <CompanyAccountTypesSection
+          accountTypes={accountTypes}
+          newAccountType={newAccountType}
+          setNewAccountType={setNewAccountType}
+          onAddAccountType={handleAddAccountType}
+          onRemoveAccountType={handleRemoveAccountType}
+        />
       ),
     },
-
-    // 3. Company Fields
     {
       id: "fields",
       label: "Company Fields",
       icon: SlidersHorizontal,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Standard Account Fields"
-            description="Manage core attributes and visibility in company records and forms."
-            icon={SlidersHorizontal}
-          >
-            <div className="divide-y divide-border/40">
-              {standardFields.map((field) => (
-                <div
-                  key={field.id}
-                  className="flex items-center justify-between py-2.5 px-1 text-xs"
-                >
-                  <div className="space-y-0.5 max-w-lg min-w-0 pr-2">
-                    <div className="flex items-center gap-2">
-                      <span className="font-semibold text-foreground">
-                        {field.label}
-                      </span>
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] py-0 px-1.5 h-4 font-medium text-muted-foreground"
-                      >
-                        {field.type}
-                      </Badge>
-                      {field.systemLocked && (
-                        <Badge
-                          variant="secondary"
-                          className="text-[10px] py-0 px-1.5 h-4 gap-1 bg-muted font-semibold text-muted-foreground"
-                        >
-                          <Lock className="w-2.5 h-2.5" /> System Core
-                        </Badge>
-                      )}
-                    </div>
-                    <p className="text-[11.5px] text-muted-foreground leading-normal">
-                      {field.description}
-                    </p>
-                  </div>
-
-                  <div className="shrink-0 flex items-center gap-2">
-                    {field.systemLocked ? (
-                      <Badge
-                        variant="outline"
-                        className="text-[10px] text-muted-foreground border-border/70"
-                      >
-                        Always Visible
-                      </Badge>
-                    ) : (
-                      <Switch
-                        checked={field.visible}
-                        onCheckedChange={(c) => handleToggleStandardField(field.id, c)}
-                      />
-                    )}
-                  </div>
-                </div>
-              ))}
-            </div>
-          </SettingsSection>
-
-          {/* Custom Fields Section */}
-          <SettingsSection
-            title="Custom Fields"
-            description="Add bespoke metadata fields tailored to your organization's business workflow."
-            icon={Plus}
-            headerAction={
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setIsAddCustomFieldOpen(true)}
-                className="h-8 text-xs font-semibold gap-1.5 border-border/80"
-              >
-                <Plus className="w-3.5 h-3.5" /> Add Custom Field
-              </Button>
-            }
-          >
-            {customFields.length === 0 ? (
-              <div className="text-center py-6 border border-dashed border-border/70 rounded-lg text-muted-foreground text-xs">
-                <p>No custom fields defined.</p>
-                <p className="text-[11px] text-muted-foreground/80 mt-0.5">
-                  Click &quot;+ Add Custom Field&quot; to capture custom data points.
-                </p>
-              </div>
-            ) : (
-              <div className="divide-y divide-border/40">
-                {customFields.map((cf) => (
-                  <div
-                    key={cf.id}
-                    className="flex items-center justify-between py-2.5 px-1 text-xs"
-                  >
-                    <div className="space-y-0.5">
-                      <div className="flex items-center gap-2">
-                        <span className="font-semibold text-foreground">
-                          {cf.name}
-                        </span>
-                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 h-4 uppercase">
-                          {cf.type}
-                        </Badge>
-                        {cf.required && (
-                          <Badge variant="destructive" className="text-[10px] py-0 px-1.5 h-4">
-                            Required
-                          </Badge>
-                        )}
-                      </div>
-                      {cf.options && (
-                        <p className="text-[11px] text-muted-foreground">
-                          Options: {cf.options}
-                        </p>
-                      )}
-                    </div>
-                    <Button
-                      type="button"
-                      size="icon"
-                      variant="ghost"
-                      onClick={() => handleRemoveCustomField(cf.id)}
-                      className="w-7 h-7 text-muted-foreground hover:text-destructive hover:bg-destructive/10"
-                    >
-                      <Trash2 className="w-3.5 h-3.5" />
-                    </Button>
-                  </div>
-                ))}
-              </div>
-            )}
-          </SettingsSection>
-        </div>
+        <CompanyFieldsSection
+          standardFields={standardFields}
+          customFields={customFields}
+          onToggleStandardField={handleToggleStandardField}
+          onOpenAddCustomField={() => setIsAddCustomFieldOpen(true)}
+          onRemoveCustomField={handleRemoveCustomField}
+        />
       ),
     },
-
-    // 4. Required Fields
     {
       id: "required",
       label: "Required Fields",
       icon: CheckSquare,
       component: (
-        <div className="space-y-5">
-          <div className="p-3.5 rounded-xl border border-blue-500/20 bg-blue-500/5 text-xs text-foreground flex items-start gap-2.5">
-            <Info className="w-4 h-4 text-blue-500 shrink-0 mt-0.5" />
-            <p className="leading-relaxed">
-              These rules apply when creating or updating company records.
-            </p>
-          </div>
-
-          <SettingsSection
-            title="Validation & Completeness Rules"
-            description="Configure mandatory data points for account creation."
-            icon={CheckSquare}
-          >
-            <div className="divide-y divide-border/40">
-              {/* System Required: Company Name */}
-              <div className="flex items-center justify-between py-2.5 px-2 text-xs">
-                <div className="space-y-0.5">
-                  <div className="flex items-center gap-2">
-                    <span className="font-semibold text-foreground">
-                      Company Name
-                    </span>
-                    <Badge variant="secondary" className="text-[10px] py-0 px-1.5 h-4 gap-1 bg-muted text-muted-foreground font-semibold">
-                      <Lock className="w-2.5 h-2.5" /> Required (System Default)
-                    </Badge>
-                  </div>
-                  <p className="text-[11.5px] text-muted-foreground">
-                    Core company identifier. Always mandatory at the database level.
-                  </p>
-                </div>
-                <Switch checked disabled />
-              </div>
-
-              <SettingsToggleRow
-                label="Require Industry Category"
-                description="Mandate selection of an industry sector before saving the company."
-                checked={requireIndustry}
-                onCheckedChange={(c) => {
-                  setRequireIndustry(c);
-                  setHasChanges(true);
-                }}
-              />
-
-              <SettingsToggleRow
-                label="Require Official Website"
-                description="Ensure website URL domain is provided (Recommended OFF for SMB clients)."
-                checked={requireWebsite}
-                onCheckedChange={(c) => {
-                  setRequireWebsite(c);
-                  setHasChanges(true);
-                }}
-              />
-
-              <SettingsToggleRow
-                label="Require Primary Phone Number"
-                description="Mandate a telephone contact number on company creation."
-                checked={requirePhone}
-                onCheckedChange={(c) => {
-                  setRequirePhone(c);
-                  setHasChanges(true);
-                }}
-              />
-
-              <SettingsToggleRow
-                label="Require City / Geographic Location"
-                description="Mandate headquarters city for territory and regional reporting."
-                checked={requireLocation}
-                onCheckedChange={(c) => {
-                  setRequireLocation(c);
-                  setHasChanges(true);
-                }}
-              />
-
-              <SettingsToggleRow
-                label="Require Account Type"
-                description="Enforce selecting a business relationship role (Customer, Partner, etc.)."
-                checked={requireAccountType}
-                onCheckedChange={(c) => {
-                  setRequireAccountType(c);
-                  setHasChanges(true);
-                }}
-              />
-            </div>
-          </SettingsSection>
-        </div>
+        <CompanyRequiredFieldsSection
+          requireIndustry={requireIndustry}
+          setRequireIndustry={(c) => {
+            setRequireIndustry(c);
+            setHasChanges(true);
+          }}
+          requireWebsite={requireWebsite}
+          setRequireWebsite={(c) => {
+            setRequireWebsite(c);
+            setHasChanges(true);
+          }}
+          requirePhone={requirePhone}
+          setRequirePhone={(c) => {
+            setRequirePhone(c);
+            setHasChanges(true);
+          }}
+          requireLocation={requireLocation}
+          setRequireLocation={(c) => {
+            setRequireLocation(c);
+            setHasChanges(true);
+          }}
+          requireAccountType={requireAccountType}
+          setRequireAccountType={(c) => {
+            setRequireAccountType(c);
+            setHasChanges(true);
+          }}
+        />
       ),
     },
-
-    // 5. Duplicate Rules
     {
       id: "duplicates",
       label: "Duplicate Rules",
       icon: CopyX,
       component: (
-        <div className="space-y-5">
-          <SettingsSection
-            title="Account Deduplication Rules"
-            description="Automate matching across web domains, fuzzy legal names, and normalized phone numbers."
-            icon={CopyX}
-          >
-            <div className="divide-y divide-border/40">
-              <SettingsToggleRow
-                label="Deduplicate by Domain Name"
-                description="Match website domains (e.g., acme.com) against existing accounts."
-                checked={preventDomainDuplicates}
-                onCheckedChange={(c) => {
-                  setPreventDomainDuplicates(c);
-                  setHasChanges(true);
-                }}
-              />
-
-              <SettingsToggleRow
-                label="Fuzzy Legal Name Normalization"
-                description="Detect variations like 'Acme Inc', 'Acme Corporation', and ignore punctuation."
-                checked={preventNameDuplicates}
-                onCheckedChange={(c) => {
-                  setPreventNameDuplicates(c);
-                  setHasChanges(true);
-                }}
-              />
-
-              <SettingsToggleRow
-                label="Deduplicate by Normalized Phone"
-                description="Normalize phone digits before comparison to match '+91 9876543210' with '9876543210'."
-                checked={preventPhoneDuplicates}
-                onCheckedChange={(c) => {
-                  setPreventPhoneDuplicates(c);
-                  setHasChanges(true);
-                }}
-              />
-
-              <SettingsRow
-                label="Duplicate Policy"
-                description="Action to take when a duplicate company is identified during creation."
-              >
-                <Select
-                  value={duplicatePolicy}
-                  onValueChange={(val) => {
-                    setDuplicatePolicy(val);
-                    setHasChanges(true);
-                  }}
-                >
-                  <SelectTrigger className="w-48 h-8 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="allow">Allow (No Warning)</SelectItem>
-                    <SelectItem value="warn">Warn & Allow Override</SelectItem>
-                    <SelectItem value="block">Block Creation</SelectItem>
-                  </SelectContent>
-                </Select>
-              </SettingsRow>
-            </div>
-          </SettingsSection>
-
-          {/* Merge Companies Tool */}
-          <SettingsSection
-            title="Duplicate Review & Merge"
-            description="Safely consolidate duplicate accounts without orphaning contacts, deals, invoices, or activity logs."
-            icon={GitMerge}
-          >
-            <div className="flex items-center justify-between p-3.5 rounded-lg border border-border/70 bg-card">
-              <div className="space-y-0.5 max-w-md">
-                <h5 className="text-xs font-bold text-foreground">
-                  Merge Duplicate Accounts
-                </h5>
-                <p className="text-[11.5px] text-muted-foreground leading-normal">
-                  Compare two company profiles side-by-side and transfer all relational data to the primary record.
-                </p>
-              </div>
-              <Button
-                type="button"
-                size="sm"
-                variant="outline"
-                onClick={() => setIsMergeModalOpen(true)}
-                className="text-xs font-semibold gap-1.5 h-8.5 shrink-0"
-              >
-                <GitMerge className="w-3.5 h-3.5" /> Review & Merge
-              </Button>
-            </div>
-          </SettingsSection>
-        </div>
+        <CompanyDuplicateRulesSection
+          preventDomainDuplicates={preventDomainDuplicates}
+          setPreventDomainDuplicates={(c) => {
+            setPreventDomainDuplicates(c);
+            setHasChanges(true);
+          }}
+          preventNameDuplicates={preventNameDuplicates}
+          setPreventNameDuplicates={(c) => {
+            setPreventNameDuplicates(c);
+            setHasChanges(true);
+          }}
+          preventPhoneDuplicates={preventPhoneDuplicates}
+          setPreventPhoneDuplicates={(c) => {
+            setPreventPhoneDuplicates(c);
+            setHasChanges(true);
+          }}
+          duplicatePolicy={duplicatePolicy}
+          setDuplicatePolicy={(val) => {
+            setDuplicatePolicy(val);
+            setHasChanges(true);
+          }}
+          onOpenMergeModal={() => setIsMergeModalOpen(true)}
+        />
       ),
     },
   ];
@@ -837,7 +465,6 @@ export function CompanyContextualSettings({
         onSave={handleSave}
       />
 
-      {/* ── Reassign Industry Before Deleting Dialog ───────────────────────────── */}
       <CompanyIndustryReassignModal
         industryToDelete={industryToDelete}
         onClose={() => setIndustryToDelete(null)}
@@ -849,7 +476,6 @@ export function CompanyContextualSettings({
         onConfirmReassignAndDelete={handleConfirmReassignAndDeleteIndustry}
       />
 
-      {/* ── Add Custom Field Dialog ────────────────────────────────────────────── */}
       <CompanyCustomFieldModal
         open={isAddCustomFieldOpen}
         onOpenChange={setIsAddCustomFieldOpen}
@@ -864,7 +490,6 @@ export function CompanyContextualSettings({
         onAddCustomField={handleAddCustomField}
       />
 
-      {/* ── Side-by-Side Review Duplicates & Merge Dialog ──────────────────────── */}
       <CompanyMergeModal
         open={isMergeModalOpen}
         onOpenChange={setIsMergeModalOpen}

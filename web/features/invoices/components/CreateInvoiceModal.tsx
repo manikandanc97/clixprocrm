@@ -1,35 +1,21 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import {
-  Plus,
-  Trash2,
-  Building2,
-  User,
-  FileText,
-  Sparkles,
-  Info,
-  CheckCircle2,
-} from "lucide-react";
+import { Info, CheckCircle2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
-import { Label } from "@/shared/ui/label";
-import { Textarea } from "@/shared/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import { FormModal } from "@/shared/components/crm/FormModal";
 import { useCreateInvoice, useInvoiceSettings } from "@/shared/hooks/use-invoices";
 import { useCustomers, useCompanies, useDeals, useQuotations } from "@/shared/hooks/use-crm";
-import { useCurrency } from "@/shared/hooks/use-currency";
 import { QuotationType } from "@/shared/types/quotation";
 import { PipelineLeadType } from "@/shared/types/pipeline";
 import { CustomerType } from "@/shared/types/customer";
 import { toast } from "sonner";
+
+import { LineItemState, InvoiceTotals } from "./invoice-form/invoice-types";
+import { InvoiceReferencesSection } from "./invoice-form/InvoiceReferencesSection";
+import { InvoiceDatesSection } from "./invoice-form/InvoiceDatesSection";
+import { InvoiceLineItemsTable } from "./invoice-form/InvoiceLineItemsTable";
+import { InvoiceSummaryPanel } from "./invoice-form/InvoiceSummaryPanel";
 
 interface CompanyOption {
   id: string;
@@ -43,18 +29,6 @@ interface CreateInvoiceModalProps {
   initialCompanyId?: string;
   initialDealId?: string;
   initialQuotationId?: string;
-}
-
-interface LineItemState {
-  id: string;
-  name: string;
-  description: string;
-  quantity: number;
-  unit: string;
-  unitPrice: number;
-  discountType: "PERCENTAGE" | "FIXED";
-  discountValue: number;
-  taxRate: number;
 }
 
 export function CreateInvoiceModal({
@@ -72,14 +46,13 @@ export function CreateInvoiceModal({
   const { data: dealsData } = useDeals();
   const { data: quotationsData } = useQuotations();
   const { mutateAsync: createInvoiceMutate, isPending: isSubmitting } = useCreateInvoice();
-  const { formatCurrency } = useCurrency();
 
   const safeCustomers: CustomerType[] = Array.isArray(customersData) ? (customersData as CustomerType[]) : (customersData?.customers as CustomerType[]) || [];
   const safeCompanies: CompanyOption[] = Array.isArray(companiesData) ? (companiesData as CompanyOption[]) : (companiesData?.companies as CompanyOption[]) || [];
   const safeDeals: PipelineLeadType[] = Array.isArray(dealsData) ? (dealsData as PipelineLeadType[]) : (dealsData?.deals as PipelineLeadType[]) || [];
   const safeQuotations: QuotationType[] = Array.isArray(quotationsData) ? (quotationsData as QuotationType[]) : (quotationsData?.quotations as QuotationType[]) || [];
 
-  // Form State
+  // ─── Form State ────────────────────────────────────────────────────────────
   const [customerId, setCustomerId] = useState(initialCustomerId || "");
   const [companyId, setCompanyId] = useState(initialCompanyId || "");
   const [dealId, setDealId] = useState(initialDealId || "");
@@ -110,28 +83,21 @@ export function CreateInvoiceModal({
     },
   ]);
 
-  // Load defaults from settings if loaded asynchronously
+  // Async settings sync
   const [prevSettings, setPrevSettings] = useState(settings);
   if (settings && settings !== prevSettings) {
     setPrevSettings(settings);
-    if (!notes && settings.defaultNotes) {
-      setNotes(settings.defaultNotes);
-    }
-    if (!termsAndConditions && settings.defaultTerms) {
-      setTermsAndConditions(settings.defaultTerms);
-    }
+    if (!notes && settings.defaultNotes) setNotes(settings.defaultNotes);
+    if (!termsAndConditions && settings.defaultTerms) setTermsAndConditions(settings.defaultTerms);
   }
 
-  // Auto-sync company when customer selected
+  // ─── Handlers ──────────────────────────────────────────────────────────────
   const handleCustomerChange = (cId: string) => {
     setCustomerId(cId);
     const found = safeCustomers.find((c: CustomerType) => c.id === cId);
-    if (found?.companyId) {
-      setCompanyId(found.companyId);
-    }
+    if (found?.companyId) setCompanyId(found.companyId);
   };
 
-  // If quotation selected, import items
   const handleQuotationChange = (qId: string) => {
     setQuotationId(qId);
     const found = safeQuotations.find((q: QuotationType) => q.id === qId);
@@ -147,7 +113,7 @@ export function CreateInvoiceModal({
             quantity: Number(it.quantity || it.qty) || 1,
             unit: String(it.unit || "unit"),
             unitPrice: Number(it.rate || it.unitPrice || it.price) || 0,
-            discountType: "PERCENTAGE",
+            discountType: "PERCENTAGE" as const,
             discountValue: Number(it.discount) || 0,
             taxRate: Number(it.taxRate) || defaultTax,
           }))
@@ -189,7 +155,7 @@ export function CreateInvoiceModal({
     });
   };
 
-  // Unsaved changes tracking
+  // ─── Dirty Tracking ────────────────────────────────────────────────────────
   const isDirty = useMemo(() => {
     const hasCustomerChanged = customerId !== (initialCustomerId || "");
     const hasCompanyChanged = companyId !== (initialCompanyId || "");
@@ -202,57 +168,26 @@ export function CreateInvoiceModal({
       Boolean(items[0]?.name.trim()) ||
       Number(items[0]?.unitPrice) > 0 ||
       Boolean(items[0]?.description?.trim());
-    return (
-      hasCustomerChanged ||
-      hasCompanyChanged ||
-      hasDealChanged ||
-      hasQuotationChanged ||
-      hasNotes ||
-      hasTerms ||
-      hasItemData
-    );
-  }, [
-    customerId,
-    initialCustomerId,
-    companyId,
-    initialCompanyId,
-    dealId,
-    initialDealId,
-    quotationId,
-    initialQuotationId,
-    notes,
-    settings?.defaultNotes,
-    termsAndConditions,
-    settings?.defaultTerms,
-    items,
-  ]);
+    return hasCustomerChanged || hasCompanyChanged || hasDealChanged || hasQuotationChanged || hasNotes || hasTerms || hasItemData;
+  }, [customerId, initialCustomerId, companyId, initialCompanyId, dealId, initialDealId, quotationId, initialQuotationId, notes, settings?.defaultNotes, termsAndConditions, settings?.defaultTerms, items]);
 
-  // Live Calculations
-  const calculatedTotals = useMemo(() => {
+  // ─── Live Totals ───────────────────────────────────────────────────────────
+  const calculatedTotals = useMemo((): InvoiceTotals => {
     const itemCalculations = items.map((it) => {
       const qty = Math.max(0, Number(it.quantity) || 0);
       const rate = Math.max(0, Number(it.unitPrice) || 0);
       const gross = qty * rate;
-
       let discAmt = 0;
       if (it.discountType === "PERCENTAGE") {
         discAmt = gross * (Math.min(100, Math.max(0, Number(it.discountValue) || 0)) / 100);
       } else {
         discAmt = Math.min(gross, Math.max(0, Number(it.discountValue) || 0));
       }
-
       const lineTaxable = Math.max(0, gross - discAmt);
       const taxRate = Math.max(0, Number(it.taxRate) || 0);
       const taxAmt = lineTaxable * (taxRate / 100);
       const lineTotal = lineTaxable + taxAmt;
-
-      return {
-        gross,
-        discAmt,
-        lineTaxable,
-        taxAmt,
-        lineTotal,
-      };
+      return { gross, discAmt, lineTaxable, taxAmt, lineTotal };
     });
 
     const totals = itemCalculations.reduce(
@@ -284,6 +219,7 @@ export function CreateInvoiceModal({
     };
   }, [items]);
 
+  // ─── Submit ────────────────────────────────────────────────────────────────
   const handleSubmit = async (targetStatus: "DRAFT" | "SENT") => {
     if (items.some((it) => !it.name.trim())) {
       toast.error("Please provide a name/description for all items.");
@@ -293,7 +229,6 @@ export function CreateInvoiceModal({
       toast.error("Item unit price must be greater than 0.");
       return;
     }
-
     try {
       await createInvoiceMutate({
         customerId: customerId || undefined,
@@ -319,7 +254,6 @@ export function CreateInvoiceModal({
           sortOrder: idx,
         })),
       });
-
       onClose();
     } catch {
       // Error handled by hook toast
@@ -329,9 +263,7 @@ export function CreateInvoiceModal({
   return (
     <FormModal
       open={isOpen}
-      onOpenChange={(open) => {
-        if (!open) onClose();
-      }}
+      onOpenChange={(open) => { if (!open) onClose(); }}
       title="Create Customer Invoice"
       description="Issue a GST-compliant tax invoice to a client organization or contact"
       size="xl"
@@ -342,33 +274,13 @@ export function CreateInvoiceModal({
             <Info className="w-3.5 h-3.5 text-primary shrink-0" /> Numbers and tax totals are verified server-side on creation.
           </div>
           <div className="flex items-center gap-2 sm:gap-3 w-full sm:w-auto justify-end">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={onClose}
-              disabled={isSubmitting}
-              className="text-xs font-semibold"
-            >
+            <Button type="button" variant="outline" size="sm" onClick={onClose} disabled={isSubmitting} className="text-xs font-semibold">
               Cancel
             </Button>
-            <Button
-              type="button"
-              variant="secondary"
-              size="sm"
-              onClick={() => handleSubmit("DRAFT")}
-              disabled={isSubmitting}
-              className="text-xs font-semibold"
-            >
+            <Button type="button" variant="secondary" size="sm" onClick={() => handleSubmit("DRAFT")} disabled={isSubmitting} className="text-xs font-semibold">
               Save Draft
             </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={() => handleSubmit("SENT")}
-              disabled={isSubmitting}
-              className="text-xs font-semibold gap-1.5"
-            >
+            <Button type="button" size="sm" onClick={() => handleSubmit("SENT")} disabled={isSubmitting} className="text-xs font-semibold gap-1.5">
               <CheckCircle2 className="w-3.5 h-3.5" /> Save & Issue
             </Button>
           </div>
@@ -377,323 +289,53 @@ export function CreateInvoiceModal({
     >
       <div className="space-y-6">
         {/* Section 1: Customer & References */}
-        <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4 p-4 rounded-xl bg-muted/20 border border-border/60">
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5">
-              <User className="w-3.5 h-3.5 text-primary" /> Customer / Contact
-            </Label>
-            <Select value={customerId} onValueChange={handleCustomerChange}>
-              <SelectTrigger className="h-9 text-xs bg-background">
-                <SelectValue placeholder="Select Customer" />
-              </SelectTrigger>
-              <SelectContent className="max-h-56">
-                {safeCustomers.map((c: CustomerType) => (
-                  <SelectItem key={c.id} value={c.id} className="text-xs">
-                    {c.name} {c.company ? `(${c.company})` : ""}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5">
-              <Building2 className="w-3.5 h-3.5 text-primary" /> Company (Account)
-            </Label>
-            <Select value={companyId} onValueChange={setCompanyId}>
-              <SelectTrigger className="h-9 text-xs bg-background">
-                <SelectValue placeholder="Select Company" />
-              </SelectTrigger>
-              <SelectContent className="max-h-56">
-                {safeCompanies.map((comp: CompanyOption) => (
-                  <SelectItem key={comp.id} value={comp.id} className="text-xs">
-                    {comp.name}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5">
-              <FileText className="w-3.5 h-3.5 text-primary" /> Quotation (Optional)
-            </Label>
-            <Select value={quotationId} onValueChange={handleQuotationChange}>
-              <SelectTrigger className="h-9 text-xs bg-background">
-                <SelectValue placeholder="Import Quotation" />
-              </SelectTrigger>
-              <SelectContent className="max-h-56">
-                {safeQuotations.map((q: QuotationType) => (
-                  <SelectItem key={q.id} value={q.id} className="text-xs">
-                    {q.quoteNumber || "Quote"} - {q.client}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5 flex items-center gap-1.5">
-              <Sparkles className="w-3.5 h-3.5 text-primary" /> Deal (Optional)
-            </Label>
-            <Select value={dealId} onValueChange={setDealId}>
-              <SelectTrigger className="h-9 text-xs bg-background">
-                <SelectValue placeholder="Link Deal" />
-              </SelectTrigger>
-              <SelectContent className="max-h-56">
-                {safeDeals.map((d: PipelineLeadType) => (
-                  <SelectItem key={d.id} value={d.id} className="text-xs">
-                    {d.name} ({formatCurrency(Number(d.value) || 0)})
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <InvoiceReferencesSection
+          customerId={customerId}
+          companyId={companyId}
+          dealId={dealId}
+          quotationId={quotationId}
+          customers={safeCustomers}
+          companies={safeCompanies}
+          deals={safeDeals}
+          quotations={safeQuotations}
+          onCustomerChange={handleCustomerChange}
+          onCompanyChange={setCompanyId}
+          onDealChange={setDealId}
+          onQuotationChange={handleQuotationChange}
+        />
 
         {/* Section 2: Invoice Dates & Terms */}
-        <div className="grid grid-cols-1 sm:grid-cols-4 gap-4">
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5">Invoice Date</Label>
-            <Input
-              type="date"
-              value={invoiceDate}
-              onChange={(e) => setInvoiceDate(e.target.value)}
-              className="h-9 text-xs"
-            />
-          </div>
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5">Due Date</Label>
-            <Input
-              type="date"
-              value={dueDate}
-              onChange={(e) => setDueDate(e.target.value)}
-              className="h-9 text-xs"
-            />
-          </div>
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5">Payment Terms</Label>
-            <Select value={paymentTerms} onValueChange={setPaymentTerms}>
-              <SelectTrigger className="h-9 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="DUE_ON_RECEIPT" className="text-xs">Due on Receipt</SelectItem>
-                <SelectItem value="NET15" className="text-xs">Net 15 Days</SelectItem>
-                <SelectItem value="NET30" className="text-xs">Net 30 Days</SelectItem>
-                <SelectItem value="NET60" className="text-xs">Net 60 Days</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-          <div>
-            <Label className="text-xs font-semibold text-foreground mb-1.5">Currency</Label>
-            <Select value={currency} onValueChange={setCurrency}>
-              <SelectTrigger className="h-9 text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent>
-                <SelectItem value="INR" className="text-xs">INR (₹)</SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </div>
+        <InvoiceDatesSection
+          invoiceDate={invoiceDate}
+          dueDate={dueDate}
+          paymentTerms={paymentTerms}
+          currency={currency}
+          setInvoiceDate={setInvoiceDate}
+          setDueDate={setDueDate}
+          setPaymentTerms={setPaymentTerms}
+          setCurrency={setCurrency}
+        />
 
         {/* Section 3: Line Items Table */}
-        <div className="space-y-3">
-          <div className="flex items-center justify-between">
-            <h3 className="text-sm font-bold text-foreground">Invoice Items</h3>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={addItem}
-              className="gap-1.5 text-xs h-8 font-semibold"
-            >
-              <Plus className="w-3.5 h-3.5 text-primary" /> Add Item
-            </Button>
-          </div>
-
-          <div className="border border-border/80 rounded-xl overflow-x-auto overflow-y-hidden shadow-xs">
-            <table className="w-full text-xs">
-              <thead className="bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 text-foreground font-bold">
-                <tr className="h-10">
-                  <th className="py-2 px-3 text-left w-[36%] border-r border-emerald-500/15">Item & Description</th>
-                  <th className="py-2 px-2 text-center w-[12%] border-r border-emerald-500/15">Qty / Unit</th>
-                  <th className="py-2 px-2 text-right w-[16%] border-r border-emerald-500/15">Unit Price (₹)</th>
-                  <th className="py-2 px-2 text-right w-[12%] border-r border-emerald-500/15">Disc %</th>
-                  <th className="py-2 px-2 text-right w-[10%] border-r border-emerald-500/15">GST %</th>
-                  <th className="py-2 px-3 text-right w-[14%] border-r border-emerald-500/15">Total</th>
-                  <th className="py-2 px-2 w-[4%]"></th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-border/60">
-                {items.map((item, idx) => {
-                  const itemCalc = calculatedTotals.itemCalculations[idx];
-                  return (
-                    <tr key={item.id} className="bg-card hover:bg-muted/10 transition-colors">
-                      <td className="p-2.5 space-y-1">
-                        <Input
-                          placeholder="Product or Service Name"
-                          value={item.name}
-                          onChange={(e) => updateItem(idx, "name", e.target.value)}
-                          className="h-8 text-xs font-semibold"
-                          aria-label={`Item name, row ${idx + 1}`}
-                        />
-                        <Input
-                          placeholder="Description (Optional)"
-                          value={item.description}
-                          onChange={(e) => updateItem(idx, "description", e.target.value)}
-                          className="h-7 text-[11px] text-muted-foreground"
-                          aria-label={`Item description, row ${idx + 1}`}
-                        />
-                      </td>
-                      <td className="p-2">
-                        <div className="flex gap-1 items-center">
-                          <Input
-                            type="number"
-                            min="1"
-                            value={item.quantity}
-                            onChange={(e) => updateItem(idx, "quantity", Number(e.target.value) || 0)}
-                            className="h-8 text-xs text-center px-1"
-                            aria-label={`Quantity, row ${idx + 1}`}
-                          />
-                          <Input
-                            placeholder="unit"
-                            value={item.unit}
-                            onChange={(e) => updateItem(idx, "unit", e.target.value)}
-                            className="h-8 text-[11px] text-center w-14 px-1"
-                            aria-label={`Unit, row ${idx + 1}`}
-                          />
-                        </div>
-                      </td>
-                      <td className="p-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          step="0.01"
-                          value={item.unitPrice}
-                          onChange={(e) => updateItem(idx, "unitPrice", Number(e.target.value) || 0)}
-                          className="h-8 text-xs text-right font-mono"
-                          aria-label={`Unit price, row ${idx + 1}`}
-                        />
-                      </td>
-                      <td className="p-2">
-                        <Input
-                          type="number"
-                          min="0"
-                          max="100"
-                          value={item.discountValue}
-                          onChange={(e) => updateItem(idx, "discountValue", Number(e.target.value) || 0)}
-                          className="h-8 text-xs text-right"
-                          aria-label={`Discount, row ${idx + 1}`}
-                        />
-                      </td>
-                      <td className="p-2">
-                        <Select
-                          value={String(item.taxRate)}
-                          onValueChange={(val) => updateItem(idx, "taxRate", Number(val))}
-                        >
-                          <SelectTrigger className="h-8 text-xs text-right" aria-label={`Tax rate, row ${idx + 1}`}>
-                            <SelectValue />
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="0" className="text-xs">0%</SelectItem>
-                            <SelectItem value="5" className="text-xs">5%</SelectItem>
-                            <SelectItem value="12" className="text-xs">12%</SelectItem>
-                            <SelectItem value="18" className="text-xs">18%</SelectItem>
-                            <SelectItem value="28" className="text-xs">28%</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </td>
-                      <td className="p-2.5 text-right font-mono font-bold text-foreground">
-                        {formatCurrency(itemCalc?.lineTotal || 0, currency)}
-                      </td>
-                      <td className="p-2 text-center">
-                        <button
-                          type="button"
-                          onClick={() => removeItem(idx)}
-                          aria-label="Delete line item"
-                          className="p-1 rounded text-muted-foreground hover:text-destructive hover:bg-destructive/10 transition-colors cursor-pointer"
-                        >
-                          <Trash2 className="w-4 h-4" />
-                        </button>
-                      </td>
-                    </tr>
-                  );
-                })}
-              </tbody>
-            </table>
-          </div>
-        </div>
+        <InvoiceLineItemsTable
+          items={items}
+          currency={currency}
+          itemCalculations={calculatedTotals.itemCalculations}
+          onAddItem={addItem}
+          onRemoveItem={removeItem}
+          onUpdateItem={updateItem}
+        />
 
         {/* Section 4: Notes & Financial Summary */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6 pt-2">
-          <div className="space-y-4">
-            <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5">Notes to Customer</Label>
-              <Textarea
-                rows={2}
-                placeholder="Thank you for your business..."
-                value={notes}
-                onChange={(e) => setNotes(e.target.value)}
-                className="text-xs resize-none"
-              />
-            </div>
-            <div>
-              <Label className="text-xs font-semibold text-foreground mb-1.5">Terms & Conditions</Label>
-              <Textarea
-                rows={2}
-                placeholder="Payment is due within 15 days..."
-                value={termsAndConditions}
-                onChange={(e) => setTermsAndConditions(e.target.value)}
-                className="text-xs resize-none"
-              />
-            </div>
-          </div>
-
-          <div className="bg-muted/20 border border-border/70 rounded-xl p-4 space-y-2.5 font-sans">
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Items Subtotal:</span>
-              <span className="font-semibold text-foreground font-mono">
-                {formatCurrency(calculatedTotals.subtotal, currency)}
-              </span>
-            </div>
-            {calculatedTotals.totalDiscount > 0 && (
-              <div className="flex justify-between text-xs text-emerald-600 dark:text-emerald-400 font-semibold">
-                <span>Total Discount:</span>
-                <span className="font-mono">-{formatCurrency(calculatedTotals.totalDiscount, currency)}</span>
-              </div>
-            )}
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>Taxable Amount:</span>
-              <span className="font-semibold text-foreground font-mono">
-                {formatCurrency(calculatedTotals.taxable, currency)}
-              </span>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>CGST (Intra-state):</span>
-              <span className="font-mono">{formatCurrency(calculatedTotals.cgst, currency)}</span>
-            </div>
-            <div className="flex justify-between text-xs text-muted-foreground">
-              <span>SGST (Intra-state):</span>
-              <span className="font-mono">{formatCurrency(calculatedTotals.sgst, currency)}</span>
-            </div>
-            {calculatedTotals.roundOff !== 0 && (
-              <div className="flex justify-between text-xs text-muted-foreground">
-                <span>Round Off:</span>
-                <span className="font-mono">{calculatedTotals.roundOff > 0 ? "+" : ""}{formatCurrency(calculatedTotals.roundOff, currency)}</span>
-              </div>
-            )}
-            <div className="pt-2 border-t border-border flex justify-between items-baseline">
-              <span className="text-sm font-bold text-foreground">Grand Total:</span>
-              <span className="text-lg font-black text-primary font-mono">
-                {formatCurrency(calculatedTotals.totalAmount, currency)}
-              </span>
-            </div>
-          </div>
-        </div>
+        <InvoiceSummaryPanel
+          notes={notes}
+          termsAndConditions={termsAndConditions}
+          currency={currency}
+          totals={calculatedTotals}
+          setNotes={setNotes}
+          setTermsAndConditions={setTermsAndConditions}
+        />
       </div>
     </FormModal>
   );
 }
-

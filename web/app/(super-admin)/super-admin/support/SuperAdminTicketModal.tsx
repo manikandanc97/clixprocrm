@@ -11,39 +11,24 @@ import {
   PlatformSupportTicket,
 } from "@/shared/lib/api/super-admin.api";
 import { useAuth } from "@/features/auth/components/auth-provider";
-import { formatTicketCode } from "@/shared/lib/ticket-utils";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
-import { Button } from "@/shared/ui/button";
-import { Input } from "@/shared/ui/input";
-import { Textarea } from "@/shared/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import {
   Dialog,
   DialogContent,
   DialogDescription,
-  DialogTitle,
 } from "@/shared/ui/dialog";
 import { toast } from "sonner";
-import { cn, formatBytes } from "@/shared/lib/utils";
 import { Loader2 } from "lucide-react";
 
 import {
   STATUS_CONFIG,
   PRIORITY_CONFIG,
-  CATEGORY_OPTIONS,
-  TicketAttachmentList,
-  TicketMessageItem,
-  isImageFile,
-  isVideoFile,
 } from "@/features/help-center/components/ticket-shared";
-import { formatRelativeTime, getInitials } from "@/shared/utils/formatters";
-import { UserAvatar } from "@/features/help-center/components/ticket-history/UserAvatar";
+import { TicketModalHeader } from "./components/ticket-modal/TicketModalHeader";
+import { TicketConversationPanel } from "./components/ticket-modal/TicketConversationPanel";
+import { TicketModalSidebar } from "./components/ticket-modal/TicketModalSidebar";
+import { TicketMediaPreviewModal } from "./components/ticket-modal/TicketMediaPreviewModal";
+import { TicketDeleteDialog } from "./components/ticket-modal/TicketDeleteDialog";
+import { MediaPreviewItem } from "./components/ticket-modal/ticket-modal-types";
 
 export interface SuperAdminTicketModalProps {
   ticketId: string | null;
@@ -84,14 +69,7 @@ export function SuperAdminTicketModal({
   const [deletingTicket, setDeletingTicket] = useState(false);
 
   // Media Lightbox Preview
-  const [previewMedia, setPreviewMedia] = useState<{
-    filename: string;
-    url: string;
-    size?: number;
-    contentType?: string;
-    isImage: boolean;
-    isVideo: boolean;
-  } | null>(null);
+  const [previewMedia, setPreviewMedia] = useState<MediaPreviewItem | null>(null);
 
   // Load Ticket Data
   const loadTicket = useCallback(async () => {
@@ -342,639 +320,69 @@ export function SuperAdminTicketModal({
           ) : (
             <>
               {/* Sticky Top Header */}
-              <div className="shrink-0 bg-card/95 backdrop-blur-md border-b border-border/80 p-5 sm:px-6 sm:py-4 space-y-3 relative z-10">
-                <div className="flex items-center justify-between gap-3">
-                  {/* Left: Reference, Workspace, Category */}
-                  <div className="flex flex-wrap items-center gap-2">
-                    {/* Ticket Reference Code with Copy button */}
-                    <div
-                      role="button"
-                      tabIndex={0}
-                      onClick={(e) => copyId(ticket.ticketNumber, e)}
-                      className="font-mono text-xs font-bold text-primary bg-primary/10 hover:bg-primary/20 px-2.5 py-1 rounded-lg inline-flex items-center gap-1.5 cursor-pointer transition-colors border border-primary/20 whitespace-nowrap shrink-0 select-none"
-                      title={`Click to copy ticket reference (${ticket.ticketNumber})`}
-                    >
-                      <span className="whitespace-nowrap font-mono">{formatTicketCode(ticket)}</span>
-                      {ticket.ticketNumber !== formatTicketCode(ticket) && (
-                        <span className="opacity-60 text-[10px] hidden sm:inline">({ticket.ticketNumber})</span>
-                      )}
-                      {copiedId === ticket.ticketNumber ? (
-                        <AppIcon name="check" size={13} className="text-emerald-500 shrink-0" />
-                      ) : (
-                        <AppIcon name="copy" size={13} className="text-primary/70 shrink-0" />
-                      )}
-                    </div>
-
-                    {/* Workspace Pill */}
-                    {ticket.tenant && (
-                      <span className="text-[11px] font-medium text-muted-foreground bg-muted/60 px-2.5 py-1 rounded-lg border border-border/40 inline-flex items-center gap-1.5 whitespace-nowrap shrink-0">
-                        <AppIcon name="companies" size={12} className="text-muted-foreground shrink-0" />
-                        <span className="font-semibold text-foreground">{ticket.tenant.name}</span>
-                        {ticket.tenant.plan && (
-                          <span className="text-[10px] uppercase font-bold text-muted-foreground/90">
-                            ({ticket.tenant.plan})
-                          </span>
-                        )}
-                      </span>
-                    )}
-
-                    {/* Status Pill */}
-                    <span
-                      className={cn(
-                        "text-[11px] font-semibold px-2.5 py-1 rounded-lg border flex items-center gap-1.5",
-                        STATUS_CONFIG[ticket.status]?.badgeClass || STATUS_CONFIG.OPEN.badgeClass
-                      )}
-                    >
-                      <span
-                        className={cn(
-                          "w-1.5 h-1.5 rounded-full animate-pulse",
-                          STATUS_CONFIG[ticket.status]?.dotClass || "bg-blue-500"
-                        )}
-                      />
-                      {STATUS_CONFIG[ticket.status]?.label || ticket.status}
-                    </span>
-
-                    {/* Priority Pill */}
-                    <span
-                      className={cn(
-                        "text-[11px] font-semibold px-2.5 py-1 rounded-lg border flex items-center gap-1",
-                        PRIORITY_CONFIG[ticket.priority]?.badgeClass || PRIORITY_CONFIG.MEDIUM.badgeClass
-                      )}
-                    >
-                      {ticket.priority === "CRITICAL" && (
-                        <AppIcon name="alert" size={13} className="text-rose-500" />
-                      )}
-                      {ticket.priority} Priority
-                    </span>
-                  </div>
-
-                  {/* Right: Actions */}
-                  <div className="flex items-center gap-1.5 shrink-0">
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={loadTicket}
-                      className="h-8 w-8 p-0 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                      title="Refresh ticket"
-                    >
-                      <AppIcon name="refresh" size={14} className={loading ? "animate-spin" : ""} />
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      className="h-8 text-xs px-2.5 gap-1.5 text-destructive hover:bg-destructive/10 hover:border-destructive/40 cursor-pointer rounded-lg font-medium transition-colors"
-                      onClick={() => setIsDeleteDialogOpen(true)}
-                      title="Delete this ticket"
-                    >
-                      <AppIcon name="trash" size={14} className="text-destructive" />
-                      <span className="hidden sm:inline">Delete</span>
-                    </Button>
-
-                    <Button
-                      size="sm"
-                      variant="ghost"
-                      onClick={() => onOpenChange(false)}
-                      className="h-8 w-8 p-0 rounded-lg hover:bg-muted text-muted-foreground hover:text-foreground cursor-pointer transition-colors"
-                      title="Close modal"
-                    >
-                      <AppIcon name="close" size={16} />
-                      <span className="sr-only">Close</span>
-                    </Button>
-                  </div>
-                </div>
-
-                {/* Subject Header with Inline Edit */}
-                <div>
-                  {isEditingSubject ? (
-                    <div className="flex items-center gap-2 max-w-xl">
-                      <Input
-                        value={subjectDraft}
-                        onChange={(e) => setSubjectDraft(e.target.value)}
-                        onKeyDown={(e) => {
-                          if (e.key === "Enter") handleSaveSubject();
-                          if (e.key === "Escape") {
-                            setSubjectDraft(ticket.subject);
-                            setIsEditingSubject(false);
-                          }
-                        }}
-                        autoFocus
-                        className="h-8 text-sm font-bold text-foreground"
-                      />
-                      <Button
-                        size="sm"
-                        onClick={handleSaveSubject}
-                        disabled={savingSubject || !subjectDraft.trim()}
-                        className="h-8 px-2.5 text-xs font-semibold cursor-pointer shrink-0"
-                      >
-                        {savingSubject ? <Loader2 className="w-3 h-3 animate-spin" /> : "Save"}
-                      </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => {
-                          setSubjectDraft(ticket.subject);
-                          setIsEditingSubject(false);
-                        }}
-                        className="h-8 px-2.5 text-xs cursor-pointer shrink-0"
-                      >
-                        Cancel
-                      </Button>
-                    </div>
-                  ) : (
-                    <div className="flex items-center gap-2">
-                      <DialogTitle className="text-base sm:text-lg font-bold text-foreground tracking-tight leading-snug text-left">
-                        {ticket.subject}
-                      </DialogTitle>
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setIsEditingSubject(true)}
-                        className="h-6 px-1.5 text-[11px] text-muted-foreground hover:text-foreground cursor-pointer rounded transition-colors"
-                        title="Edit subject"
-                      >
-                        <AppIcon name="edit" size={12} className="mr-1" />
-                        Edit
-                      </Button>
-                    </div>
-                  )}
-                </div>
-
-                {/* Subtitle / Metadata Row */}
-                <div className="flex flex-wrap items-center gap-y-1 gap-x-3 text-[11px] text-muted-foreground">
-                  <span className="flex items-center gap-1.5">
-                    <AppIcon name="user" size={12} className="text-primary/70" />
-                    Requester: <strong className="text-foreground font-semibold">{ticket.createdBy?.name || "Customer"}</strong>
-                    {ticket.createdBy?.email && (
-                      <span className="text-[10px] text-muted-foreground font-mono">
-                        ({ticket.createdBy.email})
-                      </span>
-                    )}
-                  </span>
-                  <span className="text-border">•</span>
-                  <span>Submitted {formatRelativeTime(ticket.createdAt)}</span>
-                  <span className="text-border hidden sm:inline">•</span>
-                  <span className="hidden sm:inline">Updated {formatRelativeTime(ticket.updatedAt)}</span>
-                </div>
-              </div>
+              <TicketModalHeader
+                ticket={ticket}
+                loading={loading}
+                copiedId={copiedId}
+                onCopyId={copyId}
+                onRefresh={loadTicket}
+                onOpenDelete={() => setIsDeleteDialogOpen(true)}
+                onClose={() => onOpenChange(false)}
+                isEditingSubject={isEditingSubject}
+                setIsEditingSubject={setIsEditingSubject}
+                subjectDraft={subjectDraft}
+                setSubjectDraft={setSubjectDraft}
+                savingSubject={savingSubject}
+                onSaveSubject={handleSaveSubject}
+              />
 
               {/* Scrollable Modal Body: 2 Columns */}
               <div className="flex-1 overflow-y-auto min-h-0 custom-scrollbar p-5 sm:p-6">
                 <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
                   {/* Left Column: Timeline & Discussion (8 cols) */}
-                  <div className="lg:col-span-8 space-y-4">
-                    {/* Initial Report Card */}
-                    <div className="rounded-xl border border-border/80 bg-card overflow-hidden shadow-2xs">
-                      <div className="px-4 py-3 bg-muted/30 border-b border-border/60 flex items-center justify-between gap-2">
-                        <div className="flex items-center gap-2.5">
-                          <UserAvatar name={ticket.createdBy?.name || "Customer"} size="sm" />
-                          <div className="flex items-center gap-1.5">
-                            <span className="text-xs font-bold text-foreground">
-                              {ticket.createdBy?.name || "Requester"}
-                            </span>
-                            <span className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-1.5 py-0.5 rounded-full border border-emerald-500/20">
-                              Author
-                            </span>
-                          </div>
-                        </div>
-                        <div className="flex items-center gap-2.5">
-                          <span className="text-[10px] text-muted-foreground flex items-center gap-1">
-                            <AppIcon name="clock" size={12} className="opacity-60" />
-                            {formatRelativeTime(ticket.createdAt)}
-                          </span>
-                          <span className="text-[9px] font-medium text-muted-foreground bg-muted px-2 py-0.5 rounded-md border border-border/40">
-                            Initial Report
-                          </span>
-                        </div>
-                      </div>
-
-                      {/* Description */}
-                      <div className="p-4 text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                        {ticket.description || "No description provided."}
-                      </div>
-
-                      {/* Attachments */}
-                      {ticket.attachments && ticket.attachments.length > 0 && (
-                        <div className="px-4 pb-4 border-t border-border/40 pt-3">
-                          <TicketAttachmentList
-                            attachments={ticket.attachments}
-                            onPreviewMedia={setPreviewMedia}
-                          />
-                        </div>
-                      )}
-                    </div>
-
-                    {/* Follow-up conversation messages */}
-                    {followUpMessages.length > 0 && (
-                      <div className="space-y-3">
-                        <div className="flex items-center gap-2 pb-1">
-                          <AppIcon name="messageSquare" size={14} className="text-primary" />
-                          <span className="text-[10px] font-bold text-muted-foreground uppercase tracking-wider">
-                            Conversation & Internal Notes ({followUpMessages.length})
-                          </span>
-                        </div>
-
-                        {followUpMessages.map((msg) => (
-                          <TicketMessageItem
-                            key={msg.id}
-                            message={msg}
-                            isSuperAdminView={true}
-                            currentUserName="Super Admin"
-                          />
-                        ))}
-                      </div>
-                    )}
-
-                    {/* Reply / Internal Note Composer */}
-                    <div className="rounded-xl border border-border/80 bg-card p-4 space-y-3 shadow-2xs">
-                      <div className="flex items-center justify-between text-xs">
-                        <div className="flex items-center gap-2">
-                          <button
-                            type="button"
-                            onClick={() => setIsInternalNote(false)}
-                            className={cn(
-                              "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all cursor-pointer",
-                              !isInternalNote
-                                ? "bg-primary text-primary-foreground shadow-xs"
-                                : "text-muted-foreground hover:text-foreground bg-muted/40"
-                            )}
-                          >
-                            Reply to Customer
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => setIsInternalNote(true)}
-                            className={cn(
-                              "px-2.5 py-1 rounded-lg text-xs font-semibold transition-all flex items-center gap-1 cursor-pointer",
-                              isInternalNote
-                                ? "bg-amber-500 text-amber-950 dark:text-black shadow-xs font-bold"
-                                : "text-muted-foreground hover:text-foreground bg-muted/40"
-                            )}
-                          >
-                            <AppIcon name="lock" size={12} />
-                            Internal Note (Staff only)
-                          </button>
-                        </div>
-                        <span className="text-[10px] text-muted-foreground hidden sm:inline">
-                          Ctrl+Enter to send
-                        </span>
-                      </div>
-
-                      <Textarea
-                        placeholder={
-                          isInternalNote
-                            ? "Write an internal diagnostic note (visible ONLY to support staff)..."
-                            : "Write a message to the customer..."
-                        }
-                        value={replyText}
-                        onChange={(e) => setReplyText(e.target.value)}
-                        onKeyDown={(e) => {
-                          if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
-                            e.preventDefault();
-                            if (!sendingReply && replyText.trim()) {
-                              handleSendReply();
-                            }
-                          }
-                        }}
-                        rows={3}
-                        className="text-xs resize-none rounded-xl bg-background border-border"
-                      />
-
-                      <div className="flex items-center justify-between pt-1">
-                        <span className="text-[10px] text-muted-foreground">
-                          {isInternalNote ? "Note visible to staff only" : "Customer will receive an email notification"}
-                        </span>
-                        <Button
-                          size="sm"
-                          onClick={handleSendReply}
-                          disabled={sendingReply || !replyText.trim()}
-                          className={cn(
-                            "text-xs font-semibold h-8 gap-1.5 px-4 cursor-pointer rounded-lg shadow-sm",
-                            isInternalNote ? "bg-amber-500 hover:bg-amber-600 text-amber-950 dark:text-black" : ""
-                          )}
-                        >
-                          {sendingReply ? (
-                            <>
-                              <Loader2 className="w-3.5 h-3.5 animate-spin" /> Sending...
-                            </>
-                          ) : (
-                            <>
-                              <AppIcon name="send" size={14} /> {isInternalNote ? "Save Note" : "Send Reply"}
-                            </>
-                          )}
-                        </Button>
-                      </div>
-                    </div>
-                  </div>
+                  <TicketConversationPanel
+                    ticket={ticket}
+                    followUpMessages={followUpMessages}
+                    replyText={replyText}
+                    setReplyText={setReplyText}
+                    isInternalNote={isInternalNote}
+                    setIsInternalNote={setIsInternalNote}
+                    sendingReply={sendingReply}
+                    onSendReply={handleSendReply}
+                    onPreviewMedia={setPreviewMedia}
+                  />
 
                   {/* Right Column: Triage Controls & Workspace Info (4 cols) */}
-                  <div className="lg:col-span-4 space-y-4">
-                    {/* Triage Settings Card */}
-                    <div className="rounded-xl border border-border/80 bg-card p-4 space-y-3.5 shadow-2xs">
-                      <h3 className="text-xs font-bold text-foreground uppercase tracking-wider pb-2 border-b border-border/60">
-                        Ticket Management
-                      </h3>
-
-                      {/* Status Selector */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-semibold text-muted-foreground">Status</label>
-                          {savingStatus && (
-                            <span className="text-[10px] text-primary flex items-center gap-1">
-                              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Saving...
-                            </span>
-                          )}
-                        </div>
-                        <Select value={ticket.status} onValueChange={handleStatusChange} disabled={savingStatus}>
-                          <SelectTrigger className="h-8.5 text-xs font-semibold px-3 rounded-lg border bg-background w-full gap-2 shadow-2xs cursor-pointer">
-                            <span className="flex items-center gap-2">
-                              <span
-                                className={cn(
-                                  "w-2 h-2 rounded-full animate-pulse shrink-0",
-                                  STATUS_CONFIG[ticket.status]?.dotClass || "bg-blue-500"
-                                )}
-                              />
-                              <SelectValue placeholder="Select status" />
-                            </span>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="OPEN">Open</SelectItem>
-                            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
-                            <SelectItem value="WAITING_FOR_USER">Waiting for User</SelectItem>
-                            <SelectItem value="RESOLVED">Resolved</SelectItem>
-                            <SelectItem value="CLOSED">Closed</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Priority Selector */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-semibold text-muted-foreground">Priority</label>
-                          {savingPriority && (
-                            <span className="text-[10px] text-primary flex items-center gap-1">
-                              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Saving...
-                            </span>
-                          )}
-                        </div>
-                        <Select value={ticket.priority} onValueChange={handlePriorityChange} disabled={savingPriority}>
-                          <SelectTrigger className="h-8.5 text-xs font-semibold px-3 rounded-lg border bg-background w-full gap-2 shadow-2xs cursor-pointer">
-                            <span className="flex items-center gap-1.5">
-                              {ticket.priority === "CRITICAL" && (
-                                <AppIcon name="alert" size={13} className="text-rose-500 shrink-0" />
-                              )}
-                              <SelectValue placeholder="Select priority" />
-                            </span>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="LOW">Low</SelectItem>
-                            <SelectItem value="MEDIUM">Medium</SelectItem>
-                            <SelectItem value="HIGH">High</SelectItem>
-                            <SelectItem value="CRITICAL">Critical</SelectItem>
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Assignee Selector */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-semibold text-muted-foreground">Assignee</label>
-                          {savingAssignee && (
-                            <span className="text-[10px] text-primary flex items-center gap-1">
-                              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Saving...
-                            </span>
-                          )}
-                        </div>
-                        <Select
-                          value={ticket.assignedToId || "unassigned"}
-                          onValueChange={handleAssigneeChange}
-                          disabled={savingAssignee}
-                        >
-                          <SelectTrigger className="h-8.5 text-xs font-semibold px-3 rounded-lg border bg-background w-full gap-2 shadow-2xs cursor-pointer">
-                            <AppIcon name="userPlus" size={13} className="text-muted-foreground shrink-0" />
-                            <span className="truncate">
-                              <SelectValue placeholder="Assignee" />
-                            </span>
-                          </SelectTrigger>
-                          <SelectContent>
-                            <SelectItem value="unassigned">Unassigned</SelectItem>
-                            {user?.id && (
-                              <SelectItem value={user.id}>
-                                Assign to Me ({user.name || "Super Admin"})
-                              </SelectItem>
-                            )}
-                          </SelectContent>
-                        </Select>
-                      </div>
-
-                      {/* Category Selector */}
-                      <div className="space-y-1.5">
-                        <div className="flex items-center justify-between">
-                          <label className="text-[11px] font-semibold text-muted-foreground">Category</label>
-                          {savingCategory && (
-                            <span className="text-[10px] text-primary flex items-center gap-1">
-                              <Loader2 className="w-2.5 h-2.5 animate-spin" /> Saving...
-                            </span>
-                          )}
-                        </div>
-                        <Select
-                          value={ticket.category || "General Inquiry"}
-                          onValueChange={handleCategoryChange}
-                          disabled={savingCategory}
-                        >
-                          <SelectTrigger className="h-8.5 text-xs font-semibold px-3 rounded-lg border bg-background w-full gap-2 shadow-2xs cursor-pointer">
-                            <AppIcon name="tag" size={13} className="text-muted-foreground shrink-0" />
-                            <span className="truncate">
-                              <SelectValue placeholder="Select category" />
-                            </span>
-                          </SelectTrigger>
-                          <SelectContent>
-                            {CATEGORY_OPTIONS.map((cat) => (
-                              <SelectItem key={cat} value={cat}>
-                                {cat}
-                              </SelectItem>
-                            ))}
-                          </SelectContent>
-                        </Select>
-                      </div>
-                    </div>
-
-                    {/* Organization & Customer Contact Info */}
-                    <div className="rounded-xl border border-border/80 bg-card p-4 space-y-3 shadow-2xs">
-                      <h3 className="text-xs font-bold text-foreground uppercase tracking-wider pb-2 border-b border-border/60">
-                        Customer & Workspace
-                      </h3>
-
-                      <div className="space-y-1.5">
-                        <span className="text-[10px] font-semibold text-muted-foreground uppercase">Customer</span>
-                        <div className="flex items-center gap-2.5 p-2 rounded-lg bg-muted/40 border border-border/50">
-                          <UserAvatar name={ticket.createdBy?.name || "Customer"} size="sm" />
-                          <div className="min-w-0">
-                            <p className="text-xs font-bold text-foreground truncate">
-                              {ticket.createdBy?.name || "Customer"}
-                            </p>
-                            {ticket.createdBy?.email && (
-                              <p className="text-[10px] text-muted-foreground font-mono truncate">
-                                {ticket.createdBy.email}
-                              </p>
-                            )}
-                          </div>
-                        </div>
-                      </div>
-
-                      {ticket.tenant && (
-                        <div className="space-y-1.5 pt-1">
-                          <span className="text-[10px] font-semibold text-muted-foreground uppercase">Workspace</span>
-                          <div className="p-2.5 rounded-lg bg-muted/40 border border-border/50 space-y-1">
-                            <div className="flex items-center justify-between">
-                              <span className="text-xs font-bold text-foreground">{ticket.tenant.name}</span>
-                              {ticket.tenant.plan && (
-                                <span className="text-[9px] font-semibold uppercase px-1.5 py-0.5 rounded bg-primary/10 text-primary border border-primary/20">
-                                  {ticket.tenant.plan}
-                                </span>
-                              )}
-                            </div>
-                            {ticket.tenant.slug && (
-                              <span className="text-[10px] text-muted-foreground font-mono block">
-                                @{ticket.tenant.slug}
-                              </span>
-                            )}
-                          </div>
-                        </div>
-                      )}
-                    </div>
-                  </div>
+                  <TicketModalSidebar
+                    ticket={ticket}
+                    currentUserId={user?.id}
+                    currentUserName={user?.name}
+                    savingStatus={savingStatus}
+                    onStatusChange={handleStatusChange}
+                    savingPriority={savingPriority}
+                    onPriorityChange={handlePriorityChange}
+                    savingAssignee={savingAssignee}
+                    onAssigneeChange={handleAssigneeChange}
+                    savingCategory={savingCategory}
+                    onCategoryChange={handleCategoryChange}
+                  />
                 </div>
               </div>
 
               {/* In-Modal Media Preview Overlay */}
-              {previewMedia && (
-                <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-md flex flex-col justify-between overflow-hidden">
-                  <div className="p-4 border-b border-border/60 flex items-center justify-between">
-                    <div className="text-sm font-bold truncate pr-6 text-foreground flex items-center gap-2">
-                      {previewMedia.isVideo ? (
-                        <AppIcon name="video" size={16} className="text-indigo-500" />
-                      ) : (
-                        <AppIcon name="image" size={16} className="text-emerald-500" />
-                      )}
-                      <span className="truncate">{previewMedia.filename}</span>
-                    </div>
-                    <Button
-                      variant="ghost"
-                      size="sm"
-                      onClick={() => setPreviewMedia(null)}
-                      className="h-8 w-8 p-0 rounded-lg text-muted-foreground hover:text-foreground cursor-pointer"
-                    >
-                      <AppIcon name="close" size={16} />
-                    </Button>
-                  </div>
-
-                  <div className="flex-1 p-4 flex items-center justify-center bg-black/5 dark:bg-black/60 overflow-hidden select-none">
-                    {previewMedia.isVideo ? (
-                      <video
-                        src={previewMedia.url}
-                        controls
-                        autoPlay
-                        className="max-h-[60vh] w-auto max-w-full rounded-xl shadow-2xl"
-                      />
-                    ) : previewMedia.isImage ? (
-                      // eslint-disable-next-line @next/next/no-img-element
-                      <img
-                        src={previewMedia.url}
-                        alt={previewMedia.filename}
-                        className="max-h-[60vh] w-auto max-w-full object-contain rounded-xl shadow-2xl"
-                      />
-                    ) : (
-                      <div className="text-center py-10">
-                        <AppIcon name="file" size={44} className="text-muted-foreground/40 mx-auto mb-2" />
-                        <p className="text-xs text-muted-foreground">Preview not available for this file type.</p>
-                      </div>
-                    )}
-                  </div>
-
-                  <div className="p-3.5 bg-muted/40 border-t border-border/60 flex items-center justify-between text-xs text-muted-foreground px-5">
-                    <span className="font-mono font-medium">
-                      {previewMedia.size ? formatBytes(previewMedia.size) : ""}
-                    </span>
-                    <div className="flex items-center gap-2">
-                      <a
-                        href={previewMedia.url}
-                        download={previewMedia.filename}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="inline-flex items-center gap-1.5 px-3 py-1.5 rounded-lg bg-primary text-primary-foreground font-semibold text-xs hover:bg-primary/90 transition-colors shadow-2xs"
-                      >
-                        <AppIcon name="download" size={13} className="text-primary-foreground" />
-                        Download
-                      </a>
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setPreviewMedia(null)}
-                        className="h-8 text-xs cursor-pointer"
-                      >
-                        Back to Ticket
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <TicketMediaPreviewModal
+                previewMedia={previewMedia}
+                onClose={() => setPreviewMedia(null)}
+              />
 
               {/* In-Modal Delete Confirmation Overlay */}
-              {isDeleteDialogOpen && (
-                <div className="absolute inset-0 z-50 bg-background/95 backdrop-blur-md flex items-center justify-center p-6">
-                  <div className="max-w-md w-full p-6 rounded-2xl bg-card border border-destructive/30 shadow-2xl space-y-4">
-                    <div className="flex items-center gap-2.5 text-destructive">
-                      <AppIcon name="alert" size={20} className="text-destructive shrink-0" />
-                      <h3 className="font-bold text-base text-foreground">
-                        Delete Ticket #{ticket.ticketNumber}?
-                      </h3>
-                    </div>
-                    <p className="text-xs text-muted-foreground leading-relaxed">
-                      Are you sure you want to permanently delete this support ticket? All messages, internal
-                      notes, and uploaded attachments will be permanently removed. This action cannot be undone.
-                    </p>
-
-                    <div className="p-3 bg-destructive/5 rounded-xl border border-destructive/20 text-xs text-foreground/80 space-y-1 my-1">
-                      <p className="font-semibold text-foreground truncate">{ticket.subject}</p>
-                      <p className="text-[11px] text-muted-foreground">
-                        Submitted by {ticket.createdBy?.name || "Customer"} ({ticket.tenant?.name})
-                      </p>
-                    </div>
-
-                    <div className="flex items-center justify-end gap-2 pt-2 border-t border-border">
-                      <Button
-                        type="button"
-                        variant="outline"
-                        size="sm"
-                        onClick={() => setIsDeleteDialogOpen(false)}
-                        disabled={deletingTicket}
-                        className="text-xs h-8 cursor-pointer"
-                      >
-                        Cancel
-                      </Button>
-                      <Button
-                        type="button"
-                        variant="destructive"
-                        size="sm"
-                        onClick={handleDeleteTicket}
-                        disabled={deletingTicket}
-                        className="text-xs h-8 gap-1.5 font-semibold cursor-pointer group"
-                      >
-                        {deletingTicket ? (
-                          <>
-                            <Loader2 className="w-3.5 h-3.5 animate-spin" /> Deleting...
-                          </>
-                        ) : (
-                          <>
-                            <AppIcon name="trash" size={14} className="text-destructive-foreground" /> Delete Permanently
-                          </>
-                        )}
-                      </Button>
-                    </div>
-                  </div>
-                </div>
-              )}
+              <TicketDeleteDialog
+                ticket={ticket}
+                isOpen={isDeleteDialogOpen}
+                onClose={() => setIsDeleteDialogOpen(false)}
+                onConfirmDelete={handleDeleteTicket}
+                deleting={deletingTicket}
+              />
             </>
           )}
         </DialogContent>
