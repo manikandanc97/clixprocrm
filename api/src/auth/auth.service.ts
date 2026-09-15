@@ -13,25 +13,19 @@ import { SYSTEM_ROLE_PERMISSIONS } from '../common/role-permissions.constants';
 
 import { BrandingService } from '../workspace/services/branding.service';
 import { MediaQueueProducer } from '../queue/producers/media-queue.producer';
+import {
+  invalidateGetMeCache,
+  getCachedUserProfile,
+  setCachedUserProfile,
+  buildSuperAdminProfile,
+  buildTenantUserProfile,
+} from './auth-profile-cache.util';
+import {
+  executeAdminWorkspaceDeletionTransaction,
+  executeMemberAccountDeletionTransaction,
+} from './account-deletion.helper';
 
-interface CachedUserProfile {
-  data: any;
-  expiresAt: number;
-}
-
-const meProfileCache = new Map<string, CachedUserProfile>();
-
-export function invalidateGetMeCache(userId?: string) {
-  if (userId) {
-    for (const key of meProfileCache.keys()) {
-      if (key.startsWith(userId)) {
-        meProfileCache.delete(key);
-      }
-    }
-  } else {
-    meProfileCache.clear();
-  }
-}
+export { invalidateGetMeCache };
 
 @Injectable()
 export class AuthService {
@@ -47,10 +41,9 @@ export class AuthService {
 
   async getMe(userId: string, tenantId?: string, email?: string) {
     const cacheKey = `${userId}:${tenantId || ''}`;
-    const now = Date.now();
-    const cached = meProfileCache.get(cacheKey);
-    if (cached && cached.expiresAt > now) {
-      return cached.data;
+    const cached = getCachedUserProfile(cacheKey);
+    if (cached) {
+      return cached;
     }
 
     let user = await this.prisma.user.findUnique({
@@ -100,28 +93,8 @@ export class AuthService {
 
     // 1. Super Admin platform special case: does not depend on tenant memberships
     if (user && (user as any).isSuperAdmin) {
-      const result = {
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          phone: user.phone,
-          avatar: (user as any).avatar || null,
-          status: user.status,
-          mustResetPassword: Boolean((user as any).mustResetPassword),
-          tenantId: null,
-          companyName: 'ClixProCRM Platform',
-          role: 'SUPER_ADMIN',
-          isSuperAdmin: true,
-          permissions: ['*'],
-        },
-      };
-
-      meProfileCache.set(cacheKey, {
-        data: result,
-        expiresAt: now + 30000,
-      });
-
+      const result = buildSuperAdminProfile(user);
+      setCachedUserProfile(cacheKey, result);
       return result;
     }
 
@@ -145,36 +118,8 @@ export class AuthService {
       );
     }
 
-    const roleName = membership.role.name;
-    const permissions = (membership.role.permissions || [])
-      .filter((rp: any) => rp.hasAccess)
-      .map((rp: any) => rp.module);
-
-    const result = {
-      user: {
-        id: user.id,
-        name: user.name,
-        email: user.email,
-        phone: user.phone,
-        avatar: (user as any).avatar || null,
-        status: user.status,
-        mustResetPassword: Boolean((user as any).mustResetPassword),
-        tenantId: membership.tenantId,
-        companyName: membership.tenant?.name || 'My Workspace',
-        companyLogo: membership.tenant?.logo || null,
-        brandPrimaryColor:
-          (membership.tenant as any)?.brandPrimaryColor || null,
-        role: roleName,
-        isSuperAdmin: false,
-        permissions,
-      },
-    };
-
-    meProfileCache.set(cacheKey, {
-      data: result,
-      expiresAt: now + 30000, // 30s TTL
-    });
-
+    const result = buildTenantUserProfile(user, membership);
+    setCachedUserProfile(cacheKey, result);
     return result;
   }
 
@@ -397,7 +342,6 @@ export class AuthService {
         }
 
         // Seed default ADMIN system role with full canonical permissions.
-        // Workspace admins can create, customize, and manage custom roles & permissions.
         const adminRole = await tx.role.create({
           data: {
             name: 'ADMIN',
@@ -528,154 +472,7 @@ export class AuthService {
         await this.prisma.withTenantContext(
           { tenantId, isSuperAdmin: true, timeout: 30000 },
           async (tx: any) => {
-            // 1. Break circular / self-referential / non-cascading FK references
-            await tx.$executeRawUnsafe(
-              `UPDATE "TenantUser" SET "reportingManagerId" = NULL, "departmentId" = NULL WHERE "tenantId" = $1`,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Task" SET "relatedCustomerId" = NULL, "relatedLeadId" = NULL, "relatedMeetingId" = NULL, "relatedQuotationId" = NULL, "relatedDealId" = NULL WHERE "tenantId" = $1`,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Meeting" SET "customerId" = NULL, "leadId" = NULL, "quotationId" = NULL, "dealId" = NULL WHERE "tenantId" = $1`,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Quotation" SET "customerId" = NULL, "dealId" = NULL WHERE "tenantId" = $1`,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Deal" SET "companyId" = NULL, "customerId" = NULL, "leadId" = NULL WHERE "tenantId" = $1`,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Lead" SET "customerId" = NULL, "companyId" = NULL WHERE "tenantId" = $1`,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Customer" SET "companyId" = NULL WHERE "tenantId" = $1`,
-              tenantId,
-            );
-
-            // 2. Delete child models of AI & RAG
-            const convs = await tx.aiConversation.findMany({
-              where: { tenantId },
-              select: { id: true },
-            });
-            if (convs.length > 0) {
-              const convIds = convs.map((c: any) => c.id);
-              await tx.aiMessage.deleteMany({
-                where: { conversationId: { in: convIds } },
-              });
-            }
-            await tx.aiConversation.deleteMany({ where: { tenantId } });
-
-            const docs = await tx.document.findMany({
-              where: { tenantId },
-              select: { id: true },
-            });
-            if (docs.length > 0) {
-              const docIds = docs.map((d: any) => d.id);
-              await tx.documentChunk.deleteMany({
-                where: { documentId: { in: docIds } },
-              });
-            }
-            await tx.document.deleteMany({ where: { tenantId } });
-            await tx.tenantAiConfig.deleteMany({ where: { tenantId } });
-
-            // 3. Delete tenant timeline events, attachments, notes, notifications
-            await tx.timelineEvent.deleteMany({ where: { tenantId } });
-            await tx.attachment.deleteMany({ where: { tenantId } });
-            await tx.note.deleteMany({ where: { tenantId } });
-            await tx.notification.deleteMany({ where: { tenantId } });
-
-            // 4. Delete financial & operational records
-            await tx.invoice.deleteMany({ where: { tenantId } });
-            await tx.invoiceCounter.deleteMany({ where: { tenantId } });
-            await tx.quotation.deleteMany({ where: { tenantId } });
-            await tx.task.deleteMany({ where: { tenantId } });
-            await tx.meeting.deleteMany({ where: { tenantId } });
-            await tx.deal.deleteMany({ where: { tenantId } });
-            await tx.lead.deleteMany({ where: { tenantId } });
-            await tx.customer.deleteMany({ where: { tenantId } });
-            await tx.company.deleteMany({ where: { tenantId } });
-            await tx.product.deleteMany({ where: { tenantId } });
-            await tx.revenueTarget.deleteMany({ where: { tenantId } });
-            await tx.invitation.deleteMany({ where: { tenantId } });
-
-            // 5. Gather all users who belong to this tenant
-            const tenantUsers = await tx.tenantUser.findMany({
-              where: { tenantId },
-              select: { userId: true },
-            });
-            const userIdsInTenant: string[] = tenantUsers.map(
-              (tu: any) => tu.userId,
-            );
-
-            // Delete tenant user memberships
-            await tx.tenantUser.deleteMany({ where: { tenantId } });
-
-            // 6. Delete roles, permissions, departments
-            const roles = await tx.role.findMany({
-              where: { tenantId },
-              select: { id: true },
-            });
-            if (roles.length > 0) {
-              const roleIds = roles.map((r: any) => r.id);
-              await tx.rolePermission.deleteMany({
-                where: { roleId: { in: roleIds } },
-              });
-            }
-            await tx.role.deleteMany({ where: { tenantId } });
-            await tx.department.deleteMany({ where: { tenantId } });
-
-            // 7. Record ORGANIZATION_DELETED audit log (preserved permanently)
-            await tx.auditLog.create({
-              data: {
-                tenantId,
-                userId,
-                action: 'ORGANIZATION_DELETED',
-                module: 'Organization',
-                details: {
-                  deletedByUserId: userId,
-                  reason: 'Tenant Owner deleted organization and account',
-                },
-              },
-            });
-
-            // 8. Delete Tenant (AuditLog rows with this tenantId remain preserved)
-            await tx.tenant.delete({ where: { id: tenantId } });
-
-            // 9. Clean up users who have no other tenant memberships (AuditLog rows preserved)
-            for (const uid of userIdsInTenant) {
-              const userObj = await tx.user.findUnique({
-                where: { id: uid },
-                select: { isSuperAdmin: true },
-              });
-              if (userObj?.isSuperAdmin) {
-                continue; // Never delete platform Super Admin
-              }
-
-              const otherMemberships = await tx.tenantUser.count({
-                where: { userId: uid },
-              });
-              if (otherMemberships === 0) {
-                await tx.auditLog.create({
-                  data: {
-                    tenantId,
-                    userId: uid,
-                    action: 'USER_ACCOUNT_DELETED',
-                    module: 'Authentication',
-                    details: {
-                      deletedUserId: uid,
-                      cascadeFromTenantDeletion: true,
-                    },
-                  },
-                });
-                await tx.user.delete({ where: { id: uid } });
-              }
-            }
+            await executeAdminWorkspaceDeletionTransaction(tx, tenantId, userId);
           },
         );
       } else {
@@ -683,83 +480,12 @@ export class AuthService {
         await this.prisma.withTenantContext(
           { tenantId, timeout: 30000 },
           async (tx: any) => {
-            await tx.$executeRawUnsafe(
-              `UPDATE "TenantUser" SET "reportingManagerId" = NULL WHERE "id" = $1 OR "reportingManagerId" = $1`,
+            await executeMemberAccountDeletionTransaction(
+              tx,
+              tenantId,
+              userId,
               membership.id,
             );
-
-            await tx.$executeRawUnsafe(
-              `UPDATE "Customer" SET "assignedToId" = NULL WHERE "assignedToId" = $1 AND "tenantId" = $2`,
-              userId,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Lead" SET "assignedToId" = NULL, "createdById" = NULL, "updatedById" = NULL WHERE ("assignedToId" = $1 OR "createdById" = $1 OR "updatedById" = $1) AND "tenantId" = $2`,
-              userId,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Task" SET "assignedToId" = NULL, "createdById" = NULL, "completedById" = NULL WHERE ("assignedToId" = $1 OR "createdById" = $1 OR "completedById" = $1) AND "tenantId" = $2`,
-              userId,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Quotation" SET "assignedToId" = NULL WHERE "assignedToId" = $1 AND "tenantId" = $2`,
-              userId,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Meeting" SET "assignedToId" = NULL, "ownerId" = NULL WHERE ("assignedToId" = $1 OR "ownerId" = $1) AND "tenantId" = $2`,
-              userId,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Company" SET "ownerId" = NULL WHERE "ownerId" = $1 AND "tenantId" = $2`,
-              userId,
-              tenantId,
-            );
-            await tx.$executeRawUnsafe(
-              `UPDATE "Deal" SET "ownerId" = NULL WHERE "ownerId" = $1 AND "tenantId" = $2`,
-              userId,
-              tenantId,
-            );
-
-            const convs = await tx.aiConversation.findMany({
-              where: { userId, tenantId },
-              select: { id: true },
-            });
-            if (convs.length > 0) {
-              const convIds = convs.map((c: any) => c.id);
-              await tx.aiMessage.deleteMany({
-                where: { conversationId: { in: convIds } },
-              });
-            }
-            await tx.aiConversation.deleteMany({ where: { userId, tenantId } });
-            await tx.notification.deleteMany({ where: { userId, tenantId } });
-            await tx.attachment.deleteMany({ where: { userId, tenantId } });
-            await tx.note.deleteMany({ where: { userId, tenantId } });
-            await tx.timelineEvent.deleteMany({ where: { userId, tenantId } });
-
-            await tx.tenantUser.delete({ where: { id: membership.id } });
-
-            const otherMemberships = await tx.tenantUser.count({
-              where: { userId },
-            });
-            if (otherMemberships === 0) {
-              await tx.auditLog.create({
-                data: {
-                  tenantId,
-                  userId,
-                  action: 'USER_ACCOUNT_DELETED',
-                  module: 'Authentication',
-                  details: {
-                    deletedUserId: userId,
-                    selfDeleted: true,
-                  },
-                },
-              });
-              await tx.user.delete({ where: { id: userId } });
-            }
           },
         );
       }

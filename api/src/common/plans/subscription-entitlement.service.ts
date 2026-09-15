@@ -12,11 +12,9 @@ import {
   getPlanDefinition,
   PlanDefinition,
   MatrixCategory,
-  MatrixFeatureItem,
 } from './plan-definitions.constant';
 import { BillingGatewayService } from '../billing/billing-gateway.service';
 import { PaymentOrderResult } from '../billing/payment-gateway.interface';
-import { toNumber } from '../utils/crm-formatters.util';
 
 import {
   WorkspaceUsageStats,
@@ -25,6 +23,12 @@ import {
   BillingInvoiceItem,
 } from './subscription-entitlement.interface';
 import { buildDynamicComparisonMatrix } from './subscription-matrix.util';
+import {
+  mapDbPlanToDefinition,
+  assembleWorkspaceUsage,
+} from './subscription-plan-mapper.util';
+import { computeSubscriptionQuote } from './subscription-quote-calculator.util';
+import { executePaymentActivationTransaction } from './subscription-payment-activator.util';
 
 export type {
   WorkspaceUsageStats,
@@ -60,7 +64,7 @@ export class SubscriptionEntitlementService {
       });
 
       if (dbPlan) {
-        return this.mapDbPlanToDefinition(dbPlan);
+        return mapDbPlanToDefinition(dbPlan);
       }
     } catch (err: any) {
       this.logger.debug(
@@ -85,7 +89,7 @@ export class SubscriptionEntitlementService {
       });
 
       if (dbPlans && dbPlans.length > 0) {
-        return dbPlans.map((dbPlan) => this.mapDbPlanToDefinition(dbPlan));
+        return dbPlans.map((dbPlan) => mapDbPlanToDefinition(dbPlan));
       }
     } catch (err: any) {
       this.logger.error(
@@ -94,97 +98,6 @@ export class SubscriptionEntitlementService {
     }
 
     return Object.values(CANONICAL_PLANS).filter((p) => p.isActive);
-  }
-
-  private mapDbPlanToDefinition(dbPlan: any): PlanDefinition {
-    const parseLimit = (val?: number) =>
-      val === undefined || val >= 1000000 ? -1 : val;
-    const currSymbol =
-      dbPlan.currency === 'USD'
-        ? '$'
-        : dbPlan.currency === 'EUR'
-          ? '€'
-          : dbPlan.currency === 'GBP'
-            ? '£'
-            : '₹';
-    const priceNum = Number(dbPlan.priceNum || 0);
-    const annualPriceNum = Number(
-      dbPlan.annualPriceNum || (priceNum ? priceNum * 10 : 0),
-    );
-    const priceDisplay =
-      dbPlan.pricingMode === 'CUSTOM'
-        ? 'Custom'
-        : `${currSymbol}${priceNum.toLocaleString()}`;
-    const rawFeatures = Array.isArray(dbPlan.features)
-      ? (dbPlan.features as string[])
-      : [];
-
-    return {
-      id: dbPlan.id,
-      name: dbPlan.name,
-      price: dbPlan.price || priceDisplay,
-      priceNum,
-      annualPriceNum,
-      currency: dbPlan.currency || 'INR',
-      billingInterval: 'user/month',
-      pricingMode:
-        (dbPlan.pricingMode as 'FIXED' | 'CUSTOM') ||
-        (priceNum === 0 && dbPlan.id !== 'free' ? 'CUSTOM' : 'FIXED'),
-      target: dbPlan.description || '',
-      description: dbPlan.description || '',
-      recommended: Boolean(dbPlan.highlight),
-      badge: dbPlan.highlight ? 'MOST POPULAR' : undefined,
-      displayOrder: dbPlan.sortOrder || 0,
-      isActive:
-        dbPlan.isActive !== false &&
-        dbPlan.status !== 'INACTIVE' &&
-        dbPlan.status !== 'ARCHIVED',
-      limits: {
-        maxUsers: parseLimit(dbPlan.maxUsers),
-        maxContacts: parseLimit(dbPlan.maxContacts),
-        maxLeads: parseLimit(dbPlan.maxLeads),
-        maxPipelines: parseLimit(
-          dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1),
-        ),
-        maxTasks: parseLimit(
-          dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1),
-        ),
-        maxCustomFields: parseLimit(
-          dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1),
-        ),
-        maxDeals: parseLimit(
-          dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1),
-        ),
-        maxAutomations: parseLimit(
-          dbPlan.maxAutomations ??
-            (dbPlan.id === 'free'
-              ? 1
-              : dbPlan.id === 'starter'
-                ? 10
-                : dbPlan.id === 'growth'
-                  ? 50
-                  : -1),
-        ),
-        storageGb:
-          dbPlan.storageGb ||
-          (dbPlan.id === 'free'
-            ? 1
-            : dbPlan.id === 'starter'
-              ? 10
-              : dbPlan.id === 'growth'
-                ? 50
-                : 200),
-        maxApiRequests: parseLimit(dbPlan.maxApiRequests),
-        dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
-      },
-      features: rawFeatures,
-      featureDescriptions: rawFeatures,
-      aiConfig: {
-        enabled: dbPlan.aiEnabled !== false,
-        level: (dbPlan.aiLevel as any) || 'Standard AI',
-        dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
-      },
-    };
   }
 
   /**
@@ -266,49 +179,23 @@ export class SubscriptionEntitlementService {
       }),
     ]);
 
-    const calculateLimit = (current: number, maxLimit: number) => {
-      if (
-        isPlatformTenant ||
-        maxLimit === -1 ||
-        maxLimit === null ||
-        maxLimit === undefined
-      ) {
-        return {
-          current,
-          limit: -1,
-          remaining: 999999,
-          percentage: 0,
-          isLimitReached: false,
-        };
-      }
-      const remaining = Math.max(0, maxLimit - current);
-      const percentage = Math.min(100, Math.round((current / maxLimit) * 100));
-      return {
-        current,
-        limit: maxLimit,
-        remaining,
-        percentage,
-        isLimitReached: current >= maxLimit,
-      };
-    };
-
     const totalBytes = attachmentAgg._sum.fileSize || 0;
     const storageGbUsed = Number(
       (totalBytes / (1024 * 1024 * 1024)).toFixed(3),
     );
 
-    const usage: WorkspaceUsageStats = {
-      users: calculateLimit(userCount, planDef.limits.maxUsers),
-      contacts: calculateLimit(contactCount, planDef.limits.maxContacts),
-      leads: calculateLimit(leadCount, planDef.limits.maxLeads),
-      tasks: calculateLimit(taskCount, planDef.limits.maxTasks),
-      pipelines: calculateLimit(1, planDef.limits.maxPipelines),
-      customFields: calculateLimit(0, planDef.limits.maxCustomFields),
-      deals: calculateLimit(dealCount, planDef.limits.maxDeals ?? -1),
-      automations: calculateLimit(0, planDef.limits.maxAutomations ?? -1),
-      storageGb: calculateLimit(storageGbUsed, planDef.limits.storageGb ?? -1),
-      apiRequests: calculateLimit(0, planDef.limits.maxApiRequests ?? -1),
-    };
+    const usage: WorkspaceUsageStats = assembleWorkspaceUsage(
+      {
+        userCount,
+        contactCount,
+        leadCount,
+        taskCount,
+        dealCount,
+        storageGbUsed,
+      },
+      planDef.limits,
+      isPlatformTenant,
+    );
 
     let trialDaysRemaining: number | null = null;
     if (tenant.trialEnd) {
@@ -403,91 +290,14 @@ export class SubscriptionEntitlementService {
     const minSeats = Math.max(activeUsersCount, 1);
     const seats = Math.max(requestedSeats || minSeats, minSeats);
 
-    if (
-      targetPlanDef.limits.maxUsers !== -1 &&
-      seats > targetPlanDef.limits.maxUsers
-    ) {
-      throw new BadRequestException(
-        `The ${targetPlanDef.name} plan supports a maximum of ${targetPlanDef.limits.maxUsers} seats. For larger teams, please choose Business.`,
-      );
-    }
-
-    if (
-      isPlatformTenant ||
-      targetPlanDef.pricingMode === 'CUSTOM' ||
-      targetPlanDef.id === 'free'
-    ) {
-      return {
-        planId: targetPlanDef.id,
-        planName: targetPlanDef.name,
-        seats,
-        billingCycle,
-        currency: tenant.currency || 'INR',
-        unitPricePerMonth: 0,
-        subtotal: 0,
-        annualDiscountPercentage: 0,
-        annualDiscountAmount: 0,
-        taxRatePercentage: 0,
-        taxAmount: 0,
-        totalAmount: 0,
-        totalAmountInMinorUnits: 0,
-        recurringAmount: 0,
-        intervalDescription:
-          targetPlanDef.id === 'free' ? 'free tier' : 'internal platform plan',
-        isUpgrade: true,
-        isDowngrade: false,
-        effectiveImmediately: true,
-      };
-    }
-
-    const unitPriceMonthly = targetPlanDef.priceNum;
-    let subtotal = 0;
-    let annualDiscountAmount = 0;
-    const annualDiscountPercentage = billingCycle === 'annual' ? 17 : 0;
-
-    if (billingCycle === 'annual') {
-      const baseYearly =
-        targetPlanDef.annualPriceNum > 0
-          ? targetPlanDef.annualPriceNum
-          : unitPriceMonthly * 10;
-      subtotal = baseYearly * seats;
-      const fullMonthlyYearly = unitPriceMonthly * 12 * seats;
-      annualDiscountAmount = Math.max(0, fullMonthlyYearly - subtotal);
-    } else {
-      subtotal = unitPriceMonthly * seats;
-    }
-
-    const taxRatePercentage = tenant.currency === 'INR' ? 18 : 0;
-    const taxAmount = Math.round((subtotal * taxRatePercentage) / 100);
-    const totalAmount = subtotal + taxAmount;
-    const totalAmountInMinorUnits = Math.round(totalAmount * 100); // e.g. ₹499 -> 49900 paise
-    const recurringAmount = billingCycle === 'annual' ? totalAmount : subtotal;
-
-    const isUpgrade = targetPlanDef.displayOrder > currentPlanDef.displayOrder;
-    const isDowngrade =
-      targetPlanDef.displayOrder < currentPlanDef.displayOrder;
-
-    return {
-      planId: targetPlanDef.id,
-      planName: targetPlanDef.name,
+    return computeSubscriptionQuote(
+      tenant.currency || 'INR',
+      currentPlanDef,
+      targetPlanDef,
       seats,
       billingCycle,
-      currency: tenant.currency || 'INR',
-      unitPricePerMonth: unitPriceMonthly,
-      subtotal,
-      annualDiscountPercentage,
-      annualDiscountAmount,
-      taxRatePercentage,
-      taxAmount,
-      totalAmount,
-      totalAmountInMinorUnits,
-      recurringAmount,
-      intervalDescription:
-        billingCycle === 'annual' ? 'billed annually' : 'billed monthly',
-      isUpgrade,
-      isDowngrade,
-      effectiveImmediately: true,
-    };
+      isPlatformTenant,
+    );
   }
 
   /**
@@ -641,159 +451,21 @@ export class SubscriptionEntitlementService {
     }
 
     return this.prisma.$transaction(async (tx) => {
-      // 3. Replay Protection & Tenant Isolation: Check if this Razorpay payment ID was already processed
-      const existingPayment = await tx.platformPayment.findFirst({
-        where: {
-          OR: [
-            { providerPaymentId: params.paymentId },
-            { gatewayTransactionId: params.paymentId },
-          ],
-        },
-      });
-
-      if (existingPayment) {
-        if (existingPayment.tenantId !== tenantId) {
-          throw new ForbiddenException(
-            'Payment identifier does not belong to this tenant.',
-          );
-        }
-        if (existingPayment.status === 'SUCCESS') {
-          this.logger.log(
-            `[PAYMENT IDEMPOTENT] Payment '${params.paymentId}' already recorded as SUCCESS.`,
-          );
-          const currentSub = await tx.platformSubscription.findFirst({
-            where: { tenantId },
-          });
-          const currentInv = await tx.platformInvoice.findFirst({
-            where: { id: existingPayment.platformInvoiceId },
-          });
-          return { subscription: currentSub, invoice: currentInv };
-        }
-      }
-
-      // 4. Synchronize or create PlatformSubscription
-      const existingSub = await tx.platformSubscription.findFirst({
-        where: { tenantId },
-      });
-
-      const subData = {
-        tenantId,
-        planId: quote.planId,
-        billingCycle,
-        seats: quote.seats,
-        status: 'ACTIVE',
-        unitPrice: quote.unitPricePerMonth,
-        recurringAmount: quote.subtotal,
-        currency: quote.currency,
-        currentPeriodStart: now,
-        currentPeriodEnd: periodEnd,
-        providerOrderId: params.orderId,
-      };
-
-      const subscription = existingSub
-        ? await tx.platformSubscription.update({
-            where: { id: existingSub.id },
-            data: subData,
-          })
-        : await tx.platformSubscription.create({
-            data: subData,
-          });
-
-      // 5. Generate Platform Invoice
-      const invoiceCount = await tx.platformInvoice.count();
-      const invoiceNumber = `CP-INV-${now.getFullYear()}-${String(invoiceCount + 1).padStart(6, '0')}`;
-
-      const platformInvoice = await tx.platformInvoice.create({
-        data: {
+      return executePaymentActivationTransaction(
+        tx,
+        {
           tenantId,
-          subscriptionId: subscription?.id || null,
-          invoiceNumber,
-          planName: quote.planName,
+          orderId: params.orderId,
+          paymentId: params.paymentId,
+          signature: params.signature,
+          quote,
           billingCycle,
-          seats: quote.seats,
-          invoiceDate: now,
-          dueDate: now,
-          currency: quote.currency,
-          subtotal: quote.subtotal,
-          discountAmount: quote.annualDiscountAmount,
-          taxRate: quote.taxRatePercentage,
-          taxAmount: quote.taxAmount,
-          totalAmount: quote.totalAmount,
-          paidAmount: quote.totalAmount,
-          status: 'PAID',
-          paymentStatus: 'PAID',
-          paidAt: now,
-          items: {
-            create: [
-              {
-                description: `${quote.planName} Plan Subscription (${quote.seats} seats, ${billingCycle})`,
-                quantity: quote.seats,
-                unitPrice: quote.unitPricePerMonth,
-                taxAmount: quote.taxAmount,
-                totalAmount: quote.totalAmount,
-              },
-            ],
-          },
-        },
-      });
-
-      // 6. Record Platform Payment
-      const paymentCount = await tx.platformPayment.count();
-      const paymentNumber = `CP-PAY-${now.getFullYear()}-${String(paymentCount + 1).padStart(6, '0')}`;
-
-      await tx.platformPayment.create({
-        data: {
-          platformInvoiceId: platformInvoice?.id || `inv_${now.getTime()}`,
-          tenantId,
-          paymentNumber,
-          gatewayTransactionId: params.paymentId,
-          gatewayProvider: 'RAZORPAY',
-          amount: quote.totalAmount,
-          currency: quote.currency,
-          paymentMethod: 'CARD',
-          status: 'SUCCESS',
-          paymentDate: now,
-          providerPaymentId: params.paymentId,
-          providerOrderId: params.orderId,
-          providerSignature: params.signature,
-        },
-      });
-
-      // 7. Update Tenant Record
-      await tx.tenant.update({
-        where: { id: tenantId },
-        data: {
-          plan: quote.planId,
-          billingCycle,
-          subscriptionStatus: 'ACTIVE',
-          currentPeriodEnd: periodEnd,
-        },
-      });
-
-      // 8. Audit Log
-      await tx.auditLog.create({
-        data: {
-          tenantId,
+          now,
+          periodEnd,
           userId,
-          action: 'PAYMENT_VERIFIED_AND_SUBSCRIPTION_ACTIVATED',
-          module: 'BILLING',
-          details: {
-            planId: quote.planId,
-            seats: quote.seats,
-            billingCycle,
-            amount: quote.totalAmount,
-            invoiceNumber,
-            paymentNumber,
-            gatewayPaymentId: params.paymentId,
-            orderId: params.orderId,
-          },
         },
-      });
-
-      return {
-        subscription,
-        invoice: platformInvoice,
-      };
+        this.logger,
+      );
     });
   }
 
@@ -804,7 +476,7 @@ export class SubscriptionEntitlementService {
   async switchBillingCycle(
     tenantId: string,
     billingCycle: 'monthly' | 'annual',
-    userId?: string,
+    _userId?: string,
   ) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },
@@ -846,7 +518,7 @@ export class SubscriptionEntitlementService {
     tenantId: string,
     targetPlanId: string,
     billingCycle: 'monthly' | 'annual' = 'monthly',
-    seats?: number,
+    _seats?: number,
   ) {
     const tenant = await this.prisma.tenant.findUnique({
       where: { id: tenantId },

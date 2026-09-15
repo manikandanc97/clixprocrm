@@ -10,7 +10,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { NotificationsService } from '../../notifications/services/notifications.service';
 import { StorageService } from '../../common/services/storage.service';
 import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
-import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
+import { SupportTicketStatus } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
 
 import { SupportTicketRecord } from '../interfaces/support.interface';
@@ -21,6 +21,11 @@ import {
   extractRoleString,
   formatTicketOutput,
 } from '../utils/support-mapper.util';
+import {
+  calculateEstimatedResponseTime,
+  buildFallbackSupportTicket,
+  buildSupportEmailHtml,
+} from '../utils/support-template.util';
 
 export type { SupportTicketRecord };
 export {
@@ -30,38 +35,6 @@ export {
   extractRoleString,
   formatTicketOutput,
 };
-
-function formatTicketSummary(ticket: any): SupportTicketRecord {
-  return {
-    id: ticket.id,
-    ticketId: ticket.ticketNumber,
-    userId: ticket.createdById || '',
-    userEmail: ticket.createdBy?.email || 'support@clixprocrm.com',
-    userName: ticket.createdBy?.name || 'Workspace Member',
-    tenantId: ticket.tenantId,
-    subject: ticket.subject,
-    category: ticket.category,
-    priority: mapEnumToPriority(ticket.priority),
-    status: ticket.status,
-    description: ticket.description,
-    diagnostics: ticket.diagnostics,
-    attachments: (ticket.attachments || []).map((a: any) => ({
-      filename: a.fileName,
-      size: a.fileSize,
-      contentType: a.fileType,
-    })),
-    estimatedResponseTime: ticket.estimatedResponseTime || 'Within 24 Hours',
-    createdAt:
-      ticket.createdAt instanceof Date
-        ? ticket.createdAt.toISOString()
-        : String(ticket.createdAt),
-    updatedAt:
-      ticket.updatedAt instanceof Date
-        ? ticket.updatedAt.toISOString()
-        : String(ticket.updatedAt),
-    replies: [],
-  };
-}
 
 @Injectable()
 export class SupportService {
@@ -102,13 +75,7 @@ export class SupportService {
     const year = new Date().getFullYear();
     const randomNum = Math.floor(100000 + Math.random() * 900000).toString();
     const ticketId = `CP-SUP-${year}-${randomNum}`;
-
-    let estimatedResponseTime = 'Within 24 hours';
-    if (priority === 'Critical')
-      estimatedResponseTime = '< 1 Hour (Priority Escalation)';
-    else if (priority === 'High') estimatedResponseTime = '< 4 Hours';
-    else if (priority === 'Medium') estimatedResponseTime = '< 12 Hours';
-    else estimatedResponseTime = 'Within 24 Hours';
+    const estimatedResponseTime = calculateEstimatedResponseTime(priority);
 
     const userId =
       authenticatedContext?.userId || diagnostics?.userId || 'system';
@@ -275,38 +242,20 @@ export class SupportService {
       }
     } else {
       // Fallback for tests or disconnected environments
-      createdRecord = {
-        id: `ticket_${Date.now()}_${Math.random().toString(36).substring(7)}`,
+      createdRecord = buildFallbackSupportTicket({
         ticketId,
         userId,
         userEmail,
         userName,
         tenantId,
         subject,
-        category: category || 'General',
-        priority: mapEnumToPriority(mappedPriority),
-        status: 'OPEN',
+        category,
+        priority,
         description,
         diagnostics,
-        attachments: attachments.map((a) => ({
-          filename: a.filename,
-          size: a.content.length,
-          contentType: a.contentType,
-        })),
+        attachments,
         estimatedResponseTime,
-        createdAt: new Date().toISOString(),
-        updatedAt: new Date().toISOString(),
-        replies: [
-          {
-            id: `rep_${Date.now()}`,
-            author: userName,
-            authorRole: 'Client',
-            message: description,
-            createdAt: new Date().toISOString(),
-            isStaff: false,
-          },
-        ],
-      };
+      });
     }
 
     // 5. Send support notification email (Enqueues to BullMQ crm-email-queue with fallback)
@@ -333,77 +282,18 @@ export class SupportService {
       }
     }
 
-    const safeSubject = escapeHtml(subject);
-    const safeCategory = escapeHtml(category);
-    const safePriority = escapeHtml(priority);
-    const safeDescription = escapeHtml(description);
-
-    const safeDiagnostics = {
-      currentUserName: escapeHtml(
-        diagnostics?.currentUserName || userName || 'N/A',
-      ),
-      email: escapeHtml(diagnostics?.email || userEmail || 'N/A'),
-      userId: escapeHtml(diagnostics?.userId || userId || 'N/A'),
-      role: escapeHtml(diagnostics?.role || 'N/A'),
-      currentUrl: escapeHtml(diagnostics?.currentUrl || 'N/A'),
-      browser: escapeHtml(diagnostics?.browser || 'N/A'),
-      operatingSystem: escapeHtml(diagnostics?.operatingSystem || 'N/A'),
-      deviceType: escapeHtml(diagnostics?.deviceType || 'N/A'),
-      screenResolution: escapeHtml(diagnostics?.screenResolution || 'N/A'),
-      timezone: escapeHtml(diagnostics?.timezone || 'N/A'),
-      appVersion: escapeHtml(diagnostics?.appVersion || 'N/A'),
-      timestamp: escapeHtml(diagnostics?.timestamp || new Date().toISOString()),
-    };
-
-    const priorityColor =
-      priority === 'Critical'
-        ? '#ef4444'
-        : priority === 'High'
-          ? '#f97316'
-          : priority === 'Medium'
-            ? '#eab308'
-            : '#10b981';
-
-    const htmlContent = `
-      <div style="font-family: Arial, sans-serif; max-width: 600px; margin: 0 auto; color: #333;">
-        <div style="background-color: #0f172a; padding: 20px; text-align: center; border-radius: 8px 8px 0 0;">
-          <h2 style="color: white; margin: 0;">Clixpro CRM Support Ticket</h2>
-        </div>
-        <div style="padding: 20px; border: 1px solid #e2e8f0; border-top: none; border-radius: 0 0 8px 8px;">
-          <p><strong>Ticket ID:</strong> ${escapeHtml(ticketId)}</p>
-          <p><strong>Subject:</strong> ${safeSubject}</p>
-          <p><strong>Category:</strong> ${safeCategory}</p>
-          <p><strong>Priority:</strong> <span style="background-color: ${priorityColor}; color: white; padding: 2px 8px; border-radius: 4px; font-size: 12px;">${safePriority}</span></p>
-          
-          <div style="margin: 20px 0; padding: 15px; background-color: #f8fafc; border-radius: 4px; white-space: pre-wrap;">
-            <strong>Description:</strong><br/>
-            ${safeDescription}
-          </div>
-          
-          <h3 style="border-bottom: 1px solid #e2e8f0; padding-bottom: 5px;">User & System Diagnostics</h3>
-          <table style="width: 100%; font-size: 13px; text-align: left; border-collapse: collapse;">
-            <tbody>
-              <tr><th style="padding: 4px;">User Name:</th><td>${safeDiagnostics.currentUserName}</td></tr>
-              <tr><th style="padding: 4px;">Email:</th><td>${safeDiagnostics.email}</td></tr>
-              <tr><th style="padding: 4px;">User ID:</th><td>${safeDiagnostics.userId}</td></tr>
-              <tr><th style="padding: 4px;">Role:</th><td>${safeDiagnostics.role}</td></tr>
-              <tr><th style="padding: 4px;">Current URL:</th><td>${safeDiagnostics.currentUrl}</td></tr>
-              <tr><th style="padding: 4px;">Browser:</th><td>${safeDiagnostics.browser}</td></tr>
-              <tr><th style="padding: 4px;">OS:</th><td>${safeDiagnostics.operatingSystem}</td></tr>
-              <tr><th style="padding: 4px;">Device:</th><td>${safeDiagnostics.deviceType}</td></tr>
-              <tr><th style="padding: 4px;">Resolution:</th><td>${safeDiagnostics.screenResolution}</td></tr>
-              <tr><th style="padding: 4px;">Timezone:</th><td>${safeDiagnostics.timezone}</td></tr>
-              <tr><th style="padding: 4px;">App Version:</th><td>${safeDiagnostics.appVersion}</td></tr>
-              <tr><th style="padding: 4px;">Submitted At:</th><td>${safeDiagnostics.timestamp}</td></tr>
-            </tbody>
-          </table>
-          
-          <p style="margin-top: 20px; font-size: 13px; color: #64748b;">
-            <em>Attachments: ${attachments.length} files included.</em>
-          </p>
-        </div>
-      </div>
-    `;
+    const htmlContent = buildSupportEmailHtml({
+      ticketId,
+      subject,
+      category,
+      priority,
+      description,
+      diagnostics,
+      userEmail,
+      userName,
+      userId,
+      attachmentsCount: attachments.length,
+    });
 
     const supportRecipient =
       process.env.SUPPORT_EMAIL || 'support@clixprocrm.com';
