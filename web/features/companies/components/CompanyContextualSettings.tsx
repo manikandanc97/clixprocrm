@@ -14,7 +14,6 @@ import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { Badge } from "@/shared/ui/badge";
 import { Switch } from "@/shared/ui/switch";
-import { Label } from "@/shared/ui/label";
 import {
   Select,
   SelectContent,
@@ -22,14 +21,6 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/shared/ui/select";
-import {
-  Dialog,
-  DialogContent,
-  DialogHeader,
-  DialogTitle,
-  DialogDescription,
-  DialogFooter,
-} from "@/shared/ui/dialog";
 import { toast } from "sonner";
 import {
   Building2,
@@ -40,7 +31,6 @@ import {
   Trash2,
   SlidersHorizontal,
   GitMerge,
-  AlertTriangle,
   Lock,
   Info,
 } from "lucide-react";
@@ -54,133 +44,23 @@ export interface CompanyContextualSettingsProps {
   defaultSection?: string;
 }
 
-const DEFAULT_INDUSTRIES = [
-  "Technology & Software",
-  "Healthcare & Pharma",
-  "Financial Services & Banking",
-  "Manufacturing & Industrial",
-  "Retail & E-Commerce",
-  "Real Estate & Construction",
-  "Consulting & Professional",
-  "Education & EdTech",
-  "Logistics & Supply Chain",
-  "Energy & Utilities",
-  "Telecommunications",
-  "Media & Entertainment",
-];
+import {
+  DEFAULT_INDUSTRIES,
+  DEFAULT_ACCOUNT_TYPES,
+  INITIAL_STANDARD_FIELDS,
+  CustomField,
+  StandardFieldConfig,
+} from "../constants/company-settings.constants";
+import { CompanyIndustryReassignModal } from "./contextual-settings/CompanyIndustryReassignModal";
+import { CompanyCustomFieldModal } from "./contextual-settings/CompanyCustomFieldModal";
+import { CompanyMergeModal } from "./contextual-settings/CompanyMergeModal";
 
-const DEFAULT_ACCOUNT_TYPES = [
-  "Customer",
-  "Prospect",
-  "Partner",
-  "Vendor",
-  "Distributor",
-];
-
-interface CustomField {
-  id: string;
-  name: string;
-  type: "text" | "number" | "url" | "select" | "date" | "boolean" | "currency";
-  required: boolean;
-  options?: string;
-}
-
-interface StandardFieldConfig {
-  id: string;
-  label: string;
-  type: string;
-  description: string;
-  visible: boolean;
-  systemLocked?: boolean;
-}
-
-const INITIAL_STANDARD_FIELDS: StandardFieldConfig[] = [
-  {
-    id: "name",
-    label: "Company Name",
-    type: "Text",
-    description: "Primary legal or trade name of the organization.",
-    visible: true,
-    systemLocked: true,
-  },
-  {
-    id: "industry",
-    label: "Industry Classification",
-    type: "Select",
-    description: "Sector classification based on workspace taxonomy.",
-    visible: true,
-  },
-  {
-    id: "accountType",
-    label: "Account Type",
-    type: "Select",
-    description: "Business relationship role (Customer, Partner, Vendor, etc.).",
-    visible: true,
-  },
-  {
-    id: "website",
-    label: "Website / Domain",
-    type: "URL",
-    description: "Corporate website domain for deduplication and enrichment.",
-    visible: true,
-  },
-  {
-    id: "phone",
-    label: "Primary Phone",
-    type: "Phone",
-    description: "Direct switchboard or headquarters contact number.",
-    visible: true,
-  },
-  {
-    id: "email",
-    label: "Corporate Email",
-    type: "Email",
-    description: "General inbound inquiry or billing contact email.",
-    visible: true,
-  },
-  {
-    id: "employeeCount",
-    label: "Employee Headcount",
-    type: "Select",
-    description: "Workforce size tier (1-10, 11-50, 50-200, 200+).",
-    visible: true,
-  },
-  {
-    id: "annualRevenue",
-    label: "Annual Revenue",
-    type: "Currency",
-    description: "Estimated annual turnover and commercial scale.",
-    visible: true,
-  },
-  {
-    id: "taxId",
-    label: "Tax ID / GSTIN / PAN",
-    type: "Text",
-    description: "Corporate registration and tax identification for invoicing.",
-    visible: true,
-  },
-  {
-    id: "address",
-    label: "Headquarters Address",
-    type: "Text",
-    description: "Physical headquarters or billing street address.",
-    visible: true,
-  },
-  {
-    id: "city",
-    label: "City / Geographic Location",
-    type: "Text",
-    description: "Primary operating city and geographic jurisdiction.",
-    visible: true,
-  },
-  {
-    id: "accountSize",
-    label: "Company Size / Account Tier",
-    type: "Select (Enterprise / Mid-Market / SMB)",
-    description: "Commercial account scale classification.",
-    visible: true,
-  },
-];
+export type { CustomField, StandardFieldConfig };
+export {
+  DEFAULT_INDUSTRIES,
+  DEFAULT_ACCOUNT_TYPES,
+  INITIAL_STANDARD_FIELDS,
+};
 
 interface CompanyItem {
   id: string;
@@ -472,16 +352,6 @@ export function CompanyContextualSettings({
       setIsSaving(false);
     }
   };
-
-  // Get objects for merge modal comparison
-  const primaryCompany: CompanyItem | undefined = useMemo(
-    () => companiesList.find((c: CompanyItem) => c.id === mergePrimaryId),
-    [companiesList, mergePrimaryId]
-  );
-  const secondaryCompany: CompanyItem | undefined = useMemo(
-    () => companiesList.find((c: CompanyItem) => c.id === mergeSecondaryId),
-    [companiesList, mergeSecondaryId]
-  );
 
   // Define exactly the 5 requested sections
   const sections: ContextualSettingSection[] = [
@@ -968,307 +838,44 @@ export function CompanyContextualSettings({
       />
 
       {/* ── Reassign Industry Before Deleting Dialog ───────────────────────────── */}
-      <Dialog
-        open={!!industryToDelete}
-        onOpenChange={(isOpen) => {
-          if (!isOpen) setIndustryToDelete(null);
-        }}
-      >
-        <DialogContent className="sm:max-w-md">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-sm font-bold text-destructive">
-              <AlertTriangle className="w-4 h-4 text-destructive" />
-              Reassign Companies Before Deletion
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground leading-relaxed pt-1">
-              <strong className="text-foreground font-semibold">
-                &quot;{industryToDelete}&quot;
-              </strong>{" "}
-              is currently assigned to{" "}
-              <strong className="text-foreground font-semibold">
-                {industryToDelete ? industryUsageCounts[industryToDelete] || 0 : 0}
-              </strong>{" "}
-              company account(s). Please select a replacement industry before removing it to prevent broken references.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="py-3 space-y-2">
-            <Label className="text-xs font-semibold text-foreground">
-              Replacement Industry
-            </Label>
-            <Select
-              value={reassignTargetIndustry}
-              onValueChange={setReassignTargetIndustry}
-            >
-              <SelectTrigger className="w-full text-xs h-9">
-                <SelectValue placeholder="Select replacement industry..." />
-              </SelectTrigger>
-              <SelectContent>
-                {industries
-                  .filter((ind) => ind !== industryToDelete)
-                  .map((ind) => (
-                    <SelectItem key={ind} value={ind} className="text-xs">
-                      {ind}
-                    </SelectItem>
-                  ))}
-              </SelectContent>
-            </Select>
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIndustryToDelete(null)}
-              disabled={isReassigningIndustry}
-              className="text-xs h-8.5"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              variant="destructive"
-              size="sm"
-              onClick={handleConfirmReassignAndDeleteIndustry}
-              disabled={!reassignTargetIndustry || isReassigningIndustry}
-              className="text-xs h-8.5 font-semibold gap-1.5"
-            >
-              {isReassigningIndustry ? "Reassigning..." : "Reassign & Delete"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CompanyIndustryReassignModal
+        industryToDelete={industryToDelete}
+        onClose={() => setIndustryToDelete(null)}
+        industryUsageCounts={industryUsageCounts}
+        reassignTargetIndustry={reassignTargetIndustry}
+        setReassignTargetIndustry={setReassignTargetIndustry}
+        industries={industries}
+        isReassigningIndustry={isReassigningIndustry}
+        onConfirmReassignAndDelete={handleConfirmReassignAndDeleteIndustry}
+      />
 
       {/* ── Add Custom Field Dialog ────────────────────────────────────────────── */}
-      <Dialog open={isAddCustomFieldOpen} onOpenChange={setIsAddCustomFieldOpen}>
-        <DialogContent className="sm:max-w-md">
-          <form onSubmit={handleAddCustomField}>
-            <DialogHeader>
-              <DialogTitle className="text-sm font-bold">
-                Add Custom Company Field
-              </DialogTitle>
-              <DialogDescription className="text-xs text-muted-foreground">
-                Define a custom attribute to capture organization-specific metadata.
-              </DialogDescription>
-            </DialogHeader>
-
-            <div className="space-y-3.5 py-4">
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold">Field Label</Label>
-                <Input
-                  placeholder="e.g. LinkedIn Company URL, Parent Holding, Fiscal Year End..."
-                  value={newCustomFieldName}
-                  onChange={(e) => setNewCustomFieldName(e.target.value)}
-                  className="text-xs h-9"
-                  required
-                />
-              </div>
-
-              <div className="space-y-1">
-                <Label className="text-xs font-semibold">Data Type</Label>
-                <Select
-                  value={newCustomFieldType}
-                  onValueChange={(val: "text" | "number" | "url" | "currency" | "date" | "select") => setNewCustomFieldType(val)}
-                >
-                  <SelectTrigger className="text-xs h-9">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent>
-                    <SelectItem value="text" className="text-xs">Text (Single Line)</SelectItem>
-                    <SelectItem value="number" className="text-xs">Numeric Number</SelectItem>
-                    <SelectItem value="url" className="text-xs">Website / Profile URL</SelectItem>
-                    <SelectItem value="currency" className="text-xs">Currency Amount</SelectItem>
-                    <SelectItem value="date" className="text-xs">Date Picker</SelectItem>
-                    <SelectItem value="select" className="text-xs">Dropdown Select</SelectItem>
-                    <SelectItem value="boolean" className="text-xs">Checkbox (Yes/No)</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {newCustomFieldType === "select" && (
-                <div className="space-y-1">
-                  <Label className="text-xs font-semibold">Options (comma-separated)</Label>
-                  <Input
-                    placeholder="e.g. Tier 1, Tier 2, Tier 3"
-                    value={newCustomFieldOptions}
-                    onChange={(e) => setNewCustomFieldOptions(e.target.value)}
-                    className="text-xs h-9"
-                  />
-                </div>
-              )}
-
-              <div className="flex items-center justify-between pt-2 border-t border-border/50">
-                <div className="space-y-0.5">
-                  <Label className="text-xs font-semibold">Required Field</Label>
-                  <p className="text-[11px] text-muted-foreground">
-                    Must be populated when creating a company
-                  </p>
-                </div>
-                <Switch
-                  checked={newCustomFieldRequired}
-                  onCheckedChange={setNewCustomFieldRequired}
-                />
-              </div>
-            </div>
-
-            <DialogFooter className="gap-2 sm:gap-0">
-              <Button
-                type="button"
-                variant="outline"
-                size="sm"
-                onClick={() => setIsAddCustomFieldOpen(false)}
-                className="text-xs h-8.5"
-              >
-                Cancel
-              </Button>
-              <Button
-                type="submit"
-                size="sm"
-                className="text-xs h-8.5 font-semibold"
-                disabled={!newCustomFieldName.trim()}
-              >
-                Add Field
-              </Button>
-            </DialogFooter>
-          </form>
-        </DialogContent>
-      </Dialog>
+      <CompanyCustomFieldModal
+        open={isAddCustomFieldOpen}
+        onOpenChange={setIsAddCustomFieldOpen}
+        newCustomFieldName={newCustomFieldName}
+        setNewCustomFieldName={setNewCustomFieldName}
+        newCustomFieldType={newCustomFieldType}
+        setNewCustomFieldType={setNewCustomFieldType}
+        newCustomFieldOptions={newCustomFieldOptions}
+        setNewCustomFieldOptions={setNewCustomFieldOptions}
+        newCustomFieldRequired={newCustomFieldRequired}
+        setNewCustomFieldRequired={setNewCustomFieldRequired}
+        onAddCustomField={handleAddCustomField}
+      />
 
       {/* ── Side-by-Side Review Duplicates & Merge Dialog ──────────────────────── */}
-      <Dialog open={isMergeModalOpen} onOpenChange={setIsMergeModalOpen}>
-        <DialogContent className="sm:max-w-2xl max-h-[85vh] overflow-y-auto">
-          <DialogHeader>
-            <DialogTitle className="flex items-center gap-2 text-sm font-bold text-foreground">
-              <GitMerge className="w-4 h-4 text-emerald-600" />
-              Review & Merge Company Accounts
-            </DialogTitle>
-            <DialogDescription className="text-xs text-muted-foreground">
-              Select the Master (Primary) record to keep and the Duplicate (Secondary) record to merge. All linked contacts, deals, invoices, and timeline history will be safely transferred.
-            </DialogDescription>
-          </DialogHeader>
-
-          <div className="space-y-4 py-2">
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-              {/* Primary Selector */}
-              <div className="space-y-1.5 p-3 rounded-xl border border-emerald-500/30 bg-emerald-500/5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-bold text-emerald-700 dark:text-emerald-300">
-                    Master Record (To Keep)
-                  </Label>
-                  <Badge variant="outline" className="text-[10px] bg-emerald-500/10 text-emerald-700 border-emerald-500/30">
-                    Primary
-                  </Badge>
-                </div>
-                <Select value={mergePrimaryId} onValueChange={setMergePrimaryId}>
-                  <SelectTrigger className="w-full text-xs h-9 bg-card">
-                    <SelectValue placeholder="Select primary company..." />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-48">
-                    {companiesList
-                      .filter((c: CompanyItem) => c.id !== mergeSecondaryId)
-                      .map((c: CompanyItem) => (
-                        <SelectItem key={c.id} value={c.id} className="text-xs">
-                          {c.name} ({c.industry || "No Industry"})
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Secondary Selector */}
-              <div className="space-y-1.5 p-3 rounded-xl border border-rose-500/30 bg-rose-500/5">
-                <div className="flex items-center justify-between">
-                  <Label className="text-xs font-bold text-rose-700 dark:text-rose-300">
-                    Duplicate Record (To Merge & Archive)
-                  </Label>
-                  <Badge variant="outline" className="text-[10px] bg-rose-500/10 text-rose-700 border-rose-500/30">
-                    Duplicate
-                  </Badge>
-                </div>
-                <Select value={mergeSecondaryId} onValueChange={setMergeSecondaryId}>
-                  <SelectTrigger className="w-full text-xs h-9 bg-card">
-                    <SelectValue placeholder="Select duplicate company..." />
-                  </SelectTrigger>
-                  <SelectContent className="max-h-48">
-                    {companiesList
-                      .filter((c: CompanyItem) => c.id !== mergePrimaryId)
-                      .map((c: CompanyItem) => (
-                        <SelectItem key={c.id} value={c.id} className="text-xs">
-                          {c.name} ({c.industry || "No Industry"})
-                        </SelectItem>
-                      ))}
-                  </SelectContent>
-                </Select>
-              </div>
-            </div>
-
-            {/* Side-by-Side Field Comparison Table */}
-            {primaryCompany && secondaryCompany && (
-              <div className="rounded-lg border border-border overflow-hidden text-xs">
-                <div className="grid grid-cols-3 bg-muted/60 p-2 font-bold text-[11px] border-b border-border">
-                  <span>Attribute</span>
-                  <span className="text-emerald-700 dark:text-emerald-400">Master Record</span>
-                  <span className="text-rose-700 dark:text-rose-400">Duplicate Record</span>
-                </div>
-                <div className="divide-y divide-border/50 text-[11.5px]">
-                  <div className="grid grid-cols-3 p-2 items-center">
-                    <span className="font-medium text-muted-foreground">Name</span>
-                    <span className="font-semibold text-foreground">{primaryCompany.name}</span>
-                    <span className="text-muted-foreground line-through">{secondaryCompany.name}</span>
-                  </div>
-                  <div className="grid grid-cols-3 p-2 items-center">
-                    <span className="font-medium text-muted-foreground">Industry</span>
-                    <span>{primaryCompany.industry || secondaryCompany.industry || "—"}</span>
-                    <span className="text-muted-foreground">{secondaryCompany.industry || "—"}</span>
-                  </div>
-                  <div className="grid grid-cols-3 p-2 items-center">
-                    <span className="font-medium text-muted-foreground">Website</span>
-                    <span>{primaryCompany.website || secondaryCompany.website || "—"}</span>
-                    <span className="text-muted-foreground">{secondaryCompany.website || "—"}</span>
-                  </div>
-                  <div className="grid grid-cols-3 p-2 items-center">
-                    <span className="font-medium text-muted-foreground">Phone</span>
-                    <span>{primaryCompany.phone || secondaryCompany.phone || "—"}</span>
-                    <span className="text-muted-foreground">{secondaryCompany.phone || "—"}</span>
-                  </div>
-                  <div className="grid grid-cols-3 p-2 items-center">
-                    <span className="font-medium text-muted-foreground">Contacts / Deals</span>
-                    <span className="text-emerald-600 font-semibold">
-                      +{secondaryCompany._count?.customers || 0} Contacts, +{secondaryCompany._count?.deals || 0} Deals transferred
-                    </span>
-                    <span className="text-muted-foreground">
-                      {secondaryCompany._count?.customers || 0} Contacts, {secondaryCompany._count?.deals || 0} Deals
-                    </span>
-                  </div>
-                </div>
-              </div>
-            )}
-          </div>
-
-          <DialogFooter className="gap-2 sm:gap-0">
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => setIsMergeModalOpen(false)}
-              disabled={isMerging}
-              className="text-xs h-8.5"
-            >
-              Cancel
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              onClick={handleExecuteMerge}
-              disabled={!mergePrimaryId || !mergeSecondaryId || isMerging}
-              className="text-xs h-8.5 font-semibold gap-1.5 bg-emerald-600 hover:bg-emerald-700 text-white"
-            >
-              {isMerging ? "Merging..." : "Confirm & Merge Accounts"}
-            </Button>
-          </DialogFooter>
-        </DialogContent>
-      </Dialog>
+      <CompanyMergeModal
+        open={isMergeModalOpen}
+        onOpenChange={setIsMergeModalOpen}
+        companiesList={companiesList}
+        mergePrimaryId={mergePrimaryId}
+        setMergePrimaryId={setMergePrimaryId}
+        mergeSecondaryId={mergeSecondaryId}
+        setMergeSecondaryId={setMergeSecondaryId}
+        isMerging={isMerging}
+        onExecuteMerge={handleExecuteMerge}
+      />
     </>
   );
 }

@@ -17,54 +17,25 @@ import {
 } from '../../common/plans/plan-definitions.constant';
 import { roundTo2 } from '../../finance/utils/invoice-calculation.util';
 
-export class UpdatePlatformBillingConfigDto {
-  companyLegalName?: string;
-  billingAddress?: string;
-  city?: string;
-  state?: string;
-  postalCode?: string;
-  country?: string;
-  gstin?: string;
-  pan?: string;
-  invoicePrefix?: string;
-  currency?: string;
-  taxRate?: number;
-  paymentTermsDays?: number;
-  bankName?: string;
-  accountNumber?: string;
-  ifscCode?: string;
-  accountHolder?: string;
-  upiId?: string;
-  paymentGateway?: string;
-  webhookSecret?: string;
-  razorpayKeyId?: string;
-  razorpayKeySecret?: string;
-  stripePublishableKey?: string;
-  stripeSecretKey?: string;
-}
+import {
+  UpdatePlatformBillingConfigDto,
+  CreatePlatformSubscriptionDto,
+  RecordPlatformPaymentDto,
+  ProcessPlatformRefundDto,
+} from '../dto/platform-billing.dto';
 
-export class CreatePlatformSubscriptionDto {
-  tenantId: string;
-  planId: string;
-  billingCycle?: 'monthly' | 'annual';
-  seats?: number;
-  status?: string;
-}
+export {
+  UpdatePlatformBillingConfigDto,
+  CreatePlatformSubscriptionDto,
+  RecordPlatformPaymentDto,
+  ProcessPlatformRefundDto,
+};
 
-export class RecordPlatformPaymentDto {
-  amount: number;
-  paymentMethod?: string;
-  gatewayProvider?: string;
-  gatewayTransactionId?: string;
-  notes?: string;
-  status?: 'SUCCESS' | 'PENDING' | 'FAILED';
-}
-
-export class ProcessPlatformRefundDto {
-  amount: number;
-  reason: string;
-  paymentId?: string;
-}
+import {
+  allocatePlatformInvoiceNumber,
+  allocatePlatformPaymentNumber,
+  allocatePlatformRefundNumber,
+} from '../utils/platform-billing.util';
 
 @Injectable()
 export class PlatformBillingService {
@@ -75,30 +46,19 @@ export class PlatformBillingService {
   private async allocatePlatformInvoiceNumber(
     tx: Prisma.TransactionClient,
   ): Promise<string> {
-    const config = await tx.platformBillingConfig.findFirst();
-    const prefix = config?.invoicePrefix?.trim() || 'CP-INV';
-    const year = new Date().getFullYear();
-    const count = await tx.platformInvoice.count();
-    const seq = count + 1;
-    return `${prefix}-${year}-${String(seq).padStart(6, '0')}`;
+    return allocatePlatformInvoiceNumber(tx);
   }
 
   private async allocatePlatformPaymentNumber(
     tx: Prisma.TransactionClient,
   ): Promise<string> {
-    const year = new Date().getFullYear();
-    const count = await tx.platformPayment.count();
-    const seq = count + 1;
-    return `CP-PAY-${year}-${String(seq).padStart(6, '0')}`;
+    return allocatePlatformPaymentNumber(tx);
   }
 
   private async allocatePlatformRefundNumber(
     tx: Prisma.TransactionClient,
   ): Promise<string> {
-    const year = new Date().getFullYear();
-    const count = await tx.platformRefund.count();
-    const seq = count + 1;
-    return `CP-REF-${year}-${String(seq).padStart(6, '0')}`;
+    return allocatePlatformRefundNumber(tx);
   }
 
   private async syncMissingTenantSubscriptions() {

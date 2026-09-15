@@ -10,11 +10,11 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { PlatformPlansService } from '../services/platform-plans.service';
 import {
-  PlatformPlansService,
   CreatePlatformPlanDto,
   UpdatePlatformPlanDto,
-} from '../services/platform-plans.service';
+} from '../dto/platform-plans.dto';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 

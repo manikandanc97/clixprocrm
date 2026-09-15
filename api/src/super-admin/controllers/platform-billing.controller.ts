@@ -9,12 +9,12 @@ import {
   UseGuards,
   Req,
 } from '@nestjs/common';
+import { PlatformBillingService } from '../services/platform-billing.service';
 import {
-  PlatformBillingService,
   CreatePlatformSubscriptionDto,
   ProcessPlatformRefundDto,
   UpdatePlatformBillingConfigDto,
-} from '../services/platform-billing.service';
+} from '../dto/platform-billing.dto';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 

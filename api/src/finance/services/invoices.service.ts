@@ -20,6 +20,11 @@ import {
   calculateInvoiceTotals,
   roundTo2,
 } from '../utils/invoice-calculation.util';
+import {
+  checkIsInvoiceOverdue,
+  calculateInvoiceSummaryStats,
+  mapInvoiceRecordToDto,
+} from '../utils/invoice-stats.util';
 import { InvoicePdfService } from './invoice-pdf.service';
 import { InvoiceEmailService } from './invoice-email.service';
 
@@ -73,18 +78,7 @@ export class InvoicesService {
     balanceAmount: number,
     status: string,
   ): boolean {
-    if (!dueDate || balanceAmount <= 0) return false;
-    if (
-      status === 'PAID' ||
-      status === 'CANCELLED' ||
-      status === 'VOID' ||
-      status === 'REFUNDED'
-    ) {
-      return false;
-    }
-    const today = new Date();
-    today.setHours(0, 0, 0, 0);
-    return new Date(dueDate) < today;
+    return checkIsInvoiceOverdue(dueDate, balanceAmount, status);
   }
 
   async createInvoice(
@@ -508,106 +502,14 @@ export class InvoicesService {
         },
       });
 
-      let totalInvoiced = 0;
-      let totalPaid = 0;
-      let totalPending = 0;
-      let totalOverdue = 0;
-      let paidCount = 0;
-      let pendingCount = 0;
-      let overdueCount = 0;
-
-      const now = new Date();
-      now.setHours(0, 0, 0, 0);
-
-      for (const inv of allStats) {
-        const tot = toNumber(inv.totalAmount);
-        const pd = toNumber(inv.paidAmount);
-        const bal = toNumber(inv.balanceAmount) || tot - pd;
-
-        totalInvoiced += tot;
-        totalPaid += pd;
-
-        const isOverdue =
-          inv.dueDate &&
-          new Date(inv.dueDate) < now &&
-          bal > 0 &&
-          inv.status !== 'PAID' &&
-          inv.status !== 'CANCELLED' &&
-          inv.status !== 'VOID';
-
-        if (inv.status === 'PAID') {
-          paidCount++;
-        } else if (isOverdue) {
-          overdueCount++;
-          totalOverdue += bal;
-        } else if (inv.status !== 'CANCELLED' && inv.status !== 'VOID') {
-          pendingCount++;
-          totalPending += bal;
-        }
-      }
+      const stats = calculateInvoiceSummaryStats(allStats, currency);
 
       return {
-        stats: {
-          totalInvoiced,
-          totalInvoicedFormatted: formatCurrency(totalInvoiced, currency),
-          totalPaid,
-          totalPaidFormatted: formatCurrency(totalPaid, currency),
-          totalPending,
-          totalPendingFormatted: formatCurrency(totalPending, currency),
-          totalOverdue,
-          totalOverdueFormatted: formatCurrency(totalOverdue, currency),
-          paidCount,
-          pendingCount,
-          overdueCount,
-          totalCount: allStats.length,
-        },
-        invoices: invoices.map((inv) => {
-          const tot = toNumber(inv.totalAmount || inv.amount);
-          const pd = toNumber(inv.paidAmount);
-          const bal = toNumber(inv.balanceAmount) || tot - pd;
-          const isOverdue = this.checkIsOverdue(inv.dueDate, bal, inv.status);
-          const displayStatus =
-            isOverdue && inv.status !== 'CANCELLED' && inv.status !== 'VOID'
-              ? 'OVERDUE'
-              : inv.status;
-
-          return {
-            id: inv.id,
-            tenantId: inv.tenantId,
-            customerId: inv.customerId,
-            companyId: inv.companyId,
-            dealId: inv.dealId,
-            quotationId: inv.quotationId,
-            invoiceNumber: inv.invoiceNumber || inv.id.slice(0, 8),
-            invoiceDate: inv.invoiceDate.toISOString(),
-            dueDate: inv.dueDate ? inv.dueDate.toISOString() : null,
-            currency: inv.currency || currency,
-            paymentTerms: inv.paymentTerms,
-            status: displayStatus,
-            subtotal: toNumber(inv.subtotal),
-            discountAmount: toNumber(inv.discountAmount),
-            taxableAmount: toNumber(inv.taxableAmount),
-            cgstAmount: toNumber(inv.cgstAmount),
-            sgstAmount: toNumber(inv.sgstAmount),
-            igstAmount: toNumber(inv.igstAmount),
-            roundOff: toNumber(inv.roundOff),
-            totalAmount: tot,
-            totalAmountFormatted: formatCurrency(tot, inv.currency || currency),
-            paidAmount: pd,
-            paidAmountFormatted: formatCurrency(pd, inv.currency || currency),
-            balanceAmount: bal,
-            balanceAmountFormatted: formatCurrency(
-              bal,
-              inv.currency || currency,
-            ),
-            customer: inv.customer,
-            company: inv.company,
-            deal: inv.deal,
-            paymentsCount: inv.payments.length,
-            createdAt: inv.createdAt.toISOString(),
-            updatedAt: inv.updatedAt.toISOString(),
-          };
-        }),
+        stats,
+        invoices: invoices.map((inv) => ({
+          ...mapInvoiceRecordToDto(inv, currency),
+          paymentsCount: inv.payments.length,
+        })),
         pagination: {
           page,
           limit,
