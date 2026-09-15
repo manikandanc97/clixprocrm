@@ -72,7 +72,6 @@ export default function DashboardKPIs() {
       color: "emerald" as const,
       loading: dashboardLoading,
       sparklineData: dashboardRevenue?.sparklineData,
-      comparisonText: "vs last month",
       href: "/analytics",
       tooltip: "Total recognized revenue generated across all closed deals.",
     },
@@ -93,7 +92,6 @@ export default function DashboardKPIs() {
       color: "violet" as const,
       loading: dashboardLoading || leadsLoading,
       sparklineData: dashboardLeads?.sparklineData || [],
-      comparisonText: "vs last month",
       href: "/leads",
       tooltip: "Total number of leads accumulated.",
     },
@@ -115,7 +113,6 @@ export default function DashboardKPIs() {
       color: "orange" as const,
       loading: dashboardLoading || pipelineLoading,
       sparklineData: dashboardActiveDeals?.sparklineData || (pipelineActiveDeals as ReturnType<typeof JSON.parse>)?.sparklineData || [],
-      comparisonText: "vs last month",
       href: "/pipeline",
       tooltip: "Number of active deals currently in the pipeline.",
     },
@@ -137,7 +134,6 @@ export default function DashboardKPIs() {
       color: "pink" as const,
       loading: dashboardLoading || pipelineLoading,
       sparklineData: dashboardWinRate?.sparklineData || (pipelineWinRate as ReturnType<typeof JSON.parse>)?.sparklineData || [],
-      comparisonText: "vs last month",
       href: "/analytics",
       tooltip: "Percentage of leads successfully converted to closed deals.",
     },
@@ -203,8 +199,6 @@ export default function DashboardKPIs() {
                     sparklineData={kpi.sparklineData}
                     delay={0.08 * (index + 1)}
                     loading={kpi.loading}
-                    comparisonText={kpi.comparisonText}
-                    className="group-hover:ring-2 ring-primary/20 transition-all"
                   />
                 </Link>
               </TooltipTrigger>

@@ -323,35 +323,35 @@ export default function SubscriptionSettings() {
               </p>
             </div>
           ) : (
-            <div className="overflow-x-auto">
+            <div className="overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
               <table className="w-full text-left text-xs border-collapse">
-                <thead>
-                  <tr className="border-b border-border/80 bg-muted/30">
-                    <th className="p-3 font-semibold text-muted-foreground">Date</th>
-                    <th className="p-3 font-semibold text-muted-foreground">Invoice #</th>
-                    <th className="p-3 font-semibold text-muted-foreground">Description</th>
-                    <th className="p-3 font-semibold text-muted-foreground">Seats</th>
-                    <th className="p-3 font-semibold text-muted-foreground">Amount</th>
-                    <th className="p-3 font-semibold text-muted-foreground">Status</th>
-                    <th className="p-3 font-semibold text-muted-foreground text-right">Invoice</th>
+                <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+                  <tr className="h-10 text-xs font-bold text-foreground">
+                    <th className="px-4 py-2 border-r border-emerald-500/15">Date</th>
+                    <th className="px-4 py-2 border-r border-emerald-500/15">Invoice #</th>
+                    <th className="px-4 py-2 border-r border-emerald-500/15">Description</th>
+                    <th className="px-4 py-2 border-r border-emerald-500/15">Seats</th>
+                    <th className="px-4 py-2 border-r border-emerald-500/15">Amount</th>
+                    <th className="px-4 py-2 border-r border-emerald-500/15">Status</th>
+                    <th className="px-4 py-2 text-right">Invoice</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-border/50">
+                <tbody className="divide-y divide-border/40 text-xs">
                   {invoices.map((inv) => (
-                    <tr key={inv.id} className="hover:bg-muted/20 transition-colors">
-                      <td className="p-3 font-medium text-foreground">{inv.date}</td>
-                      <td className="p-3 font-mono text-[11px] text-muted-foreground">{inv.invoiceNumber}</td>
-                      <td className="p-3 text-foreground">{inv.description}</td>
-                      <td className="p-3 text-foreground">{inv.seats} seats</td>
-                      <td className="p-3 font-bold text-foreground">
+                    <tr key={inv.id} className="group h-14 hover:bg-muted/30 transition-colors">
+                      <td className="px-4 py-3 font-medium text-foreground">{inv.date}</td>
+                      <td className="px-4 py-3 font-mono text-[11px] text-muted-foreground">{inv.invoiceNumber}</td>
+                      <td className="px-4 py-3 text-foreground">{inv.description}</td>
+                      <td className="px-4 py-3 text-foreground">{inv.seats} seats</td>
+                      <td className="px-4 py-3 font-bold text-foreground">
                         ₹{inv.amount.toLocaleString("en-IN")}
                       </td>
-                      <td className="p-3">
+                      <td className="px-4 py-3">
                         <span className="text-[10px] font-bold uppercase tracking-wider px-2 py-0.5 rounded-full bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
                           {inv.status}
                         </span>
                       </td>
-                      <td className="p-3 text-right">
+                      <td className="px-4 py-3 text-right">
                         <Button
                           variant="ghost"
                           size="sm"

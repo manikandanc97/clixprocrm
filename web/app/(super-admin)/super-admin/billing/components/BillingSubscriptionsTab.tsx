@@ -105,12 +105,12 @@ export function BillingSubscriptionsTab({
         </div>
       </CRMToolbar>
 
-      <div className={cn("crm-table-wrap", (loading || filteredSubscriptions.length <= subRowsPerPage) && "crm-table-no-pagination")}>
-        <div className="overflow-auto flex-1 min-h-0">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-              <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
+          <table className="w-full text-left text-xs border-collapse min-w-[1000px]">
+            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+              <tr className="h-10 text-xs font-bold text-foreground">
+                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Organization"
                     sortable
@@ -118,16 +118,16 @@ export function BillingSubscriptionsTab({
                     onSort={(d) => setSubSortConfig(d ? { key: "tenantName", direction: d } : null)}
                   />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Plan Tier" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-center border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Billing Cycle" align="center" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-right border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Seats" align="right" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap cursor-pointer select-none">
+                <th className="h-10 px-4 py-2 text-right border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Recurring Amount"
                     align="right"
@@ -136,29 +136,29 @@ export function BillingSubscriptionsTab({
                     onSort={(d) => setSubSortConfig(d ? { key: "recurringAmount", direction: d } : null)}
                   />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Next Renewal" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-center border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Status" align="center" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                <th className="h-10 w-20 px-4 py-2 text-right bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Actions" align="right" />
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-border/40 text-xs">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse h-14">
-                    <td className="px-6 py-3"><div className="h-4 w-36 bg-muted rounded" /></td>
-                    <td className="px-6 py-3"><div className="h-5 w-20 bg-muted rounded-full" /></td>
-                    <td className="px-6 py-3 text-center"><div className="h-4 w-16 bg-muted rounded mx-auto" /></td>
-                    <td className="px-6 py-3 text-right"><div className="h-4 w-8 bg-muted rounded ml-auto" /></td>
-                    <td className="px-6 py-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
-                    <td className="px-6 py-3"><div className="h-4 w-24 bg-muted rounded" /></td>
-                    <td className="px-6 py-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
-                    <td className="px-6 py-3 text-right"><div className="h-7 w-14 bg-muted rounded ml-auto" /></td>
+                  <tr key={i} className="animate-pulse h-16">
+                    <td className="px-4 py-4"><div className="h-4 w-36 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-5 w-20 bg-muted rounded-full" /></td>
+                    <td className="px-4 py-4 text-center"><div className="h-4 w-16 bg-muted rounded mx-auto" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-4 w-8 bg-muted rounded ml-auto" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
+                    <td className="px-4 py-4 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-7 w-14 bg-muted rounded ml-auto" /></td>
                   </tr>
                 ))
               ) : paginatedSubscriptions.length === 0 ? (
@@ -178,8 +178,8 @@ export function BillingSubscriptionsTab({
                 </tr>
               ) : (
                 paginatedSubscriptions.map((sub) => (
-                  <tr key={sub.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-3.5 font-bold text-foreground">
+                  <tr key={sub.id} className="group h-16 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3.5 font-bold text-foreground">
                       <div className="flex items-center gap-2.5 min-w-0">
                         {(() => {
                           const orgColor = getOrgAvatarColor(sub.tenantName);
@@ -204,31 +204,31 @@ export function BillingSubscriptionsTab({
                         </div>
                       </div>
                     </td>
-                    <td className="px-6 py-3.5">
+                    <td className="px-4 py-3.5">
                       <PlanBadge plan={sub.planName || sub.planId} size="sm" />
                     </td>
-                    <td className="px-6 py-3.5 text-center capitalize text-xs text-muted-foreground font-medium">
+                    <td className="px-4 py-3.5 text-center capitalize text-xs text-muted-foreground font-medium">
                       <span className="px-2 py-0.5 rounded-md bg-muted/40 border border-border/60">
                         {sub.billingCycle}
                       </span>
                     </td>
-                    <td className="px-6 py-3.5 text-right font-mono font-medium text-xs">
+                    <td className="px-4 py-3.5 text-right font-mono font-medium text-xs">
                       {sub.seats}
                     </td>
-                    <td className="px-6 py-3.5 text-right font-mono font-bold text-foreground text-xs">
+                    <td className="px-4 py-3.5 text-right font-mono font-bold text-foreground text-xs">
                       {formatCurrency(sub.recurringAmount, sub.currency)}
                     </td>
-                    <td className="px-6 py-3.5 text-xs text-muted-foreground">
+                    <td className="px-4 py-3.5 text-xs text-muted-foreground">
                       {new Date(sub.currentPeriodEnd).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-6 py-3.5 text-center">
+                    <td className="px-4 py-3.5 text-center">
                       {getSubStatusBadge(sub.status)}
                     </td>
-                    <td className="px-6 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <Button
                         variant="outline"
                         size="sm"

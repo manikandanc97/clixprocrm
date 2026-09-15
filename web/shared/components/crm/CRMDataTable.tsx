@@ -58,14 +58,14 @@ export interface CRMDataTableProps<T = unknown> {
 }
 
 export const crmTableStyles = {
-  container: "bg-card border border-border rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0",
+  container: "bg-transparent border-0 rounded-none shadow-none overflow-hidden flex flex-col flex-1 min-h-0",
   table: "w-full border-collapse text-left text-xs",
-  header: "sticky top-0 z-20 bg-muted/60 dark:bg-muted/40 border-b border-border shadow-xs backdrop-blur-xs",
+  header: "sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs",
   body: "divide-y divide-border/40 text-xs",
-  row: "group h-14 sm:h-16 border-b border-border/40 align-middle hover:bg-muted/30 transition-colors",
+  row: "group h-16 border-b border-border/40 align-middle hover:bg-muted/30 transition-colors",
   rowInteractive: "cursor-pointer transition-colors duration-150 hover:bg-muted/30",
-  cell: "h-14 sm:h-16 px-4 py-3.5 align-middle text-xs",
-  headerCell: "h-11 px-4 py-3 text-left text-xs font-semibold text-muted-foreground border-r border-border/40 bg-muted/60 dark:bg-muted/40 whitespace-nowrap last:border-r-0 select-none",
+  cell: "h-16 px-4 py-3.5 align-middle text-xs",
+  headerCell: "h-10 px-4 py-2 text-left text-xs font-bold text-foreground border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap last:border-r-0 select-none",
 } as const;
 
 export function CRMDataTable<T = unknown>({
@@ -115,7 +115,7 @@ export function CRMDataTable<T = unknown>({
         )}
       >
         <TableHeader>
-          <TableRow className="hover:bg-transparent">
+          <TableRow className="h-10 hover:bg-transparent">
             {columns.map((column, index) => {
               const alignClass =
                 column.align === "right"
@@ -148,7 +148,7 @@ export function CRMDataTable<T = unknown>({
         <TableBody>
           {isLoading ? (
             Array.from({ length: loadingRows }).map((_, rIdx) => (
-              <TableRow key={`skeleton-row-${rIdx}`} className="h-14 sm:h-16 animate-pulse hover:bg-transparent">
+              <TableRow key={`skeleton-row-${rIdx}`} className="h-16 animate-pulse hover:bg-transparent">
                 {columns.map((column, cIdx) => (
                   <TableCell key={`skeleton-col-${cIdx}`} className={column.className}>
                     {cIdx === 0 ? (

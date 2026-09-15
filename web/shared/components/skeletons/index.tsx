@@ -198,11 +198,11 @@ export function TableRowSkeleton({
   hasActions?: boolean;
 }) {
   return (
-    <tr className="border-b border-border/50 h-16">
+    <tr className="border-b border-border/40 h-16 animate-pulse">
       {Array.from({ length: cols }).map((_, i) => {
         if (i === 0 && hasAvatar) {
           return (
-            <td key={i} className="px-6 py-4">
+            <td key={i} className="px-4 py-3.5">
               <div className="flex items-center gap-3">
                 <Skeleton className="w-9 h-9 rounded-xl shrink-0" />
                 <div className="space-y-1.5">
@@ -215,7 +215,7 @@ export function TableRowSkeleton({
         }
         if (i === cols - 1 && hasActions) {
           return (
-            <td key={i} className="px-6 py-4 text-right">
+            <td key={i} className="px-4 py-3.5 text-right">
               <div className="flex items-center justify-end gap-1.5 ml-auto">
                 <Skeleton className="h-8 w-16 rounded-lg" />
                 <Skeleton className="h-8 w-8 rounded-lg" />
@@ -224,7 +224,7 @@ export function TableRowSkeleton({
           );
         }
         return (
-          <td key={i} className="px-6 py-4">
+          <td key={i} className="px-4 py-3.5">
             <Skeleton className="h-3.5 w-24 max-w-full" />
           </td>
         );
@@ -246,18 +246,18 @@ export function TableSkeleton({
 }) {
   return (
     <div className="space-y-4 w-full">
-      <div className="w-full overflow-hidden rounded-xl border border-border/60 bg-card shadow-sm">
+      <div className="w-full overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-border/60 bg-muted/20 h-10 sm:h-11">
+            <tr className="border-b border-emerald-500/20 bg-emerald-50/80 dark:bg-emerald-950/40 h-10">
               {Array.from({ length: cols }).map((_, i) => (
-                <th key={i} className="px-4 sm:px-6 py-3 text-left">
-                  <Skeleton className="h-2.5 w-20" />
+                <th key={i} className="px-4 py-2 text-left border-r border-emerald-500/15 last:border-r-0">
+                  <Skeleton className="h-3 w-20" />
                 </th>
               ))}
             </tr>
           </thead>
-          <tbody className="divide-y divide-border/40">
+          <tbody className="divide-y divide-border/40 text-xs">
             {Array.from({ length: rows }).map((_, i) => (
               <TableRowSkeleton key={i} cols={cols} hasAvatar={hasAvatar} />
             ))}

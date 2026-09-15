@@ -81,12 +81,12 @@ export function BillingInvoicesTab({
         </div>
       </CRMToolbar>
 
-      <div className={cn("crm-table-wrap", (loading || filteredInvoices.length <= invRowsPerPage) && "crm-table-no-pagination")}>
-        <div className="overflow-auto flex-1 min-h-0">
-          <table className="w-full text-left text-sm border-collapse">
-            <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-              <tr className="text-[12px] font-semibold uppercase tracking-[0.05em] leading-tight text-muted-foreground">
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
+          <table className="w-full text-left text-xs border-collapse min-w-[1050px]">
+            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+              <tr className="h-10 text-xs font-bold text-foreground">
+                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Platform Invoice #"
                     sortable
@@ -94,13 +94,13 @@ export function BillingInvoicesTab({
                     onSort={(d) => setInvSortConfig(d ? { key: "invoiceNumber", direction: d } : null)}
                   />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Organization (Tenant)" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Plan & Seats" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-left bg-card whitespace-nowrap cursor-pointer select-none">
+                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Date"
                     sortable
@@ -108,10 +108,10 @@ export function BillingInvoicesTab({
                     onSort={(d) => setInvSortConfig(d ? { key: "invoiceDate", direction: d } : null)}
                   />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-right border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Tax (GST)" align="right" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap cursor-pointer select-none">
+                <th className="h-10 px-4 py-2 text-right border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Total Amount"
                     align="right"
@@ -120,26 +120,26 @@ export function BillingInvoicesTab({
                     onSort={(d) => setInvSortConfig(d ? { key: "totalAmount", direction: d } : null)}
                   />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-center bg-card whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-center border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Status" align="center" />
                 </th>
-                <th className="group h-10 sm:h-11 px-4 sm:px-6 py-2.5 text-right bg-card whitespace-nowrap">
+                <th className="h-10 w-24 px-4 py-2 text-right bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
                   <DataTableColumnHeader title="Actions" align="right" />
                 </th>
               </tr>
             </thead>
-            <tbody className="divide-y divide-border/50">
+            <tbody className="divide-y divide-border/40 text-xs">
               {loading ? (
                 Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse h-14">
-                    <td className="px-6 py-3"><div className="h-4 w-28 bg-muted rounded font-mono" /></td>
-                    <td className="px-6 py-3"><div className="h-4 w-36 bg-muted rounded" /></td>
-                    <td className="px-6 py-3"><div className="h-4 w-24 bg-muted rounded" /></td>
-                    <td className="px-6 py-3"><div className="h-4 w-20 bg-muted rounded" /></td>
-                    <td className="px-6 py-3 text-right"><div className="h-4 w-16 bg-muted rounded ml-auto" /></td>
-                    <td className="px-6 py-3 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
-                    <td className="px-6 py-3 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
-                    <td className="px-6 py-3 text-right"><div className="h-7 w-20 bg-muted rounded ml-auto" /></td>
+                  <tr key={i} className="animate-pulse h-16">
+                    <td className="px-4 py-4"><div className="h-4 w-28 bg-muted rounded font-mono" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-36 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
+                    <td className="px-4 py-4"><div className="h-4 w-20 bg-muted rounded" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-4 w-16 bg-muted rounded ml-auto" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
+                    <td className="px-4 py-4 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
+                    <td className="px-4 py-4 text-right"><div className="h-7 w-20 bg-muted rounded ml-auto" /></td>
                   </tr>
                 ))
               ) : paginatedInvoices.length === 0 ? (
@@ -155,36 +155,36 @@ export function BillingInvoicesTab({
                 </tr>
               ) : (
                 paginatedInvoices.map((inv) => (
-                  <tr key={inv.id} className="hover:bg-muted/20 transition-colors">
-                    <td className="px-6 py-3.5 font-mono font-bold text-foreground text-xs">
+                  <tr key={inv.id} className="group h-16 hover:bg-muted/30 transition-colors">
+                    <td className="px-4 py-3.5 font-mono font-bold text-foreground text-xs">
                       {inv.invoiceNumber}
                     </td>
-                    <td className="px-6 py-3.5 font-semibold text-foreground text-xs max-w-[200px]">
+                    <td className="px-4 py-3.5 font-semibold text-foreground text-xs max-w-[200px]">
                       <div className="flex items-center gap-2 min-w-0">
                         <Building2 className="w-4 h-4 text-primary shrink-0" />
                         <TruncatedText text={inv.tenantName} lines={1} className="font-semibold text-foreground" />
                       </div>
                     </td>
-                    <td className="px-6 py-3.5 text-muted-foreground capitalize text-xs max-w-[160px]">
+                    <td className="px-4 py-3.5 text-muted-foreground capitalize text-xs max-w-[160px]">
                       <TruncatedText text={`${inv.planName} (${inv.seats} seats)`} lines={1} />
                     </td>
-                    <td className="px-6 py-3.5 text-xs text-muted-foreground">
+                    <td className="px-4 py-3.5 text-xs text-muted-foreground">
                       {new Date(inv.invoiceDate).toLocaleDateString("en-IN", {
                         day: "2-digit",
                         month: "short",
                         year: "numeric",
                       })}
                     </td>
-                    <td className="px-6 py-3.5 text-right font-mono text-muted-foreground text-xs">
+                    <td className="px-4 py-3.5 text-right font-mono text-muted-foreground text-xs">
                       {formatCurrency(inv.taxAmount, inv.currency)}
                     </td>
-                    <td className="px-6 py-3.5 text-right font-mono font-bold text-foreground text-xs">
+                    <td className="px-4 py-3.5 text-right font-mono font-bold text-foreground text-xs">
                       {formatCurrency(inv.totalAmount, inv.currency)}
                     </td>
-                    <td className="px-6 py-3.5 text-center">
+                    <td className="px-4 py-3.5 text-center">
                       {getInvStatusBadge(inv.status, inv.paymentStatus)}
                     </td>
-                    <td className="px-6 py-3.5 text-right">
+                    <td className="px-4 py-3.5 text-right">
                       <div className="flex items-center justify-end gap-1.5">
                         <Button
                           variant="ghost"

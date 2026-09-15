@@ -332,22 +332,22 @@ export function InvoiceDetailModal({
                       </div>
 
                       {/* Line Items Table */}
-                      <Table wrapperClassName="border border-border/70 rounded-xl overflow-hidden shadow-none">
-                        <TableHeader className="bg-muted/40 border-b border-border/70">
-                          <TableRow className="h-9 hover:bg-transparent border-b border-border/70">
-                            <TableHead className="py-2.5 px-4 text-left font-semibold text-muted-foreground text-xs">
+                      <Table wrapperClassName="border border-border/80 rounded-xl overflow-hidden shadow-none">
+                        <TableHeader>
+                          <TableRow className="hover:bg-transparent">
+                            <TableHead className="px-4 text-left">
                               Item Description
                             </TableHead>
-                            <TableHead className="py-2.5 px-3 text-center font-semibold text-muted-foreground text-xs w-20">
+                            <TableHead className="px-3 text-center w-20">
                               Qty
                             </TableHead>
-                            <TableHead className="py-2.5 px-3 text-right font-semibold text-muted-foreground text-xs w-28">
+                            <TableHead className="px-3 text-right w-28">
                               Rate
                             </TableHead>
-                            <TableHead className="py-2.5 px-3 text-right font-semibold text-muted-foreground text-xs w-20">
+                            <TableHead className="px-3 text-right w-20">
                               Tax
                             </TableHead>
-                            <TableHead className="py-2.5 px-4 text-right font-semibold text-muted-foreground text-xs w-32">
+                            <TableHead className="px-4 text-right w-32 border-r-0">
                               Amount
                             </TableHead>
                           </TableRow>

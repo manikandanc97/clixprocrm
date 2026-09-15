@@ -4,31 +4,31 @@ import { Skeleton } from "@/shared/ui/skeleton";
 
 export function ModulesTableSkeleton() {
   return (
-    <div className="overflow-x-auto w-full rounded-xl border border-border/60 bg-card shadow-sm">
-      <table className="w-full text-left text-sm border-collapse">
-        <thead className="sticky top-0 z-20 bg-card border-b border-border/60">
-          <tr className="h-10 sm:h-11">
-            <th className="px-3 sm:px-4 py-2.5 w-20 text-center">
-              <Skeleton className="h-2.5 w-10 mx-auto" />
+    <div className="overflow-x-auto w-full rounded-xl border border-border/80 bg-card shadow-xs">
+      <table className="w-full text-left text-xs border-collapse">
+        <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+          <tr className="h-10">
+            <th className="px-3 py-2 w-20 text-center border-r border-emerald-500/15">
+              <Skeleton className="h-3 w-10 mx-auto" />
             </th>
-            <th className="px-4 sm:px-6 py-2.5">
-              <Skeleton className="h-2.5 w-28" />
+            <th className="px-4 py-2 border-r border-emerald-500/15">
+              <Skeleton className="h-3 w-28" />
             </th>
-            <th className="px-4 sm:px-6 py-2.5">
-              <Skeleton className="h-2.5 w-24" />
+            <th className="px-4 py-2 border-r border-emerald-500/15">
+              <Skeleton className="h-3 w-24" />
             </th>
-            <th className="px-4 sm:px-6 py-2.5 text-center">
-              <Skeleton className="h-2.5 w-20 mx-auto" />
+            <th className="px-4 py-2 text-center border-r border-emerald-500/15">
+              <Skeleton className="h-3 w-20 mx-auto" />
             </th>
-            <th className="px-4 sm:px-6 py-2.5 text-center">
-              <Skeleton className="h-2.5 w-20 mx-auto" />
+            <th className="px-4 py-2 text-center border-r border-emerald-500/15">
+              <Skeleton className="h-3 w-20 mx-auto" />
             </th>
-            <th className="px-4 sm:px-6 py-2.5 text-right">
-              <Skeleton className="h-2.5 w-12 ml-auto" />
+            <th className="px-4 py-2 text-right">
+              <Skeleton className="h-3 w-12 ml-auto" />
             </th>
           </tr>
         </thead>
-        <tbody className="divide-y divide-border/50">
+        <tbody className="divide-y divide-border/40 text-xs">
           {Array.from({ length: 6 }).map((_, i) => (
             <tr key={i} className="h-16">
               <td className="px-3 py-4 text-center">
