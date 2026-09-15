@@ -27,7 +27,7 @@ import {
   getClientIp,
   RATE_LIMITS,
 } from '../common/utils/rate-limit.util';
-import { Request } from 'express';
+
 
 @Controller('crm/deals')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

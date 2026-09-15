@@ -45,11 +45,16 @@ export class WebhookQueueProducer {
    * - No sensitive secrets in payload
    */
   async enqueueBillingWebhook(
-    payload: Omit<BillingWebhookJobPayload, 'correlationId' | 'timestamp'> & {
+    payload: Omit<
+      BillingWebhookJobPayload,
+      'correlationId' | 'timestamp' | 'tenantId'
+    > & {
+      tenantId?: string;
       correlationId?: string;
       timestamp?: string;
     },
   ): Promise<{ enqueued: boolean; jobId?: string }> {
+
     const correlationId = payload.correlationId || randomUUID();
     const timestamp = payload.timestamp || new Date().toISOString();
     const tenantId = payload.tenantId || 'system';

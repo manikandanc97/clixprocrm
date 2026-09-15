@@ -313,7 +313,6 @@ export const CRMTableHeaderCell = ({
   </TableHead>
 );
 
-export const CRMTableHead = CRMTableHeaderCell;
 
 
 

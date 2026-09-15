@@ -48,7 +48,6 @@ export const DEFAULT_PERMISSION_CATEGORIES = [
   },
 ];
 
-export const PERMISSION_CATEGORIES = DEFAULT_PERMISSION_CATEGORIES;
 
 interface RolePermissionMatrixProps {
   permissions: string[];

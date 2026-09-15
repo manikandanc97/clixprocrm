@@ -1,6 +1,7 @@
 import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
-import { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
+
 
 type RateLimitConfig = {
   windowMs: number;
@@ -138,9 +139,9 @@ export function resetRateLimit(identifier: string) {
   }
 }
 
-export function getClientIp(req: Request): string {
-  const forwarded = req.headers['x-forwarded-for'];
-  const realIp = req.headers['x-real-ip'];
+export function getClientIp(req: FastifyRequest | any): string {
+  const forwarded = req.headers?.['x-forwarded-for'];
+  const realIp = req.headers?.['x-real-ip'];
 
   if (typeof forwarded === 'string') {
     return forwarded.split(',')[0]?.trim();
@@ -156,3 +157,4 @@ export function getClientIp(req: Request): string {
 
   return req.ip || req.socket?.remoteAddress || 'unknown';
 }
+

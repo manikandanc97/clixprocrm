@@ -8,6 +8,11 @@ import { QUEUE_NAMES } from '../../queue/queue.constants';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
 import { SecurityIncidentsService } from '../services/security-incidents.service';
+import type {
+  AggregateQueueMetrics,
+  SingleQueueMetrics,
+} from '../../queue/interfaces/queue-metrics.interface';
+
 
 describe('PlatformQueueOperations (Phase 2.1.8)', () => {
   let controller: PlatformSecurityOperationsController;
@@ -190,8 +195,9 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
       const res = await controller.getQueueMetrics();
       expect(res.success).toBe(true);
       expect(mockQueueMetricsService.getAggregateMetrics).toHaveBeenCalled();
-      expect(res.data.totalActive).toBe(2);
-      expect(res.data.status).toBe('HEALTHY');
+      const data = res.data as AggregateQueueMetrics;
+      expect(data?.totalActive).toBe(2);
+      expect(data?.status).toBe('HEALTHY');
     });
 
     it('returns single queue metrics when valid queueName query parameter is supplied', async () => {
@@ -200,7 +206,8 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
       expect(
         mockQueueMetricsService.getSingleQueueMetrics,
       ).toHaveBeenCalledWith(QUEUE_NAMES.EMAIL);
-      expect(res.data.queueName).toBe(QUEUE_NAMES.EMAIL);
+      const data = res.data as SingleQueueMetrics;
+      expect(data?.queueName).toBe(QUEUE_NAMES.EMAIL);
     });
 
     it('retrieves dead-letter jobs across all queues or for a specific queue', async () => {
@@ -214,8 +221,8 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
         QUEUE_NAMES.EMAIL,
         { limit: 10, offset: 0 },
       );
-      expect(res.data.length).toBe(1);
-      expect(res.data[0].id).toBe('dead-1');
+      expect(res.data?.length).toBe(1);
+      expect(res.data?.[0]?.id).toBe('dead-1');
     });
 
     it('retries a dead-letter job via POST endpoint', async () => {
@@ -243,9 +250,10 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
         3600000,
         50,
       );
-      expect(res.data.cleanedCount).toBe(1);
+      expect(res.data?.cleanedCount).toBe(1);
     });
   });
+
 
   describe('SecOps Health Integration with BullMQ', () => {
     it('integrates BullMQ queue metrics into Background Jobs platform health row', async () => {

@@ -11,12 +11,13 @@ import {
 import { NotificationsService } from '../services/notifications.service';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import type { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 
-interface AuthenticatedRequest extends Request {
+interface AuthenticatedRequest extends FastifyRequest {
   tenantId: string;
   user: { id: string };
 }
+
 
 @Controller('crm/notifications')
 @UseGuards(SupabaseAuthGuard, TenantGuard)

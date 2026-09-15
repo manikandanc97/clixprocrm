@@ -281,6 +281,4 @@ export function CRMActionMenuItem({
 
 export const CRMActionMenuSeparator = DropdownMenuSeparator;
 export const CRMActionMenuLabel = DropdownMenuLabel;
-export const ActionMenu = CRMActionMenu;
-export const ActionMenuItem = CRMActionMenuItem;
-export const ActionMenuSeparator = CRMActionMenuSeparator;
+

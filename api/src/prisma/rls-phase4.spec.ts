@@ -36,8 +36,9 @@ import { PlatformDashboardService } from '../super-admin/services/platform-dashb
 import { PlatformAnalyticsService } from '../super-admin/services/platform-analytics.service';
 import { PlatformOrganizationsService } from '../super-admin/services/platform-organizations.service';
 import { EncryptionService } from '../common/encryption/encryption.service';
-import { BrandingService } from '../branding/branding.service';
+import { BrandingService } from '../workspace/services/branding.service';
 import { TenantContextService } from '../common/context/tenant-context.service';
+
 import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
 function buildModelMocks() {
@@ -203,6 +204,15 @@ function buildModelMocks() {
     revenueTarget: {
       deleteMany: jest.fn().mockResolvedValue({ count: 0 }),
     },
+    platformSubscription: {
+      findMany: jest.fn().mockResolvedValue([]),
+      findFirst: jest.fn(),
+      count: jest.fn().mockResolvedValue(0),
+    },
+    platformAuditLog: {
+      findMany: jest.fn().mockResolvedValue([]),
+      count: jest.fn().mockResolvedValue(0),
+    },
   };
 }
 
@@ -228,13 +238,17 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
       ),
       hash: jest.fn((v) => (v ? `hash_${v}` : v)),
       encryptWithHash: jest.fn((v) => ({
-        encrypted: v ? `enc_${v}` : null,
-        hash: v ? `hash_${v}` : null,
+        encrypted: `enc_${v}`,
+        hash: `hash_${v}`,
       })),
+      decryptOrPassthrough: jest.fn((v) =>
+        v && v.startsWith('enc_') ? v.replace('enc_', '') : v,
+      ),
     } as any;
   });
 
   describe('1. TenantGuard & Normal User Discovery Bootstrap', () => {
+
     it('should query user memberships in userId-scoped tenant context (without superadmin flag)', async () => {
       const guard = new TenantGuard(mockPrisma, new TenantContextService());
 
@@ -286,9 +300,14 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
           processAndUploadLogo: jest.fn(),
           processAndUploadAvatar: jest.fn(),
         } as any,
-        new TenantContextService(),
+        {
+          isQueueAvailable: jest.fn().mockReturnValue(true),
+          enqueueBrandingMedia: jest.fn(),
+          enqueueAvatarMedia: jest.fn(),
+        } as any,
       );
     });
+
 
     it('getMe wraps profile discovery in userId context', async () => {
       mockTx.user.findUnique.mockResolvedValue({

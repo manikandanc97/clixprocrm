@@ -47,4 +47,3 @@ export const getOrgAvatarColor = (name?: string | null): LetterColorStyle => {
   return LETTER_COLORS[letters[charCode % letters.length]];
 };
 
-export const getUserAvatarColor = getOrgAvatarColor;

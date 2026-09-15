@@ -18,6 +18,8 @@ import {
   EmailMessageStatus,
 } from '@prisma/client';
 import { BadRequestException } from '@nestjs/common';
+import type { SyncInboxJobPayload } from '../../queue/interfaces/email-jobs';
+
 
 describe('InboundEmailService Suite', () => {
   let service: InboundEmailService;
@@ -130,10 +132,12 @@ describe('InboundEmailService Suite', () => {
               for (const [key, val] of Object.entries(where)) {
                 if (
                   key === 'internetMessageId' &&
+                  val &&
                   typeof val === 'object' &&
-                  val.in
+                  'in' in val &&
+                  Array.isArray((val as any).in)
                 ) {
-                  if (!val.in.includes(item.internetMessageId)) return false;
+                  if (!(val as any).in.includes(item.internetMessageId)) return false;
                   continue;
                 }
                 if (item[key] !== val) return false;
@@ -147,6 +151,7 @@ describe('InboundEmailService Suite', () => {
             }
             return matches[0] || null;
           }),
+
           create: jest.fn(async ({ data }: any) => {
             const newMsg = {
               id: `msg-${dbMessages.length + 1}`,
@@ -257,6 +262,17 @@ describe('InboundEmailService Suite', () => {
     });
   });
 
+  function createSyncPayload(
+    opts: Partial<SyncInboxJobPayload> & { tenantId: string; accountId: string },
+  ): SyncInboxJobPayload {
+    return {
+      folder: 'INBOX',
+      correlationId: 'test-corr-inbound-1',
+      timestamp: '2026-09-15T00:00:00.000Z',
+      ...opts,
+    };
+  }
+
   it('1. should perform end-to-end IMAP sync: persist message, thread, timeline event, and advance cursor', async () => {
     jest.spyOn(verifierService, 'assertSafeHost').mockResolvedValue(undefined);
 
@@ -265,8 +281,7 @@ describe('InboundEmailService Suite', () => {
       'To: inbound@clixprocrm.com',
       'Subject: Order Inquiry',
       'Message-ID: <order-101@client.com>',
-      'Date: Sat, 05 Sep 2026 10:30:00 +0000',
-      'Content-Type: text/html; charset=utf-8',
+      'Content-Type: text/html',
       '',
       '<p>Hello, please send us a quotation for 50 licenses.</p>',
     ].join('\r\n');
@@ -280,11 +295,13 @@ describe('InboundEmailService Suite', () => {
       },
     ];
 
-    const result = await service.processSyncInboxJob({
-      tenantId: TENANT_1,
-      accountId: ACCOUNT_ID,
-      folder: 'INBOX',
-    });
+    const result = await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_1,
+        accountId: ACCOUNT_ID,
+        folder: 'INBOX',
+      }),
+    );
 
     expect(result.success).toBe(true);
     expect(result.messagesProcessed).toBe(1);
@@ -343,20 +360,24 @@ describe('InboundEmailService Suite', () => {
     ];
 
     // First sync run
-    const result1 = await service.processSyncInboxJob({
-      tenantId: TENANT_1,
-      accountId: ACCOUNT_ID,
-    });
+    const result1 = await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_1,
+        accountId: ACCOUNT_ID,
+      }),
+    );
     expect(result1.messagesProcessed).toBe(1);
     expect(dbMessages).toHaveLength(1);
     expect(dbThreads).toHaveLength(1);
     expect(dbTimelineEvents).toHaveLength(1);
 
     // Second sync run with the same message (e.g. re-fetched or retry)
-    const result2 = await service.processSyncInboxJob({
-      tenantId: TENANT_1,
-      accountId: ACCOUNT_ID,
-    });
+    const result2 = await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_1,
+        accountId: ACCOUNT_ID,
+      }),
+    );
     expect(result2.messagesProcessed).toBe(0);
     expect(result2.messagesSkipped).toBe(1);
 
@@ -410,10 +431,12 @@ describe('InboundEmailService Suite', () => {
       },
     ];
 
-    await service.processSyncInboxJob({
-      tenantId: TENANT_1,
-      accountId: ACCOUNT_ID,
-    });
+    await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_1,
+        accountId: ACCOUNT_ID,
+      }),
+    );
 
     // Message must attach to existing thread
     expect(dbMessages).toHaveLength(2);
@@ -471,10 +494,12 @@ describe('InboundEmailService Suite', () => {
       },
     ];
 
-    await service.processSyncInboxJob({
-      tenantId: TENANT_1,
-      accountId: ACCOUNT_ID,
-    });
+    await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_1,
+        accountId: ACCOUNT_ID,
+      }),
+    );
 
     const followUpMsg = dbMessages.find(
       (m) => m.internetMessageId === '<feature-followup-789@corp.com>',
@@ -516,10 +541,12 @@ describe('InboundEmailService Suite', () => {
       },
     ];
 
-    await service.processSyncInboxJob({
-      tenantId: TENANT_1,
-      accountId: ACCOUNT_ID,
-    });
+    await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_1,
+        accountId: ACCOUNT_ID,
+      }),
+    );
 
     const matchedMsg = dbMessages.find(
       (m) => m.internetMessageId === '<subject-match-111@client.com>',
@@ -548,10 +575,12 @@ describe('InboundEmailService Suite', () => {
       },
     ];
 
-    await service.processSyncInboxJob({
-      tenantId: TENANT_1,
-      accountId: ACCOUNT_ID,
-    });
+    await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_1,
+        accountId: ACCOUNT_ID,
+      }),
+    );
 
     const msg = dbMessages.find(
       (m) => m.internetMessageId === '<xss-injection-123@evil.com>',
@@ -582,10 +611,12 @@ describe('InboundEmailService Suite', () => {
     ];
 
     await expect(
-      service.processSyncInboxJob({
-        tenantId: TENANT_1,
-        accountId: ACCOUNT_ID,
-      }),
+      service.processSyncInboxJob(
+        createSyncPayload({
+          tenantId: TENANT_1,
+          accountId: ACCOUNT_ID,
+        }),
+      ),
     ).rejects.toThrow();
 
     const account = dbAccounts.find((a) => a.id === ACCOUNT_ID);
@@ -605,10 +636,12 @@ describe('InboundEmailService Suite', () => {
     );
 
     await expect(
-      service.processSyncInboxJob({
-        tenantId: TENANT_1,
-        accountId: ACCOUNT_ID,
-      }),
+      service.processSyncInboxJob(
+        createSyncPayload({
+          tenantId: TENANT_1,
+          accountId: ACCOUNT_ID,
+        }),
+      ),
     ).rejects.toThrow(/IMAP connection failure \(AUTH_FAILED\)/);
 
     const account = dbAccounts.find((a) => a.id === ACCOUNT_ID);
@@ -632,10 +665,12 @@ describe('InboundEmailService Suite', () => {
     dbAccounts.push(dangerousAccount);
 
     await expect(
-      service.processSyncInboxJob({
-        tenantId: TENANT_1,
-        accountId: 'acc-ssrf-1',
-      }),
+      service.processSyncInboxJob(
+        createSyncPayload({
+          tenantId: TENANT_1,
+          accountId: 'acc-ssrf-1',
+        }),
+      ),
     ).rejects.toThrow(/Connection refused/);
 
     expect(mockImapClient.connect).not.toHaveBeenCalled();
@@ -643,10 +678,12 @@ describe('InboundEmailService Suite', () => {
 
   it('10. Tenant Isolation: cross-tenant access is rejected without processing', async () => {
     // Attempt to sync Tenant 1 account using Tenant 2 credentials in payload
-    const result = await service.processSyncInboxJob({
-      tenantId: TENANT_2,
-      accountId: ACCOUNT_ID, // belongs to TENANT_1
-    });
+    const result = await service.processSyncInboxJob(
+      createSyncPayload({
+        tenantId: TENANT_2,
+        accountId: ACCOUNT_ID, // belongs to TENANT_1
+      }),
+    );
 
     expect(result.success).toBe(false);
     expect(result.skipped).toBe(true);
@@ -654,3 +691,4 @@ describe('InboundEmailService Suite', () => {
     expect(mockImapClient.connect).not.toHaveBeenCalled();
   });
 });
+

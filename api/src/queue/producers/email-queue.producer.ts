@@ -43,11 +43,16 @@ export class EmailQueueProducer {
    * Enqueues a security / new-device sign-in alert email.
    */
   async enqueueSecurityAlert(
-    payload: Omit<SecurityAlertJobPayload, 'correlationId' | 'timestamp'> & {
+    payload: Omit<
+      SecurityAlertJobPayload,
+      'correlationId' | 'timestamp' | 'tenantId'
+    > & {
+      tenantId?: string;
       correlationId?: string;
       timestamp?: string;
     },
   ): Promise<{ enqueued: boolean; jobId?: string }> {
+
     const correlationId = payload.correlationId || randomUUID();
     const timestamp = payload.timestamp || new Date().toISOString();
     const tenantId = payload.tenantId || 'system';

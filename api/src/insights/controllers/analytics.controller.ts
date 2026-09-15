@@ -4,11 +4,12 @@ import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
-import type { Request } from 'express';
+import type { FastifyRequest } from 'fastify';
 
-interface AuthenticatedRequest extends Request {
+interface AuthenticatedRequest extends FastifyRequest {
   tenantId: string;
 }
+
 
 @Controller('crm/analytics')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

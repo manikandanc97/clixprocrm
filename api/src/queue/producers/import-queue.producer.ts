@@ -40,11 +40,16 @@ export class ImportQueueProducer {
    * Ensures deterministic job ID generation and typed BaseJobPayload structure.
    */
   async enqueueLeadsImport(
-    payload: Omit<LeadsBulkImportJobPayload, 'correlationId' | 'timestamp'> & {
+    payload: Omit<
+      LeadsBulkImportJobPayload,
+      'correlationId' | 'timestamp' | 'tenantId'
+    > & {
+      tenantId?: string;
       correlationId?: string;
       timestamp?: string;
     },
   ): Promise<{ enqueued: boolean; jobId?: string }> {
+
     const correlationId = payload.correlationId || randomUUID();
     const timestamp = payload.timestamp || new Date().toISOString();
     const tenantId = payload.tenantId || 'system';
