@@ -24,6 +24,7 @@ import {
   SendInvoiceEmailDto,
 } from '../dto/enterprise-invoice.dto';
 import type { FastifyReply } from 'fastify';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 
 @Controller('crm/invoices')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)
@@ -44,8 +45,7 @@ export class InvoicesController {
     @Query('dateFrom') dateFrom?: string,
     @Query('dateTo') dateTo?: string,
   ) {
-    const p = page ? parseInt(page, 10) : 1;
-    const l = limit ? parseInt(limit, 10) : 20;
+    const { page: p, limit: l } = parsePaginationParams({ page, limit }, 20);
     const data = await this.invoicesService.getInvoices(req.tenantId, p, l, {
       search,
       status,

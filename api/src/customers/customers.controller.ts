@@ -14,6 +14,7 @@ import { CustomersService } from './customers.service';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { parsePaginationParams } from '../common/utils/pagination.util';
 
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 @Controller('customers')
@@ -29,8 +30,7 @@ export class CustomersController {
     @Query('search') search: string,
   ) {
     const tenantId = req.user.tenantId;
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 10;
+    const { page: pageNum, limit: limitNum } = parsePaginationParams({ page, limit }, 10);
 
     return this.customersService.getCustomers(
       tenantId,

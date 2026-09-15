@@ -17,6 +17,7 @@ import {
 } from '../dto/platform-billing.dto';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 
 @Controller(['super-admin/billing', 'super_admin/billing'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)
@@ -37,8 +38,7 @@ export class PlatformBillingController {
     @Query('planId') planId?: string,
     @Query('status') status?: string,
   ) {
-    const p = page ? parseInt(page, 10) : 1;
-    const l = limit ? parseInt(limit, 10) : 20;
+    const { page: p, limit: l } = parsePaginationParams({ page, limit }, 20);
     const data = await this.billingService.getSubscriptions(p, l, {
       search,
       planId,
@@ -69,8 +69,7 @@ export class PlatformBillingController {
     @Query('paymentStatus') paymentStatus?: string,
     @Query('tenantId') tenantId?: string,
   ) {
-    const p = page ? parseInt(page, 10) : 1;
-    const l = limit ? parseInt(limit, 10) : 20;
+    const { page: p, limit: l } = parsePaginationParams({ page, limit }, 20);
     const data = await this.billingService.getPlatformInvoices(p, l, {
       search,
       status,

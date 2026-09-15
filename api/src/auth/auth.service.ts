@@ -323,8 +323,8 @@ export class AuthService {
       }
     }
 
-    const platformConfig = await (this.prisma as any).platformConfig
-      ?.findUnique({ where: { id: 'global' } })
+    const platformConfig = await this.prisma.platformConfig
+      .findUnique({ where: { id: 'global' } })
       .catch(() => null);
 
     if (platformConfig) {
@@ -873,7 +873,7 @@ export class AuthService {
     }
 
     // Clear mustResetPassword flag
-    await (this.prisma as any).user
+    await this.prisma.user
       .update({
         where: { id: userId },
         data: { mustResetPassword: false },
@@ -953,7 +953,7 @@ export class AuthService {
     }
 
     // Clear mustResetPassword flag
-    await (this.prisma as any).user
+    await this.prisma.user
       .update({
         where: { id: userId },
         data: { mustResetPassword: false },

@@ -104,28 +104,8 @@ export const isVideoFile = (filename: string, contentType?: string) => {
   return ["mp4", "webm", "mov", "avi", "mkv", "m4v"].includes(ext);
 };
 
-export const getInitials = (name?: string) => {
-  if (!name) return "U";
-  const parts = name.trim().split(" ");
-  if (parts.length >= 2 && parts[0] && parts[1]) {
-    return `${parts[0][0]}${parts[1][0]}`.toUpperCase();
-  }
-  return name.slice(0, 2).toUpperCase();
-};
-
-export const formatRelativeTime = (isoString: string) => {
-  try {
-    const date = new Date(isoString);
-    const now = new Date();
-    const diffInHours = Math.floor((now.getTime() - date.getTime()) / (1000 * 60 * 60));
-
-    if (diffInHours < 1) return "Just now";
-    if (diffInHours < 24) return `${diffInHours}h ago`;
-    const diffInDays = Math.floor(diffInHours / 24);
-    if (diffInDays < 7) return `${diffInDays}d ago`;
-    return date.toLocaleDateString();
-  } catch {
-    return "Recently";
-  }
-};
+export {
+  getInitials,
+  formatRelativeTime,
+} from "@/shared/utils/formatters";
 

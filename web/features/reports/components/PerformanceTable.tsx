@@ -16,6 +16,7 @@ import { useCurrency } from "@/shared/hooks/use-currency";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shared/ui/card";
 import { motion } from "framer-motion";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { getInitials } from "@/shared/utils/formatters";
 
 interface PerformanceTableProps {
   performance: PerformanceType[];
@@ -59,7 +60,7 @@ const PerformanceTable = ({ performance, onViewAll }: PerformanceTableProps) => 
 
         <CardContent className="p-0 overflow-x-auto">
           <CRMDataTable containerClassName="border-0 shadow-none rounded-none w-full" className="w-full">
-            <CRMTableHeader className="bg-muted/30 border-b border-border/60">
+            <CRMTableHeader className="bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20">
               <CRMTableRow className="h-10 hover:bg-transparent">
                 <CRMTableHeaderCell className="text-xs font-semibold text-muted-foreground pl-5">
                   Team Member
@@ -96,7 +97,7 @@ const PerformanceTable = ({ performance, onViewAll }: PerformanceTableProps) => 
                       <div className="flex items-center gap-3">
                         <Avatar className="w-8 h-8 rounded-full border border-border/80 bg-muted flex items-center justify-center font-bold text-xs text-foreground shrink-0">
                           <AvatarFallback className="bg-muted text-foreground">
-                            {item.name?.split(' ').map((n: string) => n[0]).join('').substring(0, 2).toUpperCase() || 'U'}
+                            {getInitials(item.name, 'U')}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0">

@@ -4,6 +4,7 @@ import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import { PermissionsGuard } from '../../auth/permissions.guard';
 import { Permissions } from '../../auth/permissions.decorator';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 
 @Controller('crm/audit-logs')
 @UseGuards(SupabaseAuthGuard, TenantGuard, PermissionsGuard)
@@ -18,8 +19,7 @@ export class AuditLogsController {
     @Query('limit') limit: string,
     @Query('search') search: string,
   ) {
-    const pageNum = parseInt(page) || 1;
-    const limitNum = parseInt(limit) || 20;
+    const { page: pageNum, limit: limitNum } = parsePaginationParams({ page, limit }, 20);
     const result = await this.auditLogsService.getAuditLogs(
       req.tenantId,
       pageNum,

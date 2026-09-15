@@ -45,13 +45,73 @@ export function toNumber(value: unknown): number {
   return Number(value || 0);
 }
 
-export function formatCurrency(value: unknown, _currency?: string): string {
-  return new Intl.NumberFormat("en-IN", {
-    style: "currency",
-    currency: "INR",
-    minimumFractionDigits: 0,
-    maximumFractionDigits: 0,
-  }).format(toNumber(value));
+export interface FormatCurrencyOptions {
+  currency?: string;
+  decimals?: number;
+}
+
+export function formatCurrency(
+  value: unknown,
+  options?: FormatCurrencyOptions | string
+): string {
+  const currencyCode =
+    typeof options === "string" ? options : options?.currency || "INR";
+  const decimals =
+    typeof options === "object" && typeof options?.decimals === "number"
+      ? options.decimals
+      : 0;
+
+  try {
+    return new Intl.NumberFormat("en-IN", {
+      style: "currency",
+      currency: currencyCode,
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    }).format(toNumber(value));
+  } catch {
+    const num = toNumber(value);
+    const symbol = currencyCode === "USD" ? "$" : currencyCode === "EUR" ? "€" : "₹";
+    return `${symbol}${num.toLocaleString("en-IN", {
+      minimumFractionDigits: decimals,
+      maximumFractionDigits: decimals,
+    })}`;
+  }
+}
+
+export function getInitials(name?: string | null, fallback = "CR"): string {
+  if (!name || typeof name !== "string") return fallback;
+  const trimmed = name.trim();
+  if (!trimmed) return fallback;
+  const parts = trimmed.split(/\s+/).filter(Boolean);
+  if (parts.length === 0) return fallback;
+  if (parts.length === 1) {
+    return parts[0].slice(0, 2).toUpperCase();
+  }
+  return (parts[0][0] + parts[1][0]).toUpperCase();
+}
+
+export function formatRelativeTime(
+  dateStr: string | number | Date | null | undefined,
+  fallback = "Recently"
+): string {
+  if (!dateStr) return fallback;
+  try {
+    const d = new Date(dateStr);
+    if (isNaN(d.getTime())) return fallback;
+    const now = new Date();
+    const diffSecs = Math.floor((now.getTime() - d.getTime()) / 1000);
+    if (diffSecs < 0) return "just now";
+    if (diffSecs < 60) return "just now";
+    const diffMins = Math.floor(diffSecs / 60);
+    if (diffMins < 60) return `${diffMins}m ago`;
+    const diffHours = Math.floor(diffMins / 60);
+    if (diffHours < 24) return `${diffHours}h ago`;
+    const diffDays = Math.floor(diffHours / 24);
+    if (diffDays < 30) return `${diffDays}d ago`;
+    return d.toLocaleDateString();
+  } catch {
+    return fallback;
+  }
 }
 
 export function formatPercentage(value: number | string | null | undefined, digits = 0): string {

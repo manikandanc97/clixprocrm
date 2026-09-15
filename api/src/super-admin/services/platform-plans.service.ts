@@ -35,7 +35,7 @@ export class PlatformPlansService {
    * If plans already exist, this method is a strict NO-OP to preserve Super Admin edits and deletions.
    */
   async seedCanonicalPlansIfEmpty(): Promise<void> {
-    const planCount = await (this.prisma as any).plan.count();
+    const planCount = await this.prisma.plan.count();
     if (planCount > 0) {
       return;
     }
@@ -70,13 +70,13 @@ export class PlatformPlansService {
     }));
 
     // Find default chat model in catalog if exists
-    const defaultChatModel = await (this.prisma as any).aiModel.findFirst({
+    const defaultChatModel = await this.prisma.aiModel.findFirst({
       where: { isAvailable: true, status: 'ENABLED', isChatModel: true },
       orderBy: { sortOrder: 'asc' },
     });
 
     for (const plan of canonicalPlans) {
-      const created = await (this.prisma as any).plan.create({
+      const created = await this.prisma.plan.create({
         data: {
           ...plan,
           defaultModelId: defaultChatModel?.id || null,
@@ -84,7 +84,7 @@ export class PlatformPlansService {
       });
 
       if (defaultChatModel) {
-        await (this.prisma as any).planAiEntitlement.create({
+        await this.prisma.planAiEntitlement.create({
           data: {
             planId: created.id,
             modelId: defaultChatModel.id,
@@ -109,7 +109,7 @@ export class PlatformPlansService {
 
     try {
       const [plans, tenantDistributionRaw, aiModels] = await Promise.all([
-        (this.prisma as any).plan.findMany({
+        this.prisma.plan.findMany({
           orderBy: [{ sortOrder: 'asc' }, { priceNum: 'asc' }],
           include: {
             defaultModel: true,
@@ -118,13 +118,13 @@ export class PlatformPlansService {
             },
           },
         }),
-        (this.prisma as any).tenant
+        this.prisma.tenant
           .groupBy({
             by: ['plan'],
             _count: { _all: true },
           })
           .catch(() => []),
-        (this.prisma as any).aiModel
+        this.prisma.aiModel
           .findMany({
             where: { isAvailable: true, status: 'ENABLED', isChatModel: true },
             orderBy: { sortOrder: 'asc' },
@@ -295,7 +295,7 @@ export class PlatformPlansService {
     dto: UpdatePlatformPlanDto,
     actorUserId: string,
   ) {
-    const existing = await (this.prisma as any).plan.findUnique({
+    const existing = await this.prisma.plan.findUnique({
       where: { id: planId },
       include: {
         defaultModel: true,
@@ -472,13 +472,17 @@ export class PlatformPlansService {
     await this.entitlementService.invalidateAllCache();
 
     // Fetch updated record for response and audit log
-    const updated = await (this.prisma as any).plan.findUnique({
+    const updated = await this.prisma.plan.findUnique({
       where: { id: planId },
       include: {
         defaultModel: true,
         aiEntitlements: { include: { model: true } },
       },
     });
+
+    if (!updated) {
+      throw new NotFoundException(`Plan '${planId}' could not be reloaded after update.`);
+    }
 
     // Sealed Audit Log
     await this.prisma.createSealedAuditLog({
@@ -516,7 +520,7 @@ export class PlatformPlansService {
    * Safely archives a plan without deleting existing customer billing subscriptions.
    */
   async archivePlan(planId: string, actorUserId: string) {
-    const existing = await (this.prisma as any).plan.findUnique({
+    const existing = await this.prisma.plan.findUnique({
       where: { id: planId },
     });
 
@@ -524,7 +528,7 @@ export class PlatformPlansService {
       throw new NotFoundException(`Plan '${planId}' does not exist.`);
     }
 
-    const updated = await (this.prisma as any).plan.update({
+    const updated = await this.prisma.plan.update({
       where: { id: planId },
       data: {
         status: 'ARCHIVED',
@@ -565,7 +569,7 @@ export class PlatformPlansService {
       throw new BadRequestException('Valid Plan ID could not be determined.');
     }
 
-    const existing = await (this.prisma as any).plan.findUnique({
+    const existing = await this.prisma.plan.findUnique({
       where: { id: planId },
     });
     if (existing) {
@@ -601,9 +605,9 @@ export class PlatformPlansService {
       return val < 0 ? 1000000 : val;
     };
 
-    let defaultModelId = dto.defaultModelId;
+    let defaultModelId: string | null | undefined = dto.defaultModelId;
     if (!defaultModelId) {
-      const defaultChatModel = await (this.prisma as any).aiModel.findFirst({
+      const defaultChatModel = await this.prisma.aiModel.findFirst({
         where: { isAvailable: true, status: 'ENABLED', isChatModel: true },
         orderBy: { sortOrder: 'asc' },
       });
@@ -612,12 +616,12 @@ export class PlatformPlansService {
 
     const newPlan = await this.prisma.$transaction(async (tx) => {
       if (dto.highlight === true) {
-        await (tx as any).plan.updateMany({
+        await tx.plan.updateMany({
           data: { highlight: false },
         });
       }
 
-      const plan = await (tx as any).plan.create({
+      const plan = await tx.plan.create({
         data: {
           id: planId,
           name: dto.name.trim(),
@@ -657,7 +661,7 @@ export class PlatformPlansService {
             : [];
 
       for (const mId of allowedModelIds) {
-        await (tx as any).planAiEntitlement.upsert({
+        await tx.planAiEntitlement.upsert({
           where: {
             planId_modelId_capability: {
               planId: plan.id,
@@ -701,7 +705,7 @@ export class PlatformPlansService {
    * Deletes a plan permanently if no active workspaces are currently assigned to it.
    */
   async deletePlan(planId: string, actorUserId: string) {
-    const existing = await (this.prisma as any).plan.findUnique({
+    const existing = await this.prisma.plan.findUnique({
       where: { id: planId },
     });
 
@@ -710,7 +714,7 @@ export class PlatformPlansService {
     }
 
     // Check if any tenant is using this plan
-    const tenantCount = await (this.prisma as any).tenant.count({
+    const tenantCount = await this.prisma.tenant.count({
       where: {
         plan: {
           equals: planId,
@@ -722,7 +726,7 @@ export class PlatformPlansService {
     await this.prisma.$transaction(async (tx) => {
       // If any active tenants were on this plan, safely reassign them to free tier
       if (tenantCount > 0 && planId.toLowerCase() !== 'free') {
-        await (tx as any).tenant.updateMany({
+        await tx.tenant.updateMany({
           where: {
             plan: {
               equals: planId,
@@ -736,12 +740,12 @@ export class PlatformPlansService {
       }
 
       // Delete AI entitlements first
-      await (tx as any).planAiEntitlement.deleteMany({
+      await tx.planAiEntitlement.deleteMany({
         where: { planId },
       });
 
       // Delete the plan permanently
-      await (tx as any).plan.delete({
+      await tx.plan.delete({
         where: { id: planId },
       });
     });

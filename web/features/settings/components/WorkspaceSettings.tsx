@@ -36,6 +36,8 @@ import {
 import { CRMCard } from "@/shared/components/crm";
 import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
+import { useImageCropper } from "@/shared/hooks/use-image-cropper";
+import { getInitials } from "@/shared/utils/formatters";
 import {
   useWorkspace,
   useUpdateWorkspace,
@@ -66,16 +68,6 @@ const PRESET_BRAND_SWATCHES = [
   { name: "Amber", hex: "#f59e0b" },
 ];
 
-function getInitials(name?: string) {
-  if (!name) return "WS";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
-
 const normalizeCurrency = (curr?: string | null) => {
   if (!curr) return "INR";
   return curr.toUpperCase() === "INR" ? "INR" : "INR";
@@ -96,11 +88,18 @@ const WorkspaceSettings = () => {
   const { refreshUser } = useAuth();
   const queryClient = useQueryClient();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [uploadingLogo, setUploadingLogo] = useState(false);
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [selectedRawFile, setSelectedRawFile] = useState<File | null>(null);
+  const {
+    fileInputRef,
+    isDragging,
+    cropModalOpen,
+    setCropModalOpen,
+    selectedRawFile,
+    handleFileChange,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useImageCropper();
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [logoColors, setLogoColors] = useState<string[]>([]);
 
@@ -163,49 +162,6 @@ const WorkspaceSettings = () => {
     }
   }, [workspace?.currency, workspace?.brandPrimaryColor, setStoreCurrency, setAccentColor]);
 
-  const handleSelectRawFile = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload a valid image file (PNG, JPG, or WebP)");
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("Image file size must be less than 5MB");
-      return;
-    }
-
-    setSelectedRawFile(file);
-    setCropModalOpen(true);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleSelectRawFile(file);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleSelectRawFile(file);
-    }
-  };
 
   const handleCropComplete = async (croppedFile: File) => {
     setUploadingLogo(true);

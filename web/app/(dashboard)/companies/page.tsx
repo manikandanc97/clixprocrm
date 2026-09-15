@@ -24,6 +24,7 @@ import {
   CRMPageHeader,
   CRMToolbar,
   CRMPagination,
+  CRMDeleteDialog,
 } from "@/shared/components/crm";
 import {
   useDeleteCompany,
@@ -38,7 +39,6 @@ import {
   type CompanyItem,
 } from "@/features/companies/hooks/use-companies-data";
 import { CompaniesDataTable } from "@/features/companies/components/CompaniesDataTable";
-import { CompaniesDeleteDialog } from "@/features/companies/components/CompaniesDeleteDialog";
 import type { SortDirection } from "@/shared/components/DataTableColumnHeader";
 
 const CompanyForm = dynamic(
@@ -362,16 +362,48 @@ export default function CompaniesPage() {
       </div>
 
       {/* 4. Delete Confirmation Dialogs */}
-      <CompaniesDeleteDialog
-        companyToDelete={companyToDelete}
-        onCloseSingle={() => setCompanyToDelete(null)}
-        onConfirmSingle={handleDeleteCompany}
-        isDeletingSingle={isDeletingCompany}
-        isBulkOpen={bulkDeleteModalOpen}
-        bulkCount={selectedCompanyIds.length}
-        onCloseBulk={() => setBulkDeleteModalOpen(false)}
-        onConfirmBulk={handleBulkDelete}
-        isDeletingBulk={isBulkDeleting}
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={Boolean(companyToDelete)}
+        onOpenChange={(open) => {
+          if (!open && !isDeletingCompany) setCompanyToDelete(null);
+        }}
+        title="Delete Company?"
+        itemName="Company"
+        description={
+          <>
+            Are you sure you want to delete{" "}
+            <strong className="text-foreground">
+              {companyToDelete?.name || "this company"}
+            </strong>
+            ?
+          </>
+        }
+        warningText="This action will permanently delete the company account and unlink associated contacts."
+        confirmLabel="Delete Company"
+        onConfirm={handleDeleteCompany}
+        isDeleting={isDeletingCompany}
+      />
+
+      <CRMDeleteDialog
+        mode="bulk"
+        isOpen={bulkDeleteModalOpen}
+        onOpenChange={(open) => {
+          if (!open && !isBulkDeleting) setBulkDeleteModalOpen(false);
+        }}
+        title="Delete Selected Companies?"
+        itemName="Company"
+        selectedCount={selectedCompanyIds.length}
+        description={
+          <>
+            You are about to delete{" "}
+            <strong className="text-foreground">{selectedCompanyIds.length}</strong> selected company account(s).
+          </>
+        }
+        warningText="This action cannot be undone. All selected company accounts will be permanently removed."
+        confirmLabel={`Delete ${selectedCompanyIds.length} Companies`}
+        onConfirm={handleBulkDelete}
+        isDeleting={isBulkDeleting}
       />
 
       {/* 5. Company Form Modal (Create & Edit) */}

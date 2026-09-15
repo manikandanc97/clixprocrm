@@ -12,16 +12,7 @@ import { Button } from "@/shared/ui/button";
 import GlobalSearch from "./GlobalSearch";
 import CurrencySwitcher from "./CurrencySwitcher";
 import ThemeToggle from "./ThemeToggle";
-
-function getInitials(name?: string) {
-  if (!name) return "CR";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
+import { getInitials } from "@/shared/utils/formatters";
 
 export default function Topbar() {
   const { user } = useAuth();

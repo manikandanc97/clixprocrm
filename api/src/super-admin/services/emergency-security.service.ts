@@ -22,12 +22,12 @@ export class EmergencySecurityService {
    * Generates or retrieves the platform emergency state.
    */
   async getPlatformSecurityState() {
-    let state = await (this.prisma as any).platformSecurityState.findUnique({
+    let state = await this.prisma.platformSecurityState.findUnique({
       where: { id: 'global' },
     });
 
     if (!state) {
-      state = await (this.prisma as any).platformSecurityState.create({
+      state = await this.prisma.platformSecurityState.create({
         data: {
           id: 'global',
           emergencyMode: false,
@@ -43,7 +43,7 @@ export class EmergencySecurityService {
    */
   async generateBreakGlassCode(actorId: string): Promise<string> {
     const code = `EMERGENCY-${crypto.randomBytes(4).toString('hex').toUpperCase()}`;
-    await (this.prisma as any).platformSecurityState.upsert({
+    await this.prisma.platformSecurityState.upsert({
       where: { id: 'global' },
       update: { confirmationCode: code },
       create: { id: 'global', emergencyMode: false, confirmationCode: code },

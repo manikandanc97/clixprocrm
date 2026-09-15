@@ -16,40 +16,35 @@ import { extractErrorMessage, getApiErrorMessage } from "@/shared/lib/api/error"
 import { extractDominantColorClient } from "@/shared/lib/utils/color-utils";
 import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
 import { toast } from "sonner";
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+import { useImageCropper } from "@/shared/hooks/use-image-cropper";
 
 export default function OnboardingPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { refreshUser } = useAuth();
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
   const [companyName, setCompanyName] = useState("");
   const [logoFile, setLogoFile] = useState<File | null>(null);
   const [logoPreview, setLogoPreview] = useState<string | null>(null);
   const [detectedColor, setDetectedColor] = useState<string | null>(null);
-  const [isDragging, setIsDragging] = useState(false);
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [selectedRawFile, setSelectedRawFile] = useState<File | null>(null);
+
+  const {
+    fileInputRef,
+    isDragging,
+    cropModalOpen,
+    setCropModalOpen,
+    selectedRawFile,
+    handleFileChange,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    openCropperForFile,
+  } = useImageCropper({
+    allowedTypesMessage: "Please select a valid image file (PNG, JPG, or WebP)",
+  });
 
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState<string | null>(null);
-
-  const handleSelectRawFile = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please select a valid image file (PNG, JPG, or WebP)");
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("Image file size must be less than 5MB");
-      return;
-    }
-
-    setSelectedRawFile(file);
-    setCropModalOpen(true);
-  };
 
   const handleCropComplete = async (croppedFile: File, previewUrl: string) => {
     setLogoFile(croppedFile);
@@ -67,40 +62,10 @@ export default function OnboardingPage() {
     }
   };
 
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleSelectRawFile(file);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleSelectRawFile(file);
-    }
-  };
-
   const handleOpenCropForCurrentLogo = (e: React.MouseEvent) => {
     e.stopPropagation();
     if (!logoFile && !logoPreview) return;
-    setSelectedRawFile(logoFile);
-    setCropModalOpen(true);
+    openCropperForFile(logoFile);
   };
 
   const handleRemoveLogo = () => {

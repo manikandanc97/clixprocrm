@@ -33,6 +33,7 @@ import {
   CRMToolbar,
   CRMPagination,
   PageErrorState,
+  CRMDeleteDialog,
 } from "@/shared/components/crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import {
@@ -54,7 +55,6 @@ import {
   type ContactItem,
 } from "@/features/contacts/hooks/use-contacts-data";
 import { ContactsDataTable } from "@/features/contacts/components/ContactsDataTable";
-import { ContactsDeleteDialog } from "@/features/contacts/components/ContactsDeleteDialog";
 import type { SortDirection } from "@/shared/components/DataTableColumnHeader";
 
 const BulkImportModal = dynamic(
@@ -488,16 +488,48 @@ export default function ContactsPage() {
       </div>
 
       {/* 6. Delete Dialogs */}
-      <ContactsDeleteDialog
-        contactToDelete={contactToDelete}
-        onCloseSingle={() => setContactToDelete(null)}
-        onConfirmSingle={handleDeleteContact}
-        isDeletingSingle={isDeletingContact}
-        isBulkOpen={bulkDeleteModalOpen}
-        bulkCount={selectedContactIds.length}
-        onCloseBulk={() => setBulkDeleteModalOpen(false)}
-        onConfirmBulk={handleBulkDelete}
-        isDeletingBulk={isBulkDeleting}
+      <CRMDeleteDialog
+        mode="single"
+        isOpen={Boolean(contactToDelete)}
+        onOpenChange={(open) => {
+          if (!open && !isDeletingContact) setContactToDelete(null);
+        }}
+        title={`Delete ${contactToDelete?.type || "Contact"}?`}
+        itemName={contactToDelete?.type || "Contact"}
+        description={
+          <>
+            Are you sure you want to delete{" "}
+            <strong className="text-foreground">
+              {contactToDelete?.name || "this contact"}
+            </strong>
+            ?
+          </>
+        }
+        warningText="This action will permanently delete this record and its associated history."
+        confirmLabel="Delete Record"
+        onConfirm={handleDeleteContact}
+        isDeleting={isDeletingContact}
+      />
+
+      <CRMDeleteDialog
+        mode="bulk"
+        isOpen={bulkDeleteModalOpen}
+        onOpenChange={(open) => {
+          if (!open && !isBulkDeleting) setBulkDeleteModalOpen(false);
+        }}
+        title="Delete Selected Contacts?"
+        itemName="Contact"
+        selectedCount={selectedContactIds.length}
+        description={
+          <>
+            You are about to delete{" "}
+            <strong className="text-foreground">{selectedContactIds.length}</strong> selected contact records.
+          </>
+        }
+        warningText="This action cannot be undone. All selected leads and customers will be removed."
+        confirmLabel={`Delete ${selectedContactIds.length} Records`}
+        onConfirm={handleBulkDelete}
+        isDeleting={isBulkDeleting}
       />
 
       {/* 7. Lead Form Modal */}

@@ -16,6 +16,7 @@ import {
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import { PlatformOrganizationsService } from '../services/platform-organizations.service';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 
 @Controller(['super-admin/organizations', 'super_admin/organizations'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)
@@ -30,12 +31,13 @@ export class PlatformOrganizationsController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
+    const { page: p, limit: l } = parsePaginationParams({ page, limit }, 20);
     const data = await this.orgsService.listOrganizations({
       search,
       status,
       plan,
-      page: page ? parseInt(page) : 1,
-      limit: limit ? parseInt(limit) : 20,
+      page: p,
+      limit: l,
     });
     return {
       success: true,

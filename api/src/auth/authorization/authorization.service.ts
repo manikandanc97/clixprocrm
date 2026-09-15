@@ -281,7 +281,7 @@ export class AuthorizationService {
     recordId: string,
   ): Promise<boolean> {
     try {
-      const share = await (this.prisma as any).recordShare.findFirst({
+      const share = await this.prisma.recordShare.findFirst({
         where: {
           tenantId,
           resourceId: recordId,
@@ -303,11 +303,11 @@ export class AuthorizationService {
     if (cached) return cached;
 
     try {
-      const memberships = await (this.prisma as any).teamMember.findMany({
+      const memberships = await this.prisma.teamMember.findMany({
         where: { tenantId, userId },
         select: { teamId: true },
       });
-      const ledTeams = await (this.prisma as any).team.findMany({
+      const ledTeams = await this.prisma.team.findMany({
         where: { tenantId, leaderId: userId },
         select: { id: true },
       });
@@ -615,7 +615,7 @@ export class AuthorizationService {
     targetUserId: string,
     action: 'delete' | 'deactivate' | 'change_role',
   ): Promise<void> {
-    const targetMembership = await (this.prisma as any).tenantUser.findFirst({
+    const targetMembership = await this.prisma.tenantUser.findFirst({
       where: { tenantId, userId: targetUserId },
       include: { role: true },
     });
@@ -630,7 +630,7 @@ export class AuthorizationService {
 
     const roleName = (targetMembership.role?.name || '').toUpperCase().trim();
     if (roleName === 'ADMIN' || roleName === 'SUPERADMIN') {
-      const activeAdminCount = await (this.prisma as any).tenantUser.count({
+      const activeAdminCount = await this.prisma.tenantUser.count({
         where: {
           tenantId,
           status: 'ACTIVE',

@@ -7,20 +7,11 @@ import GlobalSearch from "@/features/dashboard/components/GlobalSearch";
 import CurrencySwitcher from "@/features/dashboard/components/CurrencySwitcher";
 import NotificationPanel from "@/features/dashboard/components/NotificationPanel";
 import ThemeToggle from "@/features/dashboard/components/ThemeToggle";
-
-function getInitials(name?: string) {
-  if (!name) return "SA";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
+import { getInitials } from "@/shared/utils/formatters";
 
 export function SuperAdminHeader() {
   const { user } = useAuth();
-  const initials = getInitials(user?.name);
+  const initials = getInitials(user?.name, "SA");
   const headerRef = useRef<HTMLElement>(null);
 
   // Measure actual header height → expose as --sa-header-h for table workspace calc

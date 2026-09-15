@@ -35,8 +35,8 @@ import { DeleteAccountModal } from "./DeleteAccountModal";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { toast } from "sonner";
 import { getApiErrorMessage } from "@/shared/lib/api/error";
-
-const MAX_FILE_SIZE = 5 * 1024 * 1024; // 5MB
+import { useImageCropper } from "@/shared/hooks/use-image-cropper";
+import { getInitials } from "@/shared/utils/formatters";
 
 function formatRole(role?: string) {
   if (!role) return "Member";
@@ -47,26 +47,23 @@ function formatRole(role?: string) {
     .join(" ");
 }
 
-function getInitials(name?: string) {
-  if (!name) return "CR";
-  return name
-    .split(" ")
-    .filter(Boolean)
-    .slice(0, 2)
-    .map((part) => part.charAt(0).toUpperCase())
-    .join("");
-}
-
 const ProfileSettings = () => {
   const { user, refreshUser } = useAuth();
   const [showDeleteModal, setShowDeleteModal] = useState(false);
   const [editModalOpen, setEditModalOpen] = useState(false);
 
-  const fileInputRef = useRef<HTMLInputElement>(null);
-  const [isDragging, setIsDragging] = useState(false);
   const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [cropModalOpen, setCropModalOpen] = useState(false);
-  const [selectedRawFile, setSelectedRawFile] = useState<File | null>(null);
+  const {
+    fileInputRef,
+    isDragging,
+    cropModalOpen,
+    setCropModalOpen,
+    selectedRawFile,
+    handleFileChange,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+  } = useImageCropper();
   
   const [formData, setFormData] = useState({
     name: user?.name || "",
@@ -109,49 +106,6 @@ const ProfileSettings = () => {
     return score;
   }, [user]);
 
-  const handleSelectRawFile = (file: File) => {
-    if (!file.type.startsWith("image/")) {
-      toast.error("Please upload a valid image file (PNG, JPG, or WebP)");
-      return;
-    }
-
-    if (file.size > MAX_FILE_SIZE) {
-      toast.error("Image file size must be less than 5MB");
-      return;
-    }
-
-    setSelectedRawFile(file);
-    setCropModalOpen(true);
-  };
-
-  const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      handleSelectRawFile(file);
-    }
-    if (fileInputRef.current) {
-      fileInputRef.current.value = "";
-    }
-  };
-
-  const handleDragOver = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(true);
-  };
-
-  const handleDragLeave = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-  };
-
-  const handleDrop = (e: React.DragEvent) => {
-    e.preventDefault();
-    setIsDragging(false);
-    const file = e.dataTransfer.files?.[0];
-    if (file) {
-      handleSelectRawFile(file);
-    }
-  };
 
   const handleCropComplete = async (croppedFile: File) => {
     setUploadingAvatar(true);

@@ -21,6 +21,7 @@ import {
   UpdateQuotationDto,
   UpdateQuotationStatusDto,
 } from '../dto/update-quotation.dto';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 
 @Controller('crm/quotations')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)
@@ -35,8 +36,7 @@ export class QuotationsController {
     @Query('limit') limit?: string,
     @Query('search') search?: string,
   ) {
-    const p = page ? parseInt(page, 10) : 1;
-    const l = limit ? parseInt(limit, 10) : 10;
+    const { page: p, limit: l } = parsePaginationParams({ page, limit }, 10);
     const quotations = await this.quotationsService.getQuotations(
       req.tenantId,
       p,

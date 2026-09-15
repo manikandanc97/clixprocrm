@@ -50,7 +50,7 @@ export class SubscriptionEntitlementService {
   ): Promise<PlanDefinition> {
     const cleanId = (rawPlanId || 'free').toLowerCase().trim();
     try {
-      const dbPlan = await (this.prisma as any).plan.findFirst({
+      const dbPlan = await this.prisma.plan.findFirst({
         where: {
           OR: [
             { id: { equals: cleanId, mode: 'insensitive' } },
@@ -60,95 +60,7 @@ export class SubscriptionEntitlementService {
       });
 
       if (dbPlan) {
-        const parseLimit = (val?: number) =>
-          val === undefined || val >= 1000000 ? -1 : val;
-        const currSymbol =
-          dbPlan.currency === 'USD'
-            ? '$'
-            : dbPlan.currency === 'EUR'
-              ? '€'
-              : dbPlan.currency === 'GBP'
-                ? '£'
-                : '₹';
-        const priceDisplay =
-          dbPlan.pricingMode === 'CUSTOM'
-            ? 'Custom'
-            : `${currSymbol}${Number(dbPlan.priceNum || 0).toLocaleString()}`;
-        const rawFeatures = Array.isArray(dbPlan.features)
-          ? dbPlan.features
-          : [];
-
-        return {
-          id: dbPlan.id,
-          name: dbPlan.name,
-          price: dbPlan.price || priceDisplay,
-          priceNum: Number(dbPlan.priceNum || 0),
-          annualPriceNum: Number(
-            dbPlan.annualPriceNum ||
-              (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0),
-          ),
-          currency: dbPlan.currency || 'INR',
-          billingInterval: 'user/month',
-          pricingMode:
-            dbPlan.pricingMode ||
-            (dbPlan.priceNum === 0 && dbPlan.id !== 'free'
-              ? 'CUSTOM'
-              : 'FIXED'),
-          target: dbPlan.description || '',
-          description: dbPlan.description || '',
-          recommended: Boolean(dbPlan.highlight),
-          badge: dbPlan.highlight ? 'MOST POPULAR' : undefined,
-          displayOrder: dbPlan.sortOrder || 0,
-          isActive:
-            dbPlan.isActive !== false &&
-            dbPlan.status !== 'INACTIVE' &&
-            dbPlan.status !== 'ARCHIVED',
-          limits: {
-            maxUsers: parseLimit(dbPlan.maxUsers),
-            maxContacts: parseLimit(dbPlan.maxContacts),
-            maxLeads: parseLimit(dbPlan.maxLeads),
-            maxPipelines: parseLimit(
-              dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1),
-            ),
-            maxTasks: parseLimit(
-              dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1),
-            ),
-            maxCustomFields: parseLimit(
-              dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1),
-            ),
-            maxDeals: parseLimit(
-              dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1),
-            ),
-            maxAutomations: parseLimit(
-              dbPlan.maxAutomations ??
-                (dbPlan.id === 'free'
-                  ? 1
-                  : dbPlan.id === 'starter'
-                    ? 10
-                    : dbPlan.id === 'growth'
-                      ? 50
-                      : -1),
-            ),
-            storageGb:
-              dbPlan.storageGb ||
-              (dbPlan.id === 'free'
-                ? 1
-                : dbPlan.id === 'starter'
-                  ? 10
-                  : dbPlan.id === 'growth'
-                    ? 50
-                    : 200),
-            maxApiRequests: parseLimit(dbPlan.maxApiRequests),
-            dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
-          },
-          features: rawFeatures,
-          featureDescriptions: rawFeatures,
-          aiConfig: {
-            enabled: dbPlan.aiEnabled !== false,
-            level: dbPlan.aiLevel || 'Standard AI',
-            dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
-          },
-        };
+        return this.mapDbPlanToDefinition(dbPlan);
       }
     } catch (err: any) {
       this.logger.debug(
@@ -164,7 +76,7 @@ export class SubscriptionEntitlementService {
    */
   async getAvailablePlans(): Promise<PlanDefinition[]> {
     try {
-      const dbPlans = await (this.prisma as any).plan.findMany({
+      const dbPlans = await this.prisma.plan.findMany({
         where: {
           status: 'ACTIVE',
           isActive: true,
@@ -173,102 +85,106 @@ export class SubscriptionEntitlementService {
       });
 
       if (dbPlans && dbPlans.length > 0) {
-        return dbPlans.map((dbPlan: any) => {
-          const parseLimit = (val?: number) =>
-            val === undefined || val >= 1000000 ? -1 : val;
-          const currSymbol =
-            dbPlan.currency === 'USD'
-              ? '$'
-              : dbPlan.currency === 'EUR'
-                ? '€'
-                : dbPlan.currency === 'GBP'
-                  ? '£'
-                  : '₹';
-          const priceDisplay =
-            dbPlan.pricingMode === 'CUSTOM'
-              ? 'Custom'
-              : `${currSymbol}${Number(dbPlan.priceNum || 0).toLocaleString()}`;
-          const rawFeatures = Array.isArray(dbPlan.features)
-            ? dbPlan.features
-            : [];
-
-          return {
-            id: dbPlan.id,
-            name: dbPlan.name,
-            price: dbPlan.price || priceDisplay,
-            priceNum: Number(dbPlan.priceNum || 0),
-            annualPriceNum: Number(
-              dbPlan.annualPriceNum ||
-                (dbPlan.priceNum ? dbPlan.priceNum * 10 : 0),
-            ),
-            currency: dbPlan.currency || 'INR',
-            billingInterval: 'user/month',
-            pricingMode:
-              dbPlan.pricingMode ||
-              (dbPlan.priceNum === 0 && dbPlan.id !== 'free'
-                ? 'CUSTOM'
-                : 'FIXED'),
-            target: dbPlan.description || '',
-            description: dbPlan.description || '',
-            recommended: Boolean(dbPlan.highlight),
-            badge: dbPlan.highlight ? 'MOST POPULAR' : undefined,
-            displayOrder: dbPlan.sortOrder || 0,
-            isActive: true,
-            limits: {
-              maxUsers: parseLimit(dbPlan.maxUsers),
-              maxContacts: parseLimit(dbPlan.maxContacts),
-              maxLeads: parseLimit(dbPlan.maxLeads),
-              maxPipelines: parseLimit(
-                dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1),
-              ),
-              maxTasks: parseLimit(
-                dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1),
-              ),
-              maxCustomFields: parseLimit(
-                dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1),
-              ),
-              maxDeals: parseLimit(
-                dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1),
-              ),
-              maxAutomations: parseLimit(
-                dbPlan.maxAutomations ??
-                  (dbPlan.id === 'free'
-                    ? 1
-                    : dbPlan.id === 'starter'
-                      ? 10
-                      : dbPlan.id === 'growth'
-                        ? 50
-                        : -1),
-              ),
-              storageGb:
-                dbPlan.storageGb ||
-                (dbPlan.id === 'free'
-                  ? 1
-                  : dbPlan.id === 'starter'
-                    ? 10
-                    : dbPlan.id === 'growth'
-                      ? 50
-                      : 200),
-              maxApiRequests: parseLimit(dbPlan.maxApiRequests),
-              dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
-            },
-            features: rawFeatures,
-            featureDescriptions: rawFeatures,
-            aiConfig: {
-              enabled: dbPlan.aiEnabled !== false,
-              level: dbPlan.aiLevel || 'Standard AI',
-              dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
-            },
-          };
-        });
+        return dbPlans.map((dbPlan) => this.mapDbPlanToDefinition(dbPlan));
       }
     } catch (err: any) {
-      this.logger.debug(
-        `Failed to fetch available plans from DB, using fallback: ${err.message}`,
+      this.logger.error(
+        `Failed to load database plans, falling back to static constants: ${err.message}`,
       );
     }
 
-    return Object.values(CANONICAL_PLANS);
+    return Object.values(CANONICAL_PLANS).filter((p) => p.isActive);
+  }
+
+  private mapDbPlanToDefinition(dbPlan: any): PlanDefinition {
+    const parseLimit = (val?: number) =>
+      val === undefined || val >= 1000000 ? -1 : val;
+    const currSymbol =
+      dbPlan.currency === 'USD'
+        ? '$'
+        : dbPlan.currency === 'EUR'
+          ? '€'
+          : dbPlan.currency === 'GBP'
+            ? '£'
+            : '₹';
+    const priceNum = Number(dbPlan.priceNum || 0);
+    const annualPriceNum = Number(
+      dbPlan.annualPriceNum || (priceNum ? priceNum * 10 : 0),
+    );
+    const priceDisplay =
+      dbPlan.pricingMode === 'CUSTOM'
+        ? 'Custom'
+        : `${currSymbol}${priceNum.toLocaleString()}`;
+    const rawFeatures = Array.isArray(dbPlan.features)
+      ? (dbPlan.features as string[])
+      : [];
+
+    return {
+      id: dbPlan.id,
+      name: dbPlan.name,
+      price: dbPlan.price || priceDisplay,
+      priceNum,
+      annualPriceNum,
+      currency: dbPlan.currency || 'INR',
+      billingInterval: 'user/month',
+      pricingMode:
+        (dbPlan.pricingMode as 'FIXED' | 'CUSTOM') ||
+        (priceNum === 0 && dbPlan.id !== 'free' ? 'CUSTOM' : 'FIXED'),
+      target: dbPlan.description || '',
+      description: dbPlan.description || '',
+      recommended: Boolean(dbPlan.highlight),
+      badge: dbPlan.highlight ? 'MOST POPULAR' : undefined,
+      displayOrder: dbPlan.sortOrder || 0,
+      isActive:
+        dbPlan.isActive !== false &&
+        dbPlan.status !== 'INACTIVE' &&
+        dbPlan.status !== 'ARCHIVED',
+      limits: {
+        maxUsers: parseLimit(dbPlan.maxUsers),
+        maxContacts: parseLimit(dbPlan.maxContacts),
+        maxLeads: parseLimit(dbPlan.maxLeads),
+        maxPipelines: parseLimit(
+          dbPlan.maxPipelines ?? (dbPlan.id === 'free' ? 1 : -1),
+        ),
+        maxTasks: parseLimit(
+          dbPlan.maxTasks ?? (dbPlan.id === 'free' ? 500 : -1),
+        ),
+        maxCustomFields: parseLimit(
+          dbPlan.maxCustomFields ?? (dbPlan.id === 'free' ? 5 : -1),
+        ),
+        maxDeals: parseLimit(
+          dbPlan.maxDeals ?? (dbPlan.maxLeads ? dbPlan.maxLeads : -1),
+        ),
+        maxAutomations: parseLimit(
+          dbPlan.maxAutomations ??
+            (dbPlan.id === 'free'
+              ? 1
+              : dbPlan.id === 'starter'
+                ? 10
+                : dbPlan.id === 'growth'
+                  ? 50
+                  : -1),
+        ),
+        storageGb:
+          dbPlan.storageGb ||
+          (dbPlan.id === 'free'
+            ? 1
+            : dbPlan.id === 'starter'
+              ? 10
+              : dbPlan.id === 'growth'
+                ? 50
+                : 200),
+        maxApiRequests: parseLimit(dbPlan.maxApiRequests),
+        dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
+      },
+      features: rawFeatures,
+      featureDescriptions: rawFeatures,
+      aiConfig: {
+        enabled: dbPlan.aiEnabled !== false,
+        level: (dbPlan.aiLevel as any) || 'Standard AI',
+        dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
+      },
+    };
   }
 
   /**

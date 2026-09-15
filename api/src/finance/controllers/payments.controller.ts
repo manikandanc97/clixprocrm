@@ -15,6 +15,7 @@ import { TenantGuard } from '../../auth/tenant.guard';
 import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import { RecordPaymentDto } from '../dto/enterprise-invoice.dto';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 
 @Controller('crm/payments')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)
@@ -30,8 +31,7 @@ export class PaymentsController {
     @Query('invoiceId') invoiceId?: string,
     @Query('status') status?: string,
   ) {
-    const p = page ? parseInt(page, 10) : 1;
-    const l = limit ? parseInt(limit, 10) : 20;
+    const { page: p, limit: l } = parsePaginationParams({ page, limit }, 20);
     const data = await this.paymentsService.getPayments(
       req.tenantId,
       p,

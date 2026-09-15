@@ -16,6 +16,7 @@ import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import { PlatformUsersService } from '../services/platform-users.service';
 import { UserStatus } from '@prisma/client';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 
 @Controller(['super-admin/users', 'super_admin/users'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)
@@ -30,6 +31,7 @@ export class PlatformUsersController {
     @Query('page') page?: string,
     @Query('limit') limit?: string,
   ) {
+    const { page: p, limit: l } = parsePaginationParams({ page, limit }, 20);
     const data = await this.usersService.listUsers({
       search,
       status,
@@ -39,8 +41,8 @@ export class PlatformUsersController {
           : isSuperAdmin === 'false'
             ? false
             : undefined,
-      page: page ? parseInt(page) : 1,
-      limit: limit ? parseInt(limit) : 20,
+      page: p,
+      limit: l,
     });
     return {
       success: true,

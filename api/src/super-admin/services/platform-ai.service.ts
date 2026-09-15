@@ -20,7 +20,7 @@ export class PlatformAiService {
    * Retrieves all AI models configured in the platform catalog.
    */
   async getAiModels() {
-    const models = await (this.prisma as any).aiModel.findMany({
+    const models = await this.prisma.aiModel.findMany({
       orderBy: { sortOrder: 'asc' },
     });
 
@@ -35,7 +35,7 @@ export class PlatformAiService {
     isAvailable: boolean,
     actorUserId: string,
   ) {
-    const model = await (this.prisma as any).aiModel.findUnique({
+    const model = await this.prisma.aiModel.findUnique({
       where: { id: modelId },
     });
 
@@ -45,7 +45,7 @@ export class PlatformAiService {
 
     const status = isAvailable ? 'ENABLED' : 'DISABLED';
 
-    const updated = await (this.prisma as any).aiModel.update({
+    const updated = await this.prisma.aiModel.update({
       where: { id: modelId },
       data: { isAvailable, status },
     });
@@ -83,7 +83,7 @@ export class PlatformAiService {
       );
     }
 
-    const model = await (this.prisma as any).aiModel.findUnique({
+    const model = await this.prisma.aiModel.findUnique({
       where: { id: modelId },
     });
 
@@ -93,7 +93,7 @@ export class PlatformAiService {
 
     const isAvailable = status === 'ENABLED';
 
-    const updated = await (this.prisma as any).aiModel.update({
+    const updated = await this.prisma.aiModel.update({
       where: { id: modelId },
       data: { status, isAvailable },
     });
@@ -120,7 +120,7 @@ export class PlatformAiService {
    * Sets a model as the default platform model.
    */
   async setDefaultModel(modelId: string, actorUserId: string) {
-    const model = await (this.prisma as any).aiModel.findUnique({
+    const model = await this.prisma.aiModel.findUnique({
       where: { id: modelId },
     });
 
@@ -178,7 +178,7 @@ export class PlatformAiService {
    * Sets a model as the fallback platform model.
    */
   async setFallbackModel(modelId: string, actorUserId: string) {
-    const model = await (this.prisma as any).aiModel.findUnique({
+    const model = await this.prisma.aiModel.findUnique({
       where: { id: modelId },
     });
 
@@ -232,7 +232,7 @@ export class PlatformAiService {
   async getPlanAiOverview() {
     try {
       const [plans, allModels, platformConfig] = await Promise.all([
-        (this.prisma as any).plan.findMany({
+        this.prisma.plan.findMany({
           orderBy: { priceNum: 'asc' },
           include: {
             defaultModel: true,
@@ -242,10 +242,10 @@ export class PlatformAiService {
             },
           },
         }),
-        (this.prisma as any).aiModel.findMany({
+        this.prisma.aiModel.findMany({
           orderBy: { sortOrder: 'asc' },
         }),
-        (this.prisma as any).platformConfig.findUnique({
+        this.prisma.platformConfig.findUnique({
           where: { id: 'global' },
         }),
       ]);
@@ -324,11 +324,11 @@ export class PlatformAiService {
     actorUserId: string,
   ) {
     const [plan, model] = await Promise.all([
-      (this.prisma as any).plan.findUnique({
+      this.prisma.plan.findUnique({
         where: { id: planId },
         include: { defaultModel: true },
       }),
-      (this.prisma as any).aiModel.findUnique({
+      this.prisma.aiModel.findUnique({
         where: { id: modelId },
       }),
     ]);
@@ -424,7 +424,7 @@ export class PlatformAiService {
     },
     actorUserId: string,
   ) {
-    const plan = await (this.prisma as any).plan.findUnique({
+    const plan = await this.prisma.plan.findUnique({
       where: { id: planId },
       include: { defaultModel: true },
     });
@@ -507,7 +507,7 @@ export class PlatformAiService {
    * Toggles platform-wide global AI killswitch.
    */
   async toggleGlobalAiKillswitch(enabled: boolean, actorUserId: string) {
-    await (this.prisma as any).platformConfig.upsert({
+    await this.prisma.platformConfig.upsert({
       where: { id: 'global' },
       update: { aiCopilot: enabled },
       create: {
@@ -552,8 +552,8 @@ export class PlatformAiService {
 
     const [totalRequests, recentLogs, aggregates, tenantBreakdownRaw] =
       await Promise.all([
-        (this.prisma as any).aiUsageLog.count(),
-        (this.prisma as any).aiUsageLog.findMany({
+        this.prisma.aiUsageLog.count(),
+        this.prisma.aiUsageLog.findMany({
           take: Math.min(100, Math.max(1, limit)),
           orderBy: { createdAt: 'desc' },
           include: {
@@ -562,7 +562,7 @@ export class PlatformAiService {
             },
           },
         }),
-        (this.prisma as any).aiUsageLog.aggregate({
+        this.prisma.aiUsageLog.aggregate({
           _sum: {
             totalTokens: true,
             inputTokens: true,
@@ -572,7 +572,7 @@ export class PlatformAiService {
             latencyMs: true,
           },
         }),
-        (this.prisma as any).aiUsageLog.groupBy({
+        this.prisma.aiUsageLog.groupBy({
           by: ['tenantId'],
           where: { createdAt: { gte: thirtyDaysAgo } },
           _count: { id: true },

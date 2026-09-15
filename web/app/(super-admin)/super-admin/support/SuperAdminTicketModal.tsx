@@ -33,159 +33,17 @@ import { toast } from "sonner";
 import { cn, formatBytes } from "@/shared/lib/utils";
 import { Loader2 } from "lucide-react";
 
-// Status configuration map
-const STATUS_CONFIG: Record<
-  string,
-  { label: string; badgeClass: string; dotClass: string }
-> = {
-  OPEN: {
-    label: "Open",
-    badgeClass: "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400",
-    dotClass: "bg-blue-500",
-  },
-  IN_PROGRESS: {
-    label: "In Progress",
-    badgeClass: "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400",
-    dotClass: "bg-amber-500",
-  },
-  WAITING_FOR_USER: {
-    label: "Waiting for User",
-    badgeClass: "bg-purple-500/10 text-purple-600 border-purple-500/20 dark:text-purple-400",
-    dotClass: "bg-purple-500",
-  },
-  RESOLVED: {
-    label: "Resolved",
-    badgeClass: "bg-emerald-500/10 text-emerald-600 border-emerald-500/20 dark:text-emerald-400",
-    dotClass: "bg-emerald-500",
-  },
-  CLOSED: {
-    label: "Closed",
-    badgeClass: "bg-muted text-muted-foreground border-border",
-    dotClass: "bg-muted-foreground",
-  },
-};
-
-// Priority configuration map
-const PRIORITY_CONFIG: Record<string, { label: string; badgeClass: string }> = {
-  LOW: {
-    label: "Low",
-    badgeClass: "bg-slate-500/10 text-slate-600 border-slate-500/20 dark:text-slate-400",
-  },
-  MEDIUM: {
-    label: "Medium",
-    badgeClass: "bg-blue-500/10 text-blue-600 border-blue-500/20 dark:text-blue-400",
-  },
-  HIGH: {
-    label: "High",
-    badgeClass: "bg-amber-500/10 text-amber-600 border-amber-500/20 dark:text-amber-400",
-  },
-  CRITICAL: {
-    label: "Critical",
-    badgeClass: "bg-rose-500/10 text-rose-600 border-rose-500/20 dark:text-rose-400",
-  },
-};
-
-const CATEGORY_OPTIONS = [
-  "Bug Report",
-  "Feature Request",
-  "Billing Issue",
-  "Account Access",
-  "Integration",
-  "General Inquiry",
-];
-
-const formatRelativeTime = (dateStr: string) => {
-  try {
-    const d = new Date(dateStr);
-    if (isNaN(d.getTime())) return "Recently";
-    const now = new Date();
-    const diffSecs = Math.floor((now.getTime() - d.getTime()) / 1000);
-    if (diffSecs < 60) return "just now";
-    const diffMins = Math.floor(diffSecs / 60);
-    if (diffMins < 60) return `${diffMins}m ago`;
-    const diffHours = Math.floor(diffMins / 60);
-    if (diffHours < 24) return `${diffHours}h ago`;
-    const diffDays = Math.floor(diffHours / 24);
-    if (diffDays < 30) return `${diffDays}d ago`;
-    return d.toLocaleDateString();
-  } catch {
-    return "Recently";
-  }
-};
-
-const getInitials = (name?: string) => {
-  if (!name) return "U";
-  return name
-    .split(" ")
-    .map((n) => n[0])
-    .join("")
-    .substring(0, 2)
-    .toUpperCase();
-};
-
-function UserAvatar({
-  name,
-  isStaff,
-  size = "md",
-  className = "",
-}: {
-  name?: string;
-  isStaff?: boolean;
-  size?: "xs" | "sm" | "md" | "lg";
-  className?: string;
-}) {
-  const initials = getInitials(name);
-  const sizeClasses = {
-    xs: "w-5 h-5 text-[9px]",
-    sm: "w-7 h-7 text-[11px]",
-    md: "w-8 h-8 text-xs",
-    lg: "w-10 h-10 text-sm",
-  }[size];
-
-  if (isStaff) {
-    return (
-      <div
-        className={cn(
-          sizeClasses,
-          "rounded-full bg-linear-to-br from-blue-500/20 to-indigo-500/25 text-blue-600 dark:text-blue-400 font-bold flex items-center justify-center ring-1 ring-blue-500/30 shadow-2xs shrink-0 select-none",
-          className
-        )}
-        title={name ? `${name} (Support Staff)` : "Support Staff"}
-      >
-        <AppIcon
-          name="security"
-          size={size === "xs" ? 11 : size === "sm" ? 13 : 15}
-          className="text-blue-600 dark:text-blue-400"
-        />
-      </div>
-    );
-  }
-
-  return (
-    <div
-      className={cn(
-        sizeClasses,
-        "rounded-full bg-linear-to-br from-emerald-500/20 via-teal-500/15 to-emerald-500/10 text-emerald-700 dark:text-emerald-300 font-bold flex items-center justify-center ring-1 ring-emerald-500/30 shadow-2xs shrink-0 select-none",
-        className
-      )}
-      title={name || "User"}
-    >
-      {initials}
-    </div>
-  );
-}
-
-const isImageFile = (filename?: string, contentType?: string) => {
-  if (contentType?.startsWith("image/")) return true;
-  if (!filename) return false;
-  return /\.(png|jpe?g|webp|gif|svg|bmp|ico)$/i.test(filename);
-};
-
-const isVideoFile = (filename?: string, contentType?: string) => {
-  if (contentType?.startsWith("video/")) return true;
-  if (!filename) return false;
-  return /\.(mp4|webm|mov|m4v|ogg)$/i.test(filename);
-};
+import {
+  STATUS_CONFIG,
+  PRIORITY_CONFIG,
+  CATEGORY_OPTIONS,
+  TicketAttachmentList,
+  TicketMessageItem,
+  isImageFile,
+  isVideoFile,
+} from "@/features/help-center/components/ticket-shared";
+import { formatRelativeTime, getInitials } from "@/shared/utils/formatters";
+import { UserAvatar } from "@/features/help-center/components/ticket-history/UserAvatar";
 
 export interface SuperAdminTicketModalProps {
   ticketId: string | null;
@@ -697,83 +555,11 @@ export function SuperAdminTicketModal({
 
                       {/* Attachments */}
                       {ticket.attachments && ticket.attachments.length > 0 && (
-                        <div className="px-4 pb-4 border-t border-border/40 pt-3 space-y-2">
-                          <div className="text-[10px] font-semibold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
-                            <AppIcon name="paperclip" size={13} className="text-muted-foreground" />
-                            Attachments ({ticket.attachments.length})
-                          </div>
-                          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2">
-                            {ticket.attachments.map((att, idx) => {
-                              const isImg = isImageFile(att.fileName, att.fileType);
-                              const isVid = isVideoFile(att.fileName, att.fileType);
-                              const hasUrl = Boolean(att.fileUrl);
-                              return (
-                                <div
-                                  key={att.id || idx}
-                                  onClick={() => {
-                                    if (hasUrl) {
-                                      if (isImg || isVid) {
-                                        setPreviewMedia({
-                                          filename: att.fileName,
-                                          url: att.fileUrl,
-                                          size: att.fileSize,
-                                          contentType: att.fileType,
-                                          isImage: isImg,
-                                          isVideo: isVid,
-                                        });
-                                      } else {
-                                        window.open(att.fileUrl, "_blank", "noopener,noreferrer");
-                                      }
-                                    }
-                                  }}
-                                  className={cn(
-                                    "flex items-center gap-3 p-2.5 rounded-lg border bg-muted/30 hover:border-primary/50 hover:bg-primary/5 transition-all select-none",
-                                    hasUrl ? "cursor-pointer" : "opacity-80"
-                                  )}
-                                >
-                                  <div className="shrink-0 w-10 h-10 rounded-md bg-muted flex items-center justify-center overflow-hidden border border-border/60">
-                                    {hasUrl && isImg ? (
-                                      // eslint-disable-next-line @next/next/no-img-element
-                                      <img src={att.fileUrl} alt={att.fileName} className="w-full h-full object-cover" />
-                                    ) : hasUrl && isVid ? (
-                                      <div className="relative w-full h-full flex items-center justify-center bg-black/80">
-                                        <AppIcon name="play" size={16} className="text-white fill-white" />
-                                      </div>
-                                    ) : (
-                                      <AppIcon name="file" size={18} className="text-muted-foreground" />
-                                    )}
-                                  </div>
-                                  <div className="flex-1 min-w-0">
-                                    <p className="text-xs font-semibold text-foreground truncate" title={att.fileName}>
-                                      {att.fileName}
-                                    </p>
-                                    <div className="flex items-center gap-1.5 mt-0.5">
-                                      <span className="text-[10px] text-muted-foreground">
-                                        {att.fileSize ? formatBytes(att.fileSize) : "—"}
-                                      </span>
-                                      {isImg && <span className="text-[9px] px-1 py-0 rounded bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 font-bold uppercase">IMG</span>}
-                                      {isVid && <span className="text-[9px] px-1 py-0 rounded bg-indigo-500/10 text-indigo-600 dark:text-indigo-400 font-bold uppercase">VID</span>}
-                                    </div>
-                                  </div>
-                                  {hasUrl && (
-                                    <div className="flex items-center gap-0.5 shrink-0">
-                                      <a
-                                        href={att.fileUrl}
-                                        download={att.fileName}
-                                        target="_blank"
-                                        rel="noreferrer"
-                                        onClick={(e) => e.stopPropagation()}
-                                        className="p-1.5 rounded-md hover:bg-muted text-muted-foreground hover:text-foreground transition-colors cursor-pointer"
-                                        title="Download"
-                                      >
-                                        <AppIcon name="download" size={14} />
-                                      </a>
-                                    </div>
-                                  )}
-                                </div>
-                              );
-                            })}
-                          </div>
+                        <div className="px-4 pb-4 border-t border-border/40 pt-3">
+                          <TicketAttachmentList
+                            attachments={ticket.attachments}
+                            onPreviewMedia={setPreviewMedia}
+                          />
                         </div>
                       )}
                     </div>
@@ -788,63 +574,14 @@ export function SuperAdminTicketModal({
                           </span>
                         </div>
 
-                        {followUpMessages.map((msg) => {
-                          const isStaff = msg.isStaff || msg.isInternal;
-                          const isInternal = Boolean(msg.isInternal);
-                          return (
-                            <div
-                              key={msg.id}
-                              className={cn(
-                                "rounded-xl border bg-card overflow-hidden shadow-2xs",
-                                isInternal
-                                  ? "border-amber-500/30 bg-amber-500/[0.02]"
-                                  : isStaff
-                                  ? "border-primary/25 ring-1 ring-primary/8"
-                                  : "border-border/70"
-                              )}
-                            >
-                              <div
-                                className={cn(
-                                  "px-4 py-2.5 border-b flex items-center justify-between gap-2",
-                                  isInternal
-                                    ? "bg-amber-500/10 border-amber-500/20"
-                                    : isStaff
-                                    ? "bg-primary/5 border-primary/15"
-                                    : "bg-muted/25 border-border/50"
-                                )}
-                              >
-                                <div className="flex items-center gap-2.5">
-                                  <UserAvatar name={msg.sender?.name || (isStaff ? "Support Staff" : "Customer")} isStaff={isStaff} size="sm" />
-                                  <div className="flex items-center gap-1.5">
-                                    <span className="font-bold text-xs text-foreground">
-                                      {msg.sender?.name || (isStaff ? "Support Staff" : "Customer")}
-                                    </span>
-                                    {isInternal ? (
-                                      <span className="text-[9px] font-bold bg-amber-500 text-amber-950 dark:text-black py-0.5 px-2 rounded-full flex items-center gap-1">
-                                        <AppIcon name="lock" size={11} /> Internal Note
-                                      </span>
-                                    ) : isStaff ? (
-                                      <span className="text-[9px] font-bold bg-primary text-primary-foreground py-0.5 px-2 rounded-full flex items-center gap-1">
-                                        <AppIcon name="circleCheck" size={11} className="text-primary-foreground" /> Support Staff
-                                      </span>
-                                    ) : (
-                                      <span className="text-[9px] font-semibold bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 px-2 py-0.5 rounded-full border border-emerald-500/20">
-                                        Customer
-                                      </span>
-                                    )}
-                                  </div>
-                                </div>
-                                <span className="text-[10px] text-muted-foreground flex items-center gap-1 font-medium shrink-0">
-                                  <AppIcon name="clock" size={12} className="opacity-50" />
-                                  {formatRelativeTime(msg.createdAt)}
-                                </span>
-                              </div>
-                              <div className="px-4 py-3.5 text-sm text-foreground/90 leading-relaxed whitespace-pre-wrap">
-                                {msg.message}
-                              </div>
-                            </div>
-                          );
-                        })}
+                        {followUpMessages.map((msg) => (
+                          <TicketMessageItem
+                            key={msg.id}
+                            message={msg}
+                            isSuperAdminView={true}
+                            currentUserName="Super Admin"
+                          />
+                        ))}
                       </div>
                     )}
 

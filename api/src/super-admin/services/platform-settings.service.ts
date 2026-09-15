@@ -42,10 +42,10 @@ export class PlatformSettingsService {
       }
 
       const [config, rawPlans] = await Promise.all([
-        (this.prisma as any).platformConfig.findUnique({
+        this.prisma.platformConfig.findUnique({
           where: { id: 'global' },
         }),
-        (this.prisma as any).plan.findMany({
+        this.prisma.plan.findMany({
           orderBy: { sortOrder: 'asc' },
         }),
       ]);
@@ -178,7 +178,7 @@ export class PlatformSettingsService {
 
       // Validate default plan if provided
       if (defaultTenantPlan) {
-        const existingPlan = await (this.prisma as any).plan.findUnique({
+        const existingPlan = await this.prisma.plan.findUnique({
           where: { id: defaultTenantPlan },
         });
         if (!existingPlan) {
@@ -189,9 +189,7 @@ export class PlatformSettingsService {
       }
 
       // Fetch current settings to detect changed fields
-      const existingConfig = await (
-        this.prisma as any
-      ).platformConfig.findUnique({
+      const existingConfig = await this.prisma.platformConfig.findUnique({
         where: { id: 'global' },
       });
 
@@ -256,7 +254,7 @@ export class PlatformSettingsService {
       );
 
       // Perform atomic upsert
-      const updated = await (this.prisma as any).platformConfig.upsert({
+      const updated = await this.prisma.platformConfig.upsert({
         where: { id: 'global' },
         update: {
           ...(name !== undefined && { name }),
