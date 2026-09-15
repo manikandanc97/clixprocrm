@@ -16,8 +16,9 @@ describe('TenantContext & Guard Security Specifications', () => {
   let tenantGuard: TenantGuard;
   let superAdminGuard: SuperAdminGuard;
 
-  const mockPrismaService = {
+  const mockPrismaService: any = {
     user: {
+
       findUnique: jest.fn(),
     },
     tenant: {
@@ -54,18 +55,19 @@ describe('TenantContext & Guard Security Specifications', () => {
     return {
       switchToHttp: () => ({
         getRequest: () => req,
-        getResponse: () => ({}),
-        getNext: () => ({}),
+        getResponse: () => ({}) as any,
+        getNext: () => ({}) as any,
       }),
-      getType: () => 'http',
+      getType: () => 'http' as any,
       getClass: () => ({}) as any,
       getHandler: () => ({}) as any,
       getArgs: () => [] as any,
       getArgByIndex: () => ({}) as any,
       switchToRpc: () => ({}) as any,
       switchToWs: () => ({}) as any,
-    };
+    } as any;
   }
+
 
   // ─── 1. Tenant A & Tenant B Request Context Isolation ───────────────────────────
 
@@ -196,7 +198,7 @@ describe('TenantContext & Guard Security Specifications', () => {
       memberships: [],
     });
 
-    const req = {
+    const req: any = {
       user: {
         id: 'superadmin-uuid',
         email: 'admin@clixprocrm.com',
@@ -204,6 +206,7 @@ describe('TenantContext & Guard Security Specifications', () => {
       },
       headers: {},
     };
+
 
     await tenantContextService.run({ isSuperAdmin: false }, async () => {
       const execCtx = createMockExecutionContext(req);
@@ -261,12 +264,13 @@ describe('TenantContext & Guard Security Specifications', () => {
     });
 
     // Attacker sends request with header x-tenant-id: tenant-victim-tampered
-    const req = {
+    const req: any = {
       user: { id: 'user-victim' },
       headers: {
         'x-tenant-id': 'tenant-victim-tampered',
       },
     };
+
 
     await tenantContextService.run({ isSuperAdmin: false }, async () => {
       const execCtx = createMockExecutionContext(req);

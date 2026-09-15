@@ -9,9 +9,11 @@ import {
   CRMActionMenu,
 } from "@/shared/components/crm";
 import { EmptyState } from "@/shared/components/EmptyState";
-import { getUserAvatarColor } from "@/shared/utils/avatar-colors";
+import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { SortDirection } from "@/shared/components/DataTableColumnHeader";
+
 import { cn } from "@/shared/lib/utils";
+
 
 interface UsersTableProps {
   users: PlatformUser[];
@@ -153,8 +155,9 @@ export function UsersTable({
             ))
           ) : users.length > 0 ? (
             users.map((u) => {
-              const color = getUserAvatarColor(u.name || u.email);
+              const color = getOrgAvatarColor(u.name || u.email);
               const isSelected = selectedUserIds.includes(u.id);
+
 
               return (
                 <tr

@@ -117,15 +117,9 @@ describe('P0 AuditLog Immutability & Tamper-Resistance Security Suite', () => {
 
     mfaService = new MfaService(mockPrisma);
     sessionsService = new SessionsService(mockPrisma);
-    authService = new AuthService(
-      mockPrisma,
-      {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
-      {} as any,
-    );
+    authService = new AuthService(mockPrisma, {} as any);
     platformOrgsService = new PlatformOrganizationsService(mockPrisma);
+
   });
 
   describe('1. Database Migration & Immutability Trigger Validation', () => {

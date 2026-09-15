@@ -175,6 +175,10 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
       auditLog: {
         create: jest.fn().mockResolvedValue({ id: 'audit-1' }),
       },
+      user: {
+        update: jest.fn().mockResolvedValue({}),
+        findUnique: jest.fn().mockResolvedValue(null),
+      },
     };
 
     mockBrandingService = {};
@@ -468,7 +472,7 @@ describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', (
       expect(mockPrisma.auditLog.create).toHaveBeenCalledWith(
         expect.objectContaining({
           data: expect.objectContaining({
-            action: 'PASSWORD_RESET',
+            action: 'PASSWORD_RESET_COMPLETED',
             userId: 'usr-alice',
           }),
         }),

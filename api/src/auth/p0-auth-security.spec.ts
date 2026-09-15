@@ -52,7 +52,8 @@ describe('P0 Authentication & Session Security Tests', () => {
     };
 
     tenantGuard = new TenantGuard(mockPrisma, mockTenantContext);
-    authController = new AuthController(mockAuthService);
+    authController = new AuthController(mockAuthService, {} as any);
+
 
     // Clear caches and rate-limit stores
     invalidateTokenUserCache();

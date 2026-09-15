@@ -91,7 +91,7 @@ export async function checkRateLimit(
   }
 
   const effectiveMax =
-    process.env.NODE_ENV !== 'production'
+    process.env.NODE_ENV === 'development'
       ? Math.max(config.maxRequests, 100)
       : config.maxRequests;
 

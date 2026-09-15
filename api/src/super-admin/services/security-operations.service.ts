@@ -315,25 +315,76 @@ export class SecurityOperationsService {
   }
 
   /**
-   * Legacy method support for backward compatibility if any test calls getSecurityHealth.
+   * Health status aggregation across security subsystems.
    */
   async getSecurityHealth() {
-    const summary = await this.getSecOpsSummary();
+    let dbStatus: 'HEALTHY' | 'CRITICAL' = 'HEALTHY';
+    try {
+      if ((this.prisma as any)?.$queryRaw) {
+        await (this.prisma as any).$queryRaw`SELECT 1`;
+      }
+    } catch {
+      dbStatus = 'CRITICAL';
+    }
+
+    let integrityStatus: 'HEALTHY' | 'CRITICAL' = 'HEALTHY';
+    try {
+      const integrity = await this.integrityMonitor?.getSystemStatus?.();
+      if (
+        integrity?.status === 'CRITICAL' ||
+        (integrity?.brokenLinks || 0) > 0 ||
+        (integrity?.hashMismatches || 0) > 0
+      ) {
+        integrityStatus = 'CRITICAL';
+      }
+    } catch {
+      integrityStatus = 'CRITICAL';
+    }
+
+    let wormStatus: 'HEALTHY' | 'DEGRADED' | 'NOT_CONFIGURED' = 'NOT_CONFIGURED';
+    const isS3Configured = Boolean(
+      (process.env.AWS_S3_AUDIT_BUCKET ||
+        process.env.AUDIT_ARCHIVE_BUCKET ||
+        process.env.AWS_BUCKET) &&
+        process.env.AWS_ACCESS_KEY_ID &&
+        process.env.AWS_SECRET_ACCESS_KEY,
+    );
+
+    const archiveSvc = (this.incidentsService as any)?.getOutboxStats
+      ? (this.incidentsService as any)
+      : (this as any).archiveService;
+
+    if (archiveSvc?.getOutboxStats) {
+      try {
+        const stats = await archiveSvc.getOutboxStats();
+        if ((stats?.stale || 0) > 0 || (stats?.failed || 0) > 5) {
+          wormStatus = 'DEGRADED';
+        } else if (isS3Configured) {
+          wormStatus = 'HEALTHY';
+        }
+      } catch {
+        wormStatus = 'DEGRADED';
+      }
+    } else if (isS3Configured) {
+      wormStatus = 'HEALTHY';
+    }
+
+    let overallStatus: 'HEALTHY' | 'DEGRADED' | 'CRITICAL' = 'HEALTHY';
+    if (dbStatus === 'CRITICAL' || integrityStatus === 'CRITICAL') {
+      overallStatus = 'CRITICAL';
+    } else if (wormStatus === 'DEGRADED') {
+      overallStatus = 'DEGRADED';
+    }
+
     return {
-      overallStatus: summary.overallStatus,
-      database: {
-        status:
-          summary.servicesHealth.find((s) => s.service === 'Database')
-            ?.status === 'Healthy'
-            ? 'HEALTHY'
-            : 'DEGRADED',
-      },
+      overallStatus,
+      database: { status: dbStatus },
       redis: {
-        status: 'NOT_CONFIGURED',
+        status: (this as any).redisClient ? 'HEALTHY' : 'NOT_CONFIGURED',
         message: 'Operating with memory fallback',
       },
-      auditIntegrity: { status: 'HEALTHY' },
-      wormArchive: { status: 'NOT_CONFIGURED' },
+      auditIntegrity: { status: integrityStatus },
+      wormArchive: { status: wormStatus },
       incidentSystem: { status: 'HEALTHY' },
       sessions: { status: 'HEALTHY' },
       mfa: { status: 'HEALTHY' },
@@ -344,34 +395,75 @@ export class SecurityOperationsService {
         uploadSecurity: 'HEALTHY',
         rateLimiting: 'NOT_CONFIGURED',
       },
-      lastCheckedAt: summary.lastCheckedAt,
+      lastCheckedAt: new Date().toISOString(),
     };
   }
 
   /**
-   * Legacy metrics support.
+   * Security metrics and anomaly detection.
    */
   async getSecurityMetrics(period: '24h' | '7d' | '30d' = '24h') {
-    const summary = await this.getSecOpsSummary();
+    let loginSuccessCount = 0;
+    let loginFailureCount = 0;
+    let newDeviceCount = 0;
+    let mfaFailureCount = 0;
+
+    if ((this.prisma as any)?.auditLog?.count) {
+      const counts = await Promise.all([
+        (this.prisma as any).auditLog
+          .count({ where: { action: 'LOGIN_SUCCESS' } })
+          .catch(() => 0),
+        (this.prisma as any).auditLog
+          .count({ where: { action: 'LOGIN_FAILED' } })
+          .catch(() => 0),
+        (this.prisma as any).auditLog
+          .count({ where: { action: 'NEW_DEVICE_LOGIN' } })
+          .catch(() => 0),
+        (this.prisma as any).auditLog
+          .count({ where: { action: 'MFA_CHALLENGE_FAILED' } })
+          .catch(() => 0),
+      ]);
+      loginSuccessCount = counts[0];
+      loginFailureCount = counts[1];
+      newDeviceCount = counts[2];
+      mfaFailureCount = counts[3];
+    }
+
+    const anomaliesDetected: any[] = [];
+    if (loginFailureCount > 50) {
+      anomaliesDetected.push({
+        metric: 'LOGIN_FAILED_SPIKE',
+        severity: 'HIGH',
+        message: `High volume of login failures (${loginFailureCount}) detected within ${period}`,
+      });
+    }
+    if (mfaFailureCount > 20) {
+      anomaliesDetected.push({
+        metric: 'MFA_FAILURE_SPIKE',
+        severity: 'HIGH',
+        message: `High volume of MFA failures (${mfaFailureCount}) detected within ${period}`,
+      });
+    }
+
     return {
       period,
       metrics: {
-        loginSuccessCount: 0,
-        loginFailureCount: 0,
-        newDeviceCount: 0,
-        mfaFailureCount: 0,
+        loginSuccessCount,
+        loginFailureCount,
+        newDeviceCount,
+        mfaFailureCount,
         sessionRevocationCount: 0,
         lockedUsersCount: 0,
         lockedTenantsCount: 0,
-        openIncidentsCount: summary.metrics.openIncidentsCount,
+        openIncidentsCount: 0,
         criticalIncidentsCount: 0,
         auditIntegrityFailures: 0,
         wormArchiveFailures: 0,
         staleOutboxItems: 0,
         emergencyMode: false,
       },
-      anomaliesDetected: [],
-      generatedAt: summary.lastCheckedAt,
+      anomaliesDetected,
+      generatedAt: new Date().toISOString(),
     };
   }
 

@@ -14,10 +14,11 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
   let cacheService: AuthorizationCacheService;
   let prismaService: any;
 
-  const mockPrismaService = {
-    withTenantContext: jest.fn(async ({ tenantId }, fn) =>
+  const mockPrismaService: any = {
+    withTenantContext: jest.fn(async ({ tenantId }: any, fn: (tx: any) => any) =>
       fn(mockPrismaService),
     ),
+
     createSealedAuditLog: jest.fn().mockResolvedValue({ id: 'audit-log-uuid' }),
     tenantUser: {
       findFirst: jest.fn(),

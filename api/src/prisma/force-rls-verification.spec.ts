@@ -533,8 +533,9 @@ describe('FORCE ROW LEVEL SECURITY — Comprehensive Targeted Verification Suite
             data: { name: 'ADMIN', tenantId: tenant.id },
           });
           await tx.rolePermission.createMany({
-            data: [{ roleId: role.id, action: 'manage', subject: 'all' }],
+            data: [{ roleId: role.id, action: 'manage', module: 'all' }],
           });
+
           const tenantUser = await tx.tenantUser.create({
             data: { userId: user.id, tenantId: tenant.id, roleId: role.id },
           });

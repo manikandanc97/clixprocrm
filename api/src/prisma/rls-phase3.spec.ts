@@ -96,6 +96,7 @@ function buildModelMocks() {
       findFirst: jest.fn().mockResolvedValue(null),
       count: jest.fn().mockResolvedValue(0),
       groupBy: jest.fn().mockResolvedValue([]),
+      aggregate: jest.fn().mockResolvedValue({ _sum: { value: 0 } }),
     },
     meeting: {
       findMany: jest.fn().mockResolvedValue([]),
@@ -356,10 +357,10 @@ describe('DashboardService Phase 3', () => {
     );
   });
 
-  it('getDashboardData: $queryRaw uses tx, not prisma directly', async () => {
+  it('getDashboardData: queries use tx, not prisma directly', async () => {
     await service.getDashboardData('tenant-dash-B');
-    expect(txMock.$queryRaw).toHaveBeenCalled();
-    expect(prismaMock.$queryRaw).not.toHaveBeenCalled();
+    expect(txMock.deal.aggregate).toHaveBeenCalled();
+    expect(prismaMock.deal.aggregate).not.toHaveBeenCalled();
   });
 
   it('getDashboardData: ORM queries use tx, not prisma directly', async () => {

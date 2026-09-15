@@ -13,8 +13,9 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
   let prisma: PrismaService;
   let billingGateway: BillingGatewayService;
 
-  const mockPrisma = {
+  const mockPrisma: any = {
     tenant: {
+
       findUnique: jest.fn(),
       update: jest.fn(),
       findMany: jest.fn(),

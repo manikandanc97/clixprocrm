@@ -652,8 +652,13 @@ describe('Core CRM Services RLS Phase 2 - Tenant Context Integration & Isolation
 
   describe('5. Finance Services (Invoices, Quotations, Revenue)', () => {
     it('executes InvoicesService, QuotationsService, and RevenueService in tenant context', async () => {
-      const invoicesService = new InvoicesService(prismaService);
+      const invoicesService = new InvoicesService(
+        prismaService,
+        {} as any,
+        {} as any,
+      );
       const quotationsService = new QuotationsService(prismaService, enc);
+
       const revenueService = new RevenueService(prismaService);
 
       const inv = await invoicesService.createInvoice('tenant-a', 'user-1', {

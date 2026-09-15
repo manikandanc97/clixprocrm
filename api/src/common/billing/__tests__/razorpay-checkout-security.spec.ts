@@ -186,8 +186,9 @@ describe('Razorpay Checkout Security & Tampering Resistance Suite', () => {
       });
 
       billingGatewayMock.createCheckoutOrder.mockImplementation(
-        async (params) => {
+        async (params: any) => {
           return {
+
             provider: 'RAZORPAY',
             orderId: 'order_test_server_price',
             amount: params.amountInMinorUnits,

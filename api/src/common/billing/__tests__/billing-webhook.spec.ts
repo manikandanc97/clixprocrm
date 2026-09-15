@@ -13,8 +13,9 @@ describe('Billing Webhook Architecture & Queue Migration Suite', () => {
   let billingGateway: BillingGatewayService;
   let webhookQueueProducer: WebhookQueueProducer;
 
-  const mockPrisma = {
+  const mockPrisma: any = {
     platformWebhookEvent: {
+
       findUnique: jest.fn(),
       upsert: jest.fn(),
     },
