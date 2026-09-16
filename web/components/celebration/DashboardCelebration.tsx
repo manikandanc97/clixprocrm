@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useEffect, useState, useRef, useCallback } from "react";
-import confetti from "canvas-confetti";
+import type { Options as ConfettiOptions } from "canvas-confetti";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 
@@ -79,23 +79,30 @@ export function DashboardCelebration() {
       return;
     }
 
-    const canvas = canvasRef.current;
-    const fireInstance = canvas
-      ? confetti.create(canvas, { resize: true, useWorker: true })
-      : confetti;
+    let isCancelled = false;
 
-    const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
-    const multiplier = isMobile ? 0.65 : 1.0;
+    const runConfettiCelebration = async () => {
+      const { default: confetti } = await import("canvas-confetti");
+      if (isCancelled) return;
 
-    const fire = (opts: confetti.Options) => {
-      try {
-        fireInstance(opts);
-      } catch {
+      const canvas = canvasRef.current;
+      const fireInstance = canvas
+        ? confetti.create(canvas, { resize: true, useWorker: true })
+        : confetti;
+
+      const isMobile = typeof window !== "undefined" && window.innerWidth < 768;
+      const multiplier = isMobile ? 0.65 : 1.0;
+
+      const fire = (opts: ConfettiOptions) => {
+        if (isCancelled) return;
         try {
-          confetti(opts);
-        } catch {}
-      }
-    };
+          fireInstance(opts);
+        } catch {
+          try {
+            confetti(opts);
+          } catch {}
+        }
+      };
 
     // -------------------------------------------------------------
     // Phase 1 (T = 100ms): Precursor top sparkle flurry
@@ -254,8 +261,12 @@ export function DashboardCelebration() {
     }, 4000);
 
     timeoutsRef.current.push(t1, t2, t3, t4, tHideBanner, tComplete);
+    };
+
+    runConfettiCelebration();
 
     return () => {
+      isCancelled = true;
       clearAllTimers();
     };
   }, [isActivating, shouldReduceMotion, clearAllTimers]);

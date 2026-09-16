@@ -89,24 +89,19 @@ export function ImportUploadStep({
           onChange={onFileUpload}
         />
 
-        {/* Center Animated Icon Container - Animates strictly on its own hover */}
-        <motion.div
+        {/* Center Animated Icon Container */}
+        <div
           data-animate-target="true"
-          whileHover={{ scale: 1.08, y: -3 }}
-          transition={{ type: "spring", stiffness: 400, damping: 17 }}
-          className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 shadow-sm relative cursor-pointer ${
+          className={`w-14 h-14 rounded-2xl flex items-center justify-center mb-3 transition-all duration-300 shadow-sm relative cursor-pointer hover:scale-105 hover:-translate-y-0.5 ${
             isDragging
               ? "bg-primary text-primary-foreground scale-110 shadow-primary/25 ring-4 ring-primary/20"
               : "bg-primary/10 text-primary border border-primary/25 hover:bg-primary/20 hover:border-primary/40 hover:shadow-lg hover:shadow-primary/10"
           }`}
         >
           {isDragging ? (
-            <motion.div
-              animate={{ y: [0, -4, 0] }}
-              transition={{ repeat: Infinity, duration: 1, ease: "easeInOut" }}
-            >
+            <div className="animate-bounce">
               <AppIcon name="file" size={28} standalone />
-            </motion.div>
+            </div>
           ) : (
             <div className="relative flex items-center justify-center">
               <AppIcon
@@ -117,7 +112,7 @@ export function ImportUploadStep({
               />
             </div>
           )}
-        </motion.div>
+        </div>
 
         {/* Title & Subtitle */}
         <h3 className="text-base sm:text-lg font-bold text-foreground mb-1 tracking-tight group-hover:text-primary transition-colors duration-200">

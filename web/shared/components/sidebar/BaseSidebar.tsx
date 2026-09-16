@@ -691,9 +691,7 @@ export function BaseSidebarContent({
   return (
     <>
       {/* ── CARD 1: Workspace / Brand Header ── */}
-      <motion.div
-        initial={false}
-        animate={{ opacity: 1 }}
+      <div
         className="relative shrink-0 h-[58px] flex items-center bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xs rounded-2xl overflow-hidden"
       >
         {collapsedState ? (
@@ -767,11 +765,10 @@ export function BaseSidebarContent({
             )}
           </div>
         )}
-      </motion.div>
+      </div>
 
       {/* ── CARD 2: Navigation Menu ── */}
-      <motion.div
-        initial={false}
+      <div
         className="relative flex-1 min-h-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xs rounded-2xl overflow-hidden flex flex-col"
       >
         <TooltipProvider delayDuration={0}>
@@ -860,18 +857,17 @@ export function BaseSidebarContent({
             ))}
           </div>
         </TooltipProvider>
-      </motion.div>
+      </div>
 
       {/* ── CARD 3: Footer (Standalone Card) ── */}
       {(footer || collapsedFooter) && (
-        <motion.div
-          initial={false}
+        <div
           className={`shrink-0 bg-sidebar text-sidebar-foreground border border-sidebar-border/80 dark:border-white/10 shadow-xs rounded-2xl overflow-hidden ${
             collapsedState ? "p-1.5" : "p-2"
           }`}
         >
           {collapsedState ? (collapsedFooter || footer) : footer}
-        </motion.div>
+        </div>
       )}
     </>
   );

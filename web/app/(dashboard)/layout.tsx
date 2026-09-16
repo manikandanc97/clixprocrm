@@ -7,13 +7,17 @@ import DashboardShell from "@/features/dashboard/components/DashboardShell";
 import { TooltipProvider } from "@/shared/ui/tooltip";
 import { GlobalModalManager } from "@/shared/components/GlobalModalManager";
 import dynamic from "next/dynamic";
-import { MfaChallengeModal } from "@/features/auth/components/MfaChallengeModal";
 import { createClient } from "@/lib/supabase/client";
 import { useQueryClient } from "@tanstack/react-query";
 import { useRealtimeNotifications } from "@/shared/hooks/use-realtime-notifications";
 
 const DashboardCelebration = dynamic(
-  () => import("@/components/celebration").then((mod) => mod.DashboardCelebration),
+  () => import("@/components/celebration/DashboardCelebration").then((mod) => mod.DashboardCelebration),
+  { ssr: false }
+);
+
+const MfaChallengeModal = dynamic(
+  () => import("@/features/auth/components/MfaChallengeModal").then((mod) => mod.MfaChallengeModal),
   { ssr: false }
 );
 

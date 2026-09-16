@@ -8,7 +8,6 @@ import {
 import { StatusBadge, StatusVariant } from "@/shared/components/StatusBadge";
 import { CRMActionMenu } from "@/shared/components/crm";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
-import { motion } from "framer-motion";
 import { useSortable } from "@dnd-kit/sortable";
 import { CSS } from "@dnd-kit/utilities";
 import { cn } from "@/shared/lib/utils";
@@ -135,11 +134,10 @@ const PipelineCard = ({ item, isOverlay, onSelect }: Props) => {
         </div>
         <div className="flex items-center gap-2">
           <div className="w-16 h-1.5 bg-muted rounded-full overflow-hidden">
-            <motion.div 
-              initial={{ width: 0 }}
-              animate={{ width: `${item.probability}%` }}
+            <div 
+              style={{ width: `${item.probability}%` }}
               className={cn(
-                "h-full rounded-full",
+                "h-full rounded-full transition-all duration-500 ease-out",
                 item.probability > 70 ? 'bg-success' : item.probability > 30 ? 'bg-primary' : 'bg-muted-foreground'
               )}
             />

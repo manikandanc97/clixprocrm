@@ -1,6 +1,7 @@
 "use client";
 
 import { useState } from "react";
+import dynamic from "next/dynamic";
 import {
   Receipt,
   Plus,
@@ -29,13 +30,29 @@ import {
 import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { useDeleteInvoice } from "@/shared/hooks/use-invoices";
 import { useCurrency } from "@/shared/hooks/use-currency";
-import { CreateInvoiceModal } from "@/features/invoices/components/CreateInvoiceModal";
-import { InvoiceDetailModal } from "@/features/invoices/components/InvoiceDetailModal";
-import { RecordPaymentModal } from "@/features/invoices/components/RecordPaymentModal";
-import { InvoiceContextualSettings } from "@/features/invoices/components/InvoiceContextualSettings";
 import { InvoicesDataTable } from "@/features/invoices/components/InvoicesDataTable";
 import { useInvoicesUrlState } from "@/features/invoices/hooks/use-invoices-url-state";
 import { useInvoicesData } from "@/features/invoices/hooks/use-invoices-data";
+
+const CreateInvoiceModal = dynamic(
+  () => import("@/features/invoices/components/CreateInvoiceModal").then((mod) => mod.CreateInvoiceModal),
+  { ssr: false }
+);
+
+const InvoiceDetailModal = dynamic(
+  () => import("@/features/invoices/components/InvoiceDetailModal").then((mod) => mod.InvoiceDetailModal),
+  { ssr: false }
+);
+
+const RecordPaymentModal = dynamic(
+  () => import("@/features/invoices/components/RecordPaymentModal").then((mod) => mod.RecordPaymentModal),
+  { ssr: false }
+);
+
+const InvoiceContextualSettings = dynamic(
+  () => import("@/features/invoices/components/InvoiceContextualSettings").then((mod) => mod.InvoiceContextualSettings),
+  { ssr: false }
+);
 
 export default function InvoicesPage() {
   const { formatCurrency } = useCurrency();

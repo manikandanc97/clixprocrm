@@ -43,8 +43,6 @@ import {
 } from "@/shared/hooks/use-crm";
 import { FormModal } from "@/shared/components/crm/FormModal";
 import { FormSkeleton } from "@/shared/components/skeletons";
-import { LeadContextualSettings } from "@/features/leads/components/LeadContextualSettings";
-import { ContactContextualSettings } from "@/features/contacts/components/ContactContextualSettings";
 import { useContactSettings } from "@/features/contacts/hooks/use-contact-settings";
 import {
   useContactsUrlState,
@@ -76,6 +74,16 @@ const CustomerForm = dynamic(
       default: mod.CustomerForm,
     })),
   { loading: () => <FormSkeleton /> }
+);
+
+const LeadContextualSettings = dynamic(
+  () => import("@/features/leads/components/LeadContextualSettings").then((mod) => mod.LeadContextualSettings),
+  { ssr: false }
+);
+
+const ContactContextualSettings = dynamic(
+  () => import("@/features/contacts/components/ContactContextualSettings").then((mod) => mod.ContactContextualSettings),
+  { ssr: false }
 );
 
 export default function ContactsPage() {

@@ -28,6 +28,7 @@ export class TasksHistoryService {
         user: { select: { id: true, name: true, email: true } },
       },
       orderBy: { createdAt: 'desc' },
+      take: 100,
     });
 
     const userIds = new Set<string>();

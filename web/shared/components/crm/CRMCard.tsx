@@ -2,7 +2,6 @@
 
 import { cn } from "@/shared/lib/utils";
 import { crmSurface } from "@/shared/lib/design-system";
-import { motion } from "framer-motion";
 import { ReactNode } from "react";
 
 interface CRMCardProps {
@@ -30,8 +29,6 @@ export const CRMCard = ({
   accentColor,
   accentSeed,
 }: CRMCardProps) => {
-  const Component = animate ? motion.div : "div";
-  
   const accentColors = [
     "border-l-blue-500",
     "border-l-emerald-500",
@@ -56,16 +53,10 @@ export const CRMCard = ({
 
   const finalAccentColor = accentColor || (accentSeed !== undefined ? getStableColor(accentSeed) : "border-l-primary");
 
-  const animationProps = animate ? {
-    initial: { opacity: 0, y: 10 },
-    animate: { opacity: 1, y: 0 },
-    transition: { duration: 0.3, delay }
-  } : {};
-
   return (
-    <Component
-      {...animationProps}
+    <div
       onClick={onClick}
+      style={delay > 0 ? { animationDelay: `${delay}s` } : undefined}
       className={cn(
         "overflow-hidden",
         crmSurface.card,
@@ -73,12 +64,13 @@ export const CRMCard = ({
         !noPadding && "p-4 sm:p-5",
         withAccent && "border-l-4",
         withAccent && finalAccentColor,
+        animate && "animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both",
         className,
         "rounded-xl"
       )}
     >
       {children}
-    </Component>
+    </div>
   );
 };
 

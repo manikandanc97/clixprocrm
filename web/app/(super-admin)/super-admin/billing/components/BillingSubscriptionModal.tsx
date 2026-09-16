@@ -5,7 +5,6 @@ import { CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
-import { motion } from "framer-motion";
 import { PlatformOrganization } from "@/shared/lib/api/super-admin.api";
 
 interface BillingSubscriptionModalProps {
@@ -43,11 +42,8 @@ export function BillingSubscriptionModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        className="bg-card border border-border/80 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4"
+      <div
+        className="bg-card border border-border/80 w-full max-w-md rounded-2xl shadow-2xl p-6 space-y-4 animate-in fade-in zoom-in-95 duration-150"
       >
         <div className="flex justify-between items-center">
           <h3 className="text-base font-bold text-foreground flex items-center gap-2">
@@ -146,7 +142,7 @@ export function BillingSubscriptionModal({
             </Button>
           </div>
         </form>
-      </motion.div>
+      </div>
     </div>
   );
 }

@@ -1,6 +1,7 @@
 "use client";
 
 import { useState, useCallback } from "react";
+import dynamic from "next/dynamic";
 import {
   Users,
   UserPlus,
@@ -27,7 +28,6 @@ import {
 } from "@/shared/components/crm";
 import { toast } from "sonner";
 import { useDeleteEmployee } from "@/shared/hooks/use-hrm";
-import { EmployeeForm } from "@/features/forms/EmployeeForm";
 import { EmployeeType } from "@/shared/types/employee";
 import {
   useEmployeesData,
@@ -35,7 +35,15 @@ import {
 } from "@/features/employees/hooks/use-employees-data";
 import { useEmployeesUrlState } from "@/features/employees/hooks/use-employees-url-state";
 import { EmployeesDataTable } from "@/features/employees/components/EmployeesDataTable";
-import { EmployeeDetailsDialog } from "@/features/employees/components/EmployeeDetailsDialog";
+
+const EmployeeForm = dynamic(
+  () => import("@/features/forms/EmployeeForm").then((mod) => mod.EmployeeForm)
+);
+
+const EmployeeDetailsDialog = dynamic(
+  () => import("@/features/employees/components/EmployeeDetailsDialog").then((mod) => mod.EmployeeDetailsDialog),
+  { ssr: false }
+);
 
 export default function EmployeesPage() {
   // Modals & Dialogs State

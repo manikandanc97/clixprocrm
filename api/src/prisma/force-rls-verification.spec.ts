@@ -90,14 +90,22 @@ describe('FORCE ROW LEVEL SECURITY — Comprehensive Targeted Verification Suite
             .mockImplementation(
               (strings: TemplateStringsArray, ...values: any[]) => {
                 const sql = strings.join('?');
-                if (sql.includes("set_config('app.current_tenant_id'")) {
+                if (values.length >= 2) {
                   currentTenant = values[0];
-                }
-                if (sql.includes("set_config('app.is_super_admin'")) {
-                  isSuperAdmin = values[0] === 'true';
-                }
-                if (sql.includes("set_config('app.current_user_id'")) {
-                  currentUserId = values[0];
+                  isSuperAdmin = values[1] === 'true' || values[1] === true;
+                  if (values.length >= 3) {
+                    currentUserId = values[2];
+                  }
+                } else {
+                  if (sql.includes("set_config('app.current_tenant_id'")) {
+                    currentTenant = values[0];
+                  }
+                  if (sql.includes("set_config('app.is_super_admin'")) {
+                    isSuperAdmin = values[0] === 'true' || values[0] === true;
+                  }
+                  if (sql.includes("set_config('app.current_user_id'")) {
+                    currentUserId = values[0];
+                  }
                 }
                 return Promise.resolve(1);
               },

@@ -12,7 +12,7 @@ const tenantMetadataCache = new Map<string, CachedTenantMetadata>();
  * Avoids repeated database roundtrips on every controller method.
  */
 export async function getCachedTenantCurrency(
-  prisma: PrismaService,
+  prisma: any,
   tenantId: string,
 ): Promise<string> {
   const now = Date.now();

@@ -56,7 +56,7 @@ export class PrismaService
   }
 
   private async connectWithRetry(): Promise<void> {
-    const maxRetries = 5;
+    const maxRetries = 10;
     const initialBackoffMs = 1000;
 
     for (let attempt = 1; attempt <= maxRetries; attempt++) {
@@ -111,10 +111,19 @@ export class PrismaService
         const superAdminParam = isSuperAdmin ? 'true' : 'false';
         const userParam = userId || '';
 
-        await tx.$executeRaw`SELECT set_config('app.current_tenant_id', ${tenantParam}, true)`;
-        await tx.$executeRaw`SELECT set_config('app.is_super_admin', ${superAdminParam}, true)`;
         if (userId !== undefined) {
-          await tx.$executeRaw`SELECT set_config('app.current_user_id', ${userParam}, true)`;
+          await tx.$executeRaw`
+            SELECT
+              set_config('app.current_tenant_id', ${tenantParam}, true),
+              set_config('app.is_super_admin', ${superAdminParam}, true),
+              set_config('app.current_user_id', ${userParam}, true);
+          `;
+        } else {
+          await tx.$executeRaw`
+            SELECT
+              set_config('app.current_tenant_id', ${tenantParam}, true),
+              set_config('app.is_super_admin', ${superAdminParam}, true);
+          `;
         }
 
         return fn(tx);

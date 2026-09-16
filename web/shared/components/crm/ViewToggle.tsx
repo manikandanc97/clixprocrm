@@ -4,7 +4,6 @@ import React from "react";
 import { LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 
 export interface ViewOption {
   id: string;
@@ -53,13 +52,6 @@ export const ViewToggle: React.FC<ViewToggleProps> = ({
           >
             <Icon className="w-4 h-4 shrink-0" />
             <span className="hidden sm:inline-block">{label}</span>
-            {isActive && (
-              <motion.div
-                layoutId="viewToggleActive"
-                className="absolute inset-0 rounded-lg pointer-events-none"
-                transition={{ type: "spring", stiffness: 500, damping: 35 }}
-              />
-            )}
           </Button>
         );
       })}

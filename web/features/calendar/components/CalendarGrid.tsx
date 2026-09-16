@@ -9,7 +9,6 @@ import { Clock } from "lucide-react";
 import { EmptyState } from "./EmptyState";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 
 interface CalendarGridProps {
   events: ReturnType<typeof JSON.parse>[];
@@ -144,12 +143,10 @@ export function CalendarGrid({ events, currentDate, view, onEventClick, onViewCh
             const date = parseISO(dateStr);
             const isToday = isSameDay(date, new Date());
             return (
-              <motion.div
+              <div
                 key={dateStr}
-                initial={{ opacity: 0, y: 6 }}
-                animate={{ opacity: 1, y: 0 }}
-                transition={{ delay: gi * 0.04 }}
-                className="flex gap-5"
+                style={{ animationDelay: `${gi * 40}ms` }}
+                className="flex gap-5 animate-in fade-in slide-in-from-bottom-1 duration-200 fill-mode-both"
               >
                 {/* Date stamp */}
                 <div className="w-16 flex-shrink-0 text-right pt-0.5">
@@ -201,7 +198,7 @@ export function CalendarGrid({ events, currentDate, view, onEventClick, onViewCh
                     </button>
                   ))}
                 </div>
-              </motion.div>
+              </div>
             );
           })}
         </div>

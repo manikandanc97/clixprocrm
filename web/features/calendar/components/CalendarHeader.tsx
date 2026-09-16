@@ -6,7 +6,6 @@ import { ChevronLeft, ChevronRight, CalendarDays, Plus, Search } from "lucide-re
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 
 type ViewType = "month" | "week" | "day" | "agenda";
 
@@ -39,10 +38,8 @@ export function CalendarHeader({ currentDate, view, onViewChange, onDateChange, 
   };
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: -6 }}
-      animate={{ opacity: 1, y: 0 }}
-      className="flex flex-col md:flex-row md:items-center justify-between gap-4"
+    <div
+      className="flex flex-col md:flex-row md:items-center justify-between gap-4 animate-in fade-in slide-in-from-top-1 duration-200"
     >
       {/* Left: icon + title + nav */}
       <div className="flex items-center gap-3 min-w-0">
@@ -110,6 +107,6 @@ export function CalendarHeader({ currentDate, view, onViewChange, onDateChange, 
           <span className="hidden sm:inline">New Event</span>
         </Button>
       </div>
-    </motion.div>
+    </div>
   );
 }

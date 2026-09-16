@@ -359,8 +359,8 @@ describe('DashboardService Phase 3', () => {
 
   it('getDashboardData: queries use tx, not prisma directly', async () => {
     await service.getDashboardData('tenant-dash-B');
-    expect(txMock.deal.aggregate).toHaveBeenCalled();
-    expect(prismaMock.deal.aggregate).not.toHaveBeenCalled();
+    expect(txMock.$queryRaw).toHaveBeenCalled();
+    expect(prismaMock.$queryRaw).not.toHaveBeenCalled();
   });
 
   it('getDashboardData: ORM queries use tx, not prisma directly', async () => {
@@ -380,10 +380,10 @@ describe('DashboardService Phase 3', () => {
 
   it('getEmployeeDashboardData: all queries use tx', async () => {
     await service.getEmployeeDashboardData('tenant-emp-B', 'user-2');
-    expect(txMock.task.count).toHaveBeenCalled();
-    expect(txMock.meeting.count).toHaveBeenCalled();
-    expect(txMock.lead.count).toHaveBeenCalled();
-    expect(prismaMock.task.count).not.toHaveBeenCalled();
+    expect(txMock.$queryRaw).toHaveBeenCalled();
+    expect(txMock.task.findMany).toHaveBeenCalled();
+    expect(txMock.lead.findMany).toHaveBeenCalled();
+    expect(prismaMock.task.findMany).not.toHaveBeenCalled();
   });
 });
 

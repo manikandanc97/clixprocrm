@@ -2,6 +2,7 @@
 
 import { useEffect, useState, useCallback, useMemo } from "react";
 import Link from "next/link";
+import dynamic from "next/dynamic";
 import {
   ShieldAlert,
   ArrowUpRight,
@@ -19,7 +20,6 @@ import {
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
-import { motion } from "framer-motion";
 import { useAuth } from "@/features/auth/components/auth-provider";
 import { CRMPageContainer } from "@/shared/components/crm";
 import { SuperAdminDashboardSkeleton } from "../components/SuperAdminDashboardSkeleton";
@@ -30,12 +30,32 @@ import {
   DEFAULT_ORGANIZATION_GROWTH,
 } from "./components/dashboard-types";
 import { DashboardKpiCards } from "./components/DashboardKpiCards";
-import { OrganizationGrowthCard } from "./components/OrganizationGrowthCard";
 import { AttentionRequiredPanel } from "./components/AttentionRequiredPanel";
-import { PlatformUsageHealthRow } from "./components/PlatformUsageHealthRow";
-import { ModuleAdoptionBillingRow } from "./components/ModuleAdoptionBillingRow";
-import { RecentOrganizationsTable } from "./components/RecentOrganizationsTable";
-import { PlatformActivityAuditCard } from "./components/PlatformActivityAuditCard";
+
+const OrganizationGrowthCard = dynamic(
+  () => import("./components/OrganizationGrowthCard").then((mod) => mod.OrganizationGrowthCard),
+  { ssr: false }
+);
+
+const PlatformUsageHealthRow = dynamic(
+  () => import("./components/PlatformUsageHealthRow").then((mod) => mod.PlatformUsageHealthRow),
+  { ssr: false }
+);
+
+const ModuleAdoptionBillingRow = dynamic(
+  () => import("./components/ModuleAdoptionBillingRow").then((mod) => mod.ModuleAdoptionBillingRow),
+  { ssr: false }
+);
+
+const RecentOrganizationsTable = dynamic(
+  () => import("./components/RecentOrganizationsTable").then((mod) => mod.RecentOrganizationsTable),
+  { ssr: false }
+);
+
+const PlatformActivityAuditCard = dynamic(
+  () => import("./components/PlatformActivityAuditCard").then((mod) => mod.PlatformActivityAuditCard),
+  { ssr: false }
+);
 
 export default function SuperAdminDashboardPage() {
   const { user } = useAuth();
@@ -202,10 +222,8 @@ export default function SuperAdminDashboardPage() {
     <CRMPageContainer>
       {/* 0. AAL2 Security Elevation Alert Banner */}
       {aal2Required && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          className="rounded-2xl border border-amber-500/30 bg-amber-500/10 shadow-lg p-4 sm:p-5"
+        <div
+          className="rounded-2xl border border-amber-500/30 bg-amber-500/10 shadow-lg p-4 sm:p-5 animate-in fade-in slide-in-from-top-2 duration-200"
         >
           <div className="flex flex-wrap items-center justify-between gap-4">
             <div className="flex items-start gap-3 flex-1 min-w-[280px]">
@@ -235,7 +253,7 @@ export default function SuperAdminDashboardPage() {
               <span>Verify MFA &amp; Unlock</span>
             </Button>
           </div>
-        </motion.div>
+        </div>
       )}
 
       {/* 0b. Non-AAL Error Banner */}

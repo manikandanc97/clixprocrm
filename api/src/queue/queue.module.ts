@@ -97,7 +97,9 @@ function parseRedisUrl(redisUrl: string) {
               port: 6379,
               maxRetriesPerRequest: null,
               enableReadyCheck: false,
-              retryStrategy: (times: number) => Math.min(times * 2000, 30000),
+              lazyConnect: true,
+              enableOfflineQueue: false,
+              retryStrategy: () => null,
             },
           };
         }

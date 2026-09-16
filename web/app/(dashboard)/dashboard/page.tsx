@@ -11,8 +11,6 @@ import {
   useTasks,
   useHotLeads,
   useCustomers,
-  useLeads,
-  usePipeline,
 } from "@/shared/hooks/use-dashboard";
 import { useAnalytics } from "@/shared/hooks/use-analytics";
 import { Button } from "@/shared/ui/button";
@@ -111,24 +109,14 @@ const DashboardPage = () => {
 
   const { isInitializing } = useDashboardInitializer(activeTimeframe);
   const { data: dashboardData, isLoading: isDashboardLoading } = useDashboardData();
-  const { data: leadsData, isLoading: isLeadsLoading } = useLeads();
-  const { data: pipelineData, isLoading: isPipelineLoading } = usePipeline();
 
   const isWorkspaceEmpty = useMemo(() => {
-    if (!dashboardData || isDashboardLoading || isLeadsLoading || isPipelineLoading) return false;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const leads = (leadsData as any)?.leads || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const totalLeadsCount = (leadsData as any)?.total ?? leads.length;
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const pipelineItems = (pipelineData as any)?.items || [];
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const totalDealsCount = (pipelineData as any)?.totalDeals ?? pipelineItems.length;
+    if (!dashboardData || isDashboardLoading) return false;
 
     const stats = dashboardData?.stats || [];
-    const revenueVal = stats.find(s => s.title === "Revenue")?.valueAmount || 0;
+    const totalLeadsCount = stats.find(s => s.title === "Total Leads")?.valueAmount ?? 0;
+    const totalDealsCount = (stats.find(s => s.title === "Total Deals") ?? stats.find(s => s.title === "Active Deals"))?.valueAmount ?? 0;
+    const revenueVal = stats.find(s => s.title === "Revenue")?.valueAmount ?? 0;
     const activitiesCount = dashboardData?.recentActivities?.length || 0;
 
     return (
@@ -139,10 +127,6 @@ const DashboardPage = () => {
     );
   }, [
     isDashboardLoading,
-    isLeadsLoading,
-    isPipelineLoading,
-    leadsData,
-    pipelineData,
     dashboardData,
   ]);
 

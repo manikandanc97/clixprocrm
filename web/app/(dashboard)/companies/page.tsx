@@ -32,7 +32,6 @@ import {
 } from "@/shared/hooks/use-crm";
 import { FormModal } from "@/shared/components/crm/FormModal";
 import { FormSkeleton } from "@/shared/components/skeletons";
-import { CompanyContextualSettings } from "@/features/companies/components/CompanyContextualSettings";
 import { useCompaniesUrlState } from "@/features/companies/hooks/use-companies-url-state";
 import {
   useCompaniesData,
@@ -44,6 +43,11 @@ import type { SortDirection } from "@/shared/components/DataTableColumnHeader";
 const CompanyForm = dynamic(
   () => import("@/features/forms/CompanyForm").then((mod) => ({ default: mod.CompanyForm })),
   { loading: () => <FormSkeleton /> }
+);
+
+const CompanyContextualSettings = dynamic(
+  () => import("@/features/companies/components/CompanyContextualSettings").then((mod) => mod.CompanyContextualSettings),
+  { ssr: false }
 );
 
 export default function CompaniesPage() {

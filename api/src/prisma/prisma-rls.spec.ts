@@ -44,7 +44,7 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       );
 
       expect(result.status).toBe('success');
-      expect(executedSqlQueries).toHaveLength(2);
+      expect(executedSqlQueries).toHaveLength(1);
 
       // Verify app.current_tenant_id is set with tenantA
       expect(executedSqlQueries[0].sql).toContain(
@@ -53,10 +53,10 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       expect(executedSqlQueries[0].values).toContain(tenantA);
 
       // Verify is_super_admin is set to false
-      expect(executedSqlQueries[1].sql).toContain(
+      expect(executedSqlQueries[0].sql).toContain(
         "set_config('app.is_super_admin'",
       );
-      expect(executedSqlQueries[1].values).toContain('false');
+      expect(executedSqlQueries[0].values).toContain('false');
     });
 
     it('propagates Super Admin bypass context only when explicitly authorized', async () => {
@@ -67,9 +67,9 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
         },
       );
 
-      expect(executedSqlQueries).toHaveLength(2);
+      expect(executedSqlQueries).toHaveLength(1);
       expect(executedSqlQueries[0].values).toContain('');
-      expect(executedSqlQueries[1].values).toContain('true');
+      expect(executedSqlQueries[0].values).toContain('true');
     });
 
     it('withCurrentTenantContext automatically uses active AsyncLocalStorage context', async () => {
@@ -107,8 +107,8 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
 
       expect(res).toBe('ALS_QUERY_SUCCESS');
       expect(executedSqlQueries[0].values).toContain('tenant-als-123');
-      expect(executedSqlQueries[1].values).toContain('false');
-      expect(executedSqlQueries[2].values).toContain('user-als-456');
+      expect(executedSqlQueries[0].values).toContain('false');
+      expect(executedSqlQueries[0].values).toContain('user-als-456');
     });
 
     it('withCurrentTenantContext throws explicit error when context is missing', async () => {
@@ -143,9 +143,9 @@ describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context I
       // Request A set tenantA
       expect(queriesAfterA[0].values).toContain(tenantA);
       // Request B set tenantB
-      expect(queriesAfterB[2].values).toContain(tenantB);
+      expect(queriesAfterB[1].values).toContain(tenantB);
       // Contexts are separate
-      expect(queriesAfterB[2].values).not.toContain(tenantA);
+      expect(queriesAfterB[1].values).not.toContain(tenantA);
     });
 
     it('simultaneous concurrent tenant requests maintain separate transaction contexts', async () => {

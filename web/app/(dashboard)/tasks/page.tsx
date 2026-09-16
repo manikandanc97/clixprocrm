@@ -33,12 +33,19 @@ import {
   useUpdateTask,
 } from "@/shared/hooks/use-crm";
 import { FormModal } from "@/shared/components/crm/FormModal";
-import { MeetingForm } from "@/features/forms/MeetingForm";
-import { TaskModal } from "@/features/tasks/components/TaskModal";
 import { TasksDataTable } from "@/features/tasks/components/TasksDataTable";
 import { useTasksUrlState } from "@/features/tasks/hooks/use-tasks-url-state";
 import { useTasksData } from "@/features/tasks/hooks/use-tasks-data";
 import { TaskType } from "@/shared/types/task";
+
+const TaskModal = dynamic(
+  () => import("@/features/tasks/components/TaskModal").then((mod) => mod.TaskModal),
+  { ssr: false }
+);
+
+const MeetingForm = dynamic(
+  () => import("@/features/forms/MeetingForm").then((mod) => mod.MeetingForm)
+);
 
 // Lazy-loaded: TaskDetailsModal is only needed when a row is opened
 const TaskDetailsModal = dynamic(

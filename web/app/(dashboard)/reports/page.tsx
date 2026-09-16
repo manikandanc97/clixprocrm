@@ -33,9 +33,9 @@ import {
   DialogDescription,
 } from "@/shared/ui/dialog";
 import { toast } from "sonner";
-import RevenueTargetSettings from "@/features/settings/components/RevenueTargetSettings";
 import { useAuth } from "@/features/auth/components/auth-provider";
 
+const RevenueTargetSettings = dynamic(() => import("@/features/settings/components/RevenueTargetSettings"), { ssr: false });
 const RevenueChart = dynamic(() => import("@/features/reports/components/RevenueChart"));
 const RevenueTarget = dynamic(() => import("@/features/reports/components/RevenueTarget"));
 const LeadSourceChart = dynamic(() => import("@/features/reports/components/LeadSourceChart"));

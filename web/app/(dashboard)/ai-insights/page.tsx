@@ -11,6 +11,7 @@ import {
   Settings,
 } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
+import dynamic from "next/dynamic";
 import { 
   CRMPageContainer, 
   CRMPageHeader, 
@@ -20,22 +21,21 @@ import {
   ActivityTimeline,
   CRMPageSection
 } from "@/shared/components/crm";
-import { AIContextualSettings } from "@/features/ai/components/AIContextualSettings";
 import { Button } from "@/shared/ui/button";
 import { useAiInsights } from "@/shared/hooks/use-dashboard";
 import { AISkeleton } from "./AISkeleton";
-import { 
-  Area, 
-  AreaChart, 
-  XAxis, 
-  YAxis, 
-  Tooltip,
-  CartesianGrid 
-} from "recharts";
-// import { } from "framer-";
+import { ChartSkeleton } from "@/shared/components/skeletons";
 import { toast } from "sonner";
 
-import { ChartContainer } from "@/shared/components/charts/ChartContainer";
+const AIPerformanceChart = dynamic(
+  () => import("@/features/ai/components/AIPerformanceChart"),
+  { loading: () => <ChartSkeleton height={350} />, ssr: false }
+);
+
+const AIContextualSettings = dynamic(
+  () => import("@/features/ai/components/AIContextualSettings").then((mod) => mod.AIContextualSettings),
+  { ssr: false }
+);
 
 interface AIRecommendation {
   id: string | number;
@@ -188,61 +188,7 @@ export default function AiInsightsPage() {
             className="min-w-0"
           >
             <CRMCard className="h-[400px] min-h-[400px] p-6 min-w-0">
-              <ChartContainer 
-                height="100%" 
-                hasData={Boolean(insightsData?.forecastData && insightsData.forecastData.length > 0)}
-                className="w-full h-full"
-              >
-                <AreaChart data={insightsData?.forecastData || []}>
-                  <defs>
-                    <linearGradient id="colorRevenue" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0}/>
-                    </linearGradient>
-                    <linearGradient id="colorPrediction" x1="0" y1="0" x2="0" y2="1">
-                      <stop offset="5%" stopColor="#10b981" stopOpacity={0.1}/>
-                      <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
-                    </linearGradient>
-                  </defs>
-                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="rgba(0,0,0,0.05)" />
-                  <XAxis 
-                    dataKey="name" 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 600 }}
-                    dy={10}
-                  />
-                  <YAxis 
-                    axisLine={false} 
-                    tickLine={false} 
-                    tick={{ fontSize: 10, fontWeight: 600 }}
-                  />
-                  <Tooltip 
-                    contentStyle={{ 
-                      borderRadius: '12px', 
-                      border: 'none', 
-                      boxShadow: '0 10px 15px -3px rgba(0,0,0,0.1)' 
-                    }} 
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="revenue" 
-                    stroke="#6366f1" 
-                    strokeWidth={3}
-                    fillOpacity={1} 
-                    fill="url(#colorRevenue)" 
-                  />
-                  <Area 
-                    type="monotone" 
-                    dataKey="prediction" 
-                    stroke="#10b981" 
-                    strokeWidth={3}
-                    strokeDasharray="5 5"
-                    fillOpacity={1} 
-                    fill="url(#colorPrediction)" 
-                  />
-                </AreaChart>
-              </ChartContainer>
+              <AIPerformanceChart data={insightsData?.forecastData || []} />
             </CRMCard>
           </CRMPageSection>
 

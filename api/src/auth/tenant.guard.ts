@@ -9,10 +9,7 @@ import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../common/context/tenant-context.service';
 
 interface CachedUserRecord {
-  memberships: Array<{
-    tenantId: string;
-    role: any;
-  }>;
+  userRecord: any;
   expiresAt: number;
 }
 
@@ -57,24 +54,54 @@ export class TenantGuard implements CanActivate {
 
     const now = Date.now();
 
-    // Check user and resolve tenant memberships in a user-isolated context
-    const userRecord = await this.prisma.withTenantContext(
-      { userId: user.id },
-      async (tx) => {
-        return tx.user.findUnique({
-          where: { id: user.id },
-          include: {
-            memberships: {
-              where: { status: 'ACTIVE' },
-              include: {
-                role: { include: { permissions: true } },
-                tenant: true,
+    // Check in-memory user membership cache (60s TTL) to prevent DB connection pool exhaustion under concurrency
+    let userRecord: any = null;
+    const cached = userMembershipCache.get(user.id);
+    if (cached && cached.expiresAt > now) {
+      userRecord = (cached as any).userRecord || cached;
+    } else {
+      userRecord = await this.prisma.withTenantContext(
+        { userId: user.id },
+        async (tx) => {
+          return tx.user.findUnique({
+            where: { id: user.id },
+            select: {
+              id: true,
+              status: true,
+              isSuperAdmin: true,
+              memberships: {
+                where: { status: 'ACTIVE' },
+                select: {
+                  tenantId: true,
+                  isOrgOwner: true,
+                  branchId: true,
+                  status: true,
+                  role: {
+                    include: {
+                      permissions: true,
+                    },
+                  },
+                  tenant: {
+                    select: {
+                      id: true,
+                      name: true,
+                      status: true,
+                    },
+                  },
+                },
               },
             },
-          },
+          });
+        },
+      );
+
+      if (userRecord) {
+        userMembershipCache.set(user.id, {
+          userRecord,
+          expiresAt: now + 60000,
         });
-      },
-    );
+      }
+    }
 
     if (!userRecord) {
       throw new UnauthorizedException('User account not found');

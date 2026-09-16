@@ -3,7 +3,6 @@
 import React from "react";
 import { FileText } from "lucide-react";
 import { Button } from "@/shared/ui/button";
-import { motion } from "framer-motion";
 import { PlatformInvoiceItemData } from "@/shared/lib/api/super-admin.api";
 import { getInvStatusBadge } from "../utils/billing-formatters.util";
 
@@ -24,11 +23,8 @@ export function BillingInvoiceViewModal({
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/60 backdrop-blur-xs">
-      <motion.div
-        initial={{ opacity: 0, scale: 0.96 }}
-        animate={{ opacity: 1, scale: 1 }}
-        exit={{ opacity: 0, scale: 0.96 }}
-        className="bg-card border border-border/80 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto"
+      <div
+        className="bg-card border border-border/80 w-full max-w-lg rounded-2xl shadow-2xl p-6 space-y-4 max-h-[90vh] overflow-y-auto animate-in fade-in zoom-in-95 duration-150"
       >
         <div className="flex justify-between items-center border-b border-border/60 pb-3">
           <div className="flex items-center gap-2">
@@ -122,7 +118,7 @@ export function BillingInvoiceViewModal({
             Close
           </Button>
         </div>
-      </motion.div>
+      </div>
     </div>
   );
 }

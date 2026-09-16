@@ -36,6 +36,7 @@ export class LeadsQueryService {
     tenantId: string,
     query: PaginationQueryDto & { stage?: string; status?: string },
   ) {
+    const currency = await this.getTenantCurrency(tenantId);
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const page = Math.max(1, query.page || 1);
       const limit = Math.max(1, Math.min(query.limit || 50, 10000));
@@ -48,8 +49,7 @@ export class LeadsQueryService {
         where.stage = stageQuery as LeadStage;
       }
 
-      const [currency, leads, total] = await Promise.all([
-        this.getTenantCurrency(tenantId),
+      const [leads, total] = await Promise.all([
         tx.lead.findMany({
           where,
           orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],

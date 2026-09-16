@@ -294,10 +294,11 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
         { userId: 'user-normal-1' },
         expect.any(Function),
       );
-      expect(mockTx.user.findUnique).toHaveBeenCalledWith({
-        where: { id: 'user-normal-1' },
-        include: expect.any(Object),
-      });
+      expect(mockTx.user.findUnique).toHaveBeenCalledWith(
+        expect.objectContaining({
+          where: { id: 'user-normal-1' },
+        }),
+      );
     });
   });
 

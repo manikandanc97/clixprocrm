@@ -1,0 +1,204 @@
+{
+  "/crm/dashboard": {
+    "endpoint": "/crm/dashboard",
+    "httpTotalMs": 26019.3089,
+    "authRemoteGetUserMs": 1165.1888000000004,
+    "authGuardDbChecksMs": 5300.7187,
+    "tenantGuardMs": 3569.1090000000004,
+    "tenantContextTxSetupMs": 1446.2103000000006,
+    "dbQueryDurationMs": 5737,
+    "inMemoryProcessingMs": 0.01900000000023283,
+    "jsonSerializationMs": 0.3083000000042375,
+    "queryBreakdown": [
+      {
+        "name": "Summary Raw KPI Aggregation",
+        "durationMs": 1562.23,
+        "rowsReturned": 1
+      },
+      {
+        "name": "Monthly Sales Aggregation",
+        "durationMs": 676,
+        "rowsReturned": 0
+      },
+      {
+        "name": "Sparklines (7 days)",
+        "durationMs": 658.48,
+        "rowsReturned": 7
+      },
+      {
+        "name": "Recent Deals (take 5)",
+        "durationMs": 751.99,
+        "rowsReturned": 5
+      },
+      {
+        "name": "Recent Quotations (take 5)",
+        "durationMs": 625.3,
+        "rowsReturned": 0
+      },
+      {
+        "name": "Recent Tasks (take 5)",
+        "durationMs": 765.29,
+        "rowsReturned": 1
+      },
+      {
+        "name": "Active Revenue Target",
+        "durationMs": 697.71,
+        "rowsReturned": 1
+      }
+    ],
+    "explainAnalyze": {
+      "planningTimeMs": 0.15,
+      "executionTimeMs": 0.07,
+      "scanTypes": [
+        "Result",
+        "Aggregate",
+        "Seq Scan on Deal"
+      ],
+      "bufferHits": 6,
+      "bufferReads": 0
+    }
+  },
+  "/crm/pipeline": {
+    "endpoint": "/crm/pipeline",
+    "httpTotalMs": 1529.585500000001,
+    "authRemoteGetUserMs": 1165.1888000000004,
+    "authGuardDbChecksMs": 5300.7187,
+    "tenantGuardMs": 3569.1090000000004,
+    "tenantContextTxSetupMs": 1446.2103000000006,
+    "dbQueryDurationMs": 983.37,
+    "inMemoryProcessingMs": 0.15,
+    "jsonSerializationMs": 0.05,
+    "queryBreakdown": [
+      {
+        "name": "Pipeline Deals with Relations",
+        "durationMs": 983.37,
+        "rowsReturned": 13
+      }
+    ],
+    "explainAnalyze": {
+      "planningTimeMs": 0.14,
+      "executionTimeMs": 0.11,
+      "scanTypes": [
+        "Sort",
+        "Seq Scan on Deal"
+      ],
+      "bufferHits": 4,
+      "bufferReads": 0
+    }
+  },
+  "/crm/customers": {
+    "endpoint": "/crm/customers?page=1&limit=20",
+    "httpTotalMs": 2352.305800000002,
+    "authRemoteGetUserMs": 1165.1888000000004,
+    "authGuardDbChecksMs": 5300.7187,
+    "tenantGuardMs": 3569.1090000000004,
+    "tenantContextTxSetupMs": 1446.2103000000006,
+    "dbQueryDurationMs": 902.33,
+    "inMemoryProcessingMs": 0.2,
+    "jsonSerializationMs": 0.05,
+    "queryBreakdown": [
+      {
+        "name": "Customer Count + Paginated Fetch",
+        "durationMs": 902.33,
+        "rowsReturned": 3
+      }
+    ],
+    "explainAnalyze": {
+      "planningTimeMs": 4.49,
+      "executionTimeMs": 2.44,
+      "scanTypes": [
+        "Limit",
+        "Sort",
+        "Seq Scan on Customer"
+      ],
+      "bufferHits": 3,
+      "bufferReads": 0
+    }
+  },
+  "/crm/tasks": {
+    "endpoint": "/crm/tasks?page=1&limit=20",
+    "httpTotalMs": 1897.1756999999998,
+    "authRemoteGetUserMs": 1165.1888000000004,
+    "authGuardDbChecksMs": 5300.7187,
+    "tenantGuardMs": 3569.1090000000004,
+    "tenantContextTxSetupMs": 1446.2103000000006,
+    "dbQueryDurationMs": 787.33,
+    "inMemoryProcessingMs": 0.1,
+    "jsonSerializationMs": 0.05,
+    "queryBreakdown": [
+      {
+        "name": "Tasks Count + Paginated Fetch",
+        "durationMs": 787.33,
+        "rowsReturned": 4
+      }
+    ],
+    "explainAnalyze": {
+      "planningTimeMs": 0.17,
+      "executionTimeMs": 0.06,
+      "scanTypes": [
+        "Limit",
+        "Sort",
+        "Seq Scan on Task"
+      ],
+      "bufferHits": 3,
+      "bufferReads": 0
+    }
+  },
+  "/crm/leads": {
+    "endpoint": "/crm/leads?page=1&limit=20",
+    "httpTotalMs": 1733.758799999996,
+    "authRemoteGetUserMs": 1165.1888000000004,
+    "authGuardDbChecksMs": 5300.7187,
+    "tenantGuardMs": 3569.1090000000004,
+    "tenantContextTxSetupMs": 1446.2103000000006,
+    "dbQueryDurationMs": 887.66,
+    "inMemoryProcessingMs": 0.1,
+    "jsonSerializationMs": 0.05,
+    "queryBreakdown": [
+      {
+        "name": "Leads Count + Paginated Fetch",
+        "durationMs": 887.66,
+        "rowsReturned": 16
+      }
+    ],
+    "explainAnalyze": {
+      "planningTimeMs": 0.15,
+      "executionTimeMs": 0.08,
+      "scanTypes": [
+        "Limit",
+        "Sort",
+        "Seq Scan on Lead"
+      ],
+      "bufferHits": 15,
+      "bufferReads": 0
+    }
+  },
+  "/crm/search": {
+    "endpoint": "/crm/search?q=test",
+    "httpTotalMs": 2443.868699999999,
+    "authRemoteGetUserMs": 1165.1888000000004,
+    "authGuardDbChecksMs": 5300.7187,
+    "tenantGuardMs": 3569.1090000000004,
+    "tenantContextTxSetupMs": 1446.2103000000006,
+    "dbQueryDurationMs": 841.42,
+    "inMemoryProcessingMs": 0.1,
+    "jsonSerializationMs": 0.05,
+    "queryBreakdown": [
+      {
+        "name": "Multi-Entity ILIKE Search (Leads, Customers, Deals, Companies)",
+        "durationMs": 841.42,
+        "rowsReturned": 0
+      }
+    ],
+    "explainAnalyze": {
+      "planningTimeMs": 20.27,
+      "executionTimeMs": 0.17,
+      "scanTypes": [
+        "Limit",
+        "Seq Scan on Lead"
+      ],
+      "bufferHits": 10,
+      "bufferReads": 0
+    }
+  }
+}

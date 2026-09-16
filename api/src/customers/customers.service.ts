@@ -23,53 +23,152 @@ export class CustomersService {
       const skip = (page - 1) * limit;
 
       const where: Prisma.CustomerWhereInput = { tenantId, deletedAt: null };
-
       const searchTrimmed = search?.trim() || '';
 
       if (searchTrimmed) {
-        // When searching encrypted records, fetch tenant records to filter across the full dataset
-        const allCustomers = await tx.customer.findMany({
+        // Fast path: Exact email match via HMAC-SHA256 blind index
+        const isEmailFormat = searchTrimmed.includes('@');
+        if (isEmailFormat) {
+          const emailHash = this.enc.hash(searchTrimmed);
+          const emailWhere: Prisma.CustomerWhereInput = {
+            ...where,
+            emailHash,
+          };
+
+          const [customers, total] = await Promise.all([
+            tx.customer.findMany({
+              where: emailWhere,
+              orderBy: { createdAt: 'desc' },
+              skip,
+              take: limit,
+              include: {
+                _count: {
+                  select: { deals: { where: { status: { not: 'LOST' } } } },
+                },
+                deals: {
+                  where: { stage: { not: 'LOST' } },
+                  select: { value: true, stage: true },
+                },
+              },
+            }),
+            tx.customer.count({ where: emailWhere }),
+          ]);
+
+          if (total > 0) {
+            const mappedCustomers = customers.map((c) => {
+              const dealsRevenue = (c.deals || []).reduce(
+                (sum, d) => sum + Number(d.value || 0),
+                0,
+              );
+              return {
+                ...c,
+                name: this.enc.decrypt(c.name),
+                email: this.enc.decrypt(c.email),
+                company: this.enc.decrypt(c.company),
+                dealsCount: c._count.deals,
+                revenueValue:
+                  dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
+              };
+            });
+
+            return {
+              customers: mappedCustomers,
+              pagination: {
+                page,
+                limit,
+                total,
+                totalPages: Math.ceil(total / limit),
+              },
+            };
+          }
+        }
+
+        // Substring search on decrypted fields:
+        // Query candidate records with targeted select and filtered deal relations
+        const candidates = await tx.customer.findMany({
           where,
           orderBy: { createdAt: 'desc' },
-          include: {
+          select: {
+            id: true,
+            tenantId: true,
+            assignedToId: true,
+            name: true,
+            company: true,
+            email: true,
+            emailHash: true,
+            status: true,
+            revenue: true,
+            lastContactAt: true,
+            deletedAt: true,
+            createdAt: true,
+            updatedAt: true,
+            leadId: true,
+            companyId: true,
+            teamId: true,
+            branchId: true,
             _count: {
               select: { deals: { where: { status: { not: 'LOST' } } } },
             },
             deals: {
+              where: { stage: { not: 'LOST' } },
               select: { value: true, stage: true },
             },
           },
         });
 
-        const mapped = allCustomers.map((c) => {
-          const dealsRevenue = c.deals
-            .filter((d) => d.stage !== 'LOST')
-            .reduce((sum, d) => sum + Number(d.value || 0), 0);
+        const searchLower = searchTrimmed.toLowerCase();
+        const matchedCustomers: Array<
+          Omit<(typeof candidates)[0], 'name' | 'company' | 'email'> & {
+            name: string | null;
+            company: string | null;
+            email: string | null;
+          }
+        > = [];
 
+        for (let i = 0; i < candidates.length; i++) {
+          const c = candidates[i];
+          const decName = this.enc.decrypt(c.name);
+          const decCompany = this.enc.decrypt(c.company);
+          const decEmail = this.enc.decrypt(c.email);
+
+          const nameMatches = (decName || '')
+            .toLowerCase()
+            .includes(searchLower);
+          const companyMatches = (decCompany || '')
+            .toLowerCase()
+            .includes(searchLower);
+          const emailMatches = (decEmail || '')
+            .toLowerCase()
+            .includes(searchLower);
+
+          if (nameMatches || companyMatches || emailMatches) {
+            matchedCustomers.push({
+              ...c,
+              name: decName,
+              company: decCompany,
+              email: decEmail,
+            });
+          }
+        }
+
+        const total = matchedCustomers.length;
+        const paginatedSlice = matchedCustomers.slice(skip, skip + limit);
+
+        const mappedCustomers = paginatedSlice.map((c) => {
+          const dealsRevenue = (c.deals || []).reduce(
+            (sum, d) => sum + Number(d.value || 0),
+            0,
+          );
           return {
             ...c,
-            name: this.enc.decrypt(c.name),
-            email: this.enc.decrypt(c.email),
-            company: this.enc.decrypt(c.company),
-            dealsCount: c._count.deals,
+            dealsCount: c._count?.deals || 0,
             revenueValue:
               dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
           };
         });
 
-        const searchLower = searchTrimmed.toLowerCase();
-        const filtered = mapped.filter(
-          (c) =>
-            (c.name || '').toLowerCase().includes(searchLower) ||
-            (c.email || '').toLowerCase().includes(searchLower) ||
-            (c.company || '').toLowerCase().includes(searchLower),
-        );
-
-        const total = filtered.length;
-        const paginated = filtered.slice(skip, skip + limit);
-
         return {
-          customers: paginated,
+          customers: mappedCustomers,
           pagination: {
             page,
             limit,
@@ -79,6 +178,7 @@ export class CustomersService {
         };
       }
 
+      // Fast path: Server-side pagination without search query
       const [customers, total] = await Promise.all([
         tx.customer.findMany({
           where,
@@ -90,6 +190,7 @@ export class CustomersService {
               select: { deals: { where: { status: { not: 'LOST' } } } },
             },
             deals: {
+              where: { stage: { not: 'LOST' } },
               select: { value: true, stage: true },
             },
           },
@@ -98,12 +199,12 @@ export class CustomersService {
       ]);
 
       const mappedCustomers = customers.map((c) => {
-        const dealsRevenue = c.deals
-          .filter((d) => d.stage !== 'LOST')
-          .reduce((sum, d) => sum + Number(d.value || 0), 0);
+        const dealsRevenue = (c.deals || []).reduce(
+          (sum, d) => sum + Number(d.value || 0),
+          0,
+        );
 
-        // Decrypt PII fields
-        const decrypted = {
+        return {
           ...c,
           name: this.enc.decrypt(c.name),
           email: this.enc.decrypt(c.email),
@@ -112,7 +213,6 @@ export class CustomersService {
           revenueValue:
             dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
         };
-        return decrypted;
       });
 
       return {
@@ -160,13 +260,13 @@ export class CustomersService {
   async updateCustomer(
     tenantId: string,
     id: string,
-    data: Partial<Prisma.CustomerUpdateInput>,
+    data: Prisma.CustomerUpdateInput,
   ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       // Encrypt PII fields if provided
-      const updateData: any = { ...data };
+      const updateData: Prisma.CustomerUpdateInput = { ...data };
       if (typeof data.name === 'string') {
-        updateData.name = this.enc.encrypt(data.name);
+        updateData.name = this.enc.encrypt(data.name)!;
       }
       if (typeof data.email === 'string') {
         const { encrypted, hash } = this.enc.encryptWithHash(data.email);
@@ -174,7 +274,7 @@ export class CustomersService {
         updateData.emailHash = hash;
       }
       if (typeof data.company === 'string') {
-        updateData.company = this.enc.encrypt(data.company);
+        updateData.company = this.enc.encrypt(data.company)!;
       }
       return tx.customer.update({
         where: { id, tenantId },

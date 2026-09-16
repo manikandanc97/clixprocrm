@@ -1,6 +1,6 @@
 "use client";
 
-import React, { createContext, useContext, useEffect } from "react";
+import React, { createContext, useContext, useEffect, useMemo, useCallback } from "react";
 import { usePathname } from "next/navigation";
 import { useCRMStore } from "@/shared/store/useCRMStore";
 import { generateBrandPalette } from "@/shared/lib/utils/color-utils";
@@ -167,16 +167,15 @@ const AUTH_ROUTES = [
 ];
 
 export function SettingsProvider({ children }: { children: React.ReactNode }) {
-  const { 
-    accentColor: tenantAccentColor, 
-    setAccentColor: setTenantAccentColor, 
-    superAdminAccentColor,
-    setSuperAdminAccentColor,
-    fontFamily: tenantFontFamily, 
-    setFontFamily: setTenantFontFamily,
-    superAdminFontFamily,
-    setSuperAdminFontFamily,
-  } = useCRMStore();
+  const tenantAccentColor = useCRMStore((state) => state.accentColor);
+  const setTenantAccentColor = useCRMStore((state) => state.setAccentColor);
+  const superAdminAccentColor = useCRMStore((state) => state.superAdminAccentColor);
+  const setSuperAdminAccentColor = useCRMStore((state) => state.setSuperAdminAccentColor);
+  const tenantFontFamily = useCRMStore((state) => state.fontFamily);
+  const setTenantFontFamily = useCRMStore((state) => state.setFontFamily);
+  const superAdminFontFamily = useCRMStore((state) => state.superAdminFontFamily);
+  const setSuperAdminFontFamily = useCRMStore((state) => state.setSuperAdminFontFamily);
+
   const pathname = usePathname();
 
   const isAuthPage = pathname
@@ -252,30 +251,32 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     }
   }, [activeAccent, activeFont, isAuthPage, isSuperAdminPath]);
 
-  const handleSetAccentColor = (color: AccentColor) => {
+  const handleSetAccentColor = useCallback((color: AccentColor) => {
     if (isSuperAdminPath) {
       setSuperAdminAccentColor(color);
     } else {
       setTenantAccentColor(color);
     }
-  };
+  }, [isSuperAdminPath, setSuperAdminAccentColor, setTenantAccentColor]);
 
-  const handleSetFontFamily = (font: FontFamily) => {
+  const handleSetFontFamily = useCallback((font: FontFamily) => {
     if (isSuperAdminPath) {
       setSuperAdminFontFamily(font);
     } else {
       setTenantFontFamily(font);
     }
-  };
+  }, [isSuperAdminPath, setSuperAdminFontFamily, setTenantFontFamily]);
+
+  const contextValue = useMemo<SettingsContextType>(() => ({
+    accentColor: activeAccent as AccentColor,
+    setAccentColor: handleSetAccentColor,
+    fontFamily: activeFont as FontFamily,
+    setFontFamily: handleSetFontFamily,
+    dashboardScope,
+  }), [activeAccent, handleSetAccentColor, activeFont, handleSetFontFamily, dashboardScope]);
 
   return (
-    <SettingsContext.Provider value={{ 
-      accentColor: activeAccent as AccentColor, 
-      setAccentColor: handleSetAccentColor, 
-      fontFamily: activeFont as FontFamily, 
-      setFontFamily: handleSetFontFamily,
-      dashboardScope,
-    }}>
+    <SettingsContext.Provider value={contextValue}>
       {children}
     </SettingsContext.Provider>
   );

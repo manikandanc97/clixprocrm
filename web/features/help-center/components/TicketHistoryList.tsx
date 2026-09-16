@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useEffect, useMemo } from "react";
+import dynamic from "next/dynamic";
 import { CRMPagination } from "@/shared/components/crm";
 import { toast } from "sonner";
 import client from "@/shared/lib/api/client";
@@ -8,12 +9,29 @@ import { useAuth } from "@/features/auth/components/auth-provider";
 import {
   TicketItem,
 } from "./ticket-history/ticket-history.types";
-import { TicketMediaPreviewDialog, PreviewMediaData } from "./ticket-history/TicketMediaPreviewDialog";
-import { TicketDeleteDialog } from "./ticket-history/TicketDeleteDialog";
-import { TicketEditModal } from "./ticket-history/TicketEditModal";
-import { TicketDetailsModal } from "./ticket-history/TicketDetailsModal";
+import type { PreviewMediaData } from "./ticket-history/TicketMediaPreviewDialog";
 import { TicketHistoryToolbar } from "./ticket-history/TicketHistoryToolbar";
 import { TicketHistoryTable } from "./ticket-history/TicketHistoryTable";
+
+const TicketMediaPreviewDialog = dynamic(
+  () => import("./ticket-history/TicketMediaPreviewDialog").then((mod) => mod.TicketMediaPreviewDialog),
+  { ssr: false }
+);
+
+const TicketDeleteDialog = dynamic(
+  () => import("./ticket-history/TicketDeleteDialog").then((mod) => mod.TicketDeleteDialog),
+  { ssr: false }
+);
+
+const TicketEditModal = dynamic(
+  () => import("./ticket-history/TicketEditModal").then((mod) => mod.TicketEditModal),
+  { ssr: false }
+);
+
+const TicketDetailsModal = dynamic(
+  () => import("./ticket-history/TicketDetailsModal").then((mod) => mod.TicketDetailsModal),
+  { ssr: false }
+);
 
 export type { TicketItem };
 

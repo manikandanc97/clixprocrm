@@ -114,15 +114,6 @@ export interface UseTasksDataReturn {
  */
 export function useTasksData(): UseTasksDataReturn {
   const { isHydrated, isAuthenticated, isInitializing } = useAuth();
-  const { data, isLoading: loading, isPending, isError, error, refetch } = useTasks();
-
-  const safeTasks = useMemo(
-    () => (Array.isArray(data?.tasks) ? (data.tasks as TaskType[]) : []),
-    [data]
-  );
-
-  const isInitialLoading =
-    !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
 
   // Filter & search state
   const [statusFilter, setStatusFilterState] = useState("ALL");
@@ -132,6 +123,37 @@ export function useTasksData(): UseTasksDataReturn {
   const [currentPage, setCurrentPage] = useState(1);
   const [rowsPerPage, setRowsPerPageState] = useState(10);
   const [sortConfig, setSortConfig] = useState<TaskSortConfig | null>(null);
+
+  const queryParams = useMemo(() => {
+    const params: Record<string, string | number | boolean> = {
+      page: currentPage,
+      limit: rowsPerPage,
+    };
+    if (search.trim()) {
+      params.search = search.trim();
+    }
+    if (statusFilter && statusFilter !== "ALL") {
+      params.status = statusFilter.toLowerCase();
+    }
+    if (priorityFilter && priorityFilter !== "ALL") {
+      params.priority = priorityFilter.toLowerCase();
+    }
+    if (sortConfig) {
+      params.sortBy = sortConfig.key;
+      params.sortOrder = sortConfig.direction;
+    }
+    return params;
+  }, [currentPage, rowsPerPage, search, statusFilter, priorityFilter, sortConfig]);
+
+  const { data, isLoading: loading, isPending, isError, error, refetch } = useTasks(queryParams);
+
+  const safeTasks = useMemo(
+    () => (Array.isArray(data?.tasks) ? (data.tasks as TaskType[]) : []),
+    [data]
+  );
+
+  const isInitialLoading =
+    !data && (loading || isPending || !isHydrated || !isAuthenticated || isInitializing);
 
   const setSearch = useCallback((val: string) => {
     setSearchState(val);
@@ -157,72 +179,11 @@ export function useTasksData(): UseTasksDataReturn {
     setCurrentPage(1);
   }, []);
 
-  // Filtered and sorted tasks
-  const filteredTasks = useMemo(() => {
-    const filtered = safeTasks.filter((task: TaskType) => {
-      if (statusFilter !== "ALL") {
-        if (statusFilter === "OVERDUE") {
-          if (!isTaskOverdue(task)) return false;
-        } else if ((task.status || "PENDING").toUpperCase() !== statusFilter.toUpperCase()) {
-          return false;
-        }
-      }
-
-      if (
-        priorityFilter !== "ALL" &&
-        (task.priority || "MEDIUM").toUpperCase() !== priorityFilter.toUpperCase()
-      ) {
-        return false;
-      }
-
-      if (!search.trim()) return true;
-      const q = search.toLowerCase();
-      return (
-        (task.title && task.title.toLowerCase().includes(q)) ||
-        (task.description && task.description.toLowerCase().includes(q)) ||
-        (task.assignedTo?.name && task.assignedTo.name.toLowerCase().includes(q)) ||
-        (task.relatedLead?.name && task.relatedLead.name.toLowerCase().includes(q)) ||
-        (task.relatedCustomer?.name && task.relatedCustomer.name.toLowerCase().includes(q)) ||
-        (task.tags && task.tags.some((t) => t.toLowerCase().includes(q)))
-      );
-    });
-
-    if (!sortConfig) return filtered;
-    return [...filtered].sort((a: TaskType, b: TaskType) => {
-      let aVal: string | number = "";
-      let bVal: string | number = "";
-      if (sortConfig.key === "priority") {
-        const priorityWeight: Record<string, number> = { HIGH: 3, MEDIUM: 2, LOW: 1 };
-        aVal = priorityWeight[a.priority] || 0;
-        bVal = priorityWeight[b.priority] || 0;
-      } else if (sortConfig.key === "dueDate") {
-        aVal = a.dueDate ? new Date(a.dueDate).getTime() : 0;
-        bVal = b.dueDate ? new Date(b.dueDate).getTime() : 0;
-      } else if (sortConfig.key === "assignedTo") {
-        aVal = a.assignedTo?.name || "";
-        bVal = b.assignedTo?.name || "";
-      } else if (sortConfig.key === "createdAt") {
-        aVal = new Date(a.createdAt || 0).getTime();
-        bVal = new Date(b.createdAt || 0).getTime();
-      } else {
-        const rawA = a[sortConfig.key as keyof TaskType];
-        const rawB = b[sortConfig.key as keyof TaskType];
-        aVal = typeof rawA === "string" || typeof rawA === "number" ? rawA : (rawA ? String(rawA) : "");
-        bVal = typeof rawB === "string" || typeof rawB === "number" ? rawB : (rawB ? String(rawB) : "");
-      }
-      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [safeTasks, search, statusFilter, priorityFilter, sortConfig]);
-
-  const totalPages = Math.max(1, Math.ceil(filteredTasks.length / rowsPerPage));
-  const paginatedTasks = useMemo(() => {
-    return filteredTasks.slice(
-      (currentPage - 1) * rowsPerPage,
-      currentPage * rowsPerPage
-    );
-  }, [filteredTasks, currentPage, rowsPerPage]);
+  // Server-side filtered and paginated tasks
+  const filteredTasks = safeTasks;
+  const paginatedTasks = safeTasks;
+  const totalTasks = data?.pagination?.total ?? safeTasks.length;
+  const totalPages = data?.pagination?.totalPages ?? Math.max(1, Math.ceil(totalTasks / rowsPerPage));
 
   // Pagination navigation helpers
   const goToFirstPage = useCallback(() => setCurrentPage(1), []);
@@ -361,7 +322,7 @@ export function useTasksData(): UseTasksDataReturn {
     toggleSelectTask,
     filteredTasks,
     paginatedTasks,
-    totalTasks: filteredTasks.length,
+    totalTasks,
     exportCSV,
     isTaskOverdue,
     formatDate,

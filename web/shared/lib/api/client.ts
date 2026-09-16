@@ -30,6 +30,115 @@ const client = axios.create({
   withCredentials: true,
 });
 
+// ─── In-Memory Auth Session Cache ───────────────────────────────────────────
+let cachedAccessToken: string | null = null;
+let sessionInitPromise: Promise<string | null> | null = null;
+let isAuthListenerInitialized = false;
+
+export function setCachedAccessToken(token: string | null): void {
+  cachedAccessToken = token;
+}
+
+export function clearCachedAccessToken(): void {
+  cachedAccessToken = null;
+}
+
+export function getCachedAccessToken(): string | null {
+  return cachedAccessToken;
+}
+
+function extractTokenFromCookie(): string | null {
+  if (typeof document === "undefined") return null;
+  try {
+    const match = document.cookie.match(/sb-[^=]+-auth-token=([^;]+)/);
+    if (match) {
+      const raw = decodeURIComponent(match[1]);
+      const cleaned = raw.startsWith("base64-") ? atob(raw.slice(7)) : raw;
+      const parsed = JSON.parse(cleaned);
+      if (parsed?.access_token && typeof parsed.access_token === "string") {
+        return parsed.access_token;
+      }
+    }
+  } catch {
+    // Ignore cookie parse error
+  }
+  return null;
+}
+
+function ensureAuthListener(): void {
+  if (typeof window === "undefined" || isAuthListenerInitialized) return;
+  isAuthListenerInitialized = true;
+
+  try {
+    const supabase = createClient();
+    supabase.auth.onAuthStateChange((event, session) => {
+      if (event === "SIGNED_OUT") {
+        cachedAccessToken = null;
+      } else if (session?.access_token) {
+        cachedAccessToken = session.access_token;
+      } else {
+        cachedAccessToken = null;
+      }
+    });
+  } catch {
+    // Supabase client initialization fallback
+  }
+}
+
+// Subscribe to auth state changes immediately in browser context
+if (typeof window !== "undefined") {
+  ensureAuthListener();
+}
+
+/**
+ * Retrieve the current access token:
+ * 1. Synchronously from memory cache if already populated (0ms fast path).
+ * 2. Synchronously from auth cookie if present during cold load.
+ * 3. Asynchronously via a deduplicated single-flight Supabase getSession() promise if cache is cold.
+ */
+async function getOrFetchAccessToken(): Promise<string | null> {
+  // 1. In-memory cache (0ms synchronous return)
+  if (cachedAccessToken) {
+    return cachedAccessToken;
+  }
+
+  // 2. Cookie extraction fallback for immediate cold start
+  const cookieToken = extractTokenFromCookie();
+  if (cookieToken) {
+    cachedAccessToken = cookieToken;
+    ensureAuthListener();
+    return cookieToken;
+  }
+
+  // 3. Concurrency single-flight: if an initialization is already in flight, await it
+  if (sessionInitPromise) {
+    return sessionInitPromise;
+  }
+
+  // 4. Cold-start fallback: query Supabase getSession() once with a timeout safety
+  ensureAuthListener();
+  sessionInitPromise = (async () => {
+    try {
+      const supabase = createClient();
+      const sessionPromise = supabase.auth.getSession();
+      const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
+        setTimeout(() => resolve({ data: { session: null } }), 4000)
+      );
+      const {
+        data: { session },
+      } = await Promise.race([sessionPromise, timeoutPromise]);
+      cachedAccessToken = session?.access_token || null;
+      return cachedAccessToken;
+    } catch {
+      return null;
+    } finally {
+      sessionInitPromise = null;
+    }
+  })();
+
+  return sessionInitPromise;
+}
+
 // Add a request interceptor to attach the token and validate API URL
 client.interceptors.request.use(
   async (config: InternalAxiosRequestConfig) => {
@@ -52,30 +161,9 @@ client.interceptors.request.use(
       config.headers["X-Remember-Me"] = isRemembered ? "true" : "false";
 
       try {
-        const supabase = createClient();
-        const sessionPromise = supabase.auth.getSession();
-        const timeoutPromise = new Promise<{ data: { session: null } }>((resolve) =>
-          setTimeout(() => resolve({ data: { session: null } }), 4000)
-        );
-        const { data: { session } } = await Promise.race([sessionPromise, timeoutPromise]);
-        
-        if (session?.access_token) {
-          config.headers['Authorization'] = `Bearer ${session.access_token}`;
-        } else if (typeof document !== "undefined") {
-          // Synchronous fallback: extract access_token from Supabase auth cookie if getSession timed out
-          const match = document.cookie.match(/sb-[^=]+-auth-token=([^;]+)/);
-          if (match) {
-            try {
-              const raw = decodeURIComponent(match[1]);
-              const cleaned = raw.startsWith('base64-') ? atob(raw.slice(7)) : raw;
-              const parsed = JSON.parse(cleaned);
-              if (parsed?.access_token) {
-                config.headers['Authorization'] = `Bearer ${parsed.access_token}`;
-              }
-            } catch {
-              // Ignore cookie parse error
-            }
-          }
+        const token = await getOrFetchAccessToken();
+        if (token) {
+          config.headers["Authorization"] = `Bearer ${token}`;
         }
       } catch {
         // Continue request even if session retrieval failed
@@ -83,13 +171,13 @@ client.interceptors.request.use(
 
       // Allow browser and Axios to set correct multipart/form-data header with boundary
       if (config.data instanceof FormData && config.headers) {
-        if ('delete' in config.headers && typeof config.headers.delete === 'function') {
-          config.headers.delete('Content-Type');
-          config.headers.delete('content-type');
+        if ("delete" in config.headers && typeof config.headers.delete === "function") {
+          config.headers.delete("Content-Type");
+          config.headers.delete("content-type");
         } else {
           const rawHeaders = config.headers as Record<string, unknown>;
-          delete rawHeaders['Content-Type'];
-          delete rawHeaders['content-type'];
+          delete rawHeaders["Content-Type"];
+          delete rawHeaders["content-type"];
         }
       }
     }
@@ -137,6 +225,7 @@ client.interceptors.response.use(
           pathname === "/reset-password";
 
         if (isSessionExpiry && !isAuthPage) {
+          clearCachedAccessToken();
           try {
             const supabase = createClient();
             await supabase.auth.signOut();

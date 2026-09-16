@@ -1,5 +1,3 @@
-import Papa from 'papaparse';
-
 export const IMPORT_TEMPLATE_HEADERS = [
   "Full Name *",
   "Company",
@@ -32,6 +30,7 @@ export async function downloadSampleTemplate(type: 'csv' | 'xlsx' = 'csv') {
   const data = [IMPORT_TEMPLATE_HEADERS, ...SAMPLE_DATA];
   
   if (type === 'csv') {
+    const { default: Papa } = await import('papaparse');
     const csvContent = Papa.unparse(data);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -52,6 +51,7 @@ export async function downloadFailedRows(failedRows: any[], type: 'csv' | 'xlsx'
   if (failedRows.length === 0) return;
   
   if (type === 'csv') {
+    const { default: Papa } = await import('papaparse');
     const csvContent = Papa.unparse(failedRows);
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' });
     const link = document.createElement("a");
@@ -72,6 +72,7 @@ export async function parseFile(file: File): Promise<any[]> {
   const fileExtension = file.name.split('.').pop()?.toLowerCase();
   
   if (fileExtension === 'csv') {
+    const { default: Papa } = await import('papaparse');
     return new Promise((resolve, reject) => {
       Papa.parse(file, {
         header: true,

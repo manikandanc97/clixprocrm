@@ -7,7 +7,6 @@ import {
 } from "date-fns";
 import { ChevronLeft, ChevronRight, Users, Phone, CheckSquare } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 
 interface Summary {
   meetings: number;
@@ -103,11 +102,8 @@ function MiniCalendar({ selected, onSelect }: { selected: Date; onSelect: (d: Da
 
 export function CalendarSidebar({ currentDate, onDateSelect, summary }: CalendarSidebarProps) {
   return (
-    <motion.aside
-      initial={{ opacity: 0, x: -16 }}
-      animate={{ opacity: 1, x: 0 }}
-      transition={{ duration: 0.3 }}
-      className="hidden lg:flex w-[300px] xl:w-[320px] flex-shrink-0 flex-col bg-card rounded-xl shadow-sm border border-border/50 p-6 space-y-6 overflow-y-auto"
+    <aside
+      className="hidden lg:flex w-[300px] xl:w-[320px] flex-shrink-0 flex-col bg-card rounded-xl shadow-sm border border-border/50 p-6 space-y-6 overflow-y-auto animate-in fade-in slide-in-from-left-4 duration-300"
     >
       {/* Mini Calendar */}
       <div>
@@ -137,6 +133,6 @@ export function CalendarSidebar({ currentDate, onDateSelect, summary }: Calendar
           </div>
         </div>
       </div>
-    </motion.aside>
+    </aside>
   );
 }
