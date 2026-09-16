@@ -4,7 +4,6 @@ import React from "react";
 import { LucideIcon, Minus, ArrowUpRight, ArrowDownRight } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 import { Skeleton } from "@/shared/ui/skeleton";
-import { motion } from "framer-motion";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 /**
  * Architectural Rule — Metric Card Usage:
@@ -414,15 +413,14 @@ export const CRMMetricCard = ({
     : undefined;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 8 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.25, delay, ease: [0.25, 0.46, 0.45, 0.94] }}
+    <div
+      style={delay ? { animationDelay: `${delay * 1000}ms` } : undefined}
       className={cn(
         // Base container: pill-rounded, soft pastel surface with clean border
         "group relative overflow-hidden min-w-0 flex flex-col justify-between select-none",
         "rounded-2xl sm:rounded-[22px] p-5 sm:p-5.5",
         "border shadow-xs hover:shadow-md transition-all duration-300 hover:-translate-y-0.5",
+        "animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both",
         config.bgClass,
         config.borderClass,
         className
@@ -512,6 +510,6 @@ export const CRMMetricCard = ({
           </div>
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };

@@ -169,11 +169,11 @@ export function CalendarGrid({ events, currentDate, view, onEventClick, onViewCh
                 <div className="flex-1 space-y-2 relative">
                   <div className="absolute left-[-12px] top-1 bottom-1 w-px bg-border/50" />
                   {dayEvents.map(ev => (
-                    <motion.button
+                    <button
                       key={ev.id}
-                      whileHover={{ x: 2 }}
+                      type="button"
                       onClick={() => onEventClick(ev)}
-                      className="w-full text-left group"
+                      className="w-full text-left group hover:translate-x-0.5 transition-transform"
                     >
                       <div className={cn(
                         "absolute -left-[18px] mt-3 w-2.5 h-2.5 rounded-full border-2 border-background",
@@ -198,7 +198,7 @@ export function CalendarGrid({ events, currentDate, view, onEventClick, onViewCh
                           </p>
                         )}
                       </div>
-                    </motion.button>
+                    </button>
                   ))}
                 </div>
               </motion.div>

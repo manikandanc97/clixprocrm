@@ -129,11 +129,9 @@ export function DashboardWidgetWrapper({
   const skeletonFallback = renderSkeleton();
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, delay, ease: "easeOut" }}
-      className={cn("min-h-[200px]", className)}
+    <div
+      style={delay ? { animationDelay: `${delay * 1000}ms` } : undefined}
+      className={cn("min-h-[200px] animate-in fade-in slide-in-from-bottom-3 duration-300 fill-mode-both", className)}
     >
       <AnimatePresence>
         {isLoading ? (
@@ -183,6 +181,6 @@ export function DashboardWidgetWrapper({
           </motion.div>
         )}
       </AnimatePresence>
-    </motion.div>
+    </div>
   );
 }

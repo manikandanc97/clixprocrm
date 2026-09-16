@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CRMCard, EmptyState } from "@/shared/components/crm";
 import { CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import {
@@ -103,13 +102,11 @@ export default function UpcomingMeetings() {
           ) : (
             <div className="flex flex-col gap-3 overflow-y-auto custom-scrollbar">
               {meetings.slice(0, 3).map((meeting, index) => (
-                <motion.div
+                <div
                   key={meeting.id}
-                  initial={{ opacity: 0, y: 10 }}
-                  animate={{ opacity: 1, y: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 + index * 0.1 }}
+                  style={{ animationDelay: `${100 + index * 100}ms` }}
                   onClick={() => handleMeetingClick(meeting.title)}
-                  className={`group relative flex flex-col sm:flex-row items-center sm:items-center gap-4 p-4 rounded-xl border transition-all duration-500 cursor-pointer overflow-hidden
+                  className={`group relative flex flex-col sm:flex-row items-center sm:items-center gap-4 p-4 rounded-xl border transition-all duration-500 cursor-pointer overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both
                     ${
                       meeting.isToday
                         ? "bg-gradient-to-br from-card to-info/5 border-info/20 shadow-premium-sm hover:shadow-premium hover:border-info/40"
@@ -220,7 +217,7 @@ export default function UpcomingMeetings() {
                       )}
                     </div>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}

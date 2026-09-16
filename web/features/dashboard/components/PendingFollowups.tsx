@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CRMCard, EmptyState } from "@/shared/components/crm";
 import { CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { CheckSquare, ArrowRight, Clock, AlertCircle } from "lucide-react";
@@ -59,12 +58,10 @@ export default function PendingFollowups({ data: initialData }: { data?: TasksDa
               <>
                 <div className="space-y-4">
                   {pendingTasks.slice(0, 3).map((task, index) => (
-                    <motion.div 
+                    <div 
                       key={task.id}
-                      initial={{ opacity: 0, x: -10 }}
-                      animate={{ opacity: 1, x: 0 }}
-                      transition={{ duration: 0.4, delay: 0.1 + (index * 0.05) }}
-                      className="group flex items-start gap-4 p-3 -mx-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer"
+                      style={{ animationDelay: `${100 + index * 50}ms` }}
+                      className="group flex items-start gap-4 p-3 -mx-3 rounded-xl hover:bg-muted/50 transition-colors cursor-pointer animate-in fade-in slide-in-from-left-2 duration-300 fill-mode-both"
                     >
                       <div className="mt-0.5">
                         <div className={`w-5 h-5 rounded border-2 flex items-center justify-center transition-colors ${
@@ -85,7 +82,7 @@ export default function PendingFollowups({ data: initialData }: { data?: TasksDa
                       <div className="opacity-0 group-hover:opacity-100 -translate-x-2 group-hover:translate-x-0 transition-all duration-300">
                         <ArrowRight className="w-4 h-4 text-primary" />
                       </div>
-                    </motion.div>
+                    </div>
                   ))}
                 </div>
               </>

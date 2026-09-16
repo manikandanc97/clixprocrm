@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CRMCard, EmptyState } from "@/shared/components/crm";
 import { CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Flame, ArrowUpRight, CheckCircle2 } from "lucide-react";
@@ -39,12 +38,10 @@ export default function HotLeads() {
           ) : (
             <div className="space-y-5">
               {leads.map((lead, index) => (
-                <motion.div
+                <div
                   key={lead.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
-                  className="group flex items-center justify-between"
+                  style={{ animationDelay: `${100 + index * 50}ms` }}
+                  className="group flex items-center justify-between animate-in fade-in slide-in-from-left-2 duration-300 fill-mode-both"
                 >
                   <div className="flex items-center gap-3 cursor-pointer">
                     <div className="relative">
@@ -73,7 +70,7 @@ export default function HotLeads() {
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}

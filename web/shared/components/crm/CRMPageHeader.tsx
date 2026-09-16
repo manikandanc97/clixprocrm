@@ -5,7 +5,6 @@ import Link from "next/link";
 import { ChevronRight, Loader2, type LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export interface CRMPageHeaderAction {
@@ -133,12 +132,7 @@ export const CRMPageHeader = ({
 
   return (
     <header className={cn("flex flex-col justify-between gap-3 sm:flex-row sm:items-center", className)}>
-      <motion.div
-        initial={{ opacity: 0, x: -16 }}
-        animate={{ opacity: 1, x: 0 }}
-        transition={{ duration: 0.2 }}
-        className="flex items-start sm:items-center gap-3 min-w-0"
-      >
+      <div className="flex items-start sm:items-center gap-3 min-w-0 animate-in fade-in slide-in-from-left-4 duration-200">
         {Icon && (
           <div
             data-animate-target="true"
@@ -175,15 +169,10 @@ export const CRMPageHeader = ({
             </div>
           )}
         </div>
-      </motion.div>
+      </div>
 
       {hasActions && (
-        <motion.div
-          initial={{ opacity: 0, x: 16 }}
-          animate={{ opacity: 1, x: 0 }}
-          transition={{ duration: 0.2 }}
-          className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-2.5 shrink-0 justify-start sm:justify-end"
-        >
+        <div className="flex w-full flex-wrap items-center gap-2 sm:w-auto sm:gap-2.5 shrink-0 justify-start sm:justify-end animate-in fade-in slide-in-from-right-4 duration-200">
           {rightContent}
           {children}
 
@@ -196,7 +185,7 @@ export const CRMPageHeader = ({
             const isPrimary = index === actions.length - 1;
             return renderAction(action, index, isPrimary);
           })}
-        </motion.div>
+        </div>
       )}
     </header>
   );

@@ -1,7 +1,6 @@
 "use client";
 
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 
 interface CRMPageContainerProps {
   children: React.ReactNode;
@@ -9,7 +8,7 @@ interface CRMPageContainerProps {
   maxWidth?: string;
   /**
    * When true, the container does NOT apply `flex-1` and uses a plain div
-   * (no Framer Motion transform) so child sticky elements work correctly.
+   * (no CSS transform) so child sticky elements work correctly.
    * Use for pages that need a two-stage scroll:
    *   Stage 1 → outer page scrolls (KPI cards move away)
    *   Stage 2 → inner table body scrolls
@@ -41,14 +40,9 @@ export const CRMPageContainer = ({
   }
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 10 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.4, ease: "easeOut" }}
-      className={baseClass}
-    >
+    <div className={cn(baseClass, "animate-in fade-in slide-in-from-bottom-2 duration-300")}>
       {children}
-    </motion.div>
+    </div>
   );
 };
 

@@ -2,7 +2,6 @@
 
 import { LucideIcon } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 
 interface TimelineItem {
   id: string | number;
@@ -28,12 +27,10 @@ export const ActivityTimeline = ({ items, className }: ActivityTimelineProps) =>
       {items.map((item, index) => {
         const Icon = item.icon || (() => <div className="w-2 h-2 rounded-full bg-current" />);
         return (
-          <motion.div
+          <div
             key={item.id}
-            initial={{ opacity: 0, x: -10 }}
-            animate={{ opacity: 1, x: 0 }}
-            transition={{ delay: index * 0.1 }}
-            className="relative flex gap-4"
+            style={{ animationDelay: `${index * 100}ms` }}
+            className="relative flex gap-4 animate-in fade-in slide-in-from-left-2 duration-300 fill-mode-both"
           >
             {/* Icon Container */}
             <div 
@@ -60,7 +57,7 @@ export const ActivityTimeline = ({ items, className }: ActivityTimelineProps) =>
                 {item.description}
               </p>
             </div>
-          </motion.div>
+          </div>
         );
       })}
     </div>

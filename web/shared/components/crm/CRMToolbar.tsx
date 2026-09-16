@@ -5,7 +5,6 @@ import { Search, Filter, X } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Button } from "@/shared/ui/button";
 import { cn } from "@/shared/lib/utils";
-import { motion } from "framer-motion";
 import { ViewToggle, ViewOption } from "./ViewToggle";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
@@ -69,13 +68,10 @@ export const CRMToolbar = ({
   const hasSearch = typeof setSearchQuery === "function";
 
   return (
-    <motion.div
+    <div
       ref={toolbarRef}
-      initial={{ opacity: 0, y: 4 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.15 }}
       className={cn(
-        "crm-toolbar",
+        "crm-toolbar animate-in fade-in slide-in-from-bottom-1 duration-150",
         sticky && "sticky top-0 z-30 bg-card/95 backdrop-blur-md shadow-xs",
         className
       )}
@@ -152,6 +148,6 @@ export const CRMToolbar = ({
           />
         )}
       </div>
-    </motion.div>
+    </div>
   );
 };

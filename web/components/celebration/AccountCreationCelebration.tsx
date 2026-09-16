@@ -113,20 +113,6 @@ export function AccountCreationCelebration({
         <div className="relative z-20 flex flex-col items-center justify-center max-w-md w-full text-center px-4">
           {/* Top Status Icon */}
           <div className="relative flex items-center justify-center mb-6">
-            {!shouldReduceMotion && status !== "error" && (
-              <motion.div
-                animate={{
-                  scale: [1, 1.18, 1],
-                  opacity: [0.25, 0.5, 0.25],
-                }}
-                transition={{
-                  duration: 2.2,
-                  repeat: Infinity,
-                  ease: "easeInOut",
-                }}
-                className="absolute w-24 h-24 bg-emerald-500/25 rounded-full blur-xl"
-              />
-            )}
 
             <motion.div
               initial={{ scale: 0.9, opacity: 0 }}

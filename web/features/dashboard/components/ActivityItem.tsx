@@ -73,10 +73,9 @@ export const ActivityItem = ({ activity, index, onClick }: ActivityItemProps) =>
       initial={{ opacity: 0, x: -10 }}
       animate={{ opacity: 1, x: 0 }}
       exit={{ opacity: 0, scale: 0.95 }}
-      whileHover={{ backgroundColor: "rgba(var(--primary-rgb), 0.02)" }}
       transition={{ duration: 0.2 }}
       onClick={() => onClick(activity.title)}
-      className="flex items-start gap-5 group cursor-pointer relative z-10 py-2 px-3 -mx-3 rounded-xl transition-all duration-300"
+      className="flex items-start gap-5 group cursor-pointer relative z-10 py-2 px-3 -mx-3 rounded-xl transition-all duration-300 hover:bg-primary/[0.02]"
     >
       <div className={`h-11 w-11 rounded-xl ${variant.bg} ${variant.text} ${variant.border} border flex items-center justify-center shadow-sm group-hover:shadow-lg ${variant.glow} transition-all duration-500 shrink-0`}>
         <Icon className="w-5 h-5" />

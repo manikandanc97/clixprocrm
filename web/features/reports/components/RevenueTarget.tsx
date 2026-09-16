@@ -26,11 +26,8 @@ const RevenueTarget = ({ data, onOpenSettings }: RevenueTargetProps) => {
   const CurrencyBgIcon = CurrencyIcon;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.1 }}
-      className="min-w-0 h-full flex flex-col"
+    <div
+      className="min-w-0 h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
       <Card className="relative bg-primary text-primary-foreground rounded-2xl border border-primary/20 shadow-md overflow-hidden group min-w-0 h-full flex-1 flex flex-col justify-between select-none">
         {/* Large Decorative Translucent Currency Icon in Background */}
@@ -116,7 +113,7 @@ const RevenueTarget = ({ data, onOpenSettings }: RevenueTargetProps) => {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

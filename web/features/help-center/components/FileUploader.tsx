@@ -284,29 +284,23 @@ export function FileUploader({
 
                 {/* Animated Floating Badges and Central Icon */}
                 <div className="relative mb-6">
-                  <motion.div
-                    animate={{ y: [-4, 4, -4] }}
-                    transition={{ duration: 2.2, repeat: Infinity, ease: "easeInOut" }}
+                  <div
                     className="w-24 h-24 rounded-3xl bg-primary/20 border-2 border-primary/40 flex items-center justify-center shadow-xl shadow-primary/25"
                   >
                     <UploadCloud className="w-12 h-12 text-primary drop-shadow-md animate-pulse" />
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [4, -4, 4] }}
-                    transition={{ duration: 2.5, repeat: Infinity, ease: "easeInOut" }}
+                  </div>
+                  <div
                     className="absolute -top-2 -right-3 px-2 py-1 rounded-xl bg-emerald-500 text-white flex items-center gap-1 text-[11px] font-bold shadow-lg"
                   >
                     <ImageIcon className="w-3.5 h-3.5" />
                     <span>Images</span>
-                  </motion.div>
-                  <motion.div
-                    animate={{ y: [-3, 3, -3] }}
-                    transition={{ duration: 2.8, repeat: Infinity, ease: "easeInOut" }}
+                  </div>
+                  <div
                     className="absolute -bottom-2 -left-3 px-2 py-1 rounded-xl bg-indigo-600 text-white flex items-center gap-1 text-[11px] font-bold shadow-lg"
                   >
                     <Film className="w-3.5 h-3.5" />
                     <span>Videos</span>
-                  </motion.div>
+                  </div>
                 </div>
 
                 {/* Main Headline */}

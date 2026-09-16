@@ -5,7 +5,6 @@ import { PieChart, Pie, Cell, ResponsiveContainer, Tooltip as RechartsTooltip } 
 import { PieChart as PieChartIcon } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { LeadSourceType } from "@/shared/types/report";
-import { motion } from "framer-motion";
 import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
@@ -52,11 +51,8 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
   const hasData = chartData.length > 0 && total > 0;
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.15 }}
-      className="min-w-0 h-full flex flex-col"
+    <div
+      className="min-w-0 h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
       <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden group min-w-0 h-full flex flex-col flex-1">
         <CardHeader className="flex flex-row items-center justify-between p-5 pb-2 min-w-0">
@@ -159,7 +155,7 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
           </ChartContainer>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

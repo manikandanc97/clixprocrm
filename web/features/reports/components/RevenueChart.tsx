@@ -12,7 +12,6 @@ import {
 import { TrendingUp } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { RevenueChartPointType } from "@/shared/types/report";
-import { motion } from "framer-motion";
 import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 import { useCurrency } from "@/shared/hooks/use-currency";
 
@@ -29,11 +28,8 @@ const RevenueChart = ({ data, loading }: RevenueChartProps) => {
   const hasData = Boolean(data && data.some((d) => (d.total || 0) > 0));
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3 }}
-      className="min-w-0 h-full flex flex-col"
+    <div
+      className="min-w-0 h-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
       <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden group min-w-0 h-full flex-1 flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between p-5 pb-2">
@@ -131,7 +127,7 @@ const RevenueChart = ({ data, loading }: RevenueChartProps) => {
           </div>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

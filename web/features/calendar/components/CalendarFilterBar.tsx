@@ -1,7 +1,7 @@
 "use client";
 
 import React from "react";
-import { motion } from "framer-motion";
+
 import { Users, Phone, CheckSquare, Sparkles, Check, Filter } from "lucide-react";
 import { cn } from "@/shared/lib/utils";
 
@@ -109,13 +109,12 @@ export function CalendarFilterBar({
             const Icon = item.icon;
 
             return (
-              <motion.button
+              <button
                 key={item.key}
                 type="button"
-                whileTap={{ scale: 0.97 }}
                 onClick={() => onFilterChange(item.key, !isActive)}
                 className={cn(
-                  "group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150 cursor-pointer select-none",
+                  "group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150 cursor-pointer select-none active:scale-[0.97] transition-transform",
                   isActive
                     ? item.activeClass
                     : "bg-background/50 text-muted-foreground/60 border-border/40 hover:border-border hover:text-muted-foreground hover:bg-muted/40"
@@ -157,7 +156,7 @@ export function CalendarFilterBar({
                     {count}
                   </span>
                 )}
-              </motion.button>
+              </button>
             );
           })}
         </div>

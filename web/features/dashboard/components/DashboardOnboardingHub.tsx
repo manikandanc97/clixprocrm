@@ -2,7 +2,6 @@
 
 import React, { useState } from "react";
 import dynamic from "next/dynamic";
-import { motion } from "framer-motion";
 import { Sparkles, UserPlus, Upload, Plus } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
@@ -43,11 +42,8 @@ export default function DashboardOnboardingHub() {
   return (
     <div className="flex flex-col gap-3.5 sm:gap-4 w-full flex-1 min-h-0">
       {/* 1. Welcome Hero Banner with User Name */}
-      <motion.div
-        initial={{ opacity: 0, y: 10 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.35, ease: "easeOut" }}
-        className="relative w-full shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 sm:p-5 md:p-6 border border-white/10 shadow-xl"
+      <div
+        className="relative w-full shrink-0 overflow-hidden rounded-2xl bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 p-4 sm:p-5 md:p-6 border border-white/10 shadow-xl animate-in fade-in slide-in-from-bottom-2 duration-300"
       >
         {/* Ambient glow */}
         <div
@@ -92,7 +88,7 @@ export default function DashboardOnboardingHub() {
             </Button>
           </div>
         </div>
-      </motion.div>
+      </div>
 
       {/* 2. Clean Centered Empty State Card — dynamically aligns with bottom of sidebar */}
       <EmptyState

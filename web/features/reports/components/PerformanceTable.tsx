@@ -14,7 +14,6 @@ import {
 } from "@/shared/components/crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { Card, CardHeader, CardTitle, CardDescription, CardContent } from "@/shared/ui/card";
-import { motion } from "framer-motion";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { getInitials } from "@/shared/utils/formatters";
 
@@ -29,11 +28,8 @@ const PerformanceTable = ({ performance, onViewAll }: PerformanceTableProps) => 
   const safeData = Array.isArray(performance) ? performance : [];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.4 }}
-      className="w-full flex flex-col"
+    <div
+      className="w-full flex flex-col animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
       <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden w-full flex flex-col">
         <CardHeader className="flex flex-row items-center justify-between p-5 pb-3">
@@ -139,7 +135,7 @@ const PerformanceTable = ({ performance, onViewAll }: PerformanceTableProps) => 
           </CRMDataTable>
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

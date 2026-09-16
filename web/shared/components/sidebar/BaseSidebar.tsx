@@ -64,11 +64,11 @@ function MobileNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: I
   const Icon = item.icon;
 
   return (
-    <motion.div
-      whileTap={{ scale: 0.98 }}
+    <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => setClickKey((c) => c + 1)}
+      className="active:scale-[0.98] transition-transform"
     >
       <Link
         href={item.href || "#"}
@@ -107,7 +107,7 @@ function MobileNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: I
         />
         <span className="truncate flex-1 z-10">{item.title}</span>
       </Link>
-    </motion.div>
+    </div>
   );
 }
 
@@ -136,16 +136,15 @@ function MobileExpandableNavItem({
 
   return (
     <div className="flex flex-col">
-      <motion.button
+      <button
         type="button"
-        whileTap={{ scale: 0.98 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => {
           setClickKey((c) => c + 1);
           setIsOpen((prev) => !prev);
         }}
-        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer ${
+        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer active:scale-[0.98] transition-transform ${
           isAnyChildActive
             ? "text-sidebar-foreground font-semibold"
             : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
@@ -169,7 +168,7 @@ function MobileExpandableNavItem({
             isOpen ? "rotate-90" : "rotate-0"
           }`}
         />
-      </motion.button>
+      </button>
 
       <AnimatePresence initial={false}>
         {isOpen && (
@@ -220,11 +219,11 @@ function DesktopCollapsedNavItem({ item, isActive, themeClasses, activeLayoutIdP
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <motion.div
-          whileTap={{ scale: 0.96 }}
+        <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => setClickKey((c) => c + 1)}
+          className="active:scale-[0.96] transition-transform"
         >
           <Link
             href={item.href || "#"}
@@ -273,7 +272,7 @@ function DesktopCollapsedNavItem({ item, isActive, themeClasses, activeLayoutIdP
               {item.title}
             </span>
           </Link>
-        </motion.div>
+        </div>
       </TooltipTrigger>
       <TooltipContent
         side="right"
@@ -305,11 +304,11 @@ function DesktopCollapsedExpandableItem({
   return (
     <Tooltip>
       <TooltipTrigger asChild>
-        <motion.div
-          whileTap={{ scale: 0.96 }}
+        <div
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => setClickKey((c) => c + 1)}
+          className="active:scale-[0.96] transition-transform"
         >
           <Link
             href={item.href || item.children?.[0]?.href || "#"}
@@ -358,7 +357,7 @@ function DesktopCollapsedExpandableItem({
               {item.title}
             </span>
           </Link>
-        </motion.div>
+        </div>
       </TooltipTrigger>
       <TooltipContent
         side="right"
@@ -377,11 +376,11 @@ function DesktopExpandedNavItem({ item, isActive, themeClasses, activeLayoutIdPr
   const Icon = item.icon;
 
   return (
-    <motion.div
-      whileTap={{ scale: 0.98 }}
+    <div
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => setClickKey((c) => c + 1)}
+      className="active:scale-[0.98] transition-transform"
     >
       <Link
         href={item.href || "#"}
@@ -422,7 +421,7 @@ function DesktopExpandedNavItem({ item, isActive, themeClasses, activeLayoutIdPr
         />
         <span className="truncate flex-1 z-10">{item.title}</span>
       </Link>
-    </motion.div>
+    </div>
   );
 }
 
@@ -451,16 +450,15 @@ function DesktopExpandedExpandableItem({
 
   return (
     <div className="flex flex-col">
-      <motion.button
+      <button
         type="button"
-        whileTap={{ scale: 0.98 }}
         onMouseEnter={() => setIsHovered(true)}
         onMouseLeave={() => setIsHovered(false)}
         onClick={() => {
           setClickKey((c) => c + 1);
           setIsOpen((prev) => !prev);
         }}
-        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer ${
+        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer active:scale-[0.98] transition-transform ${
           isAnyChildActive
             ? "text-sidebar-foreground font-semibold"
             : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
@@ -486,7 +484,7 @@ function DesktopExpandedExpandableItem({
             isOpen ? "rotate-90" : "rotate-0"
           }`}
         />
-      </motion.button>
+      </button>
 
       <AnimatePresence initial={false}>
         {isOpen && (

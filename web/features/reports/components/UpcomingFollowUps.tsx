@@ -4,7 +4,6 @@ import React from "react";
 import { Calendar, CheckCircle2, Clock } from "lucide-react";
 import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/shared/ui/card";
 import { UpcomingFollowUpType } from "@/shared/types/report";
-import { motion } from "framer-motion";
 import { formatDate } from "@/shared/utils/formatters";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
@@ -17,11 +16,8 @@ const UpcomingFollowUps = ({ data }: UpcomingFollowUpsProps) => {
   const safeData = Array.isArray(data) ? data : [];
 
   return (
-    <motion.div
-      initial={{ opacity: 0, y: 15 }}
-      animate={{ opacity: 1, y: 0 }}
-      transition={{ duration: 0.3, delay: 0.35 }}
-      className="h-full flex flex-col min-w-0"
+    <div
+      className="h-full flex flex-col min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-300"
     >
       <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden h-full flex flex-col flex-1">
         <CardHeader className="flex flex-row items-center justify-between p-5 pb-3">
@@ -69,7 +65,7 @@ const UpcomingFollowUps = ({ data }: UpcomingFollowUpsProps) => {
           )}
         </CardContent>
       </Card>
-    </motion.div>
+    </div>
   );
 };
 

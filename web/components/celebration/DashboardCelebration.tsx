@@ -271,15 +271,6 @@ export function DashboardCelebration() {
         style={{ width: "100%", height: "100%" }}
       />
 
-      {/* Subtle Ambient Radial Glow (Fades out quickly) */}
-      {!shouldReduceMotion && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: [0, 0.4, 0], scale: [0.9, 1.1, 1.15] }}
-          transition={{ duration: 2.4, ease: "easeOut" }}
-          className="pointer-events-none absolute left-1/2 top-1/4 -translate-x-1/2 -translate-y-1/2 w-[650px] h-[350px] bg-gradient-to-tr from-emerald-500/25 via-teal-400/20 to-indigo-500/20 blur-[110px] rounded-full"
-        />
-      )}
 
       {/* Floating "Workspace Activated!" Banner */}
       <AnimatePresence>

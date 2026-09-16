@@ -1,6 +1,5 @@
 "use client";
 
-import { motion } from "framer-motion";
 import { CRMCard, EmptyState } from "@/shared/components/crm";
 import { CardContent, CardHeader, CardTitle } from "@/shared/ui/card";
 import { Users, ArrowUpRight } from "lucide-react";
@@ -42,12 +41,10 @@ export default function RecentCustomers({ data: initialData }: { data?: Customer
           ) : (
             <div className="space-y-5">
               {recentCustomers.map((customer, index) => (
-                <motion.div
+                <div
                   key={customer.id}
-                  initial={{ opacity: 0, x: -10 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.4, delay: 0.1 + index * 0.05 }}
-                  className="group flex items-center justify-between cursor-pointer"
+                  style={{ animationDelay: `${100 + index * 50}ms` }}
+                  className="group flex items-center justify-between cursor-pointer animate-in fade-in slide-in-from-left-2 duration-300 fill-mode-both"
                   onClick={() => router.push("/customers")}
                 >
                   <div className="flex items-center gap-3">
@@ -67,7 +64,7 @@ export default function RecentCustomers({ data: initialData }: { data?: Customer
                       <ArrowUpRight className="w-4 h-4" />
                     </button>
                   </div>
-                </motion.div>
+                </div>
               ))}
             </div>
           )}
