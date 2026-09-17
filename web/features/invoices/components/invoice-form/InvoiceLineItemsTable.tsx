@@ -50,15 +50,15 @@ export function InvoiceLineItemsTable({
 
       <div className="border border-border/80 rounded-xl overflow-x-auto overflow-y-hidden shadow-xs">
         <table className="w-full text-xs">
-          <thead className="bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 text-foreground font-bold">
+          <thead className="bg-muted border-b border-border text-foreground font-bold">
             <tr className="h-10">
-              <th className="py-2 px-3 text-left w-[36%] border-r border-emerald-500/15">Item & Description</th>
-              <th className="py-2 px-2 text-center w-[12%] border-r border-emerald-500/15">Qty / Unit</th>
-              <th className="py-2 px-2 text-right w-[16%] border-r border-emerald-500/15">Unit Price (₹)</th>
-              <th className="py-2 px-2 text-right w-[12%] border-r border-emerald-500/15">Disc %</th>
-              <th className="py-2 px-2 text-right w-[10%] border-r border-emerald-500/15">GST %</th>
-              <th className="py-2 px-3 text-right w-[14%] border-r border-emerald-500/15">Total</th>
-              <th className="py-2 px-2 w-[4%]"></th>
+              <th className="py-2 px-3 text-left w-[36%] border-r border-border/60 bg-muted">Item & Description</th>
+              <th className="py-2 px-2 text-center w-[12%] border-r border-border/60 bg-muted">Qty / Unit</th>
+              <th className="py-2 px-2 text-right w-[16%] border-r border-border/60 bg-muted">Unit Price (₹)</th>
+              <th className="py-2 px-2 text-right w-[12%] border-r border-border/60 bg-muted">Disc %</th>
+              <th className="py-2 px-2 text-right w-[10%] border-r border-border/60 bg-muted">GST %</th>
+              <th className="py-2 px-3 text-right w-[14%] border-r border-border/60 bg-muted">Total</th>
+              <th className="py-2 px-2 w-[4%] bg-muted"></th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/60">

@@ -56,7 +56,7 @@ export const crmControl = {
 export const crmState = {
   resting: "border-border bg-card shadow-xs",
   hover: "hover:border-primary/40 hover:shadow-card-hover",
-  active: "active:scale-[0.98] active:bg-muted",
+  active: "active:bg-muted/80",
   focusVisible:
     "focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2",
   disabled: "disabled:opacity-50 disabled:pointer-events-none disabled:cursor-not-allowed",

@@ -48,33 +48,45 @@ async function seedAdminForEmail(
     console.warn(`Direct auth.users query notice: ${msg}`);
   }
 
-  // 2. If not found via direct DB, try Supabase Admin API
-  if (!authUserId && supabase) {
+  // 2. Synchronize Supabase Admin auth credentials (password, metadata, confirmation)
+  if (supabase) {
     try {
-      const { data: listData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
-      const existing = listData?.users?.find(
-        (u: { email?: string }) => u.email?.toLowerCase() === email.toLowerCase(),
-      );
-
-      if (existing) {
-        authUserId = existing.id;
+      if (authUserId) {
         if (password) {
           await supabase.auth.admin.updateUserById(authUserId, {
             password,
             email_confirm: true,
             user_metadata: { name, isSuperAdmin: true },
           });
+          console.log(`✓ Synchronized Supabase auth password for: ${email}`);
         }
-      } else if (password) {
-        const { data, error } = await supabase.auth.admin.createUser({
-          email,
-          password,
-          email_confirm: true,
-          user_metadata: { name, isSuperAdmin: true },
-        });
-        if (!error && data?.user) {
-          authUserId = data.user.id;
-          console.log(`Created Supabase auth user: ${email} (${authUserId})`);
+      } else {
+        const { data: listData } = await supabase.auth.admin.listUsers({ perPage: 1000 });
+        const existing = listData?.users?.find(
+          (u: { email?: string }) => u.email?.toLowerCase() === email.toLowerCase(),
+        );
+
+        if (existing) {
+          authUserId = existing.id;
+          if (password) {
+            await supabase.auth.admin.updateUserById(authUserId, {
+              password,
+              email_confirm: true,
+              user_metadata: { name, isSuperAdmin: true },
+            });
+            console.log(`✓ Synchronized Supabase auth password for: ${email}`);
+          }
+        } else if (password) {
+          const { data, error } = await supabase.auth.admin.createUser({
+            email,
+            password,
+            email_confirm: true,
+            user_metadata: { name, isSuperAdmin: true },
+          });
+          if (!error && data?.user) {
+            authUserId = data.user.id;
+            console.log(`Created Supabase auth user: ${email} (${authUserId})`);
+          }
         }
       }
     } catch (apiErr: unknown) {

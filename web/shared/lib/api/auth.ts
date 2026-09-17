@@ -1,4 +1,4 @@
-import client from "./client";
+import client, { setCachedAccessToken } from "./client";
 import { createClient } from "@/lib/supabase/client";
 
 interface LoginPayload {
@@ -83,7 +83,7 @@ export const loginUser = async (data: LoginPayload) => {
   }
 
   const supabase = createClient();
-  const { error } = await supabase.auth.signInWithPassword({
+  const { data: authData, error } = await supabase.auth.signInWithPassword({
     email: data.email,
     password: data.password,
   });
@@ -95,6 +95,10 @@ export const loginUser = async (data: LoginPayload) => {
       sessionStorage.removeItem("clixpro_session_active");
     }
     throw new Error(error.message);
+  }
+
+  if (authData?.session?.access_token) {
+    setCachedAccessToken(authData.session.access_token);
   }
 
   // Fetch current user details to return the expected AuthResponse format
@@ -602,6 +606,27 @@ export const signInWithGoogle = async (
 
     activeOAuthCleanup = cleanup;
 
+    const safeClosePopup = (targetPopup: Window | null) => {
+      if (!targetPopup) return;
+      try {
+        if (!targetPopup.closed) {
+          targetPopup.close();
+        }
+      } catch {
+        // Cross-Origin-Opener-Policy safe fallback
+      }
+    };
+
+    const isPopupClosedSafe = (targetPopup: Window | null): boolean => {
+      if (!targetPopup) return true;
+      try {
+        return Boolean(targetPopup.closed);
+      } catch {
+        // If COOP blocks access to .closed, window is on a cross-origin auth domain and active
+        return false;
+      }
+    };
+
     const processPayload = (payload: { type?: string; target?: string; error?: string }) => {
       if (!payload || resolved) return;
 
@@ -612,11 +637,7 @@ export const signInWithGoogle = async (
           localStorage.setItem("has_session", "1");
           localStorage.removeItem("clixprocrm_google_auth_event");
         }
-        try {
-          popup?.close();
-        } catch {
-          // Ignore popup close error
-        }
+        safeClosePopup(popup);
         resolve({ success: true, target: payload.target || "/dashboard" });
       } else if (payload.type === "CLIXPROCRM_GOOGLE_AUTH_ERROR") {
         resolved = true;
@@ -624,11 +645,7 @@ export const signInWithGoogle = async (
         if (typeof window !== "undefined") {
           localStorage.removeItem("clixprocrm_google_auth_event");
         }
-        try {
-          popup?.close();
-        } catch {
-          // Ignore popup close error
-        }
+        safeClosePopup(popup);
         reject(new Error(payload.error || "Authentication failed"));
       }
     };
@@ -661,22 +678,18 @@ export const signInWithGoogle = async (
 
     // Periodically check if the user manually closed the popup window without completing auth
     closedCheckInterval = setInterval(() => {
-      try {
-        if (popup && popup.closed) {
-          if (closedCheckInterval) {
-            clearInterval(closedCheckInterval);
-            closedCheckInterval = null;
-          }
-          // Give a short grace period (1000ms) in case postMessage/storage event arrives at the exact same moment
-          setTimeout(() => {
-            if (!resolved) {
-              cleanup();
-              reject(new Error("Google sign-in was cancelled."));
-            }
-          }, 1000);
+      if (isPopupClosedSafe(popup)) {
+        if (closedCheckInterval) {
+          clearInterval(closedCheckInterval);
+          closedCheckInterval = null;
         }
-      } catch {
-        // Ignore cross-origin access errors
+        // Give a short grace period (1000ms) in case postMessage/storage event arrives at the exact same moment
+        setTimeout(() => {
+          if (!resolved) {
+            cleanup();
+            reject(new Error("Google sign-in was cancelled."));
+          }
+        }, 1000);
       }
     }, 600);
 
@@ -684,11 +697,7 @@ export const signInWithGoogle = async (
     timeoutTimer = setTimeout(() => {
       if (!resolved) {
         cleanup();
-        try {
-          popup?.close();
-        } catch {
-          // Ignore close error
-        }
+        safeClosePopup(popup);
         reject(new Error("Google sign-in timed out. Please check your connection or try again."));
       }
     }, 45 * 1000);

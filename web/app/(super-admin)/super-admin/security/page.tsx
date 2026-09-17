@@ -323,24 +323,24 @@ export default function SecurityCenterPage() {
               <col style={{ width: "160px" }} />
               <col style={{ width: "90px" }} />
             </colgroup>
-            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+            <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
               <tr className="text-xs font-bold text-foreground">
-                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
                   <span>Incident #</span>
                 </th>
-                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
                   <span>Severity</span>
                 </th>
-                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
                   <span>Status</span>
                 </th>
-                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
                   <span>Title</span>
                 </th>
-                <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
                   <span>Detected</span>
                 </th>
-                <th className="w-24 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+                <th className="w-24 px-4 py-3.5 text-right bg-muted">
                   <span>Actions</span>
                 </th>
               </tr>

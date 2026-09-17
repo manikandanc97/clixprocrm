@@ -119,10 +119,10 @@ export function TicketHistoryTable({
           <col style={{ width: "150px" }} />
           <col style={{ width: "64px" }} />
         </colgroup>
-        <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+        <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
           <tr className="text-xs font-bold text-foreground">
             {/* Checkbox Header */}
-            <th className="w-12 px-4 py-3.5 text-center bg-emerald-50/80 dark:bg-emerald-950/40 border-r border-emerald-500/15">
+            <th className="w-12 px-4 py-3.5 text-center bg-muted border-r border-border/60">
               <input
                 type="checkbox"
                 checked={
@@ -152,7 +152,7 @@ export function TicketHistoryTable({
 
             {/* Ticket ID */}
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => setSort("ticketId")}
             >
               <div className="flex items-center gap-1.5">
@@ -167,7 +167,7 @@ export function TicketHistoryTable({
 
             {/* Subject */}
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => setSort("subject")}
             >
               <div className="flex items-center gap-1.5">
@@ -182,7 +182,7 @@ export function TicketHistoryTable({
 
             {/* Requester */}
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => setSort("userName")}
             >
               <div className="flex items-center gap-1.5">
@@ -197,7 +197,7 @@ export function TicketHistoryTable({
 
             {/* Category */}
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => setSort("category")}
             >
               <div className="flex items-center gap-1.5">
@@ -212,7 +212,7 @@ export function TicketHistoryTable({
 
             {/* Priority */}
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => setSort("priority")}
             >
               <div className="flex items-center gap-1.5">
@@ -227,7 +227,7 @@ export function TicketHistoryTable({
 
             {/* Status */}
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => setSort("status")}
             >
               <div className="flex items-center gap-1.5">
@@ -242,7 +242,7 @@ export function TicketHistoryTable({
 
             {/* Created Date */}
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => setSort("createdAt")}
             >
               <div className="flex items-center gap-1.5">
@@ -256,7 +256,7 @@ export function TicketHistoryTable({
             </th>
 
             {/* Actions */}
-            <th className="w-16 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+            <th className="w-16 px-4 py-3.5 text-right bg-muted">
               <span className="sr-only">Actions</span>
             </th>
           </tr>

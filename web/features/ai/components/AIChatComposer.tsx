@@ -487,7 +487,7 @@ export function AIChatComposer({
                 <button
                   type="button"
                   onClick={onStop}
-                  className="w-7 h-7 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center shadow-xs transition-all cursor-pointer hover:scale-105 active:scale-95 shrink-0"
+                  className="w-7 h-7 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 flex items-center justify-center shadow-xs transition-colors cursor-pointer shrink-0"
                   title="Stop generation"
                 >
                   <Square className="w-3 h-3 fill-current" />
@@ -496,9 +496,9 @@ export function AIChatComposer({
                 <button
                   type="submit"
                   disabled={disabled || !input.trim()}
-                  className={`w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition-all shrink-0 ${
+                  className={`w-7 h-7 rounded-full flex items-center justify-center shadow-xs transition-colors shrink-0 ${
                     input.trim() && !disabled
-                      ? 'bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer hover:scale-105 active:scale-95'
+                      ? 'bg-primary hover:bg-primary/90 active:bg-primary/95 text-primary-foreground cursor-pointer'
                       : 'bg-muted text-muted-foreground/40 cursor-not-allowed'
                   }`}
                   title="Send message (Enter)"

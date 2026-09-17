@@ -208,7 +208,7 @@ export default function AIInsights() {
           {/* Footer */}
           <button 
             onClick={handleHubClick}
-            className="w-full mt-5 flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white bg-white/5 hover:bg-white/10 border border-white/10 rounded-lg transition-all active:scale-[0.98]"
+            className="w-full mt-5 flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-lg transition-colors cursor-pointer"
           >
             Intelligence Hub
             <ArrowRight className="w-3.5 h-3.5" />

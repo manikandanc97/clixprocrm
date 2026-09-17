@@ -96,12 +96,12 @@ export function SecOpsHealthTab({ healthRows }: SecOpsHealthTabProps) {
 
         <div className="overflow-x-auto">
           <table className="w-full text-left text-xs border-collapse min-w-[700px]">
-            <thead className="bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20">
+            <thead className="bg-muted border-b border-border">
               <tr className="text-foreground font-bold">
-                <th className="px-4 py-3 text-left border-r border-emerald-500/15">Service Subsystem</th>
-                <th className="px-4 py-3 text-left border-r border-emerald-500/15">Health Status</th>
-                <th className="px-4 py-3 text-left border-r border-emerald-500/15">Last Verified</th>
-                <th className="px-4 py-3 text-left">Operational Telemetry Detail</th>
+                <th className="px-4 py-3 text-left border-r border-border/60 bg-muted">Service Subsystem</th>
+                <th className="px-4 py-3 text-left border-r border-border/60 bg-muted">Health Status</th>
+                <th className="px-4 py-3 text-left border-r border-border/60 bg-muted">Last Verified</th>
+                <th className="px-4 py-3 text-left bg-muted">Operational Telemetry Detail</th>
               </tr>
             </thead>
             <tbody className="divide-y divide-border/40">

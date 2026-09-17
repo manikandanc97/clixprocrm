@@ -96,8 +96,8 @@ export function CalendarGrid({ events, currentDate, view, onEventClick, onViewCh
                           key={ev.id}
                           onClick={() => onEventClick(ev)}
                           className={cn(
-                            "w-full text-left text-[10px] font-semibold px-2 py-1 rounded-lg truncate border",
-                            "transition-all hover:opacity-80 hover:scale-[1.02] active:scale-100",
+                            "w-full text-left text-[10px] font-semibold px-2 py-1 rounded-lg truncate border cursor-pointer",
+                            "transition-opacity hover:opacity-80 active:opacity-90",
                             CHIP[ev.type] ?? CHIP.MEETING
                           )}
                         >

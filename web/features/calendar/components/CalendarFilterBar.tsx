@@ -114,7 +114,7 @@ export function CalendarFilterBar({
                 type="button"
                 onClick={() => onFilterChange(item.key, !isActive)}
                 className={cn(
-                  "group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-all duration-150 cursor-pointer select-none active:scale-[0.97] transition-transform",
+                  "group relative inline-flex items-center gap-2 px-3 py-1.5 rounded-lg text-xs font-medium border transition-colors duration-150 cursor-pointer select-none",
                   isActive
                     ? item.activeClass
                     : "bg-background/50 text-muted-foreground/60 border-border/40 hover:border-border hover:text-muted-foreground hover:bg-muted/40"

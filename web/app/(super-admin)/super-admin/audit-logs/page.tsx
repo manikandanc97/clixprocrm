@@ -284,10 +284,10 @@ export default function SuperAdminAuditLogsPage() {
               <col style={{ width: "170px" }} />
               <col style={{ width: "80px" }} />
             </colgroup>
-            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+            <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
               <tr className="text-xs font-bold text-foreground">
                 <th
-                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
                   onClick={() => handleSort("action", sortConfig.key === "action" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
                 >
                   <div className="flex items-center gap-1.5">
@@ -298,7 +298,7 @@ export default function SuperAdminAuditLogsPage() {
                   </div>
                 </th>
                 <th
-                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
                   onClick={() => handleSort("module", sortConfig.key === "module" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
                 >
                   <div className="flex items-center gap-1.5">
@@ -309,7 +309,7 @@ export default function SuperAdminAuditLogsPage() {
                   </div>
                 </th>
                 <th
-                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
                   onClick={() => handleSort("organization", sortConfig.key === "organization" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
                 >
                   <div className="flex items-center gap-1.5">
@@ -320,7 +320,7 @@ export default function SuperAdminAuditLogsPage() {
                   </div>
                 </th>
                 <th
-                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
                   onClick={() => handleSort("actor", sortConfig.key === "actor" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
                 >
                   <div className="flex items-center gap-1.5">
@@ -331,7 +331,7 @@ export default function SuperAdminAuditLogsPage() {
                   </div>
                 </th>
                 <th
-                  className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
                   onClick={() => handleSort("createdAt", sortConfig.key === "createdAt" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
                 >
                   <div className="flex items-center gap-1.5">
@@ -341,7 +341,7 @@ export default function SuperAdminAuditLogsPage() {
                     )}
                   </div>
                 </th>
-                <th className="w-20 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+                <th className="w-20 px-4 py-3.5 text-right bg-muted">
                   <span>Details</span>
                 </th>
               </tr>

@@ -225,7 +225,7 @@ function EmptyStateButton({
         variant={variant}
         disabled={act.disabled}
         className={cn(
-          "font-semibold transition-all duration-200 active:scale-[0.98]",
+          "font-semibold transition-colors duration-150",
           isPrimary
             ? "shadow-xs hover:shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground"
             : "hover:bg-muted/80 border-border/80 text-foreground",
@@ -245,7 +245,7 @@ function EmptyStateButton({
       variant={variant}
       disabled={act.disabled}
       className={cn(
-        "font-semibold transition-all duration-200 active:scale-[0.98]",
+        "font-semibold transition-colors duration-150",
         isPrimary
           ? "shadow-xs hover:shadow-sm bg-primary hover:bg-primary/90 text-primary-foreground"
           : "hover:bg-muted/80 border-border/80 text-foreground",

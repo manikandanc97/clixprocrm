@@ -62,11 +62,11 @@ export function BillingInvoiceViewModal({
 
           <div className="border border-border/60 rounded-xl overflow-hidden">
             <table className="w-full text-xs">
-              <thead className="bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 text-foreground font-bold">
+              <thead className="bg-muted border-b border-border text-foreground font-bold">
                 <tr className="h-10">
-                  <th className="py-2 px-3 text-left border-r border-emerald-500/15">Description</th>
-                  <th className="py-2 px-3 text-center border-r border-emerald-500/15">Seats</th>
-                  <th className="py-2 px-3 text-right">Amount</th>
+                  <th className="py-2 px-3 text-left border-r border-border/60 bg-muted">Description</th>
+                  <th className="py-2 px-3 text-center border-r border-border/60 bg-muted">Seats</th>
+                  <th className="py-2 px-3 text-right bg-muted">Amount</th>
                 </tr>
               </thead>
               <tbody className="divide-y divide-border/40">

@@ -129,7 +129,7 @@ export function ImportUploadStep({
           <Button
             type="button"
             size="sm"
-            className="group/btn rounded-xl font-semibold px-4 h-9 shadow-sm hover:shadow-md gap-1.5 bg-primary hover:bg-primary/90 text-primary-foreground transition-all duration-200 active:scale-95 cursor-pointer text-xs"
+            className="group/btn rounded-xl font-semibold px-4 h-9 shadow-xs hover:shadow-sm gap-1.5 bg-primary hover:bg-primary/90 active:bg-primary/95 text-primary-foreground transition-colors duration-150 cursor-pointer text-xs"
             onClick={(e) => {
               e.stopPropagation();
               fileInputRef.current?.click();
@@ -147,7 +147,7 @@ export function ImportUploadStep({
               e.stopPropagation();
               downloadSampleTemplate("csv");
             }}
-            className="group/btn rounded-xl font-medium px-3.5 h-9 bg-background hover:bg-muted/60 border-border text-foreground gap-1.5 transition-all duration-200 active:scale-95 cursor-pointer text-xs"
+            className="group/btn rounded-xl font-medium px-3.5 h-9 bg-background hover:bg-muted/60 active:bg-muted/80 border-border text-foreground gap-1.5 transition-colors duration-150 cursor-pointer text-xs"
           >
             <AppIcon
               name="download"
@@ -165,7 +165,7 @@ export function ImportUploadStep({
               e.stopPropagation();
               downloadSampleTemplate("xlsx");
             }}
-            className="group/btn rounded-xl font-medium px-2.5 h-9 hover:bg-muted/60 text-muted-foreground hover:text-foreground text-xs gap-1 transition-all duration-200 active:scale-95 cursor-pointer"
+            className="group/btn rounded-xl font-medium px-2.5 h-9 hover:bg-muted/60 active:bg-muted/80 text-muted-foreground hover:text-foreground text-xs gap-1 transition-colors duration-150 cursor-pointer"
             title="Download Excel format template"
           >
             <AppIcon

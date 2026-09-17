@@ -1,3 +1,8 @@
+import * as dns from 'dns'
+try {
+  dns.setDefaultResultOrder('ipv4first')
+} catch {}
+
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
@@ -230,15 +235,27 @@ export async function GET(request: Request) {
   }
   
   if (code) {
-    const supabase = await createClient()
-    const { error } = await supabase.auth.exchangeCodeForSession(code)
-    
-    if (error) {
-      console.error('Exchange code error:', error.message)
-      return sendResponse(false, error.message, true)
-    }
+    try {
+      const supabase = await createClient()
+      const { error } = await supabase.auth.exchangeCodeForSession(code)
+      
+      if (error) {
+        console.error('Exchange code error:', error.message)
+        const displayError = error.message === 'fetch failed'
+          ? 'Unable to communicate with Supabase Auth service. Please check connection and try again.'
+          : error.message
+        return sendResponse(false, displayError, true)
+      }
 
-    return sendResponse(true)
+      return sendResponse(true)
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message : String(err)
+      console.error('Exchange code exception:', msg)
+      const displayError = msg.includes('fetch failed')
+        ? 'Unable to reach auth server. Please try again.'
+        : msg
+      return sendResponse(false, displayError, true)
+    }
   }
 
   return sendResponse(false, 'No authentication code received', false)

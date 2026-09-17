@@ -5,24 +5,24 @@ import { Slot } from "radix-ui";
 import { cn } from "@/shared/lib/utils";
 
 const buttonVariants = cva(
-  "group group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-all duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 hover:scale-[1.01] active:scale-[0.98] motion-reduce:transition-none motion-reduce:transform-none motion-reduce:hover:scale-100 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
+  "group group/button inline-flex shrink-0 items-center justify-center gap-2 whitespace-nowrap rounded-md text-sm font-medium transition-colors duration-150 outline-none select-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 focus-visible:ring-offset-background disabled:pointer-events-none disabled:opacity-50 cursor-pointer [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
   {
     variants: {
       variant: {
         default:
-          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:scale-[0.98]",
+          "bg-primary text-primary-foreground shadow-xs hover:bg-primary/90 active:bg-primary/95",
         navy:
-          "bg-foreground text-background shadow-xs hover:bg-foreground/90 active:scale-[0.98]",
+          "bg-foreground text-background shadow-xs hover:bg-foreground/90 active:bg-foreground/95",
         secondary:
-          "border border-border/60 bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 active:scale-[0.98]",
+          "border border-border/60 bg-secondary text-secondary-foreground shadow-xs hover:bg-secondary/80 active:bg-secondary/90",
         outline:
-          "border border-border bg-background text-foreground shadow-xs hover:bg-muted hover:text-foreground active:scale-[0.98]",
+          "border border-border bg-background text-foreground shadow-xs hover:bg-muted hover:text-foreground active:bg-muted/80",
         ghost:
-          "text-muted-foreground hover:bg-muted hover:text-foreground active:scale-[0.98]",
+          "text-muted-foreground hover:bg-muted hover:text-foreground active:bg-muted/80",
         link: 
           "text-primary underline-offset-4 hover:underline",
         destructive:
-          "bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90 active:scale-[0.98]",
+          "bg-destructive text-destructive-foreground shadow-xs hover:bg-destructive/90 active:bg-destructive/95",
       },
       size: {
         default: "h-9 px-3.5 text-xs font-semibold",

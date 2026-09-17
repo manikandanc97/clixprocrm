@@ -353,7 +353,7 @@ export default function RegisterPage() {
         <Button
           type="submit"
           disabled={loading || googleLoading}
-          className="w-full h-10.5 rounded-xl font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 active:scale-[0.99] flex items-center justify-center gap-2 mt-2"
+          className="w-full h-10.5 rounded-xl font-semibold shadow-xs hover:shadow-sm transition-colors duration-150 flex items-center justify-center gap-2 mt-2"
         >
           {loading ? (
             <>

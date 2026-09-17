@@ -68,7 +68,7 @@ function MobileNavItem({ item, isActive, themeClasses, activeLayoutIdPrefix }: I
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => setClickKey((c) => c + 1)}
-      className="active:scale-[0.98] transition-transform"
+      className="cursor-pointer"
     >
       <Link
         href={item.href || "#"}
@@ -144,7 +144,7 @@ function MobileExpandableNavItem({
           setClickKey((c) => c + 1);
           setIsOpen((prev) => !prev);
         }}
-        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer active:scale-[0.98] transition-transform ${
+        className={`w-full flex items-center gap-3 px-3.5 py-2.5 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer ${
           isAnyChildActive
             ? "text-sidebar-foreground font-semibold"
             : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"
@@ -223,7 +223,7 @@ function DesktopCollapsedNavItem({ item, isActive, themeClasses, activeLayoutIdP
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => setClickKey((c) => c + 1)}
-          className="active:scale-[0.96] transition-transform"
+          className="cursor-pointer"
         >
           <Link
             href={item.href || "#"}
@@ -308,7 +308,7 @@ function DesktopCollapsedExpandableItem({
           onMouseEnter={() => setIsHovered(true)}
           onMouseLeave={() => setIsHovered(false)}
           onClick={() => setClickKey((c) => c + 1)}
-          className="active:scale-[0.96] transition-transform"
+          className="cursor-pointer"
         >
           <Link
             href={item.href || item.children?.[0]?.href || "#"}
@@ -380,7 +380,7 @@ function DesktopExpandedNavItem({ item, isActive, themeClasses, activeLayoutIdPr
       onMouseEnter={() => setIsHovered(true)}
       onMouseLeave={() => setIsHovered(false)}
       onClick={() => setClickKey((c) => c + 1)}
-      className="active:scale-[0.98] transition-transform"
+      className="cursor-pointer"
     >
       <Link
         href={item.href || "#"}
@@ -458,7 +458,7 @@ function DesktopExpandedExpandableItem({
           setClickKey((c) => c + 1);
           setIsOpen((prev) => !prev);
         }}
-        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer active:scale-[0.98] transition-transform ${
+        className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl transition-colors duration-150 text-[13.5px] group relative focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 focus-visible:ring-offset-1 cursor-pointer ${
           isAnyChildActive
             ? "text-sidebar-foreground font-semibold"
             : "text-sidebar-foreground/70 hover:text-primary hover:bg-primary/10 font-medium"

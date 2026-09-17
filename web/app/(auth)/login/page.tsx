@@ -126,11 +126,13 @@ export default function LoginPage() {
       }
     } catch (error: unknown) {
       setGoogleLoading(false);
-      const message = error instanceof Error ? error.message : "Unable to sign in with Google.";
-      if (message === "Google sign-in was cancelled.") {
+      const rawMsg = error instanceof Error ? error.message : "Unable to sign in with Google.";
+      if (rawMsg === "Google sign-in was cancelled.") {
         toast.info("Google sign-in was cancelled.");
+      } else if (rawMsg.toLowerCase().includes("fetch failed") || rawMsg.toLowerCase().includes("failed to fetch")) {
+        toast.error("Unable to connect to Google authentication service. Please try again.");
       } else {
-        toast.error(message);
+        toast.error(rawMsg);
       }
     }
   };
@@ -158,6 +160,9 @@ export default function LoginPage() {
       const { fieldErrors, generalError } = parseApiErrors(error, "Login failed");
       setFieldErrors(fieldErrors);
       setGeneralError(generalError);
+      if (generalError && !fieldErrors.email && !fieldErrors.password) {
+        toast.error(generalError);
+      }
 
       setTimeout(() => {
         const firstErrorField = Object.keys(fieldErrors)[0];
@@ -278,7 +283,7 @@ export default function LoginPage() {
           type="submit"
           data-testid="login-btn"
           disabled={loading || googleLoading}
-          className="w-full h-11 rounded-xl font-semibold shadow-md shadow-primary/20 hover:shadow-lg hover:shadow-primary/30 transition-all duration-200 active:scale-[0.99] flex items-center justify-center gap-2"
+          className="w-full h-11 rounded-xl font-semibold shadow-xs hover:shadow-sm transition-colors duration-150 flex items-center justify-center gap-2"
         >
           {loading ? (
             <>

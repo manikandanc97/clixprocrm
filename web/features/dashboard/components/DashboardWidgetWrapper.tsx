@@ -162,7 +162,7 @@ export function DashboardWidgetWrapper({
                 variant="outline" 
                 size="sm" 
                 onClick={onRetry}
-                className="h-8 text-xs font-bold gap-2 rounded-xl border-destructive/20 hover:bg-destructive/10 transition-all active:scale-95"
+                className="h-8 text-xs font-bold gap-2 rounded-xl border-destructive/20 hover:bg-destructive/10 active:bg-destructive/15 transition-colors"
               >
                 <RefreshCw className="w-3 h-3" />
                 Retry

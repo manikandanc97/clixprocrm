@@ -1,3 +1,8 @@
+import * as dns from 'dns';
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {}
+
 import { createServerClient } from '@supabase/ssr'
 import { cookies } from 'next/headers'
 

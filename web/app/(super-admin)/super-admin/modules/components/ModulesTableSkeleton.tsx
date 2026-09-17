@@ -6,24 +6,24 @@ export function ModulesTableSkeleton() {
   return (
     <div className="overflow-x-auto w-full rounded-xl border border-border/80 bg-card shadow-xs">
       <table className="w-full text-left text-xs border-collapse">
-        <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+        <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
           <tr className="h-10">
-            <th className="px-3 py-2 w-20 text-center border-r border-emerald-500/15">
+            <th className="px-3 py-2 w-20 text-center border-r border-border/60 bg-muted">
               <Skeleton className="h-3 w-10 mx-auto" />
             </th>
-            <th className="px-4 py-2 border-r border-emerald-500/15">
+            <th className="px-4 py-2 border-r border-border/60 bg-muted">
               <Skeleton className="h-3 w-28" />
             </th>
-            <th className="px-4 py-2 border-r border-emerald-500/15">
+            <th className="px-4 py-2 border-r border-border/60 bg-muted">
               <Skeleton className="h-3 w-24" />
             </th>
-            <th className="px-4 py-2 text-center border-r border-emerald-500/15">
+            <th className="px-4 py-2 text-center border-r border-border/60 bg-muted">
               <Skeleton className="h-3 w-20 mx-auto" />
             </th>
-            <th className="px-4 py-2 text-center border-r border-emerald-500/15">
+            <th className="px-4 py-2 text-center border-r border-border/60 bg-muted">
               <Skeleton className="h-3 w-20 mx-auto" />
             </th>
-            <th className="px-4 py-2 text-right">
+            <th className="px-4 py-2 text-right bg-muted">
               <Skeleton className="h-3 w-12 ml-auto" />
             </th>
           </tr>

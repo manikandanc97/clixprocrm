@@ -67,7 +67,14 @@ export function parseApiErrors(error: unknown, fallback = "Something went wrong.
   }
 
   if (error instanceof Error) {
-    result.generalError = error.message;
+    const msg = error.message;
+    if (msg.toLowerCase().includes('fetch failed') || msg.toLowerCase().includes('failed to fetch')) {
+      result.generalError = 'Unable to connect to authentication server. Please check your internet connection or try again.';
+    } else if (msg.includes('Invalid login credentials')) {
+      result.generalError = 'Invalid email or password. Please check your credentials and try again.';
+    } else {
+      result.generalError = msg;
+    }
     return result;
   }
 

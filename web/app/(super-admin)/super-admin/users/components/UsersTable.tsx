@@ -76,9 +76,9 @@ export function UsersTable({
           <col style={{ width: "160px" }} />
           <col style={{ width: "64px" }} />
         </colgroup>
-        <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+        <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
           <tr className="text-xs font-bold text-foreground">
-            <th className="w-12 px-4 py-3.5 text-center bg-emerald-50/80 dark:bg-emerald-950/40 border-r border-emerald-500/15">
+            <th className="w-12 px-4 py-3.5 text-center bg-muted border-r border-border/60">
               <input
                 type="checkbox"
                 checked={isAllSelected}
@@ -87,7 +87,7 @@ export function UsersTable({
               />
             </th>
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => handleSortKey("name")}
             >
               <div className="flex items-center gap-1.5">
@@ -96,7 +96,7 @@ export function UsersTable({
               </div>
             </th>
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => handleSortKey("role")}
             >
               <div className="flex items-center gap-1.5">
@@ -104,11 +104,11 @@ export function UsersTable({
                 {getSortIndicator("role")}
               </div>
             </th>
-            <th className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40">
+            <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
               <span>Organizations &amp; Role</span>
             </th>
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => handleSortKey("status")}
             >
               <div className="flex items-center gap-1.5">
@@ -117,7 +117,7 @@ export function UsersTable({
               </div>
             </th>
             <th
-              className="px-4 py-3.5 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 cursor-pointer select-none"
+              className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
               onClick={() => handleSortKey("createdAt")}
             >
               <div className="flex items-center gap-1.5">
@@ -125,7 +125,7 @@ export function UsersTable({
                 {getSortIndicator("createdAt")}
               </div>
             </th>
-            <th className="w-16 px-4 py-3.5 text-right bg-emerald-50/80 dark:bg-emerald-950/40">
+            <th className="w-16 px-4 py-3.5 text-right bg-muted">
               <span className="sr-only">Actions</span>
             </th>
           </tr>

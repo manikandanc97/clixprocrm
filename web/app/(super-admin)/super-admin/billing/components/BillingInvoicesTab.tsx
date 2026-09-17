@@ -84,9 +84,9 @@ export function BillingInvoicesTab({
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
           <table className="w-full text-left text-xs border-collapse min-w-[1050px]">
-            <thead className="sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs">
+            <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
               <tr className="h-10 text-xs font-bold text-foreground">
-                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
+                <th className="h-10 px-4 py-2 text-left border-r border-border/60 bg-muted whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Platform Invoice #"
                     sortable
@@ -94,13 +94,13 @@ export function BillingInvoicesTab({
                     onSort={(d) => setInvSortConfig(d ? { key: "invoiceNumber", direction: d } : null)}
                   />
                 </th>
-                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-left border-r border-border/60 bg-muted whitespace-nowrap">
                   <DataTableColumnHeader title="Organization (Tenant)" />
                 </th>
-                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-left border-r border-border/60 bg-muted whitespace-nowrap">
                   <DataTableColumnHeader title="Plan & Seats" />
                 </th>
-                <th className="h-10 px-4 py-2 text-left border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
+                <th className="h-10 px-4 py-2 text-left border-r border-border/60 bg-muted whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Date"
                     sortable
@@ -108,10 +108,10 @@ export function BillingInvoicesTab({
                     onSort={(d) => setInvSortConfig(d ? { key: "invoiceDate", direction: d } : null)}
                   />
                 </th>
-                <th className="h-10 px-4 py-2 text-right border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-right border-r border-border/60 bg-muted whitespace-nowrap">
                   <DataTableColumnHeader title="Tax (GST)" align="right" />
                 </th>
-                <th className="h-10 px-4 py-2 text-right border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap cursor-pointer select-none">
+                <th className="h-10 px-4 py-2 text-right border-r border-border/60 bg-muted whitespace-nowrap cursor-pointer select-none">
                   <DataTableColumnHeader
                     title="Total Amount"
                     align="right"
@@ -120,10 +120,10 @@ export function BillingInvoicesTab({
                     onSort={(d) => setInvSortConfig(d ? { key: "totalAmount", direction: d } : null)}
                   />
                 </th>
-                <th className="h-10 px-4 py-2 text-center border-r border-emerald-500/15 bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
+                <th className="h-10 px-4 py-2 text-center border-r border-border/60 bg-muted whitespace-nowrap">
                   <DataTableColumnHeader title="Status" align="center" />
                 </th>
-                <th className="h-10 w-24 px-4 py-2 text-right bg-emerald-50/80 dark:bg-emerald-950/40 whitespace-nowrap">
+                <th className="h-10 w-24 px-4 py-2 text-right bg-muted whitespace-nowrap">
                   <DataTableColumnHeader title="Actions" align="right" />
                 </th>
               </tr>

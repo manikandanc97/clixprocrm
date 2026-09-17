@@ -86,14 +86,14 @@ export function SecOpsIncidentsTab({
 
       <div className="overflow-x-auto">
         <table className="w-full text-left text-xs border-collapse min-w-[850px]">
-          <thead className="bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20">
+          <thead className="bg-muted border-b border-border">
             <tr className="text-foreground font-bold">
-              <th className="px-4 py-3 border-r border-emerald-500/15">Incident #</th>
-              <th className="px-4 py-3 border-r border-emerald-500/15">Severity</th>
-              <th className="px-4 py-3 border-r border-emerald-500/15">Status</th>
-              <th className="px-4 py-3 border-r border-emerald-500/15">Title &amp; Context</th>
-              <th className="px-4 py-3 border-r border-emerald-500/15">Detected</th>
-              <th className="px-4 py-3 text-right">Actions</th>
+              <th className="px-4 py-3 border-r border-border/60 bg-muted">Incident #</th>
+              <th className="px-4 py-3 border-r border-border/60 bg-muted">Severity</th>
+              <th className="px-4 py-3 border-r border-border/60 bg-muted">Status</th>
+              <th className="px-4 py-3 border-r border-border/60 bg-muted">Title &amp; Context</th>
+              <th className="px-4 py-3 border-r border-border/60 bg-muted">Detected</th>
+              <th className="px-4 py-3 text-right bg-muted">Actions</th>
             </tr>
           </thead>
           <tbody className="divide-y divide-border/40">

@@ -73,7 +73,7 @@ export default function DashboardOnboardingHub() {
           <div className="flex flex-wrap items-center gap-3 shrink-0">
             <Button
               onClick={() => setIsLeadModalOpen(true)}
-              className="bg-primary hover:bg-primary/90 text-primary-foreground font-bold px-5 sm:px-6 h-10 sm:h-10.5 rounded-xl shadow-md transition-all active:scale-[0.98]"
+              className="bg-primary hover:bg-primary/90 active:bg-primary/95 text-primary-foreground font-bold px-5 sm:px-6 h-10 sm:h-10.5 rounded-xl shadow-xs transition-colors"
             >
               <AppIcon name="userPlus" icon={UserPlus} size={16} className="w-4 h-4 mr-2" />
               Create First Lead

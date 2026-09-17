@@ -78,7 +78,7 @@ export function PlanBadgePopover({
         <button
           type="button"
           aria-label="View Subscription & Plan Details"
-          className="cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md inline-flex items-center transition-transform active:scale-95"
+          className="cursor-pointer focus:outline-none focus-visible:ring-1 focus-visible:ring-primary rounded-md inline-flex items-center transition-opacity hover:opacity-90"
         >
           <PlanBadge plan={planId} size={size} className={className} />
         </button>

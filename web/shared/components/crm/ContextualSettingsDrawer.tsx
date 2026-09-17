@@ -265,7 +265,7 @@ export function ContextualSettingsDrawer({
                   className={cn(
                     "group h-8.5 px-4 text-xs font-semibold gap-1.5 rounded-lg shadow-sm transition-all duration-150",
                     hasUnsavedChanges
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-xs active:scale-98"
+                      ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-xs active:bg-emerald-800"
                       : "bg-muted text-muted-foreground/60 border border-border/50 cursor-not-allowed opacity-60 hover:bg-muted hover:text-muted-foreground/60"
                   )}
                 >

@@ -1,3 +1,8 @@
+import * as dns from 'dns';
+try {
+  dns.setDefaultResultOrder('ipv4first');
+} catch {}
+
 import type { NextConfig } from "next";
 
 const nextConfig: NextConfig = {

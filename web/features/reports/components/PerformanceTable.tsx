@@ -56,7 +56,7 @@ const PerformanceTable = ({ performance, onViewAll }: PerformanceTableProps) => 
 
         <CardContent className="p-0 overflow-x-auto">
           <CRMDataTable containerClassName="border-0 shadow-none rounded-none w-full" className="w-full">
-            <CRMTableHeader className="bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20">
+            <CRMTableHeader className="bg-muted border-b border-border">
               <CRMTableRow className="h-10 hover:bg-transparent">
                 <CRMTableHeaderCell className="text-xs font-semibold text-muted-foreground pl-5">
                   Team Member

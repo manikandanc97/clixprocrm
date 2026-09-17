@@ -111,7 +111,7 @@ export default function CalendarWidget() {
               <div className="flex items-center rounded-md border border-border/60 bg-muted/30 overflow-hidden">
                 <button
                   onClick={handlePrevMonth}
-                  className="flex h-7 w-7 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95"
+                  className="flex h-7 w-7 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-muted/80 cursor-pointer"
                   aria-label="Previous Month"
                 >
                   <ChevronLeft className="h-3.5 w-3.5" />
@@ -119,7 +119,7 @@ export default function CalendarWidget() {
                 <div className="h-4 w-px bg-border/60" />
                 <button
                   onClick={handleNextMonth}
-                  className="flex h-7 w-7 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:scale-95"
+                  className="flex h-7 w-7 items-center justify-center text-muted-foreground transition-colors hover:bg-muted hover:text-foreground active:bg-muted/80 cursor-pointer"
                   aria-label="Next Month"
                 >
                   <ChevronRight className="h-3.5 w-3.5" />
@@ -129,7 +129,7 @@ export default function CalendarWidget() {
               {/* Today button */}
               <button
                 onClick={handleToday}
-                className="h-7 rounded-md border border-border/60 bg-muted/30 px-2.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground transition-all hover:border-primary/30 hover:bg-primary/8 hover:text-primary active:scale-95"
+                className="h-7 rounded-md border border-border/60 bg-muted/30 px-2.5 text-[10px] font-semibold uppercase tracking-wide text-muted-foreground transition-colors hover:border-primary/30 hover:bg-primary/8 hover:text-primary active:bg-primary/15 cursor-pointer"
               >
                 Today
               </button>

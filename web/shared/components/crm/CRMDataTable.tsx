@@ -60,12 +60,12 @@ export interface CRMDataTableProps<T = unknown> {
 export const crmTableStyles = {
   container: "bg-transparent border-0 rounded-none shadow-none overflow-hidden flex flex-col flex-1 min-h-0",
   table: "w-full border-collapse text-left text-xs",
-  header: "sticky top-0 z-20 bg-primary/[0.06] dark:bg-primary/[0.08] border-b border-primary/15 shadow-xs backdrop-blur-xs",
+  header: "sticky top-0 z-20 bg-muted border-b border-border shadow-xs",
   body: "divide-y divide-border/40 text-xs",
   row: "group h-16 border-b border-border/40 align-middle hover:bg-muted/30 transition-colors",
   rowInteractive: "cursor-pointer transition-colors duration-150 hover:bg-muted/30",
   cell: "h-16 px-4 py-3.5 align-middle text-xs",
-  headerCell: "h-10 px-4 py-2 text-left text-xs font-bold text-foreground border-r border-primary/10 bg-primary/[0.06] dark:bg-primary/[0.08] whitespace-nowrap last:border-r-0 select-none",
+  headerCell: "h-10 px-4 py-2 text-left text-xs font-bold text-foreground border-r border-border/60 bg-muted whitespace-nowrap last:border-r-0 select-none",
 } as const;
 
 export function CRMDataTable<T = unknown>({
