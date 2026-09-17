@@ -21,7 +21,7 @@ export const CRMMetricsGrid = ({
   return (
     <div
       className={cn(
-        "grid grid-cols-1 gap-3.5 sm:gap-4",
+        "grid grid-cols-1 gap-3.5 sm:gap-4 shrink-0",
         cols === 4 && "sm:grid-cols-2 lg:grid-cols-4",
         cols === 3 && "sm:grid-cols-2 lg:grid-cols-3",
         className

@@ -17,11 +17,13 @@ export const CRMPageContainer = ({
   children,
   className,
   maxWidth = "max-w-none",
-  fullHeight = true,
+  fullHeight = false,
   twoStageScroll = false,
 }: CRMPageContainerProps) => {
+  const isFullHeight = fullHeight || twoStageScroll;
   const baseClass = cn(
-    "mx-auto w-full flex-1 min-h-0 flex flex-col gap-4 sm:gap-5 px-4 sm:px-6 pt-1 pb-6 relative",
+    "mx-auto w-full flex flex-col gap-4 sm:gap-5 px-4 sm:px-6 pt-1 pb-6 relative",
+    isFullHeight ? "flex-1 min-h-0" : "min-h-full",
     maxWidth,
     className
   );

@@ -277,7 +277,7 @@ export default function SuperAdminDashboardPage() {
 
       {/* 1. Sleek Hero Section */}
       <div
-        className="relative overflow-hidden rounded-2xl bg-[#0f172a] p-5 sm:p-6 shadow-xl border border-white/5"
+        className="relative overflow-hidden rounded-2xl bg-[#0f172a] p-5 sm:p-6 shadow-xl border border-white/5 shrink-0"
         style={{ minHeight: "144px", color: "#ffffff" }}
       >
         <div
