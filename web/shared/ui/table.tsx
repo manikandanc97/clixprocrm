@@ -8,10 +8,10 @@ function Table({ className, wrapperClassName, ...props }: React.ComponentProps<"
   return (
     <div
       data-slot="table-container"
-      className={cn("bg-transparent border-0 rounded-none shadow-none overflow-hidden flex flex-col min-h-0", wrapperClassName)}
+      className={cn("bg-transparent border-0 rounded-none shadow-none overflow-hidden flex flex-col flex-1 min-h-0", wrapperClassName)}
     >
-      {/* Inner scroll owner: handles horizontal table scroll */}
-      <div className="overflow-x-auto min-h-0 relative flex flex-col">
+      {/* Inner scroll owner: handles both horizontal table scroll and vertical row scroll */}
+      <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
         <table
           data-slot="table"
           className={cn("w-full text-xs caption-bottom border-collapse text-left", className)}

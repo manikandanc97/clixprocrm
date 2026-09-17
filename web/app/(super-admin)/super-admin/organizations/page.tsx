@@ -289,7 +289,7 @@ export default function OrganizationsPage() {
   );
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Metric KPI Cards Banner */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 shrink-0">
         <div className="p-3 sm:p-3.5 rounded-xl bg-card border border-border/70 shadow-xs flex items-center justify-between">
@@ -340,7 +340,7 @@ export default function OrganizationsPage() {
       </div>
 
       {/* 2. Main Table & Toolbar Card */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         <OrganizationsToolbar
           planFilter={planFilter}
           setPlanFilter={setPlanFilter}

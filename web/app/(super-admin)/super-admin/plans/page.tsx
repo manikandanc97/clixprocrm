@@ -347,7 +347,7 @@ export default function SuperAdminPlansPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
       <CRMPageHeader
         title="Plans & Subscriptions"

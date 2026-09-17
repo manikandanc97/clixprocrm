@@ -222,7 +222,7 @@ export default function CompaniesPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
       <CRMPageHeader
         title="Companies"
@@ -246,7 +246,7 @@ export default function CompaniesPage() {
       />
 
       {/* 2. Main Data Card with Toolbar & Table */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         <CRMToolbar
           searchQuery={search}
           setSearchQuery={handleSearchChange}

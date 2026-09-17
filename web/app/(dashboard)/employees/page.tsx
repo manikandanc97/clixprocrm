@@ -153,7 +153,7 @@ export default function EmployeesPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Standard Page Header */}
       <CRMPageHeader
         title="Employees"
@@ -170,7 +170,7 @@ export default function EmployeesPage() {
       />
 
       {/* 2. Main Data Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Canonical Toolbar */}
         <CRMToolbar
           searchQuery={search}

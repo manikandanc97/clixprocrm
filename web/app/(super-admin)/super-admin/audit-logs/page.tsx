@@ -187,7 +187,7 @@ export default function SuperAdminAuditLogsPage() {
   );
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
       <CRMPageHeader
         title="Platform Audit Logs"
@@ -196,7 +196,7 @@ export default function SuperAdminAuditLogsPage() {
       />
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
           {/* Left: Filter Selects & Search */}
@@ -274,7 +274,7 @@ export default function SuperAdminAuditLogsPage() {
         </div>
 
         {/* Table Content */}
-        <div className="overflow-x-auto min-h-0 relative flex flex-col">
+        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
           <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
             <colgroup>
               <col style={{ width: "220px" }} />

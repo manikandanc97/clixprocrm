@@ -258,7 +258,7 @@ export default function SuperAdminUsersPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* Header */}
       <CRMPageHeader
         title="Platform Users"
@@ -267,7 +267,7 @@ export default function SuperAdminUsersPage() {
       />
 
       {/* Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         <UsersTableToolbar
           superAdminOnly={superAdminOnly}
           setSuperAdminOnly={setSuperAdminOnly}

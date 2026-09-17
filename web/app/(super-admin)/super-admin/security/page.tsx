@@ -208,7 +208,7 @@ export default function SecurityCenterPage() {
   );
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
       <CRMPageHeader
         title="Security Incident & Emergency Center"

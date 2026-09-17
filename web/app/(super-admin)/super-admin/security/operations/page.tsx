@@ -336,7 +336,7 @@ export default function SecurityOperationsPage() {
   const openIncidentsCount = incidents.filter((i) => i.status !== "RESOLVED").length;
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
       <CRMPageHeader
         title="Security Operations & Governance"

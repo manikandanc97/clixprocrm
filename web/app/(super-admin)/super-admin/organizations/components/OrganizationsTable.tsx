@@ -74,7 +74,7 @@ export function OrganizationsTable({
   };
 
   return (
-    <div className="overflow-x-auto min-h-0 relative flex flex-col">
+    <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
       <table className="w-full text-left text-xs border-collapse min-w-[1100px] table-fixed">
         <colgroup>
           <col style={{ width: "48px" }} />

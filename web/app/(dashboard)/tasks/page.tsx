@@ -185,7 +185,7 @@ export default function TasksPage() {
   }
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Page Header */}
       <CRMPageHeader
         title="Tasks"
@@ -207,7 +207,7 @@ export default function TasksPage() {
       />
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Toolbar — search, filters, bulk actions, toolbar actions */}
         <CRMToolbar
           searchQuery={search}

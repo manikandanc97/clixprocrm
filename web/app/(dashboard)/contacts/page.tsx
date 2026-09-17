@@ -298,7 +298,7 @@ export default function ContactsPage() {
   }, []);
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* 1. Page Header */}
       <CRMPageHeader
         title="Contacts"
@@ -357,7 +357,7 @@ export default function ContactsPage() {
       </CRMPageHeader>
 
       {/* 2. Main Data Card with Toolbar & Table */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         <CRMToolbar
           searchQuery={search}
           setSearchQuery={handleSearchChange}
@@ -457,7 +457,7 @@ export default function ContactsPage() {
             className="flex-1"
           />
         ) : (
-          <div className="overflow-x-auto min-h-0 relative flex flex-col">
+          <div className="flex-1 min-h-0 overflow-auto flex flex-col">
             <ContactsDataTable
               contacts={paginatedContacts}
               selectedContactIds={selectedContactIds}

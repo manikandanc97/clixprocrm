@@ -58,7 +58,7 @@ export interface CRMDataTableProps<T = unknown> {
 }
 
 export const crmTableStyles = {
-  container: "bg-transparent border-0 rounded-none shadow-none overflow-hidden flex flex-col min-h-0",
+  container: "bg-transparent border-0 rounded-none shadow-none overflow-hidden flex flex-col flex-1 min-h-0",
   table: "w-full border-collapse text-left text-xs",
   header: "sticky top-0 z-20 bg-emerald-50/80 dark:bg-emerald-950/40 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs",
   body: "divide-y divide-border/40 text-xs",

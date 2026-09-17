@@ -54,7 +54,7 @@ export function CRMPagination({
       role="navigation"
       aria-label="Pagination"
       className={cn(
-        "px-4 py-2 sm:py-2.5 min-h-[44px] sm:min-h-[48px] flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0",
+        "px-4 py-2 sm:py-2.5 min-h-[44px] sm:min-h-[48px] flex flex-col sm:flex-row items-center justify-between gap-3 sm:gap-4 border-t border-border/50 text-xs font-medium text-muted-foreground bg-card shrink-0 mt-auto",
         className
       )}
     >
