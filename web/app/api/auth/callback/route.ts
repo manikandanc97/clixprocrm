@@ -1,13 +1,17 @@
 import { NextResponse } from 'next/server'
 import { createClient } from '@/lib/supabase/server'
 
+export const dynamic = 'force-dynamic'
+export const runtime = 'nodejs'
+export const revalidate = 0
+
 export async function GET(request: Request) {
   const requestUrl = new URL(request.url)
   const code = requestUrl.searchParams.get('code')
   const errorParam = requestUrl.searchParams.get('error')
   const errorDescription = requestUrl.searchParams.get('error_description')
 
-  const sendResponse = (isSuccess: boolean, errorMessage?: string) => {
+  const sendResponse = (isSuccess: boolean, errorMessage?: string, isExplicitError: boolean = false) => {
     const escapedErrorMessage = (errorMessage || 'An error occurred during authentication. You can close this window and try again.')
       .replace(/\\/g, '\\\\')
       .replace(/'/g, "\\'")
@@ -104,14 +108,14 @@ export async function GET(request: Request) {
   </head>
   <body>
     <div class="card">
-      <div class="icon-container">
+      <div class="icon-container" id="icon-box">
         ${
           !isSuccess
-            ? '<span class="error-icon">✕</span>'
+            ? '<span class="error-icon" id="icon-error">✕</span>'
             : '<div id="icon-spinner" class="spinner"></div><span id="icon-check" class="success-icon" style="display: none;">✓</span>'
         }
       </div>
-      <h2>${!isSuccess ? 'Authentication Failed' : 'Authentication Successful'}</h2>
+      <h2 id="header-text">${!isSuccess ? 'Authentication Failed' : 'Authentication Successful'}</h2>
       <p id="status-text">${
         !isSuccess
           ? (errorMessage || 'An error occurred during authentication. You can close this window and try again.')
@@ -122,9 +126,21 @@ export async function GET(request: Request) {
     <script>
       (function() {
         var isSuccess = ${isSuccess ? 'true' : 'false'};
-        var messageType = isSuccess ? 'CLIXPROCRM_GOOGLE_AUTH_SUCCESS' : 'CLIXPROCRM_GOOGLE_AUTH_ERROR';
+        var isExplicitError = ${isExplicitError ? 'true' : 'false'};
         var errorMsg = '${escapedErrorMessage}';
         var targetOrigin = window.location.origin;
+
+        // Check if token or error is in URL hash (e.g. Implicit OAuth flow fallback)
+        if (!isSuccess && !isExplicitError && window.location.hash) {
+          var hashParams = new URLSearchParams(window.location.hash.replace(/^#/, ''));
+          if (hashParams.get('access_token')) {
+            isSuccess = true;
+          } else if (hashParams.get('error')) {
+            errorMsg = hashParams.get('error_description') || hashParams.get('error') || errorMsg;
+          }
+        }
+
+        var messageType = isSuccess ? 'CLIXPROCRM_GOOGLE_AUTH_SUCCESS' : 'CLIXPROCRM_GOOGLE_AUTH_ERROR';
 
         // 1. PostMessage to opener if available
         try {
@@ -160,33 +176,39 @@ export async function GET(request: Request) {
           }));
         } catch (e) {}
 
-        // In OAuth popup mode, immediately attempt to close this popup window.
-        // Never navigate the callback route to /dashboard. Application routing belongs to the parent window.
-        try {
-          window.close();
-        } catch (e) {}
-
-        // If window.close() is blocked or not executed immediately, update UI and provide manual close button
-        setTimeout(function() {
+        // In OAuth popup mode, immediately attempt to close this popup window if successful.
+        if (isSuccess) {
           try {
             window.close();
           } catch (e) {}
+        }
+
+        // Update UI state
+        setTimeout(function() {
+          if (isSuccess) {
+            try {
+              window.close();
+            } catch (e) {}
+          }
 
           var statusEl = document.getElementById('status-text');
+          var headerEl = document.getElementById('header-text');
           var btnEl = document.getElementById('close-btn');
           var spinnerEl = document.getElementById('icon-spinner');
           var checkEl = document.getElementById('icon-check');
+          var iconBox = document.getElementById('icon-box');
 
-          if (spinnerEl) spinnerEl.style.display = 'none';
-          if (checkEl) checkEl.style.display = 'inline';
-
-          if (statusEl) {
-            statusEl.innerText = isSuccess
-              ? 'Authentication complete. You can close this window and return to ClixProCRM.'
-              : errorMsg;
-          }
-          if (btnEl) {
-            btnEl.style.display = 'inline-block';
+          if (isSuccess) {
+            if (iconBox) iconBox.style.background = 'rgba(16, 185, 129, 0.15)';
+            if (headerEl) headerEl.innerText = 'Authentication Successful';
+            if (spinnerEl) spinnerEl.style.display = 'none';
+            if (checkEl) checkEl.style.display = 'inline';
+            if (statusEl) statusEl.innerText = 'Authentication complete. You can close this window and return to ClixProCRM.';
+          } else {
+            if (iconBox) iconBox.style.background = 'rgba(239, 68, 68, 0.15)';
+            if (headerEl) headerEl.innerText = 'Authentication Failed';
+            if (statusEl) statusEl.innerText = errorMsg;
+            if (btnEl) btnEl.style.display = 'inline-block';
           }
         }, 350);
       })();
@@ -197,10 +219,6 @@ export async function GET(request: Request) {
     return new NextResponse(html, {
       headers: {
         'Content-Type': 'text/html; charset=utf-8',
-        // Required for OAuth popup: ensures window.opener is not severed when the popup
-        // lands on this callback URL after navigating through Google and Supabase (cross-origin).
-        // This explicitly overrides any COOP policy that Vercel or Next.js may apply,
-        // preserving the opener reference needed for postMessage and BroadcastChannel fallbacks.
         'Cross-Origin-Opener-Policy': 'unsafe-none',
         'Cross-Origin-Resource-Policy': 'cross-origin',
       },
@@ -208,7 +226,7 @@ export async function GET(request: Request) {
   }
 
   if (errorParam || errorDescription) {
-    return sendResponse(false, errorDescription || errorParam || 'OAuth error')
+    return sendResponse(false, errorDescription || errorParam || 'OAuth error', true)
   }
   
   if (code) {
@@ -217,12 +235,13 @@ export async function GET(request: Request) {
     
     if (error) {
       console.error('Exchange code error:', error.message)
-      return sendResponse(false, error.message)
+      return sendResponse(false, error.message, true)
     }
 
     return sendResponse(true)
   }
 
-  return sendResponse(false, 'No authentication code received')
+  return sendResponse(false, 'No authentication code received', false)
 }
+
 

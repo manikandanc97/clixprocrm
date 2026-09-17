@@ -1,6 +1,8 @@
 import { test, expect } from '@playwright/test';
 
 test.describe('Google OAuth Popup Flow', () => {
+  test.use({ storageState: { cookies: [], origins: [] } });
+
   test.beforeEach(async ({ page }) => {
     await page.goto('/login');
   });
