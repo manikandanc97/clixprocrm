@@ -41,9 +41,9 @@ export function TaskChecklistTab({
   return (
     <div className="space-y-5">
       {/* Subtask Checklist */}
-      <div className="space-y-2">
+      <div className="space-y-2.5">
         <div className="flex items-center justify-between">
-          <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest">
+          <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">
             Subtasks
           </Label>
           <span className="text-[11px] font-bold text-muted-foreground">
@@ -63,7 +63,7 @@ export function TaskChecklistTab({
                 handleAdd();
               }
             }}
-            className="h-9 text-sm flex-1"
+            className="h-9 text-xs flex-1"
             autoFocus
           />
           <Button
@@ -72,9 +72,10 @@ export function TaskChecklistTab({
             size="sm"
             onClick={handleAdd}
             aria-label="Add subtask"
-            className="h-9 px-3 text-xs font-bold"
+            className="h-9 px-3 text-xs font-bold gap-1"
           >
             <Plus className="size-3.5" />
+            <span>Add</span>
           </Button>
         </div>
 
@@ -82,11 +83,11 @@ export function TaskChecklistTab({
           {checklistFields.map((item, idx) => (
             <div
               key={item.id}
-              className="flex items-center justify-between h-9 px-3 rounded-lg border border-border bg-muted/10 group"
+              className="flex items-center justify-between h-9 px-3 rounded-lg border border-border/70 bg-muted/20 group hover:bg-muted/40 transition-colors"
             >
               <div className="flex items-center gap-2 min-w-0">
-                <ChevronRight className="size-3 text-muted-foreground shrink-0" />
-                <span className="text-sm font-medium text-foreground truncate">
+                <ChevronRight className="size-3.5 text-muted-foreground shrink-0" />
+                <span className="text-xs font-medium text-foreground truncate">
                   {item.title}
                 </span>
               </div>
@@ -94,14 +95,14 @@ export function TaskChecklistTab({
                 type="button"
                 onClick={() => onRemoveChecklist(idx)}
                 aria-label="Delete subtask"
-                className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive transition-opacity shrink-0"
+                className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-opacity rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
               >
                 <Trash2 className="size-3.5" />
               </button>
             </div>
           ))}
           {checklistFields.length === 0 && (
-            <p className="text-[11px] text-muted-foreground italic text-center py-6">
+            <p className="text-xs text-muted-foreground italic text-center py-6">
               No subtasks yet — add one above
             </p>
           )}
@@ -109,16 +110,16 @@ export function TaskChecklistTab({
       </div>
 
       {/* Attachments */}
-      <div className="space-y-2 pt-4 border-t border-border">
-        <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-widest flex items-center gap-1.5">
-          <Paperclip className="size-3" /> Attachments
+      <div className="space-y-2.5 pt-4 border-t border-border">
+        <Label className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider flex items-center gap-1.5">
+          <Paperclip className="size-3.5" /> Attachments
         </Label>
 
         <Button
           type="button"
           variant="outline"
           size="sm"
-          className="w-full h-9 border-dashed text-xs text-muted-foreground gap-2 font-semibold"
+          className="w-full h-9 border-dashed text-xs text-muted-foreground gap-2 font-semibold hover:text-foreground"
           onClick={() => document.getElementById("task-file-input")?.click()}
         >
           <Paperclip className="size-3.5" /> Attach Files
@@ -136,11 +137,11 @@ export function TaskChecklistTab({
             {attachments.map((att) => (
               <div
                 key={att.id}
-                className="flex items-center justify-between h-9 px-3 rounded-lg border border-border bg-muted/10 group"
+                className="flex items-center justify-between h-9 px-3 rounded-lg border border-border/70 bg-muted/20 group hover:bg-muted/40 transition-colors"
               >
                 <div className="flex items-center gap-2 min-w-0">
                   <Paperclip className="size-3.5 text-muted-foreground shrink-0" />
-                  <span className="text-sm font-medium text-foreground truncate">
+                  <span className="text-xs font-medium text-foreground truncate">
                     {att.fileName}
                   </span>
                   <span className="text-[10px] text-muted-foreground shrink-0">
@@ -151,7 +152,7 @@ export function TaskChecklistTab({
                   type="button"
                   onClick={() => onRemoveAttachment(att.id)}
                   aria-label="Remove attachment"
-                  className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 text-muted-foreground hover:text-destructive transition-opacity shrink-0"
+                  className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 p-1 text-muted-foreground hover:text-destructive transition-opacity rounded-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring shrink-0"
                 >
                   <X className="size-3.5" />
                 </button>

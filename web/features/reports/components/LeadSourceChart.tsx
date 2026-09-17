@@ -8,8 +8,7 @@ import { LeadSourceType } from "@/shared/types/report";
 import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/shared/ui/tooltip";
-
-const COLORS = ['#2563eb', '#10b981', '#f59e0b', '#8b5cf6', '#ec4899', '#06b6d4', '#6366f1'];
+import { CHART_PALETTE, getChartColor } from "@/shared/lib/chart-tokens";
 
 interface LeadSourceChartProps {
   data: LeadSourceType[];
@@ -20,18 +19,18 @@ interface LeadSourceChartProps {
 const CustomLeadSourceTooltip = ({ active, payload, total }: any) => {
   if (active && payload && payload.length) {
     const item = payload[0].payload;
-    const color = payload[0].fill || item.color || COLORS[0];
+    const color = payload[0].fill || item.color || CHART_PALETTE[0];
     const percentage = total > 0 ? Math.round(((item.value || 0) / total) * 100) : 100;
 
     return (
-      <div className="rounded-xl border border-white/10 bg-slate-950/95 text-white p-2.5 px-3.5 shadow-2xl backdrop-blur-md min-w-[130px] select-none z-50">
+      <div className="rounded-xl border border-border bg-popover/95 text-popover-foreground p-2.5 px-3.5 shadow-elevated backdrop-blur-md min-w-[130px] select-none z-50">
         <div className="flex items-center gap-2 mb-1">
           <span className="w-2.5 h-2.5 rounded-full shrink-0 shadow-xs" style={{ backgroundColor: color }} />
-          <span className="text-xs font-bold text-white capitalize">{item.name || "Direct"}</span>
+          <span className="text-xs font-bold text-foreground capitalize">{item.name || "Direct"}</span>
         </div>
         <div className="flex items-baseline justify-between gap-3 text-xs">
-          <span className="text-slate-400 font-medium">{item.value || 0} {item.value === 1 ? 'Lead' : 'Leads'}</span>
-          <span className="text-emerald-400 font-extrabold">{percentage}%</span>
+          <span className="text-muted-foreground font-medium">{item.value || 0} {item.value === 1 ? "Lead" : "Leads"}</span>
+          <span className="text-primary font-extrabold">{percentage}%</span>
         </div>
       </div>
     );
@@ -57,8 +56,8 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
       <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden group min-w-0 h-full flex flex-col flex-1">
         <CardHeader className="flex flex-row items-center justify-between p-5 pb-2 min-w-0">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-blue-500/10 text-blue-600 border border-blue-500/20 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110">
-              <AppIcon name="leadSources" icon={PieChartIcon} size={18} className="text-blue-600 dark:text-blue-400" />
+            <div className="w-9 h-9 rounded-2xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110">
+              <AppIcon name="leadSources" icon={PieChartIcon} size={18} className="text-primary" />
             </div>
             <div>
               <CardTitle className="font-bold text-foreground text-base tracking-tight">Lead Sources</CardTitle>
@@ -107,7 +106,7 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
                         {chartData.map((_, index) => (
                           <Cell 
                             key={`cell-${index}`} 
-                            fill={COLORS[index % COLORS.length]} 
+                            fill={getChartColor(index)} 
                             className="transition-all duration-300 hover:opacity-85 cursor-pointer drop-shadow-xs"
                           />
                         ))}
@@ -122,7 +121,7 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
                   <div className="w-full sm:w-1/2 flex flex-col justify-center space-y-2.5 min-w-0 pr-2">
                     {chartData.map((entry, index) => {
                       const percentage = total > 0 ? Math.round(((entry.value || 0) / total) * 100) : 100;
-                      const color = COLORS[index % COLORS.length];
+                      const color = getChartColor(index);
 
                       return (
                         <Tooltip key={entry.name || index}>
@@ -160,6 +159,3 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
 };
 
 export default React.memo(LeadSourceChart);
-
-
-

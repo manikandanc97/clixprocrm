@@ -11,7 +11,7 @@ import {
   RotateCcw,
   Trash2,
 } from "lucide-react";
-import { CRMDataTable, CRMDataTableColumn } from "@/shared/components/crm/CRMDataTable";
+import { CRMDataTable, CRMDataTableColumn, TableDensity } from "@/shared/components/crm/CRMDataTable";
 import {
   SortDirection,
 } from "@/shared/components/DataTableColumnHeader";
@@ -70,6 +70,7 @@ export interface TasksDataTableProps {
   formatDate: (dateStr?: string | null) => { date: string; time: string };
   getTaskColor: (title: string) => { bg: string; text: string; border: string };
   togglingTaskId: string | null;
+  density?: TableDensity;
   onSelectTask: (task: TaskType) => void;
   onEditTask: (task: TaskType) => void;
   onToggleComplete: (task: TaskType) => void;
@@ -90,6 +91,7 @@ export function TasksDataTable({
   formatDate,
   getTaskColor,
   togglingTaskId,
+  density = "default",
   onSelectTask,
   onEditTask,
   onToggleComplete,
@@ -397,6 +399,7 @@ export function TasksDataTable({
     <CRMDataTable
       data={paginatedTasks}
       columns={columns}
+      density={density}
       isLoading={isInitialLoading}
       onRowClick={(task) => onSelectTask(task)}
       hasPagination={false}

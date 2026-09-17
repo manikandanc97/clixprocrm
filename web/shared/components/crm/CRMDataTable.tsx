@@ -16,6 +16,9 @@ import { Skeleton } from "@/shared/ui/skeleton";
 import { AlertCircle, RefreshCw, type LucideIcon } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
+import { TableDensity } from "./table/DataTableDensityToggle";
+export type { TableDensity };
+
 export interface CRMDataTableColumn<T> {
   header: string | React.ReactNode;
   cell: (item: T) => React.ReactNode;
@@ -45,6 +48,8 @@ export interface CRMDataTableProps<T = unknown> {
   containerClassName?: string;
   wrapperClassName?: string;
   rowClassName?: string | ((item: T) => string);
+  /** Row density scale */
+  density?: TableDensity;
   emptyMessage?: string | React.ReactNode;
   emptyTitle?: string;
   emptyDescription?: string;
@@ -77,6 +82,7 @@ export function CRMDataTable<T = unknown>({
   containerClassName,
   wrapperClassName,
   rowClassName,
+  density = "default",
   emptyMessage,
   emptyTitle = "No data available",
   emptyDescription = "There are no records matching your criteria.",
@@ -198,30 +204,40 @@ export function CRMDataTable<T = unknown>({
               </TableCell>
             </TableRow>
           ) : data.length > 0 ? (
-            data.map((item, rowIndex) => (
-              <TableRow
-                key={rowIndex}
-                onClick={() => onRowClick?.(item)}
-                className={cn(
-                  onRowClick && "cursor-pointer transition-colors hover:bg-muted/30",
-                  typeof rowClassName === "function" ? rowClassName(item) : rowClassName
-                )}
-              >
-                {columns.map((column, colIndex) => {
-                  const cellAlignClass =
-                    column.align === "right"
-                      ? "text-right"
-                      : column.align === "center"
-                      ? "text-center"
-                      : undefined;
-                  return (
-                    <TableCell key={colIndex} className={cn(column.className, cellAlignClass)}>
-                      {column.cell(item)}
-                    </TableCell>
-                  );
-                })}
-              </TableRow>
-            ))
+            data.map((item, rowIndex) => {
+              const densityClass =
+                density === "compact"
+                  ? "h-11"
+                  : density === "comfortable"
+                  ? "h-16 sm:h-18"
+                  : "h-14 sm:h-16";
+
+              return (
+                <TableRow
+                  key={rowIndex}
+                  onClick={() => onRowClick?.(item)}
+                  className={cn(
+                    densityClass,
+                    onRowClick && "cursor-pointer transition-colors hover:bg-muted/30",
+                    typeof rowClassName === "function" ? rowClassName(item) : rowClassName
+                  )}
+                >
+                  {columns.map((column, colIndex) => {
+                    const cellAlignClass =
+                      column.align === "right"
+                        ? "text-right"
+                        : column.align === "center"
+                        ? "text-center"
+                        : undefined;
+                    return (
+                      <TableCell key={colIndex} className={cn(column.className, cellAlignClass)}>
+                        {column.cell(item)}
+                      </TableCell>
+                    );
+                  })}
+                </TableRow>
+              );
+            })
           ) : (
             <TableRow className="hover:bg-transparent border-0">
               <TableCell

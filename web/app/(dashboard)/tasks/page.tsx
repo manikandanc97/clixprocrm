@@ -25,6 +25,7 @@ import {
   CRMToolbar,
   CRMPagination,
   CRMDeleteDialog,
+  DataTableDensityToggle,
 } from "@/shared/components/crm";
 import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import {
@@ -75,6 +76,7 @@ export default function TasksPage() {
   const [bulkDeleteModalOpen, setBulkDeleteModalOpen] = useState(false);
   const [bulkDeleting, setBulkDeleting] = useState(false);
   const [togglingTaskId, setTogglingTaskId] = useState<string | null>(null);
+  const [density, setDensity] = useState<"compact" | "default" | "comfortable">("default");
 
   // URL state synchronization
   const {
@@ -172,6 +174,31 @@ export default function TasksPage() {
     setMeetingTask(task);
   };
 
+  // Build active filter chips for DataTableToolbar
+  const activeFilters = [];
+  if (statusFilter && statusFilter !== "ALL") {
+    activeFilters.push({
+      id: "status",
+      label: "Status",
+      value: statusFilter.replace(/_/g, " "),
+      onRemove: () => {
+        setStatusFilter("ALL");
+        setCurrentPage(1);
+      },
+    });
+  }
+  if (priorityFilter && priorityFilter !== "ALL") {
+    activeFilters.push({
+      id: "priority",
+      label: "Priority",
+      value: priorityFilter,
+      onRemove: () => {
+        setPriorityFilter("ALL");
+        setCurrentPage(1);
+      },
+    });
+  }
+
   if (isError) {
     return (
       <CRMPageContainer twoStageScroll>
@@ -208,7 +235,7 @@ export default function TasksPage() {
 
       {/* 2. Main Card Container */}
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
-        {/* Toolbar — search, filters, bulk actions, toolbar actions */}
+        {/* Toolbar — search, filters, density, bulk actions, export */}
         <CRMToolbar
           searchQuery={search}
           setSearchQuery={setSearch}
@@ -277,6 +304,12 @@ export default function TasksPage() {
           }
           actions={
             <div className="flex items-center gap-2">
+              {/* Density Toggle */}
+              <DataTableDensityToggle
+                density={density}
+                onDensityChange={setDensity}
+              />
+
               {/* Reset Filters — conditionally shown */}
               {hasActiveFilters && (
                 <Button
@@ -304,7 +337,7 @@ export default function TasksPage() {
           }
         />
 
-        {/* Table Content — TasksDataTable (canonical CRM table system) */}
+        {/* Table Content — TasksDataTable with density support */}
         <TasksDataTable
           paginatedTasks={paginatedTasks}
           isInitialLoading={isInitialLoading}
@@ -318,6 +351,7 @@ export default function TasksPage() {
           formatDate={formatDate}
           getTaskColor={getTaskColor}
           togglingTaskId={togglingTaskId}
+          density={density}
           onSelectTask={setSelectedTask}
           onEditTask={(task) => setTaskToEdit(task)}
           onToggleComplete={handleToggleComplete}

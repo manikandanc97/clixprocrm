@@ -39,6 +39,7 @@ import { AlertCircle } from "lucide-react";
 import { Tabs, TabsList, TabsTrigger, TabsContent } from "@/shared/ui/tabs";
 import { TaskRelatedRecordPicker, RelatedRecord } from "./TaskRelatedRecordPicker";
 import { TaskChecklistTab } from "./TaskChecklistTab";
+import { cn } from "@/shared/lib/utils";
 
 // ─── Schema (essential fields only) ───
 
@@ -62,9 +63,10 @@ export type TaskFormValues = z.infer<typeof taskFormSchema>;
 // ─── Constants ───
 
 export const PRIORITY_OPTIONS = [
-  { value: "HIGH", label: "High", dot: "bg-rose-500" },
-  { value: "MEDIUM", label: "Medium", dot: "bg-amber-500" },
-  { value: "LOW", label: "Low", dot: "bg-blue-500" },
+  { value: "URGENT", label: "Urgent", dot: "bg-purple-500" },
+  { value: "HIGH", label: "High", dot: "bg-destructive" },
+  { value: "MEDIUM", label: "Medium", dot: "bg-warning" },
+  { value: "LOW", label: "Low", dot: "bg-info" },
 ] as const;
 
 export const getDefaultDueDate = () =>
@@ -510,7 +512,10 @@ export const TaskModal: React.FC<TaskModalProps> = ({
                               <SelectContent>
                                 {PRIORITY_OPTIONS.map((p) => (
                                   <SelectItem key={p.value} value={p.value}>
-                                    {p.label}
+                                    <div className="flex items-center gap-2">
+                                      <span className={cn("size-2 rounded-full", p.dot)} />
+                                      <span>{p.label}</span>
+                                    </div>
                                   </SelectItem>
                                 ))}
                               </SelectContent>
