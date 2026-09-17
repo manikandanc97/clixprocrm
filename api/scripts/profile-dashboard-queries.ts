@@ -135,7 +135,12 @@ async function testProfile() {
   console.log('--- Testing Promise.all parallel execution of all 7 queries ---');
   t0 = performance.now();
   await Promise.all([
-    prisma.$queryRaw(summaryRaw as any), // reuse
+    prisma.$queryRaw`
+      SELECT
+        (SELECT COUNT(*)::int FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL) AS total_deals,
+        (SELECT COUNT(*)::int FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "createdAt" >= ${currentStart} AND "createdAt" < ${nextStart}) AS current_period_deals,
+        (SELECT COUNT(*)::int FROM "Deal" WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL AND "createdAt" >= ${previousStart} AND "createdAt" < ${currentStart}) AS prev_period_deals
+    `,
     prisma.deal.findMany({ where: { tenantId, deletedAt: null }, select: { id: true }, take: 5 }),
     prisma.quotation.findMany({ where: { tenantId, deletedAt: null }, select: { id: true }, take: 5 }),
     prisma.task.findMany({ where: { tenantId, deletedAt: null, status: 'COMPLETED' }, select: { id: true }, take: 5 }),

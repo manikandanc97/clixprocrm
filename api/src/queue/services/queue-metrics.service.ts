@@ -1,4 +1,4 @@
-import { Injectable, Logger, Optional } from '@nestjs/common';
+import { Injectable, Logger, Optional, OnModuleInit } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
 import { Queue, Job } from 'bullmq';
 import { QUEUE_NAMES, QueueName } from '../queue.constants';
@@ -29,7 +29,7 @@ const SENSITIVE_KEY_PATTERNS = [
 ];
 
 @Injectable()
-export class QueueMetricsService {
+export class QueueMetricsService implements OnModuleInit {
   private readonly logger = new Logger(QueueMetricsService.name);
 
   constructor(
@@ -49,6 +49,24 @@ export class QueueMetricsService {
     @InjectQueue(QUEUE_NAMES.MEDIA)
     private readonly mediaQueue?: Queue,
   ) {}
+
+  onModuleInit() {
+    const queues = [
+      { name: QUEUE_NAMES.EMAIL, queue: this.emailQueue },
+      { name: QUEUE_NAMES.IMPORT, queue: this.importQueue },
+      { name: QUEUE_NAMES.WEBHOOK, queue: this.webhookQueue },
+      { name: QUEUE_NAMES.MEDIA, queue: this.mediaQueue },
+    ];
+
+    for (const { name, queue } of queues) {
+      if (queue && typeof queue.on === 'function') {
+        queue.on('error', (err: unknown) => {
+          const msg = err instanceof Error ? err.message : String(err);
+          this.logger.debug(`[QUEUE] Connection notice for ${name}: ${msg}`);
+        });
+      }
+    }
+  }
 
   /**
    * Resolves the BullMQ Queue instance for a given QueueName.

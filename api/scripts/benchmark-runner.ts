@@ -316,7 +316,7 @@ async function main() {
 
   // 5. Bulk Data Ingestion Simulation / Processing Benchmark
   console.log('\n--- 5. RUNNING BULK INGESTION BENCHMARK ---');
-  const bulkSizes = [100, 1000, 5000];
+  const bulkSizes = [100, 1000, 5000, 10000];
   for (const size of bulkSizes) {
     process.stdout.write(`  Benchmarking bulk lead generation, validation & payload serialization for ${size} rows... `);
     const dummyRows = Array.from({ length: size }, (_, i) => ({

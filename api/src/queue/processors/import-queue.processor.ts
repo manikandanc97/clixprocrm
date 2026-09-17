@@ -1,5 +1,5 @@
 import { Logger, Inject, forwardRef } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { QUEUE_NAMES } from '../queue.constants';
 import {
@@ -18,6 +18,13 @@ export class ImportQueueProcessor extends WorkerHost {
     private readonly leadsImportService: LeadsImportService,
   ) {
     super();
+  }
+
+  @OnWorkerEvent('error')
+  onError(err: Error) {
+    this.logger.warn(
+      `[IMPORT WORKER] Queue worker connection notice: ${err?.message || err}`,
+    );
   }
 
   async process(job: Job<ImportJobPayload, any, string>): Promise<any> {

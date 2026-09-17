@@ -1,9 +1,8 @@
 /* ============================================================
-   ENTERPRISE BUTTON & ICON SMOOTH MICRO-INTERACTIONS
-   Native GPU-accelerated micro-interactions harmonized with @animateicons/react
+   ENTERPRISE BUTTON & ICON STYLES (STATIC, NO ANIMATIONS)
    ============================================================ */
 
-/* Ensure smooth pointer and scaling behavior for interactive icons */
+/* Ensure clean static alignment and sizing for icons */
 [data-animate-icon="true"] {
   display: inline-flex;
   align-items: center;
@@ -14,12 +13,4 @@
 
 [data-animate-icon="true"] svg {
   overflow: visible;
-}
-
-/* Subtle button interactive feedback */
-button:hover [data-animate-icon="true"],
-[data-slot="button"]:hover [data-animate-icon="true"],
-[role="button"]:hover [data-animate-icon="true"],
-.group:hover [data-animate-icon="true"] {
-  will-change: transform;
 }

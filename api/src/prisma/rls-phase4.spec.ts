@@ -259,7 +259,6 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
   });
 
   describe('1. TenantGuard & Normal User Discovery Bootstrap', () => {
-
     it('should query user memberships in userId-scoped tenant context (without superadmin flag)', async () => {
       const guard = new TenantGuard(mockPrisma, new TenantContextService());
 
@@ -320,7 +319,6 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
       );
     });
 
-
     it('getMe wraps profile discovery in userId context', async () => {
       const mockUserData = {
         id: 'user-profile-1',
@@ -341,13 +339,10 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
       mockTx.user.findUnique.mockResolvedValue(mockUserData);
       mockPrisma.user.findUnique.mockResolvedValue(mockUserData);
 
-
       const profile = await authService.getMe('user-profile-1', 'tenant-123');
       expect(profile.user.id).toBe('user-profile-1');
       expect(profile.user.tenantId).toBe('tenant-123');
     });
-
-
 
     it('register wraps workspace creation in superadmin tenant context', async () => {
       mockTx.tenant.create.mockResolvedValue({
@@ -576,7 +571,6 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
       );
       expect(mockTx.tenant.findMany).toHaveBeenCalled();
     });
-
 
     it('PlatformOrganizationsService createOrganization executes in isSuperAdmin: true context', async () => {
       const service = new PlatformOrganizationsService(mockPrisma);

@@ -19,7 +19,10 @@ export class AuditLogsController {
     @Query('limit') limit: string,
     @Query('search') search: string,
   ) {
-    const { page: pageNum, limit: limitNum } = parsePaginationParams({ page, limit }, 20);
+    const { page: pageNum, limit: limitNum } = parsePaginationParams(
+      { page, limit },
+      20,
+    );
     const result = await this.auditLogsService.getAuditLogs(
       req.tenantId,
       pageNum,

@@ -54,9 +54,7 @@ export function computeSubscriptionQuote(
       totalAmountInMinorUnits: 0,
       recurringAmount: 0,
       intervalDescription:
-        targetPlanDef.id === 'free'
-          ? 'free tier'
-          : 'internal platform plan',
+        targetPlanDef.id === 'free' ? 'free tier' : 'internal platform plan',
       isUpgrade: true,
       isDowngrade: false,
       effectiveImmediately: true,
@@ -85,13 +83,10 @@ export function computeSubscriptionQuote(
   const totalAmount = subtotal + taxAmount;
   // e.g. ₹499 → 49900 paise
   const totalAmountInMinorUnits = Math.round(totalAmount * 100);
-  const recurringAmount =
-    billingCycle === 'annual' ? totalAmount : subtotal;
+  const recurringAmount = billingCycle === 'annual' ? totalAmount : subtotal;
 
-  const isUpgrade =
-    targetPlanDef.displayOrder > currentPlanDef.displayOrder;
-  const isDowngrade =
-    targetPlanDef.displayOrder < currentPlanDef.displayOrder;
+  const isUpgrade = targetPlanDef.displayOrder > currentPlanDef.displayOrder;
+  const isDowngrade = targetPlanDef.displayOrder < currentPlanDef.displayOrder;
 
   return {
     planId: targetPlanDef.id,

@@ -18,7 +18,6 @@ interface AuthenticatedRequest extends FastifyRequest {
   user: { id: string };
 }
 
-
 @Controller('crm/notifications')
 @UseGuards(SupabaseAuthGuard, TenantGuard)
 export class NotificationsController {

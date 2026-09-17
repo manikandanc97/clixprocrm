@@ -4,34 +4,34 @@
       "endpointName": "Lightweight Health Check",
       "endpoint": "/health",
       "vus": 1,
-      "totalRequests": 5732,
-      "successfulRequests": 5732,
+      "totalRequests": 6750,
+      "successfulRequests": 6750,
       "failedRequests": 0,
       "errorRatePercent": 0,
       "durationSeconds": 5,
-      "rps": 1146.4,
+      "rps": 1350,
       "latency": {
-        "min": 0.31,
-        "avg": 0.8,
-        "p50": 0.64,
-        "p90": 1.24,
-        "p95": 1.43,
-        "p99": 1.94,
-        "max": 10.41
+        "min": 0.3,
+        "avg": 0.68,
+        "p50": 0.48,
+        "p90": 1.22,
+        "p95": 1.4,
+        "p99": 1.98,
+        "max": 12.05
       },
       "memoryBeforeMb": {
-        "rss": 549.86,
-        "heapUsed": 331.26,
-        "heapTotal": 456.54
+        "rss": 419.25,
+        "heapUsed": 325.35,
+        "heapTotal": 329.04
       },
       "memoryAfterMb": {
-        "rss": 622.18,
-        "heapUsed": 413.11,
-        "heapTotal": 530.17
+        "rss": 603.34,
+        "heapUsed": 341.21,
+        "heapTotal": 537.99
       },
-      "cpuUsagePercent": 7.13,
+      "cpuUsagePercent": 8.2,
       "statusCodes": {
-        "200": 5732
+        "200": 6750
       },
       "tag": "MEASURED"
     },
@@ -39,34 +39,34 @@
       "endpointName": "Dashboard",
       "endpoint": "/crm/dashboard",
       "vus": 1,
-      "totalRequests": 2,
-      "successfulRequests": 2,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 5.48,
-      "rps": 0.36,
+      "totalRequests": 1,
+      "successfulRequests": 0,
+      "failedRequests": 1,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.02,
+      "rps": 0.07,
       "latency": {
-        "min": 2659.87,
-        "avg": 2739.79,
-        "p50": 2659.87,
-        "p90": 2819.72,
-        "p95": 2819.72,
-        "p99": 2819.72,
-        "max": 2819.72
+        "min": 15015.96,
+        "avg": 15015.96,
+        "p50": 15015.96,
+        "p90": 15015.96,
+        "p95": 15015.96,
+        "p99": 15015.96,
+        "max": 15015.96
       },
       "memoryBeforeMb": {
-        "rss": 622.24,
-        "heapUsed": 413.13,
-        "heapTotal": 530.17
+        "rss": 603.34,
+        "heapUsed": 341.23,
+        "heapTotal": 537.99
       },
       "memoryAfterMb": {
-        "rss": 622.5,
-        "heapUsed": 413.29,
-        "heapTotal": 530.17
+        "rss": 419.71,
+        "heapUsed": 324.13,
+        "heapTotal": 328.99
       },
-      "cpuUsagePercent": 0,
+      "cpuUsagePercent": 0.52,
       "statusCodes": {
-        "200": 2
+        "TIMEOUT": 1
       },
       "tag": "MEASURED"
     },
@@ -74,34 +74,35 @@
       "endpointName": "Employee Dashboard",
       "endpoint": "/crm/dashboard/employee",
       "vus": 1,
-      "totalRequests": 3,
-      "successfulRequests": 3,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 5.21,
-      "rps": 0.58,
+      "totalRequests": 2,
+      "successfulRequests": 1,
+      "failedRequests": 1,
+      "errorRatePercent": 50,
+      "durationSeconds": 16.69,
+      "rps": 0.12,
       "latency": {
-        "min": 1673.34,
-        "avg": 1736.44,
-        "p50": 1765.66,
-        "p90": 1770.32,
-        "p95": 1770.32,
-        "p99": 1770.32,
-        "max": 1770.32
+        "min": 1683.3,
+        "avg": 8343.82,
+        "p50": 1683.3,
+        "p90": 15004.33,
+        "p95": 15004.33,
+        "p99": 15004.33,
+        "max": 15004.33
       },
       "memoryBeforeMb": {
-        "rss": 622.5,
-        "heapUsed": 413.3,
-        "heapTotal": 530.17
+        "rss": 419.71,
+        "heapUsed": 324.14,
+        "heapTotal": 328.99
       },
       "memoryAfterMb": {
-        "rss": 422.45,
-        "heapUsed": 326.03,
-        "heapTotal": 329.04
+        "rss": 422.37,
+        "heapUsed": 323.81,
+        "heapTotal": 329.99
       },
-      "cpuUsagePercent": 1.53,
+      "cpuUsagePercent": 0.02,
       "statusCodes": {
-        "200": 3
+        "200": 1,
+        "TIMEOUT": 1
       },
       "tag": "MEASURED"
     },
@@ -109,34 +110,34 @@
       "endpointName": "Pipeline",
       "endpoint": "/crm/pipeline",
       "vus": 1,
-      "totalRequests": 3,
-      "successfulRequests": 3,
+      "totalRequests": 1,
+      "successfulRequests": 1,
       "failedRequests": 0,
       "errorRatePercent": 0,
-      "durationSeconds": 5.51,
-      "rps": 0.54,
+      "durationSeconds": 10.95,
+      "rps": 0.09,
       "latency": {
-        "min": 1374.12,
-        "avg": 1837.21,
-        "p50": 1545.4,
-        "p90": 2592.09,
-        "p95": 2592.09,
-        "p99": 2592.09,
-        "max": 2592.09
+        "min": 10950.44,
+        "avg": 10950.44,
+        "p50": 10950.44,
+        "p90": 10950.44,
+        "p95": 10950.44,
+        "p99": 10950.44,
+        "max": 10950.44
       },
       "memoryBeforeMb": {
-        "rss": 422.45,
-        "heapUsed": 326.04,
-        "heapTotal": 329.04
+        "rss": 422.38,
+        "heapUsed": 323.82,
+        "heapTotal": 329.99
       },
       "memoryAfterMb": {
-        "rss": 422.75,
-        "heapUsed": 326.28,
-        "heapTotal": 329.04
+        "rss": 422.48,
+        "heapUsed": 324.15,
+        "heapTotal": 329.99
       },
       "cpuUsagePercent": 0,
       "statusCodes": {
-        "200": 3
+        "200": 1
       },
       "tag": "MEASURED"
     },
@@ -144,34 +145,34 @@
       "endpointName": "Customers (Contacts)",
       "endpoint": "/crm/customers?page=1&limit=20",
       "vus": 1,
-      "totalRequests": 2,
-      "successfulRequests": 2,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 12.9,
-      "rps": 0.16,
+      "totalRequests": 1,
+      "successfulRequests": 0,
+      "failedRequests": 1,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.01,
+      "rps": 0.07,
       "latency": {
-        "min": 1739,
-        "avg": 6449.59,
-        "p50": 1739,
-        "p90": 11160.19,
-        "p95": 11160.19,
-        "p99": 11160.19,
-        "max": 11160.19
+        "min": 15009.36,
+        "avg": 15009.36,
+        "p50": 15009.36,
+        "p90": 15009.36,
+        "p95": 15009.36,
+        "p99": 15009.36,
+        "max": 15009.36
       },
       "memoryBeforeMb": {
-        "rss": 422.81,
-        "heapUsed": 326.28,
-        "heapTotal": 329.04
+        "rss": 422.49,
+        "heapUsed": 324.16,
+        "heapTotal": 329.99
       },
       "memoryAfterMb": {
-        "rss": 423.13,
-        "heapUsed": 326.43,
-        "heapTotal": 329.04
+        "rss": 422.64,
+        "heapUsed": 324.13,
+        "heapTotal": 330.24
       },
       "cpuUsagePercent": 0,
       "statusCodes": {
-        "200": 2
+        "TIMEOUT": 1
       },
       "tag": "MEASURED"
     },
@@ -179,34 +180,34 @@
       "endpointName": "Tasks",
       "endpoint": "/crm/tasks?page=1&limit=20",
       "vus": 1,
-      "totalRequests": 3,
-      "successfulRequests": 3,
+      "totalRequests": 1,
+      "successfulRequests": 1,
       "failedRequests": 0,
       "errorRatePercent": 0,
-      "durationSeconds": 5.87,
-      "rps": 0.51,
+      "durationSeconds": 8.09,
+      "rps": 0.12,
       "latency": {
-        "min": 1830.19,
-        "avg": 1957.23,
-        "p50": 1857.44,
-        "p90": 2184.06,
-        "p95": 2184.06,
-        "p99": 2184.06,
-        "max": 2184.06
+        "min": 8091.82,
+        "avg": 8091.82,
+        "p50": 8091.82,
+        "p90": 8091.82,
+        "p95": 8091.82,
+        "p99": 8091.82,
+        "max": 8091.82
       },
       "memoryBeforeMb": {
-        "rss": 423.18,
-        "heapUsed": 326.43,
-        "heapTotal": 329.04
+        "rss": 422.64,
+        "heapUsed": 324.14,
+        "heapTotal": 330.24
       },
       "memoryAfterMb": {
-        "rss": 423.66,
-        "heapUsed": 325.94,
-        "heapTotal": 330.04
+        "rss": 422.72,
+        "heapUsed": 324.23,
+        "heapTotal": 330.24
       },
-      "cpuUsagePercent": 0,
+      "cpuUsagePercent": 0.02,
       "statusCodes": {
-        "200": 3
+        "200": 1
       },
       "tag": "MEASURED"
     },
@@ -214,34 +215,34 @@
       "endpointName": "Leads",
       "endpoint": "/crm/leads?page=1&limit=20",
       "vus": 1,
-      "totalRequests": 3,
-      "successfulRequests": 3,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 6.77,
-      "rps": 0.44,
+      "totalRequests": 1,
+      "successfulRequests": 0,
+      "failedRequests": 1,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.01,
+      "rps": 0.07,
       "latency": {
-        "min": 1868.66,
-        "avg": 2255.24,
-        "p50": 2374.03,
-        "p90": 2523.03,
-        "p95": 2523.03,
-        "p99": 2523.03,
-        "max": 2523.03
+        "min": 15005.64,
+        "avg": 15005.64,
+        "p50": 15005.64,
+        "p90": 15005.64,
+        "p95": 15005.64,
+        "p99": 15005.64,
+        "max": 15005.64
       },
       "memoryBeforeMb": {
-        "rss": 423.66,
-        "heapUsed": 325.94,
-        "heapTotal": 330.04
+        "rss": 422.72,
+        "heapUsed": 324.23,
+        "heapTotal": 330.24
       },
       "memoryAfterMb": {
-        "rss": 423.89,
-        "heapUsed": 326.18,
-        "heapTotal": 330.04
+        "rss": 422.85,
+        "heapUsed": 324.37,
+        "heapTotal": 330.24
       },
       "cpuUsagePercent": 0,
       "statusCodes": {
-        "200": 3
+        "TIMEOUT": 1
       },
       "tag": "MEASURED"
     },
@@ -249,34 +250,34 @@
       "endpointName": "Global Search",
       "endpoint": "/crm/search?q=test",
       "vus": 1,
-      "totalRequests": 2,
-      "successfulRequests": 2,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 5.39,
-      "rps": 0.37,
+      "totalRequests": 1,
+      "successfulRequests": 0,
+      "failedRequests": 1,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.01,
+      "rps": 0.07,
       "latency": {
-        "min": 2252.34,
-        "avg": 2696.39,
-        "p50": 2252.34,
-        "p90": 3140.43,
-        "p95": 3140.43,
-        "p99": 3140.43,
-        "max": 3140.43
+        "min": 15005.5,
+        "avg": 15005.5,
+        "p50": 15005.5,
+        "p90": 15005.5,
+        "p95": 15005.5,
+        "p99": 15005.5,
+        "max": 15005.5
       },
       "memoryBeforeMb": {
-        "rss": 423.89,
-        "heapUsed": 326.19,
-        "heapTotal": 330.04
+        "rss": 422.85,
+        "heapUsed": 324.37,
+        "heapTotal": 330.24
       },
       "memoryAfterMb": {
-        "rss": 424.02,
-        "heapUsed": 326.32,
-        "heapTotal": 330.04
+        "rss": 423.03,
+        "heapUsed": 324.54,
+        "heapTotal": 330.24
       },
       "cpuUsagePercent": 0,
       "statusCodes": {
-        "200": 2
+        "TIMEOUT": 1
       },
       "tag": "MEASURED"
     }
@@ -286,34 +287,34 @@
       "endpointName": "Health Check (Fastify Baseline)",
       "endpoint": "/health",
       "vus": 5,
-      "totalRequests": 11257,
-      "successfulRequests": 11257,
+      "totalRequests": 12375,
+      "successfulRequests": 12375,
       "failedRequests": 0,
       "errorRatePercent": 0,
       "durationSeconds": 5,
-      "rps": 2251.4,
+      "rps": 2475,
       "latency": {
-        "min": 0.82,
-        "avg": 2.16,
-        "p50": 1.79,
-        "p90": 3.57,
-        "p95": 4.14,
-        "p99": 6.45,
-        "max": 20.3
+        "min": 0.81,
+        "avg": 1.96,
+        "p50": 1.54,
+        "p90": 3.41,
+        "p95": 4.01,
+        "p99": 6.35,
+        "max": 16.83
       },
       "memoryBeforeMb": {
-        "rss": 424.08,
-        "heapUsed": 326.34,
-        "heapTotal": 330.04
+        "rss": 423.03,
+        "heapUsed": 324.55,
+        "heapTotal": 330.24
       },
       "memoryAfterMb": {
-        "rss": 617.68,
-        "heapUsed": 418.22,
-        "heapTotal": 542.61
+        "rss": 613.21,
+        "heapUsed": 456.07,
+        "heapTotal": 544.01
       },
-      "cpuUsagePercent": 11.2,
+      "cpuUsagePercent": 11.14,
       "statusCodes": {
-        "200": 11257
+        "200": 12375
       },
       "tag": "MEASURED"
     },
@@ -321,34 +322,34 @@
       "endpointName": "Health Check (Fastify Baseline)",
       "endpoint": "/health",
       "vus": 10,
-      "totalRequests": 15300,
-      "successfulRequests": 15300,
+      "totalRequests": 15641,
+      "successfulRequests": 15641,
       "failedRequests": 0,
       "errorRatePercent": 0,
-      "durationSeconds": 5,
-      "rps": 3060,
+      "durationSeconds": 5.01,
+      "rps": 3121.96,
       "latency": {
-        "min": 0.96,
-        "avg": 3.23,
-        "p50": 2.74,
-        "p90": 4.88,
-        "p95": 5.61,
-        "p99": 13.2,
-        "max": 18.03
+        "min": 1.49,
+        "avg": 3.16,
+        "p50": 2.49,
+        "p90": 5.06,
+        "p95": 5.84,
+        "p99": 14.15,
+        "max": 19.63
       },
       "memoryBeforeMb": {
-        "rss": 617.68,
-        "heapUsed": 418.23,
-        "heapTotal": 542.61
+        "rss": 613.21,
+        "heapUsed": 456.08,
+        "heapTotal": 544.01
       },
       "memoryAfterMb": {
-        "rss": 881.02,
-        "heapUsed": 685.41,
-        "heapTotal": 800.05
+        "rss": 898.53,
+        "heapUsed": 706.56,
+        "heapTotal": 820.94
       },
-      "cpuUsagePercent": 9.53,
+      "cpuUsagePercent": 9.49,
       "statusCodes": {
-        "200": 15300
+        "200": 15641
       },
       "tag": "MEASURED"
     },
@@ -356,34 +357,34 @@
       "endpointName": "Health Check (Fastify Baseline)",
       "endpoint": "/health",
       "vus": 25,
-      "totalRequests": 14904,
-      "successfulRequests": 14904,
+      "totalRequests": 19248,
+      "successfulRequests": 19248,
       "failedRequests": 0,
       "errorRatePercent": 0,
       "durationSeconds": 5,
-      "rps": 2980.8,
+      "rps": 3849.6,
       "latency": {
-        "min": 2.35,
-        "avg": 8.34,
-        "p50": 7.88,
-        "p90": 10.22,
-        "p95": 13.22,
-        "p99": 21.42,
-        "max": 50.93
+        "min": 3.87,
+        "avg": 6.46,
+        "p50": 5.68,
+        "p90": 9.34,
+        "p95": 11.85,
+        "p99": 18.49,
+        "max": 37.41
       },
       "memoryBeforeMb": {
-        "rss": 881.02,
-        "heapUsed": 685.42,
-        "heapTotal": 800.05
+        "rss": 898.53,
+        "heapUsed": 706.57,
+        "heapTotal": 820.94
       },
       "memoryAfterMb": {
-        "rss": 1145.6,
-        "heapUsed": 948.98,
-        "heapTotal": 1056.55
+        "rss": 1241.16,
+        "heapUsed": 1042.16,
+        "heapTotal": 1155.16
       },
-      "cpuUsagePercent": 9.46,
+      "cpuUsagePercent": 9.79,
       "statusCodes": {
-        "200": 14904
+        "200": 19248
       },
       "tag": "MEASURED"
     },
@@ -391,34 +392,34 @@
       "endpointName": "Health Check (Fastify Baseline)",
       "endpoint": "/health",
       "vus": 50,
-      "totalRequests": 15514,
-      "successfulRequests": 15514,
+      "totalRequests": 21765,
+      "successfulRequests": 21765,
       "failedRequests": 0,
       "errorRatePercent": 0,
-      "durationSeconds": 5.01,
-      "rps": 3096.61,
+      "durationSeconds": 5,
+      "rps": 4353,
       "latency": {
-        "min": 5.3,
-        "avg": 16.08,
-        "p50": 14.9,
-        "p90": 19.93,
-        "p95": 27.3,
-        "p99": 38.95,
-        "max": 62.51
+        "min": 4.25,
+        "avg": 11.46,
+        "p50": 9.94,
+        "p90": 15.26,
+        "p95": 20.9,
+        "p99": 25.92,
+        "max": 96.05
       },
       "memoryBeforeMb": {
-        "rss": 1145.6,
-        "heapUsed": 948.99,
-        "heapTotal": 1056.55
+        "rss": 1241.16,
+        "heapUsed": 1042.17,
+        "heapTotal": 1155.16
       },
       "memoryAfterMb": {
-        "rss": 1418.3,
-        "heapUsed": 1233.68,
-        "heapTotal": 1321.48
+        "rss": 1589.45,
+        "heapUsed": 474.38,
+        "heapTotal": 1492.64
       },
-      "cpuUsagePercent": 9.51,
+      "cpuUsagePercent": 11.12,
       "statusCodes": {
-        "200": 15514
+        "200": 21765
       },
       "tag": "MEASURED"
     },
@@ -426,34 +427,34 @@
       "endpointName": "Health Check (Fastify Baseline)",
       "endpoint": "/health",
       "vus": 100,
-      "totalRequests": 14047,
-      "successfulRequests": 14047,
+      "totalRequests": 22303,
+      "successfulRequests": 22303,
       "failedRequests": 0,
       "errorRatePercent": 0,
       "durationSeconds": 5.01,
-      "rps": 2803.79,
+      "rps": 4451.7,
       "latency": {
-        "min": 9.23,
-        "avg": 35.55,
-        "p50": 31.37,
-        "p90": 46.24,
-        "p95": 51.96,
-        "p99": 118.97,
-        "max": 207.69
+        "min": 8.93,
+        "avg": 22.39,
+        "p50": 20.54,
+        "p90": 30.4,
+        "p95": 32.11,
+        "p99": 40.38,
+        "max": 90.9
       },
       "memoryBeforeMb": {
-        "rss": 1418.3,
-        "heapUsed": 1233.68,
-        "heapTotal": 1321.48
+        "rss": 1589.45,
+        "heapUsed": 474.39,
+        "heapTotal": 1492.64
       },
       "memoryAfterMb": {
-        "rss": 1582.9,
-        "heapUsed": 490.15,
-        "heapTotal": 1476.24
+        "rss": 1598.23,
+        "heapUsed": 866.41,
+        "heapTotal": 1494.83
       },
-      "cpuUsagePercent": 10.53,
+      "cpuUsagePercent": 9.62,
       "statusCodes": {
-        "200": 14047
+        "200": 22303
       },
       "tag": "MEASURED"
     },
@@ -462,881 +463,173 @@
       "endpoint": "/crm/dashboard",
       "vus": 5,
       "totalRequests": 5,
-      "successfulRequests": 5,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 7.27,
-      "rps": 0.69,
-      "latency": {
-        "min": 5893.58,
-        "avg": 6753.42,
-        "p50": 7133.49,
-        "p90": 7267.4,
-        "p95": 7267.4,
-        "p99": 7267.4,
-        "max": 7267.4
-      },
-      "memoryBeforeMb": {
-        "rss": 1582.9,
-        "heapUsed": 490.15,
-        "heapTotal": 1476.24
-      },
-      "memoryAfterMb": {
-        "rss": 1582.9,
-        "heapUsed": 490.48,
-        "heapTotal": 1476.24
-      },
-      "cpuUsagePercent": 0,
-      "statusCodes": {
-        "200": 5
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Dashboard (7-Query Aggregation)",
-      "endpoint": "/crm/dashboard",
-      "vus": 10,
-      "totalRequests": 10,
-      "successfulRequests": 10,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 12.32,
-      "rps": 0.81,
-      "latency": {
-        "min": 6828.73,
-        "avg": 9689.93,
-        "p50": 7560.31,
-        "p90": 12187.13,
-        "p95": 12314.35,
-        "p99": 12314.35,
-        "max": 12314.35
-      },
-      "memoryBeforeMb": {
-        "rss": 1582.9,
-        "heapUsed": 490.48,
-        "heapTotal": 1476.24
-      },
-      "memoryAfterMb": {
-        "rss": 428.36,
-        "heapUsed": 324.66,
-        "heapTotal": 328.11
-      },
-      "cpuUsagePercent": 0.84,
-      "statusCodes": {
-        "200": 10
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Dashboard (7-Query Aggregation)",
-      "endpoint": "/crm/dashboard",
-      "vus": 25,
-      "totalRequests": 35,
-      "successfulRequests": 35,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 16.24,
-      "rps": 2.16,
-      "latency": {
-        "min": 3737.88,
-        "avg": 8313.81,
-        "p50": 8796.26,
-        "p90": 11785.94,
-        "p95": 12053.59,
-        "p99": 12257.99,
-        "max": 12257.99
-      },
-      "memoryBeforeMb": {
-        "rss": 428.36,
-        "heapUsed": 324.67,
-        "heapTotal": 328.11
-      },
-      "memoryAfterMb": {
-        "rss": 430.74,
-        "heapUsed": 325.68,
-        "heapTotal": 328.11
-      },
-      "cpuUsagePercent": 0.02,
-      "statusCodes": {
-        "200": 35
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Dashboard (7-Query Aggregation)",
-      "endpoint": "/crm/dashboard",
-      "vus": 50,
-      "totalRequests": 60,
-      "successfulRequests": 40,
-      "failedRequests": 20,
-      "errorRatePercent": 33.33,
-      "durationSeconds": 14.77,
-      "rps": 4.06,
-      "latency": {
-        "min": 3279.75,
-        "avg": 8642.32,
-        "p50": 10023.99,
-        "p90": 11192.98,
-        "p95": 11235.47,
-        "p99": 11483.53,
-        "max": 11483.53
-      },
-      "memoryBeforeMb": {
-        "rss": 430.74,
-        "heapUsed": 325.69,
-        "heapTotal": 328.11
-      },
-      "memoryAfterMb": {
-        "rss": 432.38,
-        "heapUsed": 327.15,
-        "heapTotal": 330.86
-      },
-      "cpuUsagePercent": 0.03,
-      "statusCodes": {
-        "200": 40,
-        "500": 20
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Dashboard (7-Query Aggregation)",
-      "endpoint": "/crm/dashboard",
-      "vus": 100,
-      "totalRequests": 110,
-      "successfulRequests": 40,
-      "failedRequests": 70,
-      "errorRatePercent": 63.64,
-      "durationSeconds": 16.44,
-      "rps": 6.69,
-      "latency": {
-        "min": 3780.91,
-        "avg": 9643.28,
-        "p50": 10054.49,
-        "p90": 11564.63,
-        "p95": 11903.83,
-        "p99": 12528.43,
-        "max": 12548.57
-      },
-      "memoryBeforeMb": {
-        "rss": 432.38,
-        "heapUsed": 327.15,
-        "heapTotal": 330.86
-      },
-      "memoryAfterMb": {
-        "rss": 435.11,
-        "heapUsed": 330.33,
-        "heapTotal": 333.86
-      },
-      "cpuUsagePercent": 0.06,
-      "statusCodes": {
-        "200": 40,
-        "500": 70
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Customers (Paginated Index Scan)",
-      "endpoint": "/crm/customers?page=1&limit=20",
-      "vus": 5,
-      "totalRequests": 10,
-      "successfulRequests": 10,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 10.47,
-      "rps": 0.96,
-      "latency": {
-        "min": 1697.19,
-        "avg": 5085.76,
-        "p50": 1818.63,
-        "p90": 8469.94,
-        "p95": 8646.73,
-        "p99": 8646.73,
-        "max": 8646.73
-      },
-      "memoryBeforeMb": {
-        "rss": 435.13,
-        "heapUsed": 330.34,
-        "heapTotal": 333.86
-      },
-      "memoryAfterMb": {
-        "rss": 437.02,
-        "heapUsed": 332.36,
-        "heapTotal": 336.74
-      },
-      "cpuUsagePercent": 0.02,
-      "statusCodes": {
-        "200": 10
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Customers (Paginated Index Scan)",
-      "endpoint": "/crm/customers?page=1&limit=20",
-      "vus": 10,
-      "totalRequests": 29,
-      "successfulRequests": 29,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 6.9,
-      "rps": 4.2,
-      "latency": {
-        "min": 1842.69,
-        "avg": 2228.95,
-        "p50": 2094.74,
-        "p90": 2923.76,
-        "p95": 3010.26,
-        "p99": 3017.8,
-        "max": 3017.8
-      },
-      "memoryBeforeMb": {
-        "rss": 437.02,
-        "heapUsed": 332.36,
-        "heapTotal": 336.74
-      },
-      "memoryAfterMb": {
-        "rss": 437.95,
-        "heapUsed": 332.32,
-        "heapTotal": 334.74
-      },
-      "cpuUsagePercent": 0.02,
-      "statusCodes": {
-        "200": 29
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Customers (Paginated Index Scan)",
-      "endpoint": "/crm/customers?page=1&limit=20",
-      "vus": 25,
-      "totalRequests": 45,
-      "successfulRequests": 45,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 9.33,
-      "rps": 4.82,
-      "latency": {
-        "min": 1651.52,
-        "avg": 4079.91,
-        "p50": 4119.53,
-        "p90": 5840.58,
-        "p95": 5850.67,
-        "p99": 5882.69,
-        "max": 5882.69
-      },
-      "memoryBeforeMb": {
-        "rss": 437.95,
-        "heapUsed": 332.33,
-        "heapTotal": 334.74
-      },
-      "memoryAfterMb": {
-        "rss": 438.48,
-        "heapUsed": 333.5,
-        "heapTotal": 335.99
-      },
-      "cpuUsagePercent": 0.04,
-      "statusCodes": {
-        "200": 45
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Customers (Paginated Index Scan)",
-      "endpoint": "/crm/customers?page=1&limit=20",
-      "vus": 50,
-      "totalRequests": 70,
-      "successfulRequests": 70,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 13.59,
-      "rps": 5.15,
-      "latency": {
-        "min": 1713.14,
-        "avg": 6951.2,
-        "p50": 8034.5,
-        "p90": 9838.76,
-        "p95": 9879.83,
-        "p99": 10205.17,
-        "max": 10205.17
-      },
-      "memoryBeforeMb": {
-        "rss": 438.48,
-        "heapUsed": 333.5,
-        "heapTotal": 335.99
-      },
-      "memoryAfterMb": {
-        "rss": 440.3,
-        "heapUsed": 335.48,
-        "heapTotal": 338.49
-      },
-      "cpuUsagePercent": 0.06,
-      "statusCodes": {
-        "200": 70
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Customers (Paginated Index Scan)",
-      "endpoint": "/crm/customers?page=1&limit=20",
-      "vus": 100,
-      "totalRequests": 120,
-      "successfulRequests": 70,
-      "failedRequests": 50,
-      "errorRatePercent": 41.67,
-      "durationSeconds": 15.79,
-      "rps": 7.6,
-      "latency": {
-        "min": 1940.37,
-        "avg": 8759.88,
-        "p50": 10051.48,
-        "p90": 11031.62,
-        "p95": 11160.25,
-        "p99": 11309.08,
-        "max": 11309.65
-      },
-      "memoryBeforeMb": {
-        "rss": 440.3,
-        "heapUsed": 335.49,
-        "heapTotal": 338.49
-      },
-      "memoryAfterMb": {
-        "rss": 443.4,
-        "heapUsed": 338.62,
-        "heapTotal": 341.49
-      },
-      "cpuUsagePercent": 0.06,
-      "statusCodes": {
-        "200": 70,
-        "500": 50
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Tasks (Filtered Activity Index)",
-      "endpoint": "/crm/tasks?page=1&limit=20",
-      "vus": 5,
-      "totalRequests": 10,
-      "successfulRequests": 10,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 5.98,
-      "rps": 1.67,
-      "latency": {
-        "min": 2379.47,
-        "avg": 2792.93,
-        "p50": 2625.1,
-        "p90": 3281.33,
-        "p95": 3355.8,
-        "p99": 3355.8,
-        "max": 3355.8
-      },
-      "memoryBeforeMb": {
-        "rss": 443.4,
-        "heapUsed": 338.63,
-        "heapTotal": 341.49
-      },
-      "memoryAfterMb": {
-        "rss": 443.56,
-        "heapUsed": 338.81,
-        "heapTotal": 340.74
-      },
-      "cpuUsagePercent": 0.02,
-      "statusCodes": {
-        "200": 10
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Tasks (Filtered Activity Index)",
-      "endpoint": "/crm/tasks?page=1&limit=20",
-      "vus": 10,
-      "totalRequests": 10,
-      "successfulRequests": 10,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 11.33,
-      "rps": 0.88,
-      "latency": {
-        "min": 9990.18,
-        "avg": 10708.38,
-        "p50": 10661.63,
-        "p90": 11163.19,
-        "p95": 11330.86,
-        "p99": 11330.86,
-        "max": 11330.86
-      },
-      "memoryBeforeMb": {
-        "rss": 443.56,
-        "heapUsed": 338.82,
-        "heapTotal": 340.74
-      },
-      "memoryAfterMb": {
-        "rss": 443.84,
-        "heapUsed": 338.96,
-        "heapTotal": 340.99
-      },
-      "cpuUsagePercent": 0,
-      "statusCodes": {
-        "200": 10
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Tasks (Filtered Activity Index)",
-      "endpoint": "/crm/tasks?page=1&limit=20",
-      "vus": 25,
-      "totalRequests": 45,
-      "successfulRequests": 45,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 10.62,
-      "rps": 4.24,
-      "latency": {
-        "min": 1774.24,
-        "avg": 4384.14,
-        "p50": 4960.66,
-        "p90": 5931.05,
-        "p95": 6004.68,
-        "p99": 6594.96,
-        "max": 6594.96
-      },
-      "memoryBeforeMb": {
-        "rss": 443.84,
-        "heapUsed": 338.97,
-        "heapTotal": 340.99
-      },
-      "memoryAfterMb": {
-        "rss": 444.86,
-        "heapUsed": 340,
-        "heapTotal": 342.99
-      },
-      "cpuUsagePercent": 0.02,
-      "statusCodes": {
-        "200": 45
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Tasks (Filtered Activity Index)",
-      "endpoint": "/crm/tasks?page=1&limit=20",
-      "vus": 50,
-      "totalRequests": 70,
-      "successfulRequests": 70,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 15.5,
-      "rps": 4.52,
-      "latency": {
-        "min": 1719.49,
-        "avg": 7607.51,
-        "p50": 8623.41,
-        "p90": 10844.11,
-        "p95": 11282.16,
-        "p99": 11505.18,
-        "max": 11505.18
-      },
-      "memoryBeforeMb": {
-        "rss": 444.86,
-        "heapUsed": 340.01,
-        "heapTotal": 342.99
-      },
-      "memoryAfterMb": {
-        "rss": 447.21,
-        "heapUsed": 341.74,
-        "heapTotal": 343.74
-      },
-      "cpuUsagePercent": 0.03,
-      "statusCodes": {
-        "200": 70
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Tasks (Filtered Activity Index)",
-      "endpoint": "/crm/tasks?page=1&limit=20",
-      "vus": 100,
-      "totalRequests": 120,
-      "successfulRequests": 80,
-      "failedRequests": 40,
-      "errorRatePercent": 33.33,
-      "durationSeconds": 15.25,
-      "rps": 7.87,
-      "latency": {
-        "min": 1771.82,
-        "avg": 8270.81,
-        "p50": 10044.32,
-        "p90": 11050.43,
-        "p95": 11273,
-        "p99": 11595.45,
-        "max": 11727.91
-      },
-      "memoryBeforeMb": {
-        "rss": 447.21,
-        "heapUsed": 341.74,
-        "heapTotal": 343.74
-      },
-      "memoryAfterMb": {
-        "rss": 450.79,
-        "heapUsed": 344.86,
-        "heapTotal": 348.99
-      },
-      "cpuUsagePercent": 0.03,
-      "statusCodes": {
-        "200": 80,
-        "500": 40
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Leads (Filtered CRM Index)",
-      "endpoint": "/crm/leads?page=1&limit=20",
-      "vus": 5,
-      "totalRequests": 15,
-      "successfulRequests": 15,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 6.31,
-      "rps": 2.38,
-      "latency": {
-        "min": 1744.14,
-        "avg": 1924.51,
-        "p50": 1827.53,
-        "p90": 2103.71,
-        "p95": 2679.43,
-        "p99": 2679.43,
-        "max": 2679.43
-      },
-      "memoryBeforeMb": {
-        "rss": 450.79,
-        "heapUsed": 344.87,
-        "heapTotal": 348.99
-      },
-      "memoryAfterMb": {
-        "rss": 451.06,
-        "heapUsed": 345.31,
-        "heapTotal": 347.74
-      },
-      "cpuUsagePercent": 0,
-      "statusCodes": {
-        "200": 15
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Leads (Filtered CRM Index)",
-      "endpoint": "/crm/leads?page=1&limit=20",
-      "vus": 10,
-      "totalRequests": 20,
-      "successfulRequests": 20,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 13.96,
-      "rps": 1.43,
-      "latency": {
-        "min": 2541.88,
-        "avg": 5287.88,
-        "p50": 2793.07,
-        "p90": 10586.22,
-        "p95": 10920.05,
-        "p99": 11408.44,
-        "max": 11408.44
-      },
-      "memoryBeforeMb": {
-        "rss": 451.06,
-        "heapUsed": 345.32,
-        "heapTotal": 347.74
-      },
-      "memoryAfterMb": {
-        "rss": 451.54,
-        "heapUsed": 345.71,
-        "heapTotal": 348.99
-      },
-      "cpuUsagePercent": 0,
-      "statusCodes": {
-        "200": 20
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Leads (Filtered CRM Index)",
-      "endpoint": "/crm/leads?page=1&limit=20",
-      "vus": 25,
-      "totalRequests": 43,
-      "successfulRequests": 43,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 10.75,
-      "rps": 4,
-      "latency": {
-        "min": 1678.03,
-        "avg": 4471.71,
-        "p50": 4554.36,
-        "p90": 6189.12,
-        "p95": 6444.52,
-        "p99": 6664.43,
-        "max": 6664.43
-      },
-      "memoryBeforeMb": {
-        "rss": 451.54,
-        "heapUsed": 345.72,
-        "heapTotal": 348.99
-      },
-      "memoryAfterMb": {
-        "rss": 453.55,
-        "heapUsed": 347.28,
-        "heapTotal": 350.74
-      },
-      "cpuUsagePercent": 0.05,
-      "statusCodes": {
-        "200": 43
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Leads (Filtered CRM Index)",
-      "endpoint": "/crm/leads?page=1&limit=20",
-      "vus": 50,
-      "totalRequests": 70,
-      "successfulRequests": 70,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 16.18,
-      "rps": 4.33,
-      "latency": {
-        "min": 2146.34,
-        "avg": 7973.82,
-        "p50": 9039.44,
-        "p90": 11167.95,
-        "p95": 11388.47,
-        "p99": 11759.24,
-        "max": 11759.24
-      },
-      "memoryBeforeMb": {
-        "rss": 453.55,
-        "heapUsed": 347.29,
-        "heapTotal": 350.74
-      },
-      "memoryAfterMb": {
-        "rss": 456.14,
-        "heapUsed": 349.95,
-        "heapTotal": 351.99
-      },
-      "cpuUsagePercent": 0.03,
-      "statusCodes": {
-        "200": 70
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Leads (Filtered CRM Index)",
-      "endpoint": "/crm/leads?page=1&limit=20",
-      "vus": 100,
-      "totalRequests": 120,
-      "successfulRequests": 72,
-      "failedRequests": 48,
-      "errorRatePercent": 40,
-      "durationSeconds": 16.04,
-      "rps": 7.48,
-      "latency": {
-        "min": 1805.32,
-        "avg": 8647.38,
-        "p50": 10028.55,
-        "p90": 10846.85,
-        "p95": 11300.47,
-        "p99": 12258.87,
-        "max": 12671.98
-      },
-      "memoryBeforeMb": {
-        "rss": 456.14,
-        "heapUsed": 349.95,
-        "heapTotal": 351.99
-      },
-      "memoryAfterMb": {
-        "rss": 458.63,
-        "heapUsed": 327.97,
-        "heapTotal": 362.99
-      },
-      "cpuUsagePercent": 0.26,
-      "statusCodes": {
-        "200": 72,
-        "500": 48
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Global Search (Multi-Entity Search)",
-      "endpoint": "/crm/search?q=test",
-      "vus": 5,
-      "totalRequests": 10,
-      "successfulRequests": 10,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 6.4,
-      "rps": 1.56,
-      "latency": {
-        "min": 2824.77,
-        "avg": 3105.34,
-        "p50": 3081.71,
-        "p90": 3278.76,
-        "p95": 3571.24,
-        "p99": 3571.24,
-        "max": 3571.24
-      },
-      "memoryBeforeMb": {
-        "rss": 458.68,
-        "heapUsed": 327.97,
-        "heapTotal": 362.99
-      },
-      "memoryAfterMb": {
-        "rss": 460.24,
-        "heapUsed": 328.62,
-        "heapTotal": 362.99
-      },
-      "cpuUsagePercent": 0.04,
-      "statusCodes": {
-        "200": 10
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Global Search (Multi-Entity Search)",
-      "endpoint": "/crm/search?q=test",
-      "vus": 10,
-      "totalRequests": 10,
-      "successfulRequests": 10,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 7.96,
-      "rps": 1.26,
-      "latency": {
-        "min": 7164.3,
-        "avg": 7718.06,
-        "p50": 7715.89,
-        "p90": 7957.15,
-        "p95": 7957.43,
-        "p99": 7957.43,
-        "max": 7957.43
-      },
-      "memoryBeforeMb": {
-        "rss": 460.24,
-        "heapUsed": 328.62,
-        "heapTotal": 362.99
-      },
-      "memoryAfterMb": {
-        "rss": 460.81,
-        "heapUsed": 329.2,
-        "heapTotal": 362.99
-      },
-      "cpuUsagePercent": 0,
-      "statusCodes": {
-        "200": 10
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Global Search (Multi-Entity Search)",
-      "endpoint": "/crm/search?q=test",
-      "vus": 25,
-      "totalRequests": 25,
-      "successfulRequests": 15,
-      "failedRequests": 10,
-      "errorRatePercent": 40,
+      "successfulRequests": 0,
+      "failedRequests": 5,
+      "errorRatePercent": 100,
       "durationSeconds": 15.02,
-      "rps": 1.66,
+      "rps": 0.33,
       "latency": {
-        "min": 10422.09,
-        "avg": 13791.11,
-        "p50": 14950.99,
-        "p90": 15009.54,
-        "p95": 15009.87,
-        "p99": 15010.28,
-        "max": 15010.28
+        "min": 15014.07,
+        "avg": 15014.91,
+        "p50": 15014.96,
+        "p90": 15015.69,
+        "p95": 15015.69,
+        "p99": 15015.69,
+        "max": 15015.69
       },
       "memoryBeforeMb": {
-        "rss": 460.81,
-        "heapUsed": 329.2,
-        "heapTotal": 362.99
+        "rss": 1598.23,
+        "heapUsed": 866.41,
+        "heapTotal": 1494.83
       },
       "memoryAfterMb": {
-        "rss": 460.71,
-        "heapUsed": 329.16,
-        "heapTotal": 357.24
+        "rss": 1597.98,
+        "heapUsed": 836.03,
+        "heapTotal": 1494.49
+      },
+      "cpuUsagePercent": 0.04,
+      "statusCodes": {
+        "TIMEOUT": 5
+      },
+      "tag": "MEASURED"
+    },
+    {
+      "endpointName": "Customers (Paginated Index Scan)",
+      "endpoint": "/crm/customers?page=1&limit=20",
+      "vus": 5,
+      "totalRequests": 5,
+      "successfulRequests": 0,
+      "failedRequests": 5,
+      "errorRatePercent": 100,
+      "durationSeconds": 10.02,
+      "rps": 0.5,
+      "latency": {
+        "min": 10014.36,
+        "avg": 10017.38,
+        "p50": 10017.56,
+        "p90": 10020.22,
+        "p95": 10020.22,
+        "p99": 10020.22,
+        "max": 10020.22
+      },
+      "memoryBeforeMb": {
+        "rss": 1597.99,
+        "heapUsed": 836.04,
+        "heapTotal": 1494.49
+      },
+      "memoryAfterMb": {
+        "rss": 1597.99,
+        "heapUsed": 836.38,
+        "heapTotal": 1494.49
+      },
+      "cpuUsagePercent": 0.01,
+      "statusCodes": {
+        "500": 5
+      },
+      "tag": "MEASURED"
+    },
+    {
+      "endpointName": "Tasks (Filtered Activity Index)",
+      "endpoint": "/crm/tasks?page=1&limit=20",
+      "vus": 5,
+      "totalRequests": 5,
+      "successfulRequests": 0,
+      "failedRequests": 5,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.02,
+      "rps": 0.33,
+      "latency": {
+        "min": 15016.14,
+        "avg": 15016.82,
+        "p50": 15016.89,
+        "p90": 15017.41,
+        "p95": 15017.41,
+        "p99": 15017.41,
+        "max": 15017.41
+      },
+      "memoryBeforeMb": {
+        "rss": 1597.99,
+        "heapUsed": 836.39,
+        "heapTotal": 1494.49
+      },
+      "memoryAfterMb": {
+        "rss": 1597.99,
+        "heapUsed": 836.96,
+        "heapTotal": 1494.49
+      },
+      "cpuUsagePercent": 0.02,
+      "statusCodes": {
+        "TIMEOUT": 5
+      },
+      "tag": "MEASURED"
+    },
+    {
+      "endpointName": "Leads (Filtered CRM Index)",
+      "endpoint": "/crm/leads?page=1&limit=20",
+      "vus": 5,
+      "totalRequests": 5,
+      "successfulRequests": 0,
+      "failedRequests": 5,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.01,
+      "rps": 0.33,
+      "latency": {
+        "min": 15004.05,
+        "avg": 15004.58,
+        "p50": 15004.61,
+        "p90": 15005.06,
+        "p95": 15005.06,
+        "p99": 15005.06,
+        "max": 15005.06
+      },
+      "memoryBeforeMb": {
+        "rss": 1597.99,
+        "heapUsed": 836.97,
+        "heapTotal": 1494.49
+      },
+      "memoryAfterMb": {
+        "rss": 1597.99,
+        "heapUsed": 837.59,
+        "heapTotal": 1494.49
       },
       "cpuUsagePercent": 0,
       "statusCodes": {
-        "200": 15,
-        "TIMEOUT": 10
+        "TIMEOUT": 5
       },
       "tag": "MEASURED"
     },
     {
       "endpointName": "Global Search (Multi-Entity Search)",
       "endpoint": "/crm/search?q=test",
-      "vus": 50,
-      "totalRequests": 52,
-      "successfulRequests": 27,
-      "failedRequests": 25,
-      "errorRatePercent": 48.08,
-      "durationSeconds": 13.8,
-      "rps": 3.77,
+      "vus": 5,
+      "totalRequests": 5,
+      "successfulRequests": 0,
+      "failedRequests": 5,
+      "errorRatePercent": 100,
+      "durationSeconds": 10.01,
+      "rps": 0.5,
       "latency": {
-        "min": 4442.83,
-        "avg": 9297.79,
-        "p50": 10023.3,
-        "p90": 10822.68,
-        "p95": 12123.05,
-        "p99": 13332.89,
-        "max": 13332.89
+        "min": 10009.59,
+        "avg": 10012.29,
+        "p50": 10012.67,
+        "p90": 10013.96,
+        "p95": 10013.96,
+        "p99": 10013.96,
+        "max": 10013.96
       },
       "memoryBeforeMb": {
-        "rss": 460.71,
-        "heapUsed": 329.17,
-        "heapTotal": 357.24
+        "rss": 1597.99,
+        "heapUsed": 837.59,
+        "heapTotal": 1494.49
       },
       "memoryAfterMb": {
-        "rss": 460.97,
-        "heapUsed": 329.43,
-        "heapTotal": 357.24
+        "rss": 1598,
+        "heapUsed": 837.93,
+        "heapTotal": 1494.49
       },
-      "cpuUsagePercent": 0.05,
+      "cpuUsagePercent": 0.01,
       "statusCodes": {
-        "200": 27,
-        "500": 25
-      },
-      "tag": "MEASURED"
-    },
-    {
-      "endpointName": "Global Search (Multi-Entity Search)",
-      "endpoint": "/crm/search?q=test",
-      "vus": 100,
-      "totalRequests": 11622,
-      "successfulRequests": 3,
-      "failedRequests": 11619,
-      "errorRatePercent": 99.97,
-      "durationSeconds": 5.03,
-      "rps": 2310.54,
-      "latency": {
-        "min": 15.26,
-        "avg": 43,
-        "p50": 39.68,
-        "p90": 52.62,
-        "p95": 58.3,
-        "p99": 70.01,
-        "max": 4065.33
-      },
-      "memoryBeforeMb": {
-        "rss": 460.97,
-        "heapUsed": 329.44,
-        "heapTotal": 357.24
-      },
-      "memoryAfterMb": {
-        "rss": 643.6,
-        "heapUsed": 464.79,
-        "heapTotal": 553.75
-      },
-      "cpuUsagePercent": 11.26,
-      "statusCodes": {
-        "200": 3,
-        "429": 11619
+        "500": 5
       },
       "tag": "MEASURED"
     }
@@ -1347,33 +640,33 @@
       "endpoint": "/crm/dashboard",
       "vus": 1,
       "totalRequests": 1,
-      "successfulRequests": 1,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 5.23,
-      "rps": 0.19,
+      "successfulRequests": 0,
+      "failedRequests": 1,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.01,
+      "rps": 0.07,
       "latency": {
-        "min": 5226.78,
-        "avg": 5226.78,
-        "p50": 5226.78,
-        "p90": 5226.78,
-        "p95": 5226.78,
-        "p99": 5226.78,
-        "max": 5226.78
+        "min": 15011.01,
+        "avg": 15011.01,
+        "p50": 15011.01,
+        "p90": 15011.01,
+        "p95": 15011.01,
+        "p99": 15011.01,
+        "max": 15011.01
       },
       "memoryBeforeMb": {
-        "rss": 643.6,
-        "heapUsed": 464.79,
-        "heapTotal": 553.75
+        "rss": 1598,
+        "heapUsed": 837.94,
+        "heapTotal": 1494.49
       },
       "memoryAfterMb": {
-        "rss": 643.6,
-        "heapUsed": 464.86,
-        "heapTotal": 554
+        "rss": 1598.03,
+        "heapUsed": 843.33,
+        "heapTotal": 1494.49
       },
-      "cpuUsagePercent": 0.05,
+      "cpuUsagePercent": 0.03,
       "statusCodes": {
-        "200": 1
+        "TIMEOUT": 1
       },
       "tag": "MEASURED"
     },
@@ -1381,34 +674,35 @@
       "endpointName": "Spike Dashboard",
       "endpoint": "/crm/dashboard",
       "vus": 10,
-      "totalRequests": 12,
-      "successfulRequests": 12,
-      "failedRequests": 0,
-      "errorRatePercent": 0,
-      "durationSeconds": 10.1,
-      "rps": 1.19,
+      "totalRequests": 10,
+      "successfulRequests": 0,
+      "failedRequests": 10,
+      "errorRatePercent": 100,
+      "durationSeconds": 15.01,
+      "rps": 0.67,
       "latency": {
-        "min": 3889.98,
-        "avg": 4736.15,
-        "p50": 4446.46,
-        "p90": 5906.05,
-        "p95": 6209.46,
-        "p99": 6209.46,
-        "max": 6209.46
+        "min": 10021.07,
+        "avg": 14512.61,
+        "p50": 15011.13,
+        "p90": 15012.97,
+        "p95": 15013.12,
+        "p99": 15013.12,
+        "max": 15013.12
       },
       "memoryBeforeMb": {
-        "rss": 643.6,
-        "heapUsed": 464.87,
-        "heapTotal": 554
+        "rss": 1598.03,
+        "heapUsed": 843.34,
+        "heapTotal": 1494.49
       },
       "memoryAfterMb": {
-        "rss": 643.66,
-        "heapUsed": 465.56,
-        "heapTotal": 554
+        "rss": 1598.03,
+        "heapUsed": 844.42,
+        "heapTotal": 1494.49
       },
-      "cpuUsagePercent": 0,
+      "cpuUsagePercent": 0.02,
       "statusCodes": {
-        "200": 12
+        "500": 1,
+        "TIMEOUT": 9
       },
       "tag": "MEASURED"
     },
@@ -1416,36 +710,34 @@
       "endpointName": "Spike Dashboard",
       "endpoint": "/crm/dashboard",
       "vus": 50,
-      "totalRequests": 55,
-      "successfulRequests": 28,
-      "failedRequests": 27,
-      "errorRatePercent": 49.09,
-      "durationSeconds": 18.75,
-      "rps": 2.93,
+      "totalRequests": 50,
+      "successfulRequests": 0,
+      "failedRequests": 50,
+      "errorRatePercent": 100,
+      "durationSeconds": 10.09,
+      "rps": 4.96,
       "latency": {
-        "min": 3609.15,
-        "avg": 9815.24,
-        "p50": 10019.65,
-        "p90": 14760.02,
-        "p95": 15008.07,
-        "p99": 15015.6,
-        "max": 15015.6
+        "min": 10015.38,
+        "avg": 10055.52,
+        "p50": 10057.18,
+        "p90": 10077.11,
+        "p95": 10081.29,
+        "p99": 10083.76,
+        "max": 10083.76
       },
       "memoryBeforeMb": {
-        "rss": 643.66,
-        "heapUsed": 465.56,
-        "heapTotal": 554
+        "rss": 1598.03,
+        "heapUsed": 844.43,
+        "heapTotal": 1494.49
       },
       "memoryAfterMb": {
-        "rss": 643.84,
-        "heapUsed": 468.93,
-        "heapTotal": 554.25
+        "rss": 1041.32,
+        "heapUsed": 353.45,
+        "heapTotal": 922
       },
-      "cpuUsagePercent": 0.05,
+      "cpuUsagePercent": 0.66,
       "statusCodes": {
-        "200": 28,
-        "500": 22,
-        "TIMEOUT": 5
+        "500": 50
       },
       "tag": "MEASURED"
     },
@@ -1457,31 +749,30 @@
       "successfulRequests": 0,
       "failedRequests": 100,
       "errorRatePercent": 100,
-      "durationSeconds": 15.02,
-      "rps": 6.66,
+      "durationSeconds": 15.06,
+      "rps": 6.64,
       "latency": {
-        "min": 10011.57,
-        "avg": 11288.46,
-        "p50": 10060.47,
-        "p90": 15008.28,
-        "p95": 15009.61,
-        "p99": 15010.45,
-        "max": 15010.65
+        "min": 15017.2,
+        "avg": 15032.06,
+        "p50": 15032.2,
+        "p90": 15046.08,
+        "p95": 15047.18,
+        "p99": 15049.55,
+        "max": 15050.1
       },
       "memoryBeforeMb": {
-        "rss": 643.84,
-        "heapUsed": 468.94,
-        "heapTotal": 554.25
+        "rss": 1041.32,
+        "heapUsed": 353.46,
+        "heapTotal": 922
       },
       "memoryAfterMb": {
-        "rss": 644.31,
-        "heapUsed": 475.73,
-        "heapTotal": 554.5
+        "rss": 1046.9,
+        "heapUsed": 359.7,
+        "heapTotal": 928
       },
-      "cpuUsagePercent": 0.03,
+      "cpuUsagePercent": 0.05,
       "statusCodes": {
-        "500": 75,
-        "TIMEOUT": 25
+        "TIMEOUT": 100
       },
       "tag": "MEASURED"
     }
@@ -1491,34 +782,34 @@
       "endpointName": "Soak Health Baseline",
       "endpoint": "/health",
       "vus": 10,
-      "totalRequests": 58269,
-      "successfulRequests": 58269,
+      "totalRequests": 63482,
+      "successfulRequests": 63482,
       "failedRequests": 0,
       "errorRatePercent": 0,
-      "durationSeconds": 20.03,
-      "rps": 2909.09,
+      "durationSeconds": 20,
+      "rps": 3174.1,
       "latency": {
-        "min": 1.52,
-        "avg": 3.4,
-        "p50": 2.84,
-        "p90": 5.01,
-        "p95": 5.77,
-        "p99": 14.15,
-        "max": 106.08
+        "min": 1.42,
+        "avg": 3.11,
+        "p50": 2.43,
+        "p90": 5.03,
+        "p95": 5.81,
+        "p99": 13.63,
+        "max": 102.57
       },
       "memoryBeforeMb": {
-        "rss": 644.31,
-        "heapUsed": 475.75,
-        "heapTotal": 554.5
+        "rss": 1046.9,
+        "heapUsed": 359.7,
+        "heapTotal": 928
       },
       "memoryAfterMb": {
-        "rss": 1574.04,
-        "heapUsed": 406.14,
-        "heapTotal": 1462.2
+        "rss": 1544.89,
+        "heapUsed": 538.1,
+        "heapTotal": 1434.93
       },
-      "cpuUsagePercent": 9.86,
+      "cpuUsagePercent": 9.69,
       "statusCodes": {
-        "200": 58269
+        "200": 63482
       },
       "tag": "MEASURED"
     }
@@ -1527,54 +818,72 @@
     {
       "rows": 100,
       "payloadBytes": 14371,
-      "durationMs": 0.26,
-      "rowsPerSec": 100000,
+      "durationMs": 9.72,
+      "rowsPerSec": 10288.07,
       "validRows": 100,
       "memoryBeforeMb": {
-        "rss": 1574.04,
-        "heapUsed": 406.19,
-        "heapTotal": 1462.2
+        "rss": 1544.89,
+        "heapUsed": 538.15,
+        "heapTotal": 1434.93
       },
       "memoryAfterMb": {
-        "rss": 1574.05,
-        "heapUsed": 406.25,
-        "heapTotal": 1462.2
+        "rss": 1544.89,
+        "heapUsed": 538.2,
+        "heapTotal": 1434.93
       },
       "tag": "MEASURED"
     },
     {
       "rows": 1000,
       "payloadBytes": 146671,
-      "durationMs": 2.13,
-      "rowsPerSec": 469483.57,
+      "durationMs": 1.54,
+      "rowsPerSec": 649350.65,
       "validRows": 1000,
       "memoryBeforeMb": {
-        "rss": 1574.05,
-        "heapUsed": 406.66,
-        "heapTotal": 1462.2
+        "rss": 1544.9,
+        "heapUsed": 538.61,
+        "heapTotal": 1434.93
       },
       "memoryAfterMb": {
-        "rss": 1574.2,
-        "heapUsed": 407.17,
-        "heapTotal": 1462.34
+        "rss": 1545.04,
+        "heapUsed": 539.12,
+        "heapTotal": 1435.07
       },
       "tag": "MEASURED"
     },
     {
       "rows": 5000,
       "payloadBytes": 746671,
-      "durationMs": 7.15,
-      "rowsPerSec": 699300.7,
+      "durationMs": 7.63,
+      "rowsPerSec": 655307.99,
       "validRows": 5000,
       "memoryBeforeMb": {
-        "rss": 1574.2,
-        "heapUsed": 409.09,
-        "heapTotal": 1462.34
+        "rss": 1545.04,
+        "heapUsed": 541.04,
+        "heapTotal": 1435.07
       },
       "memoryAfterMb": {
-        "rss": 1574.91,
-        "heapUsed": 411.67,
-        "heapTotal": 1463.05
+        "rss": 1545.79,
+        "heapUsed": 543.62,
+        "heapTotal": 1435.78
+      },
+      "tag": "MEASURED"
+    },
+    {
+      "rows": 10000,
+      "payloadBytes": 1496671,
+      "durationMs": 15.31,
+      "rowsPerSec": 653167.86,
+      "validRows": 10000,
+      "memoryBeforeMb": {
+        "rss": 1544.4,
+        "heapUsed": 507.33,
+        "heapTotal": 1434.43
+      },
+      "memoryAfterMb": {
+        "rss": 1545.83,
+        "heapUsed": 512.41,
+        "heapTotal": 1435.86
       },
       "tag": "MEASURED"
     }

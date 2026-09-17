@@ -1,5 +1,5 @@
 import { Logger, Inject, forwardRef } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { QUEUE_NAMES } from '../queue.constants';
 import {
@@ -18,6 +18,13 @@ export class WebhookQueueProcessor extends WorkerHost {
     private readonly billingWebhookService: BillingWebhookService,
   ) {
     super();
+  }
+
+  @OnWorkerEvent('error')
+  onError(err: Error) {
+    this.logger.warn(
+      `[WEBHOOK WORKER] Queue worker connection notice: ${err?.message || err}`,
+    );
   }
 
   async process(job: Job<WebhookJobPayload, any, string>): Promise<any> {

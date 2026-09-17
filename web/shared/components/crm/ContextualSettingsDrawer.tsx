@@ -116,10 +116,9 @@ export function ContextualSettingsDrawer({
             <div className="flex items-center gap-3 min-w-0">
               {Icon && (
                 <div
-                  data-animate-target="true"
                   className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-xs group"
                 >
-                  <AppIcon name={title} icon={Icon} size={18} className="w-4.5 h-4.5" animateOnMount />
+                  <AppIcon name={title} icon={Icon} size={18} className="w-4.5 h-4.5" />
                 </div>
               )}
               <div className="min-w-0">
@@ -167,7 +166,6 @@ export function ContextualSettingsDrawer({
                   <button
                     key={section.id}
                     type="button"
-                    data-animate-target="true"
                     onClick={() => setActiveSectionId(section.id)}
                     className={cn(
                       "group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-xl transition-all duration-150 text-left outline-none cursor-pointer whitespace-nowrap md:whitespace-normal font-medium",

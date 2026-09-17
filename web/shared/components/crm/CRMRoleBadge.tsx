@@ -251,7 +251,7 @@ export const CRMRoleBadge: React.FC<CRMRoleBadgeProps> = ({
 
       {showIcon && RoleIcon && (
         <RoleIcon
-          className={cn("shrink-0 opacity-90 transition-transform group-hover:scale-105", s.icon, iconClassName)}
+          className={cn("shrink-0 opacity-90", s.icon, iconClassName)}
           aria-hidden="true"
         />
       )}

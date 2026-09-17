@@ -200,7 +200,7 @@ export function SecOpsAlertsTab({
           setAlertRowsPerPage(rows);
           setAlertPage(1);
         }}
-        itemName="alerts"
+        itemName="Alerts"
       />
     </div>
   );

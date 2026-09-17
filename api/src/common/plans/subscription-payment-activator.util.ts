@@ -28,8 +28,17 @@ export async function executePaymentActivationTransaction(
   params: PaymentActivationParams,
   logger: { log: (msg: string) => void },
 ) {
-  const { tenantId, orderId, paymentId, signature, quote, billingCycle, now, periodEnd, userId } =
-    params;
+  const {
+    tenantId,
+    orderId,
+    paymentId,
+    signature,
+    quote,
+    billingCycle,
+    now,
+    periodEnd,
+    userId,
+  } = params;
 
   // 1. Replay Protection & Tenant Isolation
   const existingPayment = await tx.platformPayment.findFirst({

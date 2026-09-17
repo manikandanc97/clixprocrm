@@ -30,7 +30,10 @@ export class CustomersController {
     @Query('search') search: string,
   ) {
     const tenantId = req.user.tenantId;
-    const { page: pageNum, limit: limitNum } = parsePaginationParams({ page, limit }, 10);
+    const { page: pageNum, limit: limitNum } = parsePaginationParams(
+      { page, limit },
+      10,
+    );
 
     return this.customersService.getCustomers(
       tenantId,

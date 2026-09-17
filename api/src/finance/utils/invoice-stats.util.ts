@@ -1,4 +1,7 @@
-import { toNumber, formatCurrency } from '../../common/utils/crm-formatters.util';
+import {
+  toNumber,
+  formatCurrency,
+} from '../../common/utils/crm-formatters.util';
 
 export function checkIsInvoiceOverdue(
   dueDate: Date | string | null,
@@ -104,8 +107,16 @@ export function mapInvoiceRecordToDto(inv: any, fallbackCurrency: string) {
     dealId: inv.dealId,
     quotationId: inv.quotationId,
     invoiceNumber: inv.invoiceNumber || inv.id.slice(0, 8),
-    invoiceDate: inv.invoiceDate ? (inv.invoiceDate instanceof Date ? inv.invoiceDate.toISOString() : String(inv.invoiceDate)) : new Date().toISOString(),
-    dueDate: inv.dueDate ? (inv.dueDate instanceof Date ? inv.dueDate.toISOString() : String(inv.dueDate)) : null,
+    invoiceDate: inv.invoiceDate
+      ? inv.invoiceDate instanceof Date
+        ? inv.invoiceDate.toISOString()
+        : String(inv.invoiceDate)
+      : new Date().toISOString(),
+    dueDate: inv.dueDate
+      ? inv.dueDate instanceof Date
+        ? inv.dueDate.toISOString()
+        : String(inv.dueDate)
+      : null,
     currency: curr,
     paymentTerms: inv.paymentTerms,
     status: displayStatus,
@@ -130,7 +141,15 @@ export function mapInvoiceRecordToDto(inv: any, fallbackCurrency: string) {
     payments: inv.payments,
     notes: inv.notes,
     terms: inv.terms,
-    createdAt: inv.createdAt ? (inv.createdAt instanceof Date ? inv.createdAt.toISOString() : String(inv.createdAt)) : undefined,
-    updatedAt: inv.updatedAt ? (inv.updatedAt instanceof Date ? inv.updatedAt.toISOString() : String(inv.updatedAt)) : undefined,
+    createdAt: inv.createdAt
+      ? inv.createdAt instanceof Date
+        ? inv.createdAt.toISOString()
+        : String(inv.createdAt)
+      : undefined,
+    updatedAt: inv.updatedAt
+      ? inv.updatedAt instanceof Date
+        ? inv.updatedAt.toISOString()
+        : String(inv.updatedAt)
+      : undefined,
   };
 }

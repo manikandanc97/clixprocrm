@@ -1,4 +1,8 @@
-import { escapeHtml, mapPriorityToEnum, mapEnumToPriority } from './support-mapper.util';
+import {
+  escapeHtml,
+  mapPriorityToEnum,
+  mapEnumToPriority,
+} from './support-mapper.util';
 import { SupportTicketRecord } from '../interfaces/support.interface';
 
 export function calculateEstimatedResponseTime(priority: string): string {
@@ -70,7 +74,18 @@ export function buildSupportEmailHtml(params: {
   userId: string;
   attachmentsCount: number;
 }): string {
-  const { ticketId, subject, category, priority, description, diagnostics, userEmail, userName, userId, attachmentsCount } = params;
+  const {
+    ticketId,
+    subject,
+    category,
+    priority,
+    description,
+    diagnostics,
+    userEmail,
+    userName,
+    userId,
+    attachmentsCount,
+  } = params;
 
   const safeSubject = escapeHtml(subject);
   const safeCategory = escapeHtml(category);
@@ -78,7 +93,9 @@ export function buildSupportEmailHtml(params: {
   const safeDescription = escapeHtml(description);
 
   const safeDiagnostics = {
-    currentUserName: escapeHtml(diagnostics?.currentUserName || userName || 'N/A'),
+    currentUserName: escapeHtml(
+      diagnostics?.currentUserName || userName || 'N/A',
+    ),
     email: escapeHtml(diagnostics?.email || userEmail || 'N/A'),
     userId: escapeHtml(diagnostics?.userId || userId || 'N/A'),
     role: escapeHtml(diagnostics?.role || 'N/A'),

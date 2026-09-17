@@ -96,7 +96,7 @@ export function mapDbPlanToDefinition(dbPlan: any): PlanDefinition {
     featureDescriptions: rawFeatures,
     aiConfig: {
       enabled: dbPlan.aiEnabled !== false,
-      level: (dbPlan.aiLevel as any) || 'Standard AI',
+      level: dbPlan.aiLevel || 'Standard AI',
       dailyTokenLimit: Number(dbPlan.dailyTokenLimit || 50000),
     },
   };

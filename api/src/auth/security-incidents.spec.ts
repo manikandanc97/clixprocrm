@@ -91,11 +91,7 @@ describe('P4 Security Incidents Management Suite', () => {
       }),
     };
 
-    incidentsService = new SecurityIncidentsService(
-      mockPrisma,
-      auditLogger,
-    );
-
+    incidentsService = new SecurityIncidentsService(mockPrisma, auditLogger);
   });
 
   describe('1. Incident Creation & Numbering', () => {

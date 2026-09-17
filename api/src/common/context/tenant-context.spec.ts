@@ -18,7 +18,6 @@ describe('TenantContext & Guard Security Specifications', () => {
 
   const mockPrismaService: any = {
     user: {
-
       findUnique: jest.fn(),
     },
     tenant: {
@@ -65,9 +64,8 @@ describe('TenantContext & Guard Security Specifications', () => {
       getArgByIndex: () => ({}) as any,
       switchToRpc: () => ({}) as any,
       switchToWs: () => ({}) as any,
-    } as any;
+    };
   }
-
 
   // ─── 1. Tenant A & Tenant B Request Context Isolation ───────────────────────────
 
@@ -207,7 +205,6 @@ describe('TenantContext & Guard Security Specifications', () => {
       headers: {},
     };
 
-
     await tenantContextService.run({ isSuperAdmin: false }, async () => {
       const execCtx = createMockExecutionContext(req);
       const canActivate = await superAdminGuard.canActivate(execCtx);
@@ -270,7 +267,6 @@ describe('TenantContext & Guard Security Specifications', () => {
         'x-tenant-id': 'tenant-victim-tampered',
       },
     };
-
 
     await tenantContextService.run({ isSuperAdmin: false }, async () => {
       const execCtx = createMockExecutionContext(req);

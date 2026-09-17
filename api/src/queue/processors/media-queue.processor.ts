@@ -1,5 +1,5 @@
 import { Logger, Inject, forwardRef } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import { QUEUE_NAMES } from '../queue.constants';
 import {
@@ -22,6 +22,13 @@ export class MediaQueueProcessor extends WorkerHost {
     private readonly prisma: PrismaService,
   ) {
     super();
+  }
+
+  @OnWorkerEvent('error')
+  onError(err: Error) {
+    this.logger.warn(
+      `[MEDIA WORKER] Queue worker connection notice: ${err?.message || err}`,
+    );
   }
 
   async process(job: Job<MediaJobPayload, any, string>): Promise<any> {

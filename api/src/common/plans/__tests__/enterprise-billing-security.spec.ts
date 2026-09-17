@@ -15,7 +15,6 @@ describe('Enterprise Billing & Entitlement Security Tests', () => {
 
   const mockPrisma: any = {
     tenant: {
-
       findUnique: jest.fn(),
       update: jest.fn(),
       findMany: jest.fn(),

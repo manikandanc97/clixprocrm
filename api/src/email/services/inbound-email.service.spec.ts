@@ -20,7 +20,6 @@ import {
 import { BadRequestException } from '@nestjs/common';
 import type { SyncInboxJobPayload } from '../../queue/interfaces/email-jobs';
 
-
 describe('InboundEmailService Suite', () => {
   let service: InboundEmailService;
   let encService: EncryptionService;
@@ -137,7 +136,8 @@ describe('InboundEmailService Suite', () => {
                   'in' in val &&
                   Array.isArray((val as any).in)
                 ) {
-                  if (!(val as any).in.includes(item.internetMessageId)) return false;
+                  if (!(val as any).in.includes(item.internetMessageId))
+                    return false;
                   continue;
                 }
                 if (item[key] !== val) return false;
@@ -263,7 +263,10 @@ describe('InboundEmailService Suite', () => {
   });
 
   function createSyncPayload(
-    opts: Partial<SyncInboxJobPayload> & { tenantId: string; accountId: string },
+    opts: Partial<SyncInboxJobPayload> & {
+      tenantId: string;
+      accountId: string;
+    },
   ): SyncInboxJobPayload {
     return {
       folder: 'INBOX',
@@ -691,4 +694,3 @@ describe('InboundEmailService Suite', () => {
     expect(mockImapClient.connect).not.toHaveBeenCalled();
   });
 });
-

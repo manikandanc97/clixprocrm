@@ -436,7 +436,7 @@ export const CRMMetricCard = ({
             {/* Ghost offset icon layer */}
             <div
               className={cn(
-                "absolute -top-1 -left-1.5 opacity-35 transition-transform duration-300 group-hover:-translate-y-0.5 group-hover:-translate-x-0.5",
+                "absolute -top-1 -left-1.5 opacity-35",
                 config.ghostIconColor
               )}
               aria-hidden="true"
@@ -446,7 +446,7 @@ export const CRMMetricCard = ({
             {/* Main foreground icon layer */}
             <div
               className={cn(
-                "relative z-10 transition-transform duration-300 group-hover:scale-105",
+                "relative z-10",
                 config.iconColor,
                 iconColor
               )}

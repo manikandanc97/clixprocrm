@@ -1,7 +1,6 @@
 "use client";
 
-import React, { useRef, useEffect, useState, useCallback, type CSSProperties } from "react";
-import { motion, useReducedMotion, type TargetAndTransition, type Transition } from "framer-motion";
+import React from "react";
 import {
   LayoutDashboard,
   Users,
@@ -51,6 +50,7 @@ import {
   EyeOff,
   ExternalLink,
   Phone,
+  Globe,
   Lock,
   Key,
   Folder,
@@ -79,6 +79,7 @@ import {
   Palette,
   type LucideIcon,
 } from "lucide-react";
+import { cn } from "@/shared/lib/utils";
 
 export type IconName =
   | "dashboard"
@@ -316,7 +317,105 @@ const CANONICAL_ICONS: Record<string, IconName> = {
   theme: "palette",
 };
 
-const CUBIC_EASE = [0.25, 1, 0.5, 1] as const;
+const ICON_MAP: Record<IconName, LucideIcon> = {
+  dashboard: LayoutDashboard,
+  contacts: Users,
+  leads: Users,
+  user: User,
+  userPlus: UserPlus,
+  platformUsers: UserCog,
+  companies: Building2,
+  building: Building2,
+  organizations: Building2,
+  deals: Handshake,
+  tasks: CheckCheck,
+  calendar: CalendarDays,
+  attendance: CalendarDays,
+  quotations: FileText,
+  invoices: Receipt,
+  billing: Receipt,
+  ai: Sparkles,
+  reports: ChartColumn,
+  analytics: ChartColumn,
+  performance: ChartColumn,
+  teamPerformance: BriefcaseBusiness,
+  employees: UserCheck,
+  roles: ShieldCheck,
+  roleManagement: ShieldCheck,
+  security: ShieldCheck,
+  settings: Settings,
+  support: Headset,
+  help: Headset,
+  supportTickets: Ticket,
+  modules: Layers,
+  telemetry: Activity,
+  auditLogs: FileClock,
+  sessions: Laptop,
+  plans: CreditCard,
+  packages: CreditCard,
+  notifications: Bell,
+  mail: Mail,
+  logout: LogOut,
+  arrowLeftRight: ArrowLeftRight,
+  type: Type,
+  palette: Palette,
+  search: Search,
+  filter: Filter,
+  sliders: SlidersHorizontal,
+  plus: Plus,
+  add: Plus,
+  trash: Trash2,
+  delete: Trash2,
+  refresh: RefreshCw,
+  sync: RefreshCw,
+  download: Download,
+  export: Download,
+  upload: Upload,
+  import: Upload,
+  arrowRight: ArrowRight,
+  arrowUpRight: ArrowUpRight,
+  next: ArrowRight,
+  arrowLeft: ArrowLeft,
+  back: ArrowLeft,
+  chevronRight: ChevronRight,
+  chevronLeft: ChevronLeft,
+  chevronDown: ChevronDown,
+  chevronUp: ChevronUp,
+  chevronsLeft: ChevronsLeft,
+  chevronsRight: ChevronsRight,
+  edit: Pencil,
+  pencil: Pencil,
+  copy: Copy,
+  send: Send,
+  eye: Eye,
+  view: Eye,
+  eyeOff: EyeOff,
+  check: Check,
+  circleCheck: CircleCheck,
+  save: Check,
+  externalLink: ExternalLink,
+  phone: Phone,
+  globe: Globe,
+  lock: Lock,
+  key: Key,
+  folder: Folder,
+  file: File,
+  tag: Tag,
+  bookmark: Bookmark,
+  star: Star,
+  info: Info,
+  alert: TriangleAlert,
+  close: X,
+  menu: Menu,
+  message: MessageCircle,
+  messageSquare: MessageSquare,
+  clock: Clock,
+  paperclip: Paperclip,
+  video: Video,
+  image: Image,
+  play: Play,
+  default: Layers,
+};
 
 export function resolveIconName(
   name?: string,
@@ -406,8 +505,16 @@ export function resolveIconName(
   if (iconDisp.includes("bookmark")) return "bookmark";
   if (iconDisp.includes("star")) return "star";
   if (iconDisp.includes("info")) return "info";
-  if (iconDisp.includes("alert") || iconDisp.includes("trianglealert")) return "alert";
-  if (iconDisp.includes("close") || iconDisp.includes("x")) return "close";
+  if (iconDisp.includes("globe") || iconDisp.includes("website") || iconDisp.includes("domain")) return "globe";
+  if (iconDisp.includes("messagesquare") || text.includes("thread") || text.includes("conversation") || text.includes("reply") || text.includes("replies")) return "messageSquare";
+  if (iconDisp.includes("message") || text.includes("chat") || text.includes("comment")) return "message";
+  if (iconDisp.includes("clock") || text.includes("time") || text.includes("sla") || text.includes("hour")) return "clock";
+  if (iconDisp.includes("paperclip") || text.includes("attachment")) return "paperclip";
+  if (iconDisp.includes("circlecheck") || text.includes("checkcircle") || text.includes("staff")) return "circleCheck";
+  if (iconDisp.includes("video") || text.includes("film")) return "video";
+  if (iconDisp.includes("image") || text.includes("photo") || text.includes("picture") || text.includes("screenshot")) return "image";
+  if (iconDisp.includes("play")) return "play";
+  if (iconDisp.includes("close") || text.includes("cancel") || text.includes("dismiss")) return "close";
   if (iconDisp.includes("menu")) return "menu";
 
   // 3. High-specificity route, action, and keyword resolution
@@ -515,8 +622,8 @@ export function resolveIconName(
 }
 
 /**
- * Primary Centralized Animated Icon Component powered by Lucide and Framer Motion.
- * Strictly animates ONCE per hover/interaction (no continuous loops).
+ * Clean, static Icon Component powered by Lucide.
+ * Completely static rendering with zero animations and zero runtime overhead.
  */
 export function AppIcon({
   name,
@@ -524,483 +631,21 @@ export function AppIcon({
   icon: FallbackIcon,
   size = 18,
   className = "",
-  active: _active = false,
-  isHovered = false,
-  disableHover = false,
-  animateOnMount = false,
-  standalone = false,
-  triggerAnimation,
-  duration = 0.55,
   onClick,
 }: AppIconProps) {
   const iconName = resolveIconName(name, href, FallbackIcon);
-  const containerRef = useRef<HTMLDivElement>(null);
-  const reducedMotion = useReducedMotion();
-  const [isAnimating, setIsAnimating] = useState(false);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
-  const isFormFieldRef = useRef(false);
-  const hasAnimatedForCurrentHoverRef = useRef(false);
-
-  const stopCurrentAnimation = useCallback(() => {
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-    setIsAnimating(false);
-  }, []);
-
-  const playOneShotAnimation = useCallback(() => {
-    if (reducedMotion) return;
-
-    if (timerRef.current) {
-      clearTimeout(timerRef.current);
-      timerRef.current = null;
-    }
-
-    setIsAnimating(true);
-
-    // Auto-reset back to rest state cleanly after one complete cycle
-    timerRef.current = setTimeout(() => {
-      setIsAnimating(false);
-      timerRef.current = null;
-    }, Math.max(500, Math.round(duration * 1000)));
-  }, [duration, reducedMotion]);
-
-  // Handle explicit triggerAnimation key changes (e.g. click trigger)
-  const isFirstMount = useRef(true);
-  useEffect(() => {
-    if (isFirstMount.current) {
-      isFirstMount.current = false;
-      return;
-    }
-    if (triggerAnimation !== undefined && triggerAnimation !== 0) {
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      playOneShotAnimation();
-    }
-  }, [triggerAnimation, playOneShotAnimation]);
-
-  // Animate on mount if requested (e.g. when opening a popup/modal)
-  useEffect(() => {
-    if (animateOnMount) {
-      const mountTimer = setTimeout(() => {
-        playOneShotAnimation();
-      }, 150);
-      return () => clearTimeout(mountTimer);
-    }
-  }, [animateOnMount, playOneShotAnimation]);
-
-  // Handle prop-driven hover state cleanly: strictly ONCE per hover cycle
-  useEffect(() => {
-    if (disableHover || isFormFieldRef.current) return;
-
-    if (isHovered) {
-      if (!hasAnimatedForCurrentHoverRef.current) {
-        hasAnimatedForCurrentHoverRef.current = true;
-        playOneShotAnimation();
-      }
-    } else {
-      hasAnimatedForCurrentHoverRef.current = false;
-      // eslint-disable-next-line react-hooks/set-state-in-effect
-      stopCurrentAnimation();
-    }
-  }, [isHovered, disableHover, playOneShotAnimation, stopCurrentAnimation]);
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (timerRef.current) {
-        clearTimeout(timerRef.current);
-      }
-    };
-  }, []);
-
-  // Listen for parent interactive element hover / click / focus or form field input
-  useEffect(() => {
-    const el = containerRef.current;
-    if (!el) return;
-
-    // 1. Direct interactive control (button, link, menu item, tab, etc.)
-    const directButton = el.closest(
-      'button, a, [role="button"], [role="tab"], [data-slot="tabs-trigger"], [role="menuitem"], [role="menuitemcheckbox"], [role="menuitemradio"], [data-slot="button"], [data-slot="dropdown-menu-item"], [data-slot="dropdown-menu-sub-trigger"]'
-    );
-    // 2. Explicit custom animate target (e.g. card with data-animate-target="true")
-    const localTarget = el.closest('[data-animate-target="true"]');
-
-    const parentInteractive = standalone
-      ? localTarget
-      : (directButton || localTarget);
-
-    const handleCustomTrigger = () => {
-      if (!hasAnimatedForCurrentHoverRef.current) {
-        hasAnimatedForCurrentHoverRef.current = true;
-        playOneShotAnimation();
-      }
-    };
-    const handleCustomStop = () => {
-      hasAnimatedForCurrentHoverRef.current = false;
-      stopCurrentAnimation();
-    };
-
-    el.addEventListener("trigger-icon-animation", handleCustomTrigger);
-    el.addEventListener("stop-icon-animation", handleCustomStop);
-
-    if (parentInteractive) {
-      isFormFieldRef.current = false;
-
-      const onEnter = () => {
-        if (!disableHover) {
-          if (!hasAnimatedForCurrentHoverRef.current) {
-            hasAnimatedForCurrentHoverRef.current = true;
-            playOneShotAnimation();
-          }
-        }
-      };
-
-      const onLeave = () => {
-        if (!disableHover) {
-          hasAnimatedForCurrentHoverRef.current = false;
-          stopCurrentAnimation();
-        }
-      };
-
-      const onFocusOrClick = () => {
-        playOneShotAnimation();
-      };
-
-      if (!disableHover) {
-        parentInteractive.addEventListener("mouseenter", onEnter);
-        parentInteractive.addEventListener("mouseleave", onLeave);
-      }
-      parentInteractive.addEventListener("focusin", onFocusOrClick);
-      parentInteractive.addEventListener("focusout", onLeave);
-      parentInteractive.addEventListener("click", onFocusOrClick);
-
-      return () => {
-        if (!disableHover) {
-          parentInteractive.removeEventListener("mouseenter", onEnter);
-          parentInteractive.removeEventListener("mouseleave", onLeave);
-        }
-        parentInteractive.removeEventListener("focusin", onFocusOrClick);
-        parentInteractive.removeEventListener("focusout", onLeave);
-        parentInteractive.removeEventListener("click", onFocusOrClick);
-        el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
-        el.removeEventListener("stop-icon-animation", handleCustomStop);
-      };
-    }
-
-    const findAssociatedInput = (): HTMLElement | null => {
-      if (standalone) return null;
-
-      const relativeParent = el.closest('.relative, [data-slot="control"], .form-control');
-      if (relativeParent) {
-        const input = relativeParent.querySelector<HTMLElement>(
-          'input:not([type="hidden"]):not([type="file"]), textarea, select, [role="combobox"], [role="textbox"]'
-        );
-        if (input) return input;
-      }
-
-      if (el.parentElement) {
-        const input = el.parentElement.querySelector<HTMLElement>(
-          'input:not([type="hidden"]):not([type="file"]), textarea, select, [role="combobox"], [role="textbox"]'
-        );
-        if (input) return input;
-      }
-
-      const groupParent = el.closest('.group, [data-slot="form-item"], .space-y-1\\.5, .space-y-2');
-      if (groupParent) {
-        const input = groupParent.querySelector<HTMLElement>(
-          'input:not([type="hidden"]):not([type="file"]), textarea, select, [role="combobox"], [role="textbox"], [data-slot="select-trigger"]'
-        );
-        if (input) return input;
-      }
-
-      return null;
-    };
-
-    const targetInput = findAssociatedInput();
-    const isField = Boolean(targetInput);
-    isFormFieldRef.current = isField;
-
-    if (targetInput) {
-      const handleFieldFocusOrClick = () => {
-        playOneShotAnimation();
-      };
-
-      targetInput.addEventListener("focus", handleFieldFocusOrClick);
-      targetInput.addEventListener("click", handleFieldFocusOrClick);
-      targetInput.addEventListener("pointerdown", handleFieldFocusOrClick);
-
-      const handleIconClick = () => {
-        targetInput.focus();
-        playOneShotAnimation();
-      };
-      el.addEventListener("click", handleIconClick);
-
-      return () => {
-        targetInput.removeEventListener("focus", handleFieldFocusOrClick);
-        targetInput.removeEventListener("click", handleFieldFocusOrClick);
-        targetInput.removeEventListener("pointerdown", handleFieldFocusOrClick);
-        el.removeEventListener("click", handleIconClick);
-        el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
-        el.removeEventListener("stop-icon-animation", handleCustomStop);
-      };
-    }
-
-    const onDirectEnter = () => {
-      if (!disableHover) {
-        if (!hasAnimatedForCurrentHoverRef.current) {
-          hasAnimatedForCurrentHoverRef.current = true;
-          playOneShotAnimation();
-        }
-      }
-    };
-
-    const onDirectLeave = () => {
-      if (!disableHover) {
-        hasAnimatedForCurrentHoverRef.current = false;
-        stopCurrentAnimation();
-      }
-    };
-
-    if (!disableHover) {
-      el.addEventListener("mouseenter", onDirectEnter);
-      el.addEventListener("mouseleave", onDirectLeave);
-    }
-
-    return () => {
-      if (!disableHover) {
-        el.removeEventListener("mouseenter", onDirectEnter);
-        el.removeEventListener("mouseleave", onDirectLeave);
-      }
-      el.removeEventListener("trigger-icon-animation", handleCustomTrigger);
-      el.removeEventListener("stop-icon-animation", handleCustomStop);
-    };
-  }, [playOneShotAnimation, stopCurrentAnimation, disableHover, standalone]);
-
-  const iconClasses = `shrink-0 select-none ${className}`;
-
-  // Helper to wrap icon in standard micro-interaction animation
-  const renderAnimated = (
-    IconComp: React.ComponentType<{ size?: number; className?: string }>,
-    customAnimate?: TargetAndTransition,
-    customTransition?: Transition,
-    customStyle?: CSSProperties
-  ) => {
-    const defaultAnimate = !reducedMotion && isAnimating
-      ? { scale: [1, 1.14, 0.96, 1], rotate: [0, -3, 3, 0], y: [0, -1, 0] }
-      : { scale: 1, rotate: 0, y: 0 };
-    const defaultTransition: Transition = { duration: 0.5, ease: CUBIC_EASE };
-
-    return (
-      <motion.div
-        animate={customAnimate || defaultAnimate}
-        transition={customTransition || defaultTransition}
-        style={customStyle}
-        className="shrink-0 select-none flex items-center justify-center pointer-events-none"
-      >
-        <IconComp size={size} className={iconClasses} />
-      </motion.div>
-    );
-  };
-
-  const renderIcon = () => {
-    switch (iconName) {
-      case "dashboard":
-        return renderAnimated(LayoutDashboard);
-      case "contacts":
-      case "leads":
-        return renderAnimated(Users);
-      case "user":
-        return renderAnimated(User);
-      case "platformUsers":
-        return renderAnimated(UserCog);
-      case "userPlus":
-        return renderAnimated(UserPlus, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1], y: [0, -1.5, 0] } : { scale: 1, y: 0 });
-      case "tasks":
-        return renderAnimated(CheckCheck, !reducedMotion && isAnimating ? { scale: [1, 1.2, 0.95, 1] } : { scale: 1 });
-      case "calendar":
-      case "attendance":
-        return renderAnimated(CalendarDays);
-      case "quotations":
-        return renderAnimated(FileText);
-      case "invoices":
-      case "billing":
-        return renderAnimated(Receipt);
-      case "ai":
-        return renderAnimated(Sparkles, !reducedMotion && isAnimating ? { scale: [1, 1.25, 0.92, 1.1, 1], rotate: [0, -8, 8, 0] } : { scale: 1, rotate: 0 });
-      case "reports":
-      case "analytics":
-      case "performance":
-        return renderAnimated(ChartColumn, !reducedMotion && isAnimating ? { scale: [1, 1.15, 0.96, 1], y: [0, -2, 0] } : { scale: 1, y: 0 });
-      case "settings":
-        return renderAnimated(Settings, !reducedMotion && isAnimating ? { rotate: [0, 60, 0], scale: [1, 1.1, 1] } : { rotate: 0, scale: 1 }, { duration: 0.55, ease: CUBIC_EASE });
-      case "support":
-      case "help":
-        return renderAnimated(Headset);
-      case "security":
-      case "roleManagement":
-      case "roles":
-        return renderAnimated(ShieldCheck, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 });
-      case "employees":
-        return renderAnimated(UserCheck);
-      case "plans":
-      case "packages":
-        return renderAnimated(CreditCard);
-      case "supportTickets":
-        return renderAnimated(Ticket);
-      case "modules":
-        return renderAnimated(Layers);
-      case "telemetry":
-        return renderAnimated(Activity);
-      case "auditLogs":
-        return renderAnimated(FileClock);
-      case "notifications":
-        return renderAnimated(Bell, !reducedMotion && isAnimating ? { rotate: [0, -15, 15, -10, 10, 0], scale: [1, 1.12, 1] } : { rotate: 0, scale: 1 }, { duration: 0.55, ease: "easeInOut" });
-      case "mail":
-        return renderAnimated(Mail, !reducedMotion && isAnimating ? { x: [0, 2, 0], y: [0, -2, 0], scale: [1, 1.08, 1] } : { x: 0, y: 0, scale: 1 });
-      case "phone":
-        return renderAnimated(Phone, !reducedMotion && isAnimating ? { rotate: [0, -12, 12, -8, 8, 0] } : { rotate: 0 });
-      case "search":
-        return renderAnimated(Search, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1], rotate: [0, -10, 10, 0] } : { scale: 1, rotate: 0 });
-      case "filter":
-        return renderAnimated(
-          FallbackIcon === Filter ? Filter : SlidersHorizontal,
-          !reducedMotion && isAnimating ? { rotate: [0, -12, 12, -4, 0], scale: [1, 1.1, 0.95, 1] } : { rotate: 0, scale: 1 },
-          { duration: 0.5, ease: CUBIC_EASE }
-        );
-      case "plus":
-      case "add":
-        return renderAnimated(Plus, !reducedMotion && isAnimating ? { rotate: [0, 90, 0], scale: [1, 1.15, 1] } : { rotate: 0, scale: 1 });
-      case "trash":
-      case "delete":
-        return renderAnimated(Trash2, !reducedMotion && isAnimating ? { rotate: [0, -8, 8, -4, 0], y: [0, -2, 0] } : { rotate: 0, y: 0 });
-      case "refresh":
-      case "sync":
-        return renderAnimated(RefreshCw, !reducedMotion && isAnimating ? { rotate: [0, 180, 360], scale: [1, 1.1, 1] } : { rotate: 0, scale: 1 }, { duration: 0.6, ease: "easeInOut" });
-      case "download":
-      case "export":
-        return renderAnimated(Download, !reducedMotion && isAnimating ? { y: [0, 3, 0], scale: [1, 1.08, 1] } : { y: 0, scale: 1 });
-      case "upload":
-      case "import":
-        return renderAnimated(Upload, !reducedMotion && isAnimating ? { y: [0, -3, 0], scale: [1, 1.08, 1] } : { y: 0, scale: 1 });
-      case "arrowRight":
-      case "next":
-        return renderAnimated(ArrowRight, !reducedMotion && isAnimating ? { x: [0, 3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "arrowLeft":
-      case "back":
-        return renderAnimated(ArrowLeft, !reducedMotion && isAnimating ? { x: [0, -3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "chevronDown":
-        return renderAnimated(ChevronDown, !reducedMotion && isAnimating ? { y: [0, 3, 0] } : { y: 0 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "chevronUp":
-        return renderAnimated(ChevronUp, !reducedMotion && isAnimating ? { y: [0, -3, 0] } : { y: 0 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "edit":
-      case "pencil":
-        return renderAnimated(Pencil, !reducedMotion && isAnimating ? { rotate: [0, -12, 6, 0], y: [0, -1.5, 0] } : { rotate: 0, y: 0 });
-      case "copy":
-        return renderAnimated(Copy, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1] } : { scale: 1 });
-      case "send":
-        return renderAnimated(Send, !reducedMotion && isAnimating ? { x: [0, 2.5, 0], y: [0, -2, 0], scale: [1, 1.08, 1] } : { x: 0, y: 0, scale: 1 });
-      case "eye":
-      case "view":
-        return renderAnimated(Eye, !reducedMotion && isAnimating ? { scale: [1, 1.15, 1] } : { scale: 1 });
-      case "eyeOff":
-        return renderAnimated(EyeOff, !reducedMotion && isAnimating ? { scale: [1, 1.15, 1] } : { scale: 1 });
-      case "check":
-      case "save":
-        return renderAnimated(Check, !reducedMotion && isAnimating ? { scale: [1, 1.22, 0.95, 1] } : { scale: 1 });
-      case "circleCheck":
-        return renderAnimated(CircleCheck, !reducedMotion && isAnimating ? { scale: [1, 1.22, 0.95, 1] } : { scale: 1 });
-      case "externalLink":
-        return renderAnimated(ExternalLink, !reducedMotion && isAnimating ? { x: [0, 2, 0], y: [0, -2, 0] } : { x: 0, y: 0 });
-      case "lock":
-        return renderAnimated(Lock, !reducedMotion && isAnimating ? { scale: [1, 1.12, 1], y: [0, -1, 0] } : { scale: 1, y: 0 });
-      case "key":
-        return renderAnimated(Key, !reducedMotion && isAnimating ? { rotate: [0, -15, 15, 0] } : { rotate: 0 });
-      case "folder":
-        return renderAnimated(Folder);
-      case "file":
-        return renderAnimated(File);
-      case "tag":
-        return renderAnimated(Tag, !reducedMotion && isAnimating ? { rotate: [0, -10, 10, 0] } : { rotate: 0 });
-      case "bookmark":
-        return renderAnimated(Bookmark, !reducedMotion && isAnimating ? { y: [0, -2, 0] } : { y: 0 });
-      case "star":
-        return renderAnimated(Star, !reducedMotion && isAnimating ? { scale: [1, 1.25, 0.95, 1], rotate: [0, -12, 12, 0] } : { scale: 1, rotate: 0 });
-      case "info":
-        return renderAnimated(Info);
-      case "alert":
-        return renderAnimated(TriangleAlert, !reducedMotion && isAnimating ? { scale: [1, 1.15, 1], y: [0, -2, 0] } : { scale: 1, y: 0 });
-      case "close":
-        return renderAnimated(X, !reducedMotion && isAnimating ? { rotate: [0, 90, 0] } : { rotate: 0 });
-      case "menu":
-        return renderAnimated(Menu);
-      case "message":
-        return renderAnimated(MessageCircle, !reducedMotion && isAnimating ? { scale: [1, 1.15, 0.95, 1] } : { scale: 1 });
-      case "messageSquare":
-        return renderAnimated(MessageSquare, !reducedMotion && isAnimating ? { scale: [1, 1.15, 0.95, 1] } : { scale: 1 });
-      case "clock":
-        return renderAnimated(Clock, !reducedMotion && isAnimating ? { rotate: [0, 180, 360] } : { rotate: 0 }, { duration: 0.6, ease: "easeInOut" });
-      case "paperclip":
-        return renderAnimated(Paperclip, !reducedMotion && isAnimating ? { rotate: [0, -15, 15, 0] } : { rotate: 0 });
-      case "video":
-        return renderAnimated(Video);
-      case "image":
-        return renderAnimated(Image);
-      case "logout":
-        return renderAnimated(LogOut, !reducedMotion && isAnimating ? { x: [0, 3, 0] } : { x: 0 });
-      case "arrowLeftRight":
-        return renderAnimated(ArrowLeftRight, !reducedMotion && isAnimating ? { rotate: [0, 180], scale: [1, 1.1, 1] } : { rotate: 0, scale: 1 }, { duration: 0.45, ease: "easeInOut" });
-      case "type":
-        return renderAnimated(Type);
-      case "play":
-        return renderAnimated(Play, !reducedMotion && isAnimating ? { scale: [1, 1.2, 1] } : { scale: 1 });
-
-      case "chevronRight":
-        return renderAnimated(ChevronRight, !reducedMotion && isAnimating ? { x: [0, 3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "chevronLeft":
-        return renderAnimated(ChevronLeft, !reducedMotion && isAnimating ? { x: [0, -3, 0] } : { x: 0 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "chevronsRight":
-        return renderAnimated(ChevronsRight, !reducedMotion && isAnimating ? { x: [0, 4, 0], scale: [1, 1.08, 1] } : { x: 0, scale: 1 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "chevronsLeft":
-        return renderAnimated(ChevronsLeft, !reducedMotion && isAnimating ? { x: [0, -4, 0], scale: [1, 1.08, 1] } : { x: 0, scale: 1 }, { duration: 0.35, ease: CUBIC_EASE });
-      case "arrowUpRight":
-        return renderAnimated(ArrowUpRight, !reducedMotion && isAnimating ? { x: [0, 2, 0], y: [0, -2, 0], scale: [1, 1.15, 1] } : { x: 0, y: 0, scale: 1 }, { duration: 0.45, ease: CUBIC_EASE });
-
-      case "companies":
-      case "building":
-      case "organizations":
-        return renderAnimated(Building2, !reducedMotion && isAnimating ? { scale: [1, 1.18, 0.95, 1], y: [0, -3, 0], rotate: [0, -6, 5, 0] } : { scale: 1, y: 0, rotate: 0 }, { duration: 0.5, ease: CUBIC_EASE }, { transformOrigin: "bottom center" });
-
-      case "deals":
-        return renderAnimated(Handshake, !reducedMotion && isAnimating ? { rotate: [0, -6, 4, -1, 0], scale: [1, 1.05, 0.98, 1] } : { rotate: 0, scale: 1 }, { duration: 0.55, ease: CUBIC_EASE }, { transformOrigin: "center center" });
-
-      case "teamPerformance":
-        return renderAnimated(BriefcaseBusiness, !reducedMotion && isAnimating ? { y: [0, -2, 0.4, 0], scale: [1, 1.04, 0.98, 1] } : { y: 0, scale: 1 }, { duration: 0.55, ease: CUBIC_EASE });
-
-      case "palette":
-        return renderAnimated(Palette, !reducedMotion && isAnimating ? { rotate: [0, -18, 16, -6, 0], scale: [1, 1.15, 0.95, 1] } : { rotate: 0, scale: 1 }, { duration: 0.5, ease: CUBIC_EASE }, { transformOrigin: "center center" });
-
-      case "sessions":
-        return renderAnimated(Laptop, !reducedMotion && isAnimating ? { scale: [1, 1.1, 0.96, 1], y: [0, -1.5, 0] } : { scale: 1, y: 0 }, { duration: 0.55, ease: CUBIC_EASE });
-
-      default:
-        if (FallbackIcon) {
-          return renderAnimated(FallbackIcon, !reducedMotion && isAnimating ? { scale: [1, 1.14, 0.96, 1], rotate: [0, -4, 4, 0], y: [0, -1, 0] } : { scale: 1, rotate: 0, y: 0 }, { duration: 0.55, ease: CUBIC_EASE });
-        }
-        return null;
-    }
-  };
+  const IconComp = (FallbackIcon as LucideIcon) || ICON_MAP[iconName] || Layers;
 
   return (
     <span
-      ref={containerRef}
       data-animate-icon="true"
       onClick={onClick}
-      className="inline-flex shrink-0 items-center justify-center select-none pointer-events-auto"
+      className={cn(
+        "inline-flex shrink-0 items-center justify-center select-none",
+        onClick ? "cursor-pointer pointer-events-auto" : "pointer-events-none"
+      )}
     >
-      <span className="inline-flex shrink-0 items-center justify-center pointer-events-none">
-        {renderIcon()}
-      </span>
+      <IconComp size={size} className={cn("shrink-0 select-none", className)} />
     </span>
   );
 }

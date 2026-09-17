@@ -28,7 +28,6 @@ import {
   RATE_LIMITS,
 } from '../common/utils/rate-limit.util';
 
-
 @Controller('crm/deals')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)
 export class DealsController {

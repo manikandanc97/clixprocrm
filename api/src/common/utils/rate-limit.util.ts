@@ -2,7 +2,6 @@ import { Ratelimit } from '@upstash/ratelimit';
 import { Redis } from '@upstash/redis';
 import type { FastifyRequest } from 'fastify';
 
-
 type RateLimitConfig = {
   windowMs: number;
   maxRequests: number;
@@ -157,4 +156,3 @@ export function getClientIp(req: FastifyRequest | any): string {
 
   return req.ip || req.socket?.remoteAddress || 'unknown';
 }
-

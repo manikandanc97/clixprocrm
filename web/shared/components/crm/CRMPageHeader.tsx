@@ -135,7 +135,6 @@ export const CRMPageHeader = ({
       <div className="flex items-start sm:items-center gap-3 min-w-0 animate-in fade-in slide-in-from-left-4 duration-200">
         {Icon && (
           <div
-            data-animate-target="true"
             className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all select-none mt-0.5 sm:mt-0"
           >
             <AppIcon

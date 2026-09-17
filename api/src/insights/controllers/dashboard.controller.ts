@@ -9,7 +9,6 @@ interface AuthenticatedRequest extends FastifyRequest {
   user: { id: string; [key: string]: any };
 }
 
-
 @Controller('crm/dashboard')
 @UseGuards(SupabaseAuthGuard, TenantGuard)
 export class DashboardController {

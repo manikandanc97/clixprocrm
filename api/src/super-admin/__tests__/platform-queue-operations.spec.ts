@@ -13,7 +13,6 @@ import type {
   SingleQueueMetrics,
 } from '../../queue/interfaces/queue-metrics.interface';
 
-
 describe('PlatformQueueOperations (Phase 2.1.8)', () => {
   let controller: PlatformSecurityOperationsController;
   let secOpsService: SecurityOperationsService;
@@ -253,7 +252,6 @@ describe('PlatformQueueOperations (Phase 2.1.8)', () => {
       expect(res.data?.cleanedCount).toBe(1);
     });
   });
-
 
   describe('SecOps Health Integration with BullMQ', () => {
     it('integrates BullMQ queue metrics into Background Jobs platform health row', async () => {

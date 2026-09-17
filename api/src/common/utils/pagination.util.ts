@@ -32,20 +32,23 @@ export interface PaginatedResult<T> {
 export function parsePaginationParams(
   query: PaginationQueryInput = {},
   defaultLimit = 10,
-  maxLimit = 100
+  maxLimit = 100,
 ): PaginationParams {
   const parsedPage =
     typeof query.page === 'number'
       ? query.page
       : parseInt(String(query.page || ''), 10);
-  const page = !isNaN(parsedPage) && parsedPage > 0 ? Math.floor(parsedPage) : 1;
+  const page =
+    !isNaN(parsedPage) && parsedPage > 0 ? Math.floor(parsedPage) : 1;
 
   const parsedLimit =
     typeof query.limit === 'number'
       ? query.limit
       : parseInt(String(query.limit || ''), 10);
   const rawLimit =
-    !isNaN(parsedLimit) && parsedLimit > 0 ? Math.floor(parsedLimit) : defaultLimit;
+    !isNaN(parsedLimit) && parsedLimit > 0
+      ? Math.floor(parsedLimit)
+      : defaultLimit;
   const limit = Math.min(rawLimit, maxLimit);
 
   const skip = (page - 1) * limit;
@@ -60,7 +63,7 @@ export function createPaginatedResponse<T>(
   data: T[],
   total: number,
   page: number,
-  limit: number
+  limit: number,
 ): PaginatedResult<T> {
   const totalPages = limit > 0 ? Math.ceil(total / limit) : 0;
   return {

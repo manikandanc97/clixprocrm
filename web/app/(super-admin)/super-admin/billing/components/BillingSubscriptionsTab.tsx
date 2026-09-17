@@ -246,19 +246,18 @@ export function BillingSubscriptionsTab({
         </div>
 
         {/* Pagination */}
-        {filteredSubscriptions.length > subRowsPerPage && (
-          <CRMPagination
-            currentPage={subPage}
-            totalPages={totalSubPages}
-            totalItems={filteredSubscriptions.length}
-            rowsPerPage={subRowsPerPage}
-            onPageChange={setSubPage}
-            onRowsPerPageChange={(rows: number) => {
-              setSubRowsPerPage(rows);
-              setSubPage(1);
-            }}
-          />
-        )}
+        <CRMPagination
+          currentPage={subPage}
+          totalPages={totalSubPages}
+          totalItems={filteredSubscriptions.length}
+          rowsPerPage={subRowsPerPage}
+          onPageChange={setSubPage}
+          onRowsPerPageChange={(rows: number) => {
+            setSubRowsPerPage(rows);
+            setSubPage(1);
+          }}
+          itemName="Subscriptions"
+        />
       </div>
     </div>
   );

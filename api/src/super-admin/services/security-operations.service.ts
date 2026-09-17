@@ -341,13 +341,14 @@ export class SecurityOperationsService {
       integrityStatus = 'CRITICAL';
     }
 
-    let wormStatus: 'HEALTHY' | 'DEGRADED' | 'NOT_CONFIGURED' = 'NOT_CONFIGURED';
+    let wormStatus: 'HEALTHY' | 'DEGRADED' | 'NOT_CONFIGURED' =
+      'NOT_CONFIGURED';
     const isS3Configured = Boolean(
       (process.env.AWS_S3_AUDIT_BUCKET ||
         process.env.AUDIT_ARCHIVE_BUCKET ||
         process.env.AWS_BUCKET) &&
-        process.env.AWS_ACCESS_KEY_ID &&
-        process.env.AWS_SECRET_ACCESS_KEY,
+      process.env.AWS_ACCESS_KEY_ID &&
+      process.env.AWS_SECRET_ACCESS_KEY,
     );
 
     const archiveSvc = (this.incidentsService as any)?.getOutboxStats

@@ -349,7 +349,7 @@ export function EmptyState({
           />
           <div
             className={cn(
-              "relative z-10 flex items-center justify-center rounded-2xl bg-background/95 dark:bg-card/95 border border-primary/20 text-primary shadow-xs transition-transform duration-200 group-hover:scale-105",
+              "relative z-10 flex items-center justify-center rounded-2xl bg-background/95 dark:bg-card/95 border border-primary/20 text-primary shadow-xs",
               isSmall ? "w-8 h-8 rounded-xl" : isLarge ? "w-13 h-13" : "w-11 h-11"
             )}
           >

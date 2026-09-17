@@ -61,7 +61,8 @@ function getSupabaseClient(): SupabaseClient {
   cachedSupabaseClient = createClient(supabaseUrl, supabaseKey, {
     auth: { persistSession: false, autoRefreshToken: false },
     global: {
-      fetch: (url, options) => fetch(url, { ...options, keepalive: true } as any),
+      fetch: (url, options) =>
+        fetch(url, { ...options, keepalive: true } as any),
     },
   });
   return cachedSupabaseClient;

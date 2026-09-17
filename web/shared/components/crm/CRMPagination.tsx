@@ -41,12 +41,12 @@ export function CRMPagination({
   itemName = "items",
   pageSizeOptions = [10, 20, 50, 100],
   className,
-  alwaysShow = false,
+  alwaysShow = true,
 }: CRMPaginationProps) {
-  if (totalItems === 0 || (!alwaysShow && totalItems <= rowsPerPage)) return null;
+  if (!alwaysShow && (totalItems === 0 || totalItems <= rowsPerPage)) return null;
 
   const startItem = totalItems === 0 ? 0 : (currentPage - 1) * rowsPerPage + 1;
-  const endItem = Math.min(currentPage * rowsPerPage, totalItems);
+  const endItem = totalItems === 0 ? 0 : Math.min(currentPage * rowsPerPage, totalItems);
   const safeTotalPages = Math.max(1, totalPages);
 
   return (
@@ -102,7 +102,7 @@ export function CRMPagination({
         {/* Page indicator & navigation buttons */}
         <div className="flex items-center gap-2.5 sm:gap-3">
           <span className="whitespace-nowrap">
-            Page <strong className="text-foreground">{currentPage}</strong> of{" "}
+            Page <strong className="text-foreground">{totalItems === 0 ? 1 : currentPage}</strong> of{" "}
             <strong className="text-foreground">{safeTotalPages}</strong>
           </span>
 
@@ -111,7 +111,7 @@ export function CRMPagination({
             <Button
               variant="outline"
               size="icon"
-              disabled={currentPage <= 1}
+              disabled={currentPage <= 1 || totalItems === 0}
               onClick={() => onPageChange(1)}
               className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
               title="First page"
@@ -124,7 +124,7 @@ export function CRMPagination({
             <Button
               variant="outline"
               size="icon"
-              disabled={currentPage <= 1}
+              disabled={currentPage <= 1 || totalItems === 0}
               onClick={() => onPageChange(Math.max(1, currentPage - 1))}
               className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
               title="Previous page"
@@ -137,7 +137,7 @@ export function CRMPagination({
             <Button
               variant="outline"
               size="icon"
-              disabled={currentPage >= safeTotalPages}
+              disabled={currentPage >= safeTotalPages || totalItems === 0}
               onClick={() => onPageChange(Math.min(safeTotalPages, currentPage + 1))}
               className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
               title="Next page"
@@ -150,7 +150,7 @@ export function CRMPagination({
             <Button
               variant="outline"
               size="icon"
-              disabled={currentPage >= safeTotalPages}
+              disabled={currentPage >= safeTotalPages || totalItems === 0}
               onClick={() => onPageChange(safeTotalPages)}
               className="group h-8 w-8 rounded-lg border-border/60 cursor-pointer disabled:opacity-40"
               title="Last page"

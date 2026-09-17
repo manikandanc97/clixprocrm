@@ -63,18 +63,28 @@ export class PrismaService
       try {
         await this.$connect();
         this.isReady = true;
-        this.logger.log('Database connected successfully');
+        if (attempt === 1) {
+          this.logger.log('Database connected successfully');
+        } else {
+          this.logger.log(
+            `Database connected successfully after recovery (attempt ${attempt}/${maxRetries})`,
+          );
+        }
         return;
-      } catch (err: any) {
+      } catch (err: unknown) {
         this.isReady = false;
+        const errorMsg = err instanceof Error ? err.message : String(err);
         const delay = Math.min(
-          initialBackoffMs * Math.pow(2, attempt - 1),
-          10000,
+          Math.round(initialBackoffMs * Math.pow(1.5, attempt - 1)),
+          5000,
         );
         this.logger.warn(
-          `Database connection attempt ${attempt}/${maxRetries} failed: ${err.message}. Retrying in ${delay}ms...`,
+          `Database connection attempt ${attempt}/${maxRetries} failed: ${errorMsg}. Retrying in ${delay}ms...`,
         );
         if (attempt === maxRetries) {
+          this.logger.error(
+            `[FATAL] Database connection failed after ${maxRetries} attempts. Refusing to boot.`,
+          );
           throw err;
         }
         await new Promise((resolve) => setTimeout(resolve, delay));
@@ -86,8 +96,9 @@ export class PrismaService
     try {
       this.isReady = false;
       await this.$disconnect();
-    } catch (err: any) {
-      this.logger.warn(`Notice during database disconnect: ${err.message}`);
+    } catch (err: unknown) {
+      const errorMsg = err instanceof Error ? err.message : String(err);
+      this.logger.warn(`Notice during database disconnect: ${errorMsg}`);
     }
   }
 

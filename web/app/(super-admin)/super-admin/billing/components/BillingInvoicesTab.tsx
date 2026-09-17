@@ -215,19 +215,18 @@ export function BillingInvoicesTab({
         </div>
 
         {/* Pagination */}
-        {filteredInvoices.length > invRowsPerPage && (
-          <CRMPagination
-            currentPage={invPage}
-            totalPages={totalInvPages}
-            totalItems={filteredInvoices.length}
-            rowsPerPage={invRowsPerPage}
-            onPageChange={setInvPage}
-            onRowsPerPageChange={(rows: number) => {
-              setInvRowsPerPage(rows);
-              setInvPage(1);
-            }}
-          />
-        )}
+        <CRMPagination
+          currentPage={invPage}
+          totalPages={totalInvPages}
+          totalItems={filteredInvoices.length}
+          rowsPerPage={invRowsPerPage}
+          onPageChange={setInvPage}
+          onRowsPerPageChange={(rows: number) => {
+            setInvRowsPerPage(rows);
+            setInvPage(1);
+          }}
+          itemName="Invoices"
+        />
       </div>
     </div>
   );

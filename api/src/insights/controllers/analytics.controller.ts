@@ -10,7 +10,6 @@ interface AuthenticatedRequest extends FastifyRequest {
   tenantId: string;
 }
 
-
 @Controller('crm/analytics')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)
 export class AnalyticsController {

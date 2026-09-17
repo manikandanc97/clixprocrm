@@ -472,7 +472,11 @@ export class AuthService {
         await this.prisma.withTenantContext(
           { tenantId, isSuperAdmin: true, timeout: 30000 },
           async (tx: any) => {
-            await executeAdminWorkspaceDeletionTransaction(tx, tenantId, userId);
+            await executeAdminWorkspaceDeletionTransaction(
+              tx,
+              tenantId,
+              userId,
+            );
           },
         );
       } else {

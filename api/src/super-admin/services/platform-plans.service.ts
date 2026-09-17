@@ -481,7 +481,9 @@ export class PlatformPlansService {
     });
 
     if (!updated) {
-      throw new NotFoundException(`Plan '${planId}' could not be reloaded after update.`);
+      throw new NotFoundException(
+        `Plan '${planId}' could not be reloaded after update.`,
+      );
     }
 
     // Sealed Audit Log

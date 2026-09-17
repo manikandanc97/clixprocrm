@@ -6,11 +6,9 @@ import { RolesGuard } from '../../auth/roles.guard';
 import { Roles } from '../../auth/roles.decorator';
 import type { FastifyRequest } from 'fastify';
 
-
 interface AuthenticatedRequest extends FastifyRequest {
   tenantId: string;
 }
-
 
 @Controller('crm/reports')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

@@ -35,7 +35,6 @@ export function SettingsSection({
 }: SettingsSectionProps) {
   return (
     <div
-      data-animate-target="true"
       className={cn(
         "rounded-xl border border-border/80 bg-card p-5 sm:p-6 shadow-xs transition-all space-y-4",
         className
@@ -95,7 +94,6 @@ export function SettingsRow({
 }: SettingsRowProps) {
   return (
     <div
-      data-animate-target="true"
       className={cn(
         "group flex items-center justify-between gap-4 py-2.5 px-2 -mx-2 rounded-lg hover:bg-muted/30 transition-colors text-xs",
         className

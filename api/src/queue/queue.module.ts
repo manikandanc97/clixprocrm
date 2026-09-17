@@ -57,10 +57,21 @@ function parseRedisUrl(redisUrl: string) {
       tls: isTls ? { rejectUnauthorized: false } : undefined,
       maxRetriesPerRequest: null,
       enableReadyCheck: false,
-      retryStrategy: (times: number) => Math.min(times * 2000, 30000),
+      lazyConnect: true,
+      enableOfflineQueue: false,
+      retryStrategy: (times: number) => {
+        if (times > 10) {
+          logger.warn(
+            `[QUEUE] Redis connection retry limit reached (${times} attempts). Halting reconnect attempts.`,
+          );
+          return null;
+        }
+        return Math.min(times * 1000, 10000);
+      },
     };
-  } catch (err: any) {
-    logger.error(`Failed to parse REDIS_URL ("${redisUrl}"): ${err.message}`);
+  } catch (err: unknown) {
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    logger.error(`Failed to parse REDIS_URL ("${redisUrl}"): ${errorMsg}`);
     throw err;
   }
 }
@@ -89,7 +100,7 @@ function parseRedisUrl(redisUrl: string) {
             throw new Error(msg);
           }
           logger.warn(
-            '[QUEUE] REDIS_URL not set; defaulting to local redis://127.0.0.1:6379 for non-production environment.',
+            '[QUEUE] REDIS_URL not configured. Defaulting to local redis://127.0.0.1:6379 with bounded backoff for non-production environment. Start local Redis or configure REDIS_URL in .env to process asynchronous background queue jobs.',
           );
           return {
             connection: {
@@ -99,7 +110,12 @@ function parseRedisUrl(redisUrl: string) {
               enableReadyCheck: false,
               lazyConnect: true,
               enableOfflineQueue: false,
-              retryStrategy: () => null,
+              retryStrategy: (times: number) => {
+                if (times > 2) {
+                  return null;
+                }
+                return Math.min(times * 1000, 3000);
+              },
             },
           };
         }

@@ -1,5 +1,5 @@
 import { Logger, Optional, Inject, forwardRef } from '@nestjs/common';
-import { Processor, WorkerHost } from '@nestjs/bullmq';
+import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
 import { Job } from 'bullmq';
 import * as nodemailer from 'nodemailer';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -41,6 +41,13 @@ export class EmailQueueProcessor extends WorkerHost {
         pass: process.env.SMTP_PASS,
       },
     });
+  }
+
+  @OnWorkerEvent('error')
+  onError(err: Error) {
+    this.logger.warn(
+      `[EMAIL WORKER] Queue worker connection notice: ${err?.message || err}`,
+    );
   }
 
   async process(job: Job<EmailJobPayload, any, string>): Promise<any> {

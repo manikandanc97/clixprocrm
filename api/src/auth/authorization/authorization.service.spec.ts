@@ -15,8 +15,8 @@ describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarc
   let prismaService: any;
 
   const mockPrismaService: any = {
-    withTenantContext: jest.fn(async ({ tenantId }: any, fn: (tx: any) => any) =>
-      fn(mockPrismaService),
+    withTenantContext: jest.fn(
+      async ({ tenantId }: any, fn: (tx: any) => any) => fn(mockPrismaService),
     ),
 
     createSealedAuditLog: jest.fn().mockResolvedValue({ id: 'audit-log-uuid' }),

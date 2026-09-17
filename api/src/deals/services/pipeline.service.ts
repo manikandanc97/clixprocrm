@@ -26,21 +26,21 @@ export class PipelineService {
     const currency = await this.getTenantCurrency(tenantId);
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const deals = await tx.deal.findMany({
-          where: { tenantId, deletedAt: null },
-          orderBy: [{ stage: 'asc' }, { updatedAt: 'desc' }],
-          select: {
-            id: true,
-            name: true,
-            value: true,
-            stage: true,
-            probability: true,
-            expectedCloseDate: true,
-            createdAt: true,
-            updatedAt: true,
-            company: { select: { name: true } },
-            customer: { select: { name: true } },
-          },
-        });
+        where: { tenantId, deletedAt: null },
+        orderBy: [{ stage: 'asc' }, { updatedAt: 'desc' }],
+        select: {
+          id: true,
+          name: true,
+          value: true,
+          stage: true,
+          probability: true,
+          expectedCloseDate: true,
+          createdAt: true,
+          updatedAt: true,
+          company: { select: { name: true } },
+          customer: { select: { name: true } },
+        },
+      });
 
       const now = new Date();
       const nowTime = now.getTime();

@@ -3,15 +3,14 @@ import { PlanDefinition, MatrixCategory } from './plan-definitions.constant';
 /**
  * Dynamically constructs the Feature Comparison Matrix from the live canonical plans.
  */
-export function buildDynamicComparisonMatrix(plans: PlanDefinition[]): MatrixCategory[] {
+export function buildDynamicComparisonMatrix(
+  plans: PlanDefinition[],
+): MatrixCategory[] {
   const sortedPlans = [...plans].sort(
     (a, b) => (a.displayOrder || 0) - (b.displayOrder || 0),
   );
 
-  const checkPlanFeature = (
-    p: PlanDefinition,
-    keywords: string[],
-  ): boolean => {
+  const checkPlanFeature = (p: PlanDefinition, keywords: string[]): boolean => {
     const featStr = (p.features || []).join(' ').toLowerCase();
     return keywords.some((kw) => featStr.includes(kw.toLowerCase()));
   };
@@ -126,9 +125,7 @@ export function buildDynamicComparisonMatrix(plans: PlanDefinition[]): MatrixCat
           values: Object.fromEntries(
             sortedPlans.map((p) => [
               p.id,
-              p.id === 'free'
-                ? 'Limited Email'
-                : 'Full Email Sync & Tracking',
+              p.id === 'free' ? 'Limited Email' : 'Full Email Sync & Tracking',
             ]),
           ),
         },
@@ -169,9 +166,7 @@ export function buildDynamicComparisonMatrix(plans: PlanDefinition[]): MatrixCat
           values: Object.fromEntries(
             sortedPlans.map((p) => [
               p.id,
-              p.id === 'free'
-                ? 'Basic Timeline'
-                : 'Advanced Activity Timeline',
+              p.id === 'free' ? 'Basic Timeline' : 'Advanced Activity Timeline',
             ]),
           ),
         },
@@ -196,8 +191,7 @@ export function buildDynamicComparisonMatrix(plans: PlanDefinition[]): MatrixCat
         {
           key: 'rbac_roles',
           name: 'Permissions & Access Control',
-          description:
-            'Granular roles, team scopes, and department isolation',
+          description: 'Granular roles, team scopes, and department isolation',
           values: Object.fromEntries(
             sortedPlans.map((p) => [
               p.id,

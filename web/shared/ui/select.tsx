@@ -41,34 +41,10 @@ function SelectTrigger({
 }: React.ComponentProps<typeof SelectPrimitive.Trigger> & {
   size?: "sm" | "default";
 }) {
-  const handleFocus = (e: React.FocusEvent<HTMLButtonElement>) => {
-    onFocus?.(e);
-    const container = e.currentTarget.closest(".relative, [data-slot='form-item'], .form-group, .space-y-1\\.5, form");
-    if (container) {
-      const iconEls = container.querySelectorAll<HTMLElement>("[data-animate-icon]");
-      iconEls.forEach((el) => {
-        el.dispatchEvent(new CustomEvent("trigger-icon-animation"));
-      });
-    }
-  };
-
-  const handleClick = (e: React.MouseEvent<HTMLButtonElement>) => {
-    onClick?.(e);
-    const container = e.currentTarget.closest(".relative, [data-slot='form-item'], .form-group, .space-y-1\\.5, form");
-    if (container) {
-      const iconEls = container.querySelectorAll<HTMLElement>("[data-animate-icon]");
-      iconEls.forEach((el) => {
-        el.dispatchEvent(new CustomEvent("trigger-icon-animation"));
-      });
-    }
-  };
-
   return (
     <SelectPrimitive.Trigger
       data-slot="select-trigger"
       data-size={size}
-      onFocus={handleFocus}
-      onClick={handleClick}
       className={cn(
         "flex w-fit items-center justify-between gap-2 whitespace-nowrap rounded-md border border-input bg-background px-3.5 py-2 text-sm font-medium text-foreground shadow-xs outline-none transition-[color,box-shadow,border-color] duration-150 select-none hover:border-border focus-visible:border-ring focus-visible:ring-2 focus-visible:ring-ring/20 disabled:cursor-not-allowed disabled:bg-muted/50 disabled:opacity-50 aria-invalid:border-destructive aria-invalid:ring-2 aria-invalid:ring-destructive/20 data-placeholder:text-muted-foreground data-[size=default]:h-10 data-[size=sm]:h-9 motion-reduce:transition-none *:data-[slot=select-value]:line-clamp-1 *:data-[slot=select-value]:flex *:data-[slot=select-value]:items-center *:data-[slot=select-value]:gap-1.5 [&_svg]:pointer-events-none [&_svg]:shrink-0 [&_svg:not([class*='size-'])]:size-4",
         className

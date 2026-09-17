@@ -169,7 +169,7 @@ export function SecOpsIncidentsTab({
           setIncidentRowsPerPage(rows);
           setIncidentPage(1);
         }}
-        itemName="incidents"
+        itemName="Incidents"
       />
     </div>
   );

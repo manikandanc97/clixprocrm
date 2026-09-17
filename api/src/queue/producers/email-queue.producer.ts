@@ -52,7 +52,6 @@ export class EmailQueueProducer {
       timestamp?: string;
     },
   ): Promise<{ enqueued: boolean; jobId?: string }> {
-
     const correlationId = payload.correlationId || randomUUID();
     const timestamp = payload.timestamp || new Date().toISOString();
     const tenantId = payload.tenantId || 'system';

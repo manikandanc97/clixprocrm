@@ -122,7 +122,6 @@ export function ClixProLogo({
       <div
         className={cn(
           "inline-flex items-center justify-center",
-          animated && "transition-transform hover:scale-105 duration-200",
           className
         )}
         {...props}
@@ -136,7 +135,7 @@ export function ClixProLogo({
     return (
       <div
         className={cn(
-          "inline-flex items-center justify-center p-1.5 rounded-xl bg-primary/10 border border-primary/20 shadow-sm transition-all duration-300 hover:bg-primary/15 hover:scale-105",
+          "inline-flex items-center justify-center p-1.5 rounded-xl bg-primary/10 border border-primary/20 shadow-sm transition-colors duration-200 hover:bg-primary/15",
           className
         )}
         {...props}
@@ -151,7 +150,6 @@ export function ClixProLogo({
       className={cn(
         "inline-flex items-center select-none tracking-tight font-display",
         currentSize.gap,
-        animated && "transition-transform hover:scale-[1.02] duration-200",
         className
       )}
       {...props}

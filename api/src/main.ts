@@ -134,10 +134,13 @@ async function bootstrap() {
 
   app.setGlobalPrefix('api');
 
+  // Enable graceful shutdown lifecycle hooks for Prisma, BullMQ, and Fastify
+  app.enableShutdownHooks();
+
   const port = parseInt(process.env.PORT || '4000', 10);
   await app.listen(port, '0.0.0.0');
   logger.log(
     `ClixPro CRM API server running on port ${port} (0.0.0.0:${port})`,
   );
 }
-bootstrap();
+void bootstrap();
