@@ -38,10 +38,15 @@ const RecentCustomers = dynamic(() => import("@/features/dashboard/components/Re
 // Specific Widget Components
 const RevenueChartWidget = () => {
   const { data: analyticsData, isLoading, isError, refetch } = useAnalytics();
+  
+  const chartData = useMemo(() => {
+    return analyticsData?.revenueOverview?.map(r => ({ name: r.name, total: r.revenue })) || [];
+  }, [analyticsData?.revenueOverview]);
+
   return (
     <DashboardWidgetWrapper id="revenueChart" title="Revenue Chart" skeletonType="chart" isLoading={isLoading} isError={isError} onRetry={refetch} delay={1.2}>
       <div className="h-[350px]">
-        <RevenueChart data={analyticsData?.revenueOverview?.map(r => ({ name: r.name, total: r.revenue })) || []} />
+        <RevenueChart data={chartData} />
       </div>
     </DashboardWidgetWrapper>
   );
@@ -107,8 +112,9 @@ const DashboardPage = () => {
   const activeTimeframe = useCRMStore(state => state.activeTimeframe);
   const setActiveTimeframe = useCRMStore(state => state.setActiveTimeframe);
 
-  const { isInitializing } = useDashboardInitializer(activeTimeframe);
-  const { data: dashboardData, isLoading: isDashboardLoading } = useDashboardData();
+  const { isInitializing, dashboard } = useDashboardInitializer(activeTimeframe);
+  const dashboardData = dashboard.data;
+  const isDashboardLoading = dashboard.isLoading;
 
   const isWorkspaceEmpty = useMemo(() => {
     if (!dashboardData || isDashboardLoading) return false;
@@ -129,6 +135,7 @@ const DashboardPage = () => {
     isDashboardLoading,
     dashboardData,
   ]);
+
 
   if (isInitializing) {
     return (

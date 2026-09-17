@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState } from "react";
+import React, { useState, useMemo } from "react";
 import { Filter, Activity } from "lucide-react";
 // import { } from "@/shared/types/dashboard";
 
@@ -23,13 +23,16 @@ const RecentActivities = () => {
   const activities = dashboardData?.recentActivities ?? [];
   const [filter, setFilter] = useState<CategoryType>("all");
 
-  const filteredActivities = activities.filter(activity => {
-    if (filter === "all") return true;
-    if (filter === "leads") return activity.title.toLowerCase().includes("lead");
-    if (filter === "tasks") return activity.title.toLowerCase().includes("task");
-    if (filter === "quotations") return activity.title.toLowerCase().includes("quotation");
-    return true;
-  }).slice(0, 4);
+  const filteredActivities = useMemo(() => {
+    return activities.filter(activity => {
+      if (filter === "all") return true;
+      if (filter === "leads") return activity.title.toLowerCase().includes("lead");
+      if (filter === "tasks") return activity.title.toLowerCase().includes("task");
+      if (filter === "quotations") return activity.title.toLowerCase().includes("quotation");
+      return true;
+    }).slice(0, 4);
+  }, [activities, filter]);
+
 
   const handleActivityClick = (title: string) => {
     toast.info(`Activity Detail: ${title}`, {

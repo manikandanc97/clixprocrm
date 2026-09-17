@@ -398,8 +398,20 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [queryClient]);
 
+  const permissionsKey = user?.permissions?.join(",") || "";
+  const access = useMemo<RoleAccess>(() => {
+    return buildAccess(user);
+  }, [user?.role, user?.roleName, user?.isSuperAdmin, user?.description, user?.analyticsVisibility, permissionsKey]);
+
+  const hasPermission = useCallback((permission: string) => {
+    if (!user) return false;
+    const roleKey = normalizeRole(user.role);
+    if (roleKey === CRM_ROLES.SUPER_ADMIN || roleKey === CRM_ROLES.ADMIN || user.isSuperAdmin === true) return true;
+    if (access.permissions.includes(permission)) return true;
+    return hasModuleAccess(permission, access.permissions, user.role);
+  }, [user, access.permissions]);
+
   const value = useMemo<AuthContextState>(() => {
-    const access = buildAccess(user);
     return {
       user,
       access,
@@ -414,17 +426,12 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
       logout,
       refreshUser,
       retryInit,
-      hasPermission: (permission: string) => {
-        if (!user) return false;
-        const roleKey = normalizeRole(user.role);
-        if (roleKey === CRM_ROLES.SUPER_ADMIN || roleKey === CRM_ROLES.ADMIN) return true;
-        if (access.permissions.includes(permission)) return true;
-        return hasModuleAccess(permission, access.permissions, user.role);
-      },
+      hasPermission,
     };
-  }, [status, user, login, logout, refreshUser, retryInit, loading, isHydrated, initStage, initError]);
+  }, [status, user, access, login, logout, refreshUser, retryInit, loading, isHydrated, initStage, initError, hasPermission]);
 
   return <AuthContext.Provider value={value}>{children}</AuthContext.Provider>;
+
 }
 
 export function useAuth() {

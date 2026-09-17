@@ -1,34 +1,39 @@
-import { CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
-import { 
-  PageHeaderSkeleton, 
-  MetricCardSkeleton, 
-  ToolbarSkeleton, 
-  TableSkeleton 
-} from "@/shared/components/skeletons";
+import React from "react";
+import { Users, UserPlus, Settings, Upload } from "lucide-react";
+import { PageLoadingState } from "@/shared/components/crm";
 
 export function CustomersSkeleton() {
   return (
-    <CRMPageContainer>
-      <PageHeaderSkeleton />
-      <div className="shrink-0">
-        <CRMMetricsGrid cols={3}>
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-          <MetricCardSkeleton />
-        </CRMMetricsGrid>
-      </div>
-      
-      <div className="flex-1 flex flex-col gap-4">
-        <div className="shrink-0 mb-2 py-4">
-          <ToolbarSkeleton />
-        </div>
-
-        <div className="flex-1 min-h-0 flex flex-col">
-          <div className="p-1">
-            <TableSkeleton rows={10} cols={7} showPagination={true} />
-          </div>
-        </div>
-      </div>
-    </CRMPageContainer>
+    <PageLoadingState
+      title="Contacts"
+      description="Manage leads and customers in one unified view with AI-powered insights."
+      icon={Users}
+      secondaryActions={[
+        {
+          label: "Customize",
+          icon: Settings,
+          onClick: () => {},
+          disabled: true,
+          variant: "outline",
+        },
+        {
+          label: "Bulk Upload",
+          icon: Upload,
+          onClick: () => {},
+          disabled: true,
+          variant: "outline",
+        },
+      ]}
+      primaryAction={{
+        label: "Add Contact",
+        icon: UserPlus,
+        onClick: () => {},
+        disabled: true,
+      }}
+      rows={10}
+      cols={8}
+      hasAvatar={true}
+    />
   );
 }
+

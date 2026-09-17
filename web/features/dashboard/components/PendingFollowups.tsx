@@ -7,6 +7,7 @@ import { Button } from "@/shared/ui/button";
 import { useTasks } from "@/shared/hooks/use-dashboard";
 import { format, isToday, isTomorrow, parseISO } from "date-fns";
 import { useRouter } from "next/navigation";
+import React, { useMemo } from "react";
 import { TasksDataType } from "@/shared/types/task";
 
 export default function PendingFollowups({ data: initialData }: { data?: TasksDataType }) {
@@ -14,7 +15,10 @@ export default function PendingFollowups({ data: initialData }: { data?: TasksDa
   const { data: fetchedData } = useTasks();
   const data = initialData ?? fetchedData;
   const allTasks = data?.tasks ?? [];
-  const pendingTasks = allTasks.filter(t => t.status !== "COMPLETED").slice(0, 4);
+  const pendingTasks = useMemo(() => {
+    return allTasks.filter(t => t.status !== "COMPLETED").slice(0, 4);
+  }, [allTasks]);
+
 
   const formatDueDate = (dateStr: string) => {
     try {

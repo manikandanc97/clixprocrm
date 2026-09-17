@@ -105,8 +105,14 @@ export const CustomerForm = ({ initialData, onSuccess, onCancel }: CustomerFormP
         </div>
 
         <div className="flex justify-end gap-3 pt-4 border-t border-border">
-          <Button type="button" variant="outline" onClick={onCancel} disabled={isPending}>
-            <AppIcon name="close" size={15} className="mr-1.5" />
+          <Button
+            type="button"
+            variant="outline"
+            onClick={onCancel}
+            disabled={isPending}
+            className="h-9 text-xs font-semibold rounded-lg px-4 gap-1.5 cursor-pointer"
+          >
+            <AppIcon name="close" size={15} className="mr-1" />
             Cancel
           </Button>
           <FormSubmitButton

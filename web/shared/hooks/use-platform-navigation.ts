@@ -8,22 +8,26 @@ import { getDynamicIcon } from "@/shared/lib/icons/dynamic-icon";
 export function usePlatformNavigation() {
   const { user, access, isAuthenticated } = useAuth();
 
+  const permissionsKey = access.permissions?.join(",") || "";
+
   const {
     data: dynamicModules,
     isLoading,
     isError,
     refetch,
   } = useQuery({
-    queryKey: ["platform-navigation", user?.id, user?.role, access.permissions],
+    queryKey: ["platform-navigation", user?.id, user?.role, permissionsKey],
     queryFn: fetchPlatformNavigation,
     enabled: isAuthenticated && Boolean(user?.id),
-    staleTime: 30000,
+    staleTime: 60000,
     retry: 1,
+    refetchOnWindowFocus: false,
   });
 
   const staticMenuGroups = useMemo(() => {
     return getRoleMenu(user?.role, access.permissions);
-  }, [user?.role, access.permissions]);
+  }, [user?.role, permissionsKey]);
+
 
   const menuGroups: NavGroup[] = useMemo(() => {
     // If no dynamic modules returned yet, return static fallback

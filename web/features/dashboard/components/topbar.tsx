@@ -24,15 +24,20 @@ export default function Topbar() {
   // Measure actual header height → expose as --sa-header-h for crm-table-workspace-sticky
   useEffect(() => {
     if (!headerRef.current) return;
+    let lastHeight = -1;
     const update = () => {
       const h = headerRef.current?.offsetHeight ?? 0;
-      document.documentElement.style.setProperty("--sa-header-h", `${h}px`);
+      if (h !== lastHeight && h > 0) {
+        lastHeight = h;
+        document.documentElement.style.setProperty("--sa-header-h", `${h}px`);
+      }
     };
     update();
     const ro = new ResizeObserver(update);
     ro.observe(headerRef.current);
     return () => ro.disconnect();
   }, []);
+
 
   useEffect(() => {
     // eslint-disable-next-line react-hooks/set-state-in-effect

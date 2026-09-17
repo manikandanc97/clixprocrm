@@ -48,13 +48,15 @@ export function DashboardWidgetWrapper({
 }: DashboardWidgetWrapperProps) {
   const { access, user } = useAuth();
   
-  // RBAC Check: Admin bypasses all checks. If not admin, verify widget access.
-  const hasAccess = user?.role === CRM_ROLES.ADMIN || access.dashboardWidgets.includes(id);
+  // RBAC Check: Super Admin and Admin bypass widget restrictions. Other roles check access list.
+  const isSuperAdmin = user?.role === CRM_ROLES.SUPER_ADMIN || (user as { isSuperAdmin?: boolean })?.isSuperAdmin === true || access.roleName === "Super Admin";
+  const isAdmin = isSuperAdmin || user?.role === CRM_ROLES.ADMIN || access.roleName === "Admin";
+  const hasAccess = isAdmin || (access?.dashboardWidgets || []).includes(id);
   
   if (!hasAccess) {
-    console.warn(`[Dashboard] Access denied for widget: ${id}`);
     return null;
   }
+
 
   const renderSkeleton = () => {
     if (customSkeleton) return customSkeleton;

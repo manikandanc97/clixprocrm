@@ -18,17 +18,15 @@ const TopCustomers = ({ data }: TopCustomersProps) => {
   const safeData = Array.isArray(data) ? data : [];
 
   return (
-    <div
-      className="h-full flex flex-col min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-300"
-    >
-      <Card className="bg-card rounded-2xl border-border/80 shadow-xs overflow-hidden h-full flex flex-col flex-1">
+    <div className="h-full flex flex-col min-w-0 animate-in fade-in slide-in-from-bottom-2 duration-300">
+      <Card className="bg-card rounded-xl border-border/80 shadow-xs overflow-hidden h-full flex flex-col flex-1">
         <CardHeader className="flex flex-row items-center justify-between p-5 pb-3">
           <div className="flex items-center gap-3">
-            <div className="w-9 h-9 rounded-2xl bg-amber-500/10 text-amber-600 border border-amber-500/20 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-110">
-              <AppIcon name="topCustomers" icon={Crown} size={18} className="text-amber-600 dark:text-amber-400" />
+            <div className="w-9 h-9 rounded-xl bg-warning/10 text-warning border border-warning/20 flex items-center justify-center shrink-0 shadow-xs transition-transform duration-300 group-hover:scale-105">
+              <AppIcon name="topCustomers" icon={Crown} size={18} className="text-warning" />
             </div>
             <div>
-              <CardTitle className="font-bold text-foreground text-base tracking-tight">Top Customers</CardTitle>
+              <CardTitle className="crm-type-h3 text-foreground">Top Customers</CardTitle>
               <CardDescription className="text-muted-foreground text-xs mt-0.5">Highest revenue generating clients</CardDescription>
             </div>
           </div>
@@ -46,8 +44,11 @@ const TopCustomers = ({ data }: TopCustomersProps) => {
           ) : (
             <div className="space-y-3">
               {safeData.slice(0, 5).map((customer, index) => (
-                <div key={customer.id || index} className="flex items-center gap-3 p-2.5 rounded-xl bg-muted/20 border border-border/40 hover:bg-muted/40 transition-colors">
-                  <div className="w-7 h-7 rounded-full bg-amber-100 dark:bg-amber-950/60 text-amber-700 dark:text-amber-300 flex items-center justify-center font-bold text-[11px] shrink-0">
+                <div
+                  key={customer.id || index}
+                  className="flex items-center gap-3 p-2.5 rounded-lg bg-muted/20 border border-border/40 hover:bg-muted/40 transition-colors"
+                >
+                  <div className="w-7 h-7 rounded-lg bg-warning/15 text-warning font-bold text-xs flex items-center justify-center shrink-0">
                     #{index + 1}
                   </div>
                   <div className="flex-1 min-w-0">
@@ -69,4 +70,5 @@ const TopCustomers = ({ data }: TopCustomersProps) => {
 };
 
 export default React.memo(TopCustomers);
+
 

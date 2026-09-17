@@ -1,3 +1,4 @@
+import { useCallback, useMemo } from "react";
 import { IndianRupee } from "lucide-react";
 import {
   formatCurrency as canonicalFormatCurrency,
@@ -7,16 +8,23 @@ import {
 export function useCurrency() {
   const currency = "INR";
 
-  const formatCurrency = (
-    value: number | string | undefined | null,
-    optionsOrCode?: FormatCurrencyOptions | string
-  ) => {
-    return canonicalFormatCurrency(value, optionsOrCode);
-  };
+  const formatCurrency = useCallback(
+    (
+      value: number | string | undefined | null,
+      optionsOrCode?: FormatCurrencyOptions | string
+    ) => {
+      return canonicalFormatCurrency(value, optionsOrCode);
+    },
+    []
+  );
 
   const CurrencyIcon = IndianRupee;
   const currencySymbol = "₹";
   const currencyCode = "INR";
 
-  return { currency, formatCurrency, currencySymbol, currencyCode, CurrencyIcon };
+  return useMemo(
+    () => ({ currency, formatCurrency, currencySymbol, currencyCode, CurrencyIcon }),
+    [formatCurrency]
+  );
 }
+

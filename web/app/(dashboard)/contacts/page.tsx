@@ -89,7 +89,7 @@ const ContactContextualSettings = dynamic(
 export default function ContactsPage() {
   const { currency } = useCurrency();
   const { settings: contactSettings } = useContactSettings();
-  const { typeFilter, setTypeFilter, customizeParam } = useContactsUrlState();
+  const { typeFilter, setTypeFilter, customizeParam, newParam } = useContactsUrlState();
 
   // Local Filter & Pagination State
   const [statusFilter, setStatusFilter] = useState("ALL");
@@ -100,8 +100,8 @@ export default function ContactsPage() {
   const [sortConfig, setSortConfig] = useState<{ key: string; direction: "asc" | "desc" } | null>(null);
 
   // Modals & Drawers State
-  const [isLeadModalOpen, setIsLeadModalOpen] = useState(false);
-  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(false);
+  const [isLeadModalOpen, setIsLeadModalOpen] = useState(() => Boolean(newParam && typeFilter === "lead"));
+  const [isCustomerModalOpen, setIsCustomerModalOpen] = useState(() => Boolean(newParam && typeFilter === "customer"));
   const [isBulkImportModalOpen, setIsBulkImportModalOpen] = useState(false);
   const [isCustomizeOpen, setIsCustomizeOpen] = useState(() => Boolean(customizeParam));
   const customizeDefaultSection = customizeParam && customizeParam !== "true" ? customizeParam : undefined;

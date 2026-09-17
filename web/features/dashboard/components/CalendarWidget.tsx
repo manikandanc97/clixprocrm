@@ -58,7 +58,10 @@ export default function CalendarWidget() {
     handleDateSelect(today);
   };
 
-  const selectedDayEvents = events.filter((e) => date && isSameDay(e.date, date));
+  const selectedDayEvents = useMemo(() => {
+    return events.filter((e) => date && isSameDay(e.date, date));
+  }, [events, date]);
+
 
   if (loading) {
     return (

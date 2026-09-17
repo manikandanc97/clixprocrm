@@ -33,6 +33,7 @@ export function useContactsUrlState() {
 
   // Read customize param (e.g. ?customize=sources or ?customize=true)
   const customizeParam = searchParams.get("customize");
+  const newParam = searchParams.get("new") === "true";
 
   const setTypeFilter = useCallback(
     (newType: ContactTypeFilter) => {
@@ -61,6 +62,7 @@ export function useContactsUrlState() {
     typeFilter,
     setTypeFilter,
     customizeParam,
+    newParam,
     searchParams,
   };
 }
