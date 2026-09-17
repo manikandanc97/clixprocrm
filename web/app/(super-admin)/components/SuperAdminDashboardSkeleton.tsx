@@ -7,7 +7,7 @@ import { Card } from "@/shared/ui/card";
 
 export function SuperAdminDashboardSkeleton() {
   return (
-    <CRMPageContainer className="pb-8 sm:pb-10 md:pb-12">
+    <CRMPageContainer>
       {/* 1. Welcome Hero Banner Skeleton */}
       <div className="relative overflow-hidden rounded-2xl bg-[#0f172a] p-5 sm:p-6 shadow-xl border border-white/5 min-h-[148px]">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">

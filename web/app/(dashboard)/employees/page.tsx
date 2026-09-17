@@ -153,7 +153,7 @@ export default function EmployeesPage() {
   };
 
   return (
-    <CRMPageContainer twoStageScroll>
+    <CRMPageContainer>
       {/* 1. Standard Page Header */}
       <CRMPageHeader
         title="Employees"
@@ -170,7 +170,7 @@ export default function EmployeesPage() {
       />
 
       {/* 2. Main Data Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
         {/* Canonical Toolbar */}
         <CRMToolbar
           searchQuery={search}
@@ -264,7 +264,7 @@ export default function EmployeesPage() {
             className="flex-1"
           />
         ) : (
-          <div className="flex-1 min-h-0 overflow-auto flex flex-col">
+          <div className="overflow-x-auto min-h-0 relative flex flex-col">
             <EmployeesDataTable
               employees={paginatedEmployees}
               selectedEmployeeIds={selectedEmployeeIds}

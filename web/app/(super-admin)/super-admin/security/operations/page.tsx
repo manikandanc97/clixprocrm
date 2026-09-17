@@ -33,10 +33,13 @@ import {
   SecurityIncidentItem,
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
-import { toast } from "sonner";
-import { CRMPageContainer } from "@/shared/components/crm";
+import {
+  CRMPageContainer,
+  CRMPageHeader,
+} from "@/shared/components/crm";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { cn } from "@/shared/lib/utils";
+import { toast } from "sonner";
 
 import {
   SecOpsTab,
@@ -333,82 +336,51 @@ export default function SecurityOperationsPage() {
   const openIncidentsCount = incidents.filter((i) => i.status !== "RESOLVED").length;
 
   return (
-    <CRMPageContainer twoStageScroll className="space-y-4 sm:space-y-5">
-      {/* 1. Header Layout matching ClixProCRM Design Standard */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <div
-            data-animate-target="true"
-            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
+    <CRMPageContainer>
+      {/* 1. Header Layout */}
+      <CRMPageHeader
+        title="Security Operations & Governance"
+        description="Authoritative platform security telemetry, live subsystem health, and incident response."
+        icon={Activity}
+        badge={
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold tracking-wide border uppercase",
+              summary?.overallStatus === "DEGRADED"
+                ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-500/20"
+                : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-500/20"
+            )}
           >
-            <AppIcon
-              name="security"
-              icon={Activity}
-              size={18}
-              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
+            <span
+              className={cn(
+                "w-1.5 h-1.5 rounded-full animate-pulse",
+                summary?.overallStatus === "DEGRADED" ? "bg-rose-500" : "bg-emerald-500"
+              )}
             />
-          </div>
-          <div>
-            <div className="flex items-center gap-2.5">
-              <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-                Security Operations &amp; Governance
-              </h1>
-              <span
-                className={cn(
-                  "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold tracking-wide border uppercase",
-                  summary?.overallStatus === "DEGRADED"
-                    ? "bg-rose-50 text-rose-700 dark:bg-rose-950/60 dark:text-rose-300 border-rose-500/20"
-                    : "bg-emerald-50 text-emerald-700 dark:bg-emerald-950/60 dark:text-emerald-300 border-emerald-500/20"
-                )}
-              >
-                <span
-                  className={cn(
-                    "w-1.5 h-1.5 rounded-full animate-pulse",
-                    summary?.overallStatus === "DEGRADED" ? "bg-rose-500" : "bg-emerald-500"
-                  )}
-                />
-                {summary?.overallStatusBadge || "System Healthy"}
-              </span>
-            </div>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Authoritative platform security telemetry, live subsystem health, and incident response.
-            </p>
-          </div>
-        </div>
-
-        {/* Top Header Actions */}
-        <div className="flex items-center gap-2 flex-wrap">
-          <Button
-            onClick={handleRunDetection}
-            disabled={detecting}
-            variant="outline"
-            className="group font-semibold text-xs h-9 px-3 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
-          >
-            <AppIcon
-              name="sparkles"
-              icon={Sparkles}
-              size={14}
-              className={cn("w-3.5 h-3.5 text-primary shrink-0", detecting && "animate-spin")}
-            />
-            <span>{detecting ? "Scanning Telemetry..." : "Run Threat Detection"}</span>
-          </Button>
-
-          <Button
-            onClick={() =>
-              setEmergencyModal({
-                action: "FORCE_RESET",
-                targetId: "",
-                reason: "",
-                confirmText: "",
-              })
-            }
-            className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
-          >
-            <AppIcon name="lock" icon={Lock} size={14} className="w-3.5 h-3.5 text-white shrink-0" />
-            <span>Emergency Action</span>
-          </Button>
-        </div>
-      </div>
+            {summary?.overallStatusBadge || "System Healthy"}
+          </span>
+        }
+        secondaryActions={[
+          {
+            label: detecting ? "Scanning Telemetry..." : "Run Threat Detection",
+            icon: Sparkles,
+            onClick: handleRunDetection,
+            disabled: detecting,
+            variant: "outline",
+          },
+        ]}
+        primaryAction={{
+          label: "Emergency Action",
+          icon: Lock,
+          onClick: () =>
+            setEmergencyModal({
+              action: "FORCE_RESET",
+              targetId: "",
+              reason: "",
+              confirmText: "",
+            }),
+        }}
+      />
 
       {/* 2. Navigation Segmented Tabs */}
       <div className="flex items-center justify-between border-b border-border/60 pb-1">

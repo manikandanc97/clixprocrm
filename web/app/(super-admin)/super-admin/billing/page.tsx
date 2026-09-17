@@ -399,7 +399,7 @@ export default function PlatformBillingAdminPage() {
   };
 
   return (
-    <CRMPageContainer twoStageScroll>
+    <CRMPageContainer>
       {/* 1. Standard CRM Page Header */}
       <CRMPageHeader
         title="Billing & Revenue"

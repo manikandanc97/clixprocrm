@@ -164,7 +164,7 @@ const SettingsPage = () => {
   const isTableSection = activeSection === "audit-log";
 
   return (
-    <CRMPageContainer className="flex-1 h-full min-h-0 flex flex-col gap-4 lg:gap-5">
+    <CRMPageContainer>
       {/* Dynamic Page Header */}
       <div className="shrink-0 pt-0.5 pb-1">
         <SettingsHeader activeSection={activeSection} />
@@ -174,8 +174,8 @@ const SettingsPage = () => {
       <div
         ref={contentRef}
         className={cn(
-          "flex-1 min-h-0 min-w-0 w-full h-full",
-          isTableSection ? "flex flex-col" : "overflow-y-auto pr-1.5 sidebar-scroll"
+          "w-full",
+          isTableSection ? "flex flex-col" : "sidebar-scroll"
         )}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -185,7 +185,7 @@ const SettingsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            className={cn("flex flex-col", isTableSection ? "h-full flex-1 min-h-0" : "min-h-full")}
+            className="flex flex-col"
           >
             {renderSection()}
           </motion.div>

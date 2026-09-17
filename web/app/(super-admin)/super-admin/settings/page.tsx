@@ -291,7 +291,7 @@ export default function SuperAdminSettingsPage() {
           <RefreshCw className="h-6 w-6 animate-spin text-emerald-600" />
         </div>
       ) : (
-        <form onSubmit={handleSave} className="space-y-6 pb-12">
+        <form onSubmit={handleSave} className="space-y-4 sm:space-y-5">
           {/* 1. GENERAL PLATFORM */}
           <div className="p-6 rounded-2xl bg-card border border-border shadow-card space-y-4">
             <div className="flex items-center justify-between">

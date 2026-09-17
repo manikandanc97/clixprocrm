@@ -330,13 +330,12 @@ export default function UpgradePage() {
 
   return (
     <CRMPageContainer>
-      <div className="flex flex-col gap-6 w-full pb-10">
-        {/* Standard CRM Page Header with compact right-side Active Plan status */}
-        <CRMPageHeader
-          title="Upgrade & Plans"
-          subtitle="Transparent, seat-based pricing that scales with your business. Choose the right capabilities for your sales & operations."
-          icon={Sparkles}
-        >
+      {/* Standard CRM Page Header with compact right-side Active Plan status */}
+      <CRMPageHeader
+        title="Upgrade & Plans"
+        subtitle="Transparent, seat-based pricing that scales with your business. Choose the right capabilities for your sales & operations."
+        icon={Sparkles}
+      >
           {/* Compact Current Plan Status Pill */}
           <div className="flex items-center gap-2 px-3.5 py-1.5 rounded-xl bg-card border border-border/80 shadow-xs">
             <span className="text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
@@ -449,7 +448,6 @@ export default function UpgradePage() {
           isSubmittingInquiry={isSubmittingInquiry}
           handleEnterpriseInquirySubmit={handleEnterpriseInquirySubmit}
         />
-      </div>
     </CRMPageContainer>
   );
 }

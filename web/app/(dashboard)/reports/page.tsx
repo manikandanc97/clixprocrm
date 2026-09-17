@@ -16,7 +16,7 @@ import { PageErrorState } from "@/shared/components/crm/PageFeedbackStates";
 import { ReportsSkeleton } from "@/features/reports/components/ReportsSkeleton";
 import { useReports } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
-import { CRMMetricCard, CRMPageContainer, CRMMetricsGrid } from "@/shared/components/crm";
+import { CRMMetricCard, CRMPageContainer, CRMPageHeader, CRMMetricsGrid } from "@/shared/components/crm";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import {
@@ -222,64 +222,47 @@ const ReportsPage = () => {
   }
 
   return (
-    <CRMPageContainer twoStageScroll className="pb-12 sm:pb-16">
-      {/* 1. Header Layout - Consistent with Contacts, Companies, Deals, etc. */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <div
-            data-animate-target="true"
-            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
-          >
-            <AppIcon
-              name="reports"
-              icon={BarChart3}
-              size={18}
-              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
-            />
-          </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-              Reports & Analytics
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Comprehensive breakdown of your sales performance and team efficiency.
-            </p>
-          </div>
-        </div>
+    <CRMPageContainer>
+      {/* 1. Standard Page Header */}
+      <CRMPageHeader
+        title="Reports & Analytics"
+        description="Comprehensive breakdown of your sales performance and team efficiency."
+        icon={BarChart3}
+        rightContent={
+          <div className="flex items-center gap-2">
+            {/* Period Filter Dropdown */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant="outline"
+                  className="group font-semibold text-xs h-9 px-3 rounded-lg shadow-xs gap-1.5 cursor-pointer border-border/70 bg-background hover:bg-muted/50 text-foreground"
+                >
+                  <Calendar className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
+                  <span>{PERIOD_LABELS[selectedPeriod]}</span>
+                  <ChevronDown className="w-3 h-3 text-muted-foreground ml-0.5 opacity-60" />
+                </Button>
+              </DropdownMenuTrigger>
+              <DropdownMenuContent align="end" className="w-36">
+                <DropdownMenuItem onClick={() => handlePeriodSelect("this_month")}>This Month</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handlePeriodSelect("today")}>Today</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handlePeriodSelect("this_week")}>This Week</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handlePeriodSelect("this_quarter")}>This Quarter</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handlePeriodSelect("this_year")}>This Year</DropdownMenuItem>
+                <DropdownMenuItem onClick={() => handlePeriodSelect("all")}>All Time</DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
 
-        <div className="flex items-center gap-2">
-          {/* Period Filter Dropdown */}
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <Button
-                variant="outline"
-                className="group font-semibold text-xs h-9 px-3 rounded-lg shadow-xs gap-1.5 cursor-pointer border-border/70 bg-background hover:bg-muted/50 text-foreground"
-              >
-                <Calendar className="w-3.5 h-3.5 text-muted-foreground group-hover:text-foreground shrink-0" />
-                <span>{PERIOD_LABELS[selectedPeriod]}</span>
-                <ChevronDown className="w-3 h-3 text-muted-foreground ml-0.5 opacity-60" />
-              </Button>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36">
-              <DropdownMenuItem onClick={() => handlePeriodSelect("this_month")}>This Month</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePeriodSelect("today")}>Today</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePeriodSelect("this_week")}>This Week</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePeriodSelect("this_quarter")}>This Quarter</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePeriodSelect("this_year")}>This Year</DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handlePeriodSelect("all")}>All Time</DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-
-          {/* Export Button */}
-          <Button
-            onClick={handleDownload}
-            className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
-          >
-            <Download className="w-3.5 h-3.5 text-white shrink-0" />
-            <span>Export</span>
-          </Button>
-        </div>
-      </div>
+            {/* Export Button */}
+            <Button
+              onClick={handleDownload}
+              className="group bg-emerald-600 hover:bg-emerald-700 text-white font-semibold text-xs h-9 px-3.5 rounded-lg shadow-xs gap-1.5 cursor-pointer transition-colors"
+            >
+              <Download className="w-3.5 h-3.5 text-white shrink-0" />
+              <span>Export</span>
+            </Button>
+          </div>
+        }
+      />
 
       {/* 2. Top 4 Metric Cards */}
       <CRMMetricsGrid cols={4} className="gap-4 sm:gap-5">

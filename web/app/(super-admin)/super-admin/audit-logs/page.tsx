@@ -20,6 +20,7 @@ import { Button } from "@/shared/ui/button";
 import { toast } from "sonner";
 import {
   CRMPageContainer,
+  CRMPageHeader,
   TruncatedText,
   CRMPagination,
 } from "@/shared/components/crm";
@@ -186,34 +187,16 @@ export default function SuperAdminAuditLogsPage() {
   );
 
   return (
-    <CRMPageContainer twoStageScroll>
+    <CRMPageContainer>
       {/* 1. Header Layout */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <div
-            data-animate-target="true"
-            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
-          >
-            <AppIcon
-              name="auditLogs"
-              icon={ScrollText}
-              size={18}
-              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
-            />
-          </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-              Platform Audit Logs
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Immutable cross-tenant audit trail, security events, authentication records, and administrative mutations.
-            </p>
-          </div>
-        </div>
-      </div>
+      <CRMPageHeader
+        title="Platform Audit Logs"
+        description="Immutable cross-tenant audit trail, security events, authentication records, and administrative mutations."
+        icon={ScrollText}
+      />
 
-      {/* 2. Main Card Container matching Organizations & Users Page */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      {/* 2. Main Card Container */}
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
           {/* Left: Filter Selects & Search */}
@@ -291,7 +274,7 @@ export default function SuperAdminAuditLogsPage() {
         </div>
 
         {/* Table Content */}
-        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
+        <div className="overflow-x-auto min-h-0 relative flex flex-col">
           <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
             <colgroup>
               <col style={{ width: "220px" }} />

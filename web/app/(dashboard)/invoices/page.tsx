@@ -169,7 +169,7 @@ export default function InvoicesPage() {
   }
 
   return (
-    <CRMPageContainer twoStageScroll>
+    <CRMPageContainer>
       {/* 1. Page Header */}
       <CRMPageHeader
         title="Invoices"
@@ -191,7 +191,7 @@ export default function InvoicesPage() {
       />
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
         {/* Canonical Toolbar */}
         <CRMToolbar
           searchQuery={search}

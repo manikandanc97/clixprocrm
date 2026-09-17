@@ -148,70 +148,68 @@ const DashboardPage = () => {
 
   return (
     <CRMPageContainer>
-      <div className="flex flex-col gap-6">
-        {/* Row 1: Hero Banner */}
-        <WelcomeBanner />
+      {/* Row 1: Hero Banner */}
+      <WelcomeBanner />
 
-        {/* Action Bar */}
-        <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-          <div className="flex flex-wrap items-center gap-2">
-            {(['today', 'week', 'month', 'year'] as const).map((t) => (
-              <Button
-                key={t}
-                variant={activeTimeframe === t ? "default" : "outline"}
-                size="sm"
-                onClick={() => setActiveTimeframe(t)}
-                className="capitalize h-8 px-4 rounded-full text-xs font-semibold tracking-wide shadow-sm transition-all"
-              >
-                {t}
-              </Button>
-            ))}
+      {/* Action Bar */}
+      <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 sm:gap-4">
+        <div className="flex flex-wrap items-center gap-2">
+          {(['today', 'week', 'month', 'year'] as const).map((t) => (
+            <Button
+              key={t}
+              variant={activeTimeframe === t ? "default" : "outline"}
+              size="sm"
+              onClick={() => setActiveTimeframe(t)}
+              className="capitalize h-8 px-4 rounded-full text-xs font-semibold tracking-wide shadow-sm transition-all"
+            >
+              {t}
+            </Button>
+          ))}
+        </div>
+
+        <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+          <DashboardFilterMenu />
+          <div className="hidden sm:block h-4 w-px bg-border mx-1" />
+          <CreateNewMenu />
+        </div>
+      </div>
+
+      {/* Row 2: KPI Grid */}
+      <DashboardKPIs />
+
+      {/* Row 4 & 5: Operational Layout */}
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-5">
+        <div className="xl:col-span-3 flex flex-col gap-4 sm:gap-5">
+          <div className="grid grid-cols-1 gap-4 sm:gap-5">
+            <RevenueChartWidget />
           </div>
 
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <DashboardFilterMenu />
-            <div className="hidden sm:block h-4 w-px bg-border mx-1" />
-            <CreateNewMenu />
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <UpcomingMeetingsWidget />
+            <PendingFollowupsWidget />
+          </div>
+
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
+            <HotLeadsWidget />
+            <RecentActivitiesWidget />
+          </div>
+
+          <div className="grid grid-cols-1 gap-4 sm:gap-5">
+            <RecentCustomersWidget />
           </div>
         </div>
 
-        {/* Row 2: KPI Grid */}
-        <DashboardKPIs />
+        {/* Right Sidebar (Sticky) */}
+        <div className="flex flex-col gap-4 sm:gap-5 w-full xl:sticky xl:top-24 self-start">
+          <RevenueTargetWidget />
 
-        {/* Row 4 & 5: Operational Layout */}
-        <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
-          <div className="xl:col-span-3 flex flex-col gap-6">
-            <div className="grid grid-cols-1 gap-6">
-              <RevenueChartWidget />
-            </div>
+          <React.Suspense fallback={<DashboardWidgetSkeleton />}>
+            <AIInsights />
+          </React.Suspense>
 
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <UpcomingMeetingsWidget />
-              <PendingFollowupsWidget />
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <HotLeadsWidget />
-              <RecentActivitiesWidget />
-            </div>
-
-            <div className="grid grid-cols-1 gap-6">
-              <RecentCustomersWidget />
-            </div>
-          </div>
-
-          {/* Right Sidebar (Sticky) */}
-          <div className="flex flex-col gap-6 w-full xl:sticky xl:top-24 self-start">
-            <RevenueTargetWidget />
-
-            <React.Suspense fallback={<DashboardWidgetSkeleton />}>
-              <AIInsights />
-            </React.Suspense>
-
-            <DashboardWidgetWrapper id="calendarWidget" title="Calendar" skeletonType="calendar" delay={1.3}>
-              <CalendarWidget />
-            </DashboardWidgetWrapper>
-          </div>
+          <DashboardWidgetWrapper id="calendarWidget" title="Calendar" skeletonType="calendar" delay={1.3}>
+            <CalendarWidget />
+          </DashboardWidgetWrapper>
         </div>
       </div>
     </CRMPageContainer>

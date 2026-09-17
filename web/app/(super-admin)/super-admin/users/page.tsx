@@ -13,6 +13,7 @@ import {
 import { toast } from "sonner";
 import {
   CRMPageContainer,
+  CRMPageHeader,
   CRMDeleteDialog,
   CRMPagination,
 } from "@/shared/components/crm";
@@ -257,34 +258,16 @@ export default function SuperAdminUsersPage() {
   };
 
   return (
-    <CRMPageContainer twoStageScroll>
+    <CRMPageContainer>
       {/* Header */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <div
-            data-animate-target="true"
-            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
-          >
-            <AppIcon
-              name="users"
-              icon={Users}
-              size={18}
-              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
-            />
-          </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-              Platform Users
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Manage platform authentication, global roles, and user lifecycle.
-            </p>
-          </div>
-        </div>
-      </div>
+      <CRMPageHeader
+        title="Platform Users"
+        description="Manage platform authentication, global roles, and user lifecycle."
+        icon={Users}
+      />
 
       {/* Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
         <UsersTableToolbar
           superAdminOnly={superAdminOnly}
           setSuperAdminOnly={setSuperAdminOnly}

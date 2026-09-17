@@ -179,9 +179,9 @@ export default function AiInsightsPage() {
         ))}
       </CRMMetricsGrid>
 
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-8 min-w-0">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-4 sm:gap-5 min-w-0">
         {/* Main Insights Panel */}
-        <div className="lg:col-span-2 space-y-8 min-w-0">
+        <div className="lg:col-span-2 space-y-4 sm:space-y-5 min-w-0">
           <CRMPageSection 
             title="Performance Predictions" 
             subtitle="Revenue vs AI Forecast for the next 6 weeks."
@@ -254,7 +254,7 @@ export default function AiInsightsPage() {
         </div>
 
         {/* Sidebar Insights */}
-        <div className="space-y-8">
+        <div className="space-y-4 sm:space-y-5">
           <CRMPageSection 
             title="Intelligence Timeline" 
             subtitle="Recent neural observations."
