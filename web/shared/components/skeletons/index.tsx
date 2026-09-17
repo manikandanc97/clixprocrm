@@ -249,9 +249,9 @@ export function TableSkeleton({
       <div className="w-full overflow-hidden rounded-xl border border-border/80 bg-card shadow-xs">
         <table className="w-full border-collapse">
           <thead>
-            <tr className="border-b border-emerald-500/20 bg-emerald-50/80 dark:bg-emerald-950/40 h-10">
+            <tr className="border-b border-primary/15 bg-primary/[0.06] dark:bg-primary/[0.08] h-10">
               {Array.from({ length: cols }).map((_, i) => (
-                <th key={i} className="px-4 py-2 text-left border-r border-emerald-500/15 last:border-r-0">
+                <th key={i} className="px-4 py-2 text-left border-r border-primary/10 last:border-r-0">
                   <Skeleton className="h-3 w-20" />
                 </th>
               ))}

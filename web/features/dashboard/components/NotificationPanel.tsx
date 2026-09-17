@@ -125,7 +125,7 @@ export default function NotificationPanel() {
 
   const getIcon = (type: string) => {
     const t = type?.toLowerCase() || "";
-    if (t.includes("lead")) return <AppIcon name="userPlus" size={16} className="text-emerald-500" />;
+    if (t.includes("lead")) return <AppIcon name="userPlus" size={16} className="text-success" />;
     if (t.includes("deal")) return <AppIcon name="deals" size={16} className="text-blue-500" />;
     if (t.includes("task")) return <AppIcon name="tasks" size={16} className="text-amber-500" />;
     if (t.includes("invoice") || t.includes("quote")) return <AppIcon name="invoices" size={16} className="text-violet-500" />;

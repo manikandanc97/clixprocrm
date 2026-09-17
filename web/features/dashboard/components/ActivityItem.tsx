@@ -10,6 +10,20 @@ interface ActivityItemProps {
   onClick: (title: string) => void;
 }
 
+/**
+ * DESIGN SYSTEM DECISION — Phase 3 (2026-09-17)
+ *
+ * COLOR_VARIANTS provides rotating categorical colors for activity item icon boxes.
+ * These colors cycle by index to visually distinguish consecutive activity items
+ * without relying on semantic meaning (each item's type is already expressed by
+ * the icon + categoryLabel text).
+ *
+ * These are NOT semantic state colors (success/warning/destructive/info).
+ * They are visual separators for list density — similar to how CRMMetricCard
+ * uses distinct colors per metric category.
+ *
+ * THEREFORE: These Tailwind color families are kept intentionally.
+ */
 const COLOR_VARIANTS = [
   {
     bg: "bg-emerald-500/10",

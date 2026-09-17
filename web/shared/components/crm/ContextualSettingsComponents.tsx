@@ -44,7 +44,7 @@ export function SettingsSection({
         <div className="space-y-1 min-w-0 flex-1">
           <div className="flex items-center gap-2">
             {Icon && (
-              <div className="w-6 h-6 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+              <div className="w-6 h-6 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0">
                 <AppIcon name={title} icon={Icon} size={14} className="w-3.5 h-3.5" />
               </div>
             )}
@@ -54,7 +54,7 @@ export function SettingsSection({
             {badge && (
               <Badge
                 variant="outline"
-                className="text-[10px] py-0 px-1.5 font-semibold border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300"
+                className="text-[10px] py-0 px-1.5 font-semibold border-primary/30 bg-primary/10 text-primary shrink-0"
               >
                 {badge}
               </Badge>

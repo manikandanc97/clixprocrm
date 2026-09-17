@@ -83,7 +83,7 @@ export default function UpcomingMeetings() {
             <Button
               variant="outline"
               onClick={handleViewCalendar}
-              className="hidden sm:flex rounded-xl border-border bg-background/50 backdrop-blur-md h-10 font-bold text-xs uppercase tracking-wider hover:bg-muted"
+              className="hidden sm:flex rounded-xl border-border bg-background/50 backdrop-blur-md h-9 font-bold text-xs uppercase tracking-wider hover:bg-muted"
             >
               View Calendar
             </Button>
@@ -109,7 +109,7 @@ export default function UpcomingMeetings() {
                   className={`group relative flex flex-col sm:flex-row items-center sm:items-center gap-4 p-4 rounded-xl border transition-all duration-500 cursor-pointer overflow-hidden animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both
                     ${
                       meeting.isToday
-                        ? "bg-gradient-to-br from-card to-info/5 border-info/20 shadow-premium-sm hover:shadow-premium hover:border-info/40"
+                        ? "bg-gradient-to-br from-card to-info/5 border-info/20 shadow-card hover:shadow-card-hover hover:border-info/40"
                         : "bg-muted/10 border-transparent hover:border-border hover:bg-muted/20"
                     }`}
                 >
@@ -143,8 +143,8 @@ export default function UpcomingMeetings() {
                         {meeting.title}
                       </h4>
                       {meeting.isOnline && (
-                        <div className="flex items-center gap-1 px-2 py-0.5 bg-emerald-500/10 text-emerald-500 rounded-full text-[10px] font-bold uppercase tracking-wider border border-emerald-500/20">
-                          <div className="w-1.5 h-1.5 bg-emerald-500 rounded-full animate-pulse" />
+                        <div className="flex items-center gap-1 px-2 py-0.5 bg-success/10 text-success rounded-full text-[10px] font-bold uppercase tracking-wider border border-success/20">
+                          <div className="w-1.5 h-1.5 bg-success rounded-full animate-pulse" />
                           Live
                         </div>
                       )}

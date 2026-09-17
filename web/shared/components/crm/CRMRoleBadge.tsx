@@ -28,6 +28,24 @@ interface RoleTheme {
   dotColor: string;
 }
 
+/**
+ * DESIGN SYSTEM DECISION — Phase 2 (2026-09-17)
+ *
+ * Role badge colors are INTENTIONAL IDENTITY COLORS, not semantic state mappings.
+ *
+ * Each role (SUPER_ADMIN, ADMIN, MANAGER, SALES, SUPPORT, DEVELOPER, FINANCE, EMPLOYEE)
+ * represents a distinct organizational function that requires persistent visual
+ * differentiation across user management tables, audit logs, and permission views.
+ *
+ * Mapping all roles to 4 semantic states (success, warning, destructive, info) would
+ * collapse meaningful role hierarchy into ambiguous UI states.
+ *
+ * THEREFORE: These colors intentionally use Tailwind color families (amber, indigo,
+ * emerald, blue, orange, slate, cyan, teal) with opacity modifiers. They do NOT
+ * follow the accent theme — which is correct and expected.
+ *
+ * Only `DEFAULT` uses semantic `bg-primary` so new/unknown roles follow the accent.
+ */
 const roleThemeConfig: Record<string, RoleTheme> = {
   SUPER_ADMIN: {
     label: "Super Admin",

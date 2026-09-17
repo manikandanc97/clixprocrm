@@ -27,11 +27,11 @@ export function ImportSummaryStep({
     >
       <div className="w-full max-w-xl bg-card rounded-xl border border-border/80 shadow-md p-6 relative overflow-hidden">
         {/* Decorative Background */}
-        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-emerald-500/10 to-transparent"></div>
+        <div className="absolute top-0 left-0 w-full h-24 bg-gradient-to-b from-success/10 to-transparent"></div>
 
         <div className="relative flex flex-col items-center z-10 text-center mb-5">
-          <div className="w-14 h-14 rounded-full bg-emerald-500 text-white flex items-center justify-center shadow-md shadow-emerald-500/20 mb-3 border-2 border-white dark:border-background relative">
-            <div className="absolute inset-0 rounded-full border-2 border-emerald-500/30 animate-ping"></div>
+          <div className="w-14 h-14 rounded-full bg-success text-white flex items-center justify-center shadow-md shadow-success/20 mb-3 border-2 border-white dark:border-background relative">
+            <div className="absolute inset-0 rounded-full border-2 border-success/30 animate-ping"></div>
             <AppIcon name="circleCheck" size={28} className="text-white relative z-10" />
           </div>
           <h3 className="text-xl font-black text-foreground tracking-tight mb-1">
@@ -43,19 +43,19 @@ export function ImportSummaryStep({
         </div>
 
         <div className="grid grid-cols-3 gap-3 mb-5 relative z-10">
-          <div className="p-4 rounded-xl bg-emerald-50/50 dark:bg-emerald-500/5 border border-emerald-100 dark:border-emerald-500/20 text-center shadow-2xs">
-            <h4 className="text-2xl font-black text-emerald-600 mb-1">
+          <div className="p-4 rounded-xl bg-success/[0.05] border border-success/20 text-center shadow-2xs">
+            <h4 className="text-2xl font-black text-success mb-1">
               {summary.imported}
             </h4>
-            <p className="text-[10px] font-bold text-emerald-700/80 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-success/80 uppercase tracking-wider">
               Imported
             </p>
           </div>
-          <div className="p-4 rounded-xl bg-amber-50/50 dark:bg-amber-500/5 border border-amber-100 dark:border-amber-500/20 text-center shadow-2xs">
-            <h4 className="text-2xl font-black text-amber-600 mb-1">
+          <div className="p-4 rounded-xl bg-warning/[0.05] border border-warning/20 text-center shadow-2xs">
+            <h4 className="text-2xl font-black text-warning mb-1">
               {summary.skipped}
             </h4>
-            <p className="text-[10px] font-bold text-amber-700/80 uppercase tracking-wider">
+            <p className="text-[10px] font-bold text-warning/80 uppercase tracking-wider">
               Skipped
             </p>
           </div>

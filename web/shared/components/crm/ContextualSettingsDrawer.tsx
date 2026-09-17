@@ -116,7 +116,7 @@ export function ContextualSettingsDrawer({
             <div className="flex items-center gap-3 min-w-0">
               {Icon && (
                 <div
-                  className="w-9 h-9 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 flex items-center justify-center shrink-0 shadow-xs group"
+                  className="w-9 h-9 rounded-xl bg-primary/10 text-primary border border-primary/20 flex items-center justify-center shrink-0 shadow-xs group"
                 >
                   <AppIcon name={title} icon={Icon} size={18} className="w-4.5 h-4.5" />
                 </div>
@@ -129,7 +129,7 @@ export function ContextualSettingsDrawer({
                   {badge && (
                     <Badge
                       variant="outline"
-                      className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border-emerald-500/30 bg-emerald-500/10 text-emerald-700 dark:text-emerald-300 shrink-0"
+                      className="text-[10px] uppercase font-bold tracking-wider px-2 py-0.5 border-primary/30 bg-primary/10 text-primary shrink-0"
                     >
                       {badge}
                     </Badge>

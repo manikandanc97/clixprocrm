@@ -171,7 +171,7 @@ export function ImportUploadStep({
             <AppIcon
               name="file"
               size={14}
-              className="text-muted-foreground group-hover/btn:text-emerald-600 dark:group-hover/btn:text-emerald-400"
+              className="text-muted-foreground group-hover/btn:text-success"
             />
             <span>.XLSX</span>
           </Button>
@@ -182,17 +182,17 @@ export function ImportUploadStep({
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 mt-4">
         {/* Card 1: AI / Sparkles / Auto Mapping */}
         <div
-          className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-emerald-500/[0.03] border border-border/70 hover:border-emerald-500/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
+          className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-primary/[0.03] border border-border/70 hover:border-primary/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
         >
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-emerald-500/20">
+          <div className="w-8 h-8 rounded-lg bg-primary/10 text-primary flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-primary/20">
             <AppIcon
               name="ai"
               size={18}
-              className="text-emerald-600 dark:text-emerald-400"
+              className="text-primary"
             />
           </div>
           <div className="min-w-0">
-            <h4 className="text-xs font-semibold text-foreground truncate group-hover/card:text-emerald-600 dark:group-hover/card:text-emerald-400 transition-colors">
+            <h4 className="text-xs font-semibold text-foreground truncate group-hover/card:text-primary transition-colors">
               Auto Column Mapping
             </h4>
             <p className="text-[11px] text-muted-foreground truncate">
@@ -203,17 +203,17 @@ export function ImportUploadStep({
 
         {/* Card 2: Security / Instant Validation */}
         <div
-          className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-blue-500/[0.03] border border-border/70 hover:border-blue-500/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
+          className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-success/[0.03] border border-border/70 hover:border-success/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
         >
-          <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-blue-500/20">
+          <div className="w-8 h-8 rounded-lg bg-success/10 text-success flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-success/20">
             <AppIcon
               name="security"
               size={18}
-              className="text-blue-600 dark:text-blue-400"
+              className="text-success"
             />
           </div>
           <div className="min-w-0">
-            <h4 className="text-xs font-semibold text-foreground truncate group-hover/card:text-blue-600 dark:group-hover/card:text-blue-400 transition-colors">
+            <h4 className="text-xs font-semibold text-foreground truncate group-hover/card:text-success transition-colors">
               Instant Validation
             </h4>
             <p className="text-[11px] text-muted-foreground truncate">
@@ -224,17 +224,17 @@ export function ImportUploadStep({
 
         {/* Card 3: Modules / Duplicate Protection */}
         <div
-          className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-amber-500/[0.03] border border-border/70 hover:border-amber-500/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
+          className="group/card flex items-center gap-3 p-3 rounded-xl bg-card hover:bg-warning/[0.03] border border-border/70 hover:border-warning/30 shadow-2xs hover:shadow-xs transition-colors duration-200 cursor-pointer select-none"
         >
-          <div className="w-8 h-8 rounded-lg bg-amber-500/10 text-amber-600 dark:text-amber-400 flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-amber-500/20">
+          <div className="w-8 h-8 rounded-lg bg-warning/10 text-warning flex items-center justify-center shrink-0 transition-transform duration-300 group-hover/card:scale-110 group-hover/card:bg-warning/20">
             <AppIcon
               name="modules"
               size={18}
-              className="text-amber-600 dark:text-amber-400"
+              className="text-warning"
             />
           </div>
           <div className="min-w-0">
-            <h4 className="text-xs font-semibold text-foreground truncate group-hover/card:text-amber-600 dark:group-hover/card:text-amber-400 transition-colors">
+            <h4 className="text-xs font-semibold text-foreground truncate group-hover/card:text-warning transition-colors">
               Duplicate Protection
             </h4>
             <p className="text-[11px] text-muted-foreground truncate">

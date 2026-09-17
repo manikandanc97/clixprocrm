@@ -66,7 +66,7 @@ export function ImportProgressStep({
       </p>
       <div className="flex gap-6 text-sm font-semibold mb-5 bg-card p-3 rounded-xl border border-border/70 shadow-2xs">
         <div className="flex flex-col items-center px-2">
-          <span className="text-emerald-600 dark:text-emerald-400 text-lg font-black">
+          <span className="text-success text-lg font-black">
             {currentImported}
           </span>
           <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-bold">
@@ -75,7 +75,7 @@ export function ImportProgressStep({
         </div>
         <div className="w-[1px] bg-border/60"></div>
         <div className="flex flex-col items-center px-2">
-          <span className="text-amber-600 dark:text-amber-400 text-lg font-black">
+          <span className="text-warning text-lg font-black">
             {currentSkipped}
           </span>
           <span className="text-muted-foreground text-[10px] uppercase tracking-wider font-bold">

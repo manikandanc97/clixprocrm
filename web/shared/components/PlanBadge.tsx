@@ -19,6 +19,25 @@ interface PlanStyleConfig {
   label: string;
 }
 
+/**
+ * DESIGN SYSTEM DECISION — Phase 2 (2026-09-17)
+ *
+ * Plan badge colors are INTENTIONAL PLAN IDENTITY COLORS, not semantic states.
+ *
+ * Plan tier differentiation serves as a persistent identity signal across every
+ * page, sidebar, org switcher, and billing surface. Users must be able to instantly
+ * recognize their plan tier without reading the label.
+ *
+ * Color semantics per tier:
+ *   - GROWTH / PRO    → emerald (active, positive growth signal)
+ *   - BUSINESS        → indigo (professional, mid-market)
+ *   - ENTERPRISE      → amber (premium/gold, top-tier)
+ *   - STARTER         → sky (entry-level, accessible)
+ *   - FREE / SANDBOX  → slate (neutral, inactive)
+ *
+ * THEREFORE: Plan colors intentionally use Tailwind color families and are NOT
+ * migrated to semantic tokens. Only the `default` fallback uses semantic tokens.
+ */
 export const getPlanConfig = (rawPlan?: string | null): PlanStyleConfig => {
   const normalized = (rawPlan || "").trim().toLowerCase();
 

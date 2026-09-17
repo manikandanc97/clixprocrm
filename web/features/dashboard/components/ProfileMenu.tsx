@@ -191,7 +191,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
             {isSuperAdminPath ? (
               <>
                 <DropdownMenuItem onClick={() => router.push("/super-admin/settings")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
-                  <AppIcon name="settings" size={16} className="text-emerald-600 transition-colors" />
+                  <AppIcon name="settings" size={16} className="text-primary transition-colors" />
                   <span>Platform Settings</span>
                 </DropdownMenuItem>
                 <DropdownMenuItem onClick={() => router.push("/dashboard")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
@@ -211,7 +211,7 @@ export default function ProfileMenu({ user, initials }: ProfileMenuProps) {
                 </DropdownMenuItem>
                 {(user?.role?.toUpperCase() === "SUPER_ADMIN" || user?.role?.toUpperCase() === "SUPERADMIN") && (
                   <DropdownMenuItem onClick={() => router.push("/super-admin")} className="cursor-pointer py-1.5 px-2.5 rounded-xl text-[13px] font-medium leading-none gap-2.5">
-                    <AppIcon name="security" size={16} className="text-emerald-600 transition-colors" />
+                    <AppIcon name="security" size={16} className="text-primary transition-colors" />
                     <span>Super Admin Portal</span>
                   </DropdownMenuItem>
                 )}

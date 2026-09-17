@@ -12,8 +12,20 @@ interface CRMCardProps {
   noPadding?: boolean;
   animate?: boolean;
   delay?: number;
+  /**
+   * If true, renders a 4px left accent border using `border-l-primary`.
+   * Always uses the semantic primary token — never hardcoded color families.
+   */
   withAccent?: boolean;
+  /**
+   * @deprecated Ignored. Accent borders now always use `border-l-primary` (semantic token).
+   * Previously passed a hardcoded color class; removed to comply with design system rules.
+   */
   accentColor?: string;
+  /**
+   * @deprecated Ignored. Accent borders now always use `border-l-primary` (semantic token).
+   * Previously computed a color from a seed hash; removed to comply with design system rules.
+   */
   accentSeed?: string | number;
 }
 
@@ -26,33 +38,7 @@ export const CRMCard = ({
   animate = true,
   delay = 0,
   withAccent = false,
-  accentColor,
-  accentSeed,
 }: CRMCardProps) => {
-  const accentColors = [
-    "border-l-blue-500",
-    "border-l-emerald-500",
-    "border-l-violet-500",
-    "border-l-amber-500",
-    "border-l-rose-500",
-    "border-l-cyan-500",
-    "border-l-indigo-500",
-    "border-l-purple-500",
-    "border-l-pink-500",
-    "border-l-orange-500",
-  ];
-
-  const getStableColor = (seed: string | number) => {
-    const s = String(seed);
-    let hash = 0;
-    for (let i = 0; i < s.length; i++) {
-      hash = s.charCodeAt(i) + ((hash << 5) - hash);
-    }
-    return accentColors[Math.abs(hash) % accentColors.length];
-  };
-
-  const finalAccentColor = accentColor || (accentSeed !== undefined ? getStableColor(accentSeed) : "border-l-primary");
-
   return (
     <div
       onClick={onClick}
@@ -62,8 +48,7 @@ export const CRMCard = ({
         crmSurface.card,
         hoverable && crmSurface.interactive,
         !noPadding && "p-4 sm:p-5",
-        withAccent && "border-l-4",
-        withAccent && finalAccentColor,
+        withAccent && "border-l-4 border-l-primary",
         animate && "animate-in fade-in slide-in-from-bottom-2 duration-300 fill-mode-both",
         className,
         "rounded-xl"
@@ -73,14 +58,3 @@ export const CRMCard = ({
     </div>
   );
 };
-
-
-
-
-
-
-
-
-
-
-

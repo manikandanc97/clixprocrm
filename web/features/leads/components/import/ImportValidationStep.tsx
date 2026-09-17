@@ -57,12 +57,12 @@ export function ImportValidationStep({
         {/* Valid Rows Card */}
         <div
           data-animate-target="true"
-          className="relative overflow-hidden rounded-xl border border-emerald-500/25 bg-gradient-to-br from-emerald-500/[0.06] via-card to-card p-3.5 shadow-2xs hover:shadow-xs transition-all duration-200"
+          className="relative overflow-hidden rounded-xl border border-success/25 bg-gradient-to-br from-success/[0.06] via-card to-card p-3.5 shadow-2xs hover:shadow-xs transition-all duration-200"
         >
-          <div className="absolute left-0 top-0 bottom-0 w-1 bg-emerald-500"></div>
+          <div className="absolute left-0 top-0 bottom-0 w-1 bg-success"></div>
           <div className="flex items-center justify-between pl-1">
             <div>
-              <p className="text-[11px] font-bold tracking-wider uppercase text-emerald-700 dark:text-emerald-400 mb-0.5">
+              <p className="text-[11px] font-bold tracking-wider uppercase text-success mb-0.5">
                 Valid Rows
               </p>
               <div className="flex items-baseline gap-2">
@@ -74,7 +74,7 @@ export function ImportValidationStep({
                 </span>
               </div>
             </div>
-            <div className="w-10 h-10 rounded-xl bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center shrink-0">
+            <div className="w-10 h-10 rounded-xl bg-success/10 text-success flex items-center justify-center shrink-0">
               <AppIcon name="circleCheck" size={20} />
             </div>
           </div>

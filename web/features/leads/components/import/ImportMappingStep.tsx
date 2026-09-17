@@ -161,18 +161,18 @@ export function ImportMappingStep({
           // Official Template View
           <div className="flex flex-col items-center justify-center text-center py-6 space-y-5">
             <div className="relative">
-              <div className="absolute inset-0 bg-emerald-500/20 rounded-full blur-xl animate-pulse"></div>
-              <div className="w-20 h-20 rounded-full bg-emerald-50 dark:bg-emerald-500/10 flex items-center justify-center relative z-10 border-4 border-white dark:border-background shadow-lg">
-                <AppIcon name="circleCheck" size={40} className="text-emerald-600 dark:text-emerald-400" />
+              <div className="absolute inset-0 bg-success/20 rounded-full blur-xl animate-pulse"></div>
+              <div className="w-20 h-20 rounded-full bg-success/10 flex items-center justify-center relative z-10 border-4 border-white dark:border-background shadow-lg">
+                <AppIcon name="circleCheck" size={40} className="text-success" />
               </div>
             </div>
             <div>
               <h3 className="text-2xl font-bold mb-2 text-foreground">
                 Official Template Detected
               </h3>
-              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-emerald-50 dark:bg-emerald-500/10 border border-emerald-100 dark:border-emerald-500/20">
-                <AppIcon name="circleCheck" size={14} className="text-emerald-600 dark:text-emerald-400" />
-                <span className="text-emerald-700 dark:text-emerald-400 font-semibold text-xs">
+              <div className="inline-flex items-center gap-2 px-3.5 py-1.5 rounded-full bg-success/10 border border-success/20">
+                <AppIcon name="circleCheck" size={14} className="text-success" />
+                <span className="text-success font-semibold text-xs">
                   All 16 standard columns mapped automatically
                 </span>
               </div>
@@ -203,11 +203,11 @@ export function ImportMappingStep({
               {/* Summary Badges */}
               <div className="flex items-center gap-3 bg-muted/30 px-3 py-1.5 rounded-full border border-border/70 text-[11px]">
                 <div className="flex items-center gap-1 font-medium text-muted-foreground">
-                  <div className="w-2 h-2 rounded-full bg-emerald-500"></div>{" "}
+                  <div className="w-2 h-2 rounded-full bg-success"></div>{" "}
                   Auto Mapped
                 </div>
                 <div className="flex items-center gap-1 font-medium text-muted-foreground">
-                  <div className="w-2 h-2 rounded-full bg-amber-500"></div>{" "}
+                  <div className="w-2 h-2 rounded-full bg-warning"></div>{" "}
                   Manual
                 </div>
                 <div className="flex items-center gap-1 font-medium text-muted-foreground">
@@ -234,7 +234,7 @@ export function ImportMappingStep({
                   if (unmappedBasic.length === 0 && !showAdvancedMapping) {
                     return (
                       <div className="flex-1 flex flex-col items-center justify-center text-center p-6 bg-muted/10">
-                        <div className="w-12 h-12 rounded-full bg-emerald-50 dark:bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 flex items-center justify-center mb-3 shadow-2xs border border-emerald-500/20">
+                        <div className="w-12 h-12 rounded-full bg-success/10 text-success flex items-center justify-center mb-3 shadow-2xs border border-success/20">
                           <AppIcon name="circleCheck" size={24} />
                         </div>
                         <h4 className="text-sm font-bold mb-1">
@@ -262,12 +262,12 @@ export function ImportMappingStep({
                   return (
                     <div className="flex-1 overflow-y-auto custom-scrollbar max-h-[290px]">
                       <table className="w-full text-xs text-left">
-                        <thead className="bg-emerald-50/80 dark:bg-emerald-950/40 sticky top-0 z-10 border-b border-emerald-500/20 shadow-xs backdrop-blur-xs text-xs text-foreground font-bold">
+                        <thead className="bg-primary/[0.06] sticky top-0 z-10 border-b border-primary/20 shadow-xs backdrop-blur-xs text-xs text-foreground font-bold">
                           <tr className="h-10">
-                            <th className="px-4 py-2 border-r border-emerald-500/15 w-1/3">
+                            <th className="px-4 py-2 border-r border-primary/15 w-1/3">
                               CRM Field
                             </th>
-                            <th className="px-4 py-2 border-r border-emerald-500/15">
+                            <th className="px-4 py-2 border-r border-primary/15">
                               File Column
                             </th>
                             <th className="px-4 py-2 text-center w-14">
@@ -392,9 +392,9 @@ export function ImportMappingStep({
                                   </td>
                                   <td className="px-4 py-2 text-center">
                                     {mapping[field.key] ? (
-                                      <div className="w-2.5 h-2.5 rounded-full bg-emerald-500 mx-auto shadow-2xs"></div>
+                                      <div className="w-2.5 h-2.5 rounded-full bg-success mx-auto shadow-2xs"></div>
                                     ) : (
-                                      <div className="w-2.5 h-2.5 rounded-full bg-amber-400 mx-auto shadow-2xs"></div>
+                                      <div className="w-2.5 h-2.5 rounded-full bg-warning mx-auto shadow-2xs"></div>
                                     )}
                                   </td>
                                 </tr>

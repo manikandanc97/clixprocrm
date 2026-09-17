@@ -12,9 +12,9 @@ import {
 
 export function DashboardSkeleton() {
   return (
-    <div className="flex flex-col gap-6 w-full animate-in fade-in duration-300">
+    <div className="flex flex-col gap-4 sm:gap-5 w-full animate-in fade-in duration-300">
       {/* 1. Hero Welcome Banner Skeleton */}
-      <div className="relative overflow-hidden rounded-2xl bg-slate-950 p-6 md:p-8 shadow-xl border border-white/5 min-h-[160px] flex flex-col justify-between">
+      <div className="relative overflow-hidden rounded-2xl bg-slate-950 p-5 sm:p-6 lg:p-7 shadow-xl border border-white/5 min-h-[140px] flex flex-col justify-between">
         <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
           <div className="space-y-3">
             <div className="flex items-center gap-2">
@@ -54,9 +54,9 @@ export function DashboardSkeleton() {
       </div>
 
       {/* 4. Operational Grid Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-5">
         {/* Left Main Column (3 Cols) */}
-        <div className="xl:col-span-3 flex flex-col gap-6">
+        <div className="xl:col-span-3 flex flex-col gap-4 sm:gap-5">
           {/* Revenue Chart Widget */}
           <CRMCard noPadding className="flex flex-col overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between p-5 border-b border-border/40">
@@ -75,13 +75,13 @@ export function DashboardSkeleton() {
           </CRMCard>
 
           {/* Row: Upcoming Meetings & Pending Tasks */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <DashboardWidgetSkeleton rows={3} />
             <DashboardWidgetSkeleton rows={3} />
           </div>
 
           {/* Row: Hot Leads & Recent Activities */}
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
             <DashboardWidgetSkeleton rows={3} />
             <DashboardWidgetSkeleton rows={3} />
           </div>
@@ -118,7 +118,7 @@ export function DashboardSkeleton() {
         </div>
 
         {/* Right Sticky Sidebar (1 Col) */}
-        <div className="flex flex-col gap-6 w-full xl:sticky xl:top-24 self-start">
+        <div className="flex flex-col gap-4 sm:gap-5 w-full xl:sticky xl:top-24 self-start">
           {/* Revenue Target Widget */}
           <CRMCard noPadding className="flex flex-col overflow-hidden">
             <CardHeader className="flex flex-row items-center justify-between p-5 border-b border-border/40">

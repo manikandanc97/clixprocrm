@@ -22,7 +22,7 @@ export default function CreateNewMenu() {
   const { openModal } = useGlobalModalStore();
 
   const actions = [
-    { label: "New Lead", iconName: "userPlus", iconColor: "text-emerald-500", path: "/leads?new=true", permission: PERMISSIONS.LEADS_CREATE },
+    { label: "New Lead", iconName: "userPlus", iconColor: "text-success", path: "/leads?new=true", permission: PERMISSIONS.LEADS_CREATE },
     { label: "New Customer", iconName: "contacts", iconColor: "text-blue-500", path: "/customers?new=true", permission: PERMISSIONS.CUSTOMERS_CREATE },
     { label: "New Quote", iconName: "quotations", iconColor: "text-violet-500", path: "/quotations?new=true", permission: PERMISSIONS.QUOTATIONS_CREATE },
     { label: "New Task", iconName: "tasks", iconColor: "text-amber-500", path: "/tasks?new=true", permission: PERMISSIONS.TASKS_CREATE },
@@ -59,7 +59,7 @@ export default function CreateNewMenu() {
             className="cursor-pointer py-1.5 px-2 rounded-xl group flex items-center justify-between transition-all duration-140"
           >
             <div className="flex items-center gap-2.5">
-              <div className="w-7 h-7 rounded-lg bg-muted/70 dark:bg-slate-800 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
+              <div className="w-7 h-7 rounded-lg bg-muted/70 dark:bg-muted/80 flex items-center justify-center group-hover:bg-primary/15 group-focus:bg-primary/15 transition-colors shrink-0">
                 <AppIcon name={action.iconName} size={15} className={action.iconColor} />
               </div>
               <span className="font-medium text-[13px] text-foreground group-hover:text-primary group-focus:text-primary transition-colors">

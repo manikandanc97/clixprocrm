@@ -60,6 +60,14 @@
   --color-info: var(--info);
   --color-info-foreground: var(--info-foreground);
 
+  /* Surface aliases — semantic elevation layer */
+  --color-surface: var(--surface);
+  --color-surface-muted: var(--surface-muted);
+  --color-surface-elevated: var(--surface-elevated);
+
+  /* Border subtle */
+  --color-border-subtle: var(--border-subtle);
+
   /* Radius system */
   --radius: 8px;
   --radius-xs: 4px;
@@ -69,6 +77,7 @@
   --radius-xl: 12px;
   --radius-2xl: 16px;
   --radius-full: 9999px;
+
 }
 
 /* ============================================================
@@ -113,6 +122,17 @@
   /* Radius */
   --radius: 8px;
 
+  /* Surface semantic aliases — map to the correct elevation layer */
+  --surface: oklch(1 0 0);                    /* Same as --card: panels, cards */
+  --surface-muted: oklch(0.96 0.004 250);     /* Same as --muted: table headers */
+  --surface-elevated: oklch(1 0 0);           /* Same as --popover: modals, flyouts */
+  --border-subtle: oklch(0.91 0.008 255 / 0.5); /* Soft separator */
+
+  /* Shadow system — canonical values */
+  --shadow-elevated:
+    0 10px 30px -10px oklch(0 0 0 / 0.08), 0 4px 10px -5px oklch(0 0 0 / 0.04);
+  --shadow-overlay: 0 25px 50px -12px oklch(0 0 0 / 0.25);
+
   /* CRM Specific Tokens */
   --crm-radius-card: 12px;
   --crm-radius-control: 8px;
@@ -134,8 +154,7 @@
   --crm-shell-bottom-space: 0.75rem;
   --crm-layout-gap: 0.75rem;
   --crm-layout-bottom-space: 0.75rem;
-
-  --crm-border-subtle: oklch(0.91 0.008 255 / 0.5);
+  /* REMOVED: --crm-border-subtle — use --border-subtle (canonical) */
 
   /* Sidebar — Clean Light */
   --sidebar: oklch(1 0 0);
@@ -232,7 +251,7 @@
   --crm-card-radius: var(--crm-radius-card);
   --crm-card-shadow: 0 1px 3px 0 oklch(0 0 0 / 0.35), 0 1px 2px -1px oklch(0 0 0 / 0.25);
   --crm-card-hover-shadow: 0 4px 16px -2px oklch(0 0 0 / 0.50), 0 2px 6px -2px oklch(0 0 0 / 0.35);
-  --crm-border-subtle: oklch(0.24 0.018 265 / 0.5);
+  /* REMOVED: --crm-border-subtle — use --border-subtle (canonical) */
 
   --sidebar: oklch(0.1 0.018 265);
   --sidebar-foreground: oklch(0.8 0.012 265);
@@ -260,6 +279,17 @@
     0 4px 10px -5px oklch(0 0 0 / 0.2);
   --shadow-card: 0 1px 3px 0 oklch(0 0 0 / 0.35), 0 1px 2px -1px oklch(0 0 0 / 0.25);
   --shadow-card-hover: 0 4px 16px -2px oklch(0 0 0 / 0.50), 0 2px 6px -2px oklch(0 0 0 / 0.35);
+
+  /* Surface semantic aliases — dark mode */
+  --surface: oklch(0.16 0.018 265);           /* Same as --card dark */
+  --surface-muted: oklch(0.20 0.018 265);     /* Same as --muted dark */
+  --surface-elevated: oklch(0.19 0.02 265);   /* Slightly lighter: modals, flyouts */
+  --border-subtle: oklch(0.24 0.018 265 / 0.5);
+
+  /* Shadow system — dark mode (heavier opacity) */
+  --shadow-elevated:
+    0 10px 30px -10px oklch(0 0 0 / 0.45), 0 4px 10px -5px oklch(0 0 0 / 0.25);
+  --shadow-overlay: 0 25px 50px -12px oklch(0 0 0 / 0.65);
 }
 
 /* Accent Color Overrides */
@@ -583,6 +613,103 @@
    UTILITY CLASSES
    ============================================================ */
 @layer utilities {
+  /* ============================================================
+     DESIGN SYSTEM TYPOGRAPHY SCALE
+     Canonical type classes — use these instead of ad-hoc
+     text-[13px] / text-[15px] / arbitrary font sizes.
+     ============================================================ */
+
+  /* Display — Auth heroes, KPI metric numbers */
+  .crm-type-display {
+    font-family: var(--font-display);
+    font-size: clamp(1.5rem, 2.5vw, 1.875rem); /* 24px → 30px */
+    line-height: 1.15;
+    font-weight: 800;
+    letter-spacing: -0.035em;
+  }
+
+  /* H1 — Page header titles (CRMPageHeader) */
+  .crm-type-h1 {
+    font-family: var(--font-display);
+    font-size: clamp(1.125rem, 1.5vw, 1.25rem); /* 18px → 20px */
+    line-height: 1.25;
+    font-weight: 700;
+    letter-spacing: -0.025em;
+  }
+
+  /* H2 — Section headers, card group titles */
+  .crm-type-h2 {
+    font-family: var(--font-display);
+    font-size: clamp(1rem, 1.2vw, 1.125rem); /* 16px → 18px */
+    line-height: 1.30;
+    font-weight: 700;
+    letter-spacing: -0.02em;
+  }
+
+  /* H3 — Card titles, modal headers, widget titles */
+  .crm-type-h3 {
+    font-family: var(--font-sans);
+    font-size: clamp(0.875rem, 1vw, 1rem); /* 14px → 16px */
+    line-height: 1.35;
+    font-weight: 600;
+    letter-spacing: -0.015em;
+  }
+
+  /* H4 — Sub-sections, list group headers */
+  .crm-type-h4 {
+    font-family: var(--font-sans);
+    font-size: clamp(0.8125rem, 0.9vw, 0.875rem); /* 13px → 14px */
+    line-height: 1.40;
+    font-weight: 600;
+    letter-spacing: -0.01em;
+  }
+
+  /* Body — Form descriptions, modal body text */
+  .crm-type-body {
+    font-family: var(--font-sans);
+    font-size: 0.875rem; /* 14px */
+    line-height: 1.50;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Body Small — Table cell data, subtitle text */
+  .crm-type-body-sm {
+    font-family: var(--font-sans);
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.50;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Label — Form field labels, input labels */
+  .crm-type-label {
+    font-family: var(--font-sans);
+    font-size: 0.75rem; /* 12px */
+    line-height: 1.25;
+    font-weight: 600;
+    letter-spacing: 0;
+  }
+
+  /* Caption — Timestamps, metadata annotations */
+  .crm-type-caption {
+    font-family: var(--font-sans);
+    font-size: 0.6875rem; /* 11px */
+    line-height: 1.40;
+    font-weight: 400;
+    letter-spacing: 0;
+  }
+
+  /* Overline — Badges, status pills, table column headers */
+  .crm-type-overline {
+    font-family: var(--font-sans);
+    font-size: 0.625rem; /* 10px */
+    line-height: 1.20;
+    font-weight: 700;
+    letter-spacing: 0.05em;
+    text-transform: uppercase;
+  }
+
   .crm-card {
     @apply rounded-xl border border-border bg-card text-card-foreground shadow-card transition-all duration-200;
   }
@@ -868,6 +995,16 @@
   /* Elevated shadow utility */
   .shadow-elevated {
     box-shadow: var(--shadow-elevated);
+  }
+
+  /* Overlay shadow utility — drawers, fullscreen dialogs */
+  .shadow-overlay {
+    box-shadow: var(--shadow-overlay);
+  }
+
+  /* Explicit xs shadow utility */
+  .shadow-xs {
+    box-shadow: var(--shadow-xs);
   }
 
   /* Glow shadow utility */

@@ -101,10 +101,10 @@ export const CRMPageHeader = ({
         key={`action-${idx}-${action.label}`}
         onClick={action.onClick}
         variant={variant}
-        size="sm"
+        size={isPrimary ? "default" : "sm"}
         disabled={action.disabled || action.loading}
         className={cn(
-          "text-xs font-semibold h-9 px-3.5 flex-1 sm:flex-none transition-all duration-150",
+          "flex-1 sm:flex-none transition-all duration-150",
           isPrimary && "shadow-xs"
         )}
       >
@@ -149,7 +149,7 @@ export const CRMPageHeader = ({
         <div className="min-w-0 flex-1">
           {renderBreadcrumbs()}
           <div className="flex flex-wrap items-center gap-2 sm:gap-2.5">
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground truncate">
+            <h1 className="crm-type-h1 text-foreground truncate">
               {title}
             </h1>
             {badge && (
