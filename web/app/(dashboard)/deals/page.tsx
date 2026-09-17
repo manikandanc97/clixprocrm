@@ -92,7 +92,7 @@ const DealsPage = () => {
   }
 
   return (
-    <CRMPageContainer className="h-full">
+    <CRMPageContainer twoStageScroll>
       <CRMPageHeader
         title="Deals & Pipeline"
         description="Track sales opportunities, manage stages, and forecast revenue."
@@ -113,7 +113,7 @@ const DealsPage = () => {
       />
 
       {sortedPipelineItems.length === 0 ? (
-        <div className="flex-1 min-h-0 flex flex-col mt-4">
+        <div className="flex-1 min-h-0 flex flex-col">
           <EmptyState
             module="deals"
             action={{
@@ -124,7 +124,7 @@ const DealsPage = () => {
           />
         </div>
       ) : (
-        <div className="flex-1 min-h-0 flex flex-col h-full mt-4">
+        <div className="flex-1 min-h-0 flex flex-col">
           <div className="flex-1 flex flex-col min-h-0 h-full animate-in fade-in duration-200">
             <PipelineBoard 
               items={sortedPipelineItems} 

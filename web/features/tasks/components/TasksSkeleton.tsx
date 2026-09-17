@@ -1,34 +1,31 @@
-import { CRMPageContainer } from "@/shared/components/crm";
-import { 
-  PageHeaderSkeleton, 
-  ToolbarSkeleton, 
-  TableSkeleton,
-  KanbanSkeleton
-} from "@/shared/components/skeletons";
+import React from "react";
+import { CheckSquare, Plus, Settings } from "lucide-react";
+import { PageLoadingState } from "@/shared/components/crm";
 
-export function TasksSkeleton({ viewMode = "list" }: { viewMode?: string }) {
-  const isKanban = viewMode === "kanban";
-
+export function TasksSkeleton({ viewMode: _viewMode }: { viewMode?: string } = {}) {
   return (
-    <CRMPageContainer>
-      <PageHeaderSkeleton />
-      
-      <div className="flex-1 flex flex-col gap-4">
-        <div className="shrink-0 mb-2 py-4">
-          <ToolbarSkeleton />
-        </div>
-
-        <div className="flex-1 min-h-0 flex flex-col">
-          {isKanban ? (
-            <KanbanSkeleton />
-          ) : (
-            <div className="p-1">
-              <TableSkeleton rows={10} cols={6} showPagination={true} />
-            </div>
-          )}
-        </div>
-      </div>
-    </CRMPageContainer>
+    <PageLoadingState
+      title="Tasks"
+      description="Organize your workflow, track productivity, and collaborate with your team."
+      icon={CheckSquare}
+      secondaryActions={[
+        {
+          label: "Customize",
+          icon: Settings,
+          onClick: () => {},
+          disabled: true,
+          variant: "outline",
+        },
+      ]}
+      primaryAction={{
+        label: "Create Task",
+        icon: Plus,
+        onClick: () => {},
+        disabled: true,
+      }}
+      rows={10}
+      cols={6}
+      hasAvatar={true}
+    />
   );
 }
-

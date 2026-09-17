@@ -153,7 +153,7 @@ export default function NotificationsPage() {
   };
 
   return (
-    <CRMPageContainer>
+    <CRMPageContainer twoStageScroll>
       {/* Header */}
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-3 shrink-0">
         <div>

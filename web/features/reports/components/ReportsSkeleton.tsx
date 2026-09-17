@@ -8,7 +8,7 @@ import { Skeleton } from "@/shared/ui/skeleton";
 
 export function ReportsSkeleton() {
   return (
-    <CRMPageContainer twoStageScroll className="space-y-6">
+    <CRMPageContainer>
       <PageHeaderSkeleton />
       
       {/* 4 Metric Cards */}
