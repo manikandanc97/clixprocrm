@@ -1,10 +1,10 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
-import { SecurityIncidentsService } from './security-incidents.service';
-import { SecurityAlertsService } from './security-alerts.service';
-import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import type { AggregateQueueMetrics } from '../../queue/interfaces/queue-metrics.interface';
+import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
+import { SecurityAlertsService } from './security-alerts.service';
+import { SecurityIncidentsService } from './security-incidents.service';
 
 export type HealthStatus =
   'HEALTHY' | 'DEGRADED' | 'CRITICAL' | 'NOT_CONFIGURED' | 'UNKNOWN';

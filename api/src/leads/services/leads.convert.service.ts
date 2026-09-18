@@ -1,12 +1,12 @@
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
+    BadRequestException,
+    Injectable,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { ConvertLeadDto } from '../dto/convert-lead.dto';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { ConvertLeadDto } from '../dto/convert-lead.dto';
 
 /**
  * @file leads/services/leads.convert.service.ts

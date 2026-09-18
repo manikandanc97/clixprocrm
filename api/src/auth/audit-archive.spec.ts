@@ -1,12 +1,10 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { AuditLoggerService } from '../common/audit/audit-logger.service';
 import { AuditArchiveService } from '../common/audit/archive/audit-archive.service';
 import {
-  S3ObjectLockProvider,
-  buildAuditObjectKey,
+    buildAuditObjectKey
 } from '../common/audit/archive/s3-object-lock.provider';
-import { CanonicalAuditArchiveRecord } from '../common/audit/archive/audit-archive.interface';
+import { AuditLoggerService } from '../common/audit/audit-logger.service';
 
 describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {
   let mockPrisma: any;

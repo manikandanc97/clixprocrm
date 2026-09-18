@@ -1,14 +1,14 @@
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
+    BadRequestException,
+    Injectable,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { DealStage, Prisma } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
-import { Prisma, DealStage } from '@prisma/client';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateDealDto } from '../dto/create-deal.dto';
 import { UpdateDealDto } from '../dto/update-deal.dto';
-import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 
 @Injectable()
 export class DealsService {

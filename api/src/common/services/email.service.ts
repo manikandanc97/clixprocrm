@@ -1,7 +1,7 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
 import * as nodemailer from 'nodemailer';
-import { getSharedRedisClient } from '../utils/rate-limit.util';
 import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
+import { getSharedRedisClient } from '../utils/rate-limit.util';
 
 export function escapeHtml(str: any): string {
   if (str === null || str === undefined) return '';

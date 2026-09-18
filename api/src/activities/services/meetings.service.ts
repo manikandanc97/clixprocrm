@@ -1,9 +1,9 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { EncryptionService } from '../../common/encryption/encryption.service';
+import { formatDate } from '../../common/utils/crm-formatters.util';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateMeetingDto } from '../dto/create-meeting.dto';
 import { UpdateMeetingDto } from '../dto/update-meeting.dto';
-import { formatDate } from '../../common/utils/crm-formatters.util';
-import { EncryptionService } from '../../common/encryption/encryption.service';
 
 @Injectable()
 export class MeetingsService {

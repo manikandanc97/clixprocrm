@@ -1,12 +1,11 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
+import { AuditArchiveProvider } from '../archive/audit-archive.interface';
 import { AuditArchiveService } from '../archive/audit-archive.service';
 import {
-  buildAuditObjectKey,
-  S3ObjectLockProvider,
+    buildAuditObjectKey
 } from '../archive/s3-object-lock.provider';
-import { verifyRecordHash, AuditLogSealInput } from '../audit-crypto.util';
-import { AuditArchiveProvider } from '../archive/audit-archive.interface';
+import { AuditLogSealInput, verifyRecordHash } from '../audit-crypto.util';
 
 export interface DisasterRecoveryVerificationResult {
   restorable: boolean;

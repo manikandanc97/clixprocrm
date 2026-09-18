@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Delete,
-  Post,
-  Param,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Param,
+    Post,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { SupabaseAuthGuard } from './supabase.guard';
-import { SessionsService } from './sessions.service';
 import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+    RATE_LIMITS,
 } from '../common/utils/rate-limit.util';
+import { SessionsService } from './sessions.service';
+import { SupabaseAuthGuard } from './supabase.guard';
 
 @Controller('auth/sessions')
 @UseGuards(SupabaseAuthGuard)

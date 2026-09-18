@@ -1,7 +1,7 @@
 import { PartialType } from '@nestjs/mapped-types';
-import { CreateQuotationDto } from './create-quotation.dto';
-import { IsEnum, IsOptional } from 'class-validator';
 import { QuotationStatus } from '@prisma/client';
+import { IsEnum, IsOptional } from 'class-validator';
+import { CreateQuotationDto } from './create-quotation.dto';
 
 export class UpdateQuotationDto extends PartialType(CreateQuotationDto) {}
 

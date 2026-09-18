@@ -1,8 +1,8 @@
-import {
-  ImportQueueProducer,
-  IMPORT_DEFAULT_JOB_OPTS,
-} from './import-queue.producer';
 import { IMPORT_JOB_NAMES } from '../interfaces/import-jobs';
+import {
+    IMPORT_DEFAULT_JOB_OPTS,
+    ImportQueueProducer,
+} from './import-queue.producer';
 
 describe('ImportQueueProducer Suite', () => {
   let producer: ImportQueueProducer;

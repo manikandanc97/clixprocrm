@@ -1,8 +1,8 @@
+import { ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { ForbiddenException, NotFoundException } from '@nestjs/common';
-import { SubscriptionEntitlementService } from '../subscription-entitlement.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { BillingGatewayService } from '../../billing/billing-gateway.service';
+import { SubscriptionEntitlementService } from '../subscription-entitlement.service';
 
 describe('SubscriptionEntitlementService Enterprise Suite', () => {
   let service: SubscriptionEntitlementService;

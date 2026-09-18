@@ -1,11 +1,11 @@
 import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  BadRequestException,
+    BadRequestException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { AiEntitlementService } from '../../ai/ai-entitlement.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PlatformAiService {

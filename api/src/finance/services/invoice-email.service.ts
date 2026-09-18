@@ -1,10 +1,10 @@
 import { Injectable, Logger, Optional } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { EmailService, escapeHtml } from '../../common/services/email.service';
 import {
-  formatCurrency,
-  toNumber,
+    formatCurrency,
+    toNumber,
 } from '../../common/utils/crm-formatters.util';
+import { PrismaService } from '../../prisma/prisma.service';
 import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 
 @Injectable()

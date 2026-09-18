@@ -1,9 +1,9 @@
+import { BadRequestException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { BadRequestException, NotFoundException } from '@nestjs/common';
-import { PlatformPlansService } from '../services/platform-plans.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { AiEntitlementService } from '../../ai/ai-entitlement.service';
 import { CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
+import { PrismaService } from '../../prisma/prisma.service';
+import { PlatformPlansService } from '../services/platform-plans.service';
 
 describe('PlatformPlansService SaaS Pricing Suite', () => {
   let service: PlatformPlansService;

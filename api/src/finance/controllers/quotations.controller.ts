@@ -1,27 +1,26 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards
 } from '@nestjs/common';
-import { QuotationsService } from '../services/quotations.service';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
+import { parsePaginationParams } from '../../common/utils/pagination.util';
 import { CreateQuotationDto } from '../dto/create-quotation.dto';
 import {
-  UpdateQuotationDto,
-  UpdateQuotationStatusDto,
+    UpdateQuotationDto,
+    UpdateQuotationStatusDto,
 } from '../dto/update-quotation.dto';
-import { parsePaginationParams } from '../../common/utils/pagination.util';
+import { QuotationsService } from '../services/quotations.service';
 
 @Controller('crm/quotations')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

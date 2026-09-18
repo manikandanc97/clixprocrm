@@ -1,30 +1,28 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
-  Res,
-  Header,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    Res,
+    UseGuards
 } from '@nestjs/common';
-import { InvoicesService } from '../services/invoices.service';
+import type { FastifyReply } from 'fastify';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
-import {
-  CreateInvoiceDto,
-  UpdateInvoiceDto,
-  SendInvoiceEmailDto,
-} from '../dto/enterprise-invoice.dto';
-import type { FastifyReply } from 'fastify';
 import { parsePaginationParams } from '../../common/utils/pagination.util';
+import {
+    CreateInvoiceDto,
+    SendInvoiceEmailDto,
+    UpdateInvoiceDto,
+} from '../dto/enterprise-invoice.dto';
+import { InvoicesService } from '../services/invoices.service';
 
 @Controller('crm/invoices')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

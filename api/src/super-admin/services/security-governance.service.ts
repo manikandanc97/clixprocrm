@@ -1,13 +1,13 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
+import * as crypto from 'crypto';
 import { AuditArchiveService } from '../../common/audit/archive/audit-archive.service';
+import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { SecurityIncidentsService } from './security-incidents.service';
 import {
-  SecurityOperationsService,
-  HealthStatus,
+    HealthStatus,
+    SecurityOperationsService,
 } from './security-operations.service';
-import * as crypto from 'crypto';
 
 export interface SecurityControlItem {
   controlId: string;

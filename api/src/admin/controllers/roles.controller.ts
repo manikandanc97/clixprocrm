@@ -1,31 +1,31 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { RolesService } from '../services/roles.service';
+import * as z from 'zod';
+import { AalGuard } from '../../auth/aal.guard';
+import { Permissions } from '../../auth/permissions.decorator';
+import { PermissionsGuard } from '../../auth/permissions.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { PermissionsGuard } from '../../auth/permissions.guard';
-import { Permissions } from '../../auth/permissions.decorator';
 import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+    RATE_LIMITS,
 } from '../../common/utils/rate-limit.util';
-import { AalGuard } from '../../auth/aal.guard';
-import * as z from 'zod';
+import { RolesService } from '../services/roles.service';
 
 const roleSchema = z.object({
   name: z.string().min(1, 'Name is required'),

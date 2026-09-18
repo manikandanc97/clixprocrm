@@ -1,29 +1,29 @@
 import {
-  Injectable,
-  ForbiddenException,
-  BadRequestException,
-  Logger,
-  Optional,
-  Inject,
-  forwardRef,
+    BadRequestException,
+    ForbiddenException,
+    Inject,
+    Injectable,
+    Logger,
+    Optional,
+    forwardRef,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import * as crypto from 'crypto';
 import { SYSTEM_ROLE_PERMISSIONS } from '../common/role-permissions.constants';
+import { PrismaService } from '../prisma/prisma.service';
 
-import { BrandingService } from '../workspace/services/branding.service';
 import { MediaQueueProducer } from '../queue/producers/media-queue.producer';
+import { BrandingService } from '../workspace/services/branding.service';
 import {
-  invalidateGetMeCache,
-  getCachedUserProfile,
-  setCachedUserProfile,
-  buildSuperAdminProfile,
-  buildTenantUserProfile,
-} from './auth-profile-cache.util';
-import {
-  executeAdminWorkspaceDeletionTransaction,
-  executeMemberAccountDeletionTransaction,
+    executeAdminWorkspaceDeletionTransaction,
+    executeMemberAccountDeletionTransaction,
 } from './account-deletion.helper';
+import {
+    buildSuperAdminProfile,
+    buildTenantUserProfile,
+    getCachedUserProfile,
+    invalidateGetMeCache,
+    setCachedUserProfile,
+} from './auth-profile-cache.util';
 
 export { invalidateGetMeCache };
 

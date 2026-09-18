@@ -1,8 +1,8 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AuditArchiveService } from '../archive/audit-archive.service';
+import { AuditLogSealInput, verifyRecordHash } from '../audit-crypto.util';
 import { AuditIntegrityAlertService } from './audit-integrity-alert.service';
-import { verifyRecordHash, AuditLogSealInput } from '../audit-crypto.util';
 
 export interface IntegrityReport {
   status: 'HEALTHY' | 'WARNING' | 'CRITICAL';

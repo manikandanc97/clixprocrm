@@ -1,21 +1,19 @@
 import {
-  ExecutionContext,
-  UnauthorizedException,
-  NotFoundException,
-  HttpException,
-  HttpStatus,
+    ExecutionContext,
+    NotFoundException,
+    UnauthorizedException
 } from '@nestjs/common';
-import { SessionsService } from './sessions.service';
-import { SessionsController } from './sessions.controller';
-import {
-  SupabaseAuthGuard,
-  invalidateSessionCache,
-  invalidateTokenUserCache,
-  setSupabaseClient,
-} from './supabase.guard';
-import { AuthService } from './auth.service';
-import { AuthController } from './auth.controller';
 import { getSessionTimeoutConfig } from '../common/utils/session-config.util';
+import { AuthController } from './auth.controller';
+import { AuthService } from './auth.service';
+import { SessionsController } from './sessions.controller';
+import { SessionsService } from './sessions.service';
+import {
+    SupabaseAuthGuard,
+    invalidateSessionCache,
+    invalidateTokenUserCache,
+    setSupabaseClient,
+} from './supabase.guard';
 
 describe('Active Session & Device Security Tests (Phase 1, Phase 2, Phase 3)', () => {
   let sessionsService: SessionsService;

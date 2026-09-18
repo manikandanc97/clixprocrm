@@ -14,12 +14,12 @@ jest.mock('ai', () => ({
   isStepCount: jest.fn(),
 }));
 
+import { ConfigService } from '@nestjs/config';
+import { EncryptionService } from '../../common/encryption/encryption.service';
+import { PERMISSION_MODULES } from '../../common/role-permissions.constants';
+import { PrismaService } from '../../prisma/prisma.service';
 import { AiSecurityService, UserSecurityContext } from '../ai-security.service';
 import { AiService } from '../ai.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { EncryptionService } from '../../common/encryption/encryption.service';
-import { ConfigService } from '@nestjs/config';
-import { PERMISSION_MODULES } from '../../common/role-permissions.constants';
 
 describe('AI Chatbot Enterprise RBAC & Data Access Security Audit Suite', () => {
   let securityService: AiSecurityService;

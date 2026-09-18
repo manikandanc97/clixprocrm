@@ -1,17 +1,17 @@
+import { EmailAuthType, EmailProviderType } from '@prisma/client';
 import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEmail,
-  IsEnum,
-  IsBoolean,
-  IsInt,
-  Min,
-  Max,
-  IsUUID,
-  IsDateString,
+    IsBoolean,
+    IsDateString,
+    IsEmail,
+    IsEnum,
+    IsInt,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    IsUUID,
+    Max,
+    Min,
 } from 'class-validator';
-import { EmailProviderType, EmailAuthType } from '@prisma/client';
 
 export class CreateEmailAccountDto {
   @IsEmail({}, { message: 'A valid email address is required' })

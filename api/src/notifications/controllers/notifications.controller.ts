@@ -1,17 +1,17 @@
 import {
-  Controller,
-  Get,
-  Patch,
-  Post,
-  Delete,
-  Param,
-  UseGuards,
-  Req,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { NotificationsService } from '../services/notifications.service';
+import type { FastifyRequest } from 'fastify';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import type { FastifyRequest } from 'fastify';
+import { NotificationsService } from '../services/notifications.service';
 
 interface AuthenticatedRequest extends FastifyRequest {
   tenantId: string;

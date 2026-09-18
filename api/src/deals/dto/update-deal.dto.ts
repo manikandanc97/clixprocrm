@@ -1,6 +1,6 @@
-import { IsString, IsOptional, IsNumber, IsEnum } from 'class-validator';
 import { DealStage } from '@prisma/client';
 import { Type } from 'class-transformer';
+import { IsEnum, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class UpdateDealDto {
   @IsOptional()

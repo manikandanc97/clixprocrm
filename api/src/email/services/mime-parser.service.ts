@@ -1,5 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { simpleParser, ParsedMail, HeaderValue } from 'mailparser';
+import { HeaderValue, ParsedMail, simpleParser } from 'mailparser';
 
 export interface ParsedEmailAttachment {
   fileName: string;

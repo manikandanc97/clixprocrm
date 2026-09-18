@@ -1,20 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Query,
-  Body,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
+    Body,
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { CalendarService } from './services/calendar.service';
-import { MeetingsService } from './services/meetings.service';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { CalendarService } from './services/calendar.service';
+import { MeetingsService } from './services/meetings.service';
 
 @Controller('crm/calendar')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

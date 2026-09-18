@@ -1,15 +1,15 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsBoolean,
-  IsDateString,
-  IsOptional,
-  IsNumber,
-  Min,
-} from 'class-validator';
-import { Transform } from 'class-transformer';
 import { TargetPeriod } from '@prisma/client';
+import { Transform } from 'class-transformer';
+import {
+    IsBoolean,
+    IsDateString,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    Min,
+} from 'class-validator';
 
 export class CreateRevenueTargetDto {
   @IsEnum(TargetPeriod)

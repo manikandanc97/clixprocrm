@@ -1,32 +1,31 @@
 import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-  Logger,
+    BadRequestException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import {
-  CreateInvoiceDto,
-  UpdateInvoiceDto,
-  SendInvoiceEmailDto,
-} from '../dto/enterprise-invoice.dto';
 import { Prisma } from '@prisma/client';
 import {
-  toNumber,
-  formatCurrency,
+    formatCurrency,
+    toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
+import { PrismaService } from '../../prisma/prisma.service';
 import {
-  calculateInvoiceTotals,
-  roundTo2,
+    CreateInvoiceDto,
+    SendInvoiceEmailDto,
+    UpdateInvoiceDto,
+} from '../dto/enterprise-invoice.dto';
+import {
+    calculateInvoiceTotals
 } from '../utils/invoice-calculation.util';
 import {
-  checkIsInvoiceOverdue,
-  calculateInvoiceSummaryStats,
-  mapInvoiceRecordToDto,
+    calculateInvoiceSummaryStats,
+    checkIsInvoiceOverdue,
+    mapInvoiceRecordToDto,
 } from '../utils/invoice-stats.util';
-import { InvoicePdfService } from './invoice-pdf.service';
 import { InvoiceEmailService } from './invoice-email.service';
+import { InvoicePdfService } from './invoice-pdf.service';
 
 @Injectable()
 export class InvoicesService {

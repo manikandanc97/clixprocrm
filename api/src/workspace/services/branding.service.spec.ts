@@ -1,5 +1,5 @@
-import { BrandingService } from './branding.service';
 import sharp from 'sharp';
+import { BrandingService } from './branding.service';
 
 describe('BrandingService', () => {
   let service: BrandingService;

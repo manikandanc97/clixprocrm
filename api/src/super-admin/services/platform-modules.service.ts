@@ -1,25 +1,21 @@
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ForbiddenException,
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import {
+    CreatePlatformModuleDto,
+    DEFAULT_SUPER_ADMIN_NAV_MENUS,
+    DEFAULT_TENANT_CRM_MODULES,
+    UpdatePlatformModuleDto,
+} from './platform-modules.defaults';
 
 export {
-  NAVIGATION_SCOPE,
-  CreatePlatformModuleDto,
-  UpdatePlatformModuleDto,
-  DEFAULT_TENANT_CRM_MODULES,
-  DEFAULT_SUPER_ADMIN_NAV_MENUS,
+    CreatePlatformModuleDto, DEFAULT_SUPER_ADMIN_NAV_MENUS, DEFAULT_TENANT_CRM_MODULES, NAVIGATION_SCOPE, UpdatePlatformModuleDto
 } from './platform-modules.defaults';
 export type { NavigationScope } from './platform-modules.defaults';
-import {
-  CreatePlatformModuleDto,
-  UpdatePlatformModuleDto,
-  DEFAULT_TENANT_CRM_MODULES,
-  DEFAULT_SUPER_ADMIN_NAV_MENUS,
-} from './platform-modules.defaults';
 
 @Injectable()
 export class PlatformModulesService {

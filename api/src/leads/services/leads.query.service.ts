@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma, LeadStage } from '@prisma/client';
-import {
-  formatCurrency,
-  getStatusLabel,
-  toNumber,
-  LEAD_STATUS_LABELS,
-} from '../../common/utils/crm-formatters.util';
+import { LeadStage, Prisma } from '@prisma/client';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import {
+    formatCurrency,
+    getStatusLabel,
+    LEAD_STATUS_LABELS,
+    toNumber,
+} from '../../common/utils/crm-formatters.util';
+import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * @file leads/services/leads.query.service.ts

@@ -1,10 +1,10 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { LeadsService } from './leads.service';
-import { LeadsQueryService } from './leads.query.service';
-import { LeadsConvertService } from './leads.convert.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { EncryptionService } from '../../common/encryption/encryption.service';
 import { NotFoundException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
+import { EncryptionService } from '../../common/encryption/encryption.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { LeadsConvertService } from './leads.convert.service';
+import { LeadsQueryService } from './leads.query.service';
+import { LeadsService } from './leads.service';
 
 describe('LeadsService Security - Attachment IDOR & Cross-Tenant Access Prevention', () => {
   let service: LeadsService;

@@ -1,21 +1,21 @@
-import { Module, Logger, Global, forwardRef } from '@nestjs/common';
-import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BullModule } from '@nestjs/bullmq';
-import { PrismaModule } from '../prisma/prisma.module';
-import { QUEUE_NAMES } from './queue.constants';
-import { EmailQueueProducer } from './producers/email-queue.producer';
-import { EmailQueueProcessor } from './processors/email-queue.processor';
-import { ImportQueueProducer } from './producers/import-queue.producer';
-import { ImportQueueProcessor } from './processors/import-queue.processor';
-import { WebhookQueueProducer } from './producers/webhook-queue.producer';
-import { WebhookQueueProcessor } from './processors/webhook-queue.processor';
-import { MediaQueueProducer } from './producers/media-queue.producer';
-import { MediaQueueProcessor } from './processors/media-queue.processor';
-import { QueueMetricsService } from './services/queue-metrics.service';
-import { LeadsModule } from '../leads/leads.module';
+import { Global, Logger, Module, forwardRef } from '@nestjs/common';
+import { ConfigModule, ConfigService } from '@nestjs/config';
 import { BillingModule } from '../common/billing/billing.module';
-import { WorkspaceModule } from '../workspace/workspace.module';
 import { EmailModule } from '../email/email.module';
+import { LeadsModule } from '../leads/leads.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { WorkspaceModule } from '../workspace/workspace.module';
+import { EmailQueueProcessor } from './processors/email-queue.processor';
+import { ImportQueueProcessor } from './processors/import-queue.processor';
+import { MediaQueueProcessor } from './processors/media-queue.processor';
+import { WebhookQueueProcessor } from './processors/webhook-queue.processor';
+import { EmailQueueProducer } from './producers/email-queue.producer';
+import { ImportQueueProducer } from './producers/import-queue.producer';
+import { MediaQueueProducer } from './producers/media-queue.producer';
+import { WebhookQueueProducer } from './producers/webhook-queue.producer';
+import { QUEUE_NAMES } from './queue.constants';
+import { QueueMetricsService } from './services/queue-metrics.service';
 
 const logger = new Logger('QueueModule');
 

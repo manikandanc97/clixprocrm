@@ -1,14 +1,14 @@
+import { EmailAuthType, EmailProviderType } from '@prisma/client';
 import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsInt,
-  Min,
-  Max,
-  IsDateString,
-  IsEnum,
+    IsBoolean,
+    IsDateString,
+    IsEnum,
+    IsInt,
+    IsOptional,
+    IsString,
+    Max,
+    Min,
 } from 'class-validator';
-import { EmailProviderType, EmailAuthType } from '@prisma/client';
 
 export class UpdateEmailAccountDto {
   @IsOptional()

@@ -1,18 +1,18 @@
 import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  UnauthorizedException,
+    CanActivate,
+    ExecutionContext,
+    ForbiddenException,
+    Injectable,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
+import { UserAuthContext } from './authorization-types';
 import {
-  PERMISSION_REQUIREMENT_KEY,
-  REQUIRE_OWNER_KEY,
-  PermissionRequirementMetadata,
+    PERMISSION_REQUIREMENT_KEY,
+    PermissionRequirementMetadata,
+    REQUIRE_OWNER_KEY,
 } from './authorization.decorator';
 import { AuthorizationService } from './authorization.service';
-import { UserAuthContext } from './authorization-types';
 
 @Injectable()
 export class AuthorizationGuard implements CanActivate {

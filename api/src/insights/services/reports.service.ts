@@ -1,13 +1,13 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
+import { EncryptionService } from '../../common/encryption/encryption.service';
 import {
-  formatCurrency,
-  toNumber,
-  formatPercentage,
+    formatCurrency,
+    formatPercentage,
+    toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
-import { EncryptionService } from '../../common/encryption/encryption.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 export interface ReportFilters {
   startDate?: string;

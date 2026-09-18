@@ -1,6 +1,6 @@
 import { BadRequestException } from '@nestjs/common';
-import { SubscriptionQuote } from './subscription-entitlement.interface';
 import { PlanDefinition } from './plan-definitions.constant';
+import { SubscriptionQuote } from './subscription-entitlement.interface';
 
 /**
  * Computes the authoritative subscription price quote.

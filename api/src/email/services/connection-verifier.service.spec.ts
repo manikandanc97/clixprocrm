@@ -1,5 +1,5 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
+import { Test, TestingModule } from '@nestjs/testing';
 import { ConnectionVerifierService } from './connection-verifier.service';
 
 describe('ConnectionVerifierService & SSRF Guard', () => {

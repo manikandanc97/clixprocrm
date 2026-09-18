@@ -3,9 +3,9 @@
  * Role CRUD operations with privilege escalation protection.
  * Stats aggregation is in role-stats.service.ts.
  */
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
 import { invalidateUserTenantCache } from '../../auth/tenant.guard';
+import { PrismaService } from '../../prisma/prisma.service';
 
 import { Optional } from '@nestjs/common';
 import { AuthorizationCacheService } from '../../auth/authorization/authorization-cache.service';

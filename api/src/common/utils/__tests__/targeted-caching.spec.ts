@@ -1,17 +1,15 @@
 import {
-  getOrSetCache,
-  invalidateCacheKey,
-  invalidateCacheKeys,
-  clearAllLocalCache,
-  getLocalCacheSize,
-} from '../cache.util';
-import * as rateLimitUtil from '../rate-limit.util';
+    invalidateDashboardCache,
+    invalidateEmployeeDashboardCache
+} from '../../../insights/services/dashboard.service';
 import { NotificationsService } from '../../../notifications/services/notifications.service';
 import {
-  invalidateDashboardCache,
-  invalidateEmployeeDashboardCache,
-  DASHBOARD_TIMEFRAMES,
-} from '../../../insights/services/dashboard.service';
+    clearAllLocalCache,
+    getLocalCacheSize,
+    getOrSetCache,
+    invalidateCacheKey
+} from '../cache.util';
+import * as rateLimitUtil from '../rate-limit.util';
 
 describe('Phase 5: Targeted Redis & In-Memory Fallback Caching Tests', () => {
   beforeEach(() => {

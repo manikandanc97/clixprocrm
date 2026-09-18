@@ -1,17 +1,17 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PlatformSecurityOperationsController } from '../controllers/platform-security-operations.controller';
-import { SecurityOperationsService } from '../services/security-operations.service';
-import { SecurityAlertsService } from '../services/security-alerts.service';
-import { EmergencySecurityService } from '../services/emergency-security.service';
-import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
-import { QUEUE_NAMES } from '../../queue/queue.constants';
-import { PrismaService } from '../../prisma/prisma.service';
 import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
-import { SecurityIncidentsService } from '../services/security-incidents.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import type {
-  AggregateQueueMetrics,
-  SingleQueueMetrics,
+    AggregateQueueMetrics,
+    SingleQueueMetrics,
 } from '../../queue/interfaces/queue-metrics.interface';
+import { QUEUE_NAMES } from '../../queue/queue.constants';
+import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
+import { PlatformSecurityOperationsController } from '../controllers/platform-security-operations.controller';
+import { EmergencySecurityService } from '../services/emergency-security.service';
+import { SecurityAlertsService } from '../services/security-alerts.service';
+import { SecurityIncidentsService } from '../services/security-incidents.service';
+import { SecurityOperationsService } from '../services/security-operations.service';
 
 describe('PlatformQueueOperations (Phase 2.1.8)', () => {
   let controller: PlatformSecurityOperationsController;

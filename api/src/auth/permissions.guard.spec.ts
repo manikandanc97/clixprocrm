@@ -1,6 +1,6 @@
+import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PermissionsGuard } from './permissions.guard';
-import { ExecutionContext, ForbiddenException } from '@nestjs/common';
 
 describe('PermissionsGuard Security Validation', () => {
   let guard: PermissionsGuard;

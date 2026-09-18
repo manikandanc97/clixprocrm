@@ -1,8 +1,8 @@
-import { Injectable, OnModuleInit, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { CreateContactDto } from './dto/create-contact.dto';
+import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { EncryptionService } from '../common/encryption/encryption.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateContactDto } from './dto/create-contact.dto';
 
 /**
  * @file contacts/contacts.service.ts

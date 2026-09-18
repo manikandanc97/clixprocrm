@@ -1,6 +1,5 @@
-import { SecurityIncidentsService } from '../super-admin/services/security-incidents.service';
 import { AuditLoggerService } from '../common/audit/audit-logger.service';
-import { AuditIntegrityMonitorService } from '../common/audit/integrity/audit-integrity-monitor.service';
+import { SecurityIncidentsService } from '../super-admin/services/security-incidents.service';
 
 describe('P4 Security Incidents Management Suite', () => {
   let incidentsService: SecurityIncidentsService;

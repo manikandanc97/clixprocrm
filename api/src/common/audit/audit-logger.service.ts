@@ -1,12 +1,12 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { randomUUID } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { sanitizeAuditDetails } from '../utils/audit-sanitizer.util';
 import {
-  computeAuditRecordHash,
-  verifyRecordHash,
-  AuditLogSealInput,
+    AuditLogSealInput,
+    computeAuditRecordHash,
+    verifyRecordHash,
 } from './audit-crypto.util';
-import { randomUUID } from 'crypto';
 
 export interface CreateAuditLogDto {
   tenantId?: string | null;

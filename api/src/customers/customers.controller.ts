@@ -1,20 +1,20 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { CustomersService } from './customers.service';
-import { SupabaseAuthGuard } from '../auth/supabase.guard';
-import { RolesGuard } from '../auth/roles.guard';
 import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
+import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { parsePaginationParams } from '../common/utils/pagination.util';
+import { CustomersService } from './customers.service';
 
 @UseGuards(SupabaseAuthGuard, RolesGuard)
 @Controller('customers')

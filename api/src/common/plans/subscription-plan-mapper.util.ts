@@ -1,7 +1,5 @@
 import {
-  PlanDefinition,
-  MatrixCategory,
-  MatrixFeatureItem,
+    PlanDefinition
 } from './plan-definitions.constant';
 import { WorkspaceUsageStats } from './subscription-entitlement.interface';
 

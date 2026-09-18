@@ -1,9 +1,9 @@
-import {
-  escapeHtml,
-  mapPriorityToEnum,
-  mapEnumToPriority,
-} from './support-mapper.util';
 import { SupportTicketRecord } from '../interfaces/support.interface';
+import {
+    escapeHtml,
+    mapEnumToPriority,
+    mapPriorityToEnum,
+} from './support-mapper.util';
 
 export function calculateEstimatedResponseTime(priority: string): string {
   if (priority === 'Critical') return '< 1 Hour (Priority Escalation)';

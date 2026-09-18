@@ -1,19 +1,19 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import {
-  calculateTrend,
-  formatCurrency,
-  getMonthRanges,
-  formatRelativeDate,
-  toNumber,
-  formatPercentage,
+    getOrSetCache,
+    invalidateCacheKey,
+    invalidateCacheKeys,
+} from '../../common/utils/cache.util';
+import {
+    calculateTrend,
+    formatCurrency,
+    formatPercentage,
+    formatRelativeDate,
+    getMonthRanges,
+    toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
-import {
-  getOrSetCache,
-  invalidateCacheKeys,
-  invalidateCacheKey,
-} from '../../common/utils/cache.util';
+import { PrismaService } from '../../prisma/prisma.service';
 
 export const DASHBOARD_TIMEFRAMES = ['today', 'week', 'month', 'year'] as const;
 

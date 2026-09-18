@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import {
-  normalizePlanId,
-  CANONICAL_PLANS,
+    CANONICAL_PLANS,
+    normalizePlanId,
 } from '../../common/plans/plan-definitions.constant';
-import { toNumber } from '../../common/utils/crm-formatters.util';
 import { getOrSetCache } from '../../common/utils/cache.util';
+import { toNumber } from '../../common/utils/crm-formatters.util';
+import { PrismaService } from '../../prisma/prisma.service';
 
 export interface AnalyticsQueryDto {
   range?: '30d' | '3m' | '6m' | '12m' | 'custom';

@@ -1,6 +1,6 @@
-import { Module, Global, NestModule, MiddlewareConsumer } from '@nestjs/common';
-import { TenantContextService } from './tenant-context.service';
+import { Global, MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { TenantContextMiddleware } from './tenant-context.middleware';
+import { TenantContextService } from './tenant-context.service';
 
 @Global()
 @Module({

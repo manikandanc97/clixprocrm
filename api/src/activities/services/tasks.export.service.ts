@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
+import { Prisma, TaskPriority, TaskStatus } from '@prisma/client';
 import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma, TaskStatus, TaskPriority } from '@prisma/client';
 
 /**
  * @file activities/services/tasks.export.service.ts

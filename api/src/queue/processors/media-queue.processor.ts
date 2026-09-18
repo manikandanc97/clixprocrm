@@ -1,16 +1,16 @@
-import { Logger, Inject, forwardRef } from '@nestjs/common';
-import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject, Logger, forwardRef } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { QUEUE_NAMES } from '../queue.constants';
-import {
-  MEDIA_JOB_NAMES,
-  MediaJobPayload,
-  BrandingMediaJobPayload,
-  AvatarMediaJobPayload,
-} from '../interfaces/media-jobs';
-import { BrandingService } from '../../workspace/services/branding.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { invalidateGetMeCache } from '../../auth/auth.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { BrandingService } from '../../workspace/services/branding.service';
+import {
+    AvatarMediaJobPayload,
+    BrandingMediaJobPayload,
+    MEDIA_JOB_NAMES,
+    MediaJobPayload,
+} from '../interfaces/media-jobs';
+import { QUEUE_NAMES } from '../queue.constants';
 
 @Processor(QUEUE_NAMES.MEDIA)
 export class MediaQueueProcessor extends WorkerHost {

@@ -1,10 +1,9 @@
 import { Injectable, Logger } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import {
-  PERMISSION_MODULES,
-  PermissionModule,
+    PermissionModule
 } from '../common/role-permissions.constants';
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface UserSecurityContext {
   userId: string;

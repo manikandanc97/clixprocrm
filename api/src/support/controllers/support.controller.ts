@@ -1,30 +1,29 @@
 import {
-  Controller,
-  Post,
-  Get,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  Req,
-  Res,
-  HttpException,
-  HttpStatus,
-  UseGuards,
-  BadRequestException,
-  NotFoundException,
-  ForbiddenException,
-  Logger,
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Logger,
+    NotFoundException,
+    Param,
+    Patch,
+    Post,
+    Req,
+    Res,
+    UseGuards
 } from '@nestjs/common';
-import { SupportService } from '../services/support.service';
+import * as path from 'path';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
 } from '../../common/utils/rate-limit.util';
-import * as path from 'path';
+import { SupportService } from '../services/support.service';
 
 const ALLOWED_EXTENSIONS = new Set([
   '.png',

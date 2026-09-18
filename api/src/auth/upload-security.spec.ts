@@ -1,7 +1,7 @@
 import {
-  sanitizeUploadedFilename,
-  validateFileMagicBytes,
-  validateUploadedFile,
+    sanitizeUploadedFilename,
+    validateFileMagicBytes,
+    validateUploadedFile,
 } from '../common/utils/upload-security.util';
 
 describe('P5 File Upload Security & Magic Byte Suite', () => {

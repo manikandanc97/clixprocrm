@@ -1,21 +1,21 @@
 import {
-  Controller,
-  Get,
-  Query,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { SearchService } from '../services/search.service';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+    RATE_LIMITS,
 } from '../../common/utils/rate-limit.util';
+import { SearchService } from '../services/search.service';
 
 @Controller('crm/search')
 @UseGuards(SupabaseAuthGuard, TenantGuard)

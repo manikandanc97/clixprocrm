@@ -1,15 +1,15 @@
-import { Injectable, Logger, Optional, OnModuleInit } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
-import { Queue, Job } from 'bullmq';
-import { QUEUE_NAMES, QueueName } from '../queue.constants';
+import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
+import { Job, Queue } from 'bullmq';
 import {
-  QueueJobCounts,
-  QueueHealthStatus,
-  SingleQueueMetrics,
-  AggregateQueueMetrics,
-  DeadLetterJobRecord,
-  DeadLetterQueryOptions,
+    AggregateQueueMetrics,
+    DeadLetterJobRecord,
+    DeadLetterQueryOptions,
+    QueueHealthStatus,
+    QueueJobCounts,
+    SingleQueueMetrics,
 } from '../interfaces/queue-metrics.interface';
+import { QUEUE_NAMES, QueueName } from '../queue.constants';
 
 const SENSITIVE_KEY_PATTERNS = [
   /password/i,

@@ -1,10 +1,10 @@
-import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
-import { AuditLogsService } from '../services/audit-logs.service';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import { Permissions } from '../../auth/permissions.decorator';
+import { PermissionsGuard } from '../../auth/permissions.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { PermissionsGuard } from '../../auth/permissions.guard';
-import { Permissions } from '../../auth/permissions.decorator';
 import { parsePaginationParams } from '../../common/utils/pagination.util';
+import { AuditLogsService } from '../services/audit-logs.service';
 
 @Controller('crm/audit-logs')
 @UseGuards(SupabaseAuthGuard, TenantGuard, PermissionsGuard)

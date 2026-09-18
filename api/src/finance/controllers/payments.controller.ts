@@ -1,21 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { PaymentsService } from '../services/payments.service';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
-import { RecordPaymentDto } from '../dto/enterprise-invoice.dto';
 import { parsePaginationParams } from '../../common/utils/pagination.util';
+import { RecordPaymentDto } from '../dto/enterprise-invoice.dto';
+import { PaymentsService } from '../services/payments.service';
 
 @Controller('crm/payments')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

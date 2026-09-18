@@ -1,22 +1,22 @@
 import {
-  Injectable,
-  ForbiddenException,
-  BadRequestException,
-  NotFoundException,
-  Logger,
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AuthorizationCacheService } from './authorization-cache.service';
 import {
-  DataScope,
-  UserAuthContext,
-  RecordAccessContext,
-  DATA_SCOPE_HIERARCHY,
+    DATA_SCOPE_HIERARCHY,
+    DataScope,
+    RecordAccessContext,
+    UserAuthContext,
 } from './authorization-types';
 import {
-  normalizePermissionKey,
-  matchesPermissionPattern,
+    matchesPermissionPattern,
+    normalizePermissionKey,
 } from './permission-registry';
-import { AuthorizationCacheService } from './authorization-cache.service';
 
 @Injectable()
 export class AuthorizationService {

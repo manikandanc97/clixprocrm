@@ -1,10 +1,10 @@
-import { Controller, Get, Put, Body, UseGuards, Req } from '@nestjs/common';
-import { InvoiceSettingsService } from '../services/invoice-settings.service';
+import { Body, Controller, Get, Put, Req, UseGuards } from '@nestjs/common';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
 import { UpdateInvoiceSettingsDto } from '../dto/enterprise-invoice.dto';
+import { InvoiceSettingsService } from '../services/invoice-settings.service';
 
 @Controller('crm/invoice-settings')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

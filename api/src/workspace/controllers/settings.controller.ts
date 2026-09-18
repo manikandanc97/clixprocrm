@@ -1,26 +1,26 @@
 import {
-  Controller,
-  Get,
-  Patch,
-  Body,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
+    Body,
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Patch,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { SettingsService } from '../services/settings.service';
-import { WorkspaceService } from '../services/workspace.service';
+import { AalGuard } from '../../auth/aal.guard';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
-import { AalGuard } from '../../auth/aal.guard';
 import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+    RATE_LIMITS,
 } from '../../common/utils/rate-limit.util';
+import { SettingsService } from '../services/settings.service';
+import { WorkspaceService } from '../services/workspace.service';
 
 @Controller('crm/settings')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard, AalGuard)

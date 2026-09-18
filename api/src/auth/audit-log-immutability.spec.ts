@@ -1,11 +1,11 @@
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import * as fs from 'fs';
 import * as path from 'path';
+import { sanitizeAuditDetails } from '../common/utils/audit-sanitizer.util';
+import { PlatformOrganizationsService } from '../super-admin/services/platform-organizations.service';
+import { AuthService } from './auth.service';
 import { MfaService } from './mfa.service';
 import { SessionsService } from './sessions.service';
-import { AuthService } from './auth.service';
-import { PlatformOrganizationsService } from '../super-admin/services/platform-organizations.service';
-import { sanitizeAuditDetails } from '../common/utils/audit-sanitizer.util';
-import { BadRequestException, ForbiddenException } from '@nestjs/common';
 
 describe('P0 AuditLog Immutability & Tamper-Resistance Security Suite', () => {
   let mockPrisma: any;

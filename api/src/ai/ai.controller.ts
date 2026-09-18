@@ -1,18 +1,18 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Res,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Get,
+    Post,
+    Req,
+    Res,
+    UseGuards,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
-import { AiService } from './ai.service';
-import { AiSecurityService } from './ai-security.service';
-import { AiEntitlementService } from './ai-entitlement.service';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
+import { AiEntitlementService } from './ai-entitlement.service';
+import { AiSecurityService } from './ai-security.service';
+import { AiService } from './ai.service';
 
 @UseGuards(SupabaseAuthGuard, TenantGuard)
 @Controller('ai')

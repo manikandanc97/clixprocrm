@@ -1,30 +1,30 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
-  Res,
-  HttpException,
-  HttpStatus,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Query,
+    Req,
+    Res,
+    UseGuards,
 } from '@nestjs/common';
-import { TasksService } from './services/tasks.service';
-import { TasksQueryService } from './services/tasks.query.service';
-import { CreateTaskDto } from './dto/create-task.dto';
-import { UpdateTaskDto } from './dto/update-task.dto';
-import { TaskQueryDto } from './dto/task-query.dto';
+import { Permissions } from '../auth/permissions.decorator';
+import { PermissionsGuard } from '../auth/permissions.guard';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
-import { PermissionsGuard } from '../auth/permissions.guard';
-import { Permissions } from '../auth/permissions.decorator';
-import { PlanLimitGuard } from '../common/plans/plan-feature.guard';
 import { RequirePlanLimit } from '../common/plans/plan-feature.decorator';
+import { PlanLimitGuard } from '../common/plans/plan-feature.guard';
+import { CreateTaskDto } from './dto/create-task.dto';
+import { TaskQueryDto } from './dto/task-query.dto';
+import { UpdateTaskDto } from './dto/update-task.dto';
+import { TasksQueryService } from './services/tasks.query.service';
+import { TasksService } from './services/tasks.service';
 
 @Controller('crm/tasks')
 @UseGuards(SupabaseAuthGuard, TenantGuard, PermissionsGuard)

@@ -1,13 +1,13 @@
-import { Logger, Inject, forwardRef } from '@nestjs/common';
-import { Processor, WorkerHost, OnWorkerEvent } from '@nestjs/bullmq';
+import { OnWorkerEvent, Processor, WorkerHost } from '@nestjs/bullmq';
+import { Inject, Logger, forwardRef } from '@nestjs/common';
 import { Job } from 'bullmq';
-import { QUEUE_NAMES } from '../queue.constants';
-import {
-  IMPORT_JOB_NAMES,
-  ImportJobPayload,
-  LeadsBulkImportJobPayload,
-} from '../interfaces/import-jobs';
 import { LeadsImportService } from '../../leads/services/leads.import.service';
+import {
+    IMPORT_JOB_NAMES,
+    ImportJobPayload,
+    LeadsBulkImportJobPayload,
+} from '../interfaces/import-jobs';
+import { QUEUE_NAMES } from '../queue.constants';
 
 @Processor(QUEUE_NAMES.IMPORT)
 export class ImportQueueProcessor extends WorkerHost {

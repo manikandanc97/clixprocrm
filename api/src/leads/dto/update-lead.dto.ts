@@ -1,13 +1,13 @@
-import {
-  IsOptional,
-  IsString,
-  IsEnum,
-  IsNumber,
-  IsArray,
-  Min,
-} from 'class-validator';
-import { LeadStage, LeadPriority } from '@prisma/client';
+import { LeadPriority, LeadStage } from '@prisma/client';
 import { Type } from 'class-transformer';
+import {
+    IsArray,
+    IsEnum,
+    IsNumber,
+    IsOptional,
+    IsString,
+    Min,
+} from 'class-validator';
 
 export class UpdateLeadDto {
   @IsOptional()

@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  Query,
-  Req,
-  UseGuards,
-  HttpException,
-  HttpStatus,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
+import { UserStatus } from '@prisma/client';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
-import { PlatformUsersService } from '../services/platform-users.service';
-import { UserStatus } from '@prisma/client';
 import { parsePaginationParams } from '../../common/utils/pagination.util';
+import { PlatformUsersService } from '../services/platform-users.service';
 
 @Controller(['super-admin/users', 'super_admin/users'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)

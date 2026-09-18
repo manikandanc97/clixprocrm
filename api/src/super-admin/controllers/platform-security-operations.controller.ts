@@ -1,28 +1,28 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  Query,
-  Req,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
-  Optional,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Optional,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
+import { RequireAal } from '../../auth/aal.decorator';
+import { AalGuard } from '../../auth/aal.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
-import { AalGuard } from '../../auth/aal.guard';
-import { RequireAal } from '../../auth/aal.decorator';
-import { SecurityOperationsService } from '../services/security-operations.service';
-import { SecurityAlertsService } from '../services/security-alerts.service';
-import { EmergencySecurityService } from '../services/emergency-security.service';
-import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
 import { QUEUE_NAMES, QueueName } from '../../queue/queue.constants';
+import { QueueMetricsService } from '../../queue/services/queue-metrics.service';
+import { EmergencySecurityService } from '../services/emergency-security.service';
 import type { ListSecurityAlertsDto } from '../services/security-alerts.service';
+import { SecurityAlertsService } from '../services/security-alerts.service';
+import { SecurityOperationsService } from '../services/security-operations.service';
 
 @Controller([
   'super-admin/security/operations',

@@ -1,7 +1,7 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SettingsService } from './settings.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { SettingsService } from './settings.service';
 
 describe('SettingsService - Tenant-Scoped AI Configuration & BYOK Encryption', () => {
   let service: SettingsService;

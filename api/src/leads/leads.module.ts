@@ -1,13 +1,13 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { LeadsController } from './leads.controller';
-import { HotLeadsController } from './hot-leads.controller';
-import { LeadsService } from './services/leads.service';
-import { LeadsImportService } from './services/leads.import.service';
-import { LeadsQueryService } from './services/leads.query.service';
-import { LeadsConvertService } from './services/leads.convert.service';
+import { ActivitiesModule } from '../activities/activities.module';
 import { StorageService } from '../common/services/storage.service';
 import { PrismaModule } from '../prisma/prisma.module';
-import { ActivitiesModule } from '../activities/activities.module';
+import { HotLeadsController } from './hot-leads.controller';
+import { LeadsController } from './leads.controller';
+import { LeadsConvertService } from './services/leads.convert.service';
+import { LeadsImportService } from './services/leads.import.service';
+import { LeadsQueryService } from './services/leads.query.service';
+import { LeadsService } from './services/leads.service';
 
 @Module({
   imports: [PrismaModule, forwardRef(() => ActivitiesModule)],

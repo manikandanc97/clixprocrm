@@ -1,28 +1,27 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Body,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
-  BadRequestException,
+    BadRequestException,
+    Body,
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Patch,
+    Post,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
+import {
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+    RATE_LIMITS,
+} from '../common/utils/rate-limit.util';
+import { AalGuard } from './aal.guard';
 import { MfaService } from './mfa.service';
+import { Roles } from './roles.decorator';
+import { RolesGuard } from './roles.guard';
 import { SupabaseAuthGuard } from './supabase.guard';
 import { TenantGuard } from './tenant.guard';
-import { RolesGuard } from './roles.guard';
-import { Roles } from './roles.decorator';
-import { AalGuard } from './aal.guard';
-import { RequireAal } from './aal.decorator';
-import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
-} from '../common/utils/rate-limit.util';
 
 @Controller()
 export class MfaController {

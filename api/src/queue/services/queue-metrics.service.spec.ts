@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { QueueMetricsService } from './queue-metrics.service';
-import { QUEUE_NAMES } from '../queue.constants';
 import { getQueueToken } from '@nestjs/bullmq';
+import { Test, TestingModule } from '@nestjs/testing';
+import { QUEUE_NAMES } from '../queue.constants';
+import { QueueMetricsService } from './queue-metrics.service';
 
 describe('QueueMetricsService', () => {
   let service: QueueMetricsService;

@@ -1,7 +1,7 @@
-import { Injectable, NotFoundException } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
+import { toNumber } from '../../common/utils/crm-formatters.util';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UpdateInvoiceSettingsDto } from '../dto/enterprise-invoice.dto';
-import { toNumber } from '../../common/utils/crm-formatters.util';
 
 @Injectable()
 export class InvoiceSettingsService {

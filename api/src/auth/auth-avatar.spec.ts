@@ -1,5 +1,5 @@
 import { BadRequestException } from '@nestjs/common';
-import { AuthService, invalidateGetMeCache } from './auth.service';
+import { AuthService } from './auth.service';
 
 describe('AuthService Avatar Upload Suite', () => {
   let authService: AuthService;

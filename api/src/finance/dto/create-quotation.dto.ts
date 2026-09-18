@@ -1,15 +1,15 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsEnum,
-  IsOptional,
-  IsDateString,
-  IsNumber,
-  Min,
-  IsArray,
-} from 'class-validator';
-import { Transform } from 'class-transformer';
 import { QuotationStatus } from '@prisma/client';
+import { Transform } from 'class-transformer';
+import {
+    IsArray,
+    IsDateString,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    Min,
+} from 'class-validator';
 
 export class CreateQuotationDto {
   @IsString()

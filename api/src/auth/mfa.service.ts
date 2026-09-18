@@ -1,15 +1,15 @@
 import {
-  Injectable,
-  BadRequestException,
-  ForbiddenException,
-  Logger,
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    Logger,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
-import { invalidateTokenUserCache } from './supabase.guard';
-import { invalidateGetMeCache } from './auth.service';
 import { sanitizeAuditDetails } from '../common/utils/audit-sanitizer.util';
+import { PrismaService } from '../prisma/prisma.service';
+import { invalidateGetMeCache } from './auth.service';
+import { invalidateTokenUserCache } from './supabase.guard';
 
 function hashRecoveryCode(code: string): string {
   const normalized = code.trim().replace(/[-\s]/g, '').toUpperCase();

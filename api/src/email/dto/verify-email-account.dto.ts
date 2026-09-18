@@ -1,10 +1,10 @@
 import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsInt,
-  Min,
-  Max,
+    IsBoolean,
+    IsInt,
+    IsOptional,
+    IsString,
+    Max,
+    Min,
 } from 'class-validator';
 
 export class VerifyEmailAccountDto {

@@ -1,12 +1,12 @@
 import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-  Logger,
+    BadRequestException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { AuditLoggerService } from '../../common/audit/audit-logger.service';
 import * as crypto from 'crypto';
+import { AuditLoggerService } from '../../common/audit/audit-logger.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 export interface CreateIncidentDto {
   title: string;

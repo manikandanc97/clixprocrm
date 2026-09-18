@@ -1,12 +1,12 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEmail,
-  IsEnum,
-  ValidateIf,
-} from 'class-validator';
 import { CustomerStatus } from '@prisma/client';
+import {
+    IsEmail,
+    IsEnum,
+    IsNotEmpty,
+    IsOptional,
+    IsString,
+    ValidateIf,
+} from 'class-validator';
 
 export class CreateContactDto {
   @IsString()

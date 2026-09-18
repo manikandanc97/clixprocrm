@@ -1,8 +1,8 @@
+import { HttpException, HttpStatus } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { AppController } from './app.controller';
 import { AppService } from './app.service';
 import { PrismaService } from './prisma/prisma.service';
-import { HttpException, HttpStatus } from '@nestjs/common';
 
 describe('AppController Health & Readiness', () => {
   let controller: AppController;

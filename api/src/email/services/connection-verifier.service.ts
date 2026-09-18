@@ -1,11 +1,11 @@
-import { Injectable, Logger, BadRequestException } from '@nestjs/common';
-import * as nodemailer from 'nodemailer';
-import * as net from 'net';
-import * as tls from 'tls';
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import * as dns from 'dns';
+import * as net from 'net';
+import * as nodemailer from 'nodemailer';
+import * as tls from 'tls';
 import {
-  isPrivateOrReservedIPv4,
-  isPrivateOrReservedIPv6,
+    isPrivateOrReservedIPv4,
+    isPrivateOrReservedIPv6,
 } from '../../common/utils/ssrf.util';
 
 export interface SmtpVerifyParams {

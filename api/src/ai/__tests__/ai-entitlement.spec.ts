@@ -1,11 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import {
-  ForbiddenException,
-  ServiceUnavailableException,
-  HttpException,
+    ForbiddenException,
+    HttpException,
+    ServiceUnavailableException,
 } from '@nestjs/common';
-import { AiEntitlementService } from '../ai-entitlement.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
+import { AiEntitlementService } from '../ai-entitlement.service';
 
 describe('AiEntitlementService Enterprise Subscription Architecture Suite', () => {
   let entitlementService: AiEntitlementService;

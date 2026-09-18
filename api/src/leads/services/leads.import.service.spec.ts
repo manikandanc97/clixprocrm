@@ -1,5 +1,5 @@
-import { LeadsImportService } from './leads.import.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import { LeadsImportService } from './leads.import.service';
 
 describe('LeadsImportService Suite', () => {
   let service: LeadsImportService;

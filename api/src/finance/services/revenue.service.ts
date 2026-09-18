@@ -1,9 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { CreateRevenueTargetDto } from '../dto/create-revenue-target.dto';
-import { UpdateRevenueTargetDto } from '../dto/update-revenue-target.dto';
+import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { CreateRevenueTargetDto } from '../dto/create-revenue-target.dto';
 
 @Injectable()
 export class RevenueService {

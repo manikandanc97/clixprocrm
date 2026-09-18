@@ -1,23 +1,21 @@
 import {
-  Injectable,
-  Logger,
-  BadRequestException,
-  NotFoundException,
+    BadRequestException,
+    Injectable,
+    Logger
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { EncryptionService } from '../../common/encryption/encryption.service';
-import { ConnectionVerifierService } from './connection-verifier.service';
-import { MimeParserService, ParsedInboundEmail } from './mime-parser.service';
-import { EmailHtmlSanitizerService } from './email-html-sanitizer.service';
-import { EmailAttachmentStorageService } from './email-attachment-storage.service';
-import { ImapClientFactory, IImapClient } from './imap-client.factory';
-import { SyncInboxJobPayload } from '../../queue/interfaces/email-jobs';
 import {
-  EmailSyncStatus,
-  EmailDirection,
-  EmailMessageStatus,
-  Prisma,
+    EmailDirection,
+    EmailMessageStatus,
+    EmailSyncStatus
 } from '@prisma/client';
+import { EncryptionService } from '../../common/encryption/encryption.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { SyncInboxJobPayload } from '../../queue/interfaces/email-jobs';
+import { ConnectionVerifierService } from './connection-verifier.service';
+import { EmailAttachmentStorageService } from './email-attachment-storage.service';
+import { EmailHtmlSanitizerService } from './email-html-sanitizer.service';
+import { IImapClient, ImapClientFactory } from './imap-client.factory';
+import { MimeParserService, ParsedInboundEmail } from './mime-parser.service';
 
 export interface InboundSyncResult {
   success: boolean;

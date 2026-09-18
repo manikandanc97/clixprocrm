@@ -1,4 +1,3 @@
-import { PrismaService } from '../../prisma/prisma.service';
 
 interface CachedTenantMetadata {
   currency: string;

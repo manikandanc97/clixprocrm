@@ -1,9 +1,9 @@
 import { Injectable, Optional } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { LeadStage, LeadPriority } from '@prisma/client';
+import { LeadPriority, LeadStage } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { SubscriptionEntitlementService } from '../../common/plans/subscription-entitlement.service';
 import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * @file leads/services/leads.import.service.ts

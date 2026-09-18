@@ -1,10 +1,9 @@
+import { ForbiddenException } from '@nestjs/common';
 import {
-  EmailAttachmentStorageService,
-  MAX_SINGLE_ATTACHMENT_BYTES,
-  MAX_AGGREGATE_ATTACHMENTS_BYTES,
+    EmailAttachmentStorageService,
+    MAX_SINGLE_ATTACHMENT_BYTES
 } from './email-attachment-storage.service';
 import { ParsedEmailAttachment } from './mime-parser.service';
-import { ForbiddenException, BadRequestException } from '@nestjs/common';
 
 describe('EmailAttachmentStorageService Suite', () => {
   let service: EmailAttachmentStorageService;

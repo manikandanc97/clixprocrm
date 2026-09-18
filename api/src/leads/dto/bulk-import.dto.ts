@@ -1,4 +1,4 @@
-import { IsArray, IsString, IsEnum } from 'class-validator';
+import { IsArray, IsEnum } from 'class-validator';
 
 export class BulkImportDto {
   @IsEnum(['skip', 'update', 'create'])

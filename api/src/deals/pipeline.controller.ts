@@ -1,19 +1,19 @@
 import {
-  Controller,
-  Get,
-  Patch,
-  Param,
-  Body,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Get,
+    Param,
+    Patch,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { PipelineService } from './services/pipeline.service';
-import { DealsService } from './services/deals.service';
-import { UpdateDealDto } from './dto/update-deal.dto';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { UpdateDealDto } from './dto/update-deal.dto';
+import { DealsService } from './services/deals.service';
+import { PipelineService } from './services/pipeline.service';
 
 @Controller('crm/pipeline')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

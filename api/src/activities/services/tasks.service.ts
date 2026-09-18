@@ -1,9 +1,9 @@
-import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
+import { HttpException, HttpStatus, Injectable } from '@nestjs/common';
+import { invalidateCacheKey } from '../../common/utils/cache.util';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskDto } from '../dto/update-task.dto';
-import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
-import { invalidateCacheKey } from '../../common/utils/cache.util';
 
 @Injectable()
 export class TasksService {

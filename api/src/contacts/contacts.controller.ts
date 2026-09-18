@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Query,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Get,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { ContactsService } from './contacts.service';
-import { CreateContactDto } from './dto/create-contact.dto';
-import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { Roles } from '../auth/roles.decorator';
+import { RolesGuard } from '../auth/roles.guard';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
-import { RolesGuard } from '../auth/roles.guard';
-import { Roles } from '../auth/roles.decorator';
+import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
+import { ContactsService } from './contacts.service';
+import { CreateContactDto } from './dto/create-contact.dto';
 
-import { PlanLimitGuard } from '../common/plans/plan-feature.guard';
 import { RequirePlanLimit } from '../common/plans/plan-feature.decorator';
+import { PlanLimitGuard } from '../common/plans/plan-feature.guard';
 
 @Controller('crm/customers')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

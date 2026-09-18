@@ -33,24 +33,20 @@ jest.mock('zod', () => {
  */
 
 import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from './prisma.service';
-import { TenantContextService } from '../common/context/tenant-context.service';
-import { TasksQueryService } from '../activities/services/tasks.query.service';
 import { TasksExportService } from '../activities/services/tasks.export.service';
 import { TasksHistoryService } from '../activities/services/tasks.history.service';
-import { DashboardService } from '../insights/services/dashboard.service';
-import { AnalyticsService } from '../insights/services/analytics.service';
-import { AnalyticsRevenueGrowthService } from '../insights/services/analytics.revenue-growth.service';
-import { AnalyticsInsightsService } from '../insights/services/analytics.insights.service';
-import { ReportsService } from '../insights/services/reports.service';
+import { TasksQueryService } from '../activities/services/tasks.query.service';
 import { AiSecurityService } from '../ai/ai-security.service';
-import { buildLeadsTools } from '../ai/tools/leads.tools';
 import { buildCustomersTools } from '../ai/tools/customers.tools';
 import { buildDealsTools } from '../ai/tools/deals.tools';
-import { buildTasksTools } from '../ai/tools/tasks.tools';
+import { buildLeadsTools } from '../ai/tools/leads.tools';
 import { buildQuotationsTools } from '../ai/tools/quotations.tools';
-import { EncryptionService } from '../common/encryption/encryption.service';
-import { ConfigService } from '@nestjs/config';
+import { buildTasksTools } from '../ai/tools/tasks.tools';
+import { AnalyticsInsightsService } from '../insights/services/analytics.insights.service';
+import { AnalyticsRevenueGrowthService } from '../insights/services/analytics.revenue-growth.service';
+import { AnalyticsService } from '../insights/services/analytics.service';
+import { DashboardService } from '../insights/services/dashboard.service';
+import { PrismaService } from './prisma.service';
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
 

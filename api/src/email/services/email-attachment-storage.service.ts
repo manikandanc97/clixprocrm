@@ -1,16 +1,16 @@
 import {
-  Injectable,
-  Logger,
-  BadRequestException,
-  ForbiddenException,
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    Logger,
 } from '@nestjs/common';
 import { createClient, SupabaseClient } from '@supabase/supabase-js';
-import * as path from 'path';
 import { randomUUID } from 'crypto';
+import * as path from 'path';
 import {
-  validateFileMagicBytes,
-  sanitizeUploadedFilename,
-  DISALLOWED_EXTENSIONS,
+    DISALLOWED_EXTENSIONS,
+    sanitizeUploadedFilename,
+    validateFileMagicBytes,
 } from '../../common/utils/upload-security.util';
 import { ParsedEmailAttachment } from './mime-parser.service';
 

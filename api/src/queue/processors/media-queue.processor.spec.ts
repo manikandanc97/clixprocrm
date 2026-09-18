@@ -1,8 +1,8 @@
-import { MediaQueueProcessor } from './media-queue.processor';
 import {
-  MEDIA_JOB_NAMES,
-  BrandingMediaJobPayload,
+    BrandingMediaJobPayload,
+    MEDIA_JOB_NAMES,
 } from '../interfaces/media-jobs';
+import { MediaQueueProcessor } from './media-queue.processor';
 
 describe('MediaQueueProcessor Suite', () => {
   let processor: MediaQueueProcessor;

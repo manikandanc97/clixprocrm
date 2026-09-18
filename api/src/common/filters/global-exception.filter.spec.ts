@@ -1,11 +1,9 @@
-import { GlobalExceptionFilter } from './global-exception.filter';
 import {
-  ArgumentsHost,
-  BadRequestException,
-  HttpException,
-  HttpStatus,
-  InternalServerErrorException,
+    ArgumentsHost,
+    BadRequestException,
+    HttpStatus
 } from '@nestjs/common';
+import { GlobalExceptionFilter } from './global-exception.filter';
 
 describe('GlobalExceptionFilter Security - Production Error Masking', () => {
   let filter: GlobalExceptionFilter;

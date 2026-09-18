@@ -1,18 +1,18 @@
 import {
-  Controller,
-  Get,
-  Patch,
-  Post,
-  Body,
-  UseGuards,
-  Req,
-  BadRequestException,
+    BadRequestException,
+    Body,
+    Controller,
+    Get,
+    Patch,
+    Post,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { WorkspaceService } from '../services/workspace.service';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
+import { WorkspaceService } from '../services/workspace.service';
 
 @Controller('crm/workspace')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

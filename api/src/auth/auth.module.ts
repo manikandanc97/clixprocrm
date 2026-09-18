@@ -1,27 +1,27 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { SupabaseAuthGuard } from './supabase.guard';
-import { TenantGuard } from './tenant.guard';
-import { RolesGuard } from './roles.guard';
-import { PermissionsGuard } from './permissions.guard';
+import { EmailService } from '../common/services/email.service';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { PrismaModule } from '../prisma/prisma.module';
+import { QueueModule } from '../queue/queue.module';
+import { WorkspaceModule } from '../workspace/workspace.module';
 import { AuthController } from './auth.controller';
 import { AuthService } from './auth.service';
-import { PrismaModule } from '../prisma/prisma.module';
-import { WorkspaceModule } from '../workspace/workspace.module';
-import { NotificationsModule } from '../notifications/notifications.module';
-import { EmailService } from '../common/services/email.service';
-import { QueueModule } from '../queue/queue.module';
+import { PermissionsGuard } from './permissions.guard';
+import { RolesGuard } from './roles.guard';
+import { SupabaseAuthGuard } from './supabase.guard';
+import { TenantGuard } from './tenant.guard';
 
+import { AalGuard } from './aal.guard';
 import { MfaController } from './mfa.controller';
 import { MfaService } from './mfa.service';
-import { AalGuard } from './aal.guard';
 
+import { PrivacyController } from './privacy.controller';
 import { SessionsController } from './sessions.controller';
 import { SessionsService } from './sessions.service';
-import { PrivacyController } from './privacy.controller';
 
-import { AuthorizationService } from './authorization/authorization.service';
 import { AuthorizationCacheService } from './authorization/authorization-cache.service';
 import { AuthorizationGuard } from './authorization/authorization.guard';
+import { AuthorizationService } from './authorization/authorization.service';
 
 @Module({
   imports: [

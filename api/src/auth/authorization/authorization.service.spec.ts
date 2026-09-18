@@ -1,13 +1,11 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { AuthorizationService } from './authorization.service';
-import { AuthorizationCacheService } from './authorization-cache.service';
-import { PrismaService } from '../../prisma/prisma.service';
 import {
-  ForbiddenException,
-  BadRequestException,
-  NotFoundException,
+    ForbiddenException
 } from '@nestjs/common';
-import { UserAuthContext, RecordAccessContext } from './authorization-types';
+import { Test, TestingModule } from '@nestjs/testing';
+import { PrismaService } from '../../prisma/prisma.service';
+import { AuthorizationCacheService } from './authorization-cache.service';
+import { RecordAccessContext, UserAuthContext } from './authorization-types';
+import { AuthorizationService } from './authorization.service';
 
 describe('Authorization Engine & Multi-Tenant Access Control (Enterprise Hierarchy)', () => {
   let authService: AuthorizationService;

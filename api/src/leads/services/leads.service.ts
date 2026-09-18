@@ -1,19 +1,19 @@
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Optional,
+    BadRequestException,
+    Injectable,
+    NotFoundException,
+    Optional,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
-import { CreateLeadDto } from '../dto/create-lead.dto';
-import { ConvertLeadDto } from '../dto/convert-lead.dto';
-import { UpdateLeadDto } from '../dto/update-lead.dto';
-import { LeadsQueryService } from './leads.query.service';
-import { LeadsConvertService } from './leads.convert.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { StorageService } from '../../common/services/storage.service';
 import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { ConvertLeadDto } from '../dto/convert-lead.dto';
+import { CreateLeadDto } from '../dto/create-lead.dto';
+import { UpdateLeadDto } from '../dto/update-lead.dto';
+import { LeadsConvertService } from './leads.convert.service';
+import { LeadsQueryService } from './leads.query.service';
 
 /**
  * @file leads/services/leads.service.ts

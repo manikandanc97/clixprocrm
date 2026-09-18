@@ -1,9 +1,9 @@
 import { Module } from '@nestjs/common';
+import { StorageService } from '../common/services/storage.service';
+import { NotificationsModule } from '../notifications/notifications.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { SupportController } from './controllers/support.controller';
 import { SupportService } from './services/support.service';
-import { PrismaModule } from '../prisma/prisma.module';
-import { NotificationsModule } from '../notifications/notifications.module';
-import { StorageService } from '../common/services/storage.service';
 
 @Module({
   imports: [PrismaModule, NotificationsModule],

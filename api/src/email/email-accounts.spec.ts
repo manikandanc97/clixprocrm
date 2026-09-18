@@ -1,22 +1,20 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import {
-  BadRequestException,
-  ConflictException,
-  ForbiddenException,
-  NotFoundException,
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
-import { EmailAccountsService } from './services/email-accounts.service';
-import { ConnectionVerifierService } from './services/connection-verifier.service';
-import { PrismaService } from '../prisma/prisma.service';
+import { Test, TestingModule } from '@nestjs/testing';
+import {
+    EmailSyncStatus
+} from '@prisma/client';
 import { EncryptionService } from '../common/encryption/encryption.service';
+import { PrismaService } from '../prisma/prisma.service';
 import { CreateEmailAccountDto } from './dto/create-email-account.dto';
 import { UpdateEmailAccountDto } from './dto/update-email-account.dto';
-import {
-  EmailProviderType,
-  EmailAuthType,
-  EmailSyncStatus,
-} from '@prisma/client';
+import { ConnectionVerifierService } from './services/connection-verifier.service';
+import { EmailAccountsService } from './services/email-accounts.service';
 
 describe('EmailAccountsService & Security Tests', () => {
   let service: EmailAccountsService;

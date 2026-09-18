@@ -1,6 +1,5 @@
 import {
-  calculateInvoiceTotals,
-  roundTo2,
+    calculateInvoiceTotals
 } from '../utils/invoice-calculation.util';
 
 describe('InvoiceCalculationUtil', () => {

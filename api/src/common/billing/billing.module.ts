@@ -1,8 +1,8 @@
-import { Module, Global } from '@nestjs/common';
-import { BillingGatewayService } from './billing-gateway.service';
-import { BillingWebhookService } from './billing-webhook.service';
-import { BillingWebhookController } from './billing-webhook.controller';
+import { Global, Module } from '@nestjs/common';
 import { PrismaModule } from '../../prisma/prisma.module';
+import { BillingGatewayService } from './billing-gateway.service';
+import { BillingWebhookController } from './billing-webhook.controller';
+import { BillingWebhookService } from './billing-webhook.service';
 
 @Global()
 @Module({

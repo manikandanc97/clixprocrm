@@ -1,7 +1,7 @@
 import {
-  Injectable,
-  InternalServerErrorException,
-  OnModuleInit,
+    Injectable,
+    InternalServerErrorException,
+    OnModuleInit,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';

@@ -1,18 +1,18 @@
 import { Module } from '@nestjs/common';
-import { PrismaModule } from '../prisma/prisma.module';
-import { RevenueController } from './controllers/revenue.controller';
-import { InvoicesController } from './controllers/invoices.controller';
-import { QuotationsController } from './controllers/quotations.controller';
-import { PaymentsController } from './controllers/payments.controller';
-import { InvoiceSettingsController } from './controllers/invoice-settings.controller';
-import { RevenueService } from './services/revenue.service';
-import { InvoicesService } from './services/invoices.service';
-import { QuotationsService } from './services/quotations.service';
-import { PaymentsService } from './services/payments.service';
-import { InvoiceSettingsService } from './services/invoice-settings.service';
-import { InvoicePdfService } from './services/invoice-pdf.service';
-import { InvoiceEmailService } from './services/invoice-email.service';
 import { EmailService } from '../common/services/email.service';
+import { PrismaModule } from '../prisma/prisma.module';
+import { InvoiceSettingsController } from './controllers/invoice-settings.controller';
+import { InvoicesController } from './controllers/invoices.controller';
+import { PaymentsController } from './controllers/payments.controller';
+import { QuotationsController } from './controllers/quotations.controller';
+import { RevenueController } from './controllers/revenue.controller';
+import { InvoiceEmailService } from './services/invoice-email.service';
+import { InvoicePdfService } from './services/invoice-pdf.service';
+import { InvoiceSettingsService } from './services/invoice-settings.service';
+import { InvoicesService } from './services/invoices.service';
+import { PaymentsService } from './services/payments.service';
+import { QuotationsService } from './services/quotations.service';
+import { RevenueService } from './services/revenue.service';
 
 @Module({
   imports: [PrismaModule],

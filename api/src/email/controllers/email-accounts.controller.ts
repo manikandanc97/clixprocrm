@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { EmailAccountsService } from '../services/email-accounts.service';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
+import { SupabaseAuthGuard } from '../../auth/supabase.guard';
+import { TenantGuard } from '../../auth/tenant.guard';
 import { CreateEmailAccountDto } from '../dto/create-email-account.dto';
 import { UpdateEmailAccountDto } from '../dto/update-email-account.dto';
 import { VerifyEmailAccountDto } from '../dto/verify-email-account.dto';
-import { SupabaseAuthGuard } from '../../auth/supabase.guard';
-import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
+import { EmailAccountsService } from '../services/email-accounts.service';
 
 export function isUserTenantAdmin(req: any): boolean {
   if (req.isSuperAdmin || req.isOrgOwner) return true;

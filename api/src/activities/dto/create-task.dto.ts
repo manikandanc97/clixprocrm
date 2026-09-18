@@ -1,12 +1,11 @@
+import { EventVisibility, TaskPriority, TaskStatus } from '@prisma/client';
 import {
-  IsString,
-  IsOptional,
-  IsEnum,
-  IsArray,
-  IsObject,
-  IsUUID,
+    IsArray,
+    IsEnum,
+    IsOptional,
+    IsString,
+    IsUUID
 } from 'class-validator';
-import { TaskPriority, TaskStatus, EventVisibility } from '@prisma/client';
 
 export class CreateTaskDto {
   @IsString()

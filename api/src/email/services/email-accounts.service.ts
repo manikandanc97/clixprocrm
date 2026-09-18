@@ -1,27 +1,27 @@
 import {
-  Injectable,
-  NotFoundException,
-  ForbiddenException,
-  ConflictException,
-  BadRequestException,
-  Logger,
+    BadRequestException,
+    ConflictException,
+    ForbiddenException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
+import {
+    EmailAuthType,
+    EmailProviderType,
+    EmailSyncStatus,
+    Prisma,
+} from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
-import { ConnectionVerifierService } from './connection-verifier.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { CreateEmailAccountDto } from '../dto/create-email-account.dto';
+import {
+    EmailAccountResponseDto,
+    toEmailAccountResponse,
+} from '../dto/email-account-response.dto';
 import { UpdateEmailAccountDto } from '../dto/update-email-account.dto';
 import { VerifyEmailAccountDto } from '../dto/verify-email-account.dto';
-import {
-  EmailAccountResponseDto,
-  toEmailAccountResponse,
-} from '../dto/email-account-response.dto';
-import {
-  EmailProviderType,
-  EmailAuthType,
-  EmailSyncStatus,
-  Prisma,
-} from '@prisma/client';
+import { ConnectionVerifierService } from './connection-verifier.service';
 
 @Injectable()
 export class EmailAccountsService {

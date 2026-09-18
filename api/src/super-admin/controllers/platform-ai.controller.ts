@@ -1,18 +1,18 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Put,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { PlatformAiService } from '../services/platform-ai.service';
-import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
+import { SuperAdminGuard } from '../../auth/super-admin.guard';
+import { PlatformAiService } from '../services/platform-ai.service';
 
 @Controller('super-admin/ai')
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)

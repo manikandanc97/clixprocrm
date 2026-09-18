@@ -1,23 +1,22 @@
-import { PrismaService } from './prisma.service';
-import { LeadsService } from '../leads/services/leads.service';
-import { LeadsQueryService } from '../leads/services/leads.query.service';
-import { LeadsConvertService } from '../leads/services/leads.convert.service';
-import { CustomersService } from '../customers/customers.service';
+import { CalendarService } from '../activities/services/calendar.service';
+import { MeetingsService } from '../activities/services/meetings.service';
+import { TasksService } from '../activities/services/tasks.service';
+import { DepartmentsService } from '../admin/services/departments.service';
+import { EmployeesService } from '../admin/services/employees.service';
+import { RolesService } from '../admin/services/roles.service';
+import { EncryptionService } from '../common/encryption/encryption.service';
 import { ContactsService } from '../contacts/contacts.service';
+import { CustomersService } from '../customers/customers.service';
 import { DealsService } from '../deals/services/deals.service';
 import { PipelineService } from '../deals/services/pipeline.service';
-import { TasksService } from '../activities/services/tasks.service';
-import { MeetingsService } from '../activities/services/meetings.service';
-import { CalendarService } from '../activities/services/calendar.service';
 import { InvoicesService } from '../finance/services/invoices.service';
 import { QuotationsService } from '../finance/services/quotations.service';
 import { RevenueService } from '../finance/services/revenue.service';
-import { EmployeesService } from '../admin/services/employees.service';
-import { RolesService } from '../admin/services/roles.service';
-import { DepartmentsService } from '../admin/services/departments.service';
+import { LeadsConvertService } from '../leads/services/leads.convert.service';
+import { LeadsQueryService } from '../leads/services/leads.query.service';
+import { LeadsService } from '../leads/services/leads.service';
 import { SettingsService } from '../workspace/services/settings.service';
-import { EncryptionService } from '../common/encryption/encryption.service';
-import { ConfigService } from '@nestjs/config';
+import { PrismaService } from './prisma.service';
 
 describe('Core CRM Services RLS Phase 2 - Tenant Context Integration & Isolation', () => {
   jest.setTimeout(30000);

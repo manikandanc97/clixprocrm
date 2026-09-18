@@ -1,11 +1,11 @@
 import {
-  Injectable,
-  BadRequestException,
-  NotFoundException,
-  Logger,
+    BadRequestException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { AuditLoggerService } from '../../common/audit/audit-logger.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import { SecurityIncidentsService } from './security-incidents.service';
 
 export type AlertSeverity = 'LOW' | 'MEDIUM' | 'HIGH' | 'CRITICAL';

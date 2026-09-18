@@ -1,4 +1,4 @@
-import { DataScope, PermissionDefinition } from './authorization-types';
+import { PermissionDefinition } from './authorization-types';
 
 export const PERMISSION_REGISTRY: PermissionDefinition[] = [
   // CRM - Leads

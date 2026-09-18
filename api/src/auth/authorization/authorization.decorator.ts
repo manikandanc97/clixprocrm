@@ -1,4 +1,4 @@
-import { SetMetadata, applyDecorators } from '@nestjs/common';
+import { SetMetadata } from '@nestjs/common';
 import { DataScope } from './authorization-types';
 
 export const PERMISSION_REQUIREMENT_KEY = 'auth:permission_requirement';

@@ -1,40 +1,37 @@
 import {
-  Injectable,
-  Logger,
-  NotFoundException,
-  BadRequestException,
-  ForbiddenException,
-  Optional,
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    Logger,
+    NotFoundException,
+    Optional,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { NotificationsService } from '../../notifications/services/notifications.service';
-import { StorageService } from '../../common/services/storage.service';
-import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 import { SupportTicketStatus } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
+import { StorageService } from '../../common/services/storage.service';
+import { NotificationsService } from '../../notifications/services/notifications.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 
 import { SupportTicketRecord } from '../interfaces/support.interface';
 import {
-  escapeHtml,
-  mapPriorityToEnum,
-  mapEnumToPriority,
-  extractRoleString,
-  formatTicketOutput,
+    escapeHtml,
+    extractRoleString,
+    formatTicketOutput,
+    mapEnumToPriority,
+    mapPriorityToEnum,
 } from '../utils/support-mapper.util';
 import {
-  calculateEstimatedResponseTime,
-  buildFallbackSupportTicket,
-  buildSupportEmailHtml,
+    buildFallbackSupportTicket,
+    buildSupportEmailHtml,
+    calculateEstimatedResponseTime,
 } from '../utils/support-template.util';
 
-export type { SupportTicketRecord };
 export {
-  escapeHtml,
-  mapPriorityToEnum,
-  mapEnumToPriority,
-  extractRoleString,
-  formatTicketOutput,
+    escapeHtml, extractRoleString,
+    formatTicketOutput, mapEnumToPriority, mapPriorityToEnum
 };
+export type { SupportTicketRecord };
 
 @Injectable()
 export class SupportService {

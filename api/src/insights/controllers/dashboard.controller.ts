@@ -1,8 +1,8 @@
-import { Controller, Get, Query, UseGuards, Req } from '@nestjs/common';
-import { DashboardService } from '../services/dashboard.service';
+import { Controller, Get, Query, Req, UseGuards } from '@nestjs/common';
+import type { FastifyRequest } from 'fastify';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import type { FastifyRequest } from 'fastify';
+import { DashboardService } from '../services/dashboard.service';
 
 interface AuthenticatedRequest extends FastifyRequest {
   tenantId: string;

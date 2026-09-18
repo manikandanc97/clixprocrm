@@ -1,9 +1,8 @@
-import {
-  SessionsService,
-  SECURITY_ACTIONS_ALLOWLIST,
-} from './sessions.service';
 import { AuthController } from './auth.controller';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import {
+    SECURITY_ACTIONS_ALLOWLIST,
+    SessionsService,
+} from './sessions.service';
 
 describe('Security Activity Tests (Phase P3)', () => {
   let sessionsService: SessionsService;

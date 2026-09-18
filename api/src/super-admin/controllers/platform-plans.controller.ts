@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Patch,
-  Delete,
-  Body,
-  Param,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Put,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { PlatformPlansService } from '../services/platform-plans.service';
-import {
-  CreatePlatformPlanDto,
-  UpdatePlatformPlanDto,
-} from '../dto/platform-plans.dto';
-import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
+import { SuperAdminGuard } from '../../auth/super-admin.guard';
+import {
+    CreatePlatformPlanDto,
+    UpdatePlatformPlanDto,
+} from '../dto/platform-plans.dto';
+import { PlatformPlansService } from '../services/platform-plans.service';
 
 @Controller(['super-admin/plans', 'super_admin/plans'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)

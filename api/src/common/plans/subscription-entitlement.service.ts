@@ -1,40 +1,37 @@
 import {
-  Injectable,
-  ForbiddenException,
-  NotFoundException,
-  BadRequestException,
-  Logger,
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  CANONICAL_PLANS,
-  normalizePlanId,
-  getPlanDefinition,
-  PlanDefinition,
-  MatrixCategory,
-} from './plan-definitions.constant';
 import { BillingGatewayService } from '../billing/billing-gateway.service';
 import { PaymentOrderResult } from '../billing/payment-gateway.interface';
+import {
+    CANONICAL_PLANS,
+    getPlanDefinition,
+    MatrixCategory,
+    normalizePlanId,
+    PlanDefinition,
+} from './plan-definitions.constant';
 
 import {
-  WorkspaceUsageStats,
-  WorkspaceSubscriptionDetails,
-  SubscriptionQuote,
-  BillingInvoiceItem,
+    BillingInvoiceItem,
+    SubscriptionQuote,
+    WorkspaceSubscriptionDetails,
+    WorkspaceUsageStats,
 } from './subscription-entitlement.interface';
 import { buildDynamicComparisonMatrix } from './subscription-matrix.util';
+import { executePaymentActivationTransaction } from './subscription-payment-activator.util';
 import {
-  mapDbPlanToDefinition,
-  assembleWorkspaceUsage,
+    assembleWorkspaceUsage,
+    mapDbPlanToDefinition,
 } from './subscription-plan-mapper.util';
 import { computeSubscriptionQuote } from './subscription-quote-calculator.util';
-import { executePaymentActivationTransaction } from './subscription-payment-activator.util';
 
 export type {
-  WorkspaceUsageStats,
-  WorkspaceSubscriptionDetails,
-  SubscriptionQuote,
-  BillingInvoiceItem,
+    BillingInvoiceItem, SubscriptionQuote, WorkspaceSubscriptionDetails, WorkspaceUsageStats
 };
 
 @Injectable()

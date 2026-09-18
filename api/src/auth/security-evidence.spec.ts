@@ -1,5 +1,4 @@
 import { SecurityGovernanceService } from '../super-admin/services/security-governance.service';
-import * as crypto from 'crypto';
 
 describe('P7 Security Evidence Export & SHA-256 Sealing Suite', () => {
   let governanceService: SecurityGovernanceService;

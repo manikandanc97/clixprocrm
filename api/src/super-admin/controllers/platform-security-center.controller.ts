@@ -1,26 +1,26 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Param,
-  Body,
-  Query,
-  Req,
-  UseGuards,
-  HttpCode,
-  HttpStatus,
+    Body,
+    Controller,
+    Get,
+    HttpCode,
+    HttpStatus,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
+import { RequireAal } from '../../auth/aal.decorator';
+import { AalGuard } from '../../auth/aal.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
-import { AalGuard } from '../../auth/aal.guard';
-import { RequireAal } from '../../auth/aal.decorator';
 import { EmergencySecurityService } from '../services/emergency-security.service';
-import { SecurityIncidentsService } from '../services/security-incidents.service';
 import type {
-  CreateIncidentDto,
-  ListIncidentsDto,
+    CreateIncidentDto,
+    ListIncidentsDto,
 } from '../services/security-incidents.service';
+import { SecurityIncidentsService } from '../services/security-incidents.service';
 
 @Controller(['super-admin/security', 'super_admin/security'])
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard, AalGuard)

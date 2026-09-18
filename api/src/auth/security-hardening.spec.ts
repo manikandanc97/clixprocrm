@@ -1,9 +1,9 @@
-import {
-  sanitizeXss,
-  sanitizeObjectXss,
-} from '../common/utils/xss-sanitizer.util';
 import { sanitizeRedirectUrl } from '../common/utils/redirect-security.util';
 import { SecurityConfigValidator } from '../common/utils/security-config.validator';
+import {
+    sanitizeObjectXss,
+    sanitizeXss,
+} from '../common/utils/xss-sanitizer.util';
 
 describe('P5 Security Hardening & Sanitization Suite', () => {
   describe('1. XSS Payload Sanitization', () => {

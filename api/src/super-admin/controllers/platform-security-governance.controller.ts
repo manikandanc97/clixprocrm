@@ -1,8 +1,8 @@
-import { Body, Controller, Get, Post, Query, UseGuards } from '@nestjs/common';
+import { Body, Controller, Get, Post, UseGuards } from '@nestjs/common';
+import { RequireAal } from '../../auth/aal.decorator';
+import { AalGuard } from '../../auth/aal.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
-import { AalGuard } from '../../auth/aal.guard';
-import { RequireAal } from '../../auth/aal.decorator';
 import { SecurityGovernanceService } from '../services/security-governance.service';
 import { SecurityOperationsService } from '../services/security-operations.service';
 

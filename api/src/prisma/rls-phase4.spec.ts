@@ -20,26 +20,21 @@ jest.mock('zod', () => {
   return { z: schema };
 });
 
-import { Test, TestingModule } from '@nestjs/testing';
-import { PrismaService } from './prisma.service';
-import { TenantGuard } from '../auth/tenant.guard';
-import { AuthService } from '../auth/auth.service';
-import { CompaniesService } from '../companies/companies.service';
-import { NotificationsService } from '../notifications/services/notifications.service';
-import { SearchService } from '../system/services/search.service';
-import { LeadsImportService } from '../leads/services/leads.import.service';
 import { TasksExportService } from '../activities/services/tasks.export.service';
 import { RoleStatsService } from '../admin/services/role-stats.service';
-import { AnalyticsInsightsService } from '../insights/services/analytics.insights.service';
-import { AiService } from '../ai/ai.service';
-import { PlatformDashboardService } from '../super-admin/services/platform-dashboard.service';
-import { PlatformAnalyticsService } from '../super-admin/services/platform-analytics.service';
-import { PlatformOrganizationsService } from '../super-admin/services/platform-organizations.service';
-import { EncryptionService } from '../common/encryption/encryption.service';
-import { BrandingService } from '../workspace/services/branding.service';
+import { AuthService } from '../auth/auth.service';
+import { TenantGuard } from '../auth/tenant.guard';
 import { TenantContextService } from '../common/context/tenant-context.service';
+import { EncryptionService } from '../common/encryption/encryption.service';
+import { CompaniesService } from '../companies/companies.service';
+import { AnalyticsInsightsService } from '../insights/services/analytics.insights.service';
+import { LeadsImportService } from '../leads/services/leads.import.service';
+import { NotificationsService } from '../notifications/services/notifications.service';
+import { PlatformAnalyticsService } from '../super-admin/services/platform-analytics.service';
+import { PlatformDashboardService } from '../super-admin/services/platform-dashboard.service';
+import { PlatformOrganizationsService } from '../super-admin/services/platform-organizations.service';
+import { SearchService } from '../system/services/search.service';
 
-import { ExecutionContext, UnauthorizedException } from '@nestjs/common';
 
 function buildModelMocks() {
   return {

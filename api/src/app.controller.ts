@@ -1,21 +1,21 @@
 import {
-  Controller,
-  Get,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
-  Optional,
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Optional,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
 import { AppService } from './app.service';
-import { PrismaService } from './prisma/prisma.service';
-import { SecurityConfigValidator } from './common/utils/security-config.validator';
-import { SupabaseAuthGuard } from './auth/supabase.guard';
-import { TenantGuard } from './auth/tenant.guard';
-import { RolesGuard } from './auth/roles.guard';
+import { Permissions } from './auth/permissions.decorator';
 import { PermissionsGuard } from './auth/permissions.guard';
 import { Roles } from './auth/roles.decorator';
-import { Permissions } from './auth/permissions.decorator';
+import { RolesGuard } from './auth/roles.guard';
+import { SupabaseAuthGuard } from './auth/supabase.guard';
+import { TenantGuard } from './auth/tenant.guard';
+import { SecurityConfigValidator } from './common/utils/security-config.validator';
+import { PrismaService } from './prisma/prisma.service';
 
 @Controller(['crm', ''])
 export class AppController {

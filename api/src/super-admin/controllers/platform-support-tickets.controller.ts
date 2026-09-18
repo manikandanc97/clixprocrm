@@ -1,23 +1,23 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Patch,
-  Delete,
-  Param,
-  Query,
-  Body,
-  Req,
-  UseGuards,
-  BadRequestException,
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
+import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import {
-  PlatformSupportTicketsService,
-  TicketListQueryDto,
+    PlatformSupportTicketsService,
+    TicketListQueryDto,
 } from '../services/platform-support-tickets.service';
-import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
 
 @Controller('super-admin/support')
 @UseGuards(SupabaseAuthGuard, SuperAdminGuard)

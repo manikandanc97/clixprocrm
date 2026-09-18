@@ -1,5 +1,5 @@
-import { IsString, IsOptional, IsArray, IsIn, IsNumber } from 'class-validator';
 import { Transform } from 'class-transformer';
+import { IsArray, IsIn, IsNumber, IsOptional, IsString } from 'class-validator';
 
 export class TaskQueryDto {
   @IsOptional()

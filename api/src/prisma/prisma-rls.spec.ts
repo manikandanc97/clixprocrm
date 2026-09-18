@@ -1,6 +1,6 @@
-import { PrismaService } from './prisma.service';
 import * as fs from 'fs';
 import * as path from 'path';
+import { PrismaService } from './prisma.service';
 
 describe('PostgreSQL Row-Level Security (RLS) - Stage 1 Architecture & Context Isolation', () => {
   let prismaService: PrismaService;

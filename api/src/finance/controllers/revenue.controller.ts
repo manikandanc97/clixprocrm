@@ -1,22 +1,21 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Body,
-  Param,
-  Query,
-  UseGuards,
-  Req,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    Param,
+    Post,
+    Put,
+    Req,
+    UseGuards
 } from '@nestjs/common';
-import { RevenueService } from '../services/revenue.service';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
 import { CreateRevenueTargetDto } from '../dto/create-revenue-target.dto';
 import { UpdateRevenueTargetDto } from '../dto/update-revenue-target.dto';
+import { RevenueService } from '../services/revenue.service';
 
 @Controller('crm/settings/revenue-targets')
 @UseGuards(SupabaseAuthGuard, TenantGuard, RolesGuard)

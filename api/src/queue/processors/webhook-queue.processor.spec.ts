@@ -1,5 +1,5 @@
-import { WebhookQueueProcessor } from './webhook-queue.processor';
 import { WEBHOOK_JOB_NAMES } from '../interfaces/webhook-jobs';
+import { WebhookQueueProcessor } from './webhook-queue.processor';
 
 describe('WebhookQueueProcessor Suite', () => {
   let processor: WebhookQueueProcessor;

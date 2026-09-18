@@ -1,19 +1,18 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
+import { Prisma } from '@prisma/client';
+import { EncryptionService } from '../../common/encryption/encryption.service';
+import {
+    formatCurrency,
+    formatDate,
+    toNumber,
+} from '../../common/utils/crm-formatters.util';
+import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateQuotationDto } from '../dto/create-quotation.dto';
 import {
-  UpdateQuotationDto,
-  UpdateQuotationStatusDto,
+    UpdateQuotationStatusDto
 } from '../dto/update-quotation.dto';
-import { Prisma, QuotationStatus } from '@prisma/client';
-import {
-  toNumber,
-  formatCurrency,
-  formatDate,
-} from '../../common/utils/crm-formatters.util';
-import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
-import { EncryptionService } from '../../common/encryption/encryption.service';
-import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 
 @Injectable()
 export class QuotationsService {

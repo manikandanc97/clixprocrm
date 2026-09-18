@@ -1,7 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import {
-  formatCurrency,
-  toNumber,
+    formatCurrency,
+    toNumber,
 } from '../../common/utils/crm-formatters.util';
 
 export interface InvoicePdfData {

@@ -1,14 +1,14 @@
 import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
-  UnauthorizedException,
-  Optional,
-  Logger,
+    CanActivate,
+    ExecutionContext,
+    ForbiddenException,
+    Injectable,
+    Logger,
+    Optional,
+    UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../common/context/tenant-context.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 @Injectable()
 export class SuperAdminGuard implements CanActivate {

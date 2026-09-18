@@ -1,7 +1,7 @@
-import { AuditIntegrityMonitorService } from '../common/audit/integrity/audit-integrity-monitor.service';
 import { AuditArchiveService } from '../common/audit/archive/audit-archive.service';
-import { AuditIntegrityAlertService } from '../common/audit/integrity/audit-integrity-alert.service';
 import { AuditLoggerService } from '../common/audit/audit-logger.service';
+import { AuditIntegrityAlertService } from '../common/audit/integrity/audit-integrity-alert.service';
+import { AuditIntegrityMonitorService } from '../common/audit/integrity/audit-integrity-monitor.service';
 
 describe('P3 Audit Integrity Monitor Suite', () => {
   let mockPrisma: any;

@@ -1,7 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { BadRequestException } from '@nestjs/common';
-import { PlatformSettingsService } from '../services/platform-settings.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
+import { PlatformSettingsService } from '../services/platform-settings.service';
 
 describe('PlatformSettingsService', () => {
   let service: PlatformSettingsService;

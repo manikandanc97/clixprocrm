@@ -1,9 +1,9 @@
 import { tool } from 'ai';
 import { z } from 'zod';
+import { EncryptionService } from '../../common/encryption/encryption.service';
+import { PERMISSION_MODULES } from '../../common/role-permissions.constants';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiSecurityService, UserSecurityContext } from '../ai-security.service';
-import { PERMISSION_MODULES } from '../../common/role-permissions.constants';
-import { EncryptionService } from '../../common/encryption/encryption.service';
 
 /**
  * @file ai/tools/leads.tools.ts

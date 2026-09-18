@@ -1,11 +1,11 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { Prisma, TaskStatus, TaskPriority } from '@prisma/client';
+import { Prisma, TaskStatus } from '@prisma/client';
+import { getOrSetCache } from '../../common/utils/cache.util';
 import { formatRelativeDate } from '../../common/utils/crm-formatters.util';
+import { PrismaService } from '../../prisma/prisma.service';
 import { TaskQueryDto } from '../dto/task-query.dto';
 import { TasksExportService } from './tasks.export.service';
 import { TasksHistoryService } from './tasks.history.service';
-import { getOrSetCache } from '../../common/utils/cache.util';
 
 /**
  * @file activities/services/tasks.query.service.ts

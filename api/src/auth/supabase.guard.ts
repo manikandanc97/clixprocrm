@@ -1,21 +1,21 @@
 import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-  ForbiddenException,
-  Optional,
-  Logger,
+    CanActivate,
+    ExecutionContext,
+    ForbiddenException,
+    Injectable,
+    Logger,
+    Optional,
+    UnauthorizedException,
 } from '@nestjs/common';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
-import { PrismaService } from '../prisma/prisma.service';
+import { EmailService } from '../common/services/email.service';
+import { invalidateCacheKey } from '../common/utils/cache.util';
 import { parseUserAgent } from '../common/utils/device-parser.util';
 import { getClientIp } from '../common/utils/rate-limit.util';
 import { getSessionTimeoutConfig } from '../common/utils/session-config.util';
-import { EmailService } from '../common/services/email.service';
 import { NotificationsService } from '../notifications/services/notifications.service';
-import { invalidateCacheKey } from '../common/utils/cache.util';
+import { PrismaService } from '../prisma/prisma.service';
 
 // In-memory token cache for authenticated users (60s TTL)
 interface CachedTokenUser {

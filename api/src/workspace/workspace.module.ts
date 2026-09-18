@@ -1,14 +1,14 @@
 import { Module, forwardRef } from '@nestjs/common';
-import { WorkspaceController } from './controllers/workspace.controller';
-import { SettingsController } from './controllers/settings.controller';
-import { WorkspaceService } from './services/workspace.service';
-import { SettingsService } from './services/settings.service';
-import { BrandingService } from './services/branding.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { QueueModule } from '../queue/queue.module';
+import { SettingsController } from './controllers/settings.controller';
+import { WorkspaceController } from './controllers/workspace.controller';
+import { BrandingService } from './services/branding.service';
+import { SettingsService } from './services/settings.service';
+import { WorkspaceService } from './services/workspace.service';
 
-import { SubscriptionController } from './controllers/subscription.controller';
 import { SubscriptionEntitlementService } from '../common/plans/subscription-entitlement.service';
+import { SubscriptionController } from './controllers/subscription.controller';
 
 @Module({
   imports: [PrismaModule, forwardRef(() => QueueModule)],

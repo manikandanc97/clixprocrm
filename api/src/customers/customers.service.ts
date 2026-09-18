@@ -1,8 +1,8 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
-import { Prisma, CustomerStatus } from '@prisma/client';
+import { CustomerStatus, Prisma } from '@prisma/client';
 import { EncryptionService } from '../common/encryption/encryption.service';
 import { invalidateDashboardCache } from '../insights/services/dashboard.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 /**
  * ENCRYPTION NOTE:

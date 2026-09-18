@@ -1,7 +1,7 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
-import { LeadsService } from './services/leads.service';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
+import { LeadsService } from './services/leads.service';
 
 @Controller('crm/hot-leads')
 @UseGuards(SupabaseAuthGuard, TenantGuard)

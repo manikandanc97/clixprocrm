@@ -1,24 +1,23 @@
-import { Test, TestingModule } from '@nestjs/testing';
-import { InboundEmailService } from './inbound-email.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { EncryptionService } from '../../common/encryption/encryption.service';
-import { ConnectionVerifierService } from './connection-verifier.service';
-import { MimeParserService } from './mime-parser.service';
-import { EmailHtmlSanitizerService } from './email-html-sanitizer.service';
-import { EmailAttachmentStorageService } from './email-attachment-storage.service';
-import {
-  ImapClientFactory,
-  IImapClient,
-  FetchedImapMessage,
-} from './imap-client.factory';
 import { ConfigService } from '@nestjs/config';
+import { Test, TestingModule } from '@nestjs/testing';
 import {
-  EmailSyncStatus,
-  EmailDirection,
-  EmailMessageStatus,
+    EmailDirection,
+    EmailMessageStatus,
+    EmailSyncStatus,
 } from '@prisma/client';
-import { BadRequestException } from '@nestjs/common';
+import { EncryptionService } from '../../common/encryption/encryption.service';
+import { PrismaService } from '../../prisma/prisma.service';
 import type { SyncInboxJobPayload } from '../../queue/interfaces/email-jobs';
+import { ConnectionVerifierService } from './connection-verifier.service';
+import { EmailAttachmentStorageService } from './email-attachment-storage.service';
+import { EmailHtmlSanitizerService } from './email-html-sanitizer.service';
+import {
+    FetchedImapMessage,
+    IImapClient,
+    ImapClientFactory,
+} from './imap-client.factory';
+import { InboundEmailService } from './inbound-email.service';
+import { MimeParserService } from './mime-parser.service';
 
 describe('InboundEmailService Suite', () => {
   let service: InboundEmailService;

@@ -1,12 +1,12 @@
-import {
-  IsString,
-  IsOptional,
-  IsBoolean,
-  IsNumber,
-  IsEnum,
-} from 'class-validator';
 import { DealStage } from '@prisma/client';
 import { Type } from 'class-transformer';
+import {
+    IsBoolean,
+    IsEnum,
+    IsNumber,
+    IsOptional,
+    IsString,
+} from 'class-validator';
 
 export class ConvertLeadDto {
   @IsOptional()

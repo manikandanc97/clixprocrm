@@ -1,15 +1,15 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigModule } from '@nestjs/config';
-import { QueueModule } from './queue.module';
-import { QUEUE_NAMES } from './queue.constants';
-import { BaseJobPayload } from './interfaces/job-payloads';
+import { Test, TestingModule } from '@nestjs/testing';
+import { TenantContextModule } from '../common/context/tenant-context.module';
 import { EncryptionModule } from '../common/encryption/encryption.module';
 import { SubscriptionEntitlementModule } from '../common/plans/subscription-entitlement.module';
-import { TenantContextModule } from '../common/context/tenant-context.module';
-import { WebhookQueueProducer } from './producers/webhook-queue.producer';
+import { BaseJobPayload } from './interfaces/job-payloads';
+import { MediaQueueProcessor } from './processors/media-queue.processor';
 import { WebhookQueueProcessor } from './processors/webhook-queue.processor';
 import { MediaQueueProducer } from './producers/media-queue.producer';
-import { MediaQueueProcessor } from './processors/media-queue.processor';
+import { WebhookQueueProducer } from './producers/webhook-queue.producer';
+import { QUEUE_NAMES } from './queue.constants';
+import { QueueModule } from './queue.module';
 import { QueueMetricsService } from './services/queue-metrics.service';
 
 jest.mock('bullmq', () => {

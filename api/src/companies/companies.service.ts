@@ -1,9 +1,9 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
-import { CreateCompanyDto } from './dto/create-company.dto';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import { EncryptionService } from '../common/encryption/encryption.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { CreateCompanyDto } from './dto/create-company.dto';
 
 /**
  * ENCRYPTION NOTE:

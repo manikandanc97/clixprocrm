@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { PlatformSupportTicketsService } from './platform-support-tickets.service';
-import { PrismaService } from '../../prisma/prisma.service';
-import { NotificationsService } from '../../notifications/services/notifications.service';
 import { SupportTicketStatus } from '@prisma/client';
+import { NotificationsService } from '../../notifications/services/notifications.service';
+import { PrismaService } from '../../prisma/prisma.service';
+import { PlatformSupportTicketsService } from './platform-support-tickets.service';
 
 describe('PlatformSupportTicketsService (Super Admin Operations)', () => {
   let service: PlatformSupportTicketsService;

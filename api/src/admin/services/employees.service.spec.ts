@@ -1,8 +1,7 @@
-import { Test, TestingModule } from '@nestjs/testing';
 import { ConfigService } from '@nestjs/config';
-import { EmployeesService } from './employees.service';
+import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../prisma/prisma.service';
-import { HttpException, HttpStatus } from '@nestjs/common';
+import { EmployeesService } from './employees.service';
 
 const mockSupabaseAdmin = {
   createUser: jest.fn(),

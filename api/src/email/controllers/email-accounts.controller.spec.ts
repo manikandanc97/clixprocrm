@@ -1,12 +1,12 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-  EmailAccountsController,
-  isUserTenantAdmin,
-} from './email-accounts.controller';
-import { EmailAccountsService } from '../services/email-accounts.service';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
+import { EmailAccountsService } from '../services/email-accounts.service';
+import {
+    EmailAccountsController,
+    isUserTenantAdmin,
+} from './email-accounts.controller';
 
 describe('EmailAccountsController', () => {
   let controller: EmailAccountsController;

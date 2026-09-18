@@ -20,29 +20,9 @@ jest.mock('zod', () => {
   return { z: schema };
 });
 
-import { PrismaService } from './prisma.service';
 import { TenantContextService } from '../common/context/tenant-context.service';
-import { AuthService } from '../auth/auth.service';
-import { LeadsService } from '../leads/services/leads.service';
-import { CustomersService } from '../customers/customers.service';
-import { CompaniesService } from '../companies/companies.service';
-import { DealsService } from '../deals/services/deals.service';
-import { TasksService } from '../activities/services/tasks.service';
-import { MeetingsService } from '../activities/services/meetings.service';
-import { InvoicesService } from '../finance/services/invoices.service';
-import { QuotationsService } from '../finance/services/quotations.service';
-import { SearchService } from '../system/services/search.service';
-import { NotificationsService } from '../notifications/services/notifications.service';
-import { LeadsImportService } from '../leads/services/leads.import.service';
-import { TasksExportService } from '../activities/services/tasks.export.service';
-import { RoleStatsService } from '../admin/services/role-stats.service';
-import { AnalyticsInsightsService } from '../insights/services/analytics.insights.service';
-import { AiService } from '../ai/ai.service';
-import { PlatformDashboardService } from '../super-admin/services/platform-dashboard.service';
-import { PlatformAnalyticsService } from '../super-admin/services/platform-analytics.service';
-import { PlatformOrganizationsService } from '../super-admin/services/platform-organizations.service';
 import { EncryptionService } from '../common/encryption/encryption.service';
-import { RolesService } from '../admin/services/roles.service';
+import { PrismaService } from './prisma.service';
 
 function createMockEncryption(): EncryptionService {
   return {

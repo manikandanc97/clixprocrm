@@ -1,27 +1,27 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Put,
-  Delete,
-  Param,
-  Body,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Param,
+    Post,
+    Put,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
-import { DepartmentsService } from '../services/departments.service';
+import { Permissions } from '../../auth/permissions.decorator';
+import { PermissionsGuard } from '../../auth/permissions.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { PermissionsGuard } from '../../auth/permissions.guard';
-import { Permissions } from '../../auth/permissions.decorator';
 import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+    RATE_LIMITS,
 } from '../../common/utils/rate-limit.util';
+import { DepartmentsService } from '../services/departments.service';
 
 @Controller('crm/departments')
 @UseGuards(SupabaseAuthGuard, TenantGuard, PermissionsGuard)

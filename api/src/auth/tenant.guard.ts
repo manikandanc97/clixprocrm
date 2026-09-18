@@ -1,12 +1,12 @@
 import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  UnauthorizedException,
-  Optional,
+    CanActivate,
+    ExecutionContext,
+    Injectable,
+    Optional,
+    UnauthorizedException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { TenantContextService } from '../common/context/tenant-context.service';
+import { PrismaService } from '../prisma/prisma.service';
 
 interface CachedUserRecord {
   userRecord: any;

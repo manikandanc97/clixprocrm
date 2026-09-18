@@ -1,14 +1,14 @@
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  ForbiddenException,
+    BadRequestException,
+    ForbiddenException,
+    Injectable,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { UserStatus } from '@prisma/client';
+import { invalidateGetMeCache } from '../../auth/auth.service';
 import { invalidateTokenUserCache } from '../../auth/supabase.guard';
 import { invalidateUserTenantCache } from '../../auth/tenant.guard';
-import { invalidateGetMeCache } from '../../auth/auth.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PlatformUsersService {

@@ -1,12 +1,12 @@
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
+    BadRequestException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
-import { NotificationsService } from '../../notifications/services/notifications.service';
 import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
+import { NotificationsService } from '../../notifications/services/notifications.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 export class TicketListQueryDto {
   status?: string;

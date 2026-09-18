@@ -1,10 +1,10 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
-import {
-  getPlanDefinition,
-  normalizePlanId,
-} from '../plans/plan-definitions.constant';
 import { BillingWebhookJobPayload } from '../../queue/interfaces/webhook-jobs';
+import {
+    getPlanDefinition,
+    normalizePlanId,
+} from '../plans/plan-definitions.constant';
 
 export interface WebhookProcessResult {
   processed: boolean;

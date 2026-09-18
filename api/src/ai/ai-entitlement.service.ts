@@ -1,13 +1,13 @@
 import {
-  Injectable,
-  Logger,
-  ForbiddenException,
-  ServiceUnavailableException,
-  HttpException,
-  HttpStatus,
+    ForbiddenException,
+    HttpException,
+    HttpStatus,
+    Injectable,
+    Logger,
+    ServiceUnavailableException,
 } from '@nestjs/common';
-import { PrismaService } from '../prisma/prisma.service';
 import { Redis } from '@upstash/redis';
+import { PrismaService } from '../prisma/prisma.service';
 
 export interface EntitledAiModel {
   id: string;

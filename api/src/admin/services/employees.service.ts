@@ -1,18 +1,18 @@
 import {
-  Injectable,
-  HttpException,
-  HttpStatus,
-  Optional,
+    HttpException,
+    HttpStatus,
+    Injectable,
+    Optional,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, UserStatus } from '@prisma/client';
-import { PrismaService } from '../../prisma/prisma.service';
-import { randomBytes, randomUUID, createHash } from 'crypto';
 import { createClient } from '@supabase/supabase-js';
+import { createHash, randomBytes, randomUUID } from 'crypto';
+import { invalidateGetMeCache } from '../../auth/auth.service';
 import { invalidateTokenUserCache } from '../../auth/supabase.guard';
 import { invalidateUserTenantCache } from '../../auth/tenant.guard';
-import { invalidateGetMeCache } from '../../auth/auth.service';
 import { SubscriptionEntitlementService } from '../../common/plans/subscription-entitlement.service';
+import { PrismaService } from '../../prisma/prisma.service';
 
 export function hashInvitationToken(token: string): string {
   return createHash('sha256').update(token.trim()).digest('hex');

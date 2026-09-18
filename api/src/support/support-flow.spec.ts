@@ -1,9 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { SupportService } from './services/support.service';
-import { PrismaService } from '../prisma/prisma.service';
-import { NotificationsService } from '../notifications/services/notifications.service';
 import { StorageService } from '../common/services/storage.service';
-import { NotFoundException } from '@nestjs/common';
+import { NotificationsService } from '../notifications/services/notifications.service';
+import { PrismaService } from '../prisma/prisma.service';
+import { SupportService } from './services/support.service';
 
 describe('Support Ticket Flow & Tenant Isolation', () => {
   let service: SupportService;

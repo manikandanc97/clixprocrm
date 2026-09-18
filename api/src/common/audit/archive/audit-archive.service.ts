@@ -1,13 +1,13 @@
 import { Injectable, Logger, OnModuleInit } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import {
-  AuditArchiveProvider,
-  CanonicalAuditArchiveRecord,
-  ArchiveIntegrityResult,
+    ArchiveIntegrityResult,
+    AuditArchiveProvider,
+    CanonicalAuditArchiveRecord,
 } from './audit-archive.interface';
 import {
-  S3ObjectLockProvider,
-  buildAuditObjectKey,
+    S3ObjectLockProvider,
+    buildAuditObjectKey,
 } from './s3-object-lock.provider';
 
 @Injectable()

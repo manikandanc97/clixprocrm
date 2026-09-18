@@ -1,5 +1,5 @@
-import { EmergencySecurityService } from '../super-admin/services/emergency-security.service';
 import { AuditLoggerService } from '../common/audit/audit-logger.service';
+import { EmergencySecurityService } from '../super-admin/services/emergency-security.service';
 
 describe('P4 Emergency Security Controls Suite', () => {
   let emergencyService: EmergencySecurityService;

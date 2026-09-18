@@ -1,8 +1,8 @@
 import { Test, TestingModule } from '@nestjs/testing';
-import { EmailQueueProcessor } from './email-queue.processor';
+import { Job } from 'bullmq';
 import { PrismaService } from '../../prisma/prisma.service';
 import { EMAIL_JOB_NAMES } from '../interfaces/email-jobs';
-import { Job } from 'bullmq';
+import { EmailQueueProcessor } from './email-queue.processor';
 
 describe('EmailQueueProcessor Suite', () => {
   let processor: EmailQueueProcessor;

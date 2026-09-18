@@ -1,8 +1,8 @@
 import { tool } from 'ai';
 import { z } from 'zod';
+import { CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
 import { PrismaService } from '../../prisma/prisma.service';
 import { AiSecurityService, UserSecurityContext } from '../ai-security.service';
-import { CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
 
 /**
  * @file ai/tools/platform.tools.ts

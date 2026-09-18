@@ -1,5 +1,5 @@
-import { ImportQueueProcessor } from './import-queue.processor';
 import { IMPORT_JOB_NAMES } from '../interfaces/import-jobs';
+import { ImportQueueProcessor } from './import-queue.processor';
 
 describe('ImportQueueProcessor Suite', () => {
   let processor: ImportQueueProcessor;

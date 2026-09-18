@@ -1,10 +1,10 @@
 import { Module } from '@nestjs/common';
-import { AiController } from './ai.controller';
-import { AiService } from './ai.service';
-import { AiSecurityService } from './ai-security.service';
-import { AiEntitlementService } from './ai-entitlement.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { WorkspaceModule } from '../workspace/workspace.module';
+import { AiEntitlementService } from './ai-entitlement.service';
+import { AiSecurityService } from './ai-security.service';
+import { AiController } from './ai.controller';
+import { AiService } from './ai.service';
 
 @Module({
   imports: [PrismaModule, WorkspaceModule],

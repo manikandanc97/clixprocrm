@@ -1,18 +1,16 @@
 import {
-  ExecutionContext,
-  UnauthorizedException,
-  HttpException,
-  HttpStatus,
+    ExecutionContext,
+    HttpException,
+    HttpStatus,
+    UnauthorizedException,
 } from '@nestjs/common';
-import { TenantGuard, invalidateUserTenantCache } from './tenant.guard';
-import { SupabaseAuthGuard, invalidateTokenUserCache } from './supabase.guard';
-import { AuthController } from './auth.controller';
-import { AuthService, invalidateGetMeCache } from './auth.service';
 import {
-  checkRateLimit,
-  resetRateLimit,
-  RATE_LIMITS,
+    resetRateLimit
 } from '../common/utils/rate-limit.util';
+import { AuthController } from './auth.controller';
+import { invalidateGetMeCache } from './auth.service';
+import { invalidateTokenUserCache } from './supabase.guard';
+import { TenantGuard, invalidateUserTenantCache } from './tenant.guard';
 
 describe('P0 Authentication & Session Security Tests', () => {
   let tenantGuard: TenantGuard;

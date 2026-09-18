@@ -1,21 +1,21 @@
-import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { createGoogleGenerativeAI } from '@ai-sdk/google';
-import {
-  streamText,
-  generateText,
-  convertToModelMessages,
-  isStepCount,
-} from 'ai';
+import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import {
+    convertToModelMessages,
+    generateText,
+    isStepCount,
+    streamText,
+} from 'ai';
+import { EncryptionService } from '../common/encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { AiSecurityService, UserSecurityContext } from './ai-security.service';
-import { EncryptionService } from '../common/encryption/encryption.service';
+import { buildCustomersTools } from './tools/customers.tools';
 import { buildDealsTools } from './tools/deals.tools';
 import { buildLeadsTools } from './tools/leads.tools';
-import { buildCustomersTools } from './tools/customers.tools';
-import { buildTasksTools } from './tools/tasks.tools';
-import { buildQuotationsTools } from './tools/quotations.tools';
 import { buildPlatformTools } from './tools/platform.tools';
+import { buildQuotationsTools } from './tools/quotations.tools';
+import { buildTasksTools } from './tools/tasks.tools';
 
 /**
  * @file ai/ai.service.ts

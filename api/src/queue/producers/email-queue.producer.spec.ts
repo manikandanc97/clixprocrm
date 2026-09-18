@@ -1,9 +1,8 @@
-import {
-  EmailQueueProducer,
-  EMAIL_DEFAULT_JOB_OPTS,
-} from './email-queue.producer';
 import { EMAIL_JOB_NAMES } from '../interfaces/email-jobs';
-import { QUEUE_NAMES } from '../queue.constants';
+import {
+    EMAIL_DEFAULT_JOB_OPTS,
+    EmailQueueProducer,
+} from './email-queue.producer';
 
 describe('EmailQueueProducer Suite', () => {
   let producer: EmailQueueProducer;

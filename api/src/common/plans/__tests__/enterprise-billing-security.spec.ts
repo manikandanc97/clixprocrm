@@ -1,12 +1,11 @@
+import {
+    BadRequestException,
+    ForbiddenException
+} from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
-import { SubscriptionEntitlementService } from '../subscription-entitlement.service';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { BillingGatewayService } from '../../billing/billing-gateway.service';
-import {
-  BadRequestException,
-  ForbiddenException,
-  NotFoundException,
-} from '@nestjs/common';
+import { SubscriptionEntitlementService } from '../subscription-entitlement.service';
 
 describe('Enterprise Billing & Entitlement Security Tests', () => {
   let service: SubscriptionEntitlementService;

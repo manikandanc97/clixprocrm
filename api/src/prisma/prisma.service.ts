@@ -1,18 +1,18 @@
 import {
-  Injectable,
-  OnModuleInit,
-  OnModuleDestroy,
-  Logger,
-  Optional,
+    Injectable,
+    Logger,
+    OnModuleDestroy,
+    OnModuleInit,
+    Optional,
 } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
+import { randomUUID } from 'crypto';
+import {
+    AuditLogSealInput,
+    computeAuditRecordHash,
+} from '../common/audit/audit-crypto.util';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { sanitizeAuditDetails } from '../common/utils/audit-sanitizer.util';
-import {
-  computeAuditRecordHash,
-  AuditLogSealInput,
-} from '../common/audit/audit-crypto.util';
-import { randomUUID } from 'crypto';
 
 export interface TenantContextOptions {
   tenantId?: string;

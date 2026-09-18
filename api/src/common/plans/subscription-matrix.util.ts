@@ -1,4 +1,4 @@
-import { PlanDefinition, MatrixCategory } from './plan-definitions.constant';
+import { MatrixCategory, PlanDefinition } from './plan-definitions.constant';
 
 /**
  * Dynamically constructs the Feature Comparison Matrix from the live canonical plans.

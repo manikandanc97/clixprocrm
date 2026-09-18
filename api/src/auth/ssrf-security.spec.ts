@@ -1,7 +1,7 @@
 import {
-  isPrivateOrReservedIPv4,
-  isPrivateOrReservedIPv6,
-  validateSafeUrlForFetch,
+    isPrivateOrReservedIPv4,
+    isPrivateOrReservedIPv6,
+    validateSafeUrlForFetch,
 } from '../common/utils/ssrf.util';
 
 describe('P5 SSRF & Safe URL Validation Suite', () => {

@@ -1,10 +1,10 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
-import { RolesService } from '../services/roles.service';
-import { RoleStatsService } from '../services/role-stats.service';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import { Permissions } from '../../auth/permissions.decorator';
+import { PermissionsGuard } from '../../auth/permissions.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { PermissionsGuard } from '../../auth/permissions.guard';
-import { Permissions } from '../../auth/permissions.decorator';
+import { RoleStatsService } from '../services/role-stats.service';
+import { RolesService } from '../services/roles.service';
 
 @Controller('crm/role-management/stats')
 @UseGuards(SupabaseAuthGuard, TenantGuard, PermissionsGuard)

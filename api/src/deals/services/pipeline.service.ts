@@ -1,15 +1,15 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import {
-  calculateTrend,
-  formatCurrency,
-  formatRelativeDate,
-  toNumber,
-  formatDate,
-  formatPercentage,
+    calculateTrend,
+    formatCurrency,
+    formatDate,
+    formatPercentage,
+    formatRelativeDate,
+    toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class PipelineService {

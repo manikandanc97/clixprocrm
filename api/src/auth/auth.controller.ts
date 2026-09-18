@@ -1,32 +1,32 @@
 import {
-  Controller,
-  Get,
-  Patch,
-  Post,
-  Delete,
-  Body,
-  Query,
-  UseGuards,
-  Req,
-  BadRequestException,
-  HttpException,
-  HttpStatus,
+    BadRequestException,
+    Body,
+    Controller,
+    Delete,
+    Get,
+    HttpException,
+    HttpStatus,
+    Patch,
+    Post,
+    Query,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
+import {
+    RATE_LIMITS,
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+} from '../common/utils/rate-limit.util';
+import { AalGuard } from './aal.guard';
 import { AuthService, invalidateGetMeCache } from './auth.service';
 import { SessionsService } from './sessions.service';
 import {
-  SupabaseAuthGuard,
-  invalidateTokenUserCache,
-  invalidateSessionCache,
+    SupabaseAuthGuard,
+    invalidateSessionCache,
+    invalidateTokenUserCache,
 } from './supabase.guard';
 import { TenantGuard, invalidateUserTenantCache } from './tenant.guard';
-import { AalGuard } from './aal.guard';
-import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
-} from '../common/utils/rate-limit.util';
 
 @Controller('auth')
 export class AuthController {

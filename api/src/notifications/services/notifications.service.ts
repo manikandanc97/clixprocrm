@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import {
-  getOrSetCache,
-  invalidateCacheKey,
+    getOrSetCache,
+    invalidateCacheKey,
 } from '../../common/utils/cache.util';
+import { PrismaService } from '../../prisma/prisma.service';
 
 @Injectable()
 export class NotificationsService {

@@ -1,4 +1,4 @@
-import { PlanDefinition, MatrixCategory } from './plan-definitions.constant';
+import { MatrixCategory, PlanDefinition } from './plan-definitions.constant';
 
 export interface WorkspaceUsageStats {
   users: {

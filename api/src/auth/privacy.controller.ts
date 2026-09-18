@@ -1,22 +1,22 @@
 import {
-  Controller,
-  Get,
-  UseGuards,
-  Req,
-  HttpException,
-  HttpStatus,
-  Logger,
+    Controller,
+    Get,
+    HttpException,
+    HttpStatus,
+    Logger,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
+import {
+    checkRateLimit,
+    getClientIp,
+    incrementRateLimit,
+    RATE_LIMITS,
+} from '../common/utils/rate-limit.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { MfaService } from './mfa.service';
 import { SupabaseAuthGuard } from './supabase.guard';
 import { TenantGuard } from './tenant.guard';
-import {
-  checkRateLimit,
-  incrementRateLimit,
-  getClientIp,
-  RATE_LIMITS,
-} from '../common/utils/rate-limit.util';
 
 @Controller('auth/privacy')
 export class PrivacyController {

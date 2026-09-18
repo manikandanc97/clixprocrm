@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { toNumber } from '../../common/utils/crm-formatters.util';
+import { PrismaService } from '../../prisma/prisma.service';
 
 /**
  * @file insights/services/analytics.revenue-growth.service.ts

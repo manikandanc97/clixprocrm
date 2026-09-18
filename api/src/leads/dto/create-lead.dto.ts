@@ -1,16 +1,15 @@
-import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsEmail,
-  IsEnum,
-  IsNumber,
-  IsArray,
-  ValidateIf,
-  Min,
-} from 'class-validator';
-import { LeadStage, LeadPriority } from '@prisma/client';
+import { LeadPriority, LeadStage } from '@prisma/client';
 import { Type } from 'class-transformer';
+import {
+    IsArray,
+    IsEmail,
+    IsEnum,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    Min
+} from 'class-validator';
 
 export class CreateLeadDto {
   @IsString()

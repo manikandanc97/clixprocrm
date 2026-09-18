@@ -1,9 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import {
-  computeAuditRecordHash,
-  verifyRecordHash,
-  AuditLogSealInput,
+    AuditLogSealInput,
+    computeAuditRecordHash
 } from '../common/audit/audit-crypto.util';
 import { AuditLoggerService } from '../common/audit/audit-logger.service';
 

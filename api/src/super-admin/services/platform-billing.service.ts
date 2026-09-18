@@ -1,41 +1,38 @@
 import {
-  Injectable,
-  NotFoundException,
-  BadRequestException,
-  Logger,
+    BadRequestException,
+    Injectable,
+    Logger,
+    NotFoundException,
 } from '@nestjs/common';
-import { PrismaService } from '../../prisma/prisma.service';
 import { Prisma } from '@prisma/client';
 import {
-  toNumber,
-  formatCurrency,
-} from '../../common/utils/crm-formatters.util';
-import {
-  getPlanDefinition,
-  normalizePlanId,
-  CANONICAL_PLANS,
+    CANONICAL_PLANS,
+    getPlanDefinition,
+    normalizePlanId,
 } from '../../common/plans/plan-definitions.constant';
+import {
+    formatCurrency,
+    toNumber,
+} from '../../common/utils/crm-formatters.util';
 import { roundTo2 } from '../../finance/utils/invoice-calculation.util';
+import { PrismaService } from '../../prisma/prisma.service';
 
 import {
-  UpdatePlatformBillingConfigDto,
-  CreatePlatformSubscriptionDto,
-  RecordPlatformPaymentDto,
-  ProcessPlatformRefundDto,
+    CreatePlatformSubscriptionDto,
+    ProcessPlatformRefundDto,
+    RecordPlatformPaymentDto,
+    UpdatePlatformBillingConfigDto,
 } from '../dto/platform-billing.dto';
 
 export {
-  UpdatePlatformBillingConfigDto,
-  CreatePlatformSubscriptionDto,
-  RecordPlatformPaymentDto,
-  ProcessPlatformRefundDto,
+    CreatePlatformSubscriptionDto, ProcessPlatformRefundDto, RecordPlatformPaymentDto, UpdatePlatformBillingConfigDto
 };
 
-import {
-  allocatePlatformInvoiceNumber,
-  allocatePlatformPaymentNumber,
-  allocatePlatformRefundNumber,
-} from '../utils/platform-billing.util';
+    import {
+        allocatePlatformInvoiceNumber,
+        allocatePlatformPaymentNumber,
+        allocatePlatformRefundNumber,
+    } from '../utils/platform-billing.util';
 
 @Injectable()
 export class PlatformBillingService {

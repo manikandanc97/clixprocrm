@@ -1,10 +1,10 @@
-import { Controller, Get, UseGuards, Req } from '@nestjs/common';
-import { AnalyticsService } from '../services/analytics.service';
+import { Controller, Get, Req, UseGuards } from '@nestjs/common';
+import type { FastifyRequest } from 'fastify';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
-import type { FastifyRequest } from 'fastify';
+import { AnalyticsService } from '../services/analytics.service';
 
 interface AuthenticatedRequest extends FastifyRequest {
   tenantId: string;

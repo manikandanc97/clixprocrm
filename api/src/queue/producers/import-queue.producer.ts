@@ -1,12 +1,12 @@
-import { Injectable, Logger, Optional } from '@nestjs/common';
 import { InjectQueue } from '@nestjs/bullmq';
+import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { randomUUID } from 'crypto';
-import { QUEUE_NAMES } from '../queue.constants';
 import {
-  IMPORT_JOB_NAMES,
-  LeadsBulkImportJobPayload,
+    IMPORT_JOB_NAMES,
+    LeadsBulkImportJobPayload,
 } from '../interfaces/import-jobs';
+import { QUEUE_NAMES } from '../queue.constants';
 
 export const IMPORT_DEFAULT_JOB_OPTS = {
   attempts: 3,

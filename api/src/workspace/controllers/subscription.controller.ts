@@ -1,24 +1,24 @@
 import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  UseGuards,
-  Req,
-  BadRequestException,
+    BadRequestException,
+    Body,
+    Controller,
+    Get,
+    Post,
+    Req,
+    UseGuards,
 } from '@nestjs/common';
 import {
-  IsString,
-  IsNotEmpty,
-  IsOptional,
-  IsNumber,
-  Min,
+    IsNotEmpty,
+    IsNumber,
+    IsOptional,
+    IsString,
+    Min,
 } from 'class-validator';
-import { SubscriptionEntitlementService } from '../../common/plans/subscription-entitlement.service';
+import { Roles } from '../../auth/roles.decorator';
+import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
-import { RolesGuard } from '../../auth/roles.guard';
-import { Roles } from '../../auth/roles.decorator';
+import { SubscriptionEntitlementService } from '../../common/plans/subscription-entitlement.service';
 
 export class CalculateQuoteDto {
   @IsString()

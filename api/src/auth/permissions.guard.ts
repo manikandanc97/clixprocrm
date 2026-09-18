@@ -1,8 +1,8 @@
 import {
-  Injectable,
-  CanActivate,
-  ExecutionContext,
-  ForbiddenException,
+    CanActivate,
+    ExecutionContext,
+    ForbiddenException,
+    Injectable,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { PERMISSIONS_KEY } from './permissions.decorator';
