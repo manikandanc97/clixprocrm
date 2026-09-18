@@ -6,6 +6,7 @@ import {
 import { PrismaService } from '../../prisma/prisma.service';
 import { ConvertLeadDto } from '../dto/convert-lead.dto';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 
 /**
  * @file leads/services/leads.convert.service.ts
@@ -29,7 +30,7 @@ export class LeadsConvertService {
     leadId: string,
     data: ConvertLeadDto,
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const lead = await tx.lead.findUnique({
         where: { id: leadId, tenantId, deletedAt: null },
       });
@@ -179,5 +180,9 @@ export class LeadsConvertService {
 
       return { deal, customerId: finalCustomerId, companyId: finalCompanyId };
     });
+
+    const affectedUserIds = [data.ownerId, userId].filter(Boolean) as string[];
+    await invalidateDashboardCache(tenantId, affectedUserIds);
+    return result;
   }
 }

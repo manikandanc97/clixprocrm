@@ -53,11 +53,10 @@ export class TasksQueryService {
     const todayEnd = new Date(todayStart);
     todayEnd.setDate(todayEnd.getDate() + 1);
 
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const whereConditions: Prisma.Sql[] = [
-        Prisma.sql`t."tenantId" = ${tenantId}`,
-        Prisma.sql`t."deletedAt" IS NULL`,
-      ];
+    const whereConditions: Prisma.Sql[] = [
+      Prisma.sql`t."tenantId" = ${tenantId}`,
+      Prisma.sql`t."deletedAt" IS NULL`,
+    ];
 
       // Role-based visibility scoping
       if (options.role && options.userId) {
@@ -71,29 +70,39 @@ export class TasksQueryService {
           userRole !== 'SUPERADMIN' &&
           userRole !== 'OWNER'
         ) {
-          const tenantUser = await tx.tenantUser.findFirst({
-            where: { tenantId, userId: options.userId },
-            select: { id: true, departmentId: true },
-          });
-
-          const [subordinates, teamUsers] = await Promise.all([
-            tenantUser
-              ? tx.tenantUser.findMany({
-                  where: { tenantId, reportingManagerId: tenantUser.id },
+          // Single query for tenant user hierarchy and department team members
+          const tenantUser = await this.prisma.withTenantContext({ tenantId }, (tx) =>
+            tx.tenantUser.findUnique({
+              where: {
+                tenantId_userId: {
+                  tenantId,
+                  userId: options.userId,
+                },
+              },
+              select: {
+                id: true,
+                departmentId: true,
+                subordinates: {
+                  where: { status: 'ACTIVE' },
                   select: { userId: true },
-                })
-              : Promise.resolve([]),
-            tenantUser?.departmentId
-              ? tx.tenantUser.findMany({
-                  where: { tenantId, departmentId: tenantUser.departmentId },
-                  select: { userId: true },
-                })
-              : Promise.resolve([]),
-          ]);
+                },
+                department: {
+                  select: {
+                    users: {
+                      where: { status: 'ACTIVE' },
+                      select: { userId: true },
+                    },
+                  },
+                },
+              },
+            })
+          );
 
-          const subordinateUserIds = subordinates.map((s) => s.userId);
+          const subordinateUserIds =
+            tenantUser?.subordinates?.map((s) => s.userId) || [];
           const managerScopeUserIds = [options.userId, ...subordinateUserIds];
-          const teamUserIds = teamUsers.map((u) => u.userId);
+          const teamUserIds =
+            tenantUser?.department?.users?.map((u) => u.userId) || [];
 
           const rbacOrConditions: Prisma.Sql[] = [
             Prisma.sql`t."assignedToId" IN (${Prisma.join(managerScopeUserIds)})`,
@@ -210,85 +219,87 @@ export class TasksQueryService {
           break;
       }
 
-      const rawResult = await tx.$queryRaw<
-        Array<{
-          tasks_json: any;
-          filtered_count: number;
-          total_count: number;
-          pending_count: number;
-          in_progress_count: number;
-          completed_count: number;
-          blocked_count: number;
-          overdue_count: number;
-          due_today_count: number;
-        }>
-      >`
-        WITH filtered_tasks AS (
+      const rawResult = await this.prisma.withTenantContext({ tenantId }, (tx) =>
+        tx.$queryRaw<
+          Array<{
+            tasks_json: any;
+            filtered_count: number;
+            total_count: number;
+            pending_count: number;
+            in_progress_count: number;
+            completed_count: number;
+            blocked_count: number;
+            overdue_count: number;
+            due_today_count: number;
+          }>
+        >`
+          WITH filtered_tasks AS (
+            SELECT
+              t."id",
+              t."tenantId",
+              t."title",
+              t."description",
+              t."status",
+              t."priority",
+              t."dueDate",
+              t."reminderDate",
+              t."assignedToId",
+              t."createdById",
+              t."relatedLeadId",
+              t."relatedCustomerId",
+              t."relatedMeetingId",
+              t."relatedQuotationId",
+              t."tags",
+              t."checklist",
+              t."attachments",
+              t."completedAt",
+              t."deletedAt",
+              t."createdAt",
+              t."updatedAt",
+              t."progress",
+              CASE WHEN u.id IS NOT NULL THEN json_build_object('id', u.id, 'name', u.name, 'email', u.email) ELSE NULL END AS "assignedTo",
+              CASE WHEN l.id IS NOT NULL THEN json_build_object('id', l.id, 'name', l.name, 'company', l.company, 'email', l.email) ELSE NULL END AS "relatedLead",
+              CASE WHEN c.id IS NOT NULL THEN json_build_object('id', c.id, 'name', c.name, 'company', c.company, 'email', c.email) ELSE NULL END AS "relatedCustomer",
+              CASE WHEN m.id IS NOT NULL THEN json_build_object('id', m.id, 'title', m.title) ELSE NULL END AS "relatedMeeting",
+              CASE WHEN q.id IS NOT NULL THEN json_build_object('id', q.id, 'quoteNumber', q."quoteNumber", 'client', q.client, 'amount', q.amount::float) ELSE NULL END AS "relatedQuotation"
+            FROM "Task" t
+            LEFT JOIN "User" u ON t."assignedToId" = u.id
+            LEFT JOIN "Lead" l ON t."relatedLeadId" = l.id
+            LEFT JOIN "Customer" c ON t."relatedCustomerId" = c.id
+            LEFT JOIN "Meeting" m ON t."relatedMeetingId" = m.id
+            LEFT JOIN "Quotation" q ON t."relatedQuotationId" = q.id
+            WHERE ${whereSql}
+            ORDER BY ${orderSql}
+            LIMIT ${limit} OFFSET ${offset}
+          ),
+          filtered_count AS (
+            SELECT COUNT(*)::int as count FROM "Task" t WHERE ${whereSql}
+          ),
+          stats AS (
+            SELECT
+              COUNT(*)::int as total_count,
+              COUNT(CASE WHEN "status" = 'PENDING'::"TaskStatus" THEN 1 END)::int as pending_count,
+              COUNT(CASE WHEN "status" = 'IN_PROGRESS'::"TaskStatus" THEN 1 END)::int as in_progress_count,
+              COUNT(CASE WHEN "status" = 'COMPLETED'::"TaskStatus" THEN 1 END)::int as completed_count,
+              COUNT(CASE WHEN "status" = 'BLOCKED'::"TaskStatus" THEN 1 END)::int as blocked_count,
+              COUNT(CASE WHEN "dueDate" < ${now} AND "status" NOT IN ('COMPLETED'::"TaskStatus", 'CANCELLED'::"TaskStatus") THEN 1 END)::int as overdue_count,
+              COUNT(CASE WHEN "dueDate" >= ${todayStart} AND "dueDate" < ${todayEnd} THEN 1 END)::int as due_today_count
+            FROM "Task"
+            WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL
+          )
           SELECT
-            t."id",
-            t."tenantId",
-            t."title",
-            t."description",
-            t."status",
-            t."priority",
-            t."dueDate",
-            t."reminderDate",
-            t."assignedToId",
-            t."createdById",
-            t."relatedLeadId",
-            t."relatedCustomerId",
-            t."relatedMeetingId",
-            t."relatedQuotationId",
-            t."tags",
-            t."checklist",
-            t."attachments",
-            t."completedAt",
-            t."deletedAt",
-            t."createdAt",
-            t."updatedAt",
-            t."progress",
-            CASE WHEN u.id IS NOT NULL THEN json_build_object('id', u.id, 'name', u.name, 'email', u.email) ELSE NULL END AS "assignedTo",
-            CASE WHEN l.id IS NOT NULL THEN json_build_object('id', l.id, 'name', l.name, 'company', l.company, 'email', l.email) ELSE NULL END AS "relatedLead",
-            CASE WHEN c.id IS NOT NULL THEN json_build_object('id', c.id, 'name', c.name, 'company', c.company, 'email', c.email) ELSE NULL END AS "relatedCustomer",
-            CASE WHEN m.id IS NOT NULL THEN json_build_object('id', m.id, 'title', m.title) ELSE NULL END AS "relatedMeeting",
-            CASE WHEN q.id IS NOT NULL THEN json_build_object('id', q.id, 'quoteNumber', q."quoteNumber", 'client', q.client, 'amount', q.amount::float) ELSE NULL END AS "relatedQuotation"
-          FROM "Task" t
-          LEFT JOIN "User" u ON t."assignedToId" = u.id
-          LEFT JOIN "Lead" l ON t."relatedLeadId" = l.id
-          LEFT JOIN "Customer" c ON t."relatedCustomerId" = c.id
-          LEFT JOIN "Meeting" m ON t."relatedMeetingId" = m.id
-          LEFT JOIN "Quotation" q ON t."relatedQuotationId" = q.id
-          WHERE ${whereSql}
-          ORDER BY ${orderSql}
-          LIMIT ${limit} OFFSET ${offset}
-        ),
-        filtered_count AS (
-          SELECT COUNT(*)::int as count FROM "Task" t WHERE ${whereSql}
-        ),
-        stats AS (
-          SELECT
-            COUNT(*)::int as total_count,
-            COUNT(CASE WHEN "status" = 'PENDING'::"TaskStatus" THEN 1 END)::int as pending_count,
-            COUNT(CASE WHEN "status" = 'IN_PROGRESS'::"TaskStatus" THEN 1 END)::int as in_progress_count,
-            COUNT(CASE WHEN "status" = 'COMPLETED'::"TaskStatus" THEN 1 END)::int as completed_count,
-            COUNT(CASE WHEN "status" = 'BLOCKED'::"TaskStatus" THEN 1 END)::int as blocked_count,
-            COUNT(CASE WHEN "dueDate" < ${now} AND "status" NOT IN ('COMPLETED'::"TaskStatus", 'CANCELLED'::"TaskStatus") THEN 1 END)::int as overdue_count,
-            COUNT(CASE WHEN "dueDate" >= ${todayStart} AND "dueDate" < ${todayEnd} THEN 1 END)::int as due_today_count
-          FROM "Task"
-          WHERE "tenantId" = ${tenantId} AND "deletedAt" IS NULL
-        )
-        SELECT
-          (SELECT COALESCE(json_agg(ft.*), '[]'::json) FROM filtered_tasks ft) AS tasks_json,
-          fc.count as filtered_count,
-          s.total_count,
-          s.pending_count,
-          s.in_progress_count,
-          s.completed_count,
-          s.blocked_count,
-          s.overdue_count,
-          s.due_today_count
-        FROM filtered_count fc, stats s;
-      `;
+            (SELECT COALESCE(json_agg(ft.*), '[]'::json) FROM filtered_tasks ft) AS tasks_json,
+            fc.count as filtered_count,
+            s.total_count,
+            s.pending_count,
+            s.in_progress_count,
+            s.completed_count,
+            s.blocked_count,
+            s.overdue_count,
+            s.due_today_count
+          FROM filtered_count fc, stats s;
+        `
+      );
 
       const row = rawResult[0] || {
         tasks_json: [],
@@ -490,7 +501,6 @@ export class TasksQueryService {
           totalPages: Math.ceil(total / limit),
         },
       };
-    });
   }
 
   async exportTasks(tenantId: string, userId: string, query: any) {
@@ -502,8 +512,7 @@ export class TasksQueryService {
     id: string,
     options?: { userId: string; role: string },
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const where: Prisma.TaskWhereInput = { id, tenantId, deletedAt: null };
+    const where: Prisma.TaskWhereInput = { id, tenantId, deletedAt: null };
 
       if (options?.role && options?.userId) {
         const rawRole =
@@ -516,23 +525,32 @@ export class TasksQueryService {
           userRole !== 'SUPERADMIN' &&
           userRole !== 'OWNER'
         ) {
-          const tenantUser = await tx.tenantUser.findFirst({
-            where: { tenantId, userId: options.userId },
-          });
+          const tenantUser = await this.prisma.withTenantContext({ tenantId }, (tx) =>
+            tx.tenantUser.findFirst({
+              where: { tenantId, userId: options.userId },
+            })
+          );
 
-          const subordinates = await tx.tenantUser.findMany({
-            where: { tenantId, reportingManagerId: tenantUser?.id },
-            select: { userId: true },
-          });
+          const subordinates = await this.prisma.withTenantContext({ tenantId }, (tx) =>
+            tx.tenantUser.findMany({
+              where: {
+                tenantId,
+                reportingManagerId: tenantUser?.id,
+              },
+              select: { userId: true },
+            })
+          );
           const subordinateUserIds = subordinates.map((s) => s.userId);
           const managerScopeUserIds = [options.userId, ...subordinateUserIds];
 
           let teamUserIds: string[] = [];
           if (tenantUser?.departmentId) {
-            const teamUsers = await tx.tenantUser.findMany({
-              where: { tenantId, departmentId: tenantUser.departmentId },
-              select: { userId: true },
-            });
+            const teamUsers = await this.prisma.withTenantContext({ tenantId }, (tx) =>
+              tx.tenantUser.findMany({
+                where: { tenantId, departmentId: tenantUser.departmentId },
+                select: { userId: true },
+              })
+            );
             teamUserIds = teamUsers.map((u) => u.userId);
           }
 
@@ -554,7 +572,8 @@ export class TasksQueryService {
         }
       }
 
-      const task = await tx.task.findFirst({
+      const task = await this.prisma.withTenantContext({ tenantId }, (tx) =>
+        tx.task.findFirst({
         where,
         include: {
           assignedTo: { select: { id: true, name: true, email: true } },
@@ -576,7 +595,7 @@ export class TasksQueryService {
           },
           attachmentsList: true,
         },
-      });
+      }));
 
       if (!task) return null;
 
@@ -619,7 +638,6 @@ export class TasksQueryService {
                 : 0,
         subtaskCount: { total: totalChecklist, completed: completedChecklist },
       };
-    });
   }
 
   async getTaskHistory(tenantId: string, taskId: string) {

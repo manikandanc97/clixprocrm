@@ -106,19 +106,9 @@ export async function incrementRateLimit(
   config: RateLimitConfig,
 ) {
   if (redisClient) {
-    const key = `${config.windowMs}-${config.maxRequests}`;
-    let ratelimit = ratelimiters.get(key);
-    if (!ratelimit) {
-      ratelimit = new Ratelimit({
-        redis: redisClient,
-        limiter: Ratelimit.slidingWindow(
-          config.maxRequests,
-          `${config.windowMs} ms`,
-        ),
-      });
-      ratelimiters.set(key, ratelimit);
-    }
-    await ratelimit.limit(identifier);
+    // Note: When redisClient is active, checkRateLimit already atomically
+    // evaluated and consumed the rate limit token via ratelimit.limit(identifier).
+    // Calling limit() a second time consumes 2 quota units and adds a duplicate network roundtrip.
     return;
   }
 

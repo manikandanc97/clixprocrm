@@ -3,6 +3,7 @@ import { PrismaService } from '../../prisma/prisma.service';
 import { CreateRevenueTargetDto } from '../dto/create-revenue-target.dto';
 import { UpdateRevenueTargetDto } from '../dto/update-revenue-target.dto';
 import { Prisma } from '@prisma/client';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 
 @Injectable()
 export class RevenueService {
@@ -18,7 +19,7 @@ export class RevenueService {
   }
 
   async createRevenueTarget(tenantId: string, data: CreateRevenueTargetDto) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const target = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const isActive = data.isActive !== undefined ? data.isActive : true;
 
       if (isActive) {
@@ -40,6 +41,9 @@ export class RevenueService {
         },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return target;
   }
 
   async updateRevenueTarget(
@@ -47,7 +51,7 @@ export class RevenueService {
     id: string,
     data: Partial<CreateRevenueTargetDto>,
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const target = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       if (data.isActive) {
         await tx.revenueTarget.updateMany({
           where: { tenantId, isActive: true, id: { not: id } },
@@ -67,14 +71,20 @@ export class RevenueService {
         },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return target;
   }
 
   async deleteRevenueTarget(tenantId: string, id: string) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const deleted = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       return tx.revenueTarget.delete({
         where: { id, tenantId },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return deleted;
   }
 
   async getRevenueTargetAnalytics(tenantId: string, filters: any = {}) {

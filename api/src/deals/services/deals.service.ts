@@ -8,6 +8,7 @@ import { EncryptionService } from '../../common/encryption/encryption.service';
 import { Prisma, DealStage } from '@prisma/client';
 import { CreateDealDto } from '../dto/create-deal.dto';
 import { UpdateDealDto } from '../dto/update-deal.dto';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 
 @Injectable()
 export class DealsService {
@@ -17,26 +18,45 @@ export class DealsService {
   ) {}
 
   async getDeals(tenantId: string, page = 1, limit = 10, search = '') {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       page = Math.max(1, page);
-      limit = Math.max(1, Math.min(limit, 10000));
+      limit = Math.max(1, Math.min(limit || 20, 100));
       const skip = (page - 1) * limit;
 
       const where: Prisma.DealWhereInput = { tenantId, deletedAt: null };
 
       const [deals, total] = await Promise.all([
-        tx.deal.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-          skip,
-          take: limit,
-          include: {
-            company: { select: { id: true, name: true } },
-            customer: { select: { id: true, name: true } },
-            owner: { select: { id: true, name: true } },
-          },
-        }),
-        tx.deal.count({ where }),
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.deal.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit,
+            select: {
+              id: true,
+              name: true,
+              value: true,
+              stage: true,
+              probability: true,
+              expectedCloseDate: true,
+              source: true,
+              description: true,
+              status: true,
+              lostReason: true,
+              companyId: true,
+              customerId: true,
+              leadId: true,
+              ownerId: true,
+              createdAt: true,
+              updatedAt: true,
+              company: { select: { id: true, name: true } },
+              customer: { select: { id: true, name: true } },
+              owner: { select: { id: true, name: true } },
+            },
+          })
+        ),
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.deal.count({ where })
+        ),
       ]);
 
       const decryptedDeals = deals.map((d) => ({
@@ -67,7 +87,6 @@ export class DealsService {
           totalPages: Math.ceil(total / limit),
         },
       };
-    });
   }
 
   async getDealById(tenantId: string, id: string) {
@@ -99,15 +118,63 @@ export class DealsService {
             where: { deletedAt: null },
             take: 50,
             orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              title: true,
+              status: true,
+              priority: true,
+              dueDate: true,
+              createdAt: true,
+            },
           },
-          meetings: { take: 20, orderBy: { startTime: 'desc' } },
+          meetings: {
+            take: 20,
+            orderBy: { startTime: 'desc' },
+            select: {
+              id: true,
+              title: true,
+              startTime: true,
+              endTime: true,
+              status: true,
+              location: true,
+            },
+          },
           quotations: {
             where: { deletedAt: null },
             take: 20,
             orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              quoteNumber: true,
+              status: true,
+              amount: true,
+              validTill: true,
+              createdAt: true,
+            },
           },
-          invoices: { take: 20, orderBy: { createdAt: 'desc' } },
-          timelineEvents: { orderBy: { createdAt: 'desc' }, take: 50 },
+          invoices: {
+            take: 20,
+            orderBy: { createdAt: 'desc' },
+            select: {
+              id: true,
+              invoiceNumber: true,
+              status: true,
+              totalAmount: true,
+              dueDate: true,
+              createdAt: true,
+            },
+          },
+          timelineEvents: {
+            orderBy: { createdAt: 'desc' },
+            take: 50,
+            select: {
+              id: true,
+              action: true,
+              description: true,
+              createdAt: true,
+              userId: true,
+            },
+          },
         },
       });
 
@@ -136,7 +203,7 @@ export class DealsService {
   }
 
   async createDeal(tenantId: string, userId: string, data: CreateDealDto) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const deal = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       if (data.ownerId && data.ownerId !== userId) {
         const isValidOwner = await tx.tenantUser.findFirst({
           where: { userId: data.ownerId, tenantId, status: 'ACTIVE' },
@@ -176,6 +243,10 @@ export class DealsService {
 
       return deal;
     });
+
+    const affectedOwnerIds = [deal.ownerId, userId].filter(Boolean) as string[];
+    await invalidateDashboardCache(tenantId, affectedOwnerIds);
+    return deal;
   }
 
   async updateDeal(
@@ -184,11 +255,15 @@ export class DealsService {
     userId: string,
     data: UpdateDealDto,
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    let affectedOwnerIds: string[] = [userId];
+
+    const deal = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const oldDeal = await tx.deal.findUnique({
         where: { id, tenantId },
       });
       if (!oldDeal) throw new NotFoundException('Deal not found');
+
+      if (oldDeal.ownerId) affectedOwnerIds.push(oldDeal.ownerId);
 
       const {
         wonReason,
@@ -208,6 +283,7 @@ export class DealsService {
           where: { userId: cleanData.ownerId, tenantId, status: 'ACTIVE' },
         });
         if (!isValidOwner) throw new BadRequestException('Invalid deal owner');
+        affectedOwnerIds.push(cleanData.ownerId);
       }
 
       const updateData: any = { ...cleanData };
@@ -215,7 +291,7 @@ export class DealsService {
         updateData.expectedCloseDate = new Date(cleanData.expectedCloseDate);
       }
 
-      const deal = await tx.deal.update({
+      const updated = await tx.deal.update({
         where: { id, tenantId },
         data: updateData,
       });
@@ -227,7 +303,7 @@ export class DealsService {
             action: 'STAGE_CHANGED',
             description: `Stage changed from ${oldDeal.stage} to ${cleanData.stage}`,
             userId,
-            dealId: deal.id,
+            dealId: updated.id,
           },
         });
       }
@@ -237,9 +313,9 @@ export class DealsService {
           data: {
             tenantId,
             action: 'DEAL_WON',
-            description: `Deal marked as WON! Revenue: ${actualRevenue || deal.value}. Reason: ${wonReason || 'Not specified'}. ${notes ? `Notes: ${notes}` : ''}`,
+            description: `Deal marked as WON! Revenue: ${actualRevenue || updated.value}. Reason: ${wonReason || 'Not specified'}. ${notes ? `Notes: ${notes}` : ''}`,
             userId,
-            dealId: deal.id,
+            dealId: updated.id,
           },
         });
       } else if (cleanData.stage === 'LOST' && oldDeal.stage !== 'LOST') {
@@ -249,30 +325,39 @@ export class DealsService {
             action: 'DEAL_LOST',
             description: `Deal marked as LOST. Reason: ${lostReason || 'Not specified'}. Competitor: ${competitor || 'None'}. ${notes ? `Notes: ${notes}` : ''}`,
             userId,
-            dealId: deal.id,
+            dealId: updated.id,
           },
         });
       }
 
-      return deal;
+      return updated;
     });
+
+    await invalidateDashboardCache(tenantId, affectedOwnerIds);
+    return deal;
   }
 
   async deleteDeal(tenantId: string, id: string) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const deleted = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       return tx.deal.update({
         where: { id, tenantId },
         data: { deletedAt: new Date(), status: 'INACTIVE' },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return deleted;
   }
 
   async bulkDeleteDeals(tenantId: string, ids: string[]) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       return tx.deal.updateMany({
         where: { id: { in: ids }, tenantId },
         data: { deletedAt: new Date(), status: 'INACTIVE' },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return result;
   }
 }

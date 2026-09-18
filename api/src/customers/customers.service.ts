@@ -2,6 +2,7 @@ import { Injectable } from '@nestjs/common';
 import { PrismaService } from '../prisma/prisma.service';
 import { Prisma, CustomerStatus } from '@prisma/client';
 import { EncryptionService } from '../common/encryption/encryption.service';
+import { invalidateDashboardCache } from '../insights/services/dashboard.service';
 
 /**
  * ENCRYPTION NOTE:
@@ -17,7 +18,6 @@ export class CustomersService {
   ) {}
 
   async getCustomers(tenantId: string, page = 1, limit = 10, search = '') {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       page = Math.max(1, page);
       limit = Math.max(1, Math.min(limit, 10000));
       const skip = (page - 1) * limit;
@@ -36,22 +36,39 @@ export class CustomersService {
           };
 
           const [customers, total] = await Promise.all([
-            tx.customer.findMany({
-              where: emailWhere,
-              orderBy: { createdAt: 'desc' },
-              skip,
-              take: limit,
-              include: {
-                _count: {
-                  select: { deals: { where: { status: { not: 'LOST' } } } },
+            this.prisma.withTenantContext({ tenantId }, (tx) =>
+              tx.customer.findMany({
+                where: emailWhere,
+                orderBy: { createdAt: 'desc' },
+                skip,
+                take: limit,
+                select: {
+                  id: true,
+                  tenantId: true,
+                  assignedToId: true,
+                  name: true,
+                  company: true,
+                  email: true,
+                  status: true,
+                  revenue: true,
+                  lastContactAt: true,
+                  createdAt: true,
+                  updatedAt: true,
+                  leadId: true,
+                  companyId: true,
+                  _count: {
+                    select: { deals: { where: { status: { not: 'LOST' } } } },
+                  },
+                  deals: {
+                    where: { stage: { not: 'LOST' } },
+                    select: { value: true, stage: true },
+                  },
                 },
-                deals: {
-                  where: { stage: { not: 'LOST' } },
-                  select: { value: true, stage: true },
-                },
-              },
-            }),
-            tx.customer.count({ where: emailWhere }),
+              })
+            ),
+            this.prisma.withTenantContext({ tenantId }, (tx) =>
+              tx.customer.count({ where: emailWhere })
+            ),
           ]);
 
           if (total > 0) {
@@ -61,10 +78,19 @@ export class CustomersService {
                 0,
               );
               return {
-                ...c,
+                id: c.id,
+                tenantId: c.tenantId,
+                assignedToId: c.assignedToId,
                 name: this.enc.decrypt(c.name),
                 email: this.enc.decrypt(c.email),
                 company: this.enc.decrypt(c.company),
+                status: c.status,
+                revenue: c.revenue,
+                lastContactAt: c.lastContactAt,
+                createdAt: c.createdAt,
+                updatedAt: c.updatedAt,
+                leadId: c.leadId,
+                companyId: c.companyId,
                 dealsCount: c._count.deals,
                 revenueValue:
                   dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
@@ -85,36 +111,35 @@ export class CustomersService {
 
         // Substring search on decrypted fields:
         // Query candidate records with targeted select and filtered deal relations
-        const candidates = await tx.customer.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-          select: {
-            id: true,
-            tenantId: true,
-            assignedToId: true,
-            name: true,
-            company: true,
-            email: true,
-            emailHash: true,
-            status: true,
-            revenue: true,
-            lastContactAt: true,
-            deletedAt: true,
-            createdAt: true,
-            updatedAt: true,
-            leadId: true,
-            companyId: true,
-            teamId: true,
-            branchId: true,
-            _count: {
-              select: { deals: { where: { status: { not: 'LOST' } } } },
+        const candidates = await this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.customer.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            take: 250,
+            select: {
+              id: true,
+              tenantId: true,
+              assignedToId: true,
+              name: true,
+              company: true,
+              email: true,
+              status: true,
+              revenue: true,
+              lastContactAt: true,
+              createdAt: true,
+              updatedAt: true,
+              leadId: true,
+              companyId: true,
+              _count: {
+                select: { deals: { where: { status: { not: 'LOST' } } } },
+              },
+              deals: {
+                where: { stage: { not: 'LOST' } },
+                select: { value: true, stage: true },
+              },
             },
-            deals: {
-              where: { stage: { not: 'LOST' } },
-              select: { value: true, stage: true },
-            },
-          },
-        });
+          })
+        );
 
         const searchLower = searchTrimmed.toLowerCase();
         const matchedCustomers: Array<
@@ -160,7 +185,19 @@ export class CustomersService {
             0,
           );
           return {
-            ...c,
+            id: c.id,
+            tenantId: c.tenantId,
+            assignedToId: c.assignedToId,
+            name: c.name,
+            company: c.company,
+            email: c.email,
+            status: c.status,
+            revenue: c.revenue,
+            lastContactAt: c.lastContactAt,
+            createdAt: c.createdAt,
+            updatedAt: c.updatedAt,
+            leadId: c.leadId,
+            companyId: c.companyId,
             dealsCount: c._count?.deals || 0,
             revenueValue:
               dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
@@ -180,22 +217,39 @@ export class CustomersService {
 
       // Fast path: Server-side pagination without search query
       const [customers, total] = await Promise.all([
-        tx.customer.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-          skip,
-          take: limit,
-          include: {
-            _count: {
-              select: { deals: { where: { status: { not: 'LOST' } } } },
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.customer.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit,
+            select: {
+              id: true,
+              tenantId: true,
+              assignedToId: true,
+              name: true,
+              company: true,
+              email: true,
+              status: true,
+              revenue: true,
+              lastContactAt: true,
+              createdAt: true,
+              updatedAt: true,
+              leadId: true,
+              companyId: true,
+              _count: {
+                select: { deals: { where: { status: { not: 'LOST' } } } },
+              },
+              deals: {
+                where: { stage: { not: 'LOST' } },
+                select: { value: true, stage: true },
+              },
             },
-            deals: {
-              where: { stage: { not: 'LOST' } },
-              select: { value: true, stage: true },
-            },
-          },
-        }),
-        tx.customer.count({ where }),
+          })
+        ),
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.customer.count({ where })
+        ),
       ]);
 
       const mappedCustomers = customers.map((c) => {
@@ -205,10 +259,19 @@ export class CustomersService {
         );
 
         return {
-          ...c,
+          id: c.id,
+          tenantId: c.tenantId,
+          assignedToId: c.assignedToId,
           name: this.enc.decrypt(c.name),
           email: this.enc.decrypt(c.email),
           company: this.enc.decrypt(c.company),
+          status: c.status,
+          revenue: c.revenue,
+          lastContactAt: c.lastContactAt,
+          createdAt: c.createdAt,
+          updatedAt: c.updatedAt,
+          leadId: c.leadId,
+          companyId: c.companyId,
           dealsCount: c._count.deals,
           revenueValue:
             dealsRevenue > 0 ? dealsRevenue : Number(c.revenue || 0),
@@ -224,7 +287,6 @@ export class CustomersService {
           totalPages: Math.ceil(total / limit),
         },
       };
-    });
   }
 
   async createCustomer(
@@ -238,7 +300,7 @@ export class CustomersService {
       status?: CustomerStatus;
     },
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const customer = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const { encrypted: encEmail, hash: emailHash } = this.enc.encryptWithHash(
         data.email,
       );
@@ -255,6 +317,9 @@ export class CustomersService {
         },
       });
     });
+
+    await invalidateDashboardCache(tenantId, [userId]);
+    return customer;
   }
 
   async updateCustomer(
@@ -262,7 +327,7 @@ export class CustomersService {
     id: string,
     data: Prisma.CustomerUpdateInput,
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const customer = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       // Encrypt PII fields if provided
       const updateData: Prisma.CustomerUpdateInput = { ...data };
       if (typeof data.name === 'string') {
@@ -281,23 +346,32 @@ export class CustomersService {
         data: updateData,
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return customer;
   }
 
   async deleteCustomer(tenantId: string, id: string) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const deleted = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       return tx.customer.update({
         where: { id, tenantId },
         data: { deletedAt: new Date(), status: 'INACTIVE' },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return deleted;
   }
 
   async bulkDeleteCustomers(tenantId: string, ids: string[]) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       return tx.customer.updateMany({
         where: { id: { in: ids }, tenantId },
         data: { deletedAt: new Date(), status: 'INACTIVE' },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return result;
   }
 }

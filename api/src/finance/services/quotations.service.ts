@@ -13,6 +13,7 @@ import {
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { EncryptionService } from '../../common/encryption/encryption.service';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 
 @Injectable()
 export class QuotationsService {
@@ -42,7 +43,7 @@ export class QuotationsService {
   }
 
   async createQuotation(tenantId: string, data: CreateQuotationDto) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const quoteNumber =
         data.quoteNumber || (await this.generateQuoteNumber(tenantId, tx));
       const quotation = await tx.quotation.create({
@@ -66,6 +67,9 @@ export class QuotationsService {
         notes: this.enc.decrypt(quotation.notes),
       };
     });
+
+    await invalidateDashboardCache(tenantId);
+    return result;
   }
 
   async updateQuotation(
@@ -73,7 +77,7 @@ export class QuotationsService {
     id: string,
     data: Partial<CreateQuotationDto>,
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const existing = await tx.quotation.findFirst({
         where: { id, tenantId },
       });
@@ -101,10 +105,13 @@ export class QuotationsService {
         },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return result;
   }
 
   async deleteQuotation(tenantId: string, id: string) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const existing = await tx.quotation.findFirst({
         where: { id, tenantId },
       });
@@ -115,6 +122,9 @@ export class QuotationsService {
         data: { deletedAt: new Date() },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return result;
   }
 
   async updateQuotationStatus(
@@ -122,7 +132,7 @@ export class QuotationsService {
     id: string,
     data: UpdateQuotationStatusDto,
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const quotation = await tx.quotation.findFirst({
         where: { id, tenantId },
       });
@@ -133,6 +143,9 @@ export class QuotationsService {
         data: { status: data.status },
       });
     });
+
+    await invalidateDashboardCache(tenantId);
+    return result;
   }
 
   async getQuotations(tenantId: string, page = 1, limit = 10, search = '') {

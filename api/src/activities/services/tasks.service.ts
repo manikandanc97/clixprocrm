@@ -2,13 +2,15 @@ import { Injectable, HttpException, HttpStatus } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateTaskDto } from '../dto/create-task.dto';
 import { UpdateTaskDto } from '../dto/update-task.dto';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
+import { invalidateCacheKey } from '../../common/utils/cache.util';
 
 @Injectable()
 export class TasksService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createTask(tenantId: string, userId: string, data: CreateTaskDto) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
+    const createdTask = await this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
       if (data.assignedToId) {
         const isValidAssignee = await tx.tenantUser.findFirst({
           where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
@@ -99,6 +101,15 @@ export class TasksService {
 
       return task;
     });
+
+    const affectedUserIds = [createdTask.assignedToId, userId].filter(Boolean) as string[];
+    await invalidateDashboardCache(tenantId, affectedUserIds);
+
+    if (createdTask.assignedToId && createdTask.assignedToId !== userId) {
+      await invalidateCacheKey(`notifications:unread:${tenantId}:${createdTask.assignedToId}`);
+    }
+
+    return createdTask;
   }
 
   async updateTask(
@@ -122,7 +133,11 @@ export class TasksService {
     // Evaluate if user has explicit update permission
     const hasFullEditAccess = isSuperAdminOrAdmin || roleName === 'MANAGER';
 
-    return this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
+    let affectedUserIds: string[] = [userId];
+    let reassignNotifUserId: string | null = null;
+    let statusNotifUserId: string | null = null;
+
+    const updatedTask = await this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
       const existing = await tx.task.findUnique({
         where: { id, tenantId },
       });
@@ -176,17 +191,23 @@ export class TasksService {
             HttpStatus.BAD_REQUEST,
           );
         }
+        affectedUserIds.push(data.assignedToId);
+      }
+
+      if (existing.assignedToId) {
+        affectedUserIds.push(existing.assignedToId);
       }
 
       const targetStatus = data.status || existing.status;
+      const isCompleting =
+        targetStatus === 'COMPLETED' && existing.status !== 'COMPLETED';
+      const isReopening =
+        targetStatus !== 'COMPLETED' && existing.status === 'COMPLETED';
 
       let completedAtValue = existing.completedAt;
-      if (targetStatus === 'COMPLETED' && existing.status !== 'COMPLETED') {
+      if (isCompleting) {
         completedAtValue = new Date();
-      } else if (
-        targetStatus !== 'COMPLETED' &&
-        existing.status === 'COMPLETED'
-      ) {
+      } else if (isReopening) {
         completedAtValue = null;
       }
 
@@ -268,7 +289,9 @@ export class TasksService {
         });
       }
 
-      // Generic Update Audit Log
+      if (updatedTask.createdById) affectedUserIds.push(updatedTask.createdById);
+
+      // Audit Log
       await tx.auditLog.create({
         data: {
           tenantId,
@@ -276,16 +299,17 @@ export class TasksService {
           action: 'TASK_UPDATED',
           module: 'TASKS',
           details: {
-            taskId: updatedTask.id,
+            taskId: id,
             changes: data,
-            status: targetStatus,
+            previousStatus: existing.status,
+            newStatus: targetStatus,
           },
         },
       });
 
-      // Timeline Event for Lead if status changed
+      // Lead Timeline Event if linked
       if (existing.relatedLeadId) {
-        if (targetStatus === 'COMPLETED' && existing.status !== 'COMPLETED') {
+        if (isCompleting) {
           await tx.timelineEvent.create({
             data: {
               tenantId,
@@ -295,10 +319,7 @@ export class TasksService {
               description: `Task "${existing.title}" was marked as completed.`,
             },
           });
-        } else if (
-          targetStatus !== 'COMPLETED' &&
-          existing.status === 'COMPLETED'
-        ) {
+        } else if (isReopening) {
           await tx.timelineEvent.create({
             data: {
               tenantId,
@@ -336,6 +357,7 @@ export class TasksService {
             type: 'TASK_ASSIGNED',
           },
         });
+        reassignNotifUserId = data.assignedToId;
       }
 
       // Status change notification
@@ -353,10 +375,22 @@ export class TasksService {
             type: 'TASK_UPDATED',
           },
         });
+        statusNotifUserId = updatedTask.createdById;
       }
 
       return updatedTask;
     });
+
+    await invalidateDashboardCache(tenantId, affectedUserIds);
+
+    if (reassignNotifUserId) {
+      await invalidateCacheKey(`notifications:unread:${tenantId}:${reassignNotifUserId}`);
+    }
+    if (statusNotifUserId) {
+      await invalidateCacheKey(`notifications:unread:${tenantId}:${statusNotifUserId}`);
+    }
+
+    return updatedTask;
   }
 
   async deleteTask(tenantId: string, user: any, id: string) {
@@ -385,7 +419,9 @@ export class TasksService {
       );
     }
 
-    return this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
+    let affectedUserIds: string[] = [userId];
+
+    const deletedTask = await this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
       const task = await tx.task.findUnique({
         where: { id, tenantId },
       });
@@ -397,7 +433,9 @@ export class TasksService {
         );
       }
 
-      const deletedTask = await tx.task.update({
+      if (task.assignedToId) affectedUserIds.push(task.assignedToId);
+
+      const deleted = await tx.task.update({
         where: { id, tenantId },
         data: { deletedAt: new Date() },
       });
@@ -408,24 +446,27 @@ export class TasksService {
           userId,
           action: 'TASK_DELETED',
           module: 'TASKS',
-          details: { taskId: id, title: deletedTask.title },
+          details: { taskId: id, title: deleted.title },
         },
       });
 
-      if (deletedTask.relatedLeadId) {
+      if (deleted.relatedLeadId) {
         await tx.timelineEvent.create({
           data: {
             tenantId,
-            leadId: deletedTask.relatedLeadId,
+            leadId: deleted.relatedLeadId,
             userId,
             action: 'Task Deleted',
-            description: `Task "${deletedTask.title}" was deleted.`,
+            description: `Task "${deleted.title}" was deleted.`,
           },
         });
       }
 
-      return deletedTask;
+      return deleted;
     });
+
+    await invalidateDashboardCache(tenantId, affectedUserIds);
+    return deletedTask;
   }
 
   async addTimelineEvent(

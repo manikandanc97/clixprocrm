@@ -46,9 +46,17 @@ export class PlatformUsersService {
       const [users, total] = await Promise.all([
         tx.user.findMany({
           where,
-          include: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            status: true,
+            isSuperAdmin: true,
+            createdAt: true,
             memberships: {
-              include: {
+              select: {
+                status: true,
                 tenant: {
                   select: { id: true, name: true, slug: true, status: true },
                 },

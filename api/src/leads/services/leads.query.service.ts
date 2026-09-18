@@ -37,9 +37,8 @@ export class LeadsQueryService {
     query: PaginationQueryDto & { stage?: string; status?: string },
   ) {
     const currency = await this.getTenantCurrency(tenantId);
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const page = Math.max(1, query.page || 1);
-      const limit = Math.max(1, Math.min(query.limit || 50, 10000));
+      const limit = Math.max(1, Math.min(query.limit || 20, 100));
       const skip = (page - 1) * limit;
       const search = query.search || '';
       const stageQuery = query.stage || query.status || '';
@@ -50,40 +49,44 @@ export class LeadsQueryService {
       }
 
       const [leads, total] = await Promise.all([
-        tx.lead.findMany({
-          where,
-          orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
-          skip,
-          take: limit,
-          select: {
-            id: true,
-            name: true,
-            company: true,
-            email: true,
-            phone: true,
-            source: true,
-            stage: true,
-            priority: true,
-            assignedToId: true,
-            value: true,
-            expectedCloseDate: true,
-            tags: true,
-            isConverted: true,
-            convertedAt: true,
-            customerId: true,
-            lastActivityAt: true,
-            createdAt: true,
-            updatedAt: true,
-            _count: { select: { notes: true, meetings: true } },
-            meetings: {
-              where: { startTime: { gte: new Date() } },
-              orderBy: { startTime: 'asc' },
-              take: 1,
-              select: { startTime: true, title: true },
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.lead.findMany({
+            where,
+            orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
+            skip,
+            take: limit,
+            select: {
+              id: true,
+              name: true,
+              company: true,
+              email: true,
+              phone: true,
+              source: true,
+              stage: true,
+              priority: true,
+              assignedToId: true,
+              value: true,
+              expectedCloseDate: true,
+              tags: true,
+              isConverted: true,
+              convertedAt: true,
+              customerId: true,
+              lastActivityAt: true,
+              createdAt: true,
+              updatedAt: true,
+              _count: { select: { notes: true, meetings: true } },
+              meetings: {
+                where: { startTime: { gte: new Date() } },
+                orderBy: { startTime: 'asc' },
+                take: 1,
+                select: { startTime: true, title: true },
+              },
             },
-          },
-        }),
-        tx.lead.count({ where }),
+          })
+        ),
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.lead.count({ where })
+        ),
       ]);
 
       // Decrypt PII fields
@@ -141,27 +144,26 @@ export class LeadsQueryService {
           totalPages: Math.ceil(total / limit),
         },
       };
-    });
   }
 
   async getHotLeads(tenantId: string) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const [currency, leads] = await Promise.all([
-        this.getTenantCurrency(tenantId),
+    const [currency, leads] = await Promise.all([
+      this.getTenantCurrency(tenantId),
+      this.prisma.withTenantContext({ tenantId }, (tx) =>
         tx.lead.findMany({
           where: { tenantId, stage: 'NEW', deletedAt: null },
           take: 5,
           orderBy: { createdAt: 'desc' },
           select: { id: true, name: true, company: true, value: true },
-        }),
-      ]);
-      return leads.map((l) => ({
-        id: l.id,
-        name: this.enc.decrypt(l.name),
-        company: this.enc.decrypt(l.company),
-        score: 90,
-        value: formatCurrency(toNumber(l.value), currency),
-      }));
-    });
+        })
+      ),
+    ]);
+    return leads.map((l) => ({
+      id: l.id,
+      name: this.enc.decrypt(l.name),
+      company: this.enc.decrypt(l.company),
+      score: 90,
+      value: formatCurrency(toNumber(l.value), currency),
+    }));
   }
 }

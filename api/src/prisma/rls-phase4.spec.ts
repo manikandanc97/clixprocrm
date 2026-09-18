@@ -448,7 +448,7 @@ describe('RLS Phase 4 — Final Access Path Remediation & Isolation Tests', () =
     let service: SearchService;
 
     beforeEach(() => {
-      service = new SearchService(mockPrisma);
+      service = new SearchService(mockPrisma, encService);
     });
 
     it('globalSearch executes all entity lookups inside withTenantContext', async () => {

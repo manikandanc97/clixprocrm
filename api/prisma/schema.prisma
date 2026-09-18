@@ -296,6 +296,7 @@ model Task {
   @@index([tenantId, status, deletedAt])
   @@index([tenantId, deletedAt, dueDate])
   @@index([tenantId, assignedToId, deletedAt])
+  @@index([tenantId, deletedAt, assignedToId, status])
   @@index([tenantId, deletedAt, createdAt])
   @@index([tenantId, deletedAt, status, createdAt])
   @@index([tenantId, deletedAt, status, updatedAt])
@@ -742,6 +743,7 @@ model Notification {
   @@index([tenantId])
   @@index([userId])
   @@index([tenantId, userId])
+  @@index([tenantId, userId, isRead])
   @@index([tenantId, isRead])
   @@index([tenantId, userId, createdAt])
 }

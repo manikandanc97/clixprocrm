@@ -1,9 +1,35 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
+import {
+  getOrSetCache,
+  invalidateCacheKey,
+} from '../../common/utils/cache.util';
 
 @Injectable()
 export class NotificationsService {
   constructor(private prisma: PrismaService) {}
+
+  /**
+   * Get count of unread notifications for a user, cached in Redis with a 10s TTL.
+   * Leverages composite index @@index([tenantId, userId, isRead]) for fast index-only count.
+   */
+  async getUnreadCount(tenantId: string, userId: string): Promise<number> {
+    const cacheKey = `notifications:unread:${tenantId}:${userId}`;
+    return getOrSetCache(cacheKey, 10, async () => {
+      return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+        return tx.notification.count({
+          where: { tenantId, userId, isRead: false },
+        });
+      });
+    });
+  }
+
+  /**
+   * Invalidate cached unread notification count for a specific user.
+   */
+  async invalidateUnreadCount(tenantId: string, userId: string): Promise<void> {
+    await invalidateCacheKey(`notifications:unread:${tenantId}:${userId}`);
+  }
 
   async getNotifications(tenantId: string, userId: string) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
@@ -83,6 +109,8 @@ export class NotificationsService {
           ),
         );
 
+        await this.invalidateUnreadCount(tenantId, userId);
+
         notifications = await tx.notification.findMany({
           where: { tenantId, userId },
           take: 50,
@@ -132,6 +160,7 @@ export class NotificationsService {
         data: { isRead: true },
       });
 
+      await this.invalidateUnreadCount(tenantId, userId);
       return { success: true };
     });
   }
@@ -143,6 +172,7 @@ export class NotificationsService {
         data: { isRead: true },
       });
 
+      await this.invalidateUnreadCount(tenantId, userId);
       return { success: true };
     });
   }
@@ -169,6 +199,7 @@ export class NotificationsService {
         where: { id: notificationId },
       });
 
+      await this.invalidateUnreadCount(tenantId, userId);
       return { success: true };
     });
   }
@@ -179,6 +210,7 @@ export class NotificationsService {
         where: { tenantId, userId, isRead: true },
       });
 
+      await this.invalidateUnreadCount(tenantId, userId);
       return { success: true };
     });
   }
@@ -191,7 +223,7 @@ export class NotificationsService {
     type = 'INFO',
   ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      return tx.notification.create({
+      const created = await tx.notification.create({
         data: {
           tenantId,
           userId,
@@ -200,6 +232,9 @@ export class NotificationsService {
           type,
         },
       });
+
+      await this.invalidateUnreadCount(tenantId, userId);
+      return created;
     });
   }
 
@@ -228,7 +263,7 @@ export class NotificationsService {
       const sample =
         sampleTitles[Math.floor(Math.random() * sampleTitles.length)];
 
-      return tx.notification.create({
+      const created = await tx.notification.create({
         data: {
           tenantId,
           userId,
@@ -238,6 +273,9 @@ export class NotificationsService {
           isRead: false,
         },
       });
+
+      await this.invalidateUnreadCount(tenantId, userId);
+      return created;
     });
   }
 }

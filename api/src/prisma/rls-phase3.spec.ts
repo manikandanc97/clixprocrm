@@ -108,6 +108,7 @@ function buildModelMocks() {
     },
     tenantUser: {
       findFirst: jest.fn().mockResolvedValue(null),
+      findUnique: jest.fn().mockResolvedValue(null),
       findMany: jest.fn().mockResolvedValue([]),
     },
     revenueTarget: { findFirst: jest.fn().mockResolvedValue(null) },
@@ -264,8 +265,8 @@ describe('TasksQueryService Phase 3', () => {
       page: 1,
       limit: 5,
     });
-    expect(txMock.tenantUser.findFirst).toHaveBeenCalled();
-    expect(prismaMock.tenantUser.findFirst).not.toHaveBeenCalled();
+    expect(txMock.tenantUser.findUnique).toHaveBeenCalled();
+    expect(prismaMock.tenantUser.findUnique).not.toHaveBeenCalled();
   });
 
   it('getTaskById: calls withTenantContext with correct tenantId', async () => {

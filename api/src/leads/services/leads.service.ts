@@ -13,6 +13,7 @@ import { LeadsQueryService } from './leads.query.service';
 import { LeadsConvertService } from './leads.convert.service';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { StorageService } from '../../common/services/storage.service';
+import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 
 /**
  * @file leads/services/leads.service.ts
@@ -68,7 +69,7 @@ export class LeadsService {
   // ─── Core CRUD Operations ───────────────────────────────────────────────────
 
   async createLead(tenantId: string, userId: string, data: CreateLeadDto) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    const createdLead = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       if (data.assignedToId && data.assignedToId !== userId) {
         const isValidAssignee = await tx.tenantUser.findFirst({
           where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
@@ -147,6 +148,10 @@ export class LeadsService {
       // Return decrypted lead for immediate API response
       return this.decryptLead(lead);
     });
+
+    const affectedUserIds = [data.assignedToId, userId].filter(Boolean) as string[];
+    await invalidateDashboardCache(tenantId, affectedUserIds);
+    return createdLead;
   }
 
   async getLeadById(tenantId: string, leadId: string) {
@@ -179,7 +184,9 @@ export class LeadsService {
     id: string,
     data: UpdateLeadDto,
   ) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    let affectedUserIds: string[] = [userId];
+
+    const updatedLead = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const existingLead = await tx.lead.findUnique({
         where: { id, tenantId },
         select: {
@@ -197,6 +204,9 @@ export class LeadsService {
         },
       });
       if (!existingLead) throw new NotFoundException('Lead not found');
+
+      if (existingLead.assignedToId) affectedUserIds.push(existingLead.assignedToId);
+      if (data.assignedToId) affectedUserIds.push(data.assignedToId);
 
       const targetStage = data.stage || existingLead.stage;
       const isWon = targetStage === 'WON';
@@ -349,10 +359,15 @@ export class LeadsService {
       }
       return this.decryptLead(lead);
     });
+
+    await invalidateDashboardCache(tenantId, affectedUserIds);
+    return updatedLead;
   }
 
   async deleteLead(tenantId: string, userId: string, id: string) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+    let affectedUserIds: string[] = [userId];
+
+    const lead = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const existing = await tx.lead.findUnique({
         where: { id, tenantId },
         select: {
@@ -362,11 +377,14 @@ export class LeadsService {
           email: true,
           name: true,
           company: true,
+          assignedToId: true,
         },
       });
       if (!existing) throw new NotFoundException('Lead not found');
 
-      const lead = await tx.lead.update({
+      if (existing.assignedToId) affectedUserIds.push(existing.assignedToId);
+
+      const deleted = await tx.lead.update({
         where: { id, tenantId },
         data: {
           deletedAt: new Date(),
@@ -385,8 +403,11 @@ export class LeadsService {
         },
       });
 
-      return lead;
+      return deleted;
     });
+
+    await invalidateDashboardCache(tenantId, affectedUserIds);
+    return lead;
   }
 
   async getLeadAttachments(tenantId: string, leadId: string) {
@@ -609,8 +630,8 @@ export class LeadsService {
   }
 
   async bulkDeleteLeads(tenantId: string, userId: string, ids: string[]) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const leads = await tx.lead.updateMany({
+    const leads = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      const updatedLeads = await tx.lead.updateMany({
         where: { id: { in: ids }, tenantId },
         data: {
           deletedAt: new Date(),
@@ -631,8 +652,11 @@ export class LeadsService {
         await tx.timelineEvent.createMany({ data: timelineEvents });
       }
 
-      return leads;
+      return updatedLeads;
     });
+
+    await invalidateDashboardCache(tenantId);
+    return leads;
   }
 
   // ─── Private Helpers ─────────────────────────────────────────────────────────

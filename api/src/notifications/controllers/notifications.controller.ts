@@ -34,6 +34,17 @@ export class NotificationsController {
     return { success: true, data };
   }
 
+  @Get('unread-count')
+  async getUnreadCount(@Req() req: AuthenticatedRequest) {
+    const tenantId = req.tenantId;
+    const userId = req.user.id;
+    const unreadCount = await this.notificationsService.getUnreadCount(
+      tenantId,
+      userId,
+    );
+    return { success: true, data: { unreadCount } };
+  }
+
   @Post('test')
   async createTestNotification(@Req() req: AuthenticatedRequest) {
     const tenantId = req.tenantId;

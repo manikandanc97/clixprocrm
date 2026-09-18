@@ -29,7 +29,7 @@ export class ContactsService implements OnModuleInit {
   async getCustomers(tenantId: string, query: PaginationQueryDto) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const page = Math.max(1, query.page || 1);
-      const limit = Math.max(1, Math.min(query.limit || 1000, 10000));
+      const limit = Math.max(1, Math.min(query.limit || 20, 100));
       const search = query.search?.trim() || '';
       const skip = (page - 1) * limit;
       const where = { tenantId, deletedAt: null };
@@ -50,7 +50,20 @@ export class ContactsService implements OnModuleInit {
               orderBy: { createdAt: 'desc' },
               skip,
               take: limit,
-              include: {
+              select: {
+                id: true,
+                tenantId: true,
+                assignedToId: true,
+                name: true,
+                company: true,
+                email: true,
+                status: true,
+                revenue: true,
+                lastContactAt: true,
+                createdAt: true,
+                updatedAt: true,
+                leadId: true,
+                companyId: true,
                 _count: {
                   select: { deals: { where: { status: { not: 'LOST' } } } },
                 },
@@ -79,7 +92,6 @@ export class ContactsService implements OnModuleInit {
                 status: c.status,
                 revenue: c.revenue,
                 lastContactAt: c.lastContactAt,
-                deletedAt: c.deletedAt,
                 createdAt: c.createdAt,
                 updatedAt: c.updatedAt,
                 leadId: c.leadId,
@@ -107,6 +119,7 @@ export class ContactsService implements OnModuleInit {
         const candidates = await tx.customer.findMany({
           where,
           orderBy: { createdAt: 'desc' },
+          take: 250,
           select: {
             id: true,
             tenantId: true,
@@ -117,7 +130,6 @@ export class ContactsService implements OnModuleInit {
             status: true,
             revenue: true,
             lastContactAt: true,
-            deletedAt: true,
             createdAt: true,
             updatedAt: true,
             leadId: true,
@@ -185,7 +197,6 @@ export class ContactsService implements OnModuleInit {
             status: c.status,
             revenue: c.revenue,
             lastContactAt: c.lastContactAt,
-            deletedAt: c.deletedAt,
             createdAt: c.createdAt,
             updatedAt: c.updatedAt,
             leadId: c.leadId,
@@ -214,7 +225,20 @@ export class ContactsService implements OnModuleInit {
           orderBy: { createdAt: 'desc' },
           skip,
           take: limit,
-          include: {
+          select: {
+            id: true,
+            tenantId: true,
+            assignedToId: true,
+            name: true,
+            company: true,
+            email: true,
+            status: true,
+            revenue: true,
+            lastContactAt: true,
+            createdAt: true,
+            updatedAt: true,
+            leadId: true,
+            companyId: true,
             _count: {
               select: { deals: { where: { status: { not: 'LOST' } } } },
             },
@@ -239,12 +263,11 @@ export class ContactsService implements OnModuleInit {
           tenantId: c.tenantId,
           assignedToId: c.assignedToId,
           name: this.enc.decrypt(c.name),
-          company: this.enc.decrypt(c.company),
           email: this.enc.decrypt(c.email),
+          company: this.enc.decrypt(c.company),
           status: c.status,
           revenue: c.revenue,
           lastContactAt: c.lastContactAt,
-          deletedAt: c.deletedAt,
           createdAt: c.createdAt,
           updatedAt: c.updatedAt,
           leadId: c.leadId,

@@ -21,30 +21,44 @@ export class CompaniesService {
   ) {}
 
   async getCompanies(tenantId: string, query: PaginationQueryDto) {
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const page = Math.max(1, query.page || 1);
-      const limit = Math.max(1, Math.min(query.limit || 1000, 10000));
+      const limit = Math.max(1, Math.min(query.limit || 20, 100));
       const search = query.search || '';
       const skip = (page - 1) * limit;
 
       const where: Prisma.CompanyWhereInput = { tenantId, deletedAt: null };
 
       const [companies, total] = await Promise.all([
-        tx.company.findMany({
-          where,
-          orderBy: { createdAt: 'desc' },
-          skip,
-          take: limit,
-          include: {
-            _count: {
-              select: {
-                customers: { where: { deletedAt: null } },
-                deals: true,
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.company.findMany({
+            where,
+            orderBy: { createdAt: 'desc' },
+            skip,
+            take: limit,
+            select: {
+              id: true,
+              name: true,
+              industry: true,
+              website: true,
+              email: true,
+              phone: true,
+              address: true,
+              notes: true,
+              status: true,
+              createdAt: true,
+              updatedAt: true,
+              _count: {
+                select: {
+                  customers: { where: { deletedAt: null } },
+                  deals: true,
+                },
               },
             },
-          },
-        }),
-        tx.company.count({ where }),
+          })
+        ),
+        this.prisma.withTenantContext({ tenantId }, (tx) =>
+          tx.company.count({ where })
+        ),
       ]);
 
       // Decrypt PII fields
@@ -75,7 +89,6 @@ export class CompaniesService {
           totalPages: Math.ceil(total / limit),
         },
       };
-    });
   }
 
   async createCompany(

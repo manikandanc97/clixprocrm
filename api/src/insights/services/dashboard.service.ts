@@ -9,6 +9,47 @@ import {
   formatPercentage,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
+import {
+  getOrSetCache,
+  invalidateCacheKeys,
+  invalidateCacheKey,
+} from '../../common/utils/cache.util';
+
+export const DASHBOARD_TIMEFRAMES = ['today', 'week', 'month', 'year'] as const;
+
+/**
+ * Deterministically invalidate dashboard KPI caches (and optionally affected employee dashboard caches)
+ * without scanning the entire Redis keyspace.
+ */
+export async function invalidateDashboardCache(
+  tenantId: string,
+  employeeUserIds?: string | string[],
+): Promise<void> {
+  const keys: string[] = DASHBOARD_TIMEFRAMES.map(
+    (tf) => `dashboard:kpi:${tenantId}:${tf}`,
+  );
+
+  if (employeeUserIds) {
+    const uids = Array.isArray(employeeUserIds)
+      ? employeeUserIds
+      : [employeeUserIds];
+    for (const uid of uids) {
+      if (uid) keys.push(`dashboard:emp:${tenantId}:${uid}`);
+    }
+  }
+
+  await invalidateCacheKeys(keys);
+}
+
+/**
+ * Invalidate a specific employee's dashboard cache.
+ */
+export async function invalidateEmployeeDashboardCache(
+  tenantId: string,
+  userId: string,
+): Promise<void> {
+  await invalidateCacheKey(`dashboard:emp:${tenantId}:${userId}`);
+}
 
 @Injectable()
 export class DashboardService {
@@ -19,8 +60,10 @@ export class DashboardService {
   }
 
   async getDashboardData(tenantId: string, timeframe = 'month') {
-    // Tenant table is global (not tenant-scoped) — fetch currency outside the tenant context
-    const currency = await this.getTenantCurrency(tenantId);
+    const cacheKey = `dashboard:kpi:${tenantId}:${timeframe}`;
+    return getOrSetCache(cacheKey, 30, async () => {
+      // Tenant table is global (not tenant-scoped) — fetch currency outside the tenant context
+      const currency = await this.getTenantCurrency(tenantId);
 
     const now = new Date();
     let currentStart = new Date(now);
@@ -408,6 +451,7 @@ export class DashboardService {
         revenueTarget,
       };
     });
+    });
   }
 
   async getRevenueGrowth(tenantId: string, filter: string) {
@@ -428,16 +472,18 @@ export class DashboardService {
    * No organisation-wide metrics are exposed.
    */
   async getEmployeeDashboardData(tenantId: string, userId: string) {
-    const now = new Date();
-    const todayStart = new Date(now);
-    todayStart.setHours(0, 0, 0, 0);
-    const todayEnd = new Date(todayStart);
-    todayEnd.setDate(todayEnd.getDate() + 1);
+    const cacheKey = `dashboard:emp:${tenantId}:${userId}`;
+    return getOrSetCache(cacheKey, 30, async () => {
+      const now = new Date();
+      const todayStart = new Date(now);
+      todayStart.setHours(0, 0, 0, 0);
+      const todayEnd = new Date(todayStart);
+      todayEnd.setDate(todayEnd.getDate() + 1);
 
-    const sevenDaysAgo = new Date(todayStart);
-    sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
+      const sevenDaysAgo = new Date(todayStart);
+      sevenDaysAgo.setDate(sevenDaysAgo.getDate() - 6);
 
-    return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       const [countsRaw, recentTasks, recentLeads] = await Promise.all([
         // 1. Consolidated employee metric counts
         tx.$queryRaw<
@@ -528,6 +574,7 @@ export class DashboardService {
         myActivities: recentTasks.length + recentLeads.length,
         recentActivities,
       };
+    });
     });
   }
 }

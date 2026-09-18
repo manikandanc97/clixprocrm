@@ -45,19 +45,27 @@ export class InvoicesService {
   /**
    * Concurrency-safe sequential invoice number allocation with organization prefix.
    */
+  /**
+   * Concurrency-safe sequential invoice number allocation with organization prefix.
+   * Atomically increments the per-tenant invoice counter without holding unneeded read locks.
+   */
   private async allocateInvoiceNumber(
     tenantId: string,
     tx: Prisma.TransactionClient,
+    prefixOverride?: string,
   ): Promise<string> {
-    // 1. Check if organization has custom invoice settings configured
-    const settings = await tx.tenantInvoiceSettings.findUnique({
-      where: { tenantId },
-    });
+    let prefix = prefixOverride?.trim();
+    if (!prefix) {
+      const settings = await tx.tenantInvoiceSettings.findUnique({
+        where: { tenantId },
+        select: { invoicePrefix: true },
+      });
+      prefix = settings?.invoicePrefix?.trim() || 'INV';
+    }
 
-    const prefix = settings?.invoicePrefix?.trim() || 'INV';
     const year = new Date().getFullYear();
 
-    // 2. Increment counter atomically
+    // Increment counter atomically with row-level lock
     const result = await tx.$queryRaw<Array<{ current: number }>>`
       INSERT INTO "InvoiceCounter" ("id", "tenantId", "current")
       VALUES (gen_random_uuid()::text, ${tenantId}, 1)
@@ -87,26 +95,30 @@ export class InvoicesService {
     data: CreateInvoiceDto,
   ) {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      // 1. Determine customer & company linkage
       const customerId = data.customerId || null;
       let companyId = data.companyId || null;
 
-      if (customerId && !companyId) {
-        const cust = await tx.customer.findFirst({
-          where: { id: customerId, tenantId },
-          select: { companyId: true },
-        });
-        if (cust?.companyId) companyId = cust.companyId;
-      }
-
-      // 2. Fetch tenant settings and customer state for GST determination
+      // 1. Fetch tenant settings, tenant metadata, and customer state in a single concurrent batch
       const [settings, tenant, customer] = await Promise.all([
         tx.tenantInvoiceSettings.findUnique({ where: { tenantId } }),
         tx.tenant.findUnique({ where: { id: tenantId } }),
         customerId
-          ? tx.customer.findFirst({ where: { id: customerId, tenantId } })
+          ? tx.customer.findFirst({
+              where: { id: customerId, tenantId },
+              select: {
+                id: true,
+                name: true,
+                email: true,
+                company: true,
+                companyId: true,
+              },
+            })
           : null,
       ]);
+
+      if (customer?.companyId && !companyId) {
+        companyId = customer.companyId;
+      }
 
       const isInterState = Boolean(
         settings?.state &&
@@ -115,7 +127,7 @@ export class InvoicesService {
           data.customerBillingAddress.state.trim().toLowerCase(),
       );
 
-      // 3. Perform server-side precise financial calculation
+      // 2. Perform server-side precise financial calculation
       const rawItems =
         data.items && data.items.length > 0
           ? data.items
@@ -136,12 +148,7 @@ export class InvoicesService {
         paidAmount: 0,
       });
 
-      // 4. Allocate unique invoice number
-      const invoiceNumber =
-        data.invoiceNumber?.trim() ||
-        (await this.allocateInvoiceNumber(tenantId, tx));
-
-      // 5. Build billing address snapshots
+      // 3. Build billing address snapshots
       const customerBillingSnapshot =
         data.customerBillingAddress ||
         (customer
@@ -165,6 +172,16 @@ export class InvoicesService {
               upiId: settings.upiId,
             }
           : { legalName: tenant?.name, address: tenant?.address });
+
+      // 4. Allocate unique invoice number immediately prior to invoice insertion,
+      // minimizing the duration the counter row-lock is held.
+      const invoiceNumber =
+        data.invoiceNumber?.trim() ||
+        (await this.allocateInvoiceNumber(
+          tenantId,
+          tx,
+          settings?.invoicePrefix,
+        ));
 
       // 6. Create Invoice in Database
       const invoice = await tx.invoice.create({
@@ -469,7 +486,33 @@ export class InvoicesService {
           orderBy: { createdAt: 'desc' },
           skip,
           take: limit,
-          include: {
+          select: {
+            id: true,
+            tenantId: true,
+            customerId: true,
+            companyId: true,
+            dealId: true,
+            quotationId: true,
+            invoiceNumber: true,
+            invoiceDate: true,
+            dueDate: true,
+            currency: true,
+            paymentTerms: true,
+            status: true,
+            amount: true,
+            subtotal: true,
+            discountAmount: true,
+            taxableAmount: true,
+            cgstAmount: true,
+            sgstAmount: true,
+            igstAmount: true,
+            roundOff: true,
+            totalAmount: true,
+            paidAmount: true,
+            balanceAmount: true,
+            notes: true,
+            createdAt: true,
+            updatedAt: true,
             customer: {
               select: { id: true, name: true, company: true, email: true },
             },

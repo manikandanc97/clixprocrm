@@ -254,7 +254,7 @@ async function main() {
 
   // 2. Sustained Load across Concurrency Levels (5, 10, 25, 50, 100 VUs)
   console.log('\n--- 2. RUNNING SUSTAINED LOAD PROGRESSION (5, 10, 25, 50, 100 VUs) ---');
-  const sustainedLevels = [5, 10, 25, 50, 100];
+  const sustainedLevels = [5, 10, 25, 50, 100, 200];
   const primaryEndpoints = [
     { name: 'Health Check (Fastify Baseline)', path: '/health', headers: {} },
     { name: 'Dashboard (7-Query Aggregation)', path: '/crm/dashboard', headers: commonHeaders },

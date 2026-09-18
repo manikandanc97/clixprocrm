@@ -15,6 +15,7 @@ import { getClientIp } from '../common/utils/rate-limit.util';
 import { getSessionTimeoutConfig } from '../common/utils/session-config.util';
 import { EmailService } from '../common/services/email.service';
 import { NotificationsService } from '../notifications/services/notifications.service';
+import { invalidateCacheKey } from '../common/utils/cache.util';
 
 // In-memory token cache for authenticated users (60s TTL)
 interface CachedTokenUser {
@@ -740,6 +741,11 @@ export class SupabaseAuthGuard implements CanActivate {
                               });
                             },
                           )
+                          .then(async () => {
+                            await invalidateCacheKey(
+                              `notifications:unread:${membership.tenantId}:${user.id}`,
+                            );
+                          })
                           .catch((err) => {
                             this.logger.warn(
                               `Failed to create in-app notification via tenant context: ${err?.message || err}`,

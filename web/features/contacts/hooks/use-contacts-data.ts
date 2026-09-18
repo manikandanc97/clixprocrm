@@ -72,7 +72,7 @@ export function useContactsData({
     isError: isLeadsError,
     error: leadsError,
     refetch: refetchLeads,
-  } = useLeads(undefined, { enabled: shouldFetchLeads });
+  } = useLeads({ limit: 100 }, { enabled: shouldFetchLeads });
 
   const {
     data: customersData,
@@ -81,7 +81,7 @@ export function useContactsData({
     isError: isCustomersError,
     error: customersError,
     refetch: refetchCustomers,
-  } = useCustomers(undefined, { enabled: shouldFetchCustomers });
+  } = useCustomers({ limit: 100 }, { enabled: shouldFetchCustomers });
 
   const safeLeads = useMemo(
     () => (Array.isArray(leadsData?.leads) ? leadsData.leads : []),

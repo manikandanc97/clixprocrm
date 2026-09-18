@@ -36,10 +36,28 @@ export class EmployeesService {
       const [users, total] = await Promise.all([
         tx.user.findMany({
           where: { memberships: { some: { tenantId } } },
-          include: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+            phone: true,
+            avatar: true,
+            status: true,
+            createdAt: true,
             memberships: {
               where: { tenantId },
-              select: { role: true },
+              select: {
+                isOrgOwner: true,
+                branchId: true,
+                reportingManagerId: true,
+                joinedAt: true,
+                role: {
+                  select: {
+                    id: true,
+                    name: true,
+                  },
+                },
+              },
             },
           },
           orderBy: { createdAt: 'desc' },
@@ -57,15 +75,15 @@ export class EmployeesService {
           id: u.id,
           name: u.name || 'Unknown User',
           email: u.email,
-          phone: (u as any).phone,
-          avatar: (u as any).avatar,
+          phone: u.phone || null,
+          avatar: u.avatar || null,
           status: u.status,
           role: membership?.role?.name || 'EMPLOYEE',
-          roleId: (membership?.role as any)?.id || null,
-          isOrgOwner: !!(membership as any)?.isOrgOwner,
-          branchId: (membership as any)?.branchId || null,
-          reportingManagerId: (membership as any)?.reportingManagerId || null,
-          joinedAt: (membership as any)?.joinedAt || u.createdAt,
+          roleId: membership?.role?.id || null,
+          isOrgOwner: !!membership?.isOrgOwner,
+          branchId: membership?.branchId || null,
+          reportingManagerId: membership?.reportingManagerId || null,
+          joinedAt: membership?.joinedAt || u.createdAt,
           createdAt: u.createdAt,
         };
       });
