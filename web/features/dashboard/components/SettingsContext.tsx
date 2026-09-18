@@ -227,6 +227,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     const palette = generateBrandPalette(activeHex);
 
     root.style.setProperty("--primary", palette.primary);
+    root.style.setProperty("--primary-foreground", palette.foreground);
     root.style.setProperty("--primary-hover", palette.primaryHover);
     root.style.setProperty("--primary-active", palette.primaryActive);
     root.style.setProperty("--primary-light", palette.primaryLight);
@@ -234,6 +235,7 @@ export function SettingsProvider({ children }: { children: React.ReactNode }) {
     root.style.setProperty("--ring", palette.ring);
     root.style.setProperty("--accent", palette.accentBg);
     root.style.setProperty("--color-primary", palette.primary);
+    root.style.setProperty("--color-primary-foreground", palette.foreground);
     root.style.setProperty("--color-accent", palette.accentBg);
     
     // Handle font family & Google Fonts dynamic loading

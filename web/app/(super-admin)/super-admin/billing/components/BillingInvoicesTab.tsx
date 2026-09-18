@@ -10,7 +10,6 @@ import {
   EmptyState,
 } from "@/shared/components/crm";
 import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
-import { cn } from "@/shared/lib/utils";
 import { PlatformInvoiceItemData } from "@/shared/lib/api/super-admin.api";
 import { getInvStatusBadge } from "../utils/billing-formatters.util";
 

@@ -17,7 +17,6 @@ import { ReportsSkeleton } from "@/features/reports/components/ReportsSkeleton";
 import { useReports } from "@/shared/hooks/use-crm";
 import { useCurrency } from "@/shared/hooks/use-currency";
 import { CRMMetricCard, CRMPageContainer, CRMPageHeader, CRMMetricsGrid } from "@/shared/components/crm";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Button } from "@/shared/ui/button";
 import {
   DropdownMenu,

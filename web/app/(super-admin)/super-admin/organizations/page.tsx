@@ -198,6 +198,49 @@ export default function OrganizationsPage() {
     setCurrentPage(1);
   };
 
+  const hasActiveFilters =
+    planFilter !== "ALL" ||
+    statusFilter !== "ALL" ||
+    search.trim().length > 0;
+
+  // Filter & Sort Logic
+  const filteredOrganizations = useMemo(() => {
+    const list = organizations.filter((org) => {
+      const matchesSearch =
+        search === "" ||
+        org.name.toLowerCase().includes(search.toLowerCase()) ||
+        org.slug.toLowerCase().includes(search.toLowerCase());
+      const matchesPlan =
+        planFilter === "ALL" ||
+        org.plan.toLowerCase() === planFilter.toLowerCase();
+      const matchesStatus =
+        statusFilter === "ALL" ||
+        (org.status || "ACTIVE").toUpperCase() === statusFilter.toUpperCase();
+      return matchesSearch && matchesPlan && matchesStatus;
+    });
+
+    if (!sortConfig) return list;
+
+    return [...list].sort((a, b) => {
+      const aVal = a[sortConfig.key as keyof PlatformOrganization];
+      const bVal = b[sortConfig.key as keyof PlatformOrganization];
+
+      if (sortConfig.key === "createdAt") {
+        const aTime = new Date((aVal as string) || 0).getTime();
+        const bTime = new Date((bVal as string) || 0).getTime();
+        if (aTime < bTime) return sortConfig.direction === "asc" ? -1 : 1;
+        if (aTime > bTime) return sortConfig.direction === "asc" ? 1 : -1;
+        return 0;
+      }
+      const aStr = String(aVal ?? "").toLowerCase();
+      const bStr = String(bVal ?? "").toLowerCase();
+
+      if (aStr < bStr) return sortConfig.direction === "asc" ? -1 : 1;
+      if (aStr > bStr) return sortConfig.direction === "asc" ? 1 : -1;
+      return 0;
+    });
+  }, [organizations, search, planFilter, statusFilter, sortConfig]);
+
   const exportCSV = () => {
     if (organizations.length === 0) {
       toast.error("No organizations available to export.");
@@ -240,47 +283,6 @@ export default function OrganizationsPage() {
     document.body.removeChild(link);
     toast.success("Organizations exported successfully.");
   };
-
-  const hasActiveFilters =
-    planFilter !== "ALL" ||
-    statusFilter !== "ALL" ||
-    search.trim().length > 0;
-
-  // Filter & Sort Logic
-  const filteredOrganizations = useMemo(() => {
-    const list = organizations.filter((org) => {
-      const matchesSearch =
-        search === "" ||
-        org.name.toLowerCase().includes(search.toLowerCase()) ||
-        org.slug.toLowerCase().includes(search.toLowerCase());
-      const matchesPlan =
-        planFilter === "ALL" ||
-        org.plan.toLowerCase() === planFilter.toLowerCase();
-      const matchesStatus =
-        statusFilter === "ALL" ||
-        (org.status || "ACTIVE").toUpperCase() === statusFilter.toUpperCase();
-      return matchesSearch && matchesPlan && matchesStatus;
-    });
-
-    if (!sortConfig) return list;
-
-    return [...list].sort((a, b) => {
-      let aVal: any = a[sortConfig.key as keyof PlatformOrganization];
-      let bVal: any = b[sortConfig.key as keyof PlatformOrganization];
-
-      if (sortConfig.key === "createdAt") {
-        aVal = new Date(aVal || 0).getTime();
-        bVal = new Date(bVal || 0).getTime();
-      } else if (typeof aVal === "string") {
-        aVal = aVal.toLowerCase();
-        bVal = (bVal || "").toString().toLowerCase();
-      }
-
-      if (aVal < bVal) return sortConfig.direction === "asc" ? -1 : 1;
-      if (aVal > bVal) return sortConfig.direction === "asc" ? 1 : -1;
-      return 0;
-    });
-  }, [organizations, search, planFilter, statusFilter, sortConfig]);
 
   const totalPages = Math.max(1, Math.ceil(filteredOrganizations.length / rowsPerPage));
   const paginatedOrganizations = filteredOrganizations.slice(

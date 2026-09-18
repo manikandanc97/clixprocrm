@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useMemo } from "react";
 import { Users } from "lucide-react";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   fetchPlatformUsers,
   updatePlatformUserStatus,

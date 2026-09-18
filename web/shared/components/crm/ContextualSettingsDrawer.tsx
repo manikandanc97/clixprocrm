@@ -170,7 +170,7 @@ export function ContextualSettingsDrawer({
                     className={cn(
                       "group relative flex items-center gap-2.5 px-3 py-2 text-xs rounded-xl transition-all duration-150 text-left outline-none cursor-pointer whitespace-nowrap md:whitespace-normal font-medium",
                       isSelected
-                        ? "text-emerald-700 dark:text-emerald-300 font-semibold bg-emerald-500/10 border border-emerald-500/20 shadow-xs"
+                        ? "text-primary font-semibold bg-primary/10 border border-primary/20 shadow-xs"
                         : "text-muted-foreground hover:bg-muted/60 hover:text-foreground border border-transparent"
                     )}
                   >
@@ -183,7 +183,7 @@ export function ContextualSettingsDrawer({
                           className={cn(
                             "w-4 h-4 transition-colors",
                             isSelected
-                              ? "text-emerald-600 dark:text-emerald-400"
+                              ? "text-primary"
                               : "text-muted-foreground group-hover:text-foreground"
                           )}
                         />
@@ -218,17 +218,17 @@ export function ContextualSettingsDrawer({
               {autoSave ? (
                 autoSaveStatus === "saving" ? (
                   <span className="flex items-center gap-1.5 text-muted-foreground font-medium animate-in fade-in duration-150">
-                    <Loader2 className="w-3.5 h-3.5 animate-spin text-emerald-600 dark:text-emerald-400" />
+                    <Loader2 className="w-3.5 h-3.5 animate-spin text-primary" />
                     Saving...
                   </span>
                 ) : autoSaveStatus === "saved" ? (
-                  <span className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold animate-in fade-in duration-150">
-                    <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <span className="flex items-center gap-1.5 text-primary font-semibold animate-in fade-in duration-150">
+                    <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-primary" />
                     ✓ Saved
                   </span>
                 ) : (
                   <span className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-medium">
-                    <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                    <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-primary" />
                     ✓ Changes saved automatically
                   </span>
                 )
@@ -239,7 +239,7 @@ export function ContextualSettingsDrawer({
                 </span>
               ) : (
                 <span className="text-muted-foreground flex items-center gap-1.5 text-[11px] font-medium">
-                  <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-emerald-600 dark:text-emerald-400" />
+                  <AppIcon name="check" icon={Check} size={13} className="w-3.5 h-3.5 text-primary" />
                   All settings up to date
                 </span>
               )}
@@ -265,7 +265,7 @@ export function ContextualSettingsDrawer({
                   className={cn(
                     "group h-8.5 px-4 text-xs font-semibold gap-1.5 rounded-lg shadow-sm transition-all duration-150",
                     hasUnsavedChanges
-                      ? "bg-emerald-600 hover:bg-emerald-700 text-white cursor-pointer shadow-xs active:bg-emerald-800"
+                      ? "bg-primary hover:bg-primary/90 text-primary-foreground cursor-pointer shadow-xs active:bg-primary/80"
                       : "bg-muted text-muted-foreground/60 border border-border/50 cursor-not-allowed opacity-60 hover:bg-muted hover:text-muted-foreground/60"
                   )}
                 >

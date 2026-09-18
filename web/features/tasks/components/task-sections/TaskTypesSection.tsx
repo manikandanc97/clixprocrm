@@ -3,20 +3,11 @@
 import React from "react";
 import {
   SettingsSection,
-  SettingsRow,
-  SettingsToggleRow,
 } from "@/shared/components/crm/ContextualSettingsComponents";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
 import { Button } from "@/shared/ui/button";
 import { Switch } from "@/shared/ui/switch";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 import {
   ListTodo,
   Plus,
@@ -133,11 +124,11 @@ export function TaskTypesSection({
                     <div className="flex items-center gap-2 truncate">
                       <span className="font-semibold text-foreground truncate">{type.name}</span>
                       {type.isSystem ? (
-                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-blue-500/30 bg-blue-500/10 text-blue-700 dark:text-blue-300 shrink-0 font-medium">
+                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-info/30 bg-info/10 text-info shrink-0 font-medium">
                           Standard
                         </Badge>
                       ) : (
-                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-purple-500/30 bg-purple-500/10 text-purple-700 dark:text-purple-300 shrink-0 font-medium">
+                        <Badge variant="outline" className="text-[10px] py-0 px-1.5 border-primary/30 bg-primary/10 text-primary shrink-0 font-medium">
                           Custom
                         </Badge>
                       )}
@@ -170,7 +161,7 @@ export function TaskTypesSection({
                       checked={type.active}
                       disabled={!isAdmin}
                       onCheckedChange={() => onToggleTypeActive(type.id)}
-                      className="data-[state=checked]:bg-emerald-600 scale-90"
+                      className="data-[state=checked]:bg-primary scale-90"
                     />
                   </div>
                   {isAdmin && !type.isSystem && (

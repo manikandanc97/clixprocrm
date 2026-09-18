@@ -43,10 +43,8 @@ import {
   CATEGORY_OPTIONS,
   TicketAttachmentList,
   TicketMessageItem,
-  isImageFile,
-  isVideoFile,
 } from "@/features/help-center/components/ticket-shared";
-import { formatRelativeTime, getInitials } from "@/shared/utils/formatters";
+import { formatRelativeTime } from "@/shared/utils/formatters";
 import { UserAvatar } from "@/features/help-center/components/ticket-history/UserAvatar";
 
 export default function SuperAdminTicketDetailPage() {

@@ -32,12 +32,10 @@ import {
   SecurityAlertItem,
   SecurityIncidentItem,
 } from "@/shared/lib/api/super-admin.api";
-import { Button } from "@/shared/ui/button";
 import {
   CRMPageContainer,
   CRMPageHeader,
 } from "@/shared/components/crm";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { cn } from "@/shared/lib/utils";
 import { toast } from "sonner";
 

@@ -27,7 +27,6 @@ import {
   DEFAULT_TYPES,
   DEFAULT_STATUSES,
   DEFAULT_PRIORITIES,
-  TASK_COLOR_PRESETS as COLOR_PRESETS,
 } from "../constants/task-settings.constants";
 import { TaskTypesSection } from "./task-sections/TaskTypesSection";
 import { TaskStatusesSection } from "./task-sections/TaskStatusesSection";

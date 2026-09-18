@@ -2,7 +2,6 @@
 
 import React from "react";
 import { Users, Building2, Crown } from "lucide-react";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { PlatformUser } from "@/shared/lib/api/super-admin.api";
 import {
   CRMRoleBadge,

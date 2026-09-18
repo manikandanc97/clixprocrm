@@ -20,7 +20,6 @@ import {
   CRMPageContainer,
   CRMPageHeader,
 } from "@/shared/components/crm";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { compareFormValues } from "@/shared/hooks/use-dirty-form";
 import { UnsavedWarning } from "@/shared/components/unsaved-warning";
 import { ConfigTab } from "./utils/plan-features.util";

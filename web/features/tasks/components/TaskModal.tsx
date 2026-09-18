@@ -63,7 +63,7 @@ export type TaskFormValues = z.infer<typeof taskFormSchema>;
 // ─── Constants ───
 
 export const PRIORITY_OPTIONS = [
-  { value: "URGENT", label: "Urgent", dot: "bg-purple-500" },
+  { value: "URGENT", label: "Urgent", dot: "bg-chart-1" },
   { value: "HIGH", label: "High", dot: "bg-destructive" },
   { value: "MEDIUM", label: "Medium", dot: "bg-warning" },
   { value: "LOW", label: "Low", dot: "bg-info" },

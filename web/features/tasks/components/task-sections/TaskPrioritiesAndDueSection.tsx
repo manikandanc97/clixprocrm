@@ -13,13 +13,6 @@ import { AlertTriangle, Clock, Info } from "lucide-react";
 import type { PriorityDef, TaskTypeDef } from "../../constants/task-settings.constants";
 import { AdminPermissionBanner } from "./AdminPermissionBanner";
 import { SlidersHorizontal } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/shared/ui/select";
 
 export interface TaskPrioritiesAndDueSectionProps {
   isAdmin: boolean;
@@ -97,7 +90,7 @@ export function TaskPrioritiesSection({
                   checked={p.active}
                   disabled={!isAdmin || p.key === "MEDIUM"}
                   onCheckedChange={() => onTogglePriorityActive(p.id)}
-                  className="data-[state=checked]:bg-emerald-600 scale-90"
+                  className="data-[state=checked]:bg-primary scale-90"
                 />
               </div>
             </div>

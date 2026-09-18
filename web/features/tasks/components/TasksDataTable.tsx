@@ -120,6 +120,20 @@ export function TasksDataTable({
     [sortConfig]
   );
 
+  const cellPy =
+    density === "compact"
+      ? "py-2"
+      : density === "comfortable"
+      ? "py-3.5"
+      : "py-2.5";
+
+  const avatarDimensions =
+    density === "compact"
+      ? "h-8 w-8 text-xs rounded-md"
+      : density === "comfortable"
+      ? "h-10 w-10 text-sm rounded-lg"
+      : "h-9 w-9 text-xs rounded-lg";
+
   const columns = useMemo<CRMDataTableColumn<TaskType>[]>(() => {
     return [
       // 1. Master Checkbox
@@ -165,8 +179,8 @@ export function TasksDataTable({
             </div>
           );
         },
-        className: "w-12 px-4 py-3.5 text-center",
-        headerClassName: "w-12 px-4 py-3.5 text-center",
+        className: cn("w-12 px-4 text-center", cellPy),
+        headerClassName: "w-12 px-4 py-2.5 text-center",
         align: "center",
       },
 
@@ -182,7 +196,8 @@ export function TasksDataTable({
             <div className="flex items-center gap-3 min-w-0">
               <div
                 className={cn(
-                  "h-10 w-10 rounded-lg flex items-center justify-center font-bold text-sm shadow-xs border shrink-0",
+                  "flex items-center justify-center font-bold shadow-xs border shrink-0",
+                  avatarDimensions,
                   color.bg,
                   color.text,
                   color.border
@@ -214,7 +229,7 @@ export function TasksDataTable({
             </div>
           );
         },
-        className: "min-w-[240px] px-4 py-3.5 font-medium overflow-hidden",
+        className: cn("min-w-[240px] px-4 font-medium overflow-hidden", cellPy),
       },
 
       // 3. Status
@@ -229,7 +244,7 @@ export function TasksDataTable({
             variant={getTaskStatusVariant(task.status)}
           />
         ),
-        className: "w-32 px-4 py-3.5",
+        className: cn("w-32 px-4", cellPy),
       },
 
       // 4. Priority
@@ -244,7 +259,7 @@ export function TasksDataTable({
             variant={getPriorityVariant(task.priority)}
           />
         ),
-        className: "w-28 px-4 py-3.5",
+        className: cn("w-28 px-4", cellPy),
       },
 
       // 5. Due Date
@@ -282,7 +297,7 @@ export function TasksDataTable({
             </div>
           );
         },
-        className: "w-36 px-4 py-3.5",
+        className: cn("w-36 px-4", cellPy),
       },
 
       // 6. Related Record
@@ -305,7 +320,7 @@ export function TasksDataTable({
             <span className="text-xs text-muted-foreground/50">—</span>
           );
         },
-        className: "min-w-[160px] px-4 py-3.5",
+        className: cn("min-w-[160px] px-4", cellPy),
       },
 
       // 7. Assignee
@@ -324,7 +339,7 @@ export function TasksDataTable({
             </span>
           </div>
         ),
-        className: "w-36 px-4 py-3.5",
+        className: cn("w-36 px-4", cellPy),
       },
 
       // 8. Actions
@@ -373,8 +388,8 @@ export function TasksDataTable({
             />
           </div>
         ),
-        className: "w-16 px-4 py-3.5 text-right",
-        headerClassName: "w-16 px-4 py-3.5 text-right",
+        className: cn("w-16 px-4 text-right", cellPy),
+        headerClassName: "w-16 px-4 py-2.5 text-right",
       },
     ];
   }, [
@@ -393,6 +408,8 @@ export function TasksDataTable({
     onToggleComplete,
     onScheduleMeeting,
     onDeleteTask,
+    cellPy,
+    avatarDimensions,
   ]);
 
   return (
@@ -405,8 +422,8 @@ export function TasksDataTable({
       hasPagination={false}
       rowClassName={(task) =>
         cn(
-          "group h-16 hover:bg-muted/30 transition-colors",
-          selectedTaskIds.includes(task.id) && "bg-primary/[0.03]"
+          "group hover:bg-muted/30 transition-colors",
+          selectedTaskIds.includes(task.id) && "bg-primary/[0.04]"
         )
       }
       emptyIcon={CheckSquare}

@@ -20,9 +20,9 @@ export interface RelatedRecord {
 }
 
 export const RECORD_TYPE_LABELS: Record<RelationType, { label: string; color: string }> = {
-  lead: { label: "Lead", color: "bg-blue-500/10 text-blue-700 dark:text-blue-400" },
-  customer: { label: "Customer", color: "bg-emerald-500/10 text-emerald-700 dark:text-emerald-400" },
-  quotation: { label: "Quote", color: "bg-purple-500/10 text-purple-700 dark:text-purple-400" },
+  lead: { label: "Lead", color: "bg-info/10 text-info border border-info/20" },
+  customer: { label: "Customer", color: "bg-success/10 text-success border border-success/20" },
+  quotation: { label: "Quote", color: "bg-warning/10 text-warning border border-warning/20" },
 };
 
 interface TaskRelatedRecordPickerProps {

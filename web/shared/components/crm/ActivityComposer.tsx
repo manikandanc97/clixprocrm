@@ -118,6 +118,12 @@ export function ActivityComposer({
       <Textarea
         value={content}
         onChange={(e) => setContent(e.target.value)}
+        onKeyDown={(e) => {
+          if ((e.ctrlKey || e.metaKey) && e.key === "Enter") {
+            e.preventDefault();
+            handleSubmit(e);
+          }
+        }}
         placeholder={placeholder || typeConfig[activeType].placeholder}
         disabled={isSubmitting}
         rows={3}

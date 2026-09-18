@@ -106,7 +106,7 @@ export function SettingsRow({
               name={label}
               icon={Icon}
               size={14}
-              className="w-3.5 h-3.5 text-muted-foreground group-hover:text-emerald-600 dark:group-hover:text-emerald-400 transition-colors shrink-0"
+              className="w-3.5 h-3.5 text-muted-foreground group-hover:text-primary transition-colors shrink-0"
             />
           )}
           <span className="font-semibold text-foreground">{label}</span>

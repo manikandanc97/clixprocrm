@@ -225,67 +225,82 @@ export function ActivityTimeline({
         </div>
       )}
 
-      <div className="relative space-y-6 pt-1">
-        {/* Continuous Vertical Timeline Line */}
-        <div className="absolute left-[17px] top-3 bottom-3 w-px bg-border/60" />
+      {filteredItems.length === 0 ? (
+        <div className="py-8 text-center space-y-2">
+          <p className="text-xs font-semibold text-muted-foreground">
+            No activities recorded in this category
+          </p>
+          <button
+            type="button"
+            onClick={() => setActiveFilter("all")}
+            className="text-xs text-primary hover:underline font-semibold cursor-pointer"
+          >
+            Show all activities
+          </button>
+        </div>
+      ) : (
+        <div className="relative space-y-6 pt-1">
+          {/* Continuous Vertical Timeline Line */}
+          <div className="absolute left-[17px] top-3 bottom-3 w-px bg-border/60" />
 
-        {filteredItems.map((item, index) => {
-          const typeKey = (item.type || "").toUpperCase();
-          const config = TYPE_CONFIG[typeKey] || {
-            icon: item.icon || MessageSquare,
-            iconBg: item.iconBg || "bg-muted border-border",
-            iconColor: item.iconColor || "text-foreground",
-          };
+          {filteredItems.map((item, index) => {
+            const typeKey = (item.type || "").toUpperCase();
+            const config = TYPE_CONFIG[typeKey] || {
+              icon: item.icon || MessageSquare,
+              iconBg: item.iconBg || "bg-muted border-border",
+              iconColor: item.iconColor || "text-foreground",
+            };
 
-          const Icon = item.icon || config.icon;
-          const bgClass = item.iconBg || config.iconBg;
-          const colorClass = item.iconColor || config.iconColor;
+            const Icon = item.icon || config.icon;
+            const bgClass = item.iconBg || config.iconBg;
+            const colorClass = item.iconColor || config.iconColor;
 
-          return (
-            <div
-              key={item.id || index}
-              style={{ animationDelay: `${index * 50}ms` }}
-              className="relative flex gap-3.5 items-start animate-in fade-in slide-in-from-left-1 duration-200"
-            >
-              {/* Timeline Node Icon */}
+            return (
               <div
-                className={cn(
-                  "relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border shadow-xs transition-transform duration-150",
-                  bgClass,
-                  colorClass
-                )}
+                key={item.id || index}
+                style={{ animationDelay: `${index * 50}ms` }}
+                className="relative flex gap-3.5 items-start animate-in fade-in slide-in-from-left-1 duration-200"
               >
-                <Icon className="size-4" />
-              </div>
-
-              {/* Event Content */}
-              <div className="flex flex-col gap-1 pt-0.5 min-w-0 flex-1">
-                <div className="flex flex-wrap items-baseline justify-between gap-2">
-                  <div className="flex items-center gap-2 min-w-0">
-                    <h4 className="text-xs font-bold tracking-tight text-foreground truncate">
-                      {item.title}
-                    </h4>
-                    {item.actor && (
-                      <span className="text-[11px] text-muted-foreground font-medium truncate">
-                        by {item.actor}
-                      </span>
-                    )}
-                  </div>
-                  <span className="text-[10px] font-medium text-muted-foreground shrink-0">
-                    {item.time}
-                  </span>
+                {/* Timeline Node Icon */}
+                <div
+                  className={cn(
+                    "relative z-10 flex size-9 shrink-0 items-center justify-center rounded-full border shadow-xs transition-transform duration-150",
+                    bgClass,
+                    colorClass
+                  )}
+                >
+                  <Icon className="size-4" />
                 </div>
 
-                {item.description && (
-                  <div className="text-xs leading-relaxed text-muted-foreground break-words">
-                    {item.description}
+                {/* Event Content */}
+                <div className="flex flex-col gap-1 pt-0.5 min-w-0 flex-1">
+                  <div className="flex flex-wrap items-baseline justify-between gap-2">
+                    <div className="flex items-center gap-2 min-w-0">
+                      <h4 className="text-xs font-bold tracking-tight text-foreground truncate">
+                        {item.title}
+                      </h4>
+                      {item.actor && (
+                        <span className="text-[11px] text-muted-foreground font-medium truncate">
+                          by {item.actor}
+                        </span>
+                      )}
+                    </div>
+                    <span className="text-[10px] font-medium text-muted-foreground shrink-0">
+                      {item.time}
+                    </span>
                   </div>
-                )}
+
+                  {item.description && (
+                    <div className="text-xs leading-relaxed text-muted-foreground break-words">
+                      {item.description}
+                    </div>
+                  )}
+                </div>
               </div>
-            </div>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      )}
     </div>
   );
 }

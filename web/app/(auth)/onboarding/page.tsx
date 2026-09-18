@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useRef } from "react";
+import { useState } from "react";
 import { Loader2, ArrowRight, UploadCloud, ImagePlus, X, Sparkles, Crop } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { useQueryClient } from "@tanstack/react-query";
@@ -15,7 +15,6 @@ import { fetchDashboardData } from "@/shared/lib/api/crm";
 import { extractErrorMessage, getApiErrorMessage } from "@/shared/lib/api/error";
 import { extractDominantColorClient } from "@/shared/lib/utils/color-utils";
 import { ImageCropperModal } from "@/shared/components/ImageCropperModal";
-import { toast } from "sonner";
 import { useImageCropper } from "@/shared/hooks/use-image-cropper";
 
 export default function OnboardingPage() {
