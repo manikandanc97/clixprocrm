@@ -71,25 +71,25 @@ export default function AIInsights() {
       >
         <div className="p-6">
           {/* Header */}
-          <div className="flex items-center justify-between mb-5">
-            <div className="flex items-center gap-3">
-              <div className="p-2.5 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20">
+          <div className="flex flex-wrap items-start justify-between mb-5 gap-3">
+            <div className="flex items-start gap-3 min-w-0">
+              <div className="p-2.5 rounded-xl bg-primary/10 text-primary ring-1 ring-primary/20 shrink-0 mt-0.5">
                 <Sparkles className="w-5 h-5" />
               </div>
-              <div>
-                <h3 className="font-bold text-sm tracking-tight text-foreground flex items-center gap-2">
+              <div className="min-w-0">
+                <h3 className="font-bold text-sm tracking-tight text-foreground flex flex-wrap items-center gap-2">
                   Cognitive Recommendations & Alerts
-                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20">
+                  <span className="inline-flex items-center px-1.5 py-0.5 rounded text-[9px] font-extrabold uppercase tracking-wider bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border border-emerald-500/20 shrink-0">
                     Live
                   </span>
                 </h3>
-                <p className="text-xs text-muted-foreground">Actionable intelligence generated from your pipeline telemetry</p>
+                <p className="text-xs text-muted-foreground mt-1 line-clamp-2">Actionable intelligence generated from your pipeline telemetry</p>
               </div>
             </div>
 
             <button 
               onClick={handleHubClick}
-              className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group"
+              className="text-xs font-semibold text-primary hover:text-primary/80 transition-colors flex items-center gap-1 group shrink-0 mt-1"
             >
               Intelligence Hub
               <ArrowRight className="w-3.5 h-3.5 transition-transform group-hover:translate-x-0.5" />
@@ -97,7 +97,7 @@ export default function AIInsights() {
           </div>
 
           {/* Navigation Tabs */}
-          <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl mb-4 border border-border/40">
+          <div className="flex items-center gap-1.5 p-1 bg-muted/40 rounded-xl mb-4 border border-border/40 overflow-x-auto no-scrollbar">
             {(["recommendations", "alerts", "trends"] as const).map((tab) => (
               <button
                 key={tab}
@@ -150,7 +150,7 @@ export default function AIInsights() {
                         animate={{ opacity: 1, y: 0 }}
                         exit={{ opacity: 0, scale: 0.95 }}
                         onClick={() => handleCardClick(item.title)}
-                        className="group relative bg-white/[0.03] border border-white/5 p-4 rounded-xl transition-all cursor-pointer overflow-hidden backdrop-blur-sm hover:bg-white/[0.05] hover:border-white/10 flex flex-col gap-3"
+                        className="group relative bg-muted/30 border border-border/50 p-4 rounded-xl transition-all cursor-pointer overflow-hidden backdrop-blur-sm hover:bg-muted/50 hover:border-border flex flex-col gap-3"
                       >
                         <div className="flex items-start gap-3.5">
                           <div className={`p-2.5 ${itemBgColor} rounded-lg ${itemColor} shrink-0 transition-transform group-hover:scale-110`}>
@@ -158,28 +158,28 @@ export default function AIInsights() {
                           </div>
                           <div className="flex-1 min-w-0">
                             <div className="flex items-center justify-between mb-1.5">
-                              <h4 className="font-bold text-[12px] text-white tracking-tight line-clamp-1">
+                              <h4 className="font-bold text-[12px] text-foreground tracking-tight line-clamp-1">
                                 {item.title}
                               </h4>
                               <span className={`text-[9px] font-black uppercase tracking-wider px-1.5 py-0.5 rounded border ${pColors[priority] || pColors.MEDIUM}`}>
                                 {priority}
                               </span>
                             </div>
-                            <p className="text-white/60 text-[11px] leading-relaxed line-clamp-2 pr-4">
+                            <p className="text-muted-foreground text-[11px] leading-relaxed line-clamp-2 pr-4">
                               {item.description}
                             </p>
                           </div>
                           <button
                             onClick={(e) => handleDismiss(e, activeTab, item.id)}
                             aria-label="Dismiss insight"
-                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 p-1 hover:bg-white/10 rounded transition-all text-white/30 absolute top-3 right-3"
+                            className="opacity-0 group-hover:opacity-100 focus:opacity-100 focus-visible:opacity-100 p-1 hover:bg-muted rounded transition-all text-muted-foreground absolute top-3 right-3"
                           >
                             <X className="w-3.5 h-3.5" />
                           </button>
                         </div>
 
-                        <div className="flex items-center justify-between mt-1 pt-3 border-t border-white/5">
-                          <span className="text-[10px] font-semibold text-white/50">Verified AI Insight</span>
+                        <div className="flex items-center justify-between mt-1 pt-3 border-t border-border/50">
+                          <span className="text-[10px] font-semibold text-muted-foreground/70">Verified AI Insight</span>
                           
                           <button 
                             className="flex items-center gap-1.5 text-[10px] font-bold text-primary hover:text-primary/80 transition-colors uppercase tracking-wider"
@@ -196,8 +196,8 @@ export default function AIInsights() {
                     );
                   })
                 ) : (
-                  <div className="flex flex-col items-center justify-center py-16 text-white/20">
-                    <Sparkles className="w-8 h-8 mb-3 opacity-20" />
+                  <div className="flex flex-col items-center justify-center py-16 text-muted-foreground/50">
+                    <Sparkles className="w-8 h-8 mb-3 opacity-50" />
                     <p className="text-[10px] font-bold uppercase tracking-widest">No {activeTab}</p>
                   </div>
                 )}
@@ -208,7 +208,7 @@ export default function AIInsights() {
           {/* Footer */}
           <button 
             onClick={handleHubClick}
-            className="w-full mt-5 flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider text-white bg-white/5 hover:bg-white/10 active:bg-white/15 border border-white/10 rounded-lg transition-colors cursor-pointer"
+            className="w-full mt-5 flex items-center justify-center gap-2 py-2.5 text-[10px] font-bold uppercase tracking-wider text-foreground bg-muted/50 hover:bg-muted active:bg-muted/80 border border-border/50 rounded-lg transition-colors cursor-pointer"
           >
             Intelligence Hub
             <ArrowRight className="w-3.5 h-3.5" />

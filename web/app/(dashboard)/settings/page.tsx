@@ -175,7 +175,7 @@ const SettingsPage = () => {
         ref={contentRef}
         className={cn(
           "w-full",
-          isTableSection ? "flex flex-col" : "sidebar-scroll"
+          isTableSection ? "flex flex-col flex-1 min-h-0" : "sidebar-scroll"
         )}
       >
         <AnimatePresence mode="wait" initial={false}>
@@ -185,7 +185,7 @@ const SettingsPage = () => {
             animate={{ opacity: 1, y: 0 }}
             exit={{ opacity: 0, y: -5 }}
             transition={{ duration: 0.12, ease: "easeOut" }}
-            className="flex flex-col"
+            className={cn("flex flex-col", isTableSection && "flex-1 min-h-0")}
           >
             {renderSection()}
           </motion.div>

@@ -15,7 +15,7 @@ const SettingsHeader = memo(({ activeSection }: SettingsHeaderProps) => {
       title={item.label}
       subtitle={item.description}
       icon={Icon}
-      badge={category.title}
+      badge={activeSection === "audit-log" ? undefined : category.title}
     />
   );
 });

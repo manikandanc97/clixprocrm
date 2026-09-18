@@ -21,6 +21,7 @@ import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { CRMPagination } from "@/shared/components/crm";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
 import { EmptyState } from "@/shared/components/EmptyState";
 import {
   fetchSecurityActivity,
@@ -229,17 +230,18 @@ export default function AuditLogSettings() {
         {/* Left: Action Filter & Search */}
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Action Filter */}
-          <select
-            value={actionFilter}
-            onChange={(e) => setActionFilter(e.target.value)}
-            className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
-          >
-            <option value="ALL">All Actions</option>
-            <option value="login">Sign In / Logins</option>
-            <option value="password">Password Changes</option>
-            <option value="mfa">MFA Events</option>
-            <option value="revoke">Session Revocations</option>
-          </select>
+          <Select value={actionFilter} onValueChange={setActionFilter}>
+            <SelectTrigger className="w-[180px] h-9 rounded-lg bg-background border-border/70 text-xs font-semibold shadow-xs focus:ring-primary/20">
+              <SelectValue placeholder="All Actions" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL" className="text-xs font-medium">All Actions</SelectItem>
+              <SelectItem value="login" className="text-xs font-medium">Sign In / Logins</SelectItem>
+              <SelectItem value="password" className="text-xs font-medium">Password Changes</SelectItem>
+              <SelectItem value="mfa" className="text-xs font-medium">MFA Events</SelectItem>
+              <SelectItem value="revoke" className="text-xs font-medium">Session Revocations</SelectItem>
+            </SelectContent>
+          </Select>
 
           {/* Search Input */}
           <div className="relative w-full sm:w-64 group">
