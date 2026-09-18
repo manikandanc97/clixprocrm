@@ -398,10 +398,10 @@ export function AuthProvider({ children }: { children: React.ReactNode }) {
     }
   }, [queryClient]);
 
-  const permissionsKey = user?.permissions?.join(",") || "";
+
   const access = useMemo<RoleAccess>(() => {
     return buildAccess(user);
-  }, [user?.role, user?.roleName, user?.isSuperAdmin, user?.description, user?.analyticsVisibility, permissionsKey]);
+  }, [user]);
 
   const hasPermission = useCallback((permission: string) => {
     if (!user) return false;

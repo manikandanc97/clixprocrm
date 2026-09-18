@@ -13,6 +13,7 @@ import { CRMCard } from "@/shared/components/crm";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface WorkspaceIdentityCardProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   workspace: any;
   initials: string;
   uploadingLogo: boolean;

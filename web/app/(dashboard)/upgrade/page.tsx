@@ -146,11 +146,13 @@ export default function UpgradePage() {
       const match = displayPlans.find((p) => p.id.toLowerCase() === highlightParam.toLowerCase());
       if (match && match.id !== activePlanId) {
         highlightHandledRef.current = true;
-        if (match.pricingMode === "CUSTOM") {
-          setEnterpriseModalOpen(true);
-        } else {
-          handleOpenUpgradeModal(match);
-        }
+        setTimeout(() => {
+          if (match.pricingMode === "CUSTOM") {
+            setEnterpriseModalOpen(true);
+          } else {
+            handleOpenUpgradeModal(match);
+          }
+        }, 0);
       }
     }
   }, [highlightParam, activePlanId, displayPlans, handleOpenUpgradeModal]);

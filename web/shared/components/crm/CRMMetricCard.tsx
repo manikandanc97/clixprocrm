@@ -464,8 +464,6 @@ export const CRMMetricCard = ({
         className
       )}
     >
-      {/* ── Halftone dot texture on bottom-left ── */}
-      <HalftonePattern dotColor={config.dotColor} patternId={patternId} />
 
       {/* ── TOP ROW: Layered Floating Icon (Left) + Trend Percentage (Right) ── */}
       <div className="flex items-center justify-between gap-3 z-10">

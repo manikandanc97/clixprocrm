@@ -94,7 +94,7 @@ export function EditPlanAiModal({
               onChange={(e) =>
                 setPlanForm((prev) => ({ ...prev, aiLevel: e.target.value }))
               }
-              placeholder="e.g. Basic AI, Advanced AI, Premium AI"
+              placeholder="Enter AI plan name"
               className="h-9 text-xs rounded-xl"
             />
             <p className="text-[11px] text-muted-foreground">

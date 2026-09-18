@@ -20,10 +20,10 @@ type CategoryType = "all" | "leads" | "tasks" | "quotations";
 const RecentActivities = () => {
   const router = useRouter();
   const { data: dashboardData } = useDashboardData();
-  const activities = dashboardData?.recentActivities ?? [];
   const [filter, setFilter] = useState<CategoryType>("all");
 
   const filteredActivities = useMemo(() => {
+    const activities = dashboardData?.recentActivities ?? [];
     return activities.filter(activity => {
       if (filter === "all") return true;
       if (filter === "leads") return activity.title.toLowerCase().includes("lead");
@@ -31,7 +31,7 @@ const RecentActivities = () => {
       if (filter === "quotations") return activity.title.toLowerCase().includes("quotation");
       return true;
     }).slice(0, 4);
-  }, [activities, filter]);
+  }, [dashboardData?.recentActivities, filter]);
 
 
   const handleActivityClick = (title: string) => {

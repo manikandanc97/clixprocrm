@@ -24,7 +24,7 @@ export function useCurrency() {
 
   return useMemo(
     () => ({ currency, formatCurrency, currencySymbol, currencyCode, CurrencyIcon }),
-    [formatCurrency]
+    [formatCurrency, CurrencyIcon]
   );
 }
 

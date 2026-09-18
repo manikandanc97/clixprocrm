@@ -141,7 +141,7 @@ export function DealFieldsSection({
             <div className="grid grid-cols-1 sm:grid-cols-3 gap-2.5">
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-muted-foreground">Field Label</label>
-                <Input placeholder="e.g. Budget Approved..." value={newFieldName} onChange={(e) => setNewFieldName(e.target.value)} className="text-xs h-8" required />
+                <Input placeholder="Enter field name..." value={newFieldName} onChange={(e) => setNewFieldName(e.target.value)} className="text-xs h-8" required />
               </div>
               <div className="space-y-1">
                 <label className="text-[11px] font-semibold text-muted-foreground">Type</label>

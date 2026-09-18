@@ -110,7 +110,7 @@ export function PlanPricingTab({
               })
             }
             className="rounded-xl h-10"
-            placeholder="e.g. 14"
+            placeholder="Enter trial duration in days"
           />
         </div>
 

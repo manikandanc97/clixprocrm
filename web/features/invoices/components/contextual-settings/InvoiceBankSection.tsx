@@ -217,7 +217,7 @@ export function InvoiceBankSection({
                     value={newBank.bankName}
                     onChange={(e) => setNewBank({ ...newBank, bankName: e.target.value })}
                     className="h-8 text-xs"
-                    placeholder="e.g. ICICI Bank"
+                    placeholder="Enter bank name"
                   />
                 </SettingsField>
                 <SettingsField label="Account Holder Name">
@@ -225,7 +225,7 @@ export function InvoiceBankSection({
                     value={newBank.accountHolderName}
                     onChange={(e) => setNewBank({ ...newBank, accountHolderName: e.target.value })}
                     className="h-8 text-xs"
-                    placeholder="e.g. ClixPro Technologies Pvt Ltd"
+                    placeholder="Enter account name"
                   />
                 </SettingsField>
                 <SettingsField label="Account Number" required>
@@ -249,7 +249,7 @@ export function InvoiceBankSection({
                     value={newBank.upiId}
                     onChange={(e) => setNewBank({ ...newBank, upiId: e.target.value })}
                     className="h-8 text-xs font-mono"
-                    placeholder="clixpro@icici"
+                    placeholder="Enter UPI ID"
                   />
                 </SettingsField>
                 <SettingsField label="SWIFT Code (Optional)">

@@ -230,7 +230,7 @@ export function BillingSettingsTab({
                 <Input
                   value={configForm.upiId || ""}
                   onChange={(e) => setConfigForm({ ...configForm, upiId: e.target.value })}
-                  placeholder="clixpro@hdfcbank"
+                  placeholder="Enter UPI ID"
                   className="h-8 text-xs"
                 />
               </div>

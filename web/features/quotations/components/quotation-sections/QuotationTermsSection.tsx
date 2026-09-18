@@ -58,7 +58,7 @@ export function QuotationTermsSection({
               }}
               rows={3}
               className="text-xs resize-none"
-              placeholder="e.g., 50% advance upon quote approval, balance upon project delivery..."
+              placeholder="Enter payment schedule..."
             />
           </SettingsField>
 
@@ -74,7 +74,7 @@ export function QuotationTermsSection({
               }}
               rows={3}
               className="text-xs resize-none"
-              placeholder="e.g., Delivery within 7-10 business days following confirmed PO..."
+              placeholder="Enter delivery timeframe..."
             />
           </SettingsField>
 
@@ -90,7 +90,7 @@ export function QuotationTermsSection({
               }}
               rows={3}
               className="text-xs resize-none"
-              placeholder="e.g., 12 months standard warranty; 90 days complimentary support..."
+              placeholder="Enter warranty and support terms..."
             />
           </SettingsField>
 
@@ -106,7 +106,7 @@ export function QuotationTermsSection({
               }}
               rows={3}
               className="text-xs resize-none"
-              placeholder="e.g., This quotation is subject to our master service agreement..."
+              placeholder="Enter additional conditions..."
             />
           </SettingsField>
         </div>

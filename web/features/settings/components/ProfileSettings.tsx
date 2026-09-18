@@ -450,7 +450,7 @@ const ProfileSettings = () => {
                 <Input
                   value={formData.email}
                   onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
-                  placeholder="email@company.com"
+                  placeholder="Enter your email address"
                   required
                   type="email"
                   className="pl-8.5 h-9 text-xs sm:text-sm rounded-lg border-border/70 bg-muted/20 hover:bg-muted/30 focus:bg-background focus:border-primary/40 transition-all font-medium"

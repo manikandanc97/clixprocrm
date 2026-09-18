@@ -102,7 +102,7 @@ export function WonLostModal({ isOpen, onClose, type, deal, onSubmit, isLoading 
                     value={actualRevenue}
                     onChange={(e) => setActualRevenue(e.target.value)}
                     className="pl-9 h-9 text-sm bg-card font-medium"
-                    placeholder="0.00"
+                    placeholder="Enter amount"
                   />
                 </div>
               </div>

@@ -123,7 +123,7 @@ export function WorkspaceEditModal({
               <Input
                 value={formData.taxId}
                 onChange={(e) => setFormData((prev) => ({ ...prev, taxId: e.target.value }))}
-                placeholder="e.g. 29AAAAA0000A1Z5"
+                placeholder="Enter tax ID / GSTIN"
                 className="pl-8.5 h-9 text-xs sm:text-sm rounded-lg border-border/70 bg-muted/20 hover:bg-muted/30 focus:bg-background focus:border-primary/40 transition-all font-medium"
               />
             </div>

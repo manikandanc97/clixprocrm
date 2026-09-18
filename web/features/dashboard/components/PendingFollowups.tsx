@@ -14,10 +14,10 @@ export default function PendingFollowups({ data: initialData }: { data?: TasksDa
   const router = useRouter();
   const { data: fetchedData } = useTasks();
   const data = initialData ?? fetchedData;
-  const allTasks = data?.tasks ?? [];
   const pendingTasks = useMemo(() => {
+    const allTasks = data?.tasks ?? [];
     return allTasks.filter(t => t.status !== "COMPLETED").slice(0, 4);
-  }, [allTasks]);
+  }, [data?.tasks]);
 
 
   const formatDueDate = (dateStr: string) => {

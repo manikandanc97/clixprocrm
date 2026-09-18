@@ -201,7 +201,7 @@ export default function RegisterPage() {
               <Input
                 id="name"
                 type="text"
-                placeholder="John Doe"
+                placeholder="Enter your full name"
                 className={`pl-9.5 h-10 rounded-xl bg-background/60 text-sm transition-all duration-200 border-border/80 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary ${
                   fieldErrors.name ? "border-destructive focus-visible:ring-destructive/20" : ""
                 }`}
@@ -227,7 +227,7 @@ export default function RegisterPage() {
               <Input
                 id="companyName"
                 type="text"
-                placeholder="Acme Corp"
+                placeholder="Enter company name"
                 className={`pl-9.5 h-10 rounded-xl bg-background/60 text-sm transition-all duration-200 border-border/80 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary ${
                   fieldErrors.companyName ? "border-destructive focus-visible:ring-destructive/20" : ""
                 }`}
@@ -254,7 +254,7 @@ export default function RegisterPage() {
             <Input
               id="email"
               type="email"
-              placeholder="name@company.com"
+              placeholder="Enter your email address"
               className={`pl-9.5 h-10 rounded-xl bg-background/60 text-sm transition-all duration-200 border-border/80 focus-visible:ring-2 focus-visible:ring-primary/20 focus-visible:border-primary ${
                 fieldErrors.email ? "border-destructive focus-visible:ring-destructive/20" : ""
               }`}

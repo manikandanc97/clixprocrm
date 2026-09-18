@@ -184,7 +184,7 @@ export function TaskTypesSection({
         {isAdmin && (
           <form onSubmit={onAddType} className="mt-3 flex items-center gap-2">
             <Input
-              placeholder="New task type (e.g., Onsite Assessment, Tech Review)..."
+              placeholder="Enter new task type..."
               value={newTypeName}
               onChange={(e) => setNewTypeName(e.target.value)}
               className="text-xs h-9 flex-1"

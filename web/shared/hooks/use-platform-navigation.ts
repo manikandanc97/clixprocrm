@@ -26,7 +26,7 @@ export function usePlatformNavigation() {
 
   const staticMenuGroups = useMemo(() => {
     return getRoleMenu(user?.role, access.permissions);
-  }, [user?.role, permissionsKey]);
+  }, [user?.role, access.permissions]);
 
 
   const menuGroups: NavGroup[] = useMemo(() => {

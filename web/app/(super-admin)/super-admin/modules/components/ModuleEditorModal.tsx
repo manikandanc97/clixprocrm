@@ -121,7 +121,7 @@ export function ModuleEditorModal({
               </Label>
               <Input
                 id="menu-label"
-                placeholder="e.g. Contacts"
+                placeholder="Enter module name"
                 value={formLabel}
                 onChange={(e) => handleLabelChange(e.target.value)}
                 required
@@ -289,7 +289,7 @@ export function ModuleEditorModal({
               </Label>
               <Input
                 id="menu-badge"
-                placeholder="e.g. Beta, New, Pro"
+                placeholder="Enter badge text"
                 value={formBadge}
                 onChange={(e) => setFormBadge(e.target.value)}
                 className="h-9 rounded-xl text-xs"

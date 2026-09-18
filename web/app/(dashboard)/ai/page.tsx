@@ -36,7 +36,7 @@ export default function AIWorkspacePage() {
         badge: workspace.activeContext ? (
           <span className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
         ) : undefined,
-        renderContent: ({ isMobile, closeSidebar, sendMessage }) => (
+        renderContent: ({ closeSidebar, sendMessage }) => (
           <div className="h-full animate-in fade-in-50 duration-150">
             <AICrmContextPanel
               activeContext={workspace.activeContext}

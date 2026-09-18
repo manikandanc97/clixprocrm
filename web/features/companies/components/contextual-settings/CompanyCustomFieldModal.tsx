@@ -65,7 +65,7 @@ export function CompanyCustomFieldModal({
             <div className="space-y-1">
               <Label className="text-xs font-semibold">Field Label</Label>
               <Input
-                placeholder="e.g. LinkedIn Company URL, Parent Holding, Fiscal Year End..."
+                placeholder="Enter field description..."
                 value={newCustomFieldName}
                 onChange={(e) => setNewCustomFieldName(e.target.value)}
                 className="text-xs h-9"
@@ -100,7 +100,7 @@ export function CompanyCustomFieldModal({
               <div className="space-y-1">
                 <Label className="text-xs font-semibold">Options (comma-separated)</Label>
                 <Input
-                  placeholder="e.g. Tier 1, Tier 2, Tier 3"
+                  placeholder="Enter comma separated options"
                   value={newCustomFieldOptions}
                   onChange={(e) => setNewCustomFieldOptions(e.target.value)}
                   className="text-xs h-9"

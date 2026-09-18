@@ -15,6 +15,7 @@ import { CRMCard } from "@/shared/components/crm";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 interface WorkspaceOverviewCardProps {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   workspace: any;
   CurrencyIcon: React.ComponentType<{ className?: string }>;
   onOpenEditModal: () => void;

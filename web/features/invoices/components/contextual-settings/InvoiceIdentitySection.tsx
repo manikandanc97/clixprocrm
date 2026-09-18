@@ -122,7 +122,7 @@ export function InvoiceIdentitySection({
                 value={legalName}
                 onChange={(e) => { setLegalName(e.target.value); onChangeNotify(); }}
                 className="h-9 text-xs font-semibold"
-                placeholder="e.g. ClixPro Technologies Pvt Ltd"
+                placeholder="Enter company name"
               />
             </SettingsField>
 
@@ -131,7 +131,7 @@ export function InvoiceIdentitySection({
                 value={tradeName}
                 onChange={(e) => { setTradeName(e.target.value); onChangeNotify(); }}
                 className="h-9 text-xs"
-                placeholder="e.g. ClixPro Cloud"
+                placeholder="Enter brand name"
               />
             </SettingsField>
           </div>
@@ -147,7 +147,7 @@ export function InvoiceIdentitySection({
                     "h-9 text-xs font-mono font-bold uppercase",
                     gstin && !isGstinValid && "border-rose-500 focus-visible:ring-rose-500"
                   )}
-                  placeholder="29AAAAA0000A1Z5"
+                  placeholder="Enter GSTIN"
                 />
                 {gstin && isGstinValid && (
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 absolute right-2.5 top-3" />
@@ -170,7 +170,7 @@ export function InvoiceIdentitySection({
                     "h-9 text-xs font-mono font-bold uppercase",
                     pan && !isPanValid && "border-rose-500 focus-visible:ring-rose-500"
                   )}
-                  placeholder="AAAAA0000A"
+                  placeholder="Enter PAN"
                 />
                 {pan && isPanValid && (
                   <CheckCircle2 className="w-3.5 h-3.5 text-emerald-600 absolute right-2.5 top-3" />
@@ -203,7 +203,7 @@ export function InvoiceIdentitySection({
               value={billingAddress}
               onChange={(e) => { setBillingAddress(e.target.value); onChangeNotify(); }}
               className="h-9 text-xs"
-              placeholder="e.g. Level 4, Corporate Cyber Tower, Phase 2"
+              placeholder="Enter street address"
             />
           </SettingsField>
 
@@ -213,7 +213,7 @@ export function InvoiceIdentitySection({
                 value={city}
                 onChange={(e) => { setCity(e.target.value); onChangeNotify(); }}
                 className="h-9 text-xs"
-                placeholder="Bengaluru"
+                placeholder="Enter city"
               />
             </SettingsField>
 
@@ -238,7 +238,7 @@ export function InvoiceIdentitySection({
                 onChange={(e) => { setPostalCode(e.target.value.replace(/\D/g, "").slice(0, 6)); onChangeNotify(); }}
                 maxLength={6}
                 className="h-9 text-xs font-mono"
-                placeholder="560100"
+                placeholder="Enter ZIP code"
               />
             </SettingsField>
 
@@ -247,7 +247,7 @@ export function InvoiceIdentitySection({
                 value={country}
                 onChange={(e) => { setCountry(e.target.value); onChangeNotify(); }}
                 className="h-9 text-xs"
-                placeholder="India"
+                placeholder="Enter country"
               />
             </SettingsField>
           </div>

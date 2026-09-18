@@ -227,7 +227,7 @@ export function TaskStatusesSection({
             </div>
             <div className="flex flex-wrap sm:flex-nowrap items-center gap-2">
               <Input
-                placeholder="New status name (e.g. Waiting on Client)..."
+                placeholder="Enter new status name..."
                 value={newStatusName}
                 onChange={(e) => setNewStatusName(e.target.value)}
                 className="text-xs h-9 flex-1"

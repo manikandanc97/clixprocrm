@@ -112,7 +112,7 @@ export function ClixProLogo({
   iconClassName,
   textClassName,
   showText = true,
-  animated = false,
+  animated: _animated = false,
   ...props
 }: LogoProps) {
   const currentSize = sizeConfig[size] || sizeConfig.md;
