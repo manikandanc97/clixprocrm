@@ -75,6 +75,14 @@ export interface CRMDeleteDialogProps {
   icon?: React.ReactNode;
   /** Optional extra classes for AlertDialogContent. */
   contentClassName?: string;
+  /** Optional children to render custom content between description and actions. */
+  children?: React.ReactNode;
+  /** Disables the confirm button independently of isDeleting. */
+  disabled?: boolean;
+  /** Custom classes to override or extend the media/icon wrapper styling. */
+  mediaClassName?: string;
+  /** Hides the confirm action entirely. */
+  hideConfirm?: boolean;
 }
 
 /**
@@ -99,6 +107,10 @@ export function CRMDeleteDialog({
   cancelLabel = "Cancel",
   icon,
   contentClassName,
+  children,
+  disabled,
+  mediaClassName,
+  hideConfirm = false,
 }: CRMDeleteDialogProps) {
   const isSingle = mode === "single";
 
@@ -137,7 +149,7 @@ export function CRMDeleteDialog({
       <AlertDialogContent className={cn("max-w-md p-6", contentClassName)}>
         <AlertDialogHeader className="sm:place-items-start text-left gap-3">
           <div className="flex items-center gap-3 w-full">
-            <AlertDialogMedia className="bg-destructive/10 text-destructive border border-destructive/20 rounded-xl size-10 shrink-0 mb-0 flex items-center justify-center">
+            <AlertDialogMedia className={cn("bg-destructive/10 text-destructive border border-destructive/20 rounded-xl size-10 shrink-0 mb-0 flex items-center justify-center", mediaClassName)}>
               {icon || <Trash2 className="h-5 w-5" />}
             </AlertDialogMedia>
             <div className="min-w-0 flex-1">
@@ -157,6 +169,12 @@ export function CRMDeleteDialog({
           </p>
         )}
 
+        {children && (
+          <div className="py-2">
+            {children}
+          </div>
+        )}
+
         <AlertDialogFooter className="flex-row justify-end gap-2.5 pt-2">
           <AlertDialogCancel
             disabled={isDeleting}
@@ -165,19 +183,21 @@ export function CRMDeleteDialog({
           >
             {cancelLabel}
           </AlertDialogCancel>
-          <AlertDialogAction
-            variant="destructive"
-            onClick={(e) => {
-              // Prevent AlertDialog from auto-closing before onConfirm resolves
-              e.preventDefault();
-              onConfirm();
-            }}
-            disabled={isDeleting}
-            className="text-xs font-semibold h-9 px-4 cursor-pointer gap-2"
-          >
-            {isDeleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
-            <span>{resolvedConfirmLabel}</span>
-          </AlertDialogAction>
+          {!hideConfirm && (
+            <AlertDialogAction
+              variant="destructive"
+              onClick={(e) => {
+                // Prevent AlertDialog from auto-closing before onConfirm resolves
+                e.preventDefault();
+                onConfirm();
+              }}
+              disabled={disabled || isDeleting}
+              className="text-xs font-semibold h-9 px-4 cursor-pointer gap-2"
+            >
+              {isDeleting && <Loader2 className="h-3.5 w-3.5 animate-spin" />}
+              <span>{resolvedConfirmLabel}</span>
+            </AlertDialogAction>
+          )}
         </AlertDialogFooter>
       </AlertDialogContent>
     </AlertDialog>

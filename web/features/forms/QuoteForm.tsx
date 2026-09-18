@@ -8,6 +8,7 @@ import { Form, FormField, FormItem, FormLabel, FormControl, FormMessage } from "
 import { FormInput, FormSelect, FormDatePicker } from "@/shared/components/form-fields";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import { Textarea } from "@/shared/ui/textarea";
 import { FormSubmitButton } from "@/shared/components/form-submit-button";
 import { useDirtyForm } from "@/shared/hooks/use-dirty-form";
 import { useCreateQuotation, useUpdateQuotation, useLeads } from "@/shared/hooks/use-crm";
@@ -305,8 +306,8 @@ export const QuoteForm = ({ initialData, onSuccess, onCancel }: QuoteFormProps) 
                 <FormItem>
                   <FormLabel>Terms & Conditions / Notes</FormLabel>
                   <FormControl>
-                    <textarea 
-                      className="flex min-h-[100px] w-full rounded-xl border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring disabled:cursor-not-allowed disabled:opacity-50"
+                    <Textarea 
+                      className="min-h-[100px] rounded-xl"
                       placeholder="Enter specific terms for this quotation..."
                       {...field}
                     />
