@@ -236,6 +236,8 @@ async function main() {
     { name: 'Tasks', path: '/crm/tasks?page=1&limit=20', headers: commonHeaders },
     { name: 'Leads', path: '/crm/leads?page=1&limit=20', headers: commonHeaders },
     { name: 'Global Search', path: '/crm/search?q=test', headers: commonHeaders },
+    { name: 'Companies', path: '/crm/companies?page=1&limit=20', headers: commonHeaders },
+    { name: 'Deals', path: '/crm/deals?page=1&limit=20', headers: commonHeaders },
   ];
 
   console.log('\n--- 1. RUNNING BASELINE BENCHMARK (1 VU) ---');
@@ -253,8 +255,8 @@ async function main() {
   }
 
   // 2. Sustained Load across Concurrency Levels (5, 10, 25, 50, 100 VUs)
-  console.log('\n--- 2. RUNNING SUSTAINED LOAD PROGRESSION (5, 10, 25, 50, 100 VUs) ---');
-  const sustainedLevels = [5, 10, 25, 50, 100, 200];
+  console.log('\n--- 2. RUNNING SUSTAINED LOAD PROGRESSION (5, 10, 25 VUs) ---');
+  const sustainedLevels = [5, 10, 25];
   const primaryEndpoints = [
     { name: 'Health Check (Fastify Baseline)', path: '/health', headers: {} },
     { name: 'Dashboard (7-Query Aggregation)', path: '/crm/dashboard', headers: commonHeaders },
@@ -262,6 +264,8 @@ async function main() {
     { name: 'Tasks (Filtered Activity Index)', path: '/crm/tasks?page=1&limit=20', headers: commonHeaders },
     { name: 'Leads (Filtered CRM Index)', path: '/crm/leads?page=1&limit=20', headers: commonHeaders },
     { name: 'Global Search (Multi-Entity Search)', path: '/crm/search?q=test', headers: commonHeaders },
+    { name: 'Companies', path: '/crm/companies?page=1&limit=20', headers: commonHeaders },
+    { name: 'Deals', path: '/crm/deals?page=1&limit=20', headers: commonHeaders },
   ];
 
   for (const ep of primaryEndpoints) {

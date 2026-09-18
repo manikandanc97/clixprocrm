@@ -27,10 +27,10 @@ export class EmployeesService {
     private readonly entitlementService?: SubscriptionEntitlementService,
   ) {}
 
-  async getEmployees(tenantId: string, page = 1, limit = 10) {
+  async getEmployees(tenantId: string, page = 1, limit = 10, search = '') {
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
       page = Math.max(1, page);
-      limit = Math.max(1, Math.min(limit, 10000));
+      limit = Math.max(1, Math.min(limit, 500));
       const skip = (page - 1) * limit;
 
       const [users, total] = await Promise.all([

@@ -5,6 +5,7 @@ import { formatRelativeDate } from '../../common/utils/crm-formatters.util';
 import { TaskQueryDto } from '../dto/task-query.dto';
 import { TasksExportService } from './tasks.export.service';
 import { TasksHistoryService } from './tasks.history.service';
+import { getOrSetCache } from '../../common/utils/cache.util';
 
 /**
  * @file activities/services/tasks.query.service.ts
@@ -44,7 +45,7 @@ export class TasksQueryService {
     options: TaskQueryDto & { userId: string; role: string },
   ) {
     const page = Math.max(1, options.page || 1);
-    const limit = Math.max(1, Math.min(options.limit || 50, 10000));
+    const limit = Math.max(1, Math.min(options.limit || 50, 500));
     const offset = (page - 1) * limit;
 
     const now = new Date();
@@ -70,32 +71,35 @@ export class TasksQueryService {
           userRole !== 'SUPERADMIN' &&
           userRole !== 'OWNER'
         ) {
-          // Single query for tenant user hierarchy and department team members
-          const tenantUser = await this.prisma.withTenantContext({ tenantId }, (tx) =>
-            tx.tenantUser.findUnique({
-              where: {
-                tenantId_userId: {
-                  tenantId,
-                  userId: options.userId,
+          // Single query for tenant user hierarchy and department team members (cached for 60s)
+          const cacheKey = `rbac:hierarchy:${tenantId}:${options.userId}`;
+          const tenantUser = await getOrSetCache(cacheKey, 60, () =>
+            this.prisma.withTenantContext({ tenantId }, (tx) =>
+              tx.tenantUser.findUnique({
+                where: {
+                  tenantId_userId: {
+                    tenantId,
+                    userId: options.userId,
+                  },
                 },
-              },
-              select: {
-                id: true,
-                departmentId: true,
-                subordinates: {
-                  where: { status: 'ACTIVE' },
-                  select: { userId: true },
-                },
-                department: {
-                  select: {
-                    users: {
-                      where: { status: 'ACTIVE' },
-                      select: { userId: true },
+                select: {
+                  id: true,
+                  departmentId: true,
+                  subordinates: {
+                    where: { status: 'ACTIVE' },
+                    select: { userId: true },
+                  },
+                  department: {
+                    select: {
+                      users: {
+                        where: { status: 'ACTIVE' },
+                        select: { userId: true },
+                      },
                     },
                   },
                 },
-              },
-            })
+              })
+            )
           );
 
           const subordinateUserIds =

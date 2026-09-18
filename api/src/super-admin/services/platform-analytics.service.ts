@@ -5,6 +5,7 @@ import {
   CANONICAL_PLANS,
 } from '../../common/plans/plan-definitions.constant';
 import { toNumber } from '../../common/utils/crm-formatters.util';
+import { getOrSetCache } from '../../common/utils/cache.util';
 
 export interface AnalyticsQueryDto {
   range?: '30d' | '3m' | '6m' | '12m' | 'custom';
@@ -18,9 +19,12 @@ export class PlatformAnalyticsService {
 
   async getPlatformAnalytics(query: AnalyticsQueryDto = {}) {
     const range = query.range || '6m';
-    const now = new Date();
-    let endDate = query.endDate ? new Date(query.endDate) : now;
-    if (isNaN(endDate.getTime())) endDate = now;
+    const cacheKey = `platform:analytics:${range}:${query.startDate || ''}:${query.endDate || ''}`;
+    
+    return getOrSetCache(cacheKey, 300, async () => {
+      const now = new Date();
+      let endDate = query.endDate ? new Date(query.endDate) : now;
+      if (isNaN(endDate.getTime())) endDate = now;
 
     let startDate: Date;
     if (range === 'custom' && query.startDate) {
@@ -507,5 +511,6 @@ export class PlatformAnalyticsService {
         monthlyRevenue: s.count * (CANONICAL_PLANS[s.planId]?.priceNum || 0),
       })),
     };
+    });
   }
 }

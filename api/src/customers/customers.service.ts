@@ -19,7 +19,7 @@ export class CustomersService {
 
   async getCustomers(tenantId: string, page = 1, limit = 10, search = '') {
       page = Math.max(1, page);
-      limit = Math.max(1, Math.min(limit, 10000));
+      limit = Math.max(1, Math.min(limit, 500));
       const skip = (page - 1) * limit;
 
       const where: Prisma.CustomerWhereInput = { tenantId, deletedAt: null };
