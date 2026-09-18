@@ -44,8 +44,8 @@ const STATIC_SUPER_ADMIN_GROUPS: NavGroup[] = [
     items: [
       { title: "ClixPro AI", href: "/super-admin/copilot", icon: Sparkles },
       { title: "Organizations", href: "/super-admin/organizations", icon: Building2 },
-      { title: "Platform Users", href: "/super-admin/users", icon: UserCog },
-      { title: "Platform Modules", href: "/super-admin/modules", icon: Layers },
+      { title: "Users", href: "/super-admin/users", icon: UserCog },
+      { title: "Modules", href: "/super-admin/modules", icon: Layers },
       { title: "Support Inbox", href: "/super-admin/support", icon: Ticket },
     ],
   },
@@ -79,7 +79,7 @@ const STATIC_SUPER_ADMIN_GROUPS: NavGroup[] = [
   {
     label: "Configuration",
     items: [
-      { title: "Platform Settings", href: "/super-admin/settings", icon: Settings },
+      { title: "Settings", href: "/super-admin/settings", icon: Settings },
     ],
   },
 ];

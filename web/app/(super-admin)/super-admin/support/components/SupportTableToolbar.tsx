@@ -4,6 +4,13 @@ import React from "react";
 import { Search, X, Trash2, RotateCcw, Download } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 interface SupportTableToolbarProps {
   statusFilter: string;
@@ -39,37 +46,45 @@ export function SupportTableToolbar({
       {/* Left: Filter Selects & Search */}
       <div className="flex flex-wrap items-center gap-2.5">
         {/* Status Filter */}
-        <select
-          value={statusFilter}
-          onChange={(e) => {
-            setStatusFilter(e.target.value);
+        <Select 
+          value={statusFilter} 
+          onValueChange={(val) => {
+            setStatusFilter(val);
             onResetPage();
           }}
-          className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
         >
-          <option value="ALL">All Status</option>
-          <option value="OPEN">Open</option>
-          <option value="IN_PROGRESS">In Progress</option>
-          <option value="WAITING_FOR_USER">Waiting for User</option>
-          <option value="RESOLVED">Resolved</option>
-          <option value="CLOSED">Closed</option>
-        </select>
+          <SelectTrigger className="h-9 w-[130px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Status</SelectItem>
+            <SelectItem value="OPEN">Open</SelectItem>
+            <SelectItem value="IN_PROGRESS">In Progress</SelectItem>
+            <SelectItem value="WAITING_FOR_USER">Waiting for User</SelectItem>
+            <SelectItem value="RESOLVED">Resolved</SelectItem>
+            <SelectItem value="CLOSED">Closed</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Priority Filter */}
-        <select
-          value={priorityFilter}
-          onChange={(e) => {
-            setPriorityFilter(e.target.value);
+        <Select 
+          value={priorityFilter} 
+          onValueChange={(val) => {
+            setPriorityFilter(val);
             onResetPage();
           }}
-          className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
         >
-          <option value="ALL">All Priorities</option>
-          <option value="CRITICAL">Critical</option>
-          <option value="HIGH">High</option>
-          <option value="MEDIUM">Medium</option>
-          <option value="LOW">Low</option>
-        </select>
+          <SelectTrigger className="h-9 w-[130px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+            <SelectValue placeholder="All Priorities" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Priorities</SelectItem>
+            <SelectItem value="CRITICAL">Critical</SelectItem>
+            <SelectItem value="HIGH">High</SelectItem>
+            <SelectItem value="MEDIUM">Medium</SelectItem>
+            <SelectItem value="LOW">Low</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Search Input */}
         <div className="relative w-full sm:w-64 group">

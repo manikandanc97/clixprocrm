@@ -5,6 +5,13 @@ import { Flame, Search, ShieldCheck } from "lucide-react";
 import { SecurityAlertItem } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { CRMPagination, EmptyState } from "@/shared/components/crm";
 import { cn } from "@/shared/lib/utils";
 import { getStatusBadge } from "./types";
@@ -60,34 +67,42 @@ export function SecOpsAlertsTab({
         </div>
 
         <div className="flex flex-wrap items-center gap-2">
-          <select
-            value={alertStatusFilter}
-            onChange={(e) => {
-              setAlertStatusFilter(e.target.value);
+          <Select 
+            value={alertStatusFilter} 
+            onValueChange={(val) => {
+              setAlertStatusFilter(val);
               setAlertPage(1);
             }}
-            className="h-8 px-2.5 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground cursor-pointer shadow-2xs"
           >
-            <option value="ALL">All Statuses</option>
-            <option value="OPEN">Open</option>
-            <option value="ACKNOWLEDGED">Acknowledged</option>
-            <option value="RESOLVED">Resolved</option>
-          </select>
+            <SelectTrigger className="h-8 w-[140px] px-2.5 bg-background border-border/70 text-xs font-semibold shadow-2xs focus:ring-primary/20">
+              <SelectValue placeholder="All Statuses" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Statuses</SelectItem>
+              <SelectItem value="OPEN">Open</SelectItem>
+              <SelectItem value="ACKNOWLEDGED">Acknowledged</SelectItem>
+              <SelectItem value="RESOLVED">Resolved</SelectItem>
+            </SelectContent>
+          </Select>
 
-          <select
-            value={alertSeverityFilter}
-            onChange={(e) => {
-              setAlertSeverityFilter(e.target.value);
+          <Select 
+            value={alertSeverityFilter} 
+            onValueChange={(val) => {
+              setAlertSeverityFilter(val);
               setAlertPage(1);
             }}
-            className="h-8 px-2.5 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground cursor-pointer shadow-2xs"
           >
-            <option value="ALL">All Severities</option>
-            <option value="CRITICAL">Critical</option>
-            <option value="HIGH">High</option>
-            <option value="MEDIUM">Medium</option>
-            <option value="LOW">Low</option>
-          </select>
+            <SelectTrigger className="h-8 w-[140px] px-2.5 bg-background border-border/70 text-xs font-semibold shadow-2xs focus:ring-primary/20">
+              <SelectValue placeholder="All Severities" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ALL">All Severities</SelectItem>
+              <SelectItem value="CRITICAL">Critical</SelectItem>
+              <SelectItem value="HIGH">High</SelectItem>
+              <SelectItem value="MEDIUM">Medium</SelectItem>
+              <SelectItem value="LOW">Low</SelectItem>
+            </SelectContent>
+          </Select>
 
           <div className="relative">
             <Search className="w-3.5 h-3.5 absolute left-2.5 top-1/2 -translate-y-1/2 text-muted-foreground" />

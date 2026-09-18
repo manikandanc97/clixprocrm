@@ -3,6 +3,13 @@
 import React from "react";
 import { Search, Trash2, RefreshCw, Download, X } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 interface UsersTableToolbarProps {
   superAdminOnly: boolean;
@@ -36,26 +43,31 @@ export function UsersTableToolbar({
       {/* Left: Filter Selects & Search */}
       <div className="flex flex-wrap items-center gap-2.5">
         {/* Role Filter */}
-        <select
-          value={superAdminOnly ? "SUPER_ADMIN" : "ALL"}
-          onChange={(e) => setSuperAdminOnly(e.target.value === "SUPER_ADMIN")}
-          className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
+        <Select 
+          value={superAdminOnly ? "SUPER_ADMIN" : "ALL"} 
+          onValueChange={(val) => setSuperAdminOnly(val === "SUPER_ADMIN")}
         >
-          <option value="ALL">All Roles</option>
-          <option value="SUPER_ADMIN">Super Admins Only</option>
-        </select>
+          <SelectTrigger className="h-9 w-[150px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+            <SelectValue placeholder="All Roles" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Roles</SelectItem>
+            <SelectItem value="SUPER_ADMIN">Super Admins Only</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Status Filter */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
-        >
-          <option value="ALL">All Status</option>
-          <option value="ACTIVE">Active</option>
-          <option value="INACTIVE">Inactive</option>
-          <option value="SUSPENDED">Suspended</option>
-        </select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-9 w-[130px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Status</SelectItem>
+            <SelectItem value="ACTIVE">Active</SelectItem>
+            <SelectItem value="INACTIVE">Inactive</SelectItem>
+            <SelectItem value="SUSPENDED">Suspended</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Search Input */}
         <div className="relative w-full sm:w-64 group">

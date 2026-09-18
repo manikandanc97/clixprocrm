@@ -5,6 +5,13 @@ import { CreditCard, Loader2 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { PlatformOrganization } from "@/shared/lib/api/super-admin.api";
 
 interface BillingSubscriptionModalProps {
@@ -60,45 +67,55 @@ export function BillingSubscriptionModal({
         <form onSubmit={onSubmit} className="space-y-4">
           <div>
             <Label className="text-xs font-semibold text-foreground mb-1">Organization (Workspace) *</Label>
-            <select
-              required
-              value={selectedTenantId}
-              onChange={(e) => setSelectedTenantId(e.target.value)}
-              className="w-full h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+            <Select 
+              value={selectedTenantId} 
+              onValueChange={(val) => setSelectedTenantId(val)}
             >
-              <option value="">Select an organization...</option>
-              {organizations.map((org) => (
-                <option key={org.id} value={org.id}>
-                  {org.name} ({org.plan?.toUpperCase()} - {org.slug})
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="w-full h-9 px-3 bg-card border-border text-xs font-semibold text-foreground shadow-sm">
+                <SelectValue placeholder="Select an organization..." />
+              </SelectTrigger>
+              <SelectContent>
+                {organizations.map((org) => (
+                  <SelectItem key={org.id} value={org.id}>
+                    {org.name} ({org.plan?.toUpperCase()} - {org.slug})
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
           </div>
 
           <div className="grid grid-cols-2 gap-3">
             <div>
               <Label className="text-xs font-semibold text-foreground mb-1">Plan Tier</Label>
-              <select
-                value={selectedPlanId}
-                onChange={(e) => setSelectedPlanId(e.target.value)}
-                className="w-full h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              <Select 
+                value={selectedPlanId} 
+                onValueChange={(val) => setSelectedPlanId(val)}
               >
-                <option value="free">Free Tier</option>
-                <option value="growth">Growth ⭐ (₹499/mo)</option>
-                <option value="business">Business (₹999/mo)</option>
-              </select>
+                <SelectTrigger className="w-full h-9 px-3 bg-card border-border text-xs font-semibold text-foreground shadow-sm">
+                  <SelectValue placeholder="Select Plan Tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Free Tier</SelectItem>
+                  <SelectItem value="growth">Growth ⭐ (₹499/mo)</SelectItem>
+                  <SelectItem value="business">Business (₹999/mo)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div>
               <Label className="text-xs font-semibold text-foreground mb-1">Billing Cycle</Label>
-              <select
-                value={selectedBillingCycle}
-                onChange={(e) => setSelectedBillingCycle(e.target.value as "monthly" | "annual")}
-                className="w-full h-9 px-3 rounded-xl bg-card border border-border text-xs font-semibold text-foreground shadow-sm focus:outline-none focus:ring-1 focus:ring-primary"
+              <Select 
+                value={selectedBillingCycle} 
+                onValueChange={(val) => setSelectedBillingCycle(val as "monthly" | "annual")}
               >
-                <option value="monthly">Monthly</option>
-                <option value="annual">Annual (Discounted)</option>
-              </select>
+                <SelectTrigger className="w-full h-9 px-3 bg-card border-border text-xs font-semibold text-foreground shadow-sm">
+                  <SelectValue placeholder="Select Billing Cycle" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="monthly">Monthly</SelectItem>
+                  <SelectItem value="annual">Annual (Discounted)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

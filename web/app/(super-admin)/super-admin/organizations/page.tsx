@@ -3,9 +3,6 @@
 import { useEffect, useState, useMemo } from "react";
 import {
   Building2,
-  Users,
-  ShieldCheck,
-  Zap,
 } from "lucide-react";
 import {
   fetchPlatformOrganizations,
@@ -18,6 +15,7 @@ import {
 import { toast } from "sonner";
 import {
   CRMPageContainer,
+  CRMPageHeader,
   CRMPagination,
 } from "@/shared/components/crm";
 import { OrganizationsToolbar } from "./components/OrganizationsToolbar";
@@ -292,54 +290,13 @@ export default function OrganizationsPage() {
 
   return (
     <CRMPageContainer twoStageScroll>
-      {/* 1. Metric KPI Cards Banner */}
-      <div className="grid grid-cols-2 sm:grid-cols-4 gap-2.5 sm:gap-3 shrink-0">
-        <div className="p-3 sm:p-3.5 rounded-xl bg-card border border-border/70 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total Workspaces</p>
-            <p className="text-xl sm:text-2xl font-black text-foreground mt-0.5">{organizations.length}</p>
-          </div>
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-            <Building2 className="w-4 h-4" />
-          </div>
-        </div>
+      {/* 1. Page Header */}
+      <CRMPageHeader
+        title="Organizations"
+        description="Manage workspaces, tenants, and platform organizations."
+        icon={Building2}
+      />
 
-        <div className="p-3 sm:p-3.5 rounded-xl bg-card border border-border/70 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Active Tenants</p>
-            <p className="text-xl sm:text-2xl font-black text-emerald-600 dark:text-emerald-400 mt-0.5">
-              {organizations.filter((o) => o.status !== "SUSPENDED").length}
-            </p>
-          </div>
-          <div className="w-8 h-8 rounded-lg bg-emerald-500/10 text-emerald-600 flex items-center justify-center shrink-0">
-            <ShieldCheck className="w-4 h-4" />
-          </div>
-        </div>
-
-        <div className="p-3 sm:p-3.5 rounded-xl bg-card border border-border/70 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Total Members</p>
-            <p className="text-xl sm:text-2xl font-black text-foreground mt-0.5">
-              {organizations.reduce((acc, o) => acc + (o.userCount || 0), 0)}
-            </p>
-          </div>
-          <div className="w-8 h-8 rounded-lg bg-blue-500/10 text-blue-600 dark:text-blue-400 flex items-center justify-center shrink-0">
-            <Users className="w-4 h-4" />
-          </div>
-        </div>
-
-        <div className="p-3 sm:p-3.5 rounded-xl bg-card border border-border/70 shadow-xs flex items-center justify-between">
-          <div>
-            <p className="text-[11px] font-bold text-muted-foreground uppercase tracking-wider">Paid Tiers</p>
-            <p className="text-xl sm:text-2xl font-black text-purple-600 dark:text-purple-400 mt-0.5">
-              {organizations.filter((o) => o.plan && o.plan !== "free").length}
-            </p>
-          </div>
-          <div className="w-8 h-8 rounded-lg bg-purple-500/10 text-purple-600 dark:text-purple-400 flex items-center justify-center shrink-0">
-            <Zap className="w-4 h-4" />
-          </div>
-        </div>
-      </div>
 
       {/* 2. Main Table & Toolbar Card */}
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">

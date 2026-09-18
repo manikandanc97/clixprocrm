@@ -12,6 +12,13 @@ import {
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Input } from "@/shared/ui/input";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
+import {
   fetchPlatformAuditLogs,
   PlatformAuditLog,
   triggerAuditDrVerify,
@@ -31,7 +38,7 @@ export default function SuperAdminAuditLogsPage() {
   const [logs, setLogs] = useState<PlatformAuditLog[]>([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
-  const [moduleFilter, setModuleFilter] = useState("");
+  const [moduleFilter, setModuleFilter] = useState("ALL_MODULES_FALLBACK");
   const [selectedLog, setSelectedLog] = useState<PlatformAuditLog | null>(null);
 
   const [verifyingDr, setVerifyingDr] = useState(false);
@@ -143,6 +150,7 @@ export default function SuperAdminAuditLogsPage() {
   };
 
   const filteredLogs = logs.filter((l) => {
+    if (moduleFilter !== "ALL_MODULES_FALLBACK" && l.module !== moduleFilter) return false;
     if (!search) return true;
     const q = search.toLowerCase();
     return (
@@ -201,21 +209,25 @@ export default function SuperAdminAuditLogsPage() {
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
           {/* Left: Filter Selects & Search */}
           <div className="flex flex-wrap items-center gap-2.5">
-            <select
-              value={moduleFilter}
-              onChange={(e) => {
-                setModuleFilter(e.target.value);
+            <Select 
+              value={moduleFilter} 
+              onValueChange={(val) => {
+                setModuleFilter(val);
                 setCurrentPage(1);
               }}
-              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
-              <option value="">All Modules</option>
-              {modules.map((m) => (
-                <option key={m} value={m}>
-                  {m}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-9 w-[160px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+                <SelectValue placeholder="All Modules" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL_MODULES_FALLBACK">All Modules</SelectItem>
+                {modules.map((m) => (
+                  <SelectItem key={m} value={m}>
+                    {m}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {/* Search Input */}
             <div className="relative w-full sm:w-64 group">
@@ -248,10 +260,10 @@ export default function SuperAdminAuditLogsPage() {
 
           {/* Right: Actions */}
           <div className="flex items-center gap-2 text-xs font-semibold text-muted-foreground self-end lg:self-auto flex-wrap">
-            {(moduleFilter || search.trim()) && (
+            {(moduleFilter !== "ALL_MODULES_FALLBACK" || search.trim()) && (
               <button
                 onClick={() => {
-                  setModuleFilter("");
+                  setModuleFilter("ALL_MODULES_FALLBACK");
                   setSearch("");
                   setCurrentPage(1);
                 }}

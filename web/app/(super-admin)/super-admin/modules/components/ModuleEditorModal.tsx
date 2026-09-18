@@ -15,6 +15,13 @@ import {
   DialogDescription,
   DialogFooter,
 } from "@/shared/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { cn } from "@/shared/lib/utils";
 import { getDynamicIcon, DynamicIcon } from "@/shared/lib/icons/dynamic-icon";
 import { PlatformModule } from "@/shared/lib/api/super-admin.api";
@@ -150,19 +157,22 @@ export function ModuleEditorModal({
               <Label htmlFor="menu-group" className="text-xs font-bold text-foreground">
                 Navigation Group
               </Label>
-              <select
-                id="menu-group"
-                value={formGroup}
-                onChange={(e) => setFormGroup(e.target.value)}
-                className="w-full h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+              <Select 
+                value={formGroup} 
+                onValueChange={(val) => setFormGroup(val)}
               >
-                {availableGroups.map((grp) => (
-                  <option key={grp} value={grp}>
-                    {grp}
-                  </option>
-                ))}
-                <option value="CUSTOM">Custom Group...</option>
-              </select>
+                <SelectTrigger id="menu-group" className="w-full h-9 px-3 border-input bg-background text-xs font-medium">
+                  <SelectValue placeholder="Select Navigation Group" />
+                </SelectTrigger>
+                <SelectContent>
+                  {availableGroups.map((grp) => (
+                    <SelectItem key={grp} value={grp}>
+                      {grp}
+                    </SelectItem>
+                  ))}
+                  <SelectItem value="CUSTOM">Custom Group...</SelectItem>
+                </SelectContent>
+              </Select>
               {formGroup === "CUSTOM" && (
                 <Input
                   placeholder="Enter custom group name"
@@ -195,17 +205,20 @@ export function ModuleEditorModal({
               <Label htmlFor="access-preset" className="text-xs font-bold text-foreground">
                 Access Level
               </Label>
-              <select
-                id="access-preset"
-                value={formAccessPreset}
-                onChange={(e) => setFormAccessPreset(e.target.value as "ALL" | "ADMIN_ONLY" | "MANAGER_ADMIN" | "CUSTOM")}
-                className="w-full h-9 px-3 rounded-xl border border-input bg-background text-xs font-medium focus:outline-none focus:ring-2 focus:ring-ring cursor-pointer"
+              <Select 
+                value={formAccessPreset} 
+                onValueChange={(val) => setFormAccessPreset(val as "ALL" | "ADMIN_ONLY" | "MANAGER_ADMIN" | "CUSTOM")}
               >
-                <option value="ALL">All CRM Users (Standard Access)</option>
-                <option value="ADMIN_ONLY">Admin Only</option>
-                <option value="MANAGER_ADMIN">Manager &amp; Admin</option>
-                <option value="CUSTOM">Custom RBAC Permission...</option>
-              </select>
+                <SelectTrigger id="access-preset" className="w-full h-9 px-3 border-input bg-background text-xs font-medium">
+                  <SelectValue placeholder="Select Access Level" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="ALL">All CRM Users (Standard Access)</SelectItem>
+                  <SelectItem value="ADMIN_ONLY">Admin Only</SelectItem>
+                  <SelectItem value="MANAGER_ADMIN">Manager &amp; Admin</SelectItem>
+                  <SelectItem value="CUSTOM">Custom RBAC Permission...</SelectItem>
+                </SelectContent>
+              </Select>
               {formAccessPreset === "CUSTOM" && (
                 <Input
                   placeholder="Enter custom permission key (e.g. Invoices, Reports)"

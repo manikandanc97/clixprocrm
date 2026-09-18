@@ -9,6 +9,13 @@ import {
   TruncatedText,
   EmptyState,
 } from "@/shared/components/crm";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { PlanBadge } from "@/shared/components/PlanBadge";
 import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
@@ -89,19 +96,23 @@ export function BillingSubscriptionsTab({
           </div>
 
           {/* Plan Filter */}
-          <select
-            value={subPlanFilter}
-            onChange={(e) => {
-              setSubPlanFilter(e.target.value);
+          <Select 
+            value={subPlanFilter} 
+            onValueChange={(val) => {
+              setSubPlanFilter(val);
               setSubPage(1);
             }}
-            className="h-8 px-2.5 rounded-lg bg-card border border-border text-xs font-semibold text-foreground focus:outline-none focus:ring-1 focus:ring-primary"
           >
-            <option value="all">All Plans</option>
-            <option value="free">Free</option>
-            <option value="growth">Growth / Pro</option>
-            <option value="business">Business / Enterprise</option>
-          </select>
+            <SelectTrigger className="h-8 w-[170px] text-xs font-semibold bg-card border-border shadow-xs focus:ring-primary/20">
+              <SelectValue placeholder="All Plans" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="all">All Plans</SelectItem>
+              <SelectItem value="free">Free</SelectItem>
+              <SelectItem value="growth">Growth / Pro</SelectItem>
+              <SelectItem value="business">Business / Enterprise</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </CRMToolbar>
 

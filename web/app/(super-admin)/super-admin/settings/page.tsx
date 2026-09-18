@@ -25,6 +25,13 @@ import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
 import { Checkbox } from "@/shared/ui/checkbox";
 import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
+import {
   Dialog,
   DialogContent,
   DialogHeader,
@@ -324,18 +331,21 @@ export default function SuperAdminSettingsPage() {
                 <Label htmlFor="defaultPlan" className="text-xs font-semibold">
                   Default New Workspace Plan
                 </Label>
-                <select
-                  id="defaultPlan"
-                  value={defaultTenantPlan}
-                  onChange={(e) => setDefaultTenantPlan(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-card border border-border text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
+                <Select 
+                  value={defaultTenantPlan} 
+                  onValueChange={(val) => setDefaultTenantPlan(val)}
                 >
-                  {availablePlans.map((plan) => (
-                    <option key={plan.id} value={plan.id}>
-                      {plan.name} {plan.price ? `(${plan.price})` : ""}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="defaultPlan" className="w-full h-10 px-3 bg-card border-border text-xs font-medium text-foreground shadow-sm">
+                    <SelectValue placeholder="Select Default Plan" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {availablePlans.map((plan) => (
+                      <SelectItem key={plan.id} value={plan.id}>
+                        {plan.name} {plan.price ? `(${plan.price})` : ""}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-[11px] text-muted-foreground">
                   Assigned to newly registered organizations automatically.
                 </p>
@@ -347,18 +357,21 @@ export default function SuperAdminSettingsPage() {
                   <Coins className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Default Currency</span>
                 </Label>
-                <select
-                  id="defaultCurrency"
-                  value={defaultCurrency}
-                  onChange={(e) => setDefaultCurrency(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-card border border-border text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
+                <Select 
+                  value={defaultCurrency} 
+                  onValueChange={(val) => setDefaultCurrency(val)}
                 >
-                  {CURRENCY_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="defaultCurrency" className="w-full h-10 px-3 bg-card border-border text-xs font-medium text-foreground shadow-sm">
+                    <SelectValue placeholder="Select Default Currency" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {CURRENCY_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-[11px] text-muted-foreground">
                   Base standard currency for subscriptions and tenant invoices.
                 </p>
@@ -370,18 +383,21 @@ export default function SuperAdminSettingsPage() {
                   <Clock className="h-3.5 w-3.5 text-muted-foreground" />
                   <span>Default Timezone</span>
                 </Label>
-                <select
-                  id="defaultTimezone"
-                  value={defaultTimezone}
-                  onChange={(e) => setDefaultTimezone(e.target.value)}
-                  className="w-full h-10 px-3 rounded-xl bg-card border border-border text-xs font-medium text-foreground focus:outline-none focus:ring-2 focus:ring-emerald-500/20 focus:border-emerald-500 shadow-sm"
+                <Select 
+                  value={defaultTimezone} 
+                  onValueChange={(val) => setDefaultTimezone(val)}
                 >
-                  {TIMEZONE_OPTIONS.map((opt) => (
-                    <option key={opt.value} value={opt.value}>
-                      {opt.label}
-                    </option>
-                  ))}
-                </select>
+                  <SelectTrigger id="defaultTimezone" className="w-full h-10 px-3 bg-card border-border text-xs font-medium text-foreground shadow-sm">
+                    <SelectValue placeholder="Select Default Timezone" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    {TIMEZONE_OPTIONS.map((opt) => (
+                      <SelectItem key={opt.value} value={opt.value}>
+                        {opt.label}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
                 <p className="text-[11px] text-muted-foreground">
                   Default schedule and telemetry timestamp timezone for new workspaces.
                 </p>

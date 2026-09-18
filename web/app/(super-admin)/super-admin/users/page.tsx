@@ -260,7 +260,7 @@ export default function SuperAdminUsersPage() {
     <CRMPageContainer twoStageScroll>
       {/* Header */}
       <CRMPageHeader
-        title="Platform Users"
+        title="Users"
         description="Manage platform authentication, global roles, and user lifecycle."
         icon={Users}
       />

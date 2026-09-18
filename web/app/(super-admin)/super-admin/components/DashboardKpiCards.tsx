@@ -71,7 +71,7 @@ export function DashboardKpiCards({
           <TooltipTrigger asChild>
             <Link href="/super-admin/users" className="block group">
               <CRMMetricCard
-                title="Platform Users"
+                title="Users"
                 value={aal2Required ? "—" : metrics.totalUsers.toString()}
                 change={aal2Required ? "AAL2 Locked" : `+${metrics.userGrowthPercent || 14.8}%`}
                 trend="up"

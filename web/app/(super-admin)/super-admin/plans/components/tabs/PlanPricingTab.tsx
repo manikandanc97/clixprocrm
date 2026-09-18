@@ -3,6 +3,13 @@
 import React from "react";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { PlatformPlanItem } from "@/shared/lib/api/super-admin.api";
 
 interface PlanPricingTabProps {
@@ -19,35 +26,43 @@ export function PlanPricingTab({
       <div className="grid grid-cols-2 gap-4">
         <div className="space-y-1.5">
           <Label className="text-xs font-semibold">Currency</Label>
-          <select
-            value={editingPlan.currency}
-            onChange={(e) =>
+          <Select 
+            value={editingPlan.currency} 
+            onValueChange={(val) => 
               onPlanChange({
                 ...editingPlan,
-                currency: e.target.value,
+                currency: val,
               })
             }
-            className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
           >
-            <option value="INR">INR (₹) - Indian Rupee</option>
-          </select>
+            <SelectTrigger className="w-full h-10 px-3 border-input bg-background text-xs font-semibold">
+              <SelectValue placeholder="Select Currency" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="INR">INR (₹) - Indian Rupee</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1.5">
           <Label className="text-xs font-semibold">Pricing Mode</Label>
-          <select
-            value={editingPlan.pricingMode}
-            onChange={(e) =>
+          <Select 
+            value={editingPlan.pricingMode} 
+            onValueChange={(val) => 
               onPlanChange({
                 ...editingPlan,
-                pricingMode: e.target.value as "FIXED" | "CUSTOM",
+                pricingMode: val as "FIXED" | "CUSTOM",
               })
             }
-            className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
           >
-            <option value="FIXED">Fixed Subscription Price</option>
-            <option value="CUSTOM">Custom Enterprise (Contact Sales)</option>
-          </select>
+            <SelectTrigger className="w-full h-10 px-3 border-input bg-background text-xs font-semibold">
+              <SelectValue placeholder="Select Pricing Mode" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="FIXED">Fixed Subscription Price</SelectItem>
+              <SelectItem value="CUSTOM">Custom Enterprise (Contact Sales)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
       </div>
 

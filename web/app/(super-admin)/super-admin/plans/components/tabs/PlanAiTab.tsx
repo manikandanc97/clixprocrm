@@ -3,6 +3,13 @@
 import React from "react";
 import { Label } from "@/shared/ui/label";
 import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { Switch } from "@/shared/ui/switch";
 import { PlatformPlanItem } from "@/shared/lib/api/super-admin.api";
 
@@ -41,22 +48,26 @@ export function PlanAiTab({
       <div className="grid grid-cols-2 gap-4 pt-1">
         <div className="space-y-1.5">
           <Label className="text-xs font-semibold">AI Tier Level</Label>
-          <select
-            value={editingPlan.aiLevel}
-            onChange={(e) =>
+          <Select 
+            value={editingPlan.aiLevel} 
+            onValueChange={(val) => 
               onPlanChange({
                 ...editingPlan,
-                aiLevel: e.target.value,
+                aiLevel: val,
               })
             }
-            className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
           >
-            <option value="Basic AI">Basic AI</option>
-            <option value="Standard AI">Standard AI</option>
-            <option value="Advanced AI">Advanced AI</option>
-            <option value="Premium AI">Premium AI</option>
-            <option value="Full AI">Full AI</option>
-          </select>
+            <SelectTrigger className="w-full h-10 px-3 border-input bg-background text-xs font-semibold">
+              <SelectValue placeholder="Select AI Tier Level" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="Basic AI">Basic AI</SelectItem>
+              <SelectItem value="Standard AI">Standard AI</SelectItem>
+              <SelectItem value="Advanced AI">Advanced AI</SelectItem>
+              <SelectItem value="Premium AI">Premium AI</SelectItem>
+              <SelectItem value="Full AI">Full AI</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1.5">
@@ -79,23 +90,26 @@ export function PlanAiTab({
 
       <div className="space-y-1.5 pt-2">
         <Label className="text-xs font-semibold">Authoritative Default Model</Label>
-        <select
-          value={editingPlan.defaultModelId || ""}
-          onChange={(e) =>
+        <Select 
+          value={editingPlan.defaultModelId || ""} 
+          onValueChange={(val) => 
             onPlanChange({
               ...editingPlan,
-              defaultModelId: e.target.value,
+              defaultModelId: val,
             })
           }
-          className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-bold text-foreground"
         >
-          <option value="" disabled>Select default AI model</option>
-          {aiModels.map((m) => (
-            <option key={m.id} value={m.id}>
-              {m.displayName} ({m.provider}) - {m.modelKey}
-            </option>
-          ))}
-        </select>
+          <SelectTrigger className="w-full h-10 px-3 border-input bg-background text-xs font-bold text-foreground">
+            <SelectValue placeholder="Select default AI model" />
+          </SelectTrigger>
+          <SelectContent>
+            {aiModels.map((m) => (
+              <SelectItem key={m.id} value={m.id}>
+                {m.displayName} ({m.provider}) - {m.modelKey}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
       </div>
 
       <div className="space-y-2 pt-2">

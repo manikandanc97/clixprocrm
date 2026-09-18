@@ -27,6 +27,13 @@ import {
 } from "@/shared/lib/api/super-admin.api";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { toast } from "sonner";
 import {
   CRMPageContainer,
@@ -253,20 +260,24 @@ export default function SecurityCenterPage() {
           {/* Left: Filter Selects & Search */}
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Severity Filter */}
-            <select
-              value={severityFilter}
-              onChange={(e) => {
-                setSeverityFilter(e.target.value);
+            <Select 
+              value={severityFilter} 
+              onValueChange={(val) => {
+                setSeverityFilter(val);
                 setCurrentPage(1);
               }}
-              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
-              <option value="ALL">All Severities</option>
-              <option value="CRITICAL">Critical</option>
-              <option value="HIGH">High</option>
-              <option value="MEDIUM">Medium</option>
-              <option value="LOW">Low</option>
-            </select>
+              <SelectTrigger className="h-9 w-[160px] px-3 bg-background border-border/70 text-xs font-semibold shadow-xs focus:ring-primary/20">
+                <SelectValue placeholder="All Severities" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Severities</SelectItem>
+                <SelectItem value="CRITICAL">Critical</SelectItem>
+                <SelectItem value="HIGH">High</SelectItem>
+                <SelectItem value="MEDIUM">Medium</SelectItem>
+                <SelectItem value="LOW">Low</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Search Input */}
             <div className="relative w-full sm:w-64 group">

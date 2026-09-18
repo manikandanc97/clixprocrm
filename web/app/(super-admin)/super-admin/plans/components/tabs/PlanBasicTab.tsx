@@ -4,6 +4,13 @@ import React from "react";
 import { Sparkles } from "lucide-react";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { Switch } from "@/shared/ui/switch";
 import { PlatformPlanItem } from "@/shared/lib/api/super-admin.api";
 
@@ -79,19 +86,23 @@ export function PlanBasicTab({
       <div className="grid grid-cols-2 gap-4 pt-2">
         <div className="space-y-1.5">
           <Label className="text-xs font-semibold">Plan Status</Label>
-          <select
-            value={editingPlan.status}
-            onChange={(e) =>
+          <Select 
+            value={editingPlan.status} 
+            onValueChange={(val) => 
               onPlanChange({
                 ...editingPlan,
-                status: e.target.value as "ACTIVE" | "INACTIVE" | "ARCHIVED",
+                status: val as "ACTIVE" | "INACTIVE" | "ARCHIVED",
               })
             }
-            className="w-full h-10 px-3 rounded-xl border border-input bg-background text-xs font-semibold"
           >
-            <option value="ACTIVE">ACTIVE (Available for subscriptions)</option>
-            <option value="INACTIVE">INACTIVE (Disabled / Hidden)</option>
-          </select>
+            <SelectTrigger className="w-full h-10 px-3 border-input bg-background text-xs font-semibold">
+              <SelectValue placeholder="Select Status" />
+            </SelectTrigger>
+            <SelectContent>
+              <SelectItem value="ACTIVE">ACTIVE (Available for subscriptions)</SelectItem>
+              <SelectItem value="INACTIVE">INACTIVE (Disabled / Hidden)</SelectItem>
+            </SelectContent>
+          </Select>
         </div>
 
         <div className="space-y-1.5">

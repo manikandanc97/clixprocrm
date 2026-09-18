@@ -5,6 +5,13 @@ import { Building2, X } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
 import { Label } from "@/shared/ui/label";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 interface CreateOrganizationModalProps {
   createModalOpen: boolean;
@@ -102,31 +109,37 @@ export function CreateOrganizationModal({
               <Label htmlFor="orgPlan" className="text-xs font-semibold">
                 Subscription Tier
               </Label>
-              <select
-                id="orgPlan"
-                value={newOrgPlan}
-                onChange={(e) => setNewOrgPlan(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium cursor-pointer"
+              <Select 
+                value={newOrgPlan} 
+                onValueChange={(val) => setNewOrgPlan(val)}
               >
-                <option value="free">Free Tier</option>
-                <option value="starter">Starter Plan (₹1,999/mo)</option>
-                <option value="pro">Pro Plan (₹4,999/mo)</option>
-                <option value="enterprise">Enterprise (₹14,999/mo)</option>
-              </select>
+                <SelectTrigger id="orgPlan" className="w-full h-10 px-3 bg-background border-border text-sm font-medium">
+                  <SelectValue placeholder="Select Subscription Tier" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="free">Free Tier</SelectItem>
+                  <SelectItem value="starter">Starter Plan (₹1,999/mo)</SelectItem>
+                  <SelectItem value="pro">Pro Plan (₹4,999/mo)</SelectItem>
+                  <SelectItem value="enterprise">Enterprise (₹14,999/mo)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
 
             <div className="space-y-1.5">
               <Label htmlFor="orgCurrency" className="text-xs font-semibold">
                 Primary Currency
               </Label>
-              <select
-                id="orgCurrency"
-                value={newOrgCurrency}
-                onChange={(e) => setNewOrgCurrency(e.target.value)}
-                className="w-full h-10 px-3 rounded-xl bg-background border border-border text-sm text-foreground focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary font-medium cursor-pointer"
+              <Select 
+                value={newOrgCurrency} 
+                onValueChange={(val) => setNewOrgCurrency(val)}
               >
-                <option value="INR">INR (₹)</option>
-              </select>
+                <SelectTrigger id="orgCurrency" className="w-full h-10 px-3 bg-background border-border text-sm font-medium">
+                  <SelectValue placeholder="Select Currency" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="INR">INR (₹)</SelectItem>
+                </SelectContent>
+              </Select>
             </div>
           </div>
 

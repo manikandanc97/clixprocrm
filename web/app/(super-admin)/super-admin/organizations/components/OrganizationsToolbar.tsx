@@ -12,6 +12,13 @@ import {
 } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 
 interface OrganizationsToolbarProps {
   planFilter: string;
@@ -47,29 +54,31 @@ export function OrganizationsToolbar({
       {/* Left: Filter Selects & Search Input */}
       <div className="flex flex-wrap items-center gap-2.5">
         {/* Plan Filter */}
-        <select
-          value={planFilter}
-          onChange={(e) => setPlanFilter(e.target.value)}
-          className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
-        >
-          <option value="ALL">All Plans</option>
-          <option value="free">Free</option>
-          <option value="starter">Starter</option>
-          <option value="growth">Growth</option>
-          <option value="business">Business</option>
-          <option value="enterprise">Enterprise</option>
-        </select>
+        <Select value={planFilter} onValueChange={setPlanFilter}>
+          <SelectTrigger className="h-9 w-[140px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+            <SelectValue placeholder="All Plans" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Plans</SelectItem>
+            <SelectItem value="free">Free</SelectItem>
+            <SelectItem value="starter">Starter</SelectItem>
+            <SelectItem value="growth">Growth</SelectItem>
+            <SelectItem value="business">Business</SelectItem>
+            <SelectItem value="enterprise">Enterprise</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Publish / Status Filter */}
-        <select
-          value={statusFilter}
-          onChange={(e) => setStatusFilter(e.target.value)}
-          className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
-        >
-          <option value="ALL">All Status</option>
-          <option value="ACTIVE">Published (Active)</option>
-          <option value="SUSPENDED">Draft (Suspended)</option>
-        </select>
+        <Select value={statusFilter} onValueChange={setStatusFilter}>
+          <SelectTrigger className="h-9 w-[160px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="ALL">All Status</SelectItem>
+            <SelectItem value="ACTIVE">Published (Active)</SelectItem>
+            <SelectItem value="SUSPENDED">Draft (Suspended)</SelectItem>
+          </SelectContent>
+        </Select>
 
         {/* Search Input */}
         <div className="relative w-full sm:w-64 group">

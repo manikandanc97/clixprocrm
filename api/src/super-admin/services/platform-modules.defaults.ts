@@ -275,7 +275,7 @@ export const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
   },
   {
     key: 'sa_users',
-    label: 'Platform Users',
+    label: 'Users',
     icon: 'UserCog',
     route: '/super-admin/users',
     group: 'Platform',
@@ -286,7 +286,7 @@ export const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
   },
   {
     key: 'sa_modules',
-    label: 'Platform Modules',
+    label: 'Modules',
     icon: 'Layers',
     route: '/super-admin/modules',
     group: 'Platform',
@@ -385,7 +385,7 @@ export const DEFAULT_SUPER_ADMIN_NAV_MENUS = [
   },
   {
     key: 'sa_settings',
-    label: 'Platform Settings',
+    label: 'Settings',
     icon: 'Settings',
     route: '/super-admin/settings',
     group: 'Configuration',

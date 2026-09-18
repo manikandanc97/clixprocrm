@@ -14,6 +14,14 @@ import {
   AlertTriangle,
   X,
 } from "lucide-react";
+import { Input } from "@/shared/ui/input";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/shared/ui/select";
 import { useSearchParams } from "next/navigation";
 import { toast } from "sonner";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
@@ -673,42 +681,50 @@ export default function SuperAdminModulesPage() {
           {/* Left: Filter Selects & Search */}
           <div className="flex flex-wrap items-center gap-2.5">
             {/* Group Filter */}
-            <select
-              value={groupFilter}
-              onChange={(e) => {
-                setGroupFilter(e.target.value);
+            <Select 
+              value={groupFilter} 
+              onValueChange={(val) => {
+                setGroupFilter(val);
                 setCurrentPage(1);
               }}
-              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
-              <option value="ALL">All Groups</option>
-              {availableGroups.map((g) => (
-                <option key={g} value={g}>
-                  Group: {g}
-                </option>
-              ))}
-            </select>
+              <SelectTrigger className="h-9 w-[160px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+                <SelectValue placeholder="All Groups" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Groups</SelectItem>
+                {availableGroups.map((g) => (
+                  <SelectItem key={g} value={g}>
+                    Group: {g}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
 
             {/* Status Filter */}
-            <select
-              value={statusFilter}
-              onChange={(e) => {
-                setStatusFilter(e.target.value as "ALL" | "ENABLED" | "DISABLED");
+            <Select 
+              value={statusFilter} 
+              onValueChange={(val) => {
+                setStatusFilter(val as "ALL" | "ENABLED" | "DISABLED");
                 setCurrentPage(1);
               }}
-              className="h-9 px-3 rounded-lg bg-background border border-border/70 text-xs font-semibold text-foreground shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary cursor-pointer"
             >
-              <option value="ALL">All Statuses</option>
-              <option value="ENABLED">Active Only</option>
-              <option value="DISABLED">Inactive Only</option>
-            </select>
+              <SelectTrigger className="h-9 w-[140px] text-xs font-semibold bg-background border-border/70 shadow-xs focus:ring-primary/20">
+                <SelectValue placeholder="All Statuses" />
+              </SelectTrigger>
+              <SelectContent>
+                <SelectItem value="ALL">All Statuses</SelectItem>
+                <SelectItem value="ENABLED">Active Only</SelectItem>
+                <SelectItem value="DISABLED">Inactive Only</SelectItem>
+              </SelectContent>
+            </Select>
 
             {/* Search Input */}
             <div className="relative w-full sm:w-64 group">
               <div className="absolute left-2.5 top-1/2 -translate-y-1/2 pointer-events-none flex items-center justify-center">
                 <Search className="w-3.5 h-3.5 text-muted-foreground group-focus-within:text-primary transition-colors" />
               </div>
-              <input
+              <Input
                 value={search}
                 onChange={(e) => {
                   setSearch(e.target.value);
@@ -719,7 +735,7 @@ export default function SuperAdminModulesPage() {
                     ? "Search modules by name, route..."
                     : "Search admin menus..."
                 }
-                className="h-9 w-full pl-8 pr-8 rounded-lg bg-background border border-border/70 text-xs shadow-xs focus:outline-none focus:ring-2 focus:ring-primary/20 focus:border-primary"
+                className="h-9 pl-8 pr-8 rounded-lg bg-background border-border/70 text-xs shadow-xs focus-visible:ring-2 focus-visible:ring-primary/20"
               />
               {search && (
                 <button
