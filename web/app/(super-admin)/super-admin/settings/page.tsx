@@ -45,6 +45,7 @@ import {
   CRMPageHeader,
 } from "@/shared/components/crm";
 import { compareFormValues } from "@/shared/hooks/use-dirty-form";
+import { Skeleton } from "@/shared/ui/skeleton";
 
 const CURRENCY_OPTIONS = [
   { value: "INR", label: "INR (₹) - Indian Rupee" },
@@ -294,8 +295,85 @@ export default function SuperAdminSettingsPage() {
       />
 
       {loading ? (
-        <div className="flex items-center justify-center p-12">
-          <RefreshCw className="h-6 w-6 animate-spin text-emerald-600" />
+        <div className="space-y-4 sm:space-y-5 animate-pulse pb-2">
+          {/* GENERAL PLATFORM Skeleton */}
+          <div className="p-6 rounded-2xl bg-card border border-border shadow-card space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+              <Skeleton className="h-3 w-28" />
+            </div>
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-4 pt-1">
+              <div className="space-y-1.5 md:col-span-2">
+                <Skeleton className="h-3 w-24" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+              </div>
+              <div className="space-y-1.5">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+                <Skeleton className="h-2 w-48 mt-1" />
+              </div>
+              <div className="space-y-1.5">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+                <Skeleton className="h-2 w-48 mt-1" />
+              </div>
+              <div className="space-y-1.5 md:col-span-2">
+                <Skeleton className="h-3 w-32" />
+                <Skeleton className="h-10 w-full rounded-xl" />
+                <Skeleton className="h-2 w-48 mt-1" />
+              </div>
+            </div>
+          </div>
+
+          {/* WORKSPACE & REGISTRATION Skeleton */}
+          <div className="p-6 rounded-2xl bg-card border border-border shadow-card space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-48" />
+              </div>
+              <Skeleton className="h-3 w-32" />
+            </div>
+            <div className="space-y-3 pt-1">
+              {[1, 2, 3, 4].map((i) => (
+                <div key={i} className="flex items-start space-x-3 p-4 rounded-xl border border-border/40">
+                  <Skeleton className="h-4 w-4 rounded-sm mt-0.5" />
+                  <div className="space-y-2 flex-1">
+                    <Skeleton className="h-3 w-48" />
+                    <Skeleton className="h-2 w-3/4" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* SYSTEM INFORMATION Skeleton */}
+          <div className="p-6 rounded-2xl bg-card border border-border shadow-card space-y-4">
+            <div className="flex items-center justify-between">
+              <div className="flex items-center gap-2">
+                <Skeleton className="h-4 w-4 rounded" />
+                <Skeleton className="h-4 w-40" />
+              </div>
+              <Skeleton className="h-5 w-24 rounded-md" />
+            </div>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-5 gap-3 pt-1">
+              {[1, 2, 3, 4, 5].map((i) => (
+                <div key={i} className="p-3.5 rounded-xl border border-border/40 text-center flex flex-col items-center justify-center space-y-2 h-20">
+                  <Skeleton className="h-2 w-20" />
+                  <Skeleton className="h-3 w-16" />
+                </div>
+              ))}
+            </div>
+          </div>
+
+          {/* Action Bar Skeleton */}
+          <div className="flex items-center justify-between pt-2">
+            <Skeleton className="h-3 w-48" />
+            <Skeleton className="h-10 w-32 rounded-xl" />
+          </div>
         </div>
       ) : (
         <form onSubmit={handleSave} className="space-y-4 sm:space-y-5">

@@ -66,8 +66,10 @@ export default function SuperAdminLayout({
           {/* Main Content Area */}
           <div className="flex flex-1 flex-col overflow-hidden min-w-0 h-full w-full">
             <SuperAdminHeader />
-            <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col kanban-board-scroll">
-              <div className="w-full min-h-full flex-1 flex flex-col pb-20 md:pb-0">{children}</div>
+            <main className="flex-1 overflow-y-auto overflow-x-hidden min-h-0 flex flex-col kanban-board-scroll mb-3.5">
+              <div className="w-full min-h-full flex flex-col">
+                {children}
+              </div>
             </main>
           </div>
 
