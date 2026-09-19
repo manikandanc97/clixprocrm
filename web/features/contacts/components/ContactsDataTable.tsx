@@ -7,7 +7,7 @@ import { CRMActionMenu, CRMActionMenuItemConfig } from "@/shared/components/crm/
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { Badge } from "@/shared/ui/badge";
 import { Checkbox } from "@/shared/ui/checkbox";
-import { formatCurrency, formatDate } from "@/shared/utils/formatters";
+import { formatCurrency, formatDate, LEAD_STATUS_LABELS } from "@/shared/utils/formatters";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
 import type { ContactItem } from "../hooks/use-contacts-data";
@@ -147,7 +147,7 @@ export const ContactsDataTable: React.FC<ContactsDataTableProps> = ({
       {
         header: "Status",
         cell: (contact) => {
-          // Status badge mapping
+          // Status badge mapping — use raw DB value for color variant
           let statusVariant: "slate" | "emerald" | "indigo" | "neutral" | "rose" | "amber" | "blue" = "slate";
           if (contact.type === "Customer") {
             statusVariant =
@@ -157,18 +157,32 @@ export const ContactsDataTable: React.FC<ContactsDataTableProps> = ({
                 ? "indigo"
                 : "neutral";
           } else {
-            const s = (contact.status || contact.stage || "").toLowerCase();
-            if (s.includes("won")) statusVariant = "emerald";
-            else if (s.includes("lost")) statusVariant = "rose";
-            else if (s.includes("proposal")) statusVariant = "indigo";
-            else if (s.includes("contacted")) statusVariant = "amber";
-            else if (s.includes("new")) statusVariant = "blue";
+            const rawStage = (contact.status || contact.stage || "").toUpperCase();
+            if (rawStage === "WON") statusVariant = "emerald";
+            else if (rawStage === "LOST") statusVariant = "rose";
+            else if (rawStage === "PROPOSAL_SENT") statusVariant = "indigo";
+            else if (rawStage === "CONTACTED") statusVariant = "amber";
+            else statusVariant = "blue";
           }
 
+          // Map the raw DB stage to the pipeline display label
+          const STAGE_DISPLAY_MAP: Record<string, string> = {
+            NEW: "New Lead",
+            CONTACTED: "Negotiation",
+            PROPOSAL_SENT: "Proposal",
+            WON: "Won",
+            LOST: "Lost",
+            // Customer statuses
+            ACTIVE: "Active",
+            PREMIUM: "Premium",
+            INACTIVE: "Inactive",
+          };
+
+          const rawStageKey = (contact.status || contact.stage || "NEW").toUpperCase();
           const resolvedStatus =
             contact.type === "Customer"
-              ? contact.status || "ACTIVE"
-              : contact.status || contact.stage || "NEW";
+              ? (STAGE_DISPLAY_MAP[contact.status?.toUpperCase() || "ACTIVE"] || contact.status || "Active")
+              : (STAGE_DISPLAY_MAP[rawStageKey] || rawStageKey);
 
           return <StatusBadge status={resolvedStatus} variant={statusVariant} />;
         },

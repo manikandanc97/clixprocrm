@@ -411,8 +411,8 @@ export default function ContactsPage() {
                   <SelectItem value="active">Active</SelectItem>
                   <SelectItem value="won">Won / Converted</SelectItem>
                   <SelectItem value="proposal">Proposal</SelectItem>
-                  <SelectItem value="contacted">Contacted</SelectItem>
-                  <SelectItem value="new">New</SelectItem>
+                  <SelectItem value="contacted">Negotiation</SelectItem>
+                  <SelectItem value="new">New Lead</SelectItem>
                   <SelectItem value="lost">Lost / Inactive</SelectItem>
                 </SelectContent>
               </Select>

@@ -145,6 +145,30 @@ export class LeadsService {
         },
       });
 
+      // Auto-create a Deal so it shows up in Deals & Pipeline immediately
+      const dealStageMap: Record<string, string> = {
+        NEW: 'NEW',
+        CONTACTED: 'NEGOTIATION',
+        PROPOSAL_SENT: 'PROPOSAL',
+        WON: 'WON',
+        LOST: 'LOST',
+      };
+      const dealStage = dealStageMap[data.stage || 'NEW'] || 'NEW';
+      const dealDisplayName = (companyName || data.name || 'Deal').trim();
+
+      await tx.deal.create({
+        data: {
+          tenantId,
+          name: dealDisplayName,
+          companyId: companyId || null,
+          customerId: null,
+          leadId: lead.id,
+          value: data.valueAmount || data.value || 0,
+          stage: dealStage as any,
+          ownerId: data.assignedToId || userId,
+        },
+      });
+
       // Return decrypted lead for immediate API response
       return this.decryptLead(lead);
     });

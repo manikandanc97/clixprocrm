@@ -30,7 +30,7 @@ import { DealDrawer } from "./DealDrawer";
 import { WonLostModal, WonLostSubmitData } from "./WonLostModal";
 import { ConfirmMoveModal } from "./ConfirmMoveModal";
 
-const stages: PipelineLeadType["stage"][] = [DealStage.NEW, DealStage.QUALIFIED, DealStage.PROPOSAL, DealStage.NEGOTIATION, DealStage.WON, DealStage.LOST];
+const stages: PipelineLeadType["stage"][] = [DealStage.NEW, DealStage.PROPOSAL, DealStage.NEGOTIATION, DealStage.WON, DealStage.LOST];
 
 interface PipelineBoardProps {
   items: PipelineLeadType[];

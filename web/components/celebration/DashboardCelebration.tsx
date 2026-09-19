@@ -5,18 +5,7 @@ import type { Options as ConfettiOptions } from "canvas-confetti";
 import { motion, AnimatePresence, useReducedMotion } from "framer-motion";
 import { Sparkles, CheckCircle2 } from "lucide-react";
 
-// ClixProCRM curated celebration colors
-const CELEBRATION_COLORS = [
-  "#10B981", // Green (Emerald 500)
-  "#059669", // Emerald 600
-  "#34D399", // Mint / Light Emerald
-  "#06B6D4", // Cyan 500
-  "#3B82F6", // Blue 500
-  "#8B5CF6", // Purple 500
-  "#FBBF24", // Yellow / Gold
-  "#F97316", // Orange 500
-  "#EC4899", // Pink 500
-];
+
 
 export function DashboardCelebration() {
   const shouldReduceMotion = useReducedMotion();
@@ -105,162 +94,49 @@ export function DashboardCelebration() {
       };
 
     // -------------------------------------------------------------
-    // Phase 1 (T = 100ms): Precursor top sparkle flurry
+    // Premium SaaS Subtle Sparkler Burst (T = 150ms)
     // -------------------------------------------------------------
     const t1 = setTimeout(() => {
+      // Small, soft glow particles simulating a quick burst of stars/sparkles
       fire({
-        particleCount: Math.floor(35 * multiplier),
+        particleCount: Math.floor(40 * multiplier),
+        spread: 70,
+        startVelocity: 30,
+        origin: { x: 0.5, y: 0.15 }, // Near the floating banner
+        colors: ["#34D399", "#FBBF24", "#06B6D4", "#EC4899", "#10B981"],
+        ticks: 120, // Short-lived (approx 1.5s - 2s depending on frame rate)
+        gravity: 0.6, // Soft floating effect
+        scalar: 0.8, // Small particles
+        shapes: ["circle", "square"],
+        disableForReducedMotion: true,
+      });
+
+      // Secondary even smaller overlay for "sparkle" effect
+      fire({
+        particleCount: Math.floor(25 * multiplier),
         spread: 90,
-        startVelocity: 26,
+        startVelocity: 22,
         origin: { x: 0.5, y: 0.15 },
-        colors: ["#34D399", "#FBBF24", "#06B6D4", "#EC4899"],
-        ticks: 180,
-        gravity: 0.8,
-        scalar: 0.9,
+        colors: ["#FDE68A", "#FFFFFF"], // Bright center sparks
+        ticks: 100, // Even shorter
+        gravity: 0.4,
+        scalar: 0.5,
         shapes: ["circle"],
         disableForReducedMotion: true,
       });
-    }, 100);
+    }, 150);
 
-    // -------------------------------------------------------------
-    // Phase 2 (T = 300ms): MAIN 5-ORIGIN CANNON BURST
-    // -------------------------------------------------------------
-    const t2 = setTimeout(() => {
-      // 1. Central Hero Burst
-      fire({
-        particleCount: Math.floor(90 * multiplier),
-        spread: 140,
-        startVelocity: 46,
-        origin: { x: 0.5, y: 0.35 },
-        colors: CELEBRATION_COLORS,
-        ticks: 260,
-        gravity: 0.95,
-        scalar: 1.1,
-        shapes: ["square", "circle"],
-        disableForReducedMotion: true,
-      });
-
-      // 2. Upper-Left Canopy
-      fire({
-        particleCount: Math.floor(55 * multiplier),
-        angle: 310,
-        spread: 80,
-        startVelocity: 40,
-        origin: { x: 0.12, y: 0.18 },
-        colors: CELEBRATION_COLORS,
-        ticks: 240,
-        gravity: 0.9,
-        scalar: 0.95,
-        shapes: ["square", "circle"],
-        disableForReducedMotion: true,
-      });
-
-      // 3. Upper-Right Canopy
-      fire({
-        particleCount: Math.floor(55 * multiplier),
-        angle: 230,
-        spread: 80,
-        startVelocity: 40,
-        origin: { x: 0.88, y: 0.18 },
-        colors: CELEBRATION_COLORS,
-        ticks: 240,
-        gravity: 0.9,
-        scalar: 0.95,
-        shapes: ["square", "circle"],
-        disableForReducedMotion: true,
-      });
-
-      // 4. Lateral Left Inward Cannon
-      fire({
-        particleCount: Math.floor(45 * multiplier),
-        angle: 55,
-        spread: 60,
-        startVelocity: 52,
-        origin: { x: 0.03, y: 0.55 },
-        colors: CELEBRATION_COLORS,
-        ticks: 260,
-        gravity: 1.02,
-        scalar: 1.0,
-        shapes: ["square"],
-        disableForReducedMotion: true,
-      });
-
-      // 5. Lateral Right Inward Cannon
-      fire({
-        particleCount: Math.floor(45 * multiplier),
-        angle: 125,
-        spread: 60,
-        startVelocity: 52,
-        origin: { x: 0.97, y: 0.55 },
-        colors: CELEBRATION_COLORS,
-        ticks: 260,
-        gravity: 1.02,
-        scalar: 1.0,
-        shapes: ["square"],
-        disableForReducedMotion: true,
-      });
-    }, 300);
-
-    // -------------------------------------------------------------
-    // Phase 3 (T = 800ms): Secondary Cascading Rains
-    // -------------------------------------------------------------
-    const t3 = setTimeout(() => {
-      fire({
-        particleCount: Math.floor(40 * multiplier),
-        spread: 85,
-        startVelocity: 28,
-        origin: { x: 0.3, y: 0.25 },
-        colors: ["#10B981", "#3B82F6", "#FBBF24", "#EC4899"],
-        ticks: 210,
-        gravity: 0.85,
-        scalar: 0.9,
-        shapes: ["circle", "square"],
-        disableForReducedMotion: true,
-      });
-
-      fire({
-        particleCount: Math.floor(40 * multiplier),
-        spread: 85,
-        startVelocity: 28,
-        origin: { x: 0.7, y: 0.25 },
-        colors: ["#059669", "#8B5CF6", "#F97316", "#06B6D4"],
-        ticks: 210,
-        gravity: 0.85,
-        scalar: 0.9,
-        shapes: ["circle", "square"],
-        disableForReducedMotion: true,
-      });
-    }, 800);
-
-    // -------------------------------------------------------------
-    // Phase 4 (T = 1400ms): Finale micro-sparkle flurry
-    // -------------------------------------------------------------
-    const t4 = setTimeout(() => {
-      fire({
-        particleCount: Math.floor(35 * multiplier),
-        spread: 120,
-        startVelocity: 24,
-        origin: { x: 0.5, y: 0.2 },
-        colors: ["#34D399", "#FBBF24", "#06B6D4", "#EC4899"],
-        ticks: 190,
-        gravity: 0.75,
-        scalar: 0.85,
-        shapes: ["circle"],
-        disableForReducedMotion: true,
-      });
-    }, 1400);
-
-    // Fade out floating banner at T = 2800ms
+    // Fade out floating banner at T = 2000ms (keeps the interaction fast & non-intrusive)
     const tHideBanner = setTimeout(() => {
       setShowSuccessBanner(false);
-    }, 2800);
+    }, 2000);
 
-    // Completely unmount celebration overlay after particles dissolve (T = 4000ms)
+    // Completely unmount celebration overlay after particles dissolve (T = 2500ms)
     const tComplete = setTimeout(() => {
       setIsActivating(false);
-    }, 4000);
+    }, 2500);
 
-    timeoutsRef.current.push(t1, t2, t3, t4, tHideBanner, tComplete);
+    timeoutsRef.current.push(t1, tHideBanner, tComplete);
     };
 
     runConfettiCelebration();

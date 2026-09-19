@@ -254,7 +254,7 @@ export default function SecurityCenterPage() {
       )}
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col">
+      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
           {/* Left: Filter Selects & Search */}
@@ -324,8 +324,8 @@ export default function SecurityCenterPage() {
         </div>
 
         {/* Table Content */}
-        <div className="overflow-x-auto min-h-0 relative flex flex-col">
-          <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
+        <div className="overflow-x-auto min-h-0 relative flex flex-col flex-1">
+          <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed h-full">
             <colgroup>
               <col style={{ width: "160px" }} />
               <col style={{ width: "120px" }} />
@@ -421,9 +421,9 @@ export default function SecurityCenterPage() {
                   </tr>
                 ))
               ) : (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground align-middle border-0">
-                    <div className="flex flex-col items-center justify-center py-6">
+                <tr className="h-full">
+                  <td colSpan={6} className="p-6 text-center text-muted-foreground align-middle border-0 h-full">
+                    <div className="flex flex-col items-center justify-center py-6 h-full min-h-[300px]">
                       <EmptyState
                         icon={ShieldCheck}
                         title="No matching security incidents found"

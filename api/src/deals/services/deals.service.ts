@@ -306,6 +306,22 @@ export class DealsService {
             dealId: updated.id,
           },
         });
+        
+        if (oldDeal.leadId) {
+          let leadStage = null;
+          if (cleanData.stage === 'NEW') leadStage = 'NEW';
+          else if (cleanData.stage === 'PROPOSAL') leadStage = 'PROPOSAL_SENT';
+          else if (cleanData.stage === 'NEGOTIATION') leadStage = 'CONTACTED';
+          else if (cleanData.stage === 'WON') leadStage = 'WON';
+          else if (cleanData.stage === 'LOST') leadStage = 'LOST';
+          
+          if (leadStage) {
+            await tx.lead.update({
+              where: { id: oldDeal.leadId },
+              data: { stage: leadStage as any }
+            });
+          }
+        }
       }
 
       if (cleanData.stage === 'WON' && oldDeal.stage !== 'WON') {

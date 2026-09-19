@@ -25,6 +25,53 @@ export class PipelineService {
   async getPipeline(tenantId: string) {
     const currency = await this.getTenantCurrency(tenantId);
     return this.prisma.withTenantContext({ tenantId }, async (tx) => {
+      // Hotfix: Find any deal whose name is actually an encrypted string (e.g. from lead creation bug)
+      const allDeals = await tx.deal.findMany({ where: { tenantId, deletedAt: null } });
+      for (const d of allDeals) {
+        let nameNeedsUpdate = false;
+        let newName = d.name;
+        
+        // If name looks like a base64 encrypted string (long)
+        if (d.name && d.name.length > 20) {
+          const nameToDecrypt = d.name.endsWith(' Deal') ? d.name.slice(0, -5) : d.name;
+          if (!nameToDecrypt.includes(' ')) {
+            const decrypted = this.enc.decrypt(nameToDecrypt);
+            if (decrypted && decrypted !== nameToDecrypt) {
+              newName = d.name.endsWith(' Deal') ? `${decrypted} Deal` : decrypted;
+              nameNeedsUpdate = true;
+            }
+          }
+        }
+        
+        // Also fix the stage if it's stuck in NEW or QUALIFIED
+        let stageNeedsUpdate = false;
+        let newStage = d.stage;
+        if (d.stage === 'QUALIFIED' as any) {
+          newStage = 'NEGOTIATION' as any;
+          stageNeedsUpdate = true;
+        } else if (d.leadId && d.stage === 'NEW') {
+          const linkedLead = await tx.lead.findUnique({ where: { id: d.leadId } });
+          if (linkedLead) {
+            if (linkedLead.stage === 'CONTACTED') newStage = 'NEGOTIATION' as any;
+            else if (linkedLead.stage === 'PROPOSAL_SENT') newStage = 'PROPOSAL' as any;
+            else if (linkedLead.stage === 'WON') newStage = 'WON' as any;
+            else if (linkedLead.stage === 'LOST') newStage = 'LOST' as any;
+            
+            if (newStage !== d.stage) stageNeedsUpdate = true;
+          }
+        }
+
+        if (nameNeedsUpdate || stageNeedsUpdate) {
+          await tx.deal.update({
+            where: { id: d.id },
+            data: { 
+              ...(nameNeedsUpdate ? { name: newName } : {}),
+              ...(stageNeedsUpdate ? { stage: newStage } : {})
+            }
+          });
+        }
+      }
+
       const deals = await tx.deal.findMany({
         where: { tenantId, deletedAt: null },
         orderBy: [{ stage: 'asc' }, { updatedAt: 'desc' }],
@@ -37,8 +84,10 @@ export class PipelineService {
           expectedCloseDate: true,
           createdAt: true,
           updatedAt: true,
+          leadId: true,
           company: { select: { name: true } },
           customer: { select: { name: true } },
+          lead: { select: { name: true, company: true } },
         },
       });
 
@@ -154,9 +203,29 @@ export class PipelineService {
             ? new Date(expectedCloseDate)
             : expectedCloseDate;
 
+        // Decrypt the deal name — fall back to company/customer name if decryption yields ciphertext
+        let displayName = deal.name;
+        const nameToDecrypt = deal.name.endsWith(' Deal') ? deal.name.slice(0, -5) : deal.name;
+        try {
+          const dec = this.enc.decrypt(nameToDecrypt);
+          if (dec && dec !== nameToDecrypt) {
+            displayName = deal.name.endsWith(' Deal') ? `${dec} Deal` : dec;
+          }
+        } catch (_) {}
+        
+        // If name still looks encrypted (long string, no spaces in the base part), use lead name or company
+        if (displayName && displayName.length > 30 && !nameToDecrypt.includes(' ')) {
+          let leadName = '';
+          try { leadName = deal.lead?.name ? (this.enc.decrypt(deal.lead.name) || '') : ''; } catch (_) {}
+          let leadCompany = '';
+          try { leadCompany = deal.lead?.company ? (this.enc.decrypt(deal.lead.company) || '') : ''; } catch (_) {}
+          displayName = leadCompany || leadName || displayCompany || 'Deal';
+          if (deal.name.endsWith(' Deal') && !displayName.endsWith(' Deal')) displayName += ' Deal';
+        }
+
         items[idx] = {
           id: deal.id,
-          name: deal.name,
+          name: displayName,
           company: displayCompany,
           value: formatCurrency(deal.value, currency),
           valueAmount: dealValue,

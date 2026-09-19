@@ -11,9 +11,9 @@ import { DealStage } from "@/shared/types/pipeline";
 // ─── Status / Label Maps ──────────────────────────────────────────────────────
 
 export const LEAD_STATUS_LABELS: Record<string, string> = {
-  [LeadStatus.NEW]: "New",
-  [LeadStatus.CONTACTED]: "Contacted",
-  [LeadStatus.PROPOSAL_SENT]: "Proposal Sent",
+  [LeadStatus.NEW]: "New Lead",
+  [LeadStatus.CONTACTED]: "Negotiation",
+  [LeadStatus.PROPOSAL_SENT]: "Proposal",
   [LeadStatus.WON]: "Won",
   [LeadStatus.LOST]: "Lost",
 };
@@ -21,7 +21,7 @@ export const LEAD_STATUS_LABELS: Record<string, string> = {
 export const PIPELINE_STAGE_LABELS: Record<string, string> = {
   [DealStage.NEW]: "New Lead",
   [DealStage.QUALIFIED]: "Qualified",
-  [DealStage.PROPOSAL]: "Proposal Sent",
+  [DealStage.PROPOSAL]: "Proposal",
   [DealStage.NEGOTIATION]: "Negotiation",
   [DealStage.WON]: "Won",
   [DealStage.LOST]: "Lost",
