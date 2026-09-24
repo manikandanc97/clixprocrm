@@ -266,7 +266,12 @@ client.get = function <T = unknown, R = AxiosResponse<T>, D = unknown>(
     return inFlightGetRequests.get(dedupeKey) as Promise<R>;
   }
 
-  const promise = originalGet<T, R, D>(url, config).finally(() => {
+  const fetchPromise = originalGet<T, R, D>(url, config);
+  const fallbackTimeout = new Promise<R>((_, reject) =>
+    setTimeout(() => reject(new Error("Axios request deduplication timeout")), 25000)
+  );
+
+  const promise = Promise.race([fetchPromise, fallbackTimeout]).finally(() => {
     inFlightGetRequests.delete(dedupeKey);
   });
 

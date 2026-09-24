@@ -232,7 +232,13 @@ export const changePassword = async (newPassword: string) => {
 
 export const fetchCurrentUser = async (): Promise<AuthUser | null> => {
   try {
-    const response = await client.get<AuthResponse>("/auth/me");
+    const fetchPromise = client.get<AuthResponse>("/auth/me");
+    const timeoutPromise = new Promise<never>((_, reject) => 
+      setTimeout(() => reject(new Error("Request timed out")), 15000)
+    );
+    
+    const response = await Promise.race([fetchPromise, timeoutPromise]);
+    
     if (!response.data?.success) {
       return null;
     }
