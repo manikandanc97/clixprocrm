@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useState, useMemo } from "react";
 import {
   ScrollText,
   Search,
@@ -8,6 +8,7 @@ import {
   X,
   Download,
   Shield,
+  Eye,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Input } from "@/shared/ui/input";
@@ -31,7 +32,10 @@ import {
   TruncatedText,
   CRMPagination,
 } from "@/shared/components/crm";
-import { EmptyState } from "@/shared/components/EmptyState";
+import {
+  CRMDataTable,
+  CRMDataTableColumn,
+} from "@/shared/components/crm/CRMDataTable";
 import { SortDirection } from "@/shared/components/DataTableColumnHeader";
 
 export default function SuperAdminAuditLogsPage() {
@@ -194,6 +198,88 @@ export default function SuperAdminAuditLogsPage() {
     currentPage * rowsPerPage
   );
 
+  const columns = useMemo<CRMDataTableColumn<PlatformAuditLog>[]>(() => {
+    return [
+      {
+        header: "Action",
+        sortable: true,
+        sortDirection: sortConfig.key === "action" ? sortConfig.direction : null,
+        onSort: (dir) => handleSort("action", dir),
+        cell: (log) => (
+          <div className="font-mono text-xs font-bold text-foreground truncate">
+            <TruncatedText text={log.action} lines={1} />
+          </div>
+        ),
+        className: "w-[220px]",
+      },
+      {
+        header: "Module",
+        sortable: true,
+        sortDirection: sortConfig.key === "module" ? sortConfig.direction : null,
+        onSort: (dir) => handleSort("module", dir),
+        cell: (log) => (
+          <span className="px-2.5 py-0.5 rounded-md bg-muted/70 border border-border/70 text-[11px] font-bold">
+            {log.module}
+          </span>
+        ),
+        className: "w-[130px]",
+      },
+      {
+        header: "Organization",
+        sortable: true,
+        sortDirection: sortConfig.key === "organization" ? sortConfig.direction : null,
+        onSort: (dir) => handleSort("organization", dir),
+        cell: (log) => (
+          <div className="text-xs font-semibold text-foreground truncate">
+            <TruncatedText text={log.organizationName} lines={1} />
+          </div>
+        ),
+        className: "w-[200px]",
+      },
+      {
+        header: "Actor",
+        sortable: true,
+        sortDirection: sortConfig.key === "actor" ? sortConfig.direction : null,
+        onSort: (dir) => handleSort("actor", dir),
+        cell: (log) => (
+          <div className="text-xs text-muted-foreground truncate">
+            <TruncatedText text={log.actor} lines={1} />
+          </div>
+        ),
+        className: "w-[180px]",
+      },
+      {
+        header: "Timestamp",
+        sortable: true,
+        sortDirection: sortConfig.key === "createdAt" ? sortConfig.direction : null,
+        onSort: (dir) => handleSort("createdAt", dir),
+        cell: (log) => (
+          <div>
+            <p className="font-semibold text-foreground">{new Date(log.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(log.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}</p>
+          </div>
+        ),
+        className: "w-[170px]",
+      },
+      {
+        header: "Details",
+        align: "right",
+        cell: (log) => (
+          <Button
+            variant="ghost"
+            size="sm"
+            onClick={() => setSelectedLog(log)}
+            className="h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg cursor-pointer"
+          >
+            View
+          </Button>
+        ),
+        className: "w-[80px] text-right",
+        headerClassName: "w-[80px] text-right",
+      },
+    ];
+  }, [sortConfig]);
+
   return (
     <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
@@ -286,143 +372,16 @@ export default function SuperAdminAuditLogsPage() {
         </div>
 
         {/* Table Content */}
-        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
-          <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed">
-            <colgroup>
-              <col style={{ width: "220px" }} />
-              <col style={{ width: "130px" }} />
-              <col style={{ width: "200px" }} />
-              <col style={{ width: "180px" }} />
-              <col style={{ width: "170px" }} />
-              <col style={{ width: "80px" }} />
-            </colgroup>
-            <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
-              <tr className="text-xs font-bold text-foreground">
-                <th
-                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
-                  onClick={() => handleSort("action", sortConfig.key === "action" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Action</span>
-                    {sortConfig.key === "action" && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
-                    )}
-                  </div>
-                </th>
-                <th
-                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
-                  onClick={() => handleSort("module", sortConfig.key === "module" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Module</span>
-                    {sortConfig.key === "module" && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
-                    )}
-                  </div>
-                </th>
-                <th
-                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
-                  onClick={() => handleSort("organization", sortConfig.key === "organization" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Organization</span>
-                    {sortConfig.key === "organization" && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
-                    )}
-                  </div>
-                </th>
-                <th
-                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
-                  onClick={() => handleSort("actor", sortConfig.key === "actor" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Actor</span>
-                    {sortConfig.key === "actor" && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
-                    )}
-                  </div>
-                </th>
-                <th
-                  className="px-4 py-3.5 text-left border-r border-border/60 bg-muted cursor-pointer select-none"
-                  onClick={() => handleSort("createdAt", sortConfig.key === "createdAt" ? (sortConfig.direction === "asc" ? "desc" : null) : "asc")}
-                >
-                  <div className="flex items-center gap-1.5">
-                    <span>Timestamp</span>
-                    {sortConfig.key === "createdAt" && (
-                      <span className="text-[10px] text-emerald-600 dark:text-emerald-400">{sortConfig.direction === "asc" ? "↑" : "↓"}</span>
-                    )}
-                  </div>
-                </th>
-                <th className="w-20 px-4 py-3.5 text-right bg-muted">
-                  <span>Details</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40 text-xs">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse h-16">
-                    <td className="px-4 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
-                    <td className="px-4 py-4"><div className="h-5 w-20 bg-muted rounded-md" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-32 bg-muted rounded" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-28 bg-muted rounded" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
-                    <td className="px-4 py-4 text-right"><div className="h-8 w-14 bg-muted rounded-lg ml-auto" /></td>
-                  </tr>
-                ))
-              ) : paginatedLogs.length > 0 ? (
-                paginatedLogs.map((log) => (
-                  <tr
-                    key={log.id}
-                    className="group h-16 hover:bg-muted/30 transition-colors"
-                  >
-                    <td className="px-4 py-3.5 font-mono text-xs font-bold text-foreground truncate">
-                      <TruncatedText text={log.action} lines={1} />
-                    </td>
-                    <td className="px-4 py-3.5 text-xs font-semibold whitespace-nowrap">
-                      <span className="px-2.5 py-0.5 rounded-md bg-muted/70 border border-border/70 text-[11px] font-bold">
-                        {log.module}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-xs font-semibold text-foreground truncate">
-                      <TruncatedText text={log.organizationName} lines={1} />
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground truncate">
-                      <TruncatedText text={log.actor} lines={1} />
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground">
-                      <p className="font-semibold text-foreground">{new Date(log.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(log.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}</p>
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        onClick={() => setSelectedLog(log)}
-                        className="h-8 px-2.5 text-xs font-semibold text-muted-foreground hover:text-foreground hover:bg-muted rounded-lg cursor-pointer"
-                      >
-                        View
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr>
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground align-middle border-0">
-                    <div className="flex flex-col items-center justify-center py-6">
-                      <EmptyState
-                        icon={ScrollText}
-                        title="No audit logs found"
-                        description="No logs match your filter criteria."
-                        className="border-none bg-transparent shadow-none p-0 min-h-0"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <CRMDataTable<PlatformAuditLog>
+          data={paginatedLogs}
+          columns={columns}
+          isLoading={loading}
+          isError={false}
+          emptyIcon={ScrollText}
+          emptyTitle="No audit logs found"
+          emptyDescription="No logs match your filter criteria."
+          hasPagination={false}
+        />
 
         {/* Bottom Pagination */}
         <CRMPagination

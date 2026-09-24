@@ -41,6 +41,10 @@ import {
   EmptyState,
   CRMPagination,
 } from "@/shared/components/crm";
+import {
+  CRMDataTable,
+  CRMDataTableColumn,
+} from "@/shared/components/crm/CRMDataTable";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 
 export default function SecurityCenterPage() {
@@ -214,6 +218,98 @@ export default function SecurityCenterPage() {
     currentPage * rowsPerPage
   );
 
+  const columns = useMemo<CRMDataTableColumn<SecurityIncidentItem>[]>(() => {
+    return [
+      {
+        header: "Incident #",
+        cell: (inc) => (
+          <span className="font-mono font-bold text-foreground">
+            {inc.incidentNumber}
+          </span>
+        ),
+        className: "w-[160px]",
+      },
+      {
+        header: "Severity",
+        cell: (inc) => (
+          <span
+            className={cn(
+              "inline-flex items-center px-2.5 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider uppercase border shadow-xs",
+              inc.severity === "CRITICAL"
+                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                : inc.severity === "HIGH"
+                ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20"
+                : inc.severity === "MEDIUM"
+                ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
+                : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
+            )}
+          >
+            {inc.severity}
+          </span>
+        ),
+        className: "w-[120px]",
+      },
+      {
+        header: "Status",
+        cell: (inc) => (
+          <span
+            className={cn(
+              "inline-flex items-center px-2.5 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider uppercase border shadow-xs",
+              inc.status === "RESOLVED"
+                ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
+                : inc.status === "OPEN"
+                ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
+                : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
+            )}
+          >
+            {inc.status}
+          </span>
+        ),
+        className: "w-[120px]",
+      },
+      {
+        header: "Title",
+        cell: (inc) => (
+          <span className="font-medium text-foreground truncate block">
+            {inc.title}
+          </span>
+        ),
+        className: "w-[300px]",
+      },
+      {
+        header: "Detected",
+        cell: (inc) => (
+          <div className="text-xs text-muted-foreground">
+            <p className="font-semibold text-foreground">
+              {new Date(inc.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}
+            </p>
+            <p className="text-[11px] text-muted-foreground mt-0.5">
+              {new Date(inc.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}
+            </p>
+          </div>
+        ),
+        className: "w-[160px]",
+      },
+      {
+        header: "Actions",
+        align: "right",
+        cell: (inc) => (
+          <Button
+            size="sm"
+            variant="ghost"
+            onClick={() => setSelectedIncident(inc)}
+            className="gap-1.5 text-xs h-8 px-2.5 rounded-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
+          >
+            <AppIcon name="eye" icon={Eye} size={14} className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
+            <span>Inspect</span>
+          </Button>
+        ),
+        className: "w-24 text-right",
+        headerClassName: "w-24 text-right",
+      },
+    ];
+  }, [setSelectedIncident]);
+
   return (
     <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
@@ -239,7 +335,7 @@ export default function SecurityCenterPage() {
             </div>
           </div>
           <Button
-            size="sm"
+           size="sm"
             variant="outline"
             className="bg-background text-foreground text-xs"
             onClick={async () => {
@@ -324,119 +420,16 @@ export default function SecurityCenterPage() {
         </div>
 
         {/* Table Content */}
-        <div className="overflow-x-auto min-h-0 relative flex flex-col flex-1">
-          <table className="w-full text-left text-xs border-collapse min-w-[950px] table-fixed h-full">
-            <colgroup>
-              <col style={{ width: "160px" }} />
-              <col style={{ width: "120px" }} />
-              <col style={{ width: "120px" }} />
-              <col style={{ width: "300px" }} />
-              <col style={{ width: "160px" }} />
-              <col style={{ width: "90px" }} />
-            </colgroup>
-            <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
-              <tr className="text-xs font-bold text-foreground">
-                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
-                  <span>Incident #</span>
-                </th>
-                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
-                  <span>Severity</span>
-                </th>
-                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
-                  <span>Status</span>
-                </th>
-                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
-                  <span>Title</span>
-                </th>
-                <th className="px-4 py-3.5 text-left border-r border-border/60 bg-muted">
-                  <span>Detected</span>
-                </th>
-                <th className="w-24 px-4 py-3.5 text-right bg-muted">
-                  <span>Actions</span>
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40 text-xs">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse h-16">
-                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded font-mono" /></td>
-                    <td className="px-4 py-4"><div className="h-5 w-16 bg-muted rounded-md" /></td>
-                    <td className="px-4 py-4"><div className="h-5 w-16 bg-muted rounded-md" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-48 bg-muted rounded" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
-                    <td className="px-4 py-4 text-right"><div className="h-8 w-16 bg-muted rounded-lg ml-auto" /></td>
-                  </tr>
-                ))
-              ) : paginatedIncidents.length > 0 ? (
-                paginatedIncidents.map((inc) => (
-                  <tr key={inc.id} className="group h-16 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3.5 font-mono font-bold text-foreground">{inc.incidentNumber}</td>
-                    <td className="px-4 py-3.5">
-                      <span
-                        className={cn(
-                          "inline-flex items-center px-2.5 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider uppercase border shadow-xs",
-                          inc.severity === "CRITICAL"
-                            ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
-                            : inc.severity === "HIGH"
-                            ? "bg-orange-500/10 text-orange-600 dark:text-orange-400 border-orange-500/20"
-                            : inc.severity === "MEDIUM"
-                            ? "bg-amber-500/10 text-amber-600 dark:text-amber-400 border-amber-500/20"
-                            : "bg-blue-500/10 text-blue-600 dark:text-blue-400 border-blue-500/20"
-                        )}
-                      >
-                        {inc.severity}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <span
-                        className={cn(
-                          "inline-flex items-center px-2.5 py-0.5 rounded-md text-[10.5px] font-bold tracking-wider uppercase border shadow-xs",
-                          inc.status === "RESOLVED"
-                            ? "bg-emerald-500/10 text-emerald-600 dark:text-emerald-400 border-emerald-500/20"
-                            : inc.status === "OPEN"
-                            ? "bg-rose-500/10 text-rose-600 dark:text-rose-400 border-rose-500/20"
-                            : "bg-purple-500/10 text-purple-600 dark:text-purple-400 border-purple-500/20"
-                        )}
-                      >
-                        {inc.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 font-medium text-foreground truncate">{inc.title}</td>
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground">
-                      <p className="font-semibold text-foreground">{new Date(inc.createdAt).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" })}</p>
-                      <p className="text-[11px] text-muted-foreground mt-0.5">{new Date(inc.createdAt).toLocaleTimeString("en-US", { hour: "numeric", minute: "2-digit", hour12: true })}</p>
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
-                      <Button
-                        size="sm"
-                        variant="ghost"
-                        onClick={() => setSelectedIncident(inc)}
-                        className="gap-1.5 text-xs h-8 px-2.5 rounded-lg font-semibold text-muted-foreground hover:text-foreground hover:bg-muted cursor-pointer"
-                      >
-                        <AppIcon name="eye" icon={Eye} size={14} className="w-3.5 h-3.5 text-emerald-600 shrink-0" />
-                        <span>Inspect</span>
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              ) : (
-                <tr className="h-full">
-                  <td colSpan={6} className="p-6 text-center text-muted-foreground align-middle border-0 h-full">
-                    <div className="flex flex-col items-center justify-center py-6 h-full min-h-[300px]">
-                      <EmptyState
-                        icon={ShieldCheck}
-                        title="No matching security incidents found"
-                        description="All systems healthy and operating normally."
-                        className="border-none bg-transparent shadow-none p-0 min-h-0"
-                      />
-                    </div>
-                  </td>
-                </tr>
-              )}
-            </tbody>
-          </table>
-        </div>
+        <CRMDataTable<SecurityIncidentItem>
+          data={paginatedIncidents}
+          columns={columns}
+          isLoading={loading}
+          isError={false}
+          emptyIcon={ShieldCheck}
+          emptyTitle="No matching security incidents found"
+          emptyDescription="All systems healthy and operating normally."
+          hasPagination={false}
+        />
 
         {/* Bottom Pagination */}
         <CRMPagination

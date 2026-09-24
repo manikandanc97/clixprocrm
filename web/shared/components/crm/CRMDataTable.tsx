@@ -54,6 +54,12 @@ export interface CRMDataTableProps<T = unknown> {
   emptyTitle?: string;
   emptyDescription?: string;
   emptyIcon?: LucideIcon;
+  emptyAction?: {
+    label: string;
+    onClick?: () => void;
+    href?: string;
+    icon?: LucideIcon;
+  };
   hasPagination?: boolean;
   isLoading?: boolean;
   loadingRows?: number;
@@ -87,6 +93,7 @@ export function CRMDataTable<T = unknown>({
   emptyTitle = "No data available",
   emptyDescription = "There are no records matching your criteria.",
   emptyIcon,
+  emptyAction,
   hasPagination = true,
   isLoading = false,
   loadingRows = 5,
@@ -106,6 +113,7 @@ export function CRMDataTable<T = unknown>({
           icon={emptyIcon}
           title={title}
           description={emptyDescription}
+          action={emptyAction}
           className="border-none bg-transparent shadow-none p-4 min-h-0"
         />
       );

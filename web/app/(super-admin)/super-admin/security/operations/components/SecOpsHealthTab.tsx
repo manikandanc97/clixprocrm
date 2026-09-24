@@ -1,9 +1,13 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { ShieldCheck } from "lucide-react";
 import { PlatformHealthRow } from "@/shared/lib/api/super-admin.api";
 import { cn } from "@/shared/lib/utils";
+import {
+  CRMDataTable,
+  CRMDataTableColumn,
+} from "@/shared/components/crm/CRMDataTable";
 import { getServiceIcon, getStatusBadge } from "./types";
 
 interface SecOpsHealthTabProps {
@@ -11,10 +15,61 @@ interface SecOpsHealthTabProps {
 }
 
 export function SecOpsHealthTab({ healthRows }: SecOpsHealthTabProps) {
+  const columns = useMemo<CRMDataTableColumn<PlatformHealthRow>[]>(() => {
+    return [
+      {
+        header: "Service Subsystem",
+        cell: (row) => {
+          const IconComponent = getServiceIcon(row.service);
+          return (
+            <div className="font-semibold text-foreground flex items-center gap-2.5">
+              <IconComponent className="h-4 w-4 text-muted-foreground" />
+              <span>{row.service}</span>
+            </div>
+          );
+        },
+        className: "w-[200px]",
+      },
+      {
+        header: "Health Status",
+        cell: (row) => (
+          <span
+            className={cn(
+              "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold border uppercase tracking-wider",
+              getStatusBadge(row.status)
+            )}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
+            {row.status}
+          </span>
+        ),
+        className: "w-[150px]",
+      },
+      {
+        header: "Last Verified",
+        cell: (row) => (
+          <span className="text-muted-foreground font-mono text-[11px]">
+            {new Date(row.lastChecked).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
+          </span>
+        ),
+        className: "w-[150px]",
+      },
+      {
+        header: "Operational Telemetry Detail",
+        cell: (row) => (
+          <span className="text-muted-foreground font-medium">
+            {row.detail}
+          </span>
+        ),
+        className: "min-w-[200px]",
+      },
+    ];
+  }, []);
+
   return (
-    <div className="space-y-4">
+    <div className="space-y-4 h-full flex flex-col">
       {/* Subsystem Summary Cards Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-3.5 shrink-0">
         {healthRows.map((row) => {
           const IconComponent = getServiceIcon(row.service);
           const isHealthy = row.status === "Healthy";
@@ -76,8 +131,8 @@ export function SecOpsHealthTab({ healthRows }: SecOpsHealthTabProps) {
       </div>
 
       {/* Subsystem Health Detail Table */}
-      <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden flex flex-col">
-        <div className="p-4 border-b border-border/50 flex items-center justify-between bg-muted/20">
+      <div className="bg-card border border-border/80 rounded-2xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+        <div className="p-4 border-b border-border/50 flex items-center justify-between bg-muted/20 shrink-0">
           <div className="flex items-center gap-2.5">
             <div className="p-1.5 rounded-lg bg-emerald-500/10 text-emerald-600 border border-emerald-500/20">
               <ShieldCheck className="h-4 w-4" />
@@ -94,48 +149,13 @@ export function SecOpsHealthTab({ healthRows }: SecOpsHealthTabProps) {
           </span>
         </div>
 
-        <div className="overflow-x-auto">
-          <table className="w-full text-left text-xs border-collapse min-w-[700px]">
-            <thead className="bg-muted border-b border-border">
-              <tr className="text-foreground font-bold">
-                <th className="px-4 py-3 text-left border-r border-border/60 bg-muted">Service Subsystem</th>
-                <th className="px-4 py-3 text-left border-r border-border/60 bg-muted">Health Status</th>
-                <th className="px-4 py-3 text-left border-r border-border/60 bg-muted">Last Verified</th>
-                <th className="px-4 py-3 text-left bg-muted">Operational Telemetry Detail</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40">
-              {healthRows.map((row) => {
-                const IconComponent = getServiceIcon(row.service);
-                return (
-                  <tr key={row.service} className="hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3 font-semibold text-foreground flex items-center gap-2.5 border-r border-border/30">
-                      <IconComponent className="h-4 w-4 text-muted-foreground" />
-                      <span>{row.service}</span>
-                    </td>
-                    <td className="px-4 py-3 border-r border-border/30">
-                      <span
-                        className={cn(
-                          "inline-flex items-center gap-1.5 px-2.5 py-0.5 rounded-full text-[10.5px] font-bold border uppercase tracking-wider",
-                          getStatusBadge(row.status)
-                        )}
-                      >
-                        <span className="w-1.5 h-1.5 rounded-full bg-current opacity-80" />
-                        {row.status}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground font-mono text-[11px] border-r border-border/30">
-                      {new Date(row.lastChecked).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit", second: "2-digit" })}
-                    </td>
-                    <td className="px-4 py-3 text-muted-foreground font-medium">
-                      {row.detail}
-                    </td>
-                  </tr>
-                );
-              })}
-            </tbody>
-          </table>
-        </div>
+        <CRMDataTable<PlatformHealthRow>
+          data={healthRows}
+          columns={columns}
+          isLoading={false}
+          isError={false}
+          hasPagination={false}
+        />
       </div>
     </div>
   );

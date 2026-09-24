@@ -1,14 +1,17 @@
 "use client";
 
-import React from "react";
+import React, { useMemo } from "react";
 import { CreditCard } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 import {
   CRMToolbar,
   CRMPagination,
   TruncatedText,
-  EmptyState,
 } from "@/shared/components/crm";
+import {
+  CRMDataTable,
+  CRMDataTableColumn,
+} from "@/shared/components/crm/CRMDataTable";
 import {
   Select,
   SelectContent,
@@ -17,7 +20,6 @@ import {
   SelectValue,
 } from "@/shared/ui/select";
 import { PlanBadge } from "@/shared/components/PlanBadge";
-import { DataTableColumnHeader } from "@/shared/components/DataTableColumnHeader";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
 import { PlatformSubscriptionItem } from "@/shared/lib/api/super-admin.api";
@@ -66,6 +68,115 @@ export function BillingSubscriptionsTab({
   onEditSubscription,
   onCreateSubscription,
 }: BillingSubscriptionsTabProps) {
+  
+  const columns = useMemo<CRMDataTableColumn<PlatformSubscriptionItem>[]>(() => {
+    return [
+      {
+        header: "Organization",
+        sortable: true,
+        sortDirection: subSortConfig?.key === "tenantName" ? subSortConfig.direction : null,
+        onSort: (dir) => setSubSortConfig(dir ? { key: "tenantName", direction: dir } : null),
+        cell: (sub) => {
+          const orgColor = getOrgAvatarColor(sub.tenantName);
+          return (
+            <div className="flex items-center gap-2.5 min-w-0 font-bold text-foreground">
+              <div
+                className={cn(
+                  "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs border shadow-xs",
+                  orgColor.bg,
+                  orgColor.text,
+                  orgColor.border
+                )}
+              >
+                {sub.tenantName?.charAt(0)?.toUpperCase() || "O"}
+              </div>
+              <div className="min-w-0">
+                <TruncatedText text={sub.tenantName} lines={1} className="font-bold text-foreground text-xs" />
+                <span className="text-[10px] text-muted-foreground font-mono block">
+                  ID: {sub.tenantId?.slice(0, 8)}...
+                </span>
+              </div>
+            </div>
+          );
+        },
+        className: "min-w-[200px]",
+      },
+      {
+        header: "Plan Tier",
+        cell: (sub) => (
+          <PlanBadge plan={sub.planName || sub.planId} size="sm" />
+        ),
+        className: "w-[130px]",
+      },
+      {
+        header: "Billing Cycle",
+        align: "center",
+        cell: (sub) => (
+          <span className="px-2 py-0.5 rounded-md bg-muted/40 border border-border/60 text-xs text-muted-foreground font-medium capitalize">
+            {sub.billingCycle}
+          </span>
+        ),
+        className: "w-[120px]",
+      },
+      {
+        header: "Seats",
+        align: "right",
+        cell: (sub) => (
+          <span className="font-mono font-medium text-xs">{sub.seats}</span>
+        ),
+        className: "w-[80px]",
+      },
+      {
+        header: "Recurring Amount",
+        align: "right",
+        sortable: true,
+        sortDirection: subSortConfig?.key === "recurringAmount" ? subSortConfig.direction : null,
+        onSort: (dir) => setSubSortConfig(dir ? { key: "recurringAmount", direction: dir } : null),
+        cell: (sub) => (
+          <span className="font-mono font-bold text-foreground text-xs">
+            {formatCurrency(sub.recurringAmount, sub.currency)}
+          </span>
+        ),
+        className: "w-[160px]",
+      },
+      {
+        header: "Next Renewal",
+        cell: (sub) => (
+          <span className="text-xs text-muted-foreground">
+            {new Date(sub.currentPeriodEnd).toLocaleDateString("en-IN", {
+              day: "2-digit",
+              month: "short",
+              year: "numeric",
+            })}
+          </span>
+        ),
+        className: "w-[130px]",
+      },
+      {
+        header: "Status",
+        align: "center",
+        cell: (sub) => getSubStatusBadge(sub.status),
+        className: "w-[120px]",
+      },
+      {
+        header: "Actions",
+        align: "right",
+        cell: (sub) => (
+          <Button
+            variant="outline"
+            size="sm"
+            onClick={() => onEditSubscription(sub)}
+            className="h-7 px-2.5 text-[11px] font-semibold"
+          >
+            Edit
+          </Button>
+        ),
+        className: "w-20 text-right",
+        headerClassName: "w-20 text-right",
+      },
+    ];
+  }, [subSortConfig, setSubSortConfig, formatCurrency, onEditSubscription]);
+
   return (
     <div className="crm-table-workspace-sticky">
       <CRMToolbar
@@ -117,144 +228,20 @@ export function BillingSubscriptionsTab({
       </CRMToolbar>
 
       <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
-        <div className="overflow-auto flex-1 min-h-0 relative flex flex-col">
-          <table className="w-full text-left text-xs border-collapse min-w-[1000px]">
-            <thead className="sticky top-0 z-20 bg-muted border-b border-border shadow-xs">
-              <tr className="h-10 text-xs font-bold text-foreground">
-                <th className="h-10 px-4 py-2 text-left border-r border-border/60 bg-muted whitespace-nowrap cursor-pointer select-none">
-                  <DataTableColumnHeader
-                    title="Organization"
-                    sortable
-                    sortDirection={subSortConfig?.key === "tenantName" ? subSortConfig.direction : null}
-                    onSort={(d) => setSubSortConfig(d ? { key: "tenantName", direction: d } : null)}
-                  />
-                </th>
-                <th className="h-10 px-4 py-2 text-left border-r border-border/60 bg-muted whitespace-nowrap">
-                  <DataTableColumnHeader title="Plan Tier" />
-                </th>
-                <th className="h-10 px-4 py-2 text-center border-r border-border/60 bg-muted whitespace-nowrap">
-                  <DataTableColumnHeader title="Billing Cycle" align="center" />
-                </th>
-                <th className="h-10 px-4 py-2 text-right border-r border-border/60 bg-muted whitespace-nowrap">
-                  <DataTableColumnHeader title="Seats" align="right" />
-                </th>
-                <th className="h-10 px-4 py-2 text-right border-r border-border/60 bg-muted whitespace-nowrap cursor-pointer select-none">
-                  <DataTableColumnHeader
-                    title="Recurring Amount"
-                    align="right"
-                    sortable
-                    sortDirection={subSortConfig?.key === "recurringAmount" ? subSortConfig.direction : null}
-                    onSort={(d) => setSubSortConfig(d ? { key: "recurringAmount", direction: d } : null)}
-                  />
-                </th>
-                <th className="h-10 px-4 py-2 text-left border-r border-border/60 bg-muted whitespace-nowrap">
-                  <DataTableColumnHeader title="Next Renewal" />
-                </th>
-                <th className="h-10 px-4 py-2 text-center border-r border-border/60 bg-muted whitespace-nowrap">
-                  <DataTableColumnHeader title="Status" align="center" />
-                </th>
-                <th className="h-10 w-20 px-4 py-2 text-right bg-muted whitespace-nowrap">
-                  <DataTableColumnHeader title="Actions" align="right" />
-                </th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-border/40 text-xs">
-              {loading ? (
-                Array.from({ length: 5 }).map((_, i) => (
-                  <tr key={i} className="animate-pulse h-16">
-                    <td className="px-4 py-4"><div className="h-4 w-36 bg-muted rounded" /></td>
-                    <td className="px-4 py-4"><div className="h-5 w-20 bg-muted rounded-full" /></td>
-                    <td className="px-4 py-4 text-center"><div className="h-4 w-16 bg-muted rounded mx-auto" /></td>
-                    <td className="px-4 py-4 text-right"><div className="h-4 w-8 bg-muted rounded ml-auto" /></td>
-                    <td className="px-4 py-4 text-right"><div className="h-4 w-20 bg-muted rounded ml-auto" /></td>
-                    <td className="px-4 py-4"><div className="h-4 w-24 bg-muted rounded" /></td>
-                    <td className="px-4 py-4 text-center"><div className="h-5 w-16 bg-muted rounded-full mx-auto" /></td>
-                    <td className="px-4 py-4 text-right"><div className="h-7 w-14 bg-muted rounded ml-auto" /></td>
-                  </tr>
-                ))
-              ) : paginatedSubscriptions.length === 0 ? (
-                <tr>
-                  <td colSpan={8} className="py-6 border-0">
-                    <EmptyState
-                      title="No platform subscriptions found"
-                      description="No tenant organizations match your search or filter criteria."
-                      icon={CreditCard}
-                      className="border-none bg-transparent shadow-none p-0 min-h-0"
-                      action={{
-                        label: "Create Subscription",
-                        onClick: onCreateSubscription,
-                      }}
-                    />
-                  </td>
-                </tr>
-              ) : (
-                paginatedSubscriptions.map((sub) => (
-                  <tr key={sub.id} className="group h-16 hover:bg-muted/30 transition-colors">
-                    <td className="px-4 py-3.5 font-bold text-foreground">
-                      <div className="flex items-center gap-2.5 min-w-0">
-                        {(() => {
-                          const orgColor = getOrgAvatarColor(sub.tenantName);
-                          return (
-                            <div
-                              className={cn(
-                                "w-8 h-8 rounded-lg flex items-center justify-center shrink-0 font-bold text-xs border shadow-xs",
-                                orgColor.bg,
-                                orgColor.text,
-                                orgColor.border
-                              )}
-                            >
-                              {sub.tenantName?.charAt(0)?.toUpperCase() || "O"}
-                            </div>
-                          );
-                        })()}
-                        <div className="min-w-0">
-                          <TruncatedText text={sub.tenantName} lines={1} className="font-bold text-foreground text-xs" />
-                          <span className="text-[10px] text-muted-foreground font-mono block">
-                            ID: {sub.tenantId?.slice(0, 8)}...
-                          </span>
-                        </div>
-                      </div>
-                    </td>
-                    <td className="px-4 py-3.5">
-                      <PlanBadge plan={sub.planName || sub.planId} size="sm" />
-                    </td>
-                    <td className="px-4 py-3.5 text-center capitalize text-xs text-muted-foreground font-medium">
-                      <span className="px-2 py-0.5 rounded-md bg-muted/40 border border-border/60">
-                        {sub.billingCycle}
-                      </span>
-                    </td>
-                    <td className="px-4 py-3.5 text-right font-mono font-medium text-xs">
-                      {sub.seats}
-                    </td>
-                    <td className="px-4 py-3.5 text-right font-mono font-bold text-foreground text-xs">
-                      {formatCurrency(sub.recurringAmount, sub.currency)}
-                    </td>
-                    <td className="px-4 py-3.5 text-xs text-muted-foreground">
-                      {new Date(sub.currentPeriodEnd).toLocaleDateString("en-IN", {
-                        day: "2-digit",
-                        month: "short",
-                        year: "numeric",
-                      })}
-                    </td>
-                    <td className="px-4 py-3.5 text-center">
-                      {getSubStatusBadge(sub.status)}
-                    </td>
-                    <td className="px-4 py-3.5 text-right">
-                      <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={() => onEditSubscription(sub)}
-                        className="h-7 px-2.5 text-[11px] font-semibold"
-                      >
-                        Edit
-                      </Button>
-                    </td>
-                  </tr>
-                ))
-              )}
-            </tbody>
-          </table>
-        </div>
+        <CRMDataTable<PlatformSubscriptionItem>
+          data={paginatedSubscriptions}
+          columns={columns}
+          isLoading={loading}
+          isError={false}
+          emptyIcon={CreditCard}
+          emptyTitle="No platform subscriptions found"
+          emptyDescription="No tenant organizations match your search or filter criteria."
+          emptyAction={{
+            label: "Create Subscription",
+            onClick: onCreateSubscription,
+          }}
+          hasPagination={false}
+        />
 
         {/* Pagination */}
         <CRMPagination
