@@ -20,6 +20,7 @@ import {
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   CRMToolbar,
   CRMPagination,
   PageErrorState,
@@ -170,7 +171,7 @@ export default function EmployeesPage() {
       />
 
       {/* 2. Main Data Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         {/* Canonical Toolbar */}
         <CRMToolbar
           searchQuery={search}
@@ -298,7 +299,7 @@ export default function EmployeesPage() {
           itemName="Employees"
           pageSizeOptions={[10, 25, 50, 100]}
         />
-      </div>
+      </CRMTableCard>
 
       {/* 5. Add Employee Modal */}
       <FormModal

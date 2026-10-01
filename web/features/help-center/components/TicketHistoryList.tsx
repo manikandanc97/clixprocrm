@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect, useMemo } from "react";
 import dynamic from "next/dynamic";
-import { CRMPagination } from "@/shared/components/crm";
+import { CRMPagination, CRMTableCard } from "@/shared/components/crm";
 import { toast } from "sonner";
 import client from "@/shared/lib/api/client";
 import { useAuth } from "@/features/auth/components/auth-provider";
@@ -434,8 +434,9 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
   );
 
   return (
-    <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
-      {/* 1. Top Controls Toolbar matching Organizations & Companies table */}
+    <>
+      <CRMTableCard>
+        {/* 1. Top Controls Toolbar matching Organizations & Companies table */}
       <TicketHistoryToolbar
         statusFilter={statusFilter}
         setStatusFilter={setStatusFilter}
@@ -485,6 +486,7 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
         }}
         itemName="Tickets"
       />
+    </CRMTableCard>
 
       {/* 4. Ticket Details & Discussion Dialog */}
       <TicketDetailsModal
@@ -548,6 +550,6 @@ export function TicketHistoryList({ onNewTicketClick }: TicketHistoryListProps) 
         previewMedia={previewMedia}
         onOpenChange={(open) => !open && setPreviewMedia(null)}
       />
-    </div>
+    </>
   );
 }

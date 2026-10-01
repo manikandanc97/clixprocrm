@@ -311,11 +311,11 @@ const ReportsPage = () => {
       </CRMMetricsGrid>
 
       {/* 3. Main Row 2: Revenue Trend & Goal Progress */}
-      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch">
-        <div className="lg:col-span-7 min-h-[350px] flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4 sm:gap-5 items-stretch min-w-0">
+        <div className="lg:col-span-7 min-w-0 min-h-[350px] flex flex-col">
           <RevenueChart data={data?.revenueChart || []} loading={isFetching} />
         </div>
-        <div className="lg:col-span-5 min-h-[350px] flex flex-col">
+        <div className="lg:col-span-5 min-w-0 min-h-[350px] flex flex-col">
           <RevenueTarget 
             data={data?.revenueTarget ?? null} 
             onOpenSettings={() => setIsTargetsConfigOpen(true)} 
@@ -324,11 +324,11 @@ const ReportsPage = () => {
       </div>
 
       {/* 4. Row 3: Lead Sources & Sales Activities */}
-      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-stretch">
-        <div className="min-h-[260px] flex flex-col">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 sm:gap-5 items-stretch min-w-0">
+        <div className="min-w-0 min-h-[260px] h-full flex flex-col">
           <LeadSourceChart data={data?.leadSources ?? []} loading={isFetching} />
         </div>
-        <div className="min-h-[260px] flex flex-col">
+        <div className="min-w-0 min-h-[260px] h-full flex flex-col">
           <SalesActivities data={data?.salesActivities ?? []} loading={isFetching} />
         </div>
       </div>

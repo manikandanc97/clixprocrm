@@ -18,7 +18,7 @@ import {
 } from "lucide-react";
 import { useQuery } from "@tanstack/react-query";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
-import { CRMPagination } from "@/shared/components/crm";
+import { CRMPagination, CRMTableCard } from "@/shared/components/crm";
 import { Input } from "@/shared/ui/input";
 import { Badge } from "@/shared/ui/badge";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/shared/ui/select";
@@ -224,7 +224,7 @@ export default function AuditLogSettings() {
   };
 
   return (
-    <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+    <CRMTableCard>
       {/* Top Controls Toolbar - Exactly matches Contacts / Employees / Companies */}
       <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
         {/* Left: Action Filter & Search */}
@@ -500,6 +500,6 @@ export default function AuditLogSettings() {
         }}
         itemName="Audit Events"
       />
-    </div>
+    </CRMTableCard>
   );
 }

@@ -308,7 +308,7 @@ export default function CustomerTicketDetailPage() {
       </div>
 
       {/* ── PRIMARY TICKET HEADER ── */}
-      <div className="py-4 space-y-3">
+      <div className="space-y-3">
         <div className="flex flex-wrap items-center gap-2.5">
           {/* Reference Code */}
           <div

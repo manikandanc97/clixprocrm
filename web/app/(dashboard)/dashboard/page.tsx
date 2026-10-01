@@ -45,7 +45,7 @@ const RevenueChartWidget = () => {
 
   return (
     <DashboardWidgetWrapper id="revenueChart" title="Revenue Chart" skeletonType="chart" isLoading={isLoading} isError={isError} onRetry={refetch} delay={1.2}>
-      <div className="h-[350px]">
+      <div className="w-full min-w-0 h-[300px] sm:h-[350px]">
         <RevenueChart data={chartData} />
       </div>
     </DashboardWidgetWrapper>
@@ -185,9 +185,9 @@ const DashboardPage = () => {
       <DashboardKPIs />
 
       {/* Row 4 & 5: Operational Layout */}
-      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-5">
-        <div className="xl:col-span-3 flex flex-col gap-4 sm:gap-5">
-          <div className="grid grid-cols-1 gap-4 sm:gap-5">
+      <div className="grid grid-cols-1 xl:grid-cols-4 gap-4 sm:gap-5 min-w-0">
+        <div className="xl:col-span-3 flex flex-col gap-4 sm:gap-5 min-w-0">
+          <div className="grid grid-cols-1 gap-4 sm:gap-5 min-w-0">
             <RevenueChartWidget />
           </div>
 

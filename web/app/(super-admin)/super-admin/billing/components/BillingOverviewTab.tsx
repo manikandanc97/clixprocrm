@@ -23,6 +23,7 @@ import {
   Tooltip as RechartsTooltip,
   CartesianGrid,
 } from "recharts";
+import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 
 interface BillingOverviewTabProps {
   kpis: {
@@ -100,9 +101,9 @@ export function BillingOverviewTab({
       )}
 
       {/* Main Revenue Chart & Tier Breakdown Grid */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 items-start min-w-0">
         {/* Revenue Run-Rate Trend (2 Columns) */}
-        <div className="lg:col-span-2 bg-card border border-border/80 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4">
+        <div className="lg:col-span-2 bg-card border border-border/80 rounded-2xl p-5 sm:p-6 shadow-xs space-y-4 min-w-0">
           <div className="flex items-center justify-between flex-wrap gap-2">
             <div>
               <div className="flex items-center gap-2">
@@ -153,65 +154,66 @@ export function BillingOverviewTab({
           </div>
 
           {/* Chart Component / Empty State */}
-          <div className="h-56 w-full pt-2">
-            {isClient ? (
-              kpis.totalRevenue === 0 && kpis.mrr === 0 && !trendData.some((d) => d.revenue > 0) ? (
-                <div className="h-full w-full flex flex-col items-center justify-center rounded-xl bg-muted/10 border border-dashed border-border/60 p-6 text-center">
-                  <div className="w-10 h-10 rounded-xl bg-muted/30 border border-border/40 flex items-center justify-center text-muted-foreground/70 mb-2">
-                    <TrendingUp className="w-5 h-5" />
-                  </div>
-                  <h4 className="text-xs sm:text-sm font-bold text-foreground">No revenue recorded yet</h4>
-                  <p className="text-xs text-muted-foreground max-w-sm mt-1">
-                    Revenue trends will appear here once paid subscriptions begin.
-                  </p>
-                </div>
-              ) : (
-                <ResponsiveContainer width="100%" height="100%">
-                  <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
-                    <defs>
-                      <linearGradient id="billingRevGrad" x1="0" y1="0" x2="0" y2="1">
-                        <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
-                        <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
-                      </linearGradient>
-                    </defs>
-                    <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
-                    <XAxis
-                      dataKey="month"
-                      stroke="var(--muted-foreground)"
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                    />
-                    <YAxis
-                      stroke="var(--muted-foreground)"
-                      fontSize={10}
-                      tickLine={false}
-                      axisLine={false}
-                      tickFormatter={(val) => `₹${val}`}
-                    />
-                    <RechartsTooltip
-                      contentStyle={{
-                        backgroundColor: "var(--card)",
-                        borderColor: "var(--border)",
-                        borderRadius: "12px",
-                        fontSize: "11px",
-                        boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
-                      }}
-                      formatter={(val) => [formatCurrency(Number(val)), "Revenue"]}
-                      labelStyle={{ fontWeight: "bold", color: "var(--foreground)" }}
-                    />
-                    <Area
-                      type="monotone"
-                      dataKey="revenue"
-                      stroke="#6366f1"
-                      strokeWidth={2.5}
-                      fillOpacity={1}
-                      fill="url(#billingRevGrad)"
-                    />
-                  </AreaChart>
-                </ResponsiveContainer>
-              )
-            ) : null}
+          <div className="w-full min-w-0 h-56 pt-2">
+            <ChartContainer
+              height="100%"
+              minHeight={200}
+              loading={!isClient}
+              hasData={!(kpis.totalRevenue === 0 && kpis.mrr === 0 && !trendData.some((d) => d.revenue > 0))}
+              emptyMessage="Revenue trends will appear here once paid subscriptions begin."
+              className="w-full h-full min-w-0"
+            >
+              <ResponsiveContainer 
+                width="100%" 
+                height="100%"
+                minWidth={0}
+                minHeight={200}
+                initialDimension={{ width: 600, height: 200 }}
+              >
+                <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
+                  <defs>
+                    <linearGradient id="billingRevGrad" x1="0" y1="0" x2="0" y2="1">
+                      <stop offset="5%" stopColor="#6366f1" stopOpacity={0.3} />
+                      <stop offset="95%" stopColor="#6366f1" stopOpacity={0.0} />
+                    </linearGradient>
+                  </defs>
+                  <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="var(--border)" opacity={0.5} />
+                  <XAxis
+                    dataKey="month"
+                    stroke="var(--muted-foreground)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                  />
+                  <YAxis
+                    stroke="var(--muted-foreground)"
+                    fontSize={10}
+                    tickLine={false}
+                    axisLine={false}
+                    tickFormatter={(val) => `₹${val}`}
+                  />
+                  <RechartsTooltip
+                    contentStyle={{
+                      backgroundColor: "var(--card)",
+                      borderColor: "var(--border)",
+                      borderRadius: "12px",
+                      fontSize: "11px",
+                      boxShadow: "0 4px 12px rgba(0,0,0,0.1)",
+                    }}
+                    formatter={(val) => [formatCurrency(Number(val)), "Revenue"]}
+                    labelStyle={{ fontWeight: "bold", color: "var(--foreground)" }}
+                  />
+                  <Area
+                    type="monotone"
+                    dataKey="revenue"
+                    stroke="#6366f1"
+                    strokeWidth={2.5}
+                    fillOpacity={1}
+                    fill="url(#billingRevGrad)"
+                  />
+                </AreaChart>
+              </ResponsiveContainer>
+            </ChartContainer>
           </div>
         </div>
 

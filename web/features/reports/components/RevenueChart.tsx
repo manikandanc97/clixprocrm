@@ -45,13 +45,15 @@ const RevenueChart = ({ data, loading }: RevenueChartProps) => {
         </CardHeader>
 
         <CardContent className="p-5 pt-2 min-w-0 flex-1 flex flex-col justify-between">
-          <div className="flex-1 min-h-[260px] w-full">
+          <div className="flex-1 w-full min-w-0 h-[260px] sm:h-[300px] lg:h-[320px]">
             <ChartContainer 
               height="100%" 
+              minHeight={260}
               loading={loading}
               hasData={hasData}
               emptyMessage="No revenue recorded for this period"
-              className="flex-1 min-h-[260px]"
+              skeletonType="area"
+              className="flex-1 w-full h-full min-w-0 min-h-[260px]"
             >
               <AreaChart data={data} margin={{ top: 15, right: 15, left: -10, bottom: 5 }}>
                 <defs>

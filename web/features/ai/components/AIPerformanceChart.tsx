@@ -22,8 +22,9 @@ export function AIPerformanceChart({ data = [] }: AIPerformanceChartProps) {
   return (
     <ChartContainer
       height="100%"
+      minHeight={260}
       hasData={hasData}
-      className="w-full h-full"
+      className="w-full h-full min-w-0"
     >
       <AreaChart data={data}>
         <defs>

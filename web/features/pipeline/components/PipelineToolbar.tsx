@@ -1,15 +1,5 @@
-import { useState } from "react";
-import { Search, Filter, ArrowUpDown, X } from "lucide-react";
-import { Input } from "@/shared/ui/input";
-import { Button } from "@/shared/ui/button";
-import { cn } from "@/shared/lib/utils";
-import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuRadioGroup,
-  DropdownMenuRadioItem,
-  DropdownMenuTrigger,
-} from "@/shared/ui/dropdown-menu";
+
+
 
 interface PipelineToolbarProps {
   onSearch: (value: string) => void;
@@ -18,6 +8,6 @@ interface PipelineToolbarProps {
   className?: string;
 }
 
-export function PipelineToolbar({ onSearch, onSort, onFilter, className }: PipelineToolbarProps) {
+export function PipelineToolbar(_props: PipelineToolbarProps) {
   return null;
 }

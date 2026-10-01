@@ -344,45 +344,6 @@ const SparklineCurve = ({ data, trend = "neutral", strokeColor, fallbackWave }: 
 };
 
 // ─────────────────────────────────────────────────────────────────────────────
-// Halftone Dot Grid Component (Bottom-Left Decorative Texture)
-// ─────────────────────────────────────────────────────────────────────────────
-
-interface HalftonePatternProps {
-  dotColor: string;
-  patternId: string;
-}
-
-const HalftonePattern = ({ dotColor, patternId }: HalftonePatternProps) => {
-  return (
-    <svg
-      className="absolute -bottom-3 -left-3 w-40 h-40 pointer-events-none select-none overflow-hidden"
-      viewBox="0 0 160 160"
-      fill="none"
-      aria-hidden="true"
-    >
-      <defs>
-        <radialGradient id={`dot-gradient-${patternId}`} cx="5%" cy="95%" r="85%">
-          <stop offset="0%" stopColor={dotColor} stopOpacity="0.32" />
-          <stop offset="45%" stopColor={dotColor} stopOpacity="0.16" />
-          <stop offset="100%" stopColor={dotColor} stopOpacity="0" />
-        </radialGradient>
-        <pattern
-          id={`dots-${patternId}`}
-          x="0"
-          y="0"
-          width="11"
-          height="11"
-          patternUnits="userSpaceOnUse"
-        >
-          <circle cx="2" cy="2" r="1.6" fill={`url(#dot-gradient-${patternId})`} />
-        </pattern>
-      </defs>
-      <rect width="160" height="160" fill={`url(#dots-${patternId})`} />
-    </svg>
-  );
-};
-
-// ─────────────────────────────────────────────────────────────────────────────
 // Props Interface
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -439,10 +400,6 @@ export const CRMMetricCard = ({
 
   const isUp = trend === "up";
   const isDown = trend === "down";
-
-  // Generate safe unique ID for SVG pattern defs
-  const rawId = React.useId();
-  const patternId = React.useMemo(() => rawId.replace(/[^a-zA-Z0-9_-]/g, "_"), [rawId]);
 
   const displayChange = change
     ? !isUp && !isDown && change.startsWith("+")

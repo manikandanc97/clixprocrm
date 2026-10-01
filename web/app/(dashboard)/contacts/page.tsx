@@ -30,6 +30,7 @@ import {
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   CRMToolbar,
   CRMPagination,
   PageErrorState,
@@ -357,7 +358,7 @@ export default function ContactsPage() {
       </CRMPageHeader>
 
       {/* 2. Main Data Card with Toolbar & Table */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         <CRMToolbar
           searchQuery={search}
           setSearchQuery={handleSearchChange}
@@ -493,7 +494,7 @@ export default function ContactsPage() {
           itemName="Contacts"
           pageSizeOptions={[10, 20, 50, 100]}
         />
-      </div>
+      </CRMTableCard>
 
       {/* 6. Delete Dialogs */}
       <CRMDeleteDialog

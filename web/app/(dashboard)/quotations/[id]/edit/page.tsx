@@ -35,7 +35,7 @@ export default function EditQuotationPage() {
           icon={FileText}
           badge="Editing"
         />
-        <div className="mt-8 bg-card border border-border rounded-xl p-6 md:p-8 max-w-4xl">
+        <div className="bg-card border border-border/80 rounded-xl p-4 sm:p-6 md:p-8 max-w-4xl shadow-xs">
           <QuoteFormSkeleton />
         </div>
       </CRMPageContainer>
@@ -45,7 +45,7 @@ export default function EditQuotationPage() {
   if (!quotation) {
     return (
       <CRMPageContainer>
-        <div className="p-8 text-center bg-card rounded-xl border border-border mt-8">
+        <div className="p-6 sm:p-8 text-center bg-card rounded-xl border border-border/80 shadow-xs max-w-4xl">
           <h2 className="text-xl font-bold mb-4">Quotation Not Found</h2>
           <Button onClick={() => router.push("/quotations")}>Back to Quotations</Button>
         </div>
@@ -62,7 +62,7 @@ export default function EditQuotationPage() {
         badge="Editing"
       />
       
-      <div className="mt-8 bg-card border border-border rounded-xl p-6 md:p-8 max-w-4xl">
+      <div className="bg-card border border-border/80 rounded-xl p-4 sm:p-6 md:p-8 max-w-4xl shadow-xs">
         <QuoteForm 
           initialData={quotation} 
           onSuccess={() => router.push("/quotations")}

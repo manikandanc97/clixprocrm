@@ -96,7 +96,7 @@ export function SupportTicketsTable({
         header: "T-No",
         sortable: true,
         sortDirection: sortConfig?.key === "ticketNumber" ? sortConfig.direction : null,
-        onSort: (dir) => onSort("ticketNumber"),
+        onSort: () => onSort("ticketNumber"),
         cell: (t) => {
           const ticketDisplayCode = formatTicketCode(t);
           return (
@@ -137,7 +137,7 @@ export function SupportTicketsTable({
         header: "Subject",
         sortable: true,
         sortDirection: sortConfig?.key === "subject" ? sortConfig.direction : null,
-        onSort: (dir) => onSort("subject"),
+        onSort: () => onSort("subject"),
         cell: (t) => (
           <div className="min-w-0 max-w-[250px]">
             <button
@@ -167,7 +167,7 @@ export function SupportTicketsTable({
         header: "Raised By",
         sortable: true,
         sortDirection: sortConfig?.key === "createdBy" ? sortConfig.direction : null,
-        onSort: (dir) => onSort("createdBy"),
+        onSort: () => onSort("createdBy"),
         cell: (t) => (
           <div className="min-w-0 max-w-[130px]">
             <p className="font-semibold text-foreground text-xs truncate">
@@ -190,7 +190,7 @@ export function SupportTicketsTable({
         header: "Priority",
         sortable: true,
         sortDirection: sortConfig?.key === "priority" ? sortConfig.direction : null,
-        onSort: (dir) => onSort("priority"),
+        onSort: () => onSort("priority"),
         cell: (t) => {
           const priorityInfo = PRIORITY_CONFIG[t.priority] || PRIORITY_CONFIG.MEDIUM;
           return (
@@ -212,7 +212,7 @@ export function SupportTicketsTable({
         header: "Status",
         sortable: true,
         sortDirection: sortConfig?.key === "status" ? sortConfig.direction : null,
-        onSort: (dir) => onSort("status"),
+        onSort: () => onSort("status"),
         cell: (t) => {
           const statusInfo = STATUS_CONFIG[t.status] || STATUS_CONFIG.OPEN;
           return (
@@ -235,7 +235,7 @@ export function SupportTicketsTable({
         header: "Assigned To",
         sortable: true,
         sortDirection: sortConfig?.key === "assignedTo" ? sortConfig.direction : null,
-        onSort: (dir) => onSort("assignedTo"),
+        onSort: () => onSort("assignedTo"),
         cell: (t) => {
           return t.assignedTo ? (
             <div className="flex items-center gap-1.5 text-muted-foreground min-w-0 max-w-[150px]">
@@ -256,7 +256,7 @@ export function SupportTicketsTable({
         header: "Created Date",
         sortable: true,
         sortDirection: sortConfig?.key === "createdAt" ? sortConfig.direction : null,
-        onSort: (dir) => onSort("createdAt"),
+        onSort: () => onSort("createdAt"),
         cell: (t) => {
           const { date, time } = formatDate(t.createdAt);
           return (

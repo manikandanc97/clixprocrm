@@ -6,6 +6,8 @@ export * from "./CRMDataTable";
 export * from "./ViewToggle";
 
 export * from "./CRMPageContainer";
+export * from "./CRMPageContent";
+export * from "./CRMTableCard";
 export * from "./CRMMetricsGrid";
 export * from "./CRMPageSection";
 
@@ -45,6 +47,9 @@ export { EmptyState as CRMEmptyState } from "../EmptyState";
 export { PageErrorState as CRMErrorState } from "./PageFeedbackStates";
 export { CRMMetricCard as MetricCard } from "./CRMMetricCard";
 export { CRMDataTable as DataTable } from "./CRMDataTable";
+export { CRMPageContainer as CRMPageShell, CRMPageContainer as PageShell } from "./CRMPageContainer";
+export { CRMPageContent as PageContent } from "./CRMPageContent";
+export { CRMTableCard as CRMTableContainer, CRMTableCard as TableCard } from "./CRMTableCard";
 
 export * from "../TruncatedText";
 export * from "../../lib/ticket-utils";

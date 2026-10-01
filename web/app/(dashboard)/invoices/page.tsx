@@ -23,6 +23,7 @@ import type { InvoiceType } from "@/shared/types/invoice";
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   CRMToolbar,
   CRMPagination,
   CRMDeleteDialog,
@@ -191,7 +192,7 @@ export default function InvoicesPage() {
       />
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         {/* Canonical Toolbar */}
         <CRMToolbar
           searchQuery={search}
@@ -307,7 +308,7 @@ export default function InvoicesPage() {
           itemName="Invoices"
           pageSizeOptions={[10, 20, 50, 100]}
         />
-      </div>
+      </CRMTableCard>
 
       {/* Modals */}
       <CreateInvoiceModal

@@ -394,7 +394,7 @@ export default function SuperAdminDashboardPage() {
       />
 
       {/* 4. Row 1: Organization Growth & Attention Required */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 min-w-0">
         <OrganizationGrowthCard
           growthData={growthData}
           currentGrowthSeries={currentGrowthSeries}
@@ -405,11 +405,13 @@ export default function SuperAdminDashboardPage() {
       </div>
 
       {/* 5. Row 2: Platform Usage & Platform Health */}
-      <PlatformUsageHealthRow
-        usageStats={usageStats}
-        healthServices={healthServices}
-        isClient={isClient}
-      />
+      <div className="min-w-0">
+        <PlatformUsageHealthRow
+          usageStats={usageStats}
+          healthServices={healthServices}
+          isClient={isClient}
+        />
+      </div>
 
       {/* 6. Row 3: Module Adoption & Billing Snapshot / Tenant Health */}
       <ModuleAdoptionBillingRow

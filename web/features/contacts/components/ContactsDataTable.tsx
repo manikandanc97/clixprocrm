@@ -7,7 +7,7 @@ import { CRMActionMenu, CRMActionMenuItemConfig } from "@/shared/components/crm/
 import { StatusBadge } from "@/shared/components/StatusBadge";
 import { Badge } from "@/shared/ui/badge";
 import { Checkbox } from "@/shared/ui/checkbox";
-import { formatCurrency, formatDate, LEAD_STATUS_LABELS } from "@/shared/utils/formatters";
+import { formatCurrency, formatDate } from "@/shared/utils/formatters";
 import { getOrgAvatarColor } from "@/shared/utils/avatar-colors";
 import { cn } from "@/shared/lib/utils";
 import type { ContactItem } from "../hooks/use-contacts-data";

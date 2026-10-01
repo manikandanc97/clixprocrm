@@ -1,13 +1,11 @@
 "use client";
 
-import React, { useMemo } from "react";
+import React, { useMemo, useCallback } from "react";
 import {
   Building2,
   Users,
   Eye,
   Trash2,
-  RotateCcw,
-  Plus,
 } from "lucide-react";
 import { PlatformOrganization } from "@/shared/lib/api/super-admin.api";
 import { StatusBadge } from "@/shared/components/StatusBadge";
@@ -20,7 +18,6 @@ import {
 import { CRMActionMenu, CRMActionMenuItemConfig } from "@/shared/components/crm/CRMActionMenu";
 import { Checkbox } from "@/shared/ui/checkbox";
 import { cn } from "@/shared/lib/utils";
-import type { SortDirection } from "@/shared/components/DataTableColumnHeader";
 
 interface OrganizationsTableProps {
   loading: boolean;
@@ -46,27 +43,25 @@ export function OrganizationsTable({
   handleOpenDetails,
   setOrgToDelete,
   hasActiveFilters,
-  handleClearFilters,
-  onCreateClick,
 }: OrganizationsTableProps) {
   const isAllSelected =
     paginatedOrganizations.length > 0 &&
     paginatedOrganizations.every((o) => selectedOrgIds.includes(o.id));
 
-  const handleToggleSelectAll = (checked: boolean) => {
+  const handleToggleSelectAll = useCallback((checked: boolean) => {
     if (checked) {
       setSelectedOrgIds(Array.from(new Set([...selectedOrgIds, ...paginatedOrganizations.map((o) => o.id)])));
     } else {
       const pageIds = new Set(paginatedOrganizations.map((o) => o.id));
       setSelectedOrgIds(selectedOrgIds.filter((id) => !pageIds.has(id)));
     }
-  };
+  }, [paginatedOrganizations, selectedOrgIds, setSelectedOrgIds]);
 
-  const handleToggleSelect = (id: string, checked: boolean) => {
+  const handleToggleSelect = useCallback((id: string, checked: boolean) => {
     setSelectedOrgIds((prev) =>
       checked ? [...prev, id] : prev.filter((item) => item !== id)
     );
-  };
+  }, [setSelectedOrgIds]);
 
   const formatDate = (dateStr: string) => {
     const d = new Date(dateStr);
@@ -270,6 +265,8 @@ export function OrganizationsTable({
     setSort,
     handleOpenDetails,
     setOrgToDelete,
+    handleToggleSelect,
+    handleToggleSelectAll,
   ]);
 
   return (

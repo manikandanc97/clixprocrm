@@ -166,7 +166,7 @@ const SettingsPage = () => {
   return (
     <CRMPageContainer>
       {/* Dynamic Page Header */}
-      <div className="shrink-0 pt-0.5 pb-1">
+      <div className="shrink-0">
         <SettingsHeader activeSection={activeSection} />
       </div>
 

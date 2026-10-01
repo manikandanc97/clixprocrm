@@ -7,7 +7,7 @@ import { Button } from '@/shared/ui/button';
 import { Label } from '@/shared/ui/label';
 import { Input } from '@/shared/ui/input';
 import { Switch } from '@/shared/ui/switch';
-import { CRMPageHeader } from '@/shared/components/crm';
+import { CRMPageContainer, CRMPageHeader } from '@/shared/components/crm';
 import { compareFormValues } from '@/shared/hooks/use-dirty-form';
 import { toast } from 'sonner';
 
@@ -74,7 +74,7 @@ export default function AISettingsPage() {
   );
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8 animate-in fade-in duration-500">
+    <CRMPageContainer maxWidth="max-w-4xl">
       {/* Page Header */}
       <CRMPageHeader
         title="Enterprise AI Platform"
@@ -82,9 +82,9 @@ export default function AISettingsPage() {
         icon={Sparkles}
       />
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-4 sm:gap-5">
         {/* Model Configuration */}
-        <div className="bg-card p-6 rounded-xl border border-border shadow-card space-y-5">
+        <div className="bg-card p-4 sm:p-5 lg:p-6 rounded-xl border border-border/80 shadow-xs space-y-5">
           <h2 className="text-base font-bold text-foreground flex items-center gap-2">
             <Bot className="w-4 h-4 text-primary" />
             Provider &amp; Model
@@ -138,7 +138,7 @@ export default function AISettingsPage() {
         </div>
 
         {/* Feature Toggles */}
-        <div className="bg-card p-6 rounded-xl border border-border shadow-card space-y-6">
+        <div className="bg-card p-4 sm:p-5 lg:p-6 rounded-xl border border-border/80 shadow-xs space-y-6">
           <h2 className="text-base font-bold text-foreground flex items-center gap-2">
             <Shield className="w-4 h-4 text-primary" />
             Capabilities
@@ -199,6 +199,6 @@ export default function AISettingsPage() {
           {saving ? 'Saving...' : 'Save Configuration'}
         </Button>
       </div>
-    </div>
+    </CRMPageContainer>
   );
 }

@@ -16,15 +16,15 @@ export const CRMPageSection = ({
   subtitle,
 }: CRMPageSectionProps) => {
   return (
-    <div className={cn("space-y-4", className)}>
+    <section className={cn("flex flex-col gap-4 sm:gap-5", className)}>
       {(title || subtitle) && (
-        <div className="space-y-1">
+        <div className="flex flex-col gap-1">
           {title && <h2 className="crm-section-title">{title}</h2>}
           {subtitle && <p className="crm-description">{subtitle}</p>}
         </div>
       )}
       {children}
-    </div>
+    </section>
   );
 };
 

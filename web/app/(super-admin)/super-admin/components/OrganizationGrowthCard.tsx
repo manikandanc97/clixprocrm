@@ -11,6 +11,7 @@ import {
   Tooltip as RechartsTooltip,
   CartesianGrid,
 } from "recharts";
+import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 import { TimeframeOption } from "./dashboard-types";
 
 interface GrowthDataShape {
@@ -41,7 +42,7 @@ export function OrganizationGrowthCard({
   isClient,
 }: OrganizationGrowthCardProps) {
   return (
-    <div className="lg:col-span-2 rounded-2xl bg-card border border-border shadow-card p-5 sm:p-6 flex flex-col justify-between space-y-4">
+    <div className="lg:col-span-2 rounded-2xl bg-card border border-border shadow-card p-5 sm:p-6 flex flex-col justify-between space-y-4 min-w-0">
       <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 pb-3">
         <div>
           <div className="flex items-center gap-2">
@@ -101,9 +102,22 @@ export function OrganizationGrowthCard({
       </div>
 
       {/* Lightweight Clean Chart */}
-      <div className="h-56 w-full pt-2">
-        {isClient && currentGrowthSeries.length > 0 ? (
-          <ResponsiveContainer width="100%" height="100%">
+      <div className="w-full min-w-0 h-56 pt-2">
+        <ChartContainer
+          height="100%"
+          minHeight={200}
+          loading={!isClient}
+          hasData={currentGrowthSeries.length > 0}
+          emptyMessage="Loading analytics data..."
+          className="w-full h-full min-w-0"
+        >
+          <ResponsiveContainer 
+            width="100%" 
+            height="100%"
+            minWidth={0}
+            minHeight={200}
+            initialDimension={{ width: 500, height: 200 }}
+          >
             <AreaChart
               data={currentGrowthSeries}
               margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -149,11 +163,7 @@ export function OrganizationGrowthCard({
               />
             </AreaChart>
           </ResponsiveContainer>
-        ) : (
-          <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-            Loading analytics data...
-          </div>
-        )}
+        </ChartContainer>
       </div>
     </div>
   );

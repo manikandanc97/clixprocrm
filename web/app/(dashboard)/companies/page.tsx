@@ -22,6 +22,7 @@ import {
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   CRMToolbar,
   CRMPagination,
   CRMDeleteDialog,
@@ -246,7 +247,7 @@ export default function CompaniesPage() {
       />
 
       {/* 2. Main Data Card with Toolbar & Table */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         <CRMToolbar
           searchQuery={search}
           setSearchQuery={handleSearchChange}
@@ -363,7 +364,7 @@ export default function CompaniesPage() {
           itemName="Companies"
           pageSizeOptions={[10, 20, 50, 100]}
         />
-      </div>
+      </CRMTableCard>
 
       {/* 4. Delete Confirmation Dialogs */}
       <CRMDeleteDialog

@@ -8,7 +8,6 @@ import {
   X,
   Download,
   Shield,
-  Eye,
 } from "lucide-react";
 import { AppIcon } from "@/shared/components/icons/icon-registry";
 import { Input } from "@/shared/ui/input";
@@ -29,6 +28,7 @@ import { toast } from "sonner";
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   TruncatedText,
   CRMPagination,
 } from "@/shared/components/crm";
@@ -290,7 +290,7 @@ export default function SuperAdminAuditLogsPage() {
       />
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
           {/* Left: Filter Selects & Search */}
@@ -396,7 +396,7 @@ export default function SuperAdminAuditLogsPage() {
           }}
           itemName="Logs"
         />
-      </div>
+      </CRMTableCard>
 
       {/* 5. Details Modal */}
       {selectedLog && (

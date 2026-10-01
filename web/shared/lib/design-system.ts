@@ -31,6 +31,51 @@ export const crmSurface = {
   mutedPanel: "rounded-xl border border-border bg-muted/40",
   elevated:
     "rounded-2xl border border-border bg-surface-elevated shadow-elevated",
+  /** Canonical data table & module card wrapper */
+  tableContainer:
+    "rounded-xl border border-border/80 bg-card shadow-xs overflow-hidden flex flex-col flex-1 min-h-0",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Spacing compositions — aligned to spacing.md & canonical 4pt spatial scale
+// ---------------------------------------------------------------------------
+export const crmSpacing = {
+  /** Page lateral breathing room: 16px mobile, 24px desktop */
+  pagePadding: "px-4 sm:px-6",
+  /** Page top alignment under fixed Topbar */
+  pageTop: "pt-1",
+  /** Page vertical flow rhythm: 16px mobile, 20px desktop */
+  pageGap: "gap-4 sm:gap-5",
+  /** Page terminal bottom padding: 96px mobile (clears bottom nav), 24px desktop */
+  pageBottom: "pb-24 md:pb-6",
+  /** Standard CRM card padding: 16px mobile, 20px desktop */
+  cardPadding: "p-4 sm:p-5",
+  /** Toolbar / filter bar padding: 12px mobile, 14px desktop */
+  toolbarPadding: "p-3 sm:p-3.5",
+  /** Modal / dialog / drawer body padding: 20px mobile, 24px desktop */
+  modalPadding: "p-5 sm:p-6",
+  /** Section stack vertical rhythm */
+  sectionGap: "gap-4 sm:gap-5",
+  /** Form row / field vertical rhythm */
+  formGap: "gap-4 sm:gap-5",
+  /** Card interior section separator */
+  dividerTop: "pt-4 border-t border-border/60",
+} as const;
+
+// ---------------------------------------------------------------------------
+// Layout compositions — aligned to layout.md
+// ---------------------------------------------------------------------------
+export const crmLayout = {
+  /** Canonical PageShell base class */
+  pageShell: "mx-auto w-full flex flex-col gap-4 sm:gap-5 px-4 sm:px-6 pt-1 pb-24 md:pb-6 relative",
+  /** Canonical data table card container */
+  tableContainer: "bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0",
+  /** Page header flex container */
+  header: "flex flex-col justify-between gap-3 sm:flex-row sm:items-center",
+  /** Action group flex container */
+  actionGroup: "flex items-center gap-2",
+  /** Filter group flex container */
+  filterGroup: "flex flex-wrap items-center gap-2 sm:gap-2.5",
 } as const;
 
 // ---------------------------------------------------------------------------

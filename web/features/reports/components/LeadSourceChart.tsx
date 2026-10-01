@@ -73,9 +73,11 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
         <CardContent className="p-5 pt-0 min-w-0 flex-1 flex items-center">
           <ChartContainer 
             height="100%" 
+            minHeight={200}
             loading={loading}
             hasData={hasData}
-            className="flex-1 min-h-[190px] w-full"
+            skeletonType="donut"
+            className="flex-1 w-full min-w-0 min-h-[200px]"
           >
             {!hasData ? (
               <div className="h-full min-h-[160px] w-full flex flex-col items-center justify-center text-center p-4">
@@ -86,10 +88,16 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
                 <p className="text-[11px] text-muted-foreground mt-0.5">Leads with sources will appear here</p>
               </div>
             ) : (
-              <div className="flex flex-col sm:flex-row items-center justify-between w-full h-full gap-4">
+              <div className="flex flex-col sm:flex-row items-center justify-between w-full h-full gap-4 min-w-0">
                 {/* Donut Chart with Tooltip */}
-                <div className="w-full sm:w-1/2 h-[180px] relative flex items-center justify-center">
-                  <ResponsiveContainer width="100%" height="100%">
+                <div className="w-full sm:w-1/2 min-w-0 h-[180px] sm:h-[200px] relative flex items-center justify-center">
+                  <ResponsiveContainer 
+                    width="100%" 
+                    height="100%"
+                    minWidth={0}
+                    minHeight={180}
+                    initialDimension={{ width: 180, height: 180 }}
+                  >
                     <PieChart>
                       <Pie
                         data={chartData}

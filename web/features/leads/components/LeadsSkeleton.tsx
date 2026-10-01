@@ -1,5 +1,5 @@
 import React from "react";
-import { CRMPageContainer, CRMPageHeader } from "@/shared/components/crm";
+import { CRMPageContainer, CRMPageHeader, CRMTableCard } from "@/shared/components/crm";
 import { 
   ToolbarSkeleton, 
   TableSkeleton 
@@ -37,7 +37,7 @@ export function LeadsSkeleton() {
         }}
       />
 
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0 mt-4">
+      <CRMTableCard>
         <div className="shrink-0">
           <ToolbarSkeleton />
         </div>
@@ -45,7 +45,7 @@ export function LeadsSkeleton() {
         <div className="flex-1 min-h-0 flex flex-col">
           <TableSkeleton rows={10} cols={7} showPagination={true} />
         </div>
-      </div>
+      </CRMTableCard>
     </CRMPageContainer>
   );
 }

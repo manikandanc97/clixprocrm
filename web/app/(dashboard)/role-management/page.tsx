@@ -13,6 +13,7 @@ import {
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   CRMToolbar,
   CRMPagination,
 } from "@/shared/components/crm";
@@ -88,7 +89,7 @@ export default function RoleManagementPage() {
       />
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         {/* Canonical Toolbar */}
         <CRMToolbar
           searchQuery={search}
@@ -165,7 +166,7 @@ export default function RoleManagementPage() {
           pageSizeOptions={[10, 25, 50, 100]}
           alwaysShow={true}
         />
-      </div>
+      </CRMTableCard>
 
       {/* ── Create / Edit Role Modal ── */}
       <RoleEditorModal

@@ -2,7 +2,6 @@
 
 import { useEffect, useState, useCallback } from "react";
 import { Ticket } from "lucide-react";
-import { AppIcon } from "@/shared/components/icons/icon-registry";
 import {
   fetchPlatformSupportTickets,
   deletePlatformSupportTicket,
@@ -10,7 +9,12 @@ import {
 } from "@/shared/lib/api/super-admin.api";
 import { toast } from "sonner";
 import { SuperAdminTicketModal } from "./SuperAdminTicketModal";
-import { CRMPageContainer, CRMPagination } from "@/shared/components/crm";
+import {
+  CRMPageContainer,
+  CRMPageHeader,
+  CRMTableCard,
+  CRMPagination,
+} from "@/shared/components/crm";
 import { SupportTableToolbar } from "./components/SupportTableToolbar";
 import { SupportTicketsTable } from "./components/SupportTicketsTable";
 import {
@@ -254,32 +258,14 @@ export default function SuperAdminSupportPage() {
   return (
     <CRMPageContainer twoStageScroll>
       {/* 1. Header Layout */}
-      <div className="flex flex-col justify-between gap-3 sm:flex-row sm:items-center">
-        <div className="flex items-center gap-3">
-          <div
-            data-animate-target="true"
-            className="group h-10 w-10 rounded-xl bg-card border border-border/80 flex items-center justify-center text-muted-foreground shadow-xs shrink-0 hover:border-primary/40 hover:bg-muted/30 transition-all cursor-pointer select-none"
-          >
-            <AppIcon
-              name="support"
-              icon={Ticket}
-              size={18}
-              className="w-4.5 h-4.5 text-muted-foreground group-hover:text-primary transition-colors"
-            />
-          </div>
-          <div>
-            <h1 className="text-base sm:text-lg font-bold tracking-tight text-foreground">
-              Platform Support Desk & Inbox
-            </h1>
-            <p className="text-xs text-muted-foreground mt-0.5">
-              Live multi-tenant queue for customer inquiries, escalations, and technical troubleshooting.
-            </p>
-          </div>
-        </div>
-      </div>
+      <CRMPageHeader
+        title="Platform Support Desk & Inbox"
+        description="Live multi-tenant queue for customer inquiries, escalations, and technical troubleshooting."
+        icon={Ticket}
+      />
 
       {/* 2. Main Card Container matching Organizations Page */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         <SupportTableToolbar
           statusFilter={statusFilter}
           setStatusFilter={setStatusFilter}
@@ -323,7 +309,7 @@ export default function SuperAdminSupportPage() {
           }}
           itemName="Tickets"
         />
-      </div>
+      </CRMTableCard>
 
       {/* Delete Confirmation Dialog */}
       <DeleteTicketDialog

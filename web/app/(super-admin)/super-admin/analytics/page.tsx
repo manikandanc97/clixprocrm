@@ -52,6 +52,7 @@ import {
   CartesianGrid,
   Tooltip as RechartsTooltip,
 } from "recharts";
+import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 
 type DateRangeOption = "30d" | "3m" | "6m" | "12m" | "custom";
 
@@ -319,9 +320,9 @@ export default function SuperAdminAnalyticsPage() {
       </div>
 
       {/* ── 3. Workspace Growth Chart + Subscription Mix Breakdown ── */}
-      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+      <div className="grid grid-cols-1 lg:grid-cols-3 gap-6 min-w-0">
         {/* Workspace Growth (2 Cols) */}
-        <div className="lg:col-span-2 rounded-2xl bg-card border border-border shadow-card p-5 sm:p-6 space-y-4 flex flex-col justify-between">
+        <div className="lg:col-span-2 rounded-2xl bg-card border border-border shadow-card p-5 sm:p-6 space-y-4 flex flex-col justify-between min-w-0">
           <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2">
             <div>
               <h3 className="text-sm sm:text-base font-bold text-foreground">
@@ -344,21 +345,23 @@ export default function SuperAdminAnalyticsPage() {
             </div>
           </div>
 
-          <div className="h-64 sm:h-72 w-full pt-2">
-            {loading ? (
-              <div className="h-full w-full flex items-end justify-between gap-3 animate-pulse pb-4">
-                {Array.from({ length: 6 }).map((_, idx) => (
-                  <div key={idx} className="flex-1 flex flex-col items-center gap-2 h-full justify-end">
-                    <div
-                      className="w-full max-w-[40px] rounded-t-xl bg-muted"
-                      style={{ height: `${25 + (idx % 3) * 25}%` }}
-                    />
-                    <div className="h-2.5 w-12 bg-muted/60 rounded" />
-                  </div>
-                ))}
-              </div>
-            ) : isClient && growthTrends.length > 0 ? (
-              <ResponsiveContainer width="100%" height="100%">
+          <div className="w-full min-w-0 h-64 sm:h-72 pt-2">
+            <ChartContainer
+              height="100%"
+              minHeight={256}
+              loading={loading || !isClient}
+              hasData={growthTrends.length > 0}
+              emptyMessage="No workspace growth data available for this range."
+              skeletonType="bar"
+              className="w-full h-full min-w-0"
+            >
+              <ResponsiveContainer 
+                width="100%" 
+                height="100%"
+                minWidth={0}
+                minHeight={256}
+                initialDimension={{ width: 600, height: 260 }}
+              >
                 <BarChart
                   data={growthTrends}
                   margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -417,12 +420,7 @@ export default function SuperAdminAnalyticsPage() {
                   />
                 </BarChart>
               </ResponsiveContainer>
-            ) : (
-              <div className="h-full flex flex-col items-center justify-center text-center text-xs text-muted-foreground">
-                <BarChart3 className="h-8 w-8 mb-2 opacity-30" />
-                <p className="font-medium">No workspace growth data available for this range.</p>
-              </div>
-            )}
+            </ChartContainer>
           </div>
         </div>
 

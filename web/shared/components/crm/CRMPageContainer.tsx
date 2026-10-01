@@ -1,6 +1,7 @@
 "use client";
 
 import { cn } from "@/shared/lib/utils";
+import { crmLayout } from "@/shared/lib/design-system";
 
 interface CRMPageContainerProps {
   children: React.ReactNode;
@@ -22,7 +23,7 @@ export const CRMPageContainer = ({
 }: CRMPageContainerProps) => {
   const isFullHeight = fullHeight || twoStageScroll;
   const baseClass = cn(
-    "mx-auto w-full flex flex-col gap-4 sm:gap-5 px-4 sm:px-6 pt-1 pb-24 md:pb-3.5 relative",
+    crmLayout.pageShell,
     isFullHeight ? "flex-1 min-h-0" : "min-h-full",
     maxWidth,
     className

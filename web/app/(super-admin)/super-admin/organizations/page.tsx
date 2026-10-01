@@ -16,6 +16,7 @@ import { toast } from "sonner";
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   CRMPagination,
 } from "@/shared/components/crm";
 import { OrganizationsToolbar } from "./components/OrganizationsToolbar";
@@ -299,7 +300,7 @@ export default function OrganizationsPage() {
 
 
       {/* 2. Main Table & Toolbar Card */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         <OrganizationsToolbar
           planFilter={planFilter}
           setPlanFilter={setPlanFilter}
@@ -341,7 +342,7 @@ export default function OrganizationsPage() {
           }}
           itemName="Organizations"
         />
-      </div>
+      </CRMTableCard>
 
       {/* 3. Modals and Dialogs */}
       <CreateOrganizationModal

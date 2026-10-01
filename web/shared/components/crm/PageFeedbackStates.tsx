@@ -15,6 +15,7 @@ import {
 
 import { CRMPageContainer } from "./CRMPageContainer";
 import { CRMPageHeader, type CRMPageHeaderAction } from "./CRMPageHeader";
+import { CRMTableCard } from "./CRMTableCard";
 
 /**
  * Metric Card Usage Rule:
@@ -128,7 +129,7 @@ export function PageLoadingState({
       )}
 
       {/* Canonical Data Card Container with Toolbar and Table Skeletons */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         <div className="shrink-0">
           <ToolbarSkeleton />
         </div>
@@ -140,7 +141,7 @@ export function PageLoadingState({
             hasAvatar={hasAvatar}
           />
         </div>
-      </div>
+      </CRMTableCard>
     </CRMPageContainer>
   );
 }

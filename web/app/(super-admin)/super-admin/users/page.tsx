@@ -13,6 +13,7 @@ import { toast } from "sonner";
 import {
   CRMPageContainer,
   CRMPageHeader,
+  CRMTableCard,
   CRMDeleteDialog,
   CRMPagination,
 } from "@/shared/components/crm";
@@ -266,7 +267,7 @@ export default function SuperAdminUsersPage() {
       />
 
       {/* Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         <UsersTableToolbar
           superAdminOnly={superAdminOnly}
           setSuperAdminOnly={setSuperAdminOnly}
@@ -312,7 +313,7 @@ export default function SuperAdminUsersPage() {
           }}
           itemName="Users"
         />
-      </div>
+      </CRMTableCard>
 
       {/* Modals */}
       <UserDetailModal

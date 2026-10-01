@@ -38,7 +38,7 @@ import { toast } from "sonner";
 import {
   CRMPageContainer,
   CRMPageHeader,
-  EmptyState,
+  CRMTableCard,
   CRMPagination,
 } from "@/shared/components/crm";
 import {
@@ -350,7 +350,7 @@ export default function SecurityCenterPage() {
       )}
 
       {/* 2. Main Card Container */}
-      <div className="bg-card border border-border/80 rounded-xl shadow-xs overflow-hidden flex flex-col flex-1 min-h-0">
+      <CRMTableCard>
         {/* Top Controls Toolbar */}
         <div className="p-3.5 flex flex-col lg:flex-row lg:items-center justify-between gap-3 border-b border-border/50 shrink-0">
           {/* Left: Filter Selects & Search */}
@@ -444,7 +444,7 @@ export default function SecurityCenterPage() {
           }}
           itemName="Incidents"
         />
-      </div>
+      </CRMTableCard>
 
       {/* Incident Details & Resolution Modal */}
       {selectedIncident && (

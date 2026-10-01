@@ -104,7 +104,7 @@ export default function QuotationPdfPage() {
 
       {/* A4 Canvas Container */}
       <div 
-        className="print:p-0 print:m-0 print:w-full print:bg-white overflow-auto flex-1 w-full flex justify-center p-8 pb-[100px] print:pb-0 print:block"
+        className="print:p-0 print:m-0 print:w-full print:bg-white overflow-auto flex-1 w-full flex justify-center p-8 pb-24 print:pb-0 print:block"
       >
         
         {/* The PDF Page */}

@@ -2,9 +2,15 @@
 
 import React, { useEffect, useState, useRef } from "react";
 import { cn } from "@/shared/lib/utils";
+import { ChartSkeleton, ChartSkeletonType } from "@/shared/components/skeletons";
 
-interface ChartContainerProps {
-  children: React.ReactNode;
+export interface ChartDimensions {
+  width: number;
+  height: number;
+}
+
+export interface ChartContainerProps {
+  children: React.ReactNode | ((dimensions: ChartDimensions) => React.ReactNode);
   /** Height of the container, default is 300 */
   height?: string | number;
   /** Loading state */
@@ -17,13 +23,15 @@ interface ChartContainerProps {
   className?: string;
   /** Minimum height of the container */
   minHeight?: string | number;
+  /** Skeleton type to show while loading or measuring */
+  skeletonType?: ChartSkeletonType;
 }
 
-import { ChartSkeleton } from "@/shared/components/skeletons";
-
 /**
- * A standardized wrapper for Recharts that ensures proper rendering dimensions.
- * Fixes "The width(-1) and height(-1) of chart should be greater than 0" warnings.
+ * Standardized wrapper for Recharts that ensures proper rendering dimensions.
+ * Eliminates "The width(-1) and height(-1) of chart should be greater than 0" warnings
+ * by ensuring charts only mount once the parent container has measurable, positive dimensions,
+ * injecting positive initialDimension values, and cleanly unmounting when hidden inside tabs.
  */
 export const ChartContainer = ({
   children,
@@ -32,66 +40,110 @@ export const ChartContainer = ({
   hasData = true,
   emptyMessage = "No data available",
   className,
-  minHeight
+  minHeight,
+  skeletonType = "area",
 }: ChartContainerProps) => {
-  const [dimensions, setDimensions] = useState({ width: 0, height: 0 });
+  const [dimensions, setDimensions] = useState<ChartDimensions>({ width: 0, height: 0 });
   const containerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const node = containerRef.current;
     if (!node) return;
 
-    const updateDimensions = () => {
+    const measure = () => {
       if (!node) return;
-      const { clientWidth, clientHeight } = node;
-      setDimensions({ width: clientWidth, height: clientHeight });
+      const rect = node.getBoundingClientRect();
+      const width = Math.floor(rect.width);
+      const height = Math.floor(rect.height);
+
+      if (width > 0 && height > 0) {
+        setDimensions((prev) =>
+          prev.width === width && prev.height === height ? prev : { width, height }
+        );
+      }
     };
 
-    const observer = new ResizeObserver(() => {
-      // Use requestAnimationFrame to avoid ResizeObserver loop limit exceeded error
-      window.requestAnimationFrame(updateDimensions);
+    // Immediate initial measurement
+    measure();
+
+    if (typeof ResizeObserver === "undefined") return;
+
+    const observer = new ResizeObserver((entries) => {
+      const entry = entries[0];
+      if (!entry) return;
+      const { width, height } = entry.contentRect;
+      const w = Math.floor(width);
+      const h = Math.floor(height);
+
+      if (w > 0 && h > 0) {
+        setDimensions((prev) =>
+          prev.width === w && prev.height === h ? prev : { width: w, height: h }
+        );
+      } else {
+        // Container has collapsed or is hidden (e.g. inside an inactive tab/accordion)
+        setDimensions((prev) => (prev.width === 0 && prev.height === 0 ? prev : { width: 0, height: 0 }));
+      }
     });
 
     observer.observe(node);
-    updateDimensions();
 
     return () => {
       observer.disconnect();
     };
   }, []);
 
-  const containerStyle = {
-    height: typeof height === 'number' ? `${height}px` : height,
-    minHeight: typeof minHeight === 'number' ? `${minHeight}px` : minHeight,
+  const resolvedMinHeight = minHeight ?? (typeof height === "number" ? height : undefined);
+  const containerStyle: React.CSSProperties = {
+    height: typeof height === "number" ? `${height}px` : height,
+    minHeight: typeof resolvedMinHeight === "number" ? `${resolvedMinHeight}px` : resolvedMinHeight,
   };
 
   const isReady = dimensions.width > 0 && dimensions.height > 0;
 
   return (
-    <div 
+    <div
       ref={containerRef}
-      className={cn("w-full h-full min-w-0 relative", className)} 
+      className={cn("w-full h-full min-w-0 relative", className)}
       style={containerStyle}
     >
-      {(!isReady || loading) ? (
+      {!isReady || loading ? (
         <div className="absolute inset-0 z-10 w-full h-full bg-card rounded-xl">
-          <ChartSkeleton height="100%" />
+          <ChartSkeleton height="100%" type={skeletonType} />
         </div>
       ) : !hasData ? (
         <div className="absolute inset-0 flex items-center justify-center text-muted-foreground bg-muted/5 rounded-xl border border-dashed border-border/50">
           <p className="text-sm font-medium italic">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="absolute inset-0">
-          {React.isValidElement(children) && React.cloneElement(children as React.ReactElement<{ width?: number; height?: number }>, {
-            width: dimensions.width,
-            height: dimensions.height
-          })}
+        <div className="absolute inset-0 w-full h-full min-w-0">
+          {typeof children === "function"
+            ? children(dimensions)
+            : React.isValidElement(children)
+            ? React.cloneElement(
+                children as React.ReactElement<{
+                  width?: number | string;
+                  height?: number | string;
+                  initialDimension?: { width: number; height: number };
+                  minWidth?: number;
+                  minHeight?: number;
+                }>,
+                {
+                  width: (children.props as { width?: string | number }).width ?? dimensions.width,
+                  height: (children.props as { height?: string | number }).height ?? dimensions.height,
+                  initialDimension: { width: dimensions.width, height: dimensions.height },
+                  minWidth: (children.props as { minWidth?: number }).minWidth ?? 0,
+                  minHeight:
+                    (children.props as { minHeight?: number }).minHeight ??
+                    (typeof resolvedMinHeight === "number" ? resolvedMinHeight : dimensions.height),
+                }
+              )
+            : children}
         </div>
       )}
     </div>
   );
 };
+
 
 
 

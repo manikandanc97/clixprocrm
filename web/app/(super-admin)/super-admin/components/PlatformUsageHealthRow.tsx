@@ -12,6 +12,7 @@ import {
   Tooltip as RechartsTooltip,
   CartesianGrid,
 } from "recharts";
+import { ChartContainer } from "@/shared/components/charts/ChartContainer";
 
 interface UsageStatsShape {
   dau: number;
@@ -41,9 +42,9 @@ export function PlatformUsageHealthRow({
   isClient,
 }: PlatformUsageHealthRowProps) {
   return (
-    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5">
+    <div className="grid grid-cols-1 lg:grid-cols-3 gap-5 min-w-0">
       {/* Platform Usage (2 cols) */}
-      <div className="lg:col-span-2 rounded-2xl bg-card border border-border shadow-card p-5 sm:p-6 space-y-4">
+      <div className="lg:col-span-2 rounded-2xl bg-card border border-border shadow-card p-5 sm:p-6 space-y-4 min-w-0">
         <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 border-b border-border/40 pb-3">
           <div className="flex items-center gap-2">
             <div className="p-2 rounded-xl bg-indigo-500/10 text-indigo-600 border border-indigo-500/20">
@@ -110,9 +111,22 @@ export function PlatformUsageHealthRow({
         </div>
 
         {/* 30-Day Activity Sparkline */}
-        <div className="h-44 w-full pt-1">
-          {isClient && usageStats.dailyTrend.length > 0 ? (
-            <ResponsiveContainer width="100%" height="100%">
+        <div className="w-full min-w-0 h-44 pt-1">
+          <ChartContainer
+            height="100%"
+            minHeight={160}
+            loading={!isClient}
+            hasData={usageStats.dailyTrend.length > 0}
+            emptyMessage="No usage trend data available"
+            className="w-full h-full min-w-0"
+          >
+            <ResponsiveContainer 
+              width="100%" 
+              height="100%"
+              minWidth={0}
+              minHeight={160}
+              initialDimension={{ width: 500, height: 160 }}
+            >
               <AreaChart
                 data={usageStats.dailyTrend}
                 margin={{ top: 10, right: 10, left: -20, bottom: 0 }}
@@ -158,11 +172,7 @@ export function PlatformUsageHealthRow({
                 />
               </AreaChart>
             </ResponsiveContainer>
-          ) : (
-            <div className="h-full flex items-center justify-center text-xs text-muted-foreground">
-              Loading usage trends...
-            </div>
-          )}
+          </ChartContainer>
         </div>
       </div>
 
