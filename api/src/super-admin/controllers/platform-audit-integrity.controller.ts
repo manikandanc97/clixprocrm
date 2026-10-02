@@ -1,12 +1,12 @@
 import {
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Param,
-    Post,
-    Query,
-    UseGuards,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Post,
+  Query,
+  UseGuards,
 } from '@nestjs/common';
 import { RequireAal } from '../../auth/aal.decorator';
 import { AalGuard } from '../../auth/aal.guard';

@@ -1,25 +1,25 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpException,
-    HttpStatus,
-    Param,
-    Post,
-    Put,
-    Req,
-    UseGuards,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Permissions } from '../../auth/permissions.decorator';
 import { PermissionsGuard } from '../../auth/permissions.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import {
-    checkRateLimit,
-    getClientIp,
-    incrementRateLimit,
-    RATE_LIMITS,
+  checkRateLimit,
+  getClientIp,
+  incrementRateLimit,
+  RATE_LIMITS,
 } from '../../common/utils/rate-limit.util';
 import { DepartmentsService } from '../services/departments.service';
 

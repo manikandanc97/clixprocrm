@@ -21,74 +21,74 @@ export class CompaniesService {
   ) {}
 
   async getCompanies(tenantId: string, query: PaginationQueryDto) {
-      const page = Math.max(1, query.page || 1);
-      const limit = Math.max(1, Math.min(query.limit || 20, 100));
-      const search = query.search || '';
-      const skip = (page - 1) * limit;
+    const page = Math.max(1, query.page || 1);
+    const limit = Math.max(1, Math.min(query.limit || 20, 100));
+    const search = query.search || '';
+    const skip = (page - 1) * limit;
 
-      const where: Prisma.CompanyWhereInput = { tenantId, deletedAt: null };
+    const where: Prisma.CompanyWhereInput = { tenantId, deletedAt: null };
 
-      const [companies, total] = await Promise.all([
-        this.prisma.withTenantContext({ tenantId }, (tx) =>
-          tx.company.findMany({
-            where,
-            orderBy: { createdAt: 'desc' },
-            skip,
-            take: limit,
-            select: {
-              id: true,
-              name: true,
-              industry: true,
-              website: true,
-              email: true,
-              phone: true,
-              address: true,
-              notes: true,
-              status: true,
-              createdAt: true,
-              updatedAt: true,
-              _count: {
-                select: {
-                  customers: { where: { deletedAt: null } },
-                  deals: true,
-                },
+    const [companies, total] = await Promise.all([
+      this.prisma.withTenantContext({ tenantId }, (tx) =>
+        tx.company.findMany({
+          where,
+          orderBy: { createdAt: 'desc' },
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            name: true,
+            industry: true,
+            website: true,
+            email: true,
+            phone: true,
+            address: true,
+            notes: true,
+            status: true,
+            createdAt: true,
+            updatedAt: true,
+            _count: {
+              select: {
+                customers: { where: { deletedAt: null } },
+                deals: true,
               },
             },
-          })
-        ),
-        this.prisma.withTenantContext({ tenantId }, (tx) =>
-          tx.company.count({ where })
-        ),
-      ]);
+          },
+        }),
+      ),
+      this.prisma.withTenantContext({ tenantId }, (tx) =>
+        tx.company.count({ where }),
+      ),
+    ]);
 
-      // Decrypt PII fields
-      const decrypted = companies.map((c) => ({
-        ...c,
-        name: this.enc.decrypt(c.name),
-        email: this.enc.decrypt(c.email),
-        phone: this.enc.decrypt(c.phone),
-        address: this.enc.decrypt(c.address),
-        notes: this.enc.decrypt(c.notes),
-      }));
+    // Decrypt PII fields
+    const decrypted = companies.map((c) => ({
+      ...c,
+      name: this.enc.decrypt(c.name),
+      email: this.enc.decrypt(c.email),
+      phone: this.enc.decrypt(c.phone),
+      address: this.enc.decrypt(c.address),
+      notes: this.enc.decrypt(c.notes),
+    }));
 
-      // Apply search post-decryption (name substring, industry is plaintext)
-      const filtered = search
-        ? decrypted.filter(
-            (c) =>
-              (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
-              (c.industry || '').toLowerCase().includes(search.toLowerCase()),
-          )
-        : decrypted;
+    // Apply search post-decryption (name substring, industry is plaintext)
+    const filtered = search
+      ? decrypted.filter(
+          (c) =>
+            (c.name || '').toLowerCase().includes(search.toLowerCase()) ||
+            (c.industry || '').toLowerCase().includes(search.toLowerCase()),
+        )
+      : decrypted;
 
-      return {
-        companies: filtered,
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
+    return {
+      companies: filtered,
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async createCompany(

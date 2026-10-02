@@ -1,15 +1,15 @@
 import {
-    Injectable,
-    Logger,
-    OnModuleDestroy,
-    OnModuleInit,
-    Optional,
+  Injectable,
+  Logger,
+  OnModuleDestroy,
+  OnModuleInit,
+  Optional,
 } from '@nestjs/common';
 import { Prisma, PrismaClient } from '@prisma/client';
 import { randomUUID } from 'crypto';
 import {
-    AuditLogSealInput,
-    computeAuditRecordHash,
+  AuditLogSealInput,
+  computeAuditRecordHash,
 } from '../common/audit/audit-crypto.util';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { sanitizeAuditDetails } from '../common/utils/audit-sanitizer.util';
@@ -34,10 +34,25 @@ export class PrismaService
   constructor(
     @Optional() private readonly tenantContext?: TenantContextService,
   ) {
-    super();
+    super({
+      log: [
+        { emit: 'event', level: 'query' },
+        { emit: 'stdout', level: 'error' },
+        { emit: 'stdout', level: 'info' },
+        { emit: 'stdout', level: 'warn' },
+      ],
+    });
   }
 
   async onModuleInit() {
+    // @ts-ignore - Prisma event typing workaround
+    this.$on('query', (e: any) => {
+      if (e.duration > 100) {
+        // Only log slow queries to avoid spam
+        this.logger.warn(`Slow Query [${e.duration}ms]: ${e.query}`);
+      }
+    });
+
     this.readyPromise = this.connectWithRetry();
     await this.readyPromise;
   }

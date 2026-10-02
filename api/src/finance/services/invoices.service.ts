@@ -1,28 +1,26 @@
 import {
-    BadRequestException,
-    Injectable,
-    Logger,
-    NotFoundException,
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
-    formatCurrency,
-    toNumber,
+  formatCurrency,
+  toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
-    CreateInvoiceDto,
-    SendInvoiceEmailDto,
-    UpdateInvoiceDto,
+  CreateInvoiceDto,
+  SendInvoiceEmailDto,
+  UpdateInvoiceDto,
 } from '../dto/enterprise-invoice.dto';
+import { calculateInvoiceTotals } from '../utils/invoice-calculation.util';
 import {
-    calculateInvoiceTotals
-} from '../utils/invoice-calculation.util';
-import {
-    calculateInvoiceSummaryStats,
-    checkIsInvoiceOverdue,
-    mapInvoiceRecordToDto,
+  calculateInvoiceSummaryStats,
+  checkIsInvoiceOverdue,
+  mapInvoiceRecordToDto,
 } from '../utils/invoice-stats.util';
 import { InvoiceEmailService } from './invoice-email.service';
 import { InvoicePdfService } from './invoice-pdf.service';

@@ -1,30 +1,30 @@
 import {
-    BadRequestException,
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpException,
-    HttpStatus,
-    Patch,
-    Post,
-    Query,
-    Req,
-    UseGuards,
+  BadRequestException,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-    RATE_LIMITS,
-    checkRateLimit,
-    getClientIp,
-    incrementRateLimit,
+  RATE_LIMITS,
+  checkRateLimit,
+  getClientIp,
+  incrementRateLimit,
 } from '../common/utils/rate-limit.util';
 import { AalGuard } from './aal.guard';
 import { AuthService, invalidateGetMeCache } from './auth.service';
 import { SessionsService } from './sessions.service';
 import {
-    SupabaseAuthGuard,
-    invalidateSessionCache,
-    invalidateTokenUserCache,
+  SupabaseAuthGuard,
+  invalidateSessionCache,
+  invalidateTokenUserCache,
 } from './supabase.guard';
 import { TenantGuard, invalidateUserTenantCache } from './tenant.guard';
 
@@ -87,6 +87,7 @@ export class AuthController {
       userId,
       req.tenantId,
       req.user.email,
+      req.user,
     );
     return { success: true, data: result };
   }

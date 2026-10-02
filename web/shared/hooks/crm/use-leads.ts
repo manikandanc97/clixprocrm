@@ -163,6 +163,7 @@ export function useLeadNotes(leadId: string) {
     queryKey: ["leadNotes", leadId, token],
     queryFn: () => fetchLeadNotes(leadId),
     enabled: isAuthenticated && !!leadId,
+    staleTime: 30 * 1000,
   });
 }
 
@@ -188,6 +189,7 @@ export function useLeadTimeline(leadId: string) {
     queryKey: ["leadTimeline", leadId, token],
     queryFn: () => fetchLeadTimeline(leadId),
     enabled: isAuthenticated && !!leadId,
+    staleTime: 30 * 1000,
   });
 }
 
@@ -197,6 +199,7 @@ export function useLeadAttachments(leadId: string) {
     queryKey: ["leadAttachments", leadId, token],
     queryFn: () => fetchLeadAttachments(leadId),
     enabled: isAuthenticated && !!leadId,
+    staleTime: 30 * 1000,
   });
 }
 
@@ -258,6 +261,7 @@ export function useLeadMeetings(leadId: string) {
     queryKey: ["leadMeetings", leadId, token],
     queryFn: () => fetchLeadMeetings(leadId),
     enabled: isAuthenticated && !!leadId,
+    staleTime: 30 * 1000,
   });
 }
 

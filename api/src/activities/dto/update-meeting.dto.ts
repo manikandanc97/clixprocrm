@@ -1,10 +1,10 @@
 import {
-    IsBoolean,
-    IsIn,
-    IsNumber,
-    IsOptional,
-    IsString,
-    IsUUID
+  IsBoolean,
+  IsIn,
+  IsNumber,
+  IsOptional,
+  IsString,
+  IsUUID,
 } from 'class-validator';
 
 export class UpdateMeetingDto {

@@ -1,11 +1,11 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Post,
-    Req,
-    Res,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { SupabaseAuthGuard } from '../auth/supabase.guard';

@@ -1,8 +1,8 @@
 import {
-    BadRequestException,
-    Injectable,
-    Logger,
-    NotFoundException,
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { AuditLoggerService } from '../../common/audit/audit-logger.service';
 import { PrismaService } from '../../prisma/prisma.service';

@@ -1,12 +1,12 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Req,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -53,29 +53,58 @@ export class PipelineController {
   @Roles('ADMIN', 'MANAGER', 'SALES')
   async migrateLeadsToDeals(@Req() req: any) {
     const tenantId = req.tenantId;
-    const leads = await this.prisma.lead.findMany({ where: { tenantId } });
-    
     let createdCount = 0;
-    for (const lead of leads) {
-      const existingDeal = await this.prisma.deal.findFirst({
-        where: { tenantId, leadId: lead.id }
+    let totalLeads = 0;
+    let cursor: string | undefined = undefined;
+
+    while (true) {
+      const queryArgs: any = {
+        where: { tenantId },
+        take: 100,
+        orderBy: { id: 'asc' },
+      };
+      if (cursor) {
+        queryArgs.skip = 1;
+        queryArgs.cursor = { id: cursor };
+      }
+      
+      const leads = await this.prisma.lead.findMany(queryArgs);
+
+      if (leads.length === 0) break;
+      totalLeads += leads.length;
+      cursor = leads[leads.length - 1].id;
+
+      const leadIds = leads.map((l: any) => l.id);
+
+      const existingDeals = await this.prisma.deal.findMany({
+        where: { tenantId, leadId: { in: leadIds } },
+        select: { leadId: true },
       });
-      if (!existingDeal) {
-        await this.prisma.deal.create({
-          data: {
-            tenantId,
-            name: `${lead.name} - Deal`,
-            companyId: lead.companyId,
-            customerId: lead.customerId,
-            leadId: lead.id,
-            value: lead.value,
-            ownerId: lead.assignedToId || lead.createdById,
-            stage: 'NEW',
-          }
+      
+      const existingDealLeadIds = new Set(existingDeals.map(d => d.leadId));
+
+      const dealsToCreate = leads
+        .filter((lead: any) => !existingDealLeadIds.has(lead.id))
+        .map((lead: any) => ({
+          tenantId,
+          name: `${lead.name} - Deal`,
+          companyId: lead.companyId,
+          customerId: lead.customerId,
+          leadId: lead.id,
+          value: lead.value,
+          ownerId: lead.assignedToId || lead.createdById,
+          stage: 'NEW' as any,
+        }));
+
+      if (dealsToCreate.length > 0) {
+        await this.prisma.deal.createMany({
+          data: dealsToCreate,
+          skipDuplicates: true,
         });
-        createdCount++;
+        createdCount += dealsToCreate.length;
       }
     }
-    return { success: true, createdCount, totalLeads: leads.length };
+
+    return { success: true, createdCount, totalLeads };
   }
 }

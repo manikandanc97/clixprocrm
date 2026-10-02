@@ -1,7 +1,7 @@
 import { AuthController } from './auth.controller';
 import {
-    SECURITY_ACTIONS_ALLOWLIST,
-    SessionsService,
+  SECURITY_ACTIONS_ALLOWLIST,
+  SessionsService,
 } from './sessions.service';
 
 describe('Security Activity Tests (Phase P3)', () => {

@@ -1,7 +1,7 @@
 import { ForbiddenException } from '@nestjs/common';
 import {
-    EmailAttachmentStorageService,
-    MAX_SINGLE_ATTACHMENT_BYTES
+  EmailAttachmentStorageService,
+  MAX_SINGLE_ATTACHMENT_BYTES,
 } from './email-attachment-storage.service';
 import { ParsedEmailAttachment } from './mime-parser.service';
 

@@ -1,19 +1,19 @@
 import {
-    Controller,
-    Delete,
-    Get,
-    HttpException,
-    HttpStatus,
-    Param,
-    Post,
-    Req,
-    UseGuards,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-    checkRateLimit,
-    getClientIp,
-    incrementRateLimit,
-    RATE_LIMITS,
+  checkRateLimit,
+  getClientIp,
+  incrementRateLimit,
+  RATE_LIMITS,
 } from '../common/utils/rate-limit.util';
 import { SessionsService } from './sessions.service';
 import { SupabaseAuthGuard } from './supabase.guard';

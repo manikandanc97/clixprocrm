@@ -1,14 +1,14 @@
 import { LeadPriority, LeadStage } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
-    IsArray,
-    IsEmail,
-    IsEnum,
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString,
-    Min
+  IsArray,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
 } from 'class-validator';
 
 export class CreateLeadDto {

@@ -1,15 +1,15 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Query,
-    Req,
-    Res,
-    UseGuards
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  Res,
+  UseGuards,
 } from '@nestjs/common';
 import type { FastifyReply } from 'fastify';
 import { Roles } from '../../auth/roles.decorator';
@@ -18,9 +18,9 @@ import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import { parsePaginationParams } from '../../common/utils/pagination.util';
 import {
-    CreateInvoiceDto,
-    SendInvoiceEmailDto,
-    UpdateInvoiceDto,
+  CreateInvoiceDto,
+  SendInvoiceEmailDto,
+  UpdateInvoiceDto,
 } from '../dto/enterprise-invoice.dto';
 import { InvoicesService } from '../services/invoices.service';
 

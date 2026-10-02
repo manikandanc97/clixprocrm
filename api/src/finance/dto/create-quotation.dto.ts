@@ -1,14 +1,14 @@
 import { QuotationStatus } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
-    IsArray,
-    IsDateString,
-    IsEnum,
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString,
-    Min,
+  IsArray,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
 } from 'class-validator';
 
 export class CreateQuotationDto {

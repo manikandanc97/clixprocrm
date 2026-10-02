@@ -1,11 +1,11 @@
 import {
-    CanActivate,
-    ExecutionContext,
-    ForbiddenException,
-    Injectable,
-    Logger,
-    Optional,
-    UnauthorizedException,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  Optional,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,11 +31,19 @@ export class SuperAdminGuard implements CanActivate {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    // Direct database check for isSuperAdmin flag (never trust frontend headers/flags)
-    const userRecord = await this.prisma.user.findUnique({
-      where: { id: user.id },
-      select: { id: true, isSuperAdmin: true, status: true },
-    });
+    // Direct database check for isSuperAdmin flag (leverage DB-verified user from SupabaseAuthGuard if available)
+    let userRecord =
+      user.dbUser ||
+      (user.isSuperAdmin !== undefined && user.status !== undefined
+        ? user
+        : null);
+
+    if (!userRecord) {
+      userRecord = await this.prisma.user.findUnique({
+        where: { id: user.id },
+        select: { id: true, isSuperAdmin: true, status: true },
+      });
+    }
 
     if (!userRecord) {
       this.logger.warn(
@@ -67,9 +75,9 @@ export class SuperAdminGuard implements CanActivate {
         `[AAL2_REQUIRED] Super Admin accessed without AAL2: userId=${user.id}, currentAal=${currentAal}, route=${route}`,
       );
 
-      // Record audit event for AAL2 denial
-      try {
-        await this.prisma.auditLog.create({
+      // Record audit event for AAL2 denial asynchronously to avoid network latency on error path
+      this.prisma.auditLog
+        .create({
           data: {
             userId: user.id,
             action: 'AAL2_REQUIRED_DENIED',
@@ -83,10 +91,12 @@ export class SuperAdminGuard implements CanActivate {
             ipAddress: request.ip || request.headers?.['x-forwarded-for'],
             userAgent: request.headers?.['user-agent'],
           },
+        })
+        .catch((err) => {
+          this.logger.warn(
+            `Failed to record AAL2 denial audit log: ${err.message}`,
+          );
         });
-      } catch {
-        // Suppress audit log insert errors so exception propagates cleanly
-      }
 
       throw new ForbiddenException({
         statusCode: 403,

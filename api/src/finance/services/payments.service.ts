@@ -1,13 +1,13 @@
 import {
-    BadRequestException,
-    Injectable,
-    Logger,
-    NotFoundException,
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import {
-    formatCurrency,
-    toNumber,
+  formatCurrency,
+  toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { PrismaService } from '../../prisma/prisma.service';

@@ -1,7 +1,7 @@
 import { EMAIL_JOB_NAMES } from '../interfaces/email-jobs';
 import {
-    EMAIL_DEFAULT_JOB_OPTS,
-    EmailQueueProducer,
+  EMAIL_DEFAULT_JOB_OPTS,
+  EmailQueueProducer,
 } from './email-queue.producer';
 
 describe('EmailQueueProducer Suite', () => {

@@ -2,9 +2,7 @@ import { Injectable, Logger } from '@nestjs/common';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { AuditArchiveProvider } from '../archive/audit-archive.interface';
 import { AuditArchiveService } from '../archive/audit-archive.service';
-import {
-    buildAuditObjectKey
-} from '../archive/s3-object-lock.provider';
+import { buildAuditObjectKey } from '../archive/s3-object-lock.provider';
 import { AuditLogSealInput, verifyRecordHash } from '../audit-crypto.util';
 
 export interface DisasterRecoveryVerificationResult {

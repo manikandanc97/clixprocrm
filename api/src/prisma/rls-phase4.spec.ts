@@ -35,7 +35,6 @@ import { PlatformDashboardService } from '../super-admin/services/platform-dashb
 import { PlatformOrganizationsService } from '../super-admin/services/platform-organizations.service';
 import { SearchService } from '../system/services/search.service';
 
-
 function buildModelMocks() {
   return {
     $executeRaw: jest.fn().mockResolvedValue(undefined),

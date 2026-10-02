@@ -1,8 +1,8 @@
 import {
-    BadRequestException,
-    Injectable,
-    NotFoundException,
-    Optional,
+  BadRequestException,
+  Injectable,
+  NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { EncryptionService } from '../../common/encryption/encryption.service';
@@ -69,111 +69,115 @@ export class LeadsService {
   // ─── Core CRUD Operations ───────────────────────────────────────────────────
 
   async createLead(tenantId: string, userId: string, data: CreateLeadDto) {
-    const createdLead = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      if (data.assignedToId && data.assignedToId !== userId) {
-        const isValidAssignee = await tx.tenantUser.findFirst({
-          where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
-        });
-        if (!isValidAssignee) {
-          throw new BadRequestException(
-            'Invalid assignment: User does not belong to this workspace or is inactive.',
-          );
-        }
-      }
-
-      const isWon = data.stage === 'WON';
-      let companyId = null;
-      const companyName = data.company ? data.company.trim() : null;
-
-      if (companyName) {
-        // Use nameHash for exact-match lookup on encrypted company name
-        const companyNameHash = this.enc.hash(companyName);
-        let company = await tx.company.findFirst({
-          where: { tenantId, nameHash: companyNameHash, deletedAt: null },
-        });
-        if (!company) {
-          const { encrypted: encName, hash: nameHash } =
-            this.enc.encryptWithHash(companyName);
-          company = await tx.company.create({
-            data: {
-              tenantId,
-              name: encName!,
-              nameHash,
-              ownerId: userId,
-              status: 'ACTIVE',
-            },
+    const createdLead = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        if (data.assignedToId && data.assignedToId !== userId) {
+          const isValidAssignee = await tx.tenantUser.findFirst({
+            where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
           });
+          if (!isValidAssignee) {
+            throw new BadRequestException(
+              'Invalid assignment: User does not belong to this workspace or is inactive.',
+            );
+          }
         }
-        companyId = company.id;
-      }
 
-      const { encrypted: encEmail, hash: emailHash } = this.enc.encryptWithHash(
-        data.email,
-      );
+        const isWon = data.stage === 'WON';
+        let companyId = null;
+        const companyName = data.company ? data.company.trim() : null;
 
-      const lead = await tx.lead.create({
-        data: {
-          tenantId,
-          name: this.enc.encrypt(data.name)!,
-          company: this.enc.encrypt(companyName || 'Unknown Company')!,
-          companyId,
-          email: encEmail!,
-          emailHash,
-          phone: this.enc.encrypt(data.phone),
-          source: data.source || 'Direct',
-          stage: data.stage || 'NEW',
-          priority: data.priority || 'MEDIUM',
-          value: data.valueAmount || data.value || 0,
-          expectedCloseDate: data.expectedCloseDate
-            ? new Date(data.expectedCloseDate)
-            : null,
-          tags: data.tags || [],
-          assignedToId: data.assignedToId || userId,
-          createdById: userId,
-          isConverted: isWon,
-          convertedAt: isWon ? new Date() : null,
-        },
-      });
+        if (companyName) {
+          // Use nameHash for exact-match lookup on encrypted company name
+          const companyNameHash = this.enc.hash(companyName);
+          let company = await tx.company.findFirst({
+            where: { tenantId, nameHash: companyNameHash, deletedAt: null },
+          });
+          if (!company) {
+            const { encrypted: encName, hash: nameHash } =
+              this.enc.encryptWithHash(companyName);
+            company = await tx.company.create({
+              data: {
+                tenantId,
+                name: encName!,
+                nameHash,
+                ownerId: userId,
+                status: 'ACTIVE',
+              },
+            });
+          }
+          companyId = company.id;
+        }
 
-      await tx.timelineEvent.create({
-        data: {
-          tenantId,
-          leadId: lead.id,
-          action: 'Lead Created',
-          description: `Created lead for ${companyName || 'Unknown Company'}`,
-          userId,
-        },
-      });
+        const { encrypted: encEmail, hash: emailHash } =
+          this.enc.encryptWithHash(data.email);
 
-      // Auto-create a Deal so it shows up in Deals & Pipeline immediately
-      const dealStageMap: Record<string, string> = {
-        NEW: 'NEW',
-        CONTACTED: 'NEGOTIATION',
-        PROPOSAL_SENT: 'PROPOSAL',
-        WON: 'WON',
-        LOST: 'LOST',
-      };
-      const dealStage = dealStageMap[data.stage || 'NEW'] || 'NEW';
-      const dealDisplayName = (companyName || data.name || 'Deal').trim();
+        const lead = await tx.lead.create({
+          data: {
+            tenantId,
+            name: this.enc.encrypt(data.name)!,
+            company: this.enc.encrypt(companyName || 'Unknown Company')!,
+            companyId,
+            email: encEmail!,
+            emailHash,
+            phone: this.enc.encrypt(data.phone),
+            source: data.source || 'Direct',
+            stage: data.stage || 'NEW',
+            priority: data.priority || 'MEDIUM',
+            value: data.valueAmount || data.value || 0,
+            expectedCloseDate: data.expectedCloseDate
+              ? new Date(data.expectedCloseDate)
+              : null,
+            tags: data.tags || [],
+            assignedToId: data.assignedToId || userId,
+            createdById: userId,
+            isConverted: isWon,
+            convertedAt: isWon ? new Date() : null,
+          },
+        });
 
-      await tx.deal.create({
-        data: {
-          tenantId,
-          name: dealDisplayName,
-          companyId: companyId || null,
-          customerId: null,
-          leadId: lead.id,
-          value: data.valueAmount || data.value || 0,
-          stage: dealStage as any,
-          ownerId: data.assignedToId || userId,
-        },
-      });
+        await tx.timelineEvent.create({
+          data: {
+            tenantId,
+            leadId: lead.id,
+            action: 'Lead Created',
+            description: `Created lead for ${companyName || 'Unknown Company'}`,
+            userId,
+          },
+        });
 
-      // Return decrypted lead for immediate API response
-      return this.decryptLead(lead);
-    });
+        // Auto-create a Deal so it shows up in Deals & Pipeline immediately
+        const dealStageMap: Record<string, string> = {
+          NEW: 'NEW',
+          CONTACTED: 'NEGOTIATION',
+          PROPOSAL_SENT: 'PROPOSAL',
+          WON: 'WON',
+          LOST: 'LOST',
+        };
+        const dealStage = dealStageMap[data.stage || 'NEW'] || 'NEW';
+        const dealDisplayName = (companyName || data.name || 'Deal').trim();
 
-    const affectedUserIds = [data.assignedToId, userId].filter(Boolean) as string[];
+        await tx.deal.create({
+          data: {
+            tenantId,
+            name: dealDisplayName,
+            companyId: companyId || null,
+            customerId: null,
+            leadId: lead.id,
+            value: data.valueAmount || data.value || 0,
+            stage: dealStage as any,
+            ownerId: data.assignedToId || userId,
+          },
+        });
+
+        // Return decrypted lead for immediate API response
+        return this.decryptLead(lead);
+      },
+    );
+
+    const affectedUserIds = [data.assignedToId, userId].filter(
+      Boolean,
+    ) as string[];
     await invalidateDashboardCache(tenantId, affectedUserIds);
     return createdLead;
   }
@@ -208,227 +212,237 @@ export class LeadsService {
     id: string,
     data: UpdateLeadDto,
   ) {
-    let affectedUserIds: string[] = [userId];
+    const affectedUserIds: string[] = [userId];
 
-    const updatedLead = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const existingLead = await tx.lead.findUnique({
-        where: { id, tenantId },
-        select: {
-          id: true,
-          stage: true,
-          name: true,
-          company: true,
-          email: true,
-          emailHash: true,
-          phone: true,
-          assignedToId: true,
-          customerId: true,
-          isConverted: true,
-          value: true,
-        },
-      });
-      if (!existingLead) throw new NotFoundException('Lead not found');
+    const updatedLead = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const existingLead = await tx.lead.findUnique({
+          where: { id, tenantId },
+          select: {
+            id: true,
+            stage: true,
+            name: true,
+            company: true,
+            email: true,
+            emailHash: true,
+            phone: true,
+            assignedToId: true,
+            customerId: true,
+            isConverted: true,
+            value: true,
+          },
+        });
+        if (!existingLead) throw new NotFoundException('Lead not found');
 
-      if (existingLead.assignedToId) affectedUserIds.push(existingLead.assignedToId);
-      if (data.assignedToId) affectedUserIds.push(data.assignedToId);
+        if (existingLead.assignedToId)
+          affectedUserIds.push(existingLead.assignedToId);
+        if (data.assignedToId) affectedUserIds.push(data.assignedToId);
 
-      const targetStage = data.stage || existingLead.stage;
-      const isWon = targetStage === 'WON';
-      const wasWon = existingLead.stage === 'WON';
-      const stageChanged = data.stage && existingLead.stage !== data.stage;
-      let finalCompanyId = undefined;
-      let finalCompanyName = undefined;
+        const targetStage = data.stage || existingLead.stage;
+        const isWon = targetStage === 'WON';
+        const wasWon = existingLead.stage === 'WON';
+        const stageChanged = data.stage && existingLead.stage !== data.stage;
+        let finalCompanyId = undefined;
+        let finalCompanyName = undefined;
 
-      // Decrypt existing for comparison
-      const existingCompanyPlain = this.enc.decrypt(existingLead.company);
+        // Decrypt existing for comparison
+        const existingCompanyPlain = this.enc.decrypt(existingLead.company);
 
-      if (data.company !== undefined && data.company !== existingCompanyPlain) {
-        finalCompanyName = data.company.trim();
-        if (finalCompanyName) {
-          const companyNameHash = this.enc.hash(finalCompanyName);
-          let company = await tx.company.findFirst({
-            where: { tenantId, nameHash: companyNameHash, deletedAt: null },
-          });
-          if (!company) {
-            const { encrypted: encName, hash: nameHash } =
-              this.enc.encryptWithHash(finalCompanyName);
-            company = await tx.company.create({
-              data: {
-                tenantId,
-                name: encName!,
-                nameHash,
-                ownerId: userId,
-                status: 'ACTIVE',
-              },
+        if (
+          data.company !== undefined &&
+          data.company !== existingCompanyPlain
+        ) {
+          finalCompanyName = data.company.trim();
+          if (finalCompanyName) {
+            const companyNameHash = this.enc.hash(finalCompanyName);
+            let company = await tx.company.findFirst({
+              where: { tenantId, nameHash: companyNameHash, deletedAt: null },
             });
+            if (!company) {
+              const { encrypted: encName, hash: nameHash } =
+                this.enc.encryptWithHash(finalCompanyName);
+              company = await tx.company.create({
+                data: {
+                  tenantId,
+                  name: encName!,
+                  nameHash,
+                  ownerId: userId,
+                  status: 'ACTIVE',
+                },
+              });
+            }
+            finalCompanyId = company.id;
+          } else {
+            finalCompanyId = null;
+            finalCompanyName = 'Unknown Company';
           }
-          finalCompanyId = company.id;
-        } else {
-          finalCompanyId = null;
-          finalCompanyName = 'Unknown Company';
         }
-      }
 
-      if (
-        data.assignedToId &&
-        data.assignedToId !== existingLead.assignedToId &&
-        data.assignedToId !== userId
-      ) {
-        const isValidAssignee = await tx.tenantUser.findFirst({
-          where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
-        });
-        if (!isValidAssignee) {
-          throw new BadRequestException(
-            'Invalid assignment: User does not belong to this workspace or is inactive.',
+        if (
+          data.assignedToId &&
+          data.assignedToId !== existingLead.assignedToId &&
+          data.assignedToId !== userId
+        ) {
+          const isValidAssignee = await tx.tenantUser.findFirst({
+            where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
+          });
+          if (!isValidAssignee) {
+            throw new BadRequestException(
+              'Invalid assignment: User does not belong to this workspace or is inactive.',
+            );
+          }
+        }
+
+        let customerId = existingLead.customerId;
+        if (isWon && !wasWon && !customerId) {
+          const encName = this.enc.encrypt(
+            data.name || this.enc.decrypt(existingLead.name) || '',
           );
-        }
-      }
-
-      let customerId = existingLead.customerId;
-      if (isWon && !wasWon && !customerId) {
-        const encName = this.enc.encrypt(
-          data.name || this.enc.decrypt(existingLead.name) || '',
-        );
-        const encEmail = this.enc.encrypt(
-          data.email || this.enc.decrypt(existingLead.email) || '',
-        );
-        const emailHash = this.enc.hash(
-          data.email || this.enc.decrypt(existingLead.email) || '',
-        );
-        const encCompany = this.enc.encrypt(
-          finalCompanyName || existingCompanyPlain || '',
-        );
-        const customer = await tx.customer.create({
-          data: {
-            tenantId,
-            name: encName!,
-            email: encEmail,
-            emailHash,
-            company: encCompany!,
-            companyId: finalCompanyId,
-            status: 'ACTIVE',
-          },
-        });
-        customerId = customer.id;
-      }
-
-      // Build encrypted update payload
-      const updateData: any = {};
-      if (data.name) updateData.name = this.enc.encrypt(data.name);
-      if (finalCompanyName !== undefined)
-        updateData.company = this.enc.encrypt(finalCompanyName);
-      if (finalCompanyId !== undefined) updateData.companyId = finalCompanyId;
-      if (data.email) {
-        const { encrypted, hash } = this.enc.encryptWithHash(data.email);
-        updateData.email = encrypted;
-        updateData.emailHash = hash;
-      }
-      if (data.phone !== undefined)
-        updateData.phone = this.enc.encrypt(data.phone);
-      if (data.source) updateData.source = data.source;
-      if (data.value !== undefined) updateData.value = data.value;
-      if (data.valueAmount !== undefined && data.value === undefined)
-        updateData.value = data.valueAmount;
-      if (data.stage) updateData.stage = data.stage;
-      if (data.priority) updateData.priority = data.priority;
-      if (data.expectedCloseDate !== undefined) {
-        updateData.expectedCloseDate = data.expectedCloseDate
-          ? new Date(data.expectedCloseDate)
-          : null;
-      }
-      if (data.tags) updateData.tags = data.tags;
-      if (data.assignedToId) updateData.assignedToId = data.assignedToId;
-      if (isWon && !wasWon) {
-        updateData.isConverted = true;
-        updateData.convertedAt = new Date();
-        updateData.customerId = customerId;
-      }
-      updateData.updatedById = userId;
-      updateData.lastActivityAt = new Date();
-
-      const lead = await tx.lead.update({
-        where: { id, tenantId },
-        data: updateData,
-      });
-
-      if (stageChanged) {
-        let description = `Moved from ${existingLead.stage} to ${data.stage}`;
-        if (data.stage === 'WON') {
-          description +=
-            '. Revenue: ' +
-            (data.actualRevenue || data.value || existingLead.value || 0) +
-            '. Reason: ' +
-            (data.wonReason || 'Not specified') +
-            '. ' +
-            (data.notes ? 'Notes: ' + data.notes : '');
-        } else if (data.stage === 'LOST') {
-          description +=
-            '. Reason: ' +
-            (data.lostReason || 'Not specified') +
-            '. Competitor: ' +
-            (data.competitor || 'None') +
-            '. ' +
-            (data.notes ? 'Notes: ' + data.notes : '');
+          const encEmail = this.enc.encrypt(
+            data.email || this.enc.decrypt(existingLead.email) || '',
+          );
+          const emailHash = this.enc.hash(
+            data.email || this.enc.decrypt(existingLead.email) || '',
+          );
+          const encCompany = this.enc.encrypt(
+            finalCompanyName || existingCompanyPlain || '',
+          );
+          const customer = await tx.customer.create({
+            data: {
+              tenantId,
+              name: encName!,
+              email: encEmail,
+              emailHash,
+              company: encCompany!,
+              companyId: finalCompanyId,
+              status: 'ACTIVE',
+            },
+          });
+          customerId = customer.id;
         }
 
-        await tx.timelineEvent.create({
-          data: {
-            tenantId,
-            leadId: id,
-            action: 'Stage Changed',
-            description,
-            userId,
-          },
+        // Build encrypted update payload
+        const updateData: any = {};
+        if (data.name) updateData.name = this.enc.encrypt(data.name);
+        if (finalCompanyName !== undefined)
+          updateData.company = this.enc.encrypt(finalCompanyName);
+        if (finalCompanyId !== undefined) updateData.companyId = finalCompanyId;
+        if (data.email) {
+          const { encrypted, hash } = this.enc.encryptWithHash(data.email);
+          updateData.email = encrypted;
+          updateData.emailHash = hash;
+        }
+        if (data.phone !== undefined)
+          updateData.phone = this.enc.encrypt(data.phone);
+        if (data.source) updateData.source = data.source;
+        if (data.value !== undefined) updateData.value = data.value;
+        if (data.valueAmount !== undefined && data.value === undefined)
+          updateData.value = data.valueAmount;
+        if (data.stage) updateData.stage = data.stage;
+        if (data.priority) updateData.priority = data.priority;
+        if (data.expectedCloseDate !== undefined) {
+          updateData.expectedCloseDate = data.expectedCloseDate
+            ? new Date(data.expectedCloseDate)
+            : null;
+        }
+        if (data.tags) updateData.tags = data.tags;
+        if (data.assignedToId) updateData.assignedToId = data.assignedToId;
+        if (isWon && !wasWon) {
+          updateData.isConverted = true;
+          updateData.convertedAt = new Date();
+          updateData.customerId = customerId;
+        }
+        updateData.updatedById = userId;
+        updateData.lastActivityAt = new Date();
+
+        const lead = await tx.lead.update({
+          where: { id, tenantId },
+          data: updateData,
         });
-      }
-      return this.decryptLead(lead);
-    });
+
+        if (stageChanged) {
+          let description = `Moved from ${existingLead.stage} to ${data.stage}`;
+          if (data.stage === 'WON') {
+            description +=
+              '. Revenue: ' +
+              (data.actualRevenue || data.value || existingLead.value || 0) +
+              '. Reason: ' +
+              (data.wonReason || 'Not specified') +
+              '. ' +
+              (data.notes ? 'Notes: ' + data.notes : '');
+          } else if (data.stage === 'LOST') {
+            description +=
+              '. Reason: ' +
+              (data.lostReason || 'Not specified') +
+              '. Competitor: ' +
+              (data.competitor || 'None') +
+              '. ' +
+              (data.notes ? 'Notes: ' + data.notes : '');
+          }
+
+          await tx.timelineEvent.create({
+            data: {
+              tenantId,
+              leadId: id,
+              action: 'Stage Changed',
+              description,
+              userId,
+            },
+          });
+        }
+        return this.decryptLead(lead);
+      },
+    );
 
     await invalidateDashboardCache(tenantId, affectedUserIds);
     return updatedLead;
   }
 
   async deleteLead(tenantId: string, userId: string, id: string) {
-    let affectedUserIds: string[] = [userId];
+    const affectedUserIds: string[] = [userId];
 
-    const lead = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const existing = await tx.lead.findUnique({
-        where: { id, tenantId },
-        select: {
-          id: true,
-          stage: true,
-          customerId: true,
-          email: true,
-          name: true,
-          company: true,
-          assignedToId: true,
-        },
-      });
-      if (!existing) throw new NotFoundException('Lead not found');
+    const lead = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const existing = await tx.lead.findUnique({
+          where: { id, tenantId },
+          select: {
+            id: true,
+            stage: true,
+            customerId: true,
+            email: true,
+            name: true,
+            company: true,
+            assignedToId: true,
+          },
+        });
+        if (!existing) throw new NotFoundException('Lead not found');
 
-      if (existing.assignedToId) affectedUserIds.push(existing.assignedToId);
+        if (existing.assignedToId) affectedUserIds.push(existing.assignedToId);
 
-      const deleted = await tx.lead.update({
-        where: { id, tenantId },
-        data: {
-          deletedAt: new Date(),
-          updatedById: userId,
-          lastActivityAt: new Date(),
-        },
-      });
+        const deleted = await tx.lead.update({
+          where: { id, tenantId },
+          data: {
+            deletedAt: new Date(),
+            updatedById: userId,
+            lastActivityAt: new Date(),
+          },
+        });
 
-      await tx.timelineEvent.create({
-        data: {
-          tenantId,
-          leadId: id,
-          action: 'Lead Deleted',
-          description: `Lead was softly deleted`,
-          userId,
-        },
-      });
+        await tx.timelineEvent.create({
+          data: {
+            tenantId,
+            leadId: id,
+            action: 'Lead Deleted',
+            description: `Lead was softly deleted`,
+            userId,
+          },
+        });
 
-      return deleted;
-    });
+        return deleted;
+      },
+    );
 
     await invalidateDashboardCache(tenantId, affectedUserIds);
     return lead;
@@ -654,30 +668,33 @@ export class LeadsService {
   }
 
   async bulkDeleteLeads(tenantId: string, userId: string, ids: string[]) {
-    const leads = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const updatedLeads = await tx.lead.updateMany({
-        where: { id: { in: ids }, tenantId },
-        data: {
-          deletedAt: new Date(),
-          updatedById: userId,
-          lastActivityAt: new Date(),
-        },
-      });
+    const leads = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const updatedLeads = await tx.lead.updateMany({
+          where: { id: { in: ids }, tenantId },
+          data: {
+            deletedAt: new Date(),
+            updatedById: userId,
+            lastActivityAt: new Date(),
+          },
+        });
 
-      const timelineEvents = ids.map((id) => ({
-        tenantId,
-        leadId: id,
-        action: 'Lead Deleted',
-        description: 'Lead was softly deleted (Bulk)',
-        userId,
-      }));
+        const timelineEvents = ids.map((id) => ({
+          tenantId,
+          leadId: id,
+          action: 'Lead Deleted',
+          description: 'Lead was softly deleted (Bulk)',
+          userId,
+        }));
 
-      if (timelineEvents.length > 0) {
-        await tx.timelineEvent.createMany({ data: timelineEvents });
-      }
+        if (timelineEvents.length > 0) {
+          await tx.timelineEvent.createMany({ data: timelineEvents });
+        }
 
-      return updatedLeads;
-    });
+        return updatedLeads;
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return leads;

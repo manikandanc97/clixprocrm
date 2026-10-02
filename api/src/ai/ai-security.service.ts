@@ -1,8 +1,6 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
-import {
-    PermissionModule
-} from '../common/role-permissions.constants';
+import { PermissionModule } from '../common/role-permissions.constants';
 import { PrismaService } from '../prisma/prisma.service';
 
 export interface UserSecurityContext {

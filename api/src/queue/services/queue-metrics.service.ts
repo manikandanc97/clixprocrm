@@ -2,12 +2,12 @@ import { InjectQueue } from '@nestjs/bullmq';
 import { Injectable, Logger, OnModuleInit, Optional } from '@nestjs/common';
 import { Job, Queue } from 'bullmq';
 import {
-    AggregateQueueMetrics,
-    DeadLetterJobRecord,
-    DeadLetterQueryOptions,
-    QueueHealthStatus,
-    QueueJobCounts,
-    SingleQueueMetrics,
+  AggregateQueueMetrics,
+  DeadLetterJobRecord,
+  DeadLetterQueryOptions,
+  QueueHealthStatus,
+  QueueJobCounts,
+  SingleQueueMetrics,
 } from '../interfaces/queue-metrics.interface';
 import { QUEUE_NAMES, QueueName } from '../queue.constants';
 

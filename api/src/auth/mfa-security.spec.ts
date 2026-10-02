@@ -1,8 +1,8 @@
 import {
-    BadRequestException,
-    ExecutionContext,
-    ForbiddenException,
-    HttpException
+  BadRequestException,
+  ExecutionContext,
+  ForbiddenException,
+  HttpException,
 } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import { resetRateLimit } from '../common/utils/rate-limit.util';

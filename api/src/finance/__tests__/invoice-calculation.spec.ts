@@ -1,6 +1,4 @@
-import {
-    calculateInvoiceTotals
-} from '../utils/invoice-calculation.util';
+import { calculateInvoiceTotals } from '../utils/invoice-calculation.util';
 
 describe('InvoiceCalculationUtil', () => {
   it('should accurately calculate standard line items without tax or discount', () => {

@@ -1,9 +1,9 @@
 import {
-    BadRequestException,
-    ForbiddenException,
-    Injectable,
-    Logger,
-    NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { AuditLoggerService } from '../../common/audit/audit-logger.service';

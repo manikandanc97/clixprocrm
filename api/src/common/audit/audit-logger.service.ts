@@ -3,9 +3,9 @@ import { randomUUID } from 'crypto';
 import { PrismaService } from '../../prisma/prisma.service';
 import { sanitizeAuditDetails } from '../utils/audit-sanitizer.util';
 import {
-    AuditLogSealInput,
-    computeAuditRecordHash,
-    verifyRecordHash,
+  AuditLogSealInput,
+  computeAuditRecordHash,
+  verifyRecordHash,
 } from './audit-crypto.util';
 
 export interface CreateAuditLogDto {

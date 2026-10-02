@@ -4,8 +4,8 @@ import * as net from 'net';
 import * as nodemailer from 'nodemailer';
 import * as tls from 'tls';
 import {
-    isPrivateOrReservedIPv4,
-    isPrivateOrReservedIPv6,
+  isPrivateOrReservedIPv4,
+  isPrivateOrReservedIPv6,
 } from '../../common/utils/ssrf.util';
 
 export interface SmtpVerifyParams {

@@ -1,10 +1,10 @@
 import { Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
 import {
-    AuditArchiveProvider,
-    CanonicalAuditArchiveRecord,
-    HeadArchiveResult,
-    PutArchiveResult,
+  AuditArchiveProvider,
+  CanonicalAuditArchiveRecord,
+  HeadArchiveResult,
+  PutArchiveResult,
 } from './audit-archive.interface';
 
 export interface S3ObjectLockConfig {

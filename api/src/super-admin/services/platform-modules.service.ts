@@ -1,19 +1,23 @@
 import {
-    BadRequestException,
-    ForbiddenException,
-    Injectable,
-    NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  NotFoundException,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
-    CreatePlatformModuleDto,
-    DEFAULT_SUPER_ADMIN_NAV_MENUS,
-    DEFAULT_TENANT_CRM_MODULES,
-    UpdatePlatformModuleDto,
+  CreatePlatformModuleDto,
+  DEFAULT_SUPER_ADMIN_NAV_MENUS,
+  DEFAULT_TENANT_CRM_MODULES,
+  UpdatePlatformModuleDto,
 } from './platform-modules.defaults';
 
 export {
-    CreatePlatformModuleDto, DEFAULT_SUPER_ADMIN_NAV_MENUS, DEFAULT_TENANT_CRM_MODULES, NAVIGATION_SCOPE, UpdatePlatformModuleDto
+  CreatePlatformModuleDto,
+  DEFAULT_SUPER_ADMIN_NAV_MENUS,
+  DEFAULT_TENANT_CRM_MODULES,
+  NAVIGATION_SCOPE,
+  UpdatePlatformModuleDto,
 } from './platform-modules.defaults';
 export type { NavigationScope } from './platform-modules.defaults';
 
@@ -606,6 +610,20 @@ export class PlatformModulesService {
   // ============================================================
 
   async getSuperAdminNavigationMenu() {
+    const modules = await this.prisma.platformModule.findMany({
+      where: {
+        navigationScope: 'SUPER_ADMIN',
+        isEnabled: true,
+        isVisible: true,
+      },
+      orderBy: [{ sortOrder: 'asc' }, { createdAt: 'asc' }],
+    });
+
+    if (modules.length >= DEFAULT_SUPER_ADMIN_NAV_MENUS.length) {
+      this.isSuperAdminSeeded = true;
+      return modules;
+    }
+
     await this.seedSuperAdminMenusIfEmpty();
 
     return this.prisma.platformModule.findMany({

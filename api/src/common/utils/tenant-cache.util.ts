@@ -1,4 +1,3 @@
-
 interface CachedTenantMetadata {
   currency: string;
   expiresAt: number;

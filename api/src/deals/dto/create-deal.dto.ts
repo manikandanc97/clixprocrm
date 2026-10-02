@@ -1,11 +1,11 @@
 import { DealStage } from '@prisma/client';
 import { Type } from 'class-transformer';
 import {
-    IsEnum,
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
 } from 'class-validator';
 
 export class CreateDealDto {

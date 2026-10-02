@@ -1,12 +1,12 @@
 import {
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Req,
-    UseGuards,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import type { FastifyRequest } from 'fastify';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';

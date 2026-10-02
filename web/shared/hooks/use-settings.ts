@@ -23,6 +23,7 @@ export function useWorkspace() {
     queryKey: ["workspace", token],
     queryFn: fetchWorkspaceData,
     enabled: isAuthenticated ,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -54,6 +55,7 @@ export function useSecuritySettings() {
     queryKey: ["settings", "security", token],
     queryFn: fetchSecuritySettings,
     enabled: isAuthenticated ,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -74,6 +76,7 @@ export function useIntegrationSettings() {
     queryKey: ["settings", "integrations", token],
     queryFn: fetchIntegrationSettings,
     enabled: isAuthenticated ,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -94,6 +97,7 @@ export function useAiSettings() {
     queryKey: ["settings", "ai", token],
     queryFn: fetchAiSettings,
     enabled: isAuthenticated ,
+    staleTime: 5 * 60 * 1000,
   });
 }
 
@@ -114,6 +118,7 @@ export function useNotificationSettings() {
     queryKey: ["settings", "notifications", token],
     queryFn: fetchNotificationSettings,
     enabled: isAuthenticated ,
+    staleTime: 5 * 60 * 1000,
   });
 }
 

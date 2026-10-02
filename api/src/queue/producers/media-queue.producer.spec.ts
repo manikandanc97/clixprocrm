@@ -1,7 +1,7 @@
 import { MEDIA_JOB_NAMES } from '../interfaces/media-jobs';
 import {
-    MEDIA_DEFAULT_JOB_OPTS,
-    MediaQueueProducer,
+  MEDIA_DEFAULT_JOB_OPTS,
+  MediaQueueProducer,
 } from './media-queue.producer';
 
 describe('MediaQueueProducer Suite', () => {

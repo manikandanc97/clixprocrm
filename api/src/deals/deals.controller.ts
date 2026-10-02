@@ -1,16 +1,16 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpException,
-    HttpStatus,
-    Param,
-    Post,
-    Put,
-    Query,
-    Req,
-    UseGuards,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../auth/roles.decorator';
 import { RolesGuard } from '../auth/roles.guard';
@@ -18,10 +18,10 @@ import { SupabaseAuthGuard } from '../auth/supabase.guard';
 import { TenantGuard } from '../auth/tenant.guard';
 import { PaginationQueryDto } from '../common/dto/pagination-query.dto';
 import {
-    checkRateLimit,
-    getClientIp,
-    incrementRateLimit,
-    RATE_LIMITS,
+  checkRateLimit,
+  getClientIp,
+  incrementRateLimit,
+  RATE_LIMITS,
 } from '../common/utils/rate-limit.util';
 import { BulkDealDto } from './dto/bulk-deal.dto';
 import { CreateDealDto } from './dto/create-deal.dto';

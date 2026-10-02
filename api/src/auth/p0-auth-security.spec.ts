@@ -1,12 +1,10 @@
 import {
-    ExecutionContext,
-    HttpException,
-    HttpStatus,
-    UnauthorizedException,
+  ExecutionContext,
+  HttpException,
+  HttpStatus,
+  UnauthorizedException,
 } from '@nestjs/common';
-import {
-    resetRateLimit
-} from '../common/utils/rate-limit.util';
+import { resetRateLimit } from '../common/utils/rate-limit.util';
 import { AuthController } from './auth.controller';
 import { invalidateGetMeCache } from './auth.service';
 import { invalidateTokenUserCache } from './supabase.guard';

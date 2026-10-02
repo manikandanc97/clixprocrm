@@ -1,14 +1,14 @@
 import {
-    Body,
-    Controller,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Put,
-    Query,
-    Req,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';

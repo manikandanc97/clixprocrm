@@ -1,12 +1,8 @@
+import { BadRequestException, Injectable, Logger } from '@nestjs/common';
 import {
-    BadRequestException,
-    Injectable,
-    Logger
-} from '@nestjs/common';
-import {
-    EmailDirection,
-    EmailMessageStatus,
-    EmailSyncStatus
+  EmailDirection,
+  EmailMessageStatus,
+  EmailSyncStatus,
 } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { PrismaService } from '../../prisma/prisma.service';

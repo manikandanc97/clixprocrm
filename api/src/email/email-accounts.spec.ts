@@ -1,14 +1,12 @@
 import {
-    BadRequestException,
-    ConflictException,
-    ForbiddenException,
-    NotFoundException,
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
-import {
-    EmailSyncStatus
-} from '@prisma/client';
+import { EmailSyncStatus } from '@prisma/client';
 import { EncryptionService } from '../common/encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { CreateEmailAccountDto } from './dto/create-email-account.dto';

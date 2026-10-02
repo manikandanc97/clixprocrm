@@ -1,11 +1,11 @@
 import { CustomerStatus } from '@prisma/client';
 import {
-    IsEmail,
-    IsEnum,
-    IsNotEmpty,
-    IsOptional,
-    IsString,
-    ValidateIf,
+  IsEmail,
+  IsEnum,
+  IsNotEmpty,
+  IsOptional,
+  IsString,
+  ValidateIf,
 } from 'class-validator';
 
 export class CreateContactDto {

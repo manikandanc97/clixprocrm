@@ -1,11 +1,11 @@
 import {
-    CanActivate,
-    ExecutionContext,
-    ForbiddenException,
-    Injectable,
-    Logger,
-    Optional,
-    UnauthorizedException,
+  CanActivate,
+  ExecutionContext,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  Optional,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { createClient, SupabaseClient, User } from '@supabase/supabase-js';
 import * as crypto from 'crypto';
@@ -336,69 +336,42 @@ export class SupabaseAuthGuard implements CanActivate {
     // Check DB for session revocation, absolute timeout, idle timeout, and P4 security status
     if (this.prisma) {
       try {
-        // P4 Server-Side Check 1: Cached Platform Emergency & Maintenance Mode Checks (30s TTL)
-        let platformState: any = null;
-        if (
+        // P4 Server-Side Check 1 & 2: Concurrently evaluate Platform Security State, Config, User Profile & Session Record
+        const needPlatformState = !(
           cachedPlatformSecurityState &&
           cachedPlatformSecurityState.expiresAt > now
-        ) {
-          platformState = cachedPlatformSecurityState.state;
-        } else {
-          platformState = await (this.prisma as any).platformSecurityState
-            ?.findUnique({ where: { id: 'global' } })
-            .catch(() => null);
-          cachedPlatformSecurityState = {
-            state: platformState,
-            expiresAt: now + 30000,
-          };
-        }
+        );
+        const needPlatformConfig = !(
+          cachedPlatformConfig && cachedPlatformConfig.expiresAt > now
+        );
 
-        if (platformState?.emergencyMode) {
-          const isSuperAdmin = user.isSuperAdmin === true;
-          const isAal2 = user.aal === 'aal2';
-          if (!isSuperAdmin || !isAal2) {
-            tokenUserCache.delete(token);
-            throw new ForbiddenException(
-              'Platform is in emergency lockdown mode. Access restricted to verified Super Admins with AAL2 authentication.',
-            );
-          }
-        }
-
-        let platformConfig: any = null;
-        if (cachedPlatformConfig && cachedPlatformConfig.expiresAt > now) {
-          platformConfig = cachedPlatformConfig.config;
-        } else {
-          platformConfig = await (this.prisma as any).platformConfig
-            ?.findUnique({ where: { id: 'global' } })
-            .catch(() => null);
-          cachedPlatformConfig = {
-            config: platformConfig,
-            expiresAt: now + 30000,
-          };
-        }
-
-        if (platformConfig?.maintenanceMode) {
-          const isSuperAdmin = user.isSuperAdmin === true;
-          const url = (request.originalUrl || request.url || '').toLowerCase();
-          const isSuperAdminOrExemptPath =
-            url.includes('/super-admin') ||
-            url.includes('/super_admin') ||
-            url.includes('/auth/me') ||
-            url.includes('/auth/logout');
-
-          if (!isSuperAdmin && !isSuperAdminOrExemptPath) {
-            throw new ForbiddenException(
-              'The platform is currently undergoing scheduled maintenance. Please check back shortly.',
-            );
-          }
-        }
-
-        // P4 Server-Side Check 2: Parallelized User, Tenant, and Session lookups
-        const [dbUser, dbTenant, sessionRecord] = await Promise.all([
+        const [
+          fetchedPlatformState,
+          fetchedPlatformConfig,
+          dbUser,
+          dbTenant,
+          sessionRecord,
+        ] = await Promise.all([
+          needPlatformState
+            ? (this.prisma as any).platformSecurityState
+                ?.findUnique({ where: { id: 'global' } })
+                .catch(() => null)
+            : Promise.resolve(cachedPlatformSecurityState?.state ?? null),
+          needPlatformConfig
+            ? (this.prisma as any).platformConfig
+                ?.findUnique({ where: { id: 'global' } })
+                .catch(() => null)
+            : Promise.resolve(cachedPlatformConfig?.config ?? null),
           (this.prisma as any).user
             ?.findUnique({
               where: { id: user.id },
               select: {
+                id: true,
+                name: true,
+                email: true,
+                phone: true,
+                avatar: true,
+                status: true,
                 securityStatus: true,
                 mustResetPassword: true,
                 isSuperAdmin: true,
@@ -428,6 +401,58 @@ export class SupabaseAuthGuard implements CanActivate {
             })
             .catch(() => null),
         ]);
+
+        if (needPlatformState) {
+          cachedPlatformSecurityState = {
+            state: fetchedPlatformState,
+            expiresAt: now + 30000,
+          };
+        }
+        if (needPlatformConfig) {
+          cachedPlatformConfig = {
+            config: fetchedPlatformConfig,
+            expiresAt: now + 30000,
+          };
+        }
+
+        const platformState = fetchedPlatformState;
+        const platformConfig = fetchedPlatformConfig;
+
+        if (dbUser) {
+          user.isSuperAdmin = Boolean(dbUser.isSuperAdmin);
+          user.status = dbUser.status || user.status || 'ACTIVE';
+          user.name = dbUser.name || user.name;
+          user.phone = dbUser.phone || user.phone;
+          user.avatar = dbUser.avatar || user.avatar;
+          user.dbUser = dbUser;
+        }
+
+        if (platformState?.emergencyMode) {
+          const isSuperAdmin = user.isSuperAdmin === true;
+          const isAal2 = user.aal === 'aal2';
+          if (!isSuperAdmin || !isAal2) {
+            tokenUserCache.delete(token);
+            throw new ForbiddenException(
+              'Platform is in emergency lockdown mode. Access restricted to verified Super Admins with AAL2 authentication.',
+            );
+          }
+        }
+
+        if (platformConfig?.maintenanceMode) {
+          const isSuperAdmin = user.isSuperAdmin === true;
+          const url = (request.originalUrl || request.url || '').toLowerCase();
+          const isSuperAdminOrExemptPath =
+            url.includes('/super-admin') ||
+            url.includes('/super_admin') ||
+            url.includes('/auth/me') ||
+            url.includes('/auth/logout');
+
+          if (!isSuperAdmin && !isSuperAdminOrExemptPath) {
+            throw new ForbiddenException(
+              'The platform is currently undergoing scheduled maintenance. Please check back shortly.',
+            );
+          }
+        }
 
         if (dbUser && dbUser.securityStatus === 'LOCKED') {
           revokedSessionsSet.add(sessionId);
@@ -594,85 +619,61 @@ export class SupabaseAuthGuard implements CanActivate {
         } else {
           isSessionRemembered = isRememberMeHeader;
 
-          // Check prior session history for device matching before registering new session
-          const priorMatchingSession = await this.prisma.userSession
-            .findFirst({
-              where: {
-                userId: user.id,
-                deviceType: deviceInfo.deviceType,
-                browser: deviceInfo.browser,
-                operatingSystem: deviceInfo.operatingSystem,
+          // Check prior session history for device matching before registering new session (single query)
+          const recentUserSessions = await this.prisma.userSession
+            .findMany({
+              where: { userId: user.id },
+              select: {
+                deviceType: true,
+                browser: true,
+                operatingSystem: true,
               },
-              select: { id: true },
+              take: 20,
             })
-            .catch(() => null);
+            .catch(() => [] as any[]);
 
-          let firstLogin = false;
-          let isNewDevice = false;
-          let loginAction = 'LOGIN_SUCCESS';
-
-          if (!priorMatchingSession) {
-            // No matching device environment found. Check if this is the user's first-ever login
-            const priorAnySession = await this.prisma.userSession
-              .findFirst({
-                where: { userId: user.id },
-                select: { id: true },
-              })
-              .catch(() => null);
-
-            if (!priorAnySession) {
-              // First-ever login for this user
-              firstLogin = true;
-              isNewDevice = false;
-              loginAction = 'LOGIN_SUCCESS';
-            } else {
-              // Returning user from a new device/browser environment
-              firstLogin = false;
-              isNewDevice = true;
-              loginAction = 'NEW_DEVICE_LOGIN';
-            }
-          } else {
-            // Known device environment
-            firstLogin = false;
-            isNewDevice = false;
-            loginAction = 'LOGIN_SUCCESS';
-          }
+          const firstLogin = recentUserSessions.length === 0;
+          const priorMatchingSession = recentUserSessions.find(
+            (s) =>
+              s.deviceType === deviceInfo.deviceType &&
+              s.browser === deviceInfo.browser &&
+              s.operatingSystem === deviceInfo.operatingSystem,
+          );
+          const isNewDevice = !firstLogin && !priorMatchingSession;
+          const loginAction = isNewDevice
+            ? 'NEW_DEVICE_LOGIN'
+            : 'LOGIN_SUCCESS';
 
           const initialExpiresAt = isSessionRemembered
             ? new Date(now + persistentTimeoutMs)
             : new Date(now + absoluteTimeoutMs);
 
-          // Register new session
-          const createdSession = await this.prisma.userSession
-            .create({
-              data: {
-                userId: user.id,
-                sessionId,
-                ipAddress: typeof ip === 'string' ? ip : null,
-                userAgent: ua || null,
-                deviceType: deviceInfo.deviceType,
-                browser: deviceInfo.browser,
-                operatingSystem: deviceInfo.operatingSystem,
-                lastActiveAt: new Date(),
-                expiresAt: initialExpiresAt,
-                rememberMe: isSessionRemembered,
-              },
-            })
-            .catch(() => null);
-
-          if (createdSession) {
-            sessionCreatedAt = createdSession.createdAt.getTime();
-            sessionLastActiveAt = createdSession.lastActiveAt.getTime();
-
-            // Emit secure AuditLog event for login / session creation
-            await this.prisma.auditLog
+          // Register new session and emit audit log concurrently
+          const [createdSession] = await Promise.all([
+            this.prisma.userSession
+              .create({
+                data: {
+                  userId: user.id,
+                  sessionId,
+                  ipAddress: typeof ip === 'string' ? ip : null,
+                  userAgent: ua || null,
+                  deviceType: deviceInfo.deviceType,
+                  browser: deviceInfo.browser,
+                  operatingSystem: deviceInfo.operatingSystem,
+                  lastActiveAt: new Date(),
+                  expiresAt: initialExpiresAt,
+                  rememberMe: isSessionRemembered,
+                },
+              })
+              .catch(() => null),
+            this.prisma.auditLog
               .create({
                 data: {
                   userId: user.id,
                   action: loginAction,
                   module: 'Security',
                   details: {
-                    sessionId: createdSession.id,
+                    sessionId,
                     rememberMe: isSessionRemembered,
                     browser: deviceInfo.browser,
                     operatingSystem: deviceInfo.operatingSystem,
@@ -684,7 +685,12 @@ export class SupabaseAuthGuard implements CanActivate {
                   userAgent: ua || null,
                 },
               })
-              .catch(() => {});
+              .catch(() => null),
+          ]);
+
+          if (createdSession) {
+            sessionCreatedAt = createdSession.createdAt.getTime();
+            sessionLastActiveAt = createdSession.lastActiveAt.getTime();
 
             // Phase P1 & P2: Gated alert delivery with distributed Redis deduplication
             if (loginAction === 'NEW_DEVICE_LOGIN') {

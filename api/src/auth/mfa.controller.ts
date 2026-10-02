@@ -1,20 +1,20 @@
 import {
-    BadRequestException,
-    Body,
-    Controller,
-    Get,
-    HttpException,
-    HttpStatus,
-    Patch,
-    Post,
-    Req,
-    UseGuards,
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Patch,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-    checkRateLimit,
-    getClientIp,
-    incrementRateLimit,
-    RATE_LIMITS,
+  checkRateLimit,
+  getClientIp,
+  incrementRateLimit,
+  RATE_LIMITS,
 } from '../common/utils/rate-limit.util';
 import { AalGuard } from './aal.guard';
 import { MfaService } from './mfa.service';

@@ -3,12 +3,12 @@ import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { randomUUID } from 'crypto';
 import {
-    EMAIL_JOB_NAMES,
-    InvoiceNotificationJobPayload,
-    PaymentReceiptJobPayload,
-    SecurityAlertJobPayload,
-    SupportTicketJobPayload,
-    SyncInboxJobPayload,
+  EMAIL_JOB_NAMES,
+  InvoiceNotificationJobPayload,
+  PaymentReceiptJobPayload,
+  SecurityAlertJobPayload,
+  SupportTicketJobPayload,
+  SyncInboxJobPayload,
 } from '../interfaces/email-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 

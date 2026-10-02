@@ -4,8 +4,8 @@ import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import { EmailAccountsService } from '../services/email-accounts.service';
 import {
-    EmailAccountsController,
-    isUserTenantAdmin,
+  EmailAccountsController,
+  isUserTenantAdmin,
 } from './email-accounts.controller';
 
 describe('EmailAccountsController', () => {

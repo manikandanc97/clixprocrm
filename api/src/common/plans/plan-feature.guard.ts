@@ -1,12 +1,8 @@
-import {
-    CanActivate,
-    ExecutionContext,
-    Injectable
-} from '@nestjs/common';
+import { CanActivate, ExecutionContext, Injectable } from '@nestjs/common';
 import { Reflector } from '@nestjs/core';
 import {
-    REQUIRE_PLAN_FEATURE_KEY,
-    REQUIRE_PLAN_LIMIT_KEY,
+  REQUIRE_PLAN_FEATURE_KEY,
+  REQUIRE_PLAN_LIMIT_KEY,
 } from './plan-feature.decorator';
 import { SubscriptionEntitlementService } from './subscription-entitlement.service';
 

@@ -18,28 +18,31 @@ export class RevenueService {
   }
 
   async createRevenueTarget(tenantId: string, data: CreateRevenueTargetDto) {
-    const target = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const isActive = data.isActive !== undefined ? data.isActive : true;
+    const target = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const isActive = data.isActive !== undefined ? data.isActive : true;
 
-      if (isActive) {
-        await tx.revenueTarget.updateMany({
-          where: { tenantId, isActive: true },
-          data: { isActive: false },
+        if (isActive) {
+          await tx.revenueTarget.updateMany({
+            where: { tenantId, isActive: true },
+            data: { isActive: false },
+          });
+        }
+
+        return tx.revenueTarget.create({
+          data: {
+            tenantId,
+            periodType: data.periodType || 'MONTHLY',
+            value: data.value || 0,
+            currency: data.currency || 'INR',
+            startDate: new Date(data.startDate),
+            endDate: new Date(data.endDate),
+            isActive,
+          },
         });
-      }
-
-      return tx.revenueTarget.create({
-        data: {
-          tenantId,
-          periodType: data.periodType || 'MONTHLY',
-          value: data.value || 0,
-          currency: data.currency || 'INR',
-          startDate: new Date(data.startDate),
-          endDate: new Date(data.endDate),
-          isActive,
-        },
-      });
-    });
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return target;
@@ -50,37 +53,43 @@ export class RevenueService {
     id: string,
     data: Partial<CreateRevenueTargetDto>,
   ) {
-    const target = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      if (data.isActive) {
-        await tx.revenueTarget.updateMany({
-          where: { tenantId, isActive: true, id: { not: id } },
-          data: { isActive: false },
-        });
-      }
+    const target = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        if (data.isActive) {
+          await tx.revenueTarget.updateMany({
+            where: { tenantId, isActive: true, id: { not: id } },
+            data: { isActive: false },
+          });
+        }
 
-      return tx.revenueTarget.update({
-        where: { id, tenantId },
-        data: {
-          ...(data.periodType && { periodType: data.periodType }),
-          ...(data.value !== undefined && { value: data.value }),
-          ...(data.currency && { currency: data.currency }),
-          ...(data.startDate && { startDate: new Date(data.startDate) }),
-          ...(data.endDate && { endDate: new Date(data.endDate) }),
-          ...(data.isActive !== undefined && { isActive: data.isActive }),
-        },
-      });
-    });
+        return tx.revenueTarget.update({
+          where: { id, tenantId },
+          data: {
+            ...(data.periodType && { periodType: data.periodType }),
+            ...(data.value !== undefined && { value: data.value }),
+            ...(data.currency && { currency: data.currency }),
+            ...(data.startDate && { startDate: new Date(data.startDate) }),
+            ...(data.endDate && { endDate: new Date(data.endDate) }),
+            ...(data.isActive !== undefined && { isActive: data.isActive }),
+          },
+        });
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return target;
   }
 
   async deleteRevenueTarget(tenantId: string, id: string) {
-    const deleted = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      return tx.revenueTarget.delete({
-        where: { id, tenantId },
-      });
-    });
+    const deleted = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        return tx.revenueTarget.delete({
+          where: { id, tenantId },
+        });
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return deleted;

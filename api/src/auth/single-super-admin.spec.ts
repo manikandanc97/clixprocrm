@@ -1,7 +1,7 @@
 import {
-    BadRequestException,
-    ForbiddenException,
-    NotFoundException,
+  BadRequestException,
+  ForbiddenException,
+  NotFoundException,
 } from '@nestjs/common';
 import { EmployeesService } from '../admin/services/employees.service';
 import { PlatformUsersService } from '../super-admin/services/platform-users.service';

@@ -1,9 +1,9 @@
 import { ConfigService } from '@nestjs/config';
 import { Test, TestingModule } from '@nestjs/testing';
 import {
-    EmailDirection,
-    EmailMessageStatus,
-    EmailSyncStatus,
+  EmailDirection,
+  EmailMessageStatus,
+  EmailSyncStatus,
 } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -12,9 +12,9 @@ import { ConnectionVerifierService } from './connection-verifier.service';
 import { EmailAttachmentStorageService } from './email-attachment-storage.service';
 import { EmailHtmlSanitizerService } from './email-html-sanitizer.service';
 import {
-    FetchedImapMessage,
-    IImapClient,
-    ImapClientFactory,
+  FetchedImapMessage,
+  IImapClient,
+  ImapClientFactory,
 } from './imap-client.factory';
 import { InboundEmailService } from './inbound-email.service';
 import { MimeParserService } from './mime-parser.service';

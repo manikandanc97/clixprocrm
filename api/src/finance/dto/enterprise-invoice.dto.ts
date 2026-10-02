@@ -1,12 +1,12 @@
 import { Type } from 'class-transformer';
 import {
-    IsArray,
-    IsNumber,
-    IsOptional,
-    IsString,
-    Max,
-    Min,
-    ValidateNested
+  IsArray,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Max,
+  Min,
+  ValidateNested,
 } from 'class-validator';
 
 export class CreateInvoiceItemDto {

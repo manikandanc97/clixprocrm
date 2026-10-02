@@ -1,6 +1,4 @@
-import {
-    PlanDefinition
-} from './plan-definitions.constant';
+import { PlanDefinition } from './plan-definitions.constant';
 import { WorkspaceUsageStats } from './subscription-entitlement.interface';
 
 /**

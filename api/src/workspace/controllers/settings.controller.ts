@@ -1,12 +1,12 @@
 import {
-    Body,
-    Controller,
-    Get,
-    HttpException,
-    HttpStatus,
-    Patch,
-    Req,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Patch,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AalGuard } from '../../auth/aal.guard';
 import { Roles } from '../../auth/roles.decorator';
@@ -14,10 +14,10 @@ import { RolesGuard } from '../../auth/roles.guard';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { TenantGuard } from '../../auth/tenant.guard';
 import {
-    checkRateLimit,
-    getClientIp,
-    incrementRateLimit,
-    RATE_LIMITS,
+  checkRateLimit,
+  getClientIp,
+  incrementRateLimit,
+  RATE_LIMITS,
 } from '../../common/utils/rate-limit.util';
 import { SettingsService } from '../services/settings.service';
 import { WorkspaceService } from '../services/workspace.service';

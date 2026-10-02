@@ -1,7 +1,7 @@
 import {
-    EmailAuthType,
-    EmailProviderType,
-    EmailSyncStatus,
+  EmailAuthType,
+  EmailProviderType,
+  EmailSyncStatus,
 } from '@prisma/client';
 
 export interface EmailAccountResponseDto {

@@ -1,9 +1,9 @@
 import {
-    CanActivate,
-    ExecutionContext,
-    Injectable,
-    Optional,
-    UnauthorizedException,
+  CanActivate,
+  ExecutionContext,
+  Injectable,
+  Optional,
+  UnauthorizedException,
 } from '@nestjs/common';
 import { TenantContextService } from '../common/context/tenant-context.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -47,12 +47,43 @@ export class TenantGuard implements CanActivate {
     const request = context.switchToHttp().getRequest();
     const user = request.user;
     const tenantId = request.headers['x-tenant-id'];
+    const now = Date.now();
 
     if (!user) {
       throw new UnauthorizedException('User not authenticated');
     }
 
-    const now = Date.now();
+    // 0. Super Admin fast-path (already verified by SupabaseAuthGuard)
+    const isSuperAdminUser =
+      user.isSuperAdmin === true || user.dbUser?.isSuperAdmin === true;
+
+    if (isSuperAdminUser) {
+      let effectiveTenantId = tenantId;
+      if (!effectiveTenantId) {
+        const userMembership = await this.prisma.tenantUser.findFirst({
+          where: { userId: user.id, status: 'ACTIVE' },
+          select: { tenantId: true },
+        });
+        effectiveTenantId = userMembership?.tenantId;
+      }
+      if (!effectiveTenantId) {
+        const firstTenant = await this.prisma.tenant.findFirst({
+          select: { id: true },
+        });
+        effectiveTenantId = firstTenant?.id;
+      }
+
+      request.tenantId = effectiveTenantId;
+      request.userRole = {
+        name: 'SUPER_ADMIN',
+        permissions: [{ module: 'ALL', hasAccess: true }],
+        isActive: true,
+      };
+      request.isSuperAdmin = true;
+      request.isOrgOwner = true;
+      request.isOrgAdmin = true;
+      return true;
+    }
 
     // Check in-memory user membership cache (60s TTL) to prevent DB connection pool exhaustion under concurrency
     let userRecord: any = null;
@@ -60,40 +91,35 @@ export class TenantGuard implements CanActivate {
     if (cached && cached.expiresAt > now) {
       userRecord = (cached as any).userRecord || cached;
     } else {
-      userRecord = await this.prisma.withTenantContext(
-        { userId: user.id },
-        async (tx) => {
-          return tx.user.findUnique({
-            where: { id: user.id },
+      userRecord = await this.prisma.user.findUnique({
+        where: { id: user.id },
+        select: {
+          id: true,
+          status: true,
+          isSuperAdmin: true,
+          memberships: {
+            where: { status: 'ACTIVE' },
             select: {
-              id: true,
+              tenantId: true,
+              isOrgOwner: true,
+              branchId: true,
               status: true,
-              isSuperAdmin: true,
-              memberships: {
-                where: { status: 'ACTIVE' },
+              role: {
+                include: {
+                  permissions: true,
+                },
+              },
+              tenant: {
                 select: {
-                  tenantId: true,
-                  isOrgOwner: true,
-                  branchId: true,
+                  id: true,
+                  name: true,
                   status: true,
-                  role: {
-                    include: {
-                      permissions: true,
-                    },
-                  },
-                  tenant: {
-                    select: {
-                      id: true,
-                      name: true,
-                      status: true,
-                    },
-                  },
                 },
               },
             },
-          });
+          },
         },
-      );
+      });
 
       if (userRecord) {
         userMembershipCache.set(user.id, {

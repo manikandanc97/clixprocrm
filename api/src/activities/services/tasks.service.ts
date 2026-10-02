@@ -10,103 +10,114 @@ export class TasksService {
   constructor(private readonly prisma: PrismaService) {}
 
   async createTask(tenantId: string, userId: string, data: CreateTaskDto) {
-    const createdTask = await this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
-      if (data.assignedToId) {
-        const isValidAssignee = await tx.tenantUser.findFirst({
-          where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
-        });
-        if (!isValidAssignee) {
-          throw new HttpException(
-            {
-              success: false,
-              message:
-                'Invalid assignment: User does not belong to this workspace or is inactive.',
-            },
-            HttpStatus.BAD_REQUEST,
-          );
+    const createdTask = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx: any) => {
+        if (data.assignedToId) {
+          const isValidAssignee = await tx.tenantUser.findFirst({
+            where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
+          });
+          if (!isValidAssignee) {
+            throw new HttpException(
+              {
+                success: false,
+                message:
+                  'Invalid assignment: User does not belong to this workspace or is inactive.',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+          }
         }
-      }
 
-      const task = await tx.task.create({
-        data: {
-          tenantId,
-          title: data.title,
-          description: data.description || null,
-          dueDate: new Date(data.dueDate),
-          assignedToId: data.assignedToId,
-          createdById: userId,
-          priority: data.priority || 'MEDIUM',
-          status: data.status || 'PENDING',
-          visibility: data.visibility || 'PRIVATE',
-          reminderDate: data.reminderDate ? new Date(data.reminderDate) : null,
-          relatedLeadId: data.relatedLeadId || null,
-          relatedCustomerId: data.relatedCustomerId || null,
-          relatedMeetingId: data.relatedMeetingId || null,
-          relatedQuotationId: data.relatedQuotationId || null,
-          relatedDealId: data.relatedDealId || null,
-          tags: data.tags || [],
-          checklist: data.checklist ? data.checklist : [],
-          attachments: data.attachments ? data.attachments : [],
-          completedAt: data.status === 'COMPLETED' ? new Date() : null,
-        },
-        include: {
-          assignedTo: { select: { id: true, name: true, email: true } },
-          createdBy: { select: { id: true, name: true, email: true } },
-          relatedLead: { select: { id: true, name: true, company: true } },
-          relatedCustomer: { select: { id: true, name: true, company: true } },
-        },
-      });
-
-      // 1. Audit Log
-      await tx.auditLog.create({
-        data: {
-          tenantId,
-          userId,
-          action: 'TASK_CREATED',
-          module: 'TASKS',
-          details: {
-            taskId: task.id,
-            title: task.title,
-            assignedToId: task.assignedToId,
-            priority: task.priority,
-          },
-        },
-      });
-
-      // 2. Timeline Event if linked to lead
-      if (task.relatedLeadId) {
-        await tx.timelineEvent.create({
+        const task = await tx.task.create({
           data: {
             tenantId,
-            leadId: task.relatedLeadId,
+            title: data.title,
+            description: data.description || null,
+            dueDate: new Date(data.dueDate),
+            assignedToId: data.assignedToId,
+            createdById: userId,
+            priority: data.priority || 'MEDIUM',
+            status: data.status || 'PENDING',
+            visibility: data.visibility || 'PRIVATE',
+            reminderDate: data.reminderDate
+              ? new Date(data.reminderDate)
+              : null,
+            relatedLeadId: data.relatedLeadId || null,
+            relatedCustomerId: data.relatedCustomerId || null,
+            relatedMeetingId: data.relatedMeetingId || null,
+            relatedQuotationId: data.relatedQuotationId || null,
+            relatedDealId: data.relatedDealId || null,
+            tags: data.tags || [],
+            checklist: data.checklist ? data.checklist : [],
+            attachments: data.attachments ? data.attachments : [],
+            completedAt: data.status === 'COMPLETED' ? new Date() : null,
+          },
+          include: {
+            assignedTo: { select: { id: true, name: true, email: true } },
+            createdBy: { select: { id: true, name: true, email: true } },
+            relatedLead: { select: { id: true, name: true, company: true } },
+            relatedCustomer: {
+              select: { id: true, name: true, company: true },
+            },
+          },
+        });
+
+        // 1. Audit Log
+        await tx.auditLog.create({
+          data: {
+            tenantId,
             userId,
-            action: 'Task Created',
-            description: `Task "${task.title}" created and assigned.`,
+            action: 'TASK_CREATED',
+            module: 'TASKS',
+            details: {
+              taskId: task.id,
+              title: task.title,
+              assignedToId: task.assignedToId,
+              priority: task.priority,
+            },
           },
         });
-      }
 
-      // 3. Notification to assignee
-      if (task.assignedToId && task.assignedToId !== userId) {
-        await tx.notification.create({
-          data: {
-            tenantId,
-            userId: task.assignedToId,
-            title: 'Task Assigned',
-            message: `You have been assigned to task "${task.title}".`,
-            type: 'TASK_ASSIGNED',
-          },
-        });
-      }
+        // 2. Timeline Event if linked to lead
+        if (task.relatedLeadId) {
+          await tx.timelineEvent.create({
+            data: {
+              tenantId,
+              leadId: task.relatedLeadId,
+              userId,
+              action: 'Task Created',
+              description: `Task "${task.title}" created and assigned.`,
+            },
+          });
+        }
 
-      return task;
-    });
+        // 3. Notification to assignee
+        if (task.assignedToId && task.assignedToId !== userId) {
+          await tx.notification.create({
+            data: {
+              tenantId,
+              userId: task.assignedToId,
+              title: 'Task Assigned',
+              message: `You have been assigned to task "${task.title}".`,
+              type: 'TASK_ASSIGNED',
+            },
+          });
+        }
 
-    const affectedUserIds = [createdTask.assignedToId, userId].filter(Boolean) as string[];
+        return task;
+      },
+    );
+
+    const affectedUserIds = [createdTask.assignedToId, userId].filter(
+      Boolean,
+    ) as string[];
     await invalidateDashboardCache(tenantId, affectedUserIds);
 
     if (createdTask.assignedToId && createdTask.assignedToId !== userId) {
-      await invalidateCacheKey(`notifications:unread:${tenantId}:${createdTask.assignedToId}`);
+      await invalidateCacheKey(
+        `notifications:unread:${tenantId}:${createdTask.assignedToId}`,
+      );
     }
 
     return createdTask;
@@ -133,261 +144,274 @@ export class TasksService {
     // Evaluate if user has explicit update permission
     const hasFullEditAccess = isSuperAdminOrAdmin || roleName === 'MANAGER';
 
-    let affectedUserIds: string[] = [userId];
+    const affectedUserIds: string[] = [userId];
     let reassignNotifUserId: string | null = null;
     let statusNotifUserId: string | null = null;
 
-    const updatedTask = await this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
-      const existing = await tx.task.findUnique({
-        where: { id, tenantId },
-      });
+    const updatedTask = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx: any) => {
+        const existing = await tx.task.findUnique({
+          where: { id, tenantId },
+        });
 
-      if (!existing || existing.deletedAt) {
-        throw new HttpException(
-          { success: false, message: 'Task not found' },
-          HttpStatus.NOT_FOUND,
-        );
-      }
+        if (!existing || existing.deletedAt) {
+          throw new HttpException(
+            { success: false, message: 'Task not found' },
+            HttpStatus.NOT_FOUND,
+          );
+        }
 
-      const isOwner = existing.assignedToId === userId;
+        const isOwner = existing.assignedToId === userId;
 
-      if (!hasFullEditAccess && !isOwner) {
-        throw new HttpException(
-          {
-            success: false,
-            message: 'Forbidden: You do not have permission to edit this task.',
-          },
-          HttpStatus.FORBIDDEN,
-        );
-      }
-
-      if (!hasFullEditAccess && isOwner) {
-        if (
-          data.assignedToId !== undefined &&
-          data.assignedToId !== existing.assignedToId
-        ) {
+        if (!hasFullEditAccess && !isOwner) {
           throw new HttpException(
             {
               success: false,
               message:
-                'Forbidden: You do not have permission to reassign this task.',
+                'Forbidden: You do not have permission to edit this task.',
             },
             HttpStatus.FORBIDDEN,
           );
         }
-      }
 
-      if (data.assignedToId && data.assignedToId !== existing.assignedToId) {
-        const isValidAssignee = await tx.tenantUser.findFirst({
-          where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
-        });
-        if (!isValidAssignee) {
-          throw new HttpException(
-            {
-              success: false,
-              message:
-                'Invalid assignment: User does not belong to this workspace or is inactive.',
+        if (!hasFullEditAccess && isOwner) {
+          if (
+            data.assignedToId !== undefined &&
+            data.assignedToId !== existing.assignedToId
+          ) {
+            throw new HttpException(
+              {
+                success: false,
+                message:
+                  'Forbidden: You do not have permission to reassign this task.',
+              },
+              HttpStatus.FORBIDDEN,
+            );
+          }
+        }
+
+        if (data.assignedToId && data.assignedToId !== existing.assignedToId) {
+          const isValidAssignee = await tx.tenantUser.findFirst({
+            where: { userId: data.assignedToId, tenantId, status: 'ACTIVE' },
+          });
+          if (!isValidAssignee) {
+            throw new HttpException(
+              {
+                success: false,
+                message:
+                  'Invalid assignment: User does not belong to this workspace or is inactive.',
+              },
+              HttpStatus.BAD_REQUEST,
+            );
+          }
+          affectedUserIds.push(data.assignedToId);
+        }
+
+        if (existing.assignedToId) {
+          affectedUserIds.push(existing.assignedToId);
+        }
+
+        const targetStatus = data.status || existing.status;
+        const isCompleting =
+          targetStatus === 'COMPLETED' && existing.status !== 'COMPLETED';
+        const isReopening =
+          targetStatus !== 'COMPLETED' && existing.status === 'COMPLETED';
+
+        let completedAtValue = existing.completedAt;
+        if (isCompleting) {
+          completedAtValue = new Date();
+        } else if (isReopening) {
+          completedAtValue = null;
+        }
+
+        const updatedTask = await tx.task.update({
+          where: { id, tenantId },
+          data: {
+            ...(data.title !== undefined && { title: data.title }),
+            ...(data.description !== undefined && {
+              description: data.description,
+            }),
+            ...(data.dueDate !== undefined && {
+              dueDate: data.dueDate ? new Date(data.dueDate) : null,
+            }),
+            ...(data.assignedToId !== undefined && {
+              assignedToId: data.assignedToId,
+            }),
+            ...(data.priority !== undefined && { priority: data.priority }),
+            status: targetStatus,
+            ...(data.visibility !== undefined && {
+              visibility: data.visibility,
+            }),
+            ...(data.reminderDate !== undefined && {
+              reminderDate: data.reminderDate
+                ? new Date(data.reminderDate)
+                : null,
+            }),
+            ...(data.relatedLeadId !== undefined && {
+              relatedLeadId: data.relatedLeadId,
+            }),
+            ...(data.relatedCustomerId !== undefined && {
+              relatedCustomerId: data.relatedCustomerId,
+            }),
+            ...(data.relatedMeetingId !== undefined && {
+              relatedMeetingId: data.relatedMeetingId,
+            }),
+            ...(data.relatedQuotationId !== undefined && {
+              relatedQuotationId: data.relatedQuotationId,
+            }),
+            ...(data.relatedDealId !== undefined && {
+              relatedDealId: data.relatedDealId,
+            }),
+            ...(data.tags !== undefined && { tags: data.tags }),
+            ...(data.checklist !== undefined && { checklist: data.checklist }),
+            ...(data.attachments !== undefined && {
+              attachments: data.attachments,
+            }),
+            completedAt: completedAtValue,
+          },
+          include: {
+            assignedTo: { select: { id: true, name: true, email: true } },
+            createdBy: { select: { id: true, name: true, email: true } },
+            relatedLead: { select: { id: true, name: true, company: true } },
+            relatedCustomer: {
+              select: { id: true, name: true, company: true },
             },
-            HttpStatus.BAD_REQUEST,
-          );
-        }
-        affectedUserIds.push(data.assignedToId);
-      }
+          },
+        });
 
-      if (existing.assignedToId) {
-        affectedUserIds.push(existing.assignedToId);
-      }
+        // Assignment Audit Log
+        if (
+          data.assignedToId !== undefined &&
+          data.assignedToId !== existing.assignedToId
+        ) {
+          let action = 'TASK_ASSIGNED';
+          if (data.assignedToId === null) {
+            action = 'TASK_UNASSIGNED';
+          } else if (existing.assignedToId) {
+            action = 'TASK_REASSIGNED';
+          }
 
-      const targetStatus = data.status || existing.status;
-      const isCompleting =
-        targetStatus === 'COMPLETED' && existing.status !== 'COMPLETED';
-      const isReopening =
-        targetStatus !== 'COMPLETED' && existing.status === 'COMPLETED';
-
-      let completedAtValue = existing.completedAt;
-      if (isCompleting) {
-        completedAtValue = new Date();
-      } else if (isReopening) {
-        completedAtValue = null;
-      }
-
-      const updatedTask = await tx.task.update({
-        where: { id, tenantId },
-        data: {
-          ...(data.title !== undefined && { title: data.title }),
-          ...(data.description !== undefined && {
-            description: data.description,
-          }),
-          ...(data.dueDate !== undefined && {
-            dueDate: data.dueDate ? new Date(data.dueDate) : null,
-          }),
-          ...(data.assignedToId !== undefined && {
-            assignedToId: data.assignedToId,
-          }),
-          ...(data.priority !== undefined && { priority: data.priority }),
-          status: targetStatus,
-          ...(data.visibility !== undefined && { visibility: data.visibility }),
-          ...(data.reminderDate !== undefined && {
-            reminderDate: data.reminderDate
-              ? new Date(data.reminderDate)
-              : null,
-          }),
-          ...(data.relatedLeadId !== undefined && {
-            relatedLeadId: data.relatedLeadId,
-          }),
-          ...(data.relatedCustomerId !== undefined && {
-            relatedCustomerId: data.relatedCustomerId,
-          }),
-          ...(data.relatedMeetingId !== undefined && {
-            relatedMeetingId: data.relatedMeetingId,
-          }),
-          ...(data.relatedQuotationId !== undefined && {
-            relatedQuotationId: data.relatedQuotationId,
-          }),
-          ...(data.relatedDealId !== undefined && {
-            relatedDealId: data.relatedDealId,
-          }),
-          ...(data.tags !== undefined && { tags: data.tags }),
-          ...(data.checklist !== undefined && { checklist: data.checklist }),
-          ...(data.attachments !== undefined && {
-            attachments: data.attachments,
-          }),
-          completedAt: completedAtValue,
-        },
-        include: {
-          assignedTo: { select: { id: true, name: true, email: true } },
-          createdBy: { select: { id: true, name: true, email: true } },
-          relatedLead: { select: { id: true, name: true, company: true } },
-          relatedCustomer: { select: { id: true, name: true, company: true } },
-        },
-      });
-
-      // Assignment Audit Log
-      if (
-        data.assignedToId !== undefined &&
-        data.assignedToId !== existing.assignedToId
-      ) {
-        let action = 'TASK_ASSIGNED';
-        if (data.assignedToId === null) {
-          action = 'TASK_UNASSIGNED';
-        } else if (existing.assignedToId) {
-          action = 'TASK_REASSIGNED';
+          await tx.auditLog.create({
+            data: {
+              tenantId,
+              userId,
+              action,
+              module: 'TASKS',
+              details: {
+                taskId: updatedTask.id,
+                previousAssigneeId: existing.assignedToId,
+                assignedToId: data.assignedToId,
+              },
+            },
+          });
         }
 
+        if (updatedTask.createdById)
+          affectedUserIds.push(updatedTask.createdById);
+
+        // Audit Log
         await tx.auditLog.create({
           data: {
             tenantId,
             userId,
-            action,
+            action: 'TASK_UPDATED',
             module: 'TASKS',
             details: {
-              taskId: updatedTask.id,
-              previousAssigneeId: existing.assignedToId,
-              assignedToId: data.assignedToId,
+              taskId: id,
+              changes: data,
+              previousStatus: existing.status,
+              newStatus: targetStatus,
             },
           },
         });
-      }
 
-      if (updatedTask.createdById) affectedUserIds.push(updatedTask.createdById);
-
-      // Audit Log
-      await tx.auditLog.create({
-        data: {
-          tenantId,
-          userId,
-          action: 'TASK_UPDATED',
-          module: 'TASKS',
-          details: {
-            taskId: id,
-            changes: data,
-            previousStatus: existing.status,
-            newStatus: targetStatus,
-          },
-        },
-      });
-
-      // Lead Timeline Event if linked
-      if (existing.relatedLeadId) {
-        if (isCompleting) {
-          await tx.timelineEvent.create({
-            data: {
-              tenantId,
-              leadId: existing.relatedLeadId,
-              userId,
-              action: 'Task Completed',
-              description: `Task "${existing.title}" was marked as completed.`,
-            },
-          });
-        } else if (isReopening) {
-          await tx.timelineEvent.create({
-            data: {
-              tenantId,
-              leadId: existing.relatedLeadId,
-              userId,
-              action: 'Task Reopened',
-              description: `Task "${existing.title}" was reopened.`,
-            },
-          });
-        } else {
-          await tx.timelineEvent.create({
-            data: {
-              tenantId,
-              leadId: existing.relatedLeadId,
-              userId,
-              action: 'Task Updated',
-              description: `Task "${existing.title}" was updated.`,
-            },
-          });
+        // Lead Timeline Event if linked
+        if (existing.relatedLeadId) {
+          if (isCompleting) {
+            await tx.timelineEvent.create({
+              data: {
+                tenantId,
+                leadId: existing.relatedLeadId,
+                userId,
+                action: 'Task Completed',
+                description: `Task "${existing.title}" was marked as completed.`,
+              },
+            });
+          } else if (isReopening) {
+            await tx.timelineEvent.create({
+              data: {
+                tenantId,
+                leadId: existing.relatedLeadId,
+                userId,
+                action: 'Task Reopened',
+                description: `Task "${existing.title}" was reopened.`,
+              },
+            });
+          } else {
+            await tx.timelineEvent.create({
+              data: {
+                tenantId,
+                leadId: existing.relatedLeadId,
+                userId,
+                action: 'Task Updated',
+                description: `Task "${existing.title}" was updated.`,
+              },
+            });
+          }
         }
-      }
 
-      // Assignee Notification if changed
-      if (
-        data.assignedToId &&
-        data.assignedToId !== existing.assignedToId &&
-        data.assignedToId !== userId
-      ) {
-        await tx.notification.create({
-          data: {
-            tenantId,
-            userId: data.assignedToId,
-            title: 'Task Reassigned',
-            message: `Task "${updatedTask.title}" has been reassigned to you.`,
-            type: 'TASK_ASSIGNED',
-          },
-        });
-        reassignNotifUserId = data.assignedToId;
-      }
+        // Assignee Notification if changed
+        if (
+          data.assignedToId &&
+          data.assignedToId !== existing.assignedToId &&
+          data.assignedToId !== userId
+        ) {
+          await tx.notification.create({
+            data: {
+              tenantId,
+              userId: data.assignedToId,
+              title: 'Task Reassigned',
+              message: `Task "${updatedTask.title}" has been reassigned to you.`,
+              type: 'TASK_ASSIGNED',
+            },
+          });
+          reassignNotifUserId = data.assignedToId;
+        }
 
-      // Status change notification
-      if (
-        targetStatus !== existing.status &&
-        updatedTask.createdById &&
-        updatedTask.createdById !== userId
-      ) {
-        await tx.notification.create({
-          data: {
-            tenantId,
-            userId: updatedTask.createdById,
-            title: `Task ${targetStatus}`,
-            message: `Task "${updatedTask.title}" status changed to ${targetStatus}.`,
-            type: 'TASK_UPDATED',
-          },
-        });
-        statusNotifUserId = updatedTask.createdById;
-      }
+        // Status change notification
+        if (
+          targetStatus !== existing.status &&
+          updatedTask.createdById &&
+          updatedTask.createdById !== userId
+        ) {
+          await tx.notification.create({
+            data: {
+              tenantId,
+              userId: updatedTask.createdById,
+              title: `Task ${targetStatus}`,
+              message: `Task "${updatedTask.title}" status changed to ${targetStatus}.`,
+              type: 'TASK_UPDATED',
+            },
+          });
+          statusNotifUserId = updatedTask.createdById;
+        }
 
-      return updatedTask;
-    });
+        return updatedTask;
+      },
+    );
 
     await invalidateDashboardCache(tenantId, affectedUserIds);
 
     if (reassignNotifUserId) {
-      await invalidateCacheKey(`notifications:unread:${tenantId}:${reassignNotifUserId}`);
+      await invalidateCacheKey(
+        `notifications:unread:${tenantId}:${reassignNotifUserId}`,
+      );
     }
     if (statusNotifUserId) {
-      await invalidateCacheKey(`notifications:unread:${tenantId}:${statusNotifUserId}`);
+      await invalidateCacheKey(
+        `notifications:unread:${tenantId}:${statusNotifUserId}`,
+      );
     }
 
     return updatedTask;
@@ -419,51 +443,54 @@ export class TasksService {
       );
     }
 
-    let affectedUserIds: string[] = [userId];
+    const affectedUserIds: string[] = [userId];
 
-    const deletedTask = await this.prisma.withTenantContext({ tenantId }, async (tx: any) => {
-      const task = await tx.task.findUnique({
-        where: { id, tenantId },
-      });
+    const deletedTask = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx: any) => {
+        const task = await tx.task.findUnique({
+          where: { id, tenantId },
+        });
 
-      if (!task) {
-        throw new HttpException(
-          { success: false, message: 'Task not found' },
-          HttpStatus.NOT_FOUND,
-        );
-      }
+        if (!task) {
+          throw new HttpException(
+            { success: false, message: 'Task not found' },
+            HttpStatus.NOT_FOUND,
+          );
+        }
 
-      if (task.assignedToId) affectedUserIds.push(task.assignedToId);
+        if (task.assignedToId) affectedUserIds.push(task.assignedToId);
 
-      const deleted = await tx.task.update({
-        where: { id, tenantId },
-        data: { deletedAt: new Date() },
-      });
+        const deleted = await tx.task.update({
+          where: { id, tenantId },
+          data: { deletedAt: new Date() },
+        });
 
-      await tx.auditLog.create({
-        data: {
-          tenantId,
-          userId,
-          action: 'TASK_DELETED',
-          module: 'TASKS',
-          details: { taskId: id, title: deleted.title },
-        },
-      });
-
-      if (deleted.relatedLeadId) {
-        await tx.timelineEvent.create({
+        await tx.auditLog.create({
           data: {
             tenantId,
-            leadId: deleted.relatedLeadId,
             userId,
-            action: 'Task Deleted',
-            description: `Task "${deleted.title}" was deleted.`,
+            action: 'TASK_DELETED',
+            module: 'TASKS',
+            details: { taskId: id, title: deleted.title },
           },
         });
-      }
 
-      return deleted;
-    });
+        if (deleted.relatedLeadId) {
+          await tx.timelineEvent.create({
+            data: {
+              tenantId,
+              leadId: deleted.relatedLeadId,
+              userId,
+              action: 'Task Deleted',
+              description: `Task "${deleted.title}" was deleted.`,
+            },
+          });
+        }
+
+        return deleted;
+      },
+    );
 
     await invalidateDashboardCache(tenantId, affectedUserIds);
     return deletedTask;

@@ -2,17 +2,15 @@ import { Injectable, NotFoundException } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import {
-    formatCurrency,
-    formatDate,
-    toNumber,
+  formatCurrency,
+  formatDate,
+  toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { invalidateDashboardCache } from '../../insights/services/dashboard.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateQuotationDto } from '../dto/create-quotation.dto';
-import {
-    UpdateQuotationStatusDto
-} from '../dto/update-quotation.dto';
+import { UpdateQuotationStatusDto } from '../dto/update-quotation.dto';
 
 @Injectable()
 export class QuotationsService {
@@ -42,30 +40,33 @@ export class QuotationsService {
   }
 
   async createQuotation(tenantId: string, data: CreateQuotationDto) {
-    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const quoteNumber =
-        data.quoteNumber || (await this.generateQuoteNumber(tenantId, tx));
-      const quotation = await tx.quotation.create({
-        data: {
-          tenantId,
-          leadId: data.leadId,
-          quoteNumber,
-          client: this.enc.encrypt(data.client)!, // Encrypt client name
-          amount: data.amount || 0,
-          status: data.status || 'DRAFT',
-          validTill: data.validTill ? new Date(data.validTill) : null,
-          items: data.items || [],
-          notes: this.enc.encrypt(data.notes || ''), // Encrypt notes
-          discount: data.discount || 0,
-          tax: data.tax || 0,
-        },
-      });
-      return {
-        ...quotation,
-        client: this.enc.decrypt(quotation.client),
-        notes: this.enc.decrypt(quotation.notes),
-      };
-    });
+    const result = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const quoteNumber =
+          data.quoteNumber || (await this.generateQuoteNumber(tenantId, tx));
+        const quotation = await tx.quotation.create({
+          data: {
+            tenantId,
+            leadId: data.leadId,
+            quoteNumber,
+            client: this.enc.encrypt(data.client)!, // Encrypt client name
+            amount: data.amount || 0,
+            status: data.status || 'DRAFT',
+            validTill: data.validTill ? new Date(data.validTill) : null,
+            items: data.items || [],
+            notes: this.enc.encrypt(data.notes || ''), // Encrypt notes
+            discount: data.discount || 0,
+            tax: data.tax || 0,
+          },
+        });
+        return {
+          ...quotation,
+          client: this.enc.decrypt(quotation.client),
+          notes: this.enc.decrypt(quotation.notes),
+        };
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return result;
@@ -76,51 +77,57 @@ export class QuotationsService {
     id: string,
     data: Partial<CreateQuotationDto>,
   ) {
-    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const existing = await tx.quotation.findFirst({
-        where: { id, tenantId },
-      });
-      if (!existing) throw new NotFoundException('Quotation not found');
+    const result = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const existing = await tx.quotation.findFirst({
+          where: { id, tenantId },
+        });
+        if (!existing) throw new NotFoundException('Quotation not found');
 
-      return tx.quotation.update({
-        where: { id },
-        data: {
-          ...(data.client && {
-            client: this.enc.encrypt(data.client) ?? data.client,
-          }),
-          ...(data.leadId && { lead: { connect: { id: data.leadId } } }),
-          ...(data.amount !== undefined && { amount: data.amount }),
-          ...(data.status && { status: data.status }),
-          ...(data.validTill !== undefined && {
-            validTill: data.validTill ? new Date(data.validTill) : null,
-          }),
-          ...(data.quoteNumber && { quoteNumber: data.quoteNumber }),
-          ...(data.items !== undefined && { items: data.items }),
-          ...(data.notes !== undefined && {
-            notes: this.enc.encrypt(data.notes),
-          }),
-          ...(data.discount !== undefined && { discount: data.discount }),
-          ...(data.tax !== undefined && { tax: data.tax }),
-        },
-      });
-    });
+        return tx.quotation.update({
+          where: { id },
+          data: {
+            ...(data.client && {
+              client: this.enc.encrypt(data.client) ?? data.client,
+            }),
+            ...(data.leadId && { lead: { connect: { id: data.leadId } } }),
+            ...(data.amount !== undefined && { amount: data.amount }),
+            ...(data.status && { status: data.status }),
+            ...(data.validTill !== undefined && {
+              validTill: data.validTill ? new Date(data.validTill) : null,
+            }),
+            ...(data.quoteNumber && { quoteNumber: data.quoteNumber }),
+            ...(data.items !== undefined && { items: data.items }),
+            ...(data.notes !== undefined && {
+              notes: this.enc.encrypt(data.notes),
+            }),
+            ...(data.discount !== undefined && { discount: data.discount }),
+            ...(data.tax !== undefined && { tax: data.tax }),
+          },
+        });
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return result;
   }
 
   async deleteQuotation(tenantId: string, id: string) {
-    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const existing = await tx.quotation.findFirst({
-        where: { id, tenantId },
-      });
-      if (!existing) throw new NotFoundException('Quotation not found');
+    const result = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const existing = await tx.quotation.findFirst({
+          where: { id, tenantId },
+        });
+        if (!existing) throw new NotFoundException('Quotation not found');
 
-      return tx.quotation.update({
-        where: { id },
-        data: { deletedAt: new Date() },
-      });
-    });
+        return tx.quotation.update({
+          where: { id },
+          data: { deletedAt: new Date() },
+        });
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return result;
@@ -131,17 +138,20 @@ export class QuotationsService {
     id: string,
     data: UpdateQuotationStatusDto,
   ) {
-    const result = await this.prisma.withTenantContext({ tenantId }, async (tx) => {
-      const quotation = await tx.quotation.findFirst({
-        where: { id, tenantId },
-      });
-      if (!quotation) throw new NotFoundException('Quotation not found');
+    const result = await this.prisma.withTenantContext(
+      { tenantId },
+      async (tx) => {
+        const quotation = await tx.quotation.findFirst({
+          where: { id, tenantId },
+        });
+        if (!quotation) throw new NotFoundException('Quotation not found');
 
-      return tx.quotation.update({
-        where: { id },
-        data: { status: data.status },
-      });
-    });
+        return tx.quotation.update({
+          where: { id },
+          data: { status: data.status },
+        });
+      },
+    );
 
     await invalidateDashboardCache(tenantId);
     return result;

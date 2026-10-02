@@ -1,11 +1,11 @@
 import {
-    Controller,
-    Get,
-    HttpException,
-    HttpStatus,
-    Optional,
-    Req,
-    UseGuards,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Optional,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { AppService } from './app.service';
 import { Permissions } from './auth/permissions.decorator';

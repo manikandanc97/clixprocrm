@@ -3,9 +3,9 @@ import { Inject, Logger, forwardRef } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { LeadsImportService } from '../../leads/services/leads.import.service';
 import {
-    IMPORT_JOB_NAMES,
-    ImportJobPayload,
-    LeadsBulkImportJobPayload,
+  IMPORT_JOB_NAMES,
+  ImportJobPayload,
+  LeadsBulkImportJobPayload,
 } from '../interfaces/import-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 

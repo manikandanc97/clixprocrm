@@ -2,9 +2,9 @@ import { Injectable } from '@nestjs/common';
 import { Prisma } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import {
-    formatCurrency,
-    formatPercentage,
-    toNumber,
+  formatCurrency,
+  formatPercentage,
+  toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { PrismaService } from '../../prisma/prisma.service';

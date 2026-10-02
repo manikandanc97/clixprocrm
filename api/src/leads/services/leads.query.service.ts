@@ -3,10 +3,10 @@ import { LeadStage, Prisma } from '@prisma/client';
 import { PaginationQueryDto } from '../../common/dto/pagination-query.dto';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import {
-    formatCurrency,
-    getStatusLabel,
-    LEAD_STATUS_LABELS,
-    toNumber,
+  formatCurrency,
+  getStatusLabel,
+  LEAD_STATUS_LABELS,
+  toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { getCachedTenantCurrency } from '../../common/utils/tenant-cache.util';
 import { PrismaService } from '../../prisma/prisma.service';
@@ -37,113 +37,110 @@ export class LeadsQueryService {
     query: PaginationQueryDto & { stage?: string; status?: string },
   ) {
     const currency = await this.getTenantCurrency(tenantId);
-      const page = Math.max(1, query.page || 1);
-      const limit = Math.max(1, Math.min(query.limit || 20, 100));
-      const skip = (page - 1) * limit;
-      const search = query.search || '';
-      const stageQuery = query.stage || query.status || '';
+    const page = Math.max(1, query.page || 1);
+    const limit = Math.max(1, Math.min(query.limit || 20, 100));
+    const skip = (page - 1) * limit;
+    const search = query.search || '';
+    const stageQuery = query.stage || query.status || '';
 
-      const where: Prisma.LeadWhereInput = { tenantId, deletedAt: null };
-      if (stageQuery) {
-        where.stage = stageQuery as LeadStage;
-      }
+    const where: Prisma.LeadWhereInput = { tenantId, deletedAt: null };
+    if (stageQuery) {
+      where.stage = stageQuery as LeadStage;
+    }
 
-      const [leads, total] = await Promise.all([
-        this.prisma.withTenantContext({ tenantId }, (tx) =>
-          tx.lead.findMany({
-            where,
-            orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
-            skip,
-            take: limit,
-            select: {
-              id: true,
-              name: true,
-              company: true,
-              email: true,
-              phone: true,
-              source: true,
-              stage: true,
-              priority: true,
-              assignedToId: true,
-              value: true,
-              expectedCloseDate: true,
-              tags: true,
-              isConverted: true,
-              convertedAt: true,
-              customerId: true,
-              lastActivityAt: true,
-              createdAt: true,
-              updatedAt: true,
-              _count: { select: { notes: true, meetings: true } },
-              meetings: {
-                where: { startTime: { gte: new Date() } },
-                orderBy: { startTime: 'asc' },
-                take: 1,
-                select: { startTime: true, title: true },
-              },
+    const [leads, total] = await Promise.all([
+      this.prisma.withTenantContext({ tenantId }, (tx) =>
+        tx.lead.findMany({
+          where,
+          orderBy: [{ updatedAt: 'desc' }, { createdAt: 'desc' }],
+          skip,
+          take: limit,
+          select: {
+            id: true,
+            name: true,
+            company: true,
+            email: true,
+            phone: true,
+            source: true,
+            stage: true,
+            priority: true,
+            assignedToId: true,
+            value: true,
+            expectedCloseDate: true,
+            tags: true,
+            isConverted: true,
+            convertedAt: true,
+            customerId: true,
+            lastActivityAt: true,
+            createdAt: true,
+            updatedAt: true,
+            _count: { select: { notes: true, meetings: true } },
+            meetings: {
+              where: { startTime: { gte: new Date() } },
+              orderBy: { startTime: 'asc' },
+              take: 1,
+              select: { startTime: true, title: true },
             },
-          })
-        ),
-        this.prisma.withTenantContext({ tenantId }, (tx) =>
-          tx.lead.count({ where })
-        ),
-      ]);
-
-      // Decrypt PII fields
-      const decryptedLeads = leads.map((lead) => ({
-        ...lead,
-        name: this.enc.decrypt(lead.name),
-        company: this.enc.decrypt(lead.company),
-        email: this.enc.decrypt(lead.email),
-        phone: this.enc.decrypt(lead.phone),
-      }));
-
-      // Apply search filter post-decryption (substring match on decrypted name)
-      const filteredLeads = search
-        ? decryptedLeads.filter((lead) =>
-            (lead.name || '').toLowerCase().includes(search.toLowerCase()),
-          )
-        : decryptedLeads;
-
-      return {
-        summary: { total },
-        leads: filteredLeads.map((lead) => {
-          const customerId = lead.customerId;
-          return {
-            id: lead.id,
-            name: lead.name,
-            company: lead.company,
-            email: lead.email,
-            phone: lead.phone,
-            source: lead.source,
-            stage: lead.stage,
-            status: getStatusLabel(LEAD_STATUS_LABELS, lead.stage),
-            priority: lead.priority,
-            value: formatCurrency(lead.value, currency),
-            valueAmount: toNumber(lead.value),
-            expectedCloseDate: lead.expectedCloseDate,
-            tags: lead.tags,
-            lastActivityAt: lead.lastActivityAt,
-            createdAt: lead.createdAt,
-            updatedAt: lead.updatedAt,
-            customerId,
-            isConverted:
-              !!customerId || lead.isConverted || lead.stage === 'WON',
-            notesCount: lead._count?.notes || 0,
-            meetingsCount: lead._count?.meetings || 0,
-            upcomingMeeting:
-              lead.meetings && lead.meetings.length > 0
-                ? lead.meetings[0]
-                : null,
-          };
+          },
         }),
-        pagination: {
-          page,
-          limit,
-          total,
-          totalPages: Math.ceil(total / limit),
-        },
-      };
+      ),
+      this.prisma.withTenantContext({ tenantId }, (tx) =>
+        tx.lead.count({ where }),
+      ),
+    ]);
+
+    // Decrypt PII fields
+    const decryptedLeads = leads.map((lead) => ({
+      ...lead,
+      name: this.enc.decrypt(lead.name),
+      company: this.enc.decrypt(lead.company),
+      email: this.enc.decrypt(lead.email),
+      phone: this.enc.decrypt(lead.phone),
+    }));
+
+    // Apply search filter post-decryption (substring match on decrypted name)
+    const filteredLeads = search
+      ? decryptedLeads.filter((lead) =>
+          (lead.name || '').toLowerCase().includes(search.toLowerCase()),
+        )
+      : decryptedLeads;
+
+    return {
+      summary: { total },
+      leads: filteredLeads.map((lead) => {
+        const customerId = lead.customerId;
+        return {
+          id: lead.id,
+          name: lead.name,
+          company: lead.company,
+          email: lead.email,
+          phone: lead.phone,
+          source: lead.source,
+          stage: lead.stage,
+          status: getStatusLabel(LEAD_STATUS_LABELS, lead.stage),
+          priority: lead.priority,
+          value: formatCurrency(lead.value, currency),
+          valueAmount: toNumber(lead.value),
+          expectedCloseDate: lead.expectedCloseDate,
+          tags: lead.tags,
+          lastActivityAt: lead.lastActivityAt,
+          createdAt: lead.createdAt,
+          updatedAt: lead.updatedAt,
+          customerId,
+          isConverted: !!customerId || lead.isConverted || lead.stage === 'WON',
+          notesCount: lead._count?.notes || 0,
+          meetingsCount: lead._count?.meetings || 0,
+          upcomingMeeting:
+            lead.meetings && lead.meetings.length > 0 ? lead.meetings[0] : null,
+        };
+      }),
+      pagination: {
+        page,
+        limit,
+        total,
+        totalPages: Math.ceil(total / limit),
+      },
+    };
   }
 
   async getHotLeads(tenantId: string) {
@@ -155,7 +152,7 @@ export class LeadsQueryService {
           take: 5,
           orderBy: { createdAt: 'desc' },
           select: { id: true, name: true, company: true, value: true },
-        })
+        }),
       ),
     ]);
     return leads.map((l) => ({

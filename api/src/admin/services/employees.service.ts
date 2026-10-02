@@ -1,8 +1,8 @@
 import {
-    HttpException,
-    HttpStatus,
-    Injectable,
-    Optional,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Optional,
 } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Prisma, UserStatus } from '@prisma/client';

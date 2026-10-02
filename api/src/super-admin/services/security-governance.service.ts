@@ -5,8 +5,8 @@ import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit
 import { PrismaService } from '../../prisma/prisma.service';
 import { SecurityIncidentsService } from './security-incidents.service';
 import {
-    HealthStatus,
-    SecurityOperationsService,
+  HealthStatus,
+  SecurityOperationsService,
 } from './security-operations.service';
 
 export interface SecurityControlItem {

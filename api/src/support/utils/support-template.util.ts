@@ -1,8 +1,8 @@
 import { SupportTicketRecord } from '../interfaces/support.interface';
 import {
-    escapeHtml,
-    mapEnumToPriority,
-    mapPriorityToEnum,
+  escapeHtml,
+  mapEnumToPriority,
+  mapPriorityToEnum,
 } from './support-mapper.util';
 
 export function calculateEstimatedResponseTime(priority: string): string {

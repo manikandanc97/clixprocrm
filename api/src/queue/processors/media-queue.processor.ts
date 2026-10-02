@@ -5,10 +5,10 @@ import { invalidateGetMeCache } from '../../auth/auth.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { BrandingService } from '../../workspace/services/branding.service';
 import {
-    AvatarMediaJobPayload,
-    BrandingMediaJobPayload,
-    MEDIA_JOB_NAMES,
-    MediaJobPayload,
+  AvatarMediaJobPayload,
+  BrandingMediaJobPayload,
+  MEDIA_JOB_NAMES,
+  MediaJobPayload,
 } from '../interfaces/media-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 

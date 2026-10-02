@@ -1,23 +1,23 @@
 import {
-    BadRequestException,
-    ConflictException,
-    ForbiddenException,
-    Injectable,
-    Logger,
-    NotFoundException,
+  BadRequestException,
+  ConflictException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import {
-    EmailAuthType,
-    EmailProviderType,
-    EmailSyncStatus,
-    Prisma,
+  EmailAuthType,
+  EmailProviderType,
+  EmailSyncStatus,
+  Prisma,
 } from '@prisma/client';
 import { EncryptionService } from '../../common/encryption/encryption.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { CreateEmailAccountDto } from '../dto/create-email-account.dto';
 import {
-    EmailAccountResponseDto,
-    toEmailAccountResponse,
+  EmailAccountResponseDto,
+  toEmailAccountResponse,
 } from '../dto/email-account-response.dto';
 import { UpdateEmailAccountDto } from '../dto/update-email-account.dto';
 import { VerifyEmailAccountDto } from '../dto/verify-email-account.dto';

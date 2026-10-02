@@ -16,6 +16,7 @@ export function useEmployees() {
     queryFn: fetchEmployees,
     enabled: isAuthenticated,
     refetchInterval: 30000,
+    staleTime: 30000,
   });
 }
 

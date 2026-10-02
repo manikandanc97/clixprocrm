@@ -1,10 +1,10 @@
 import {
-    ForbiddenException,
-    HttpException,
-    HttpStatus,
-    Injectable,
-    Logger,
-    ServiceUnavailableException,
+  ForbiddenException,
+  HttpException,
+  HttpStatus,
+  Injectable,
+  Logger,
+  ServiceUnavailableException,
 } from '@nestjs/common';
 import { Redis } from '@upstash/redis';
 import { PrismaService } from '../prisma/prisma.service';

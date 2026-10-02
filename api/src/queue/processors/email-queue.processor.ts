@@ -4,19 +4,19 @@ import { Job } from 'bullmq';
 import * as nodemailer from 'nodemailer';
 import { escapeHtml } from '../../common/services/email.service';
 import {
-    formatCurrency,
-    toNumber,
+  formatCurrency,
+  toNumber,
 } from '../../common/utils/crm-formatters.util';
 import { InboundEmailService } from '../../email/services/inbound-email.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import {
-    EMAIL_JOB_NAMES,
-    EmailJobPayload,
-    InvoiceNotificationJobPayload,
-    PaymentReceiptJobPayload,
-    SecurityAlertJobPayload,
-    SupportTicketJobPayload,
-    SyncInboxJobPayload,
+  EMAIL_JOB_NAMES,
+  EmailJobPayload,
+  InvoiceNotificationJobPayload,
+  PaymentReceiptJobPayload,
+  SecurityAlertJobPayload,
+  SupportTicketJobPayload,
+  SyncInboxJobPayload,
 } from '../interfaces/email-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 

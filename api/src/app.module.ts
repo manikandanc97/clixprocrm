@@ -26,6 +26,9 @@ import { SupportModule } from './support/support.module';
 import { SystemModule } from './system/system.module';
 import { WorkspaceModule } from './workspace/workspace.module';
 
+import { APP_INTERCEPTOR } from '@nestjs/core';
+import { LoggingInterceptor } from './common/interceptors/logging.interceptor';
+
 @Module({
   imports: [
     ConfigModule.forRoot({
@@ -58,6 +61,12 @@ import { WorkspaceModule } from './workspace/workspace.module';
     EmailModule,
   ],
   controllers: [AppController],
-  providers: [AppService],
+  providers: [
+    AppService,
+    {
+      provide: APP_INTERCEPTOR,
+      useClass: LoggingInterceptor,
+    },
+  ],
 })
 export class AppModule {}

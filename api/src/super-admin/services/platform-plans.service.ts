@@ -1,20 +1,20 @@
 import {
-    BadRequestException,
-    Injectable,
-    Logger,
-    NotFoundException,
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { AiEntitlementService } from '../../ai/ai-entitlement.service';
 import { PrismaService } from '../../prisma/prisma.service';
 
 import { CANONICAL_PLANS } from '../../common/plans/plan-definitions.constant';
 import {
-    FEATURE_CATALOG,
-    FeatureCatalogItem,
+  FEATURE_CATALOG,
+  FeatureCatalogItem,
 } from '../constants/platform-plans.catalog';
 import {
-    CreatePlatformPlanDto,
-    UpdatePlatformPlanDto,
+  CreatePlatformPlanDto,
+  UpdatePlatformPlanDto,
 } from '../dto/platform-plans.dto';
 
 export { CreatePlatformPlanDto, FEATURE_CATALOG, UpdatePlatformPlanDto };

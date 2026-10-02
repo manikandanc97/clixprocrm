@@ -1,14 +1,14 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    Param,
-    Patch,
-    Post,
-    Query,
-    Req,
-    UseGuards
+  Body,
+  Controller,
+  Delete,
+  Get,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { Roles } from '../../auth/roles.decorator';
 import { RolesGuard } from '../../auth/roles.guard';
@@ -17,8 +17,8 @@ import { TenantGuard } from '../../auth/tenant.guard';
 import { parsePaginationParams } from '../../common/utils/pagination.util';
 import { CreateQuotationDto } from '../dto/create-quotation.dto';
 import {
-    UpdateQuotationDto,
-    UpdateQuotationStatusDto,
+  UpdateQuotationDto,
+  UpdateQuotationStatusDto,
 } from '../dto/update-quotation.dto';
 import { QuotationsService } from '../services/quotations.service';
 

@@ -1,7 +1,7 @@
 import { IMPORT_JOB_NAMES } from '../interfaces/import-jobs';
 import {
-    IMPORT_DEFAULT_JOB_OPTS,
-    ImportQueueProducer,
+  IMPORT_DEFAULT_JOB_OPTS,
+  ImportQueueProducer,
 } from './import-queue.producer';
 
 describe('ImportQueueProducer Suite', () => {

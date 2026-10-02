@@ -1,8 +1,8 @@
 import { sanitizeRedirectUrl } from '../common/utils/redirect-security.util';
 import { SecurityConfigValidator } from '../common/utils/security-config.validator';
 import {
-    sanitizeObjectXss,
-    sanitizeXss,
+  sanitizeObjectXss,
+  sanitizeXss,
 } from '../common/utils/xss-sanitizer.util';
 
 describe('P5 Security Hardening & Sanitization Suite', () => {

@@ -3,8 +3,8 @@ import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { randomUUID } from 'crypto';
 import {
-    BillingWebhookJobPayload,
-    WEBHOOK_JOB_NAMES,
+  BillingWebhookJobPayload,
+  WEBHOOK_JOB_NAMES,
 } from '../interfaces/webhook-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 

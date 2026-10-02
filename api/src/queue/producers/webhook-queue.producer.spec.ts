@@ -1,7 +1,7 @@
 import { WEBHOOK_JOB_NAMES } from '../interfaces/webhook-jobs';
 import {
-    WEBHOOK_DEFAULT_JOB_OPTS,
-    WebhookQueueProducer,
+  WEBHOOK_DEFAULT_JOB_OPTS,
+  WebhookQueueProducer,
 } from './webhook-queue.producer';
 
 describe('WebhookQueueProducer Suite', () => {

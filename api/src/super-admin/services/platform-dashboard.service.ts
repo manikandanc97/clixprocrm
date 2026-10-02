@@ -7,133 +7,194 @@ export class PlatformDashboardService {
   constructor(private readonly prisma: PrismaService) {}
 
   async getPlatformOverview() {
+    const tStart = performance.now();
     const now = new Date();
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
-    const sevenDaysAgo = new Date(now.getTime() - 7 * 24 * 60 * 60 * 1000);
-    const ninetyDaysAgo = new Date(now.getTime() - 90 * 24 * 60 * 60 * 1000);
-    const oneYearAgo = new Date(now.getTime() - 365 * 24 * 60 * 60 * 1000);
     const sevenDaysInFuture = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
+    const timeOp = async <T>(name: string, fn: () => Promise<T>): Promise<T> => {
+      const start = performance.now();
+      const result = await fn();
+      const end = performance.now();
+      console.log(`[PERF] dashboard.${name}: ${end - start}ms`);
+      return result;
+    };
+
     const [
-      totalOrganizations,
-      activeOrganizations,
-      suspendedOrganizations,
-      totalUsers,
-      activeUsers,
-      totalLeads,
-      totalCustomers,
-      totalDeals,
-      totalTasks,
-      totalMeetings,
-      totalNotes,
-      totalAiConversations,
+      countsRows,
       allTenants,
       recentTenants,
       recentAuditLogs,
       tenantsByPlan,
-      subscriptions,
+      mrrData,
       overdueInvoices,
-      allInvoices,
-      lockedUsersCount,
-    ] = await this.prisma.withTenantContext(
-      { isSuperAdmin: true },
-      async (tx) => {
-        return Promise.all([
-          tx.tenant.count(),
-          tx.tenant.count({ where: { status: 'ACTIVE' } }),
-          tx.tenant.count({ where: { status: 'SUSPENDED' } }),
-          tx.user.count({ where: { deletedAt: null } }),
-          tx.user.count({ where: { status: 'ACTIVE', deletedAt: null } }),
-          tx.lead.count({ where: { deletedAt: null } }),
-          tx.customer.count({ where: { deletedAt: null } }),
-          tx.deal.count({ where: { deletedAt: null } }),
-          tx.task.count({ where: { deletedAt: null } }),
-          tx.meeting.count(),
-          tx.note.count(),
-          tx.aiConversation.count(),
-          tx.tenant.findMany({
-            select: {
-              id: true,
-              name: true,
-              slug: true,
-              plan: true,
-              status: true,
-              trialStart: true,
-              trialEnd: true,
-              createdAt: true,
-              _count: {
-                select: {
-                  users: true,
-                  leads: true,
-                  customers: true,
-                  deals: true,
-                  tasks: true,
-                },
-              },
-            },
-            orderBy: { createdAt: 'desc' },
-          }),
-          tx.tenant.findMany({
-            take: 8,
-            orderBy: { createdAt: 'desc' },
-            include: {
-              _count: {
-                select: {
-                  users: true,
-                  leads: true,
-                  customers: true,
-                  deals: true,
-                  tasks: true,
-                },
-              },
-            },
-          }),
-          tx.auditLog.findMany({
-            take: 8,
-            orderBy: { createdAt: 'desc' },
-            include: {
-              user: { select: { id: true, name: true, email: true } },
-            },
-          }),
-          tx.tenant.groupBy({
-            by: ['plan'],
-            _count: { _all: true },
-          }),
-          tx.platformSubscription.findMany({
-            select: {
-              id: true,
-              planId: true,
-              status: true,
-              recurringAmount: true,
-              billingCycle: true,
-              currency: true,
-            },
-          }),
-          tx.platformInvoice.findMany({
-            where: {
-              status: { notIn: ['PAID', 'CANCELLED', 'VOID'] },
-              dueDate: { lt: now },
-            },
-            include: {
-              tenant: { select: { id: true, name: true } },
-            },
-            take: 5,
-          }),
-          tx.platformInvoice.findMany({
-            select: {
-              id: true,
-              totalAmount: true,
-              paidAmount: true,
-              status: true,
-              dueDate: true,
-            },
-          }),
-          tx.user.count({
-            where: { securityStatus: 'LOCKED', deletedAt: null },
-          }),
-        ]);
-      },
-    );
+      overdueInvoicesAgg,
+    ] = await Promise.all([
+      this.prisma.$queryRaw<
+        Array<{
+          totalOrganizations: number;
+          activeOrganizations: number;
+          suspendedOrganizations: number;
+          totalUsers: number;
+          activeUsers: number;
+          totalLeads: number;
+          totalCustomers: number;
+          totalDeals: number;
+          totalTasks: number;
+          totalMeetings: number;
+          totalNotes: number;
+          totalAiConversations: number;
+          lockedUsersCount: number;
+        }>
+      >`
+        WITH t_stats AS (
+          SELECT 
+            COUNT(*)::int AS total_orgs,
+            COUNT(*) FILTER (WHERE status = 'ACTIVE')::int AS active_orgs,
+            COUNT(*) FILTER (WHERE status = 'SUSPENDED')::int AS suspended_orgs
+          FROM "Tenant"
+        ),
+        u_stats AS (
+          SELECT 
+            COUNT(*)::int AS total_users,
+            COUNT(*) FILTER (WHERE status = 'ACTIVE')::int AS active_users,
+            COUNT(*) FILTER (WHERE "securityStatus" = 'LOCKED')::int AS locked_users
+          FROM "User"
+          WHERE "deletedAt" IS NULL
+        )
+        SELECT 
+          t.total_orgs AS "totalOrganizations",
+          t.active_orgs AS "activeOrganizations",
+          t.suspended_orgs AS "suspendedOrganizations",
+          u.total_users AS "totalUsers",
+          u.active_users AS "activeUsers",
+          u.locked_users AS "lockedUsersCount",
+          (SELECT COUNT(*)::int FROM "Lead" WHERE "deletedAt" IS NULL) AS "totalLeads",
+          (SELECT COUNT(*)::int FROM "Customer" WHERE "deletedAt" IS NULL) AS "totalCustomers",
+          (SELECT COUNT(*)::int FROM "Deal" WHERE "deletedAt" IS NULL) AS "totalDeals",
+          (SELECT COUNT(*)::int FROM "Task" WHERE "deletedAt" IS NULL) AS "totalTasks",
+          (SELECT COUNT(*)::int FROM "Meeting") AS "totalMeetings",
+          (SELECT COUNT(*)::int FROM "Note") AS "totalNotes",
+          (SELECT COUNT(*)::int FROM "AiConversation") AS "totalAiConversations"
+        FROM t_stats t CROSS JOIN u_stats u
+      `,
+      this.prisma.tenant.findMany({
+        select: { id: true, name: true, slug: true, status: true, plan: true, trialEnd: true, createdAt: true },
+        orderBy: { createdAt: 'desc' },
+      }),
+      this.prisma.$queryRaw<
+        Array<{
+          id: string;
+          name: string;
+          slug: string;
+          plan: string;
+          status: string;
+          createdAt: Date;
+          usersCount: number;
+          leadsCount: number;
+          customersCount: number;
+          dealsCount: number;
+          tasksCount: number;
+        }>
+      >`
+        SELECT 
+          t.id, t.name, t.slug, t.plan, t.status, t."createdAt",
+          (SELECT COUNT(*)::int FROM "TenantUser" tu WHERE tu."tenantId" = t.id) AS "usersCount",
+          (SELECT COUNT(*)::int FROM "Lead" l WHERE l."tenantId" = t.id AND l."deletedAt" IS NULL) AS "leadsCount",
+          (SELECT COUNT(*)::int FROM "Customer" c WHERE c."tenantId" = t.id AND c."deletedAt" IS NULL) AS "customersCount",
+          (SELECT COUNT(*)::int FROM "Deal" d WHERE d."tenantId" = t.id AND d."deletedAt" IS NULL) AS "dealsCount",
+          (SELECT COUNT(*)::int FROM "Task" tk WHERE tk."tenantId" = t.id AND tk."deletedAt" IS NULL) AS "tasksCount"
+        FROM "Tenant" t
+        ORDER BY t."createdAt" DESC
+        LIMIT 8
+      `,
+      this.prisma.$queryRaw<
+        Array<{
+          id: string;
+          action: string;
+          module: string;
+          details: any;
+          createdAt: Date;
+          tenantId: string;
+          userId: string | null;
+          userName: string | null;
+          userEmail: string | null;
+        }>
+      >`
+        SELECT 
+          a.id, a.action, a.module, a.details, a."createdAt", a."tenantId",
+          u.id AS "userId", u.name AS "userName", u.email AS "userEmail"
+        FROM "AuditLog" a
+        LEFT JOIN "User" u ON a."userId" = u.id
+        ORDER BY a."createdAt" DESC
+        LIMIT 8
+      `,
+      this.prisma.tenant.groupBy({
+        by: ['plan'],
+        _count: { _all: true },
+      }),
+      this.prisma.$queryRaw<Array<{ mrr: number, count: number }>>`
+        SELECT 
+          COALESCE(SUM(
+            CASE 
+              WHEN "billingCycle" = 'annual' THEN "recurringAmount" / 12 
+              ELSE "recurringAmount" 
+            END
+          ), 0)::float AS mrr,
+          COUNT(*)::int AS count
+        FROM "PlatformSubscription"
+        WHERE status IN ('ACTIVE', 'TRIALING')
+      `,
+      this.prisma.platformInvoice.findMany({
+        where: {
+          status: { notIn: ['PAID', 'CANCELLED', 'VOID'] },
+          dueDate: { lt: now },
+        },
+        include: {
+          tenant: { select: { id: true, name: true } },
+        },
+        take: 5,
+      }),
+      this.prisma.platformInvoice.aggregate({
+        where: {
+          status: { notIn: ['PAID', 'CANCELLED', 'VOID'] },
+          dueDate: { lt: now },
+        },
+        _count: { id: true },
+        _sum: { totalAmount: true, paidAmount: true },
+      }),
+    ]);
+
+
+
+    const counts = countsRows[0] || {
+      totalOrganizations: 0,
+      activeOrganizations: 0,
+      suspendedOrganizations: 0,
+      totalUsers: 0,
+      activeUsers: 0,
+      totalLeads: 0,
+      totalCustomers: 0,
+      totalDeals: 0,
+      totalTasks: 0,
+      totalMeetings: 0,
+      totalNotes: 0,
+      totalAiConversations: 0,
+      lockedUsersCount: 0,
+    };
+    const totalOrganizations = Number(counts.totalOrganizations || 0);
+    const activeOrganizations = Number(counts.activeOrganizations || 0);
+    const suspendedOrganizations = Number(counts.suspendedOrganizations || 0);
+    const totalUsers = Number(counts.totalUsers || 0);
+    const activeUsers = Number(counts.activeUsers || 0);
+    const totalLeads = Number(counts.totalLeads || 0);
+    const totalCustomers = Number(counts.totalCustomers || 0);
+    const totalDeals = Number(counts.totalDeals || 0);
+    const totalTasks = Number(counts.totalTasks || 0);
+    const totalMeetings = Number(counts.totalMeetings || 0);
+    const totalNotes = Number(counts.totalNotes || 0);
+    const totalAiConversations = Number(counts.totalAiConversations || 0);
+    const lockedUsersCount = Number(counts.lockedUsersCount || 0);
 
     // 1. Calculate MRR & ARR
     const planPrices: Record<string, number> = {
@@ -143,16 +204,10 @@ export class PlatformDashboardService {
       enterprise: 14999,
     };
 
-    let calculatedMRR = 0;
-    if (subscriptions.length > 0) {
-      for (const sub of subscriptions) {
-        if (sub.status === 'ACTIVE' || sub.status === 'TRIALING') {
-          const recAmt = toNumber(sub.recurringAmount);
-          const mVal = sub.billingCycle === 'annual' ? recAmt / 12 : recAmt;
-          calculatedMRR += mVal;
-        }
-      }
-    } else {
+    let calculatedMRR = mrrData[0]?.mrr || 0;
+    const paidOrganizationsCount = mrrData[0]?.count || 0;
+
+    if (calculatedMRR === 0) {
       // Fallback estimate based on active tenant plan tiers
       for (const t of allTenants) {
         if (t.status === 'ACTIVE') {
@@ -175,13 +230,13 @@ export class PlatformDashboardService {
 
     const enrichedRecentOrgs = recentTenants.map((t) => {
       const recordsCount =
-        t._count.leads + t._count.customers + t._count.deals + t._count.tasks;
+        t.leadsCount + t.customersCount + t.dealsCount + t.tasksCount;
       let healthStatus: 'HEALTHY' | 'AT_RISK' | 'INACTIVE' = 'HEALTHY';
 
       if (t.status === 'SUSPENDED') {
         healthStatus = 'INACTIVE';
         inactiveCount++;
-      } else if (recordsCount === 0 || t._count.users === 0) {
+      } else if (recordsCount === 0 || t.usersCount === 0) {
         healthStatus = 'AT_RISK';
         atRiskCount++;
       } else {
@@ -195,24 +250,19 @@ export class PlatformDashboardService {
         plan: t.plan,
         status: t.status,
         healthStatus,
-        userCount: t._count.users,
+        userCount: t.usersCount,
         recordsCount,
-        leadCount: t._count.leads,
-        customerCount: t._count.customers,
-        dealCount: t._count.deals,
-        taskCount: t._count.tasks,
-        createdAt: t.createdAt.toISOString(),
+        leadCount: t.leadsCount,
+        customerCount: t.customersCount,
+        dealCount: t.dealsCount,
+        taskCount: t.tasksCount,
+        createdAt: new Date(t.createdAt).toISOString(),
       };
     });
 
     // Account for remaining tenants not in top 8
-    allTenants.slice(recentTenants.length).forEach((t) => {
-      const recs =
-        t._count.leads + t._count.customers + t._count.deals + t._count.tasks;
-      if (t.status === 'SUSPENDED') inactiveCount++;
-      else if (recs === 0 || t._count.users === 0) atRiskCount++;
-      else healthyCount++;
-    });
+    inactiveCount = suspendedOrganizations;
+    healthyCount = Math.max(0, activeOrganizations - atRiskCount);
 
     if (healthyCount === 0 && activeOrganizations > 0) {
       healthyCount = Math.max(1, activeOrganizations - atRiskCount);
@@ -298,12 +348,12 @@ export class PlatformDashboardService {
     }
 
     // Check inactive empty tenants
-    allTenants
+    recentTenants
       .filter(
         (t) =>
           t.status === 'ACTIVE' &&
-          t._count.leads === 0 &&
-          t._count.customers === 0 &&
+          t.leadsCount === 0 &&
+          t.customersCount === 0 &&
           new Date(t.createdAt).getTime() < thirtyDaysAgo.getTime(),
       )
       .slice(0, 2)
@@ -316,7 +366,7 @@ export class PlatformDashboardService {
           entityName: t.name,
           entityType: 'Onboarding',
           targetUrl: '/super-admin/organizations',
-          createdAt: t.createdAt.toISOString(),
+          createdAt: new Date(t.createdAt).toISOString(),
         });
       });
 
@@ -510,24 +560,22 @@ export class PlatformDashboardService {
       ],
     };
 
-    // 8. Billing Snapshot
-    let pastDueAmount = 0;
-    overdueInvoices.forEach((inv) => {
-      pastDueAmount += toNumber(inv.totalAmount) - toNumber(inv.paidAmount);
-    });
+    const pastDueAmount =
+      toNumber(overdueInvoicesAgg._sum?.totalAmount || 0) -
+      toNumber(overdueInvoicesAgg._sum?.paidAmount || 0);
 
     const billingSnapshot = {
       mrr: calculatedMRR,
       arr: calculatedARR,
       paidOrganizations: Math.max(
-        subscriptions.filter((s) => s.status === 'ACTIVE').length,
+        paidOrganizationsCount,
         Math.round(activeOrganizations * 0.7),
       ),
       trialOrganizations: Math.max(
         allTenants.filter((t) => t.trialEnd && t.trialEnd > now).length,
         2,
       ),
-      pastDueCount: overdueInvoices.length,
+      pastDueCount: overdueInvoicesAgg._count?.id || 0,
       pastDueAmount,
       currency: 'INR',
     };
@@ -552,7 +600,7 @@ export class PlatformDashboardService {
       count: p._count._all,
     }));
 
-    return {
+    const result = {
       metrics: {
         totalOrganizations,
         activeOrganizations,
@@ -585,16 +633,18 @@ export class PlatformDashboardService {
       tenantHealth,
       planDistribution,
       recentOrganizations: enrichedRecentOrgs,
-      recentAuditLogs: recentAuditLogs.map((log) => ({
+      recentAuditLogs: recentAuditLogs.map((log: any) => ({
         id: log.id,
         action: log.action,
         module: log.module || 'System',
-        actor: log.user ? log.user.name || log.user.email : 'Platform System',
-        actorEmail: log.user?.email || null,
+        actor: log.userName || log.userEmail || 'Platform System',
+        actorEmail: log.userEmail || null,
         tenantId: log.tenantId,
         details: log.details,
-        createdAt: log.createdAt.toISOString(),
+        createdAt: new Date(log.createdAt).toISOString(),
       })),
     };
+
+    return result;
   }
 }

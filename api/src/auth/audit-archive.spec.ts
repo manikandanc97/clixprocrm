@@ -1,9 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { AuditArchiveService } from '../common/audit/archive/audit-archive.service';
-import {
-    buildAuditObjectKey
-} from '../common/audit/archive/s3-object-lock.provider';
+import { buildAuditObjectKey } from '../common/audit/archive/s3-object-lock.provider';
 import { AuditLoggerService } from '../common/audit/audit-logger.service';
 
 describe('P2 External WORM Backup & Integrity Monitoring Suite', () => {

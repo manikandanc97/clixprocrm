@@ -1,18 +1,18 @@
 import {
-    BadRequestException,
-    Body,
-    Controller,
-    Get,
-    Post,
-    Req,
-    UseGuards,
+  BadRequestException,
+  Body,
+  Controller,
+  Get,
+  Post,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString,
-    Min,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
 } from 'class-validator';
 import { Roles } from '../../auth/roles.decorator';
 import { RolesGuard } from '../../auth/roles.guard';

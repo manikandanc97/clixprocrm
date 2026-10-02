@@ -1,13 +1,13 @@
 import {
-    invalidateDashboardCache,
-    invalidateEmployeeDashboardCache
+  invalidateDashboardCache,
+  invalidateEmployeeDashboardCache,
 } from '../../../insights/services/dashboard.service';
 import { NotificationsService } from '../../../notifications/services/notifications.service';
 import {
-    clearAllLocalCache,
-    getLocalCacheSize,
-    getOrSetCache,
-    invalidateCacheKey
+  clearAllLocalCache,
+  getLocalCacheSize,
+  getOrSetCache,
+  invalidateCacheKey,
 } from '../cache.util';
 import * as rateLimitUtil from '../rate-limit.util';
 
@@ -37,7 +37,9 @@ describe('Phase 5: Targeted Redis & In-Memory Fallback Caching Tests', () => {
         get: jest.fn().mockRejectedValue(new Error('Redis connection timeout')),
         set: jest.fn().mockRejectedValue(new Error('Redis connection timeout')),
       };
-      jest.spyOn(rateLimitUtil, 'getSharedRedisClient').mockReturnValue(mockRedis as any);
+      jest
+        .spyOn(rateLimitUtil, 'getSharedRedisClient')
+        .mockReturnValue(mockRedis as any);
 
       const mockFetch = jest.fn().mockResolvedValue({ revenue: 50000 });
 
@@ -52,7 +54,9 @@ describe('Phase 5: Targeted Redis & In-Memory Fallback Caching Tests', () => {
     it('should bound in-memory cache to maximum capacity (500 entries) without leaking memory', async () => {
       // Insert 550 unique items into local cache
       for (let i = 0; i < 550; i++) {
-        await getOrSetCache(`test:bounded:key-${i}`, 30, async () => ({ index: i }));
+        await getOrSetCache(`test:bounded:key-${i}`, 30, async () => ({
+          index: i,
+        }));
       }
 
       // Memory size must never exceed 500
@@ -62,8 +66,12 @@ describe('Phase 5: Targeted Redis & In-Memory Fallback Caching Tests', () => {
 
   describe('3. Multi-Tenant Isolation Verification', () => {
     it('should strictly isolate cached data between tenants (no cross-tenant leakage)', async () => {
-      const fetchTenantA = jest.fn().mockResolvedValue({ tenant: 'Tenant-A', data: [1, 2, 3] });
-      const fetchTenantB = jest.fn().mockResolvedValue({ tenant: 'Tenant-B', data: [99, 100] });
+      const fetchTenantA = jest
+        .fn()
+        .mockResolvedValue({ tenant: 'Tenant-A', data: [1, 2, 3] });
+      const fetchTenantB = jest
+        .fn()
+        .mockResolvedValue({ tenant: 'Tenant-B', data: [99, 100] });
 
       interface TenantMockData {
         tenant: string;
@@ -99,7 +107,8 @@ describe('Phase 5: Targeted Redis & In-Memory Fallback Caching Tests', () => {
 
   describe('4. Deterministic Invalidation Verification (No Redis KEYS)', () => {
     it('should invalidate specific key and trigger re-fetch on next call', async () => {
-      const mockFetch = jest.fn()
+      const mockFetch = jest
+        .fn()
         .mockResolvedValueOnce({ count: 1 })
         .mockResolvedValueOnce({ count: 2 });
 
@@ -110,7 +119,11 @@ describe('Phase 5: Targeted Redis & In-Memory Fallback Caching Tests', () => {
       await invalidateCacheKey('notifications:unread:t1:u1');
 
       // Next call must be a miss and fetch fresh count
-      const fresh = await getOrSetCache('notifications:unread:t1:u1', 10, mockFetch);
+      const fresh = await getOrSetCache(
+        'notifications:unread:t1:u1',
+        10,
+        mockFetch,
+      );
       expect(fresh).toEqual({ count: 2 });
       expect(mockFetch).toHaveBeenCalledTimes(2);
     });

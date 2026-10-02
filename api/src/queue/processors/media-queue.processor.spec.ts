@@ -1,6 +1,6 @@
 import {
-    BrandingMediaJobPayload,
-    MEDIA_JOB_NAMES,
+  BrandingMediaJobPayload,
+  MEDIA_JOB_NAMES,
 } from '../interfaces/media-jobs';
 import { MediaQueueProcessor } from './media-queue.processor';
 

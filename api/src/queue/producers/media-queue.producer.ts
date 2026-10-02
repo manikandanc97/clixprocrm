@@ -3,9 +3,9 @@ import { Injectable, Logger, Optional } from '@nestjs/common';
 import { Queue } from 'bullmq';
 import { randomUUID } from 'crypto';
 import {
-    AvatarMediaJobPayload,
-    BrandingMediaJobPayload,
-    MEDIA_JOB_NAMES,
+  AvatarMediaJobPayload,
+  BrandingMediaJobPayload,
+  MEDIA_JOB_NAMES,
 } from '../interfaces/media-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 

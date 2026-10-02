@@ -1,8 +1,8 @@
 import {
-    BadRequestException,
-    Injectable,
-    Logger,
-    NotFoundException,
+  BadRequestException,
+  Injectable,
+  Logger,
+  NotFoundException,
 } from '@nestjs/common';
 import { SupportTicketPriority, SupportTicketStatus } from '@prisma/client';
 import { NotificationsService } from '../../notifications/services/notifications.service';

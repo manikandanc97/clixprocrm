@@ -60,6 +60,20 @@ export class LeadsImportService {
 
     for (const batch of batches) {
       await this.prisma.withTenantContext({ tenantId, userId }, async (tx) => {
+        const companyNames = Array.from(new Set(batch.map(r => (r.company || 'Unknown Company').trim()).filter(Boolean)));
+        const companyNameHashes = companyNames.map(n => this.enc.hash(n)).filter(Boolean) as string[];
+        const existingCompaniesList = await tx.company.findMany({
+          where: { tenantId, nameHash: { in: companyNameHashes }, deletedAt: null }
+        });
+        const companyCache = new Map(existingCompaniesList.map(c => [c.nameHash, c]));
+
+        const emails = Array.from(new Set(batch.map(r => r.email).filter(Boolean)));
+        const emailHashes = emails.map(e => this.enc.hash(e)).filter(Boolean) as string[];
+        const existingLeadsList = await tx.lead.findMany({
+          where: { tenantId, emailHash: { in: emailHashes }, deletedAt: null }
+        });
+        const leadCache = new Map(existingLeadsList.map(l => [l.emailHash, l]));
+
         for (let i = 0; i < batch.length; i++) {
           const row = batch[i];
           try {
@@ -97,11 +111,9 @@ export class LeadsImportService {
             const companyName = (row.company || 'Unknown Company').trim();
             let companyId: string | null = null;
             if (companyName && companyName !== 'Unknown Company') {
-              // Exact-match on encrypted company name via nameHash
               const companyNameHash = this.enc.hash(companyName);
-              let company = await tx.company.findFirst({
-                where: { tenantId, nameHash: companyNameHash, deletedAt: null },
-              });
+              let company = companyCache.get(companyNameHash);
+              
               if (!company) {
                 const { encrypted: encName, hash: nameHash } =
                   this.enc.encryptWithHash(companyName);
@@ -114,15 +126,13 @@ export class LeadsImportService {
                     status: 'ACTIVE',
                   },
                 });
+                companyCache.set(companyNameHash, company as any);
               }
               companyId = company.id;
             }
 
-            // Duplicate detection via emailHash (deterministic, no plaintext scan)
             const emailHash = this.enc.hash(row.email);
-            const existing = await tx.lead.findFirst({
-              where: { tenantId, emailHash, deletedAt: null },
-            });
+            const existing = leadCache.get(emailHash);
 
             if (existing) {
               if (duplicateStrategy === 'skip') {

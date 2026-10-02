@@ -2,10 +2,10 @@ import { createGoogleGenerativeAI } from '@ai-sdk/google';
 import { Injectable, InternalServerErrorException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import {
-    convertToModelMessages,
-    generateText,
-    isStepCount,
-    streamText,
+  convertToModelMessages,
+  generateText,
+  isStepCount,
+  streamText,
 } from 'ai';
 import { EncryptionService } from '../common/encryption/encryption.service';
 import { PrismaService } from '../prisma/prisma.service';

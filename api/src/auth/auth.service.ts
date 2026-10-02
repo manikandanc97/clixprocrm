@@ -1,11 +1,11 @@
 import {
-    BadRequestException,
-    ForbiddenException,
-    Inject,
-    Injectable,
-    Logger,
-    Optional,
-    forwardRef,
+  BadRequestException,
+  ForbiddenException,
+  Inject,
+  Injectable,
+  Logger,
+  Optional,
+  forwardRef,
 } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { SYSTEM_ROLE_PERMISSIONS } from '../common/role-permissions.constants';
@@ -14,15 +14,15 @@ import { PrismaService } from '../prisma/prisma.service';
 import { MediaQueueProducer } from '../queue/producers/media-queue.producer';
 import { BrandingService } from '../workspace/services/branding.service';
 import {
-    executeAdminWorkspaceDeletionTransaction,
-    executeMemberAccountDeletionTransaction,
+  executeAdminWorkspaceDeletionTransaction,
+  executeMemberAccountDeletionTransaction,
 } from './account-deletion.helper';
 import {
-    buildSuperAdminProfile,
-    buildTenantUserProfile,
-    getCachedUserProfile,
-    invalidateGetMeCache,
-    setCachedUserProfile,
+  buildSuperAdminProfile,
+  buildTenantUserProfile,
+  getCachedUserProfile,
+  invalidateGetMeCache,
+  setCachedUserProfile,
 } from './auth-profile-cache.util';
 
 export { invalidateGetMeCache };
@@ -39,11 +39,45 @@ export class AuthService {
     private readonly mediaQueueProducer?: MediaQueueProducer,
   ) {}
 
-  async getMe(userId: string, tenantId?: string, email?: string) {
+  async getMe(
+    userId: string,
+    tenantId?: string,
+    email?: string,
+    userHint?: any,
+  ) {
     const cacheKey = `${userId}:${tenantId || ''}`;
     const cached = getCachedUserProfile(cacheKey);
     if (cached) {
       return cached;
+    }
+
+    // 0. Fast-path: If userHint from SupabaseAuthGuard is already DB-verified Super Admin, build profile immediately (0ms)
+    const hintCandidate = userHint?.dbUser || userHint;
+    if (hintCandidate && hintCandidate.isSuperAdmin) {
+      const result = buildSuperAdminProfile(hintCandidate);
+      setCachedUserProfile(cacheKey, result);
+      return result;
+    }
+
+    // Fast-path: check if user is Super Admin via lean query to avoid expensive membership/role/tenant joins
+    const leanUser = await this.prisma.user.findUnique({
+      where: { id: userId },
+      select: {
+        id: true,
+        name: true,
+        email: true,
+        phone: true,
+        avatar: true,
+        status: true,
+        mustResetPassword: true,
+        isSuperAdmin: true,
+      },
+    });
+
+    if (leanUser?.isSuperAdmin) {
+      const result = buildSuperAdminProfile(leanUser);
+      setCachedUserProfile(cacheKey, result);
+      return result;
     }
 
     let user = await this.prisma.user.findUnique({

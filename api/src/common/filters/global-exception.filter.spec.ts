@@ -1,8 +1,4 @@
-import {
-    ArgumentsHost,
-    BadRequestException,
-    HttpStatus
-} from '@nestjs/common';
+import { ArgumentsHost, BadRequestException, HttpStatus } from '@nestjs/common';
 import { GlobalExceptionFilter } from './global-exception.filter';
 
 describe('GlobalExceptionFilter Security - Production Error Masking', () => {

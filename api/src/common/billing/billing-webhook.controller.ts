@@ -1,11 +1,11 @@
 import {
-    Controller,
-    Headers,
-    HttpStatus,
-    Logger,
-    Post,
-    Req,
-    Res,
+  Controller,
+  Headers,
+  HttpStatus,
+  Logger,
+  Post,
+  Req,
+  Res,
 } from '@nestjs/common';
 import { PrismaService } from '../../prisma/prisma.service';
 import { WebhookQueueProducer } from '../../queue/producers/webhook-queue.producer';

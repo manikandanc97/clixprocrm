@@ -3,9 +3,9 @@ import { Inject, Logger, forwardRef } from '@nestjs/common';
 import { Job } from 'bullmq';
 import { BillingWebhookService } from '../../common/billing/billing-webhook.service';
 import {
-    BillingWebhookJobPayload,
-    WEBHOOK_JOB_NAMES,
-    WebhookJobPayload,
+  BillingWebhookJobPayload,
+  WEBHOOK_JOB_NAMES,
+  WebhookJobPayload,
 } from '../interfaces/webhook-jobs';
 import { QUEUE_NAMES } from '../queue.constants';
 

@@ -1,7 +1,4 @@
-import {
-    Injectable,
-    NotFoundException
-} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import * as crypto from 'crypto';
 import { SYSTEM_ROLE_PERMISSIONS } from '../../common/role-permissions.constants';
 import { PrismaService } from '../../prisma/prisma.service';

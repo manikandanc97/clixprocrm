@@ -1,7 +1,4 @@
-import {
-    BadRequestException,
-    ForbiddenException
-} from '@nestjs/common';
+import { BadRequestException, ForbiddenException } from '@nestjs/common';
 import { Test, TestingModule } from '@nestjs/testing';
 import { PrismaService } from '../../../prisma/prisma.service';
 import { BillingGatewayService } from '../../billing/billing-gateway.service';

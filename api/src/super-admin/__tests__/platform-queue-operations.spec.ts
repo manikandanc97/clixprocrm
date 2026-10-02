@@ -2,8 +2,8 @@ import { Test, TestingModule } from '@nestjs/testing';
 import { AuditIntegrityMonitorService } from '../../common/audit/integrity/audit-integrity-monitor.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import type {
-    AggregateQueueMetrics,
-    SingleQueueMetrics,
+  AggregateQueueMetrics,
+  SingleQueueMetrics,
 } from '../../queue/interfaces/queue-metrics.interface';
 import { QUEUE_NAMES } from '../../queue/queue.constants';
 import { QueueMetricsService } from '../../queue/services/queue-metrics.service';

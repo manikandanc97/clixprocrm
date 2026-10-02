@@ -1,14 +1,14 @@
 import { TargetPeriod } from '@prisma/client';
 import { Transform } from 'class-transformer';
 import {
-    IsBoolean,
-    IsDateString,
-    IsEnum,
-    IsNotEmpty,
-    IsNumber,
-    IsOptional,
-    IsString,
-    Min,
+  IsBoolean,
+  IsDateString,
+  IsEnum,
+  IsNotEmpty,
+  IsNumber,
+  IsOptional,
+  IsString,
+  Min,
 } from 'class-validator';
 
 export class CreateRevenueTargetDto {

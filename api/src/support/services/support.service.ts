@@ -1,10 +1,10 @@
 import {
-    BadRequestException,
-    ForbiddenException,
-    Injectable,
-    Logger,
-    NotFoundException,
-    Optional,
+  BadRequestException,
+  ForbiddenException,
+  Injectable,
+  Logger,
+  NotFoundException,
+  Optional,
 } from '@nestjs/common';
 import { SupportTicketStatus } from '@prisma/client';
 import * as nodemailer from 'nodemailer';
@@ -15,21 +15,24 @@ import { EmailQueueProducer } from '../../queue/producers/email-queue.producer';
 
 import { SupportTicketRecord } from '../interfaces/support.interface';
 import {
-    escapeHtml,
-    extractRoleString,
-    formatTicketOutput,
-    mapEnumToPriority,
-    mapPriorityToEnum,
+  escapeHtml,
+  extractRoleString,
+  formatTicketOutput,
+  mapEnumToPriority,
+  mapPriorityToEnum,
 } from '../utils/support-mapper.util';
 import {
-    buildFallbackSupportTicket,
-    buildSupportEmailHtml,
-    calculateEstimatedResponseTime,
+  buildFallbackSupportTicket,
+  buildSupportEmailHtml,
+  calculateEstimatedResponseTime,
 } from '../utils/support-template.util';
 
 export {
-    escapeHtml, extractRoleString,
-    formatTicketOutput, mapEnumToPriority, mapPriorityToEnum
+  escapeHtml,
+  extractRoleString,
+  formatTicketOutput,
+  mapEnumToPriority,
+  mapPriorityToEnum,
 };
 export type { SupportTicketRecord };
 

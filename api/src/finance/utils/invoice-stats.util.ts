@@ -1,6 +1,6 @@
 import {
-    formatCurrency,
-    toNumber,
+  formatCurrency,
+  toNumber,
 } from '../../common/utils/crm-formatters.util';
 
 export function checkIsInvoiceOverdue(

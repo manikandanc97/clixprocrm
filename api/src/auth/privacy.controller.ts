@@ -1,17 +1,17 @@
 import {
-    Controller,
-    Get,
-    HttpException,
-    HttpStatus,
-    Logger,
-    Req,
-    UseGuards,
+  Controller,
+  Get,
+  HttpException,
+  HttpStatus,
+  Logger,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import {
-    checkRateLimit,
-    getClientIp,
-    incrementRateLimit,
-    RATE_LIMITS,
+  checkRateLimit,
+  getClientIp,
+  incrementRateLimit,
+  RATE_LIMITS,
 } from '../common/utils/rate-limit.util';
 import { PrismaService } from '../prisma/prisma.service';
 import { MfaService } from './mfa.service';

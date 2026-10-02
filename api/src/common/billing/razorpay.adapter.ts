@@ -1,14 +1,14 @@
 import { Injectable, Logger } from '@nestjs/common';
 import * as crypto from 'crypto';
 import {
-    CreateOrderParams,
-    IPaymentGatewayAdapter,
-    NormalizedWebhookEvent,
-    PaymentOrderResult,
-    ProcessRefundParams,
-    RefundResult,
-    VerifySignatureParams,
-    WebhookVerificationParams,
+  CreateOrderParams,
+  IPaymentGatewayAdapter,
+  NormalizedWebhookEvent,
+  PaymentOrderResult,
+  ProcessRefundParams,
+  RefundResult,
+  VerifySignatureParams,
+  WebhookVerificationParams,
 } from './payment-gateway.interface';
 
 @Injectable()

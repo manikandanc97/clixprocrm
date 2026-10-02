@@ -12,7 +12,11 @@ const localCache = new Map<string, LocalCacheEntry<any>>();
 /**
  * Safely insert an entry into local memory with LRU + TTL eviction and strict size capping.
  */
-function setLocalCacheEntry<T>(key: string, value: T, ttlSeconds: number): void {
+function setLocalCacheEntry<T>(
+  key: string,
+  value: T,
+  ttlSeconds: number,
+): void {
   const now = Date.now();
 
   // If at capacity, sweep expired entries first

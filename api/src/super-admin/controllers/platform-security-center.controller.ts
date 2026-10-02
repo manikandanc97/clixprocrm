@@ -1,15 +1,15 @@
 import {
-    Body,
-    Controller,
-    Get,
-    HttpCode,
-    HttpStatus,
-    Param,
-    Patch,
-    Post,
-    Query,
-    Req,
-    UseGuards,
+  Body,
+  Controller,
+  Get,
+  HttpCode,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { RequireAal } from '../../auth/aal.decorator';
 import { AalGuard } from '../../auth/aal.guard';
@@ -17,8 +17,8 @@ import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import { EmergencySecurityService } from '../services/emergency-security.service';
 import type {
-    CreateIncidentDto,
-    ListIncidentsDto,
+  CreateIncidentDto,
+  ListIncidentsDto,
 } from '../services/security-incidents.service';
 import { SecurityIncidentsService } from '../services/security-incidents.service';
 

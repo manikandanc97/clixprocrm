@@ -1,24 +1,24 @@
 import {
-    Body,
-    Controller,
-    Delete,
-    Get,
-    HttpException,
-    HttpStatus,
-    Param,
-    Patch,
-    Post,
-    Put,
-    Query,
-    Req,
-    UseGuards,
+  Body,
+  Controller,
+  Delete,
+  Get,
+  HttpException,
+  HttpStatus,
+  Param,
+  Patch,
+  Post,
+  Put,
+  Query,
+  Req,
+  UseGuards,
 } from '@nestjs/common';
 import { SupabaseAuthGuard } from '../../auth/supabase.guard';
 import { SuperAdminGuard } from '../../auth/super-admin.guard';
 import {
-    CreatePlatformModuleDto,
-    PlatformModulesService,
-    UpdatePlatformModuleDto
+  CreatePlatformModuleDto,
+  PlatformModulesService,
+  UpdatePlatformModuleDto,
 } from '../services/platform-modules.service';
 
 @Controller(['super-admin/modules', 'super_admin/modules'])

@@ -1,15 +1,15 @@
 import { ExecutionContext } from '@nestjs/common';
 import {
-    EmailService,
-    buildAlertDeduplicationKey,
-    getAlertCooldownSeconds,
-    normalizeKeyPart
+  EmailService,
+  buildAlertDeduplicationKey,
+  getAlertCooldownSeconds,
+  normalizeKeyPart,
 } from '../common/services/email.service';
 import {
-    SupabaseAuthGuard,
-    invalidateSessionCache,
-    invalidateTokenUserCache,
-    setSupabaseClient,
+  SupabaseAuthGuard,
+  invalidateSessionCache,
+  invalidateTokenUserCache,
+  setSupabaseClient,
 } from './supabase.guard';
 
 describe('New Device Security Tests (Phase P0, P1, P2)', () => {
