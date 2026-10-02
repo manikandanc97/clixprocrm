@@ -67,7 +67,7 @@ export class PipelineController {
         queryArgs.skip = 1;
         queryArgs.cursor = { id: cursor };
       }
-      
+
       const leads = await this.prisma.lead.findMany(queryArgs);
 
       if (leads.length === 0) break;
@@ -80,8 +80,8 @@ export class PipelineController {
         where: { tenantId, leadId: { in: leadIds } },
         select: { leadId: true },
       });
-      
-      const existingDealLeadIds = new Set(existingDeals.map(d => d.leadId));
+
+      const existingDealLeadIds = new Set(existingDeals.map((d) => d.leadId));
 
       const dealsToCreate = leads
         .filter((lead: any) => !existingDealLeadIds.has(lead.id))

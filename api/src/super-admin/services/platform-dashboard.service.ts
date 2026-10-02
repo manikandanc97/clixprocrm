@@ -12,7 +12,10 @@ export class PlatformDashboardService {
     const thirtyDaysAgo = new Date(now.getTime() - 30 * 24 * 60 * 60 * 1000);
     const sevenDaysInFuture = new Date(now.getTime() + 7 * 24 * 60 * 60 * 1000);
 
-    const timeOp = async <T>(name: string, fn: () => Promise<T>): Promise<T> => {
+    const timeOp = async <T>(
+      name: string,
+      fn: () => Promise<T>,
+    ): Promise<T> => {
       const start = performance.now();
       const result = await fn();
       const end = performance.now();
@@ -79,7 +82,15 @@ export class PlatformDashboardService {
         FROM t_stats t CROSS JOIN u_stats u
       `,
       this.prisma.tenant.findMany({
-        select: { id: true, name: true, slug: true, status: true, plan: true, trialEnd: true, createdAt: true },
+        select: {
+          id: true,
+          name: true,
+          slug: true,
+          status: true,
+          plan: true,
+          trialEnd: true,
+          createdAt: true,
+        },
         orderBy: { createdAt: 'desc' },
       }),
       this.prisma.$queryRaw<
@@ -133,7 +144,7 @@ export class PlatformDashboardService {
         by: ['plan'],
         _count: { _all: true },
       }),
-      this.prisma.$queryRaw<Array<{ mrr: number, count: number }>>`
+      this.prisma.$queryRaw<Array<{ mrr: number; count: number }>>`
         SELECT 
           COALESCE(SUM(
             CASE 
@@ -164,8 +175,6 @@ export class PlatformDashboardService {
         _sum: { totalAmount: true, paidAmount: true },
       }),
     ]);
-
-
 
     const counts = countsRows[0] || {
       totalOrganizations: 0,

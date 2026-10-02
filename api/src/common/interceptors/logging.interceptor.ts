@@ -26,12 +26,12 @@ export class LoggingInterceptor implements NestInterceptor {
       tap(() => {
         const duration = Date.now() - startTime;
         const statusCode = res.statusCode;
-        
+
         // Skip noisy health check or frequent polls if needed
         if (url.includes('/api/health')) return;
 
         this.logger.log(
-          `${method} ${url} status=${statusCode} duration=${duration}ms env=${process.env.NODE_ENV || 'development'}`
+          `${method} ${url} status=${statusCode} duration=${duration}ms env=${process.env.NODE_ENV || 'development'}`,
         );
       }),
     );
