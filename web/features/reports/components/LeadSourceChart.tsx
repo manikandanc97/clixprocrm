@@ -75,89 +75,88 @@ const LeadSourceChart = ({ data, loading }: LeadSourceChartProps) => {
             height="100%" 
             minHeight={200}
             loading={loading}
-            hasData={hasData}
+            hasData={true}
             skeletonType="donut"
             className="flex-1 w-full min-w-0 min-h-[200px]"
           >
-            {!hasData ? (
-              <div className="h-full min-h-[160px] w-full flex flex-col items-center justify-center text-center p-4">
-                <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-2">
-                  <PieChartIcon className="w-5 h-5 opacity-60" />
+            {() => (
+              !hasData ? (
+                <div className="h-full min-h-[160px] w-full flex flex-col items-center justify-center text-center p-4">
+                  <div className="w-10 h-10 rounded-full bg-muted/60 flex items-center justify-center text-muted-foreground mb-2">
+                    <PieChartIcon className="w-5 h-5 opacity-60" />
+                  </div>
+                  <p className="text-xs font-semibold text-foreground">No lead sources</p>
+                  <p className="text-[11px] text-muted-foreground mt-0.5">Leads with sources will appear here</p>
                 </div>
-                <p className="text-xs font-semibold text-foreground">No lead sources</p>
-                <p className="text-[11px] text-muted-foreground mt-0.5">Leads with sources will appear here</p>
-              </div>
-            ) : (
-              <div className="flex flex-col sm:flex-row items-center justify-between w-full h-full gap-4 min-w-0">
-                {/* Donut Chart with Tooltip */}
-                <div className="w-full sm:w-1/2 min-w-0 h-[180px] sm:h-[200px] relative flex items-center justify-center">
-                  <ResponsiveContainer 
-                    width="100%" 
-                    height="100%"
-                    minWidth={0}
-                    minHeight={180}
-                    initialDimension={{ width: 180, height: 180 }}
-                  >
-                    <PieChart>
-                      <Pie
-                        data={chartData}
-                        cx="50%"
-                        cy="50%"
-                        innerRadius={50}
-                        outerRadius={76}
-                        paddingAngle={chartData.length > 1 ? 6 : 0}
-                        cornerRadius={chartData.length > 1 ? 8 : 0}
-                        dataKey="value"
-                        stroke="none"
-                        animationDuration={1200}
-                      >
-                        {chartData.map((_, index) => (
-                          <Cell 
-                            key={`cell-${index}`} 
-                            fill={getChartColor(index)} 
-                            className="transition-all duration-300 hover:opacity-85 cursor-pointer drop-shadow-xs"
-                          />
-                        ))}
-                      </Pie>
-                      <RechartsTooltip content={<CustomLeadSourceTooltip total={total} />} />
-                    </PieChart>
-                  </ResponsiveContainer>
-                </div>
+              ) : (
+                <div className="flex flex-col sm:flex-row items-center justify-between w-full h-full gap-4 min-w-0">
+                  {/* Donut Chart with Tooltip */}
+                  <div className="w-full sm:w-1/2 min-w-0 h-[180px] sm:h-[200px] relative flex items-center justify-center">
+                    <ResponsiveContainer 
+                      width="100%" 
+                      height="100%"
+                    >
+                      <PieChart>
+                        <Pie
+                          data={chartData}
+                          cx="50%"
+                          cy="50%"
+                          innerRadius={50}
+                          outerRadius={76}
+                          paddingAngle={chartData.length > 1 ? 6 : 0}
+                          cornerRadius={chartData.length > 1 ? 8 : 0}
+                          dataKey="value"
+                          stroke="none"
+                          animationDuration={1200}
+                        >
+                          {chartData.map((_, index) => (
+                            <Cell 
+                              key={`cell-${index}`} 
+                              fill={getChartColor(index)} 
+                              className="transition-all duration-300 hover:opacity-85 cursor-pointer drop-shadow-xs"
+                            />
+                          ))}
+                        </Pie>
+                        <RechartsTooltip content={<CustomLeadSourceTooltip total={total} />} />
+                      </PieChart>
+                    </ResponsiveContainer>
+                  </div>
 
-                {/* Legend List with Interactive Tooltip */}
-                <TooltipProvider delayDuration={150}>
-                  <div className="w-full sm:w-1/2 flex flex-col justify-center space-y-2.5 min-w-0 pr-2">
-                    {chartData.map((entry, index) => {
-                      const percentage = total > 0 ? Math.round(((entry.value || 0) / total) * 100) : 100;
-                      const color = getChartColor(index);
+                  {/* Legend List with Interactive Tooltip */}
+                  <TooltipProvider delayDuration={150}>
+                    <div className="w-full sm:w-1/2 flex flex-col justify-center space-y-2.5 min-w-0 pr-2">
+                      {chartData.map((entry, index) => {
+                        const percentage = total > 0 ? Math.round(((entry.value || 0) / total) * 100) : 100;
+                        const color = getChartColor(index);
 
-                      return (
-                        <Tooltip key={entry.name || index}>
-                          <TooltipTrigger asChild>
-                            <div className="flex items-center justify-between text-xs gap-2 p-1.5 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer select-none">
-                              <div className="flex items-center gap-2 min-w-0">
-                                <span 
-                                  className="w-2.5 h-2.5 rounded-xs shrink-0" 
-                                  style={{ backgroundColor: color }} 
-                                />
-                                <span className="text-foreground font-medium truncate capitalize">
-                                  {entry.name || "Unknown"}
+                        return (
+                          <Tooltip key={entry.name || index}>
+                            <TooltipTrigger asChild>
+                              <div className="flex items-center justify-between text-xs gap-2 p-1.5 rounded-lg hover:bg-muted/40 transition-colors cursor-pointer select-none">
+                                <div className="flex items-center gap-2 min-w-0">
+                                  <span 
+                                    className="w-2.5 h-2.5 rounded-xs shrink-0" 
+                                    style={{ backgroundColor: color }} 
+                                  />
+                                  <span className="text-foreground font-medium truncate capitalize">
+                                    {entry.name || "Unknown"}
+                                  </span>
+                                </div>
+                                <span className="text-muted-foreground font-medium shrink-0">
+                                  {entry.value} ({percentage}%)
                                 </span>
                               </div>
-                              <span className="text-muted-foreground font-medium shrink-0">
-                                {entry.value} ({percentage}%)
-                              </span>
-                            </div>
-                          </TooltipTrigger>
-                          <TooltipContent side="top" className="rounded-xl px-3 py-1.5 text-xs shadow-2xl">
-                            <span className="font-bold">{entry.name || "Unknown"}:</span> {entry.value} leads ({percentage}% of total)
-                          </TooltipContent>
-                        </Tooltip>
-                      );
-                    })}
-                  </div>
-                </TooltipProvider>
-              </div>
+                            </TooltipTrigger>
+                            <TooltipContent side="top" className="rounded-xl px-3 py-1.5 text-xs shadow-2xl">
+                              <span className="font-bold">{entry.name || "Unknown"}:</span> {entry.value} leads ({percentage}% of total)
+                            </TooltipContent>
+                          </Tooltip>
+                        );
+                      })}
+                    </div>
+                  </TooltipProvider>
+                </div>
+              )
             )}
           </ChartContainer>
         </CardContent>

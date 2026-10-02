@@ -1,12 +1,8 @@
-"use client";
-
-import { useRouter } from "next/navigation";
+import Link from "next/link";
 import { ShieldAlert } from "lucide-react";
 import { Button } from "@/shared/ui/button";
 
 export default function UnauthorizedPage() {
-  const router = useRouter();
-
   return (
     <div className="min-h-screen bg-background flex items-center justify-center px-4">
       <div className="max-w-md w-full rounded-xl border border-border bg-card p-8 text-center shadow-elevated">
@@ -17,9 +13,11 @@ export default function UnauthorizedPage() {
         <p className="mt-2 text-sm text-muted-foreground">
           Your current role does not have permission to open this module.
         </p>
-        <Button className="mt-6 w-full" onClick={() => router.push("/dashboard")}>
-          Back to Dashboard
-        </Button>
+        <Link href="/dashboard" className="mt-6 block">
+          <Button className="w-full">
+            Back to Dashboard
+          </Button>
+        </Link>
       </div>
     </div>
   );

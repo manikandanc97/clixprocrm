@@ -114,9 +114,6 @@ export function OrganizationGrowthCard({
           <ResponsiveContainer 
             width="100%" 
             height="100%"
-            minWidth={0}
-            minHeight={200}
-            initialDimension={{ width: 500, height: 200 }}
           >
             <AreaChart
               data={currentGrowthSeries}

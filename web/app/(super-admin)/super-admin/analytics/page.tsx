@@ -358,9 +358,6 @@ export default function SuperAdminAnalyticsPage() {
               <ResponsiveContainer 
                 width="100%" 
                 height="100%"
-                minWidth={0}
-                minHeight={256}
-                initialDimension={{ width: 600, height: 260 }}
               >
                 <BarChart
                   data={growthTrends}

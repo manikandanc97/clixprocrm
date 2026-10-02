@@ -1,9 +1,10 @@
 import { redirect } from 'next/navigation';
 
 export default async function CustomersRedirect(props: {
-  searchParams?: Promise<{ [key: string]: string | string[] | undefined }> | { [key: string]: string | string[] | undefined };
+  searchParams: Promise<{ [key: string]: string | string[] | undefined }>;
 }) {
-  const searchParams = props.searchParams ? await props.searchParams : {};
+  const resolvedSearchParams = await props.searchParams;
+  const searchParams = resolvedSearchParams || {};
   const params = new URLSearchParams();
   params.set('type', 'customer');
 

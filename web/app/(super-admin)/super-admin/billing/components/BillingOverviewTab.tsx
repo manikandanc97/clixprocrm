@@ -166,9 +166,6 @@ export function BillingOverviewTab({
               <ResponsiveContainer 
                 width="100%" 
                 height="100%"
-                minWidth={0}
-                minHeight={200}
-                initialDimension={{ width: 600, height: 200 }}
               >
                 <AreaChart data={trendData} margin={{ top: 10, right: 10, left: -20, bottom: 0 }}>
                   <defs>

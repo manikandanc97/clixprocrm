@@ -1,119 +1,48 @@
-# ClixProCRM — Production Deployment Runbook & Smoke Test Protocol
+# FINAL PRODUCTION DEPLOYMENT RUNBOOK
 
-This runbook provides the step-by-step procedure for deploying ClixProCRM to production, applying database migrations safely, validating security configurations, and executing post-deployment smoke tests.
+## 1. Before Deployment
+- **Backup Verification:** Verify a full database backup and ensure PITR (Point-in-Time Recovery) is active via the Supabase Dashboard.
+- **Environment Verification:** Confirm `api/.env.production` and Vercel production environment variables map correctly without exposing secrets.
+- **Migration Verification:** Ensure `npx prisma migrate status` identifies pending migrations accurately.
+- **Deployment Approval:** Ensure all Staging tests (when available) have passed.
+- **Rollback Plan:** Confirm that prior container images or Vercel deployments can be reverted within 5 minutes if issues arise.
 
----
+## 2. Database
+- **Migration Command:** Run `npx prisma migrate deploy` ONLY after establishing the pre-deployment backup.
+- **Migration Verification:** Run `npx prisma migrate status` to confirm all migrations are successfully applied.
+- **Health Check:** Ensure database responds to basic queries or API health checks.
+- **Migration `20260916173000_phase3_8_database_index_optimization` Analysis:** This pending migration is safe. It only performs `CREATE INDEX IF NOT EXISTS` for read-heavy operations on `Task`, `Quotation`, `Meeting`, and `Company`. It does not drop tables or columns, and does not perform destructive data mutations. **Expected duration:** < 10 seconds. **Expected locks:** Standard index creation locks (non-concurrent). **Rollback:** Safe to drop indexes manually if performance degrades, though highly unlikely.
 
-## Part I: 18-Step Production Deployment Checklist
+## 3. Backend
+- **Deploy:** Trigger container build/deployment on production host (AWS/Render/Railway) using `npm run build` and `npm run start:prod`.
+- **Health Check:** Hit the `/api/health` endpoint and verify a `200 OK` response.
+- **Logs:** Monitor startup logs to ensure `SecurityConfigValidator` passes and no uncaught exceptions or database connection errors occur.
 
-### Step 1: Provision Infrastructure
-- Provision PostgreSQL Database with Point-in-Time Recovery (PITR) enabled.
-- Provision Supabase Identity project.
-- Provision Vercel Project (Frontend) and AWS/Render Container Service (Backend API).
-- *(Optional)* Provision Upstash Redis instance.
-- *(Optional)* Provision AWS S3 Bucket with Object Lock enabled in `COMPLIANCE` mode.
+## 4. Frontend
+- **Deploy:** Trigger production build on Vercel. Ensure the build command `npm run build` exits with code 0.
+- **Browser Verification:** Open `https://app.clixprocrm.com` and ensure static assets, CSS, and JS chunks load without 404s or hydration errors.
 
-### Step 2: Configure Production Secrets
-Ensure the following secrets are configured in backend environment variables (never in git):
-- `DATABASE_URL` and `DIRECT_URL` (with SSL required)
-- `SUPABASE_URL` and `SUPABASE_ANON_KEY`
-- `SUPABASE_SERVICE_ROLE_KEY`
-- `FIELD_ENCRYPTION_KEY` (64-character hex string / 32 bytes)
-- `AUDIT_LOG_HMAC_SECRET` (32+ character high entropy secret)
-- `ALLOWED_ORIGINS` (comma-separated frontend production domains)
+## 5. Authentication
+- **Login:** Attempt login using valid production credentials.
+- **Logout:** Verify session is successfully destroyed and user is redirected.
+- **Callback Verification:** Test password reset and magic link flows to ensure callbacks correctly route to the production domain.
 
-### Step 3: Configure Supabase
-- Under Supabase Project -> **Authentication** -> **Providers**: Confirm Email provider is enabled.
-- Under **MFA**: Enable TOTP (Authenticator App) support.
-- Set **Site URL** to `https://app.clixprocrm.com` and add redirect URLs for `/api/auth/callback`.
+## 6. Smoke Test (Critical Workflows)
+Perform brief manual verification of the following modules to ensure core connectivity and RBAC are intact:
+- Dashboard (Loads without 500s)
+- Leads (Data renders correctly)
+- Customers (Tenant isolation respected)
+- Deals / Pipeline (Drag and drop/update functions properly)
+- Tasks (Read/Write succeeds)
+- Notifications (Real-time updates or fetch succeeds)
 
-### Step 4: Configure PostgreSQL
-- Confirm `pgcrypto` and required extensions are installed.
-- Ensure PgBouncer pool mode is set to `transaction`.
+## 7. Monitoring
+- **Logs:** Monitor Vercel and Backend log streams for the first 15 minutes post-deployment for 5xx errors.
+- **Errors:** Check Sentry or configured error tracking platform for new regression alerts.
+- **Performance:** Verify latency for `/api/auth/me` and dashboard endpoints against established baselines.
+- **Uptime:** Ensure uptime monitors (e.g., BetterStack, Datadog) report all green.
 
-### Step 5: Apply Prisma Migrations
-Run production migration command from deployment CI/CD:
-```bash
-cd api
-npx prisma migrate deploy
-```
-Verify status:
-```bash
-npx prisma migrate status
-```
-*Expected*: All migrations applied, schema in sync.
-
-### Step 6: Configure Redis (Optional)
-- Set `UPSTASH_REDIS_REST_URL` and `UPSTASH_REDIS_REST_TOKEN` if multi-instance cluster rate limiting is active.
-- If skipped, verify single-instance in-memory rate limiter initializes.
-
-### Step 7: Configure SMTP (Optional)
-- Set `SMTP_HOST`, `SMTP_PORT`, `SMTP_USER`, `SMTP_PASS`, `SMTP_FROM`.
-- Send safe test notification or verify fallback logger.
-
-### Step 8: Configure AWS S3 WORM (Optional / Enterprise)
-- Set `AWS_S3_AUDIT_BUCKET`, `AWS_REGION`, `AWS_ACCESS_KEY_ID`, `AWS_SECRET_ACCESS_KEY`.
-- Ensure bucket retention matches compliance rules (e.g. 2555 days).
-
-### Step 9: Deploy Backend API
-- Build container / bundle: `npm run build` in `api/`.
-- Start Fastify API process: `npm run start:prod` (or container entrypoint).
-- Verify startup logs show successful fail-fast security validation.
-
-### Step 10: Deploy Frontend
-- Build Next.js app: `npm run build` in `web/`.
-- Deploy to Vercel / edge hosting.
-- Confirm environment variables (`NEXT_PUBLIC_API_URL`, `NEXT_PUBLIC_SUPABASE_URL`, `NEXT_PUBLIC_SUPABASE_ANON_KEY`, `NEXT_PUBLIC_SITE_URL`) are populated.
-
-### Step 11: Verify Health & Readiness
-- `GET https://api.clixprocrm.com/api/health/live` -> Returns HTTP 200 `{ status: "UP" }`.
-- `GET https://api.clixprocrm.com/api/health/ready` -> Returns HTTP 200 `{ status: "UP", checks: { database: "UP", configuration: "UP" } }`.
-
-### Step 12: Verify Authentication
-- Navigate to `https://app.clixprocrm.com/login`.
-- Authenticate with a test user; confirm JWT issue and secure cookie creation.
-- Test session refresh and logout.
-
-### Step 13: Verify MFA (AAL2 Enforcement)
-- Enroll TOTP authenticator for admin user.
-- Attempt access to Super Admin Security Operations; confirm `AalGuard` requires `aal2` verification.
-
-### Step 14: Verify Tenant Isolation (RLS)
-- In test tenant A, query CRM Leads; verify 0 records from tenant B are returned.
-- Attempt cross-tenant IDOR access using a crafted direct ID; verify 404 or 403 response.
-
-### Step 15: Verify Audit Logging & Hash Chains
-- Perform a CRM entity update (e.g. edit contact).
-- Check `AuditLog` table: verify record created with `recordHash` and valid `previousHash`.
-- Attempt direct SQL `UPDATE` on `AuditLog`; verify `trg_audit_log_immutable` trigger aborts transaction.
-
-### Step 16: Verify Rate Limiting
-- Dispatch 25 rapid requests to `/api/auth/login`; verify HTTP 429 `Too Many Requests` with `Retry-After` header.
-
-### Step 17: Verify Real-Time Security Alerts
-- Log in from a new user-agent/IP combination.
-- Verify security activity record created under `/api/auth/sessions/activity`.
-
-### Step 18: Verify Rollback Readiness
-- Confirm previous release artifact / container tag is stored in registry and ready for instant activation if required.
-
----
-
-## Part II: Production Smoke Test Protocol
-
-Execute these non-destructive checks following every production release:
-
-| Test ID | Area | Action / Path | Expected Outcome | Status |
-| :--- | :--- | :--- | :--- | :--- |
-| **ST-01** | Public | `GET /` | Returns 200, landing / login redirect | PASS |
-| **ST-02** | Health | `GET /api/health/live` | Returns 200 `{ status: "UP" }` | PASS |
-| **ST-03** | Readiness | `GET /api/health/ready` | Returns 200 `{ status: "UP", database: "UP" }` | PASS |
-| **ST-04** | Auth | `POST /api/auth/login` | Returns JWT and tenant context | PASS |
-| **ST-05** | MFA | `POST /api/auth/mfa/verify` | Upgrades session to `aal2` | PASS |
-| **ST-06** | Navigation | `GET /dashboard` | Renders dashboard metrics for active tenant | PASS |
-| **ST-07** | CRUD | `GET /api/crm/contacts` | Returns contacts strictly for active tenant | PASS |
-| **ST-08** | Isolation | `GET /api/crm/deals/:id` | Returns 404/403 for other tenant ID | PASS |
-| **ST-09** | Audit Chain | `GET /api/crm/audit-logs` | Logs returned with valid `recordHash` | PASS |
-| **ST-10** | Immutability | Direct `UPDATE` AuditLog | Aborted by PostgreSQL trigger | PASS |
-| **ST-11** | Security Ops | `GET /super-admin/security` | Accessible only by Super Admin with AAL2 | PASS |
-| **ST-12** | Session Revocation | `POST /api/auth/sessions/revoke` | Invalidates target session token | PASS |
+## 8. Rollback
+- **Frontend:** Use Vercel's "Instant Rollback" feature to revert to the previous known-good deployment.
+- **Backend:** Re-deploy the previously tagged Docker image or use the host's rollback capability.
+- **Database Considerations:** Additive migrations (like indexes) do not strictly require rollback if the application reverts. For schema-breaking changes, restore from the pre-deployment PITR backup if downward migration is unsafe.

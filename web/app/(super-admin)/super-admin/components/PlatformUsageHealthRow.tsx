@@ -123,9 +123,6 @@ export function PlatformUsageHealthRow({
             <ResponsiveContainer 
               width="100%" 
               height="100%"
-              minWidth={0}
-              minHeight={160}
-              initialDimension={{ width: 500, height: 160 }}
             >
               <AreaChart
                 data={usageStats.dailyTrend}

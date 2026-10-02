@@ -123,18 +123,10 @@ export const ChartContainer = ({
                 children as React.ReactElement<{
                   width?: number | string;
                   height?: number | string;
-                  initialDimension?: { width: number; height: number };
-                  minWidth?: number;
-                  minHeight?: number;
                 }>,
                 {
                   width: (children.props as { width?: string | number }).width ?? dimensions.width,
                   height: (children.props as { height?: string | number }).height ?? dimensions.height,
-                  initialDimension: { width: dimensions.width, height: dimensions.height },
-                  minWidth: (children.props as { minWidth?: number }).minWidth ?? 0,
-                  minHeight:
-                    (children.props as { minHeight?: number }).minHeight ??
-                    (typeof resolvedMinHeight === "number" ? resolvedMinHeight : dimensions.height),
                 }
               )
             : children}
